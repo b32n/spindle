@@ -22,6 +22,7 @@ export default defineConfig({
       declaration: true,
       declarationDir: './dist',
       rootDir: './src',
+      outputToFilesystem: true,
     }),
   ],
 });

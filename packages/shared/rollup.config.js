@@ -12,12 +12,14 @@ const tsMain = typescript({
   declaration: true,
   declarationDir: './dist',
   rootDir: './src',
+  outputToFilesystem: true,
 });
 const tsReact = typescript({
   tsconfig: './tsconfig.json',
   declaration: true,
   declarationDir: './dist',
   rootDir: './src',
+  outputToFilesystem: true,
 });
 
 export default defineConfig([

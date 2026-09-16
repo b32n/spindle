@@ -15,7 +15,6 @@ import {
   rotateFrame,
   scaleGroup,
   rotateGroup,
-  frameCenter,
   type DeckImpl,
   type SlideElement,
   type Frame,
@@ -254,5 +253,3 @@ export function expandGroups(deck: DeckImpl, ids: string[]): string[] {
   }
   return [...out];
 }
-
-export { frameCenter };

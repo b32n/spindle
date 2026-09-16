@@ -5,7 +5,7 @@
 
 import { useCallback } from 'react';
 import type { DeckImpl, NewElementSpec, SlideElement } from '@b32nio/spindle-slides-core';
-import { useDeck } from './index';
+import { useDeckContext } from '../context/DeckContext';
 
 // Module-scoped so copy in one place and paste in another share it.
 let buffer: NewElementSpec[] = [];
@@ -80,7 +80,7 @@ export function pasteElements(deck: DeckImpl): void {
 }
 
 export function useClipboard(): ClipboardApi {
-  const deck = useDeck();
+  const deck = useDeckContext().deck;
   const copy = useCallback(() => copyElements(deck), [deck]);
   const cut = useCallback(() => {
     copyElements(deck);
