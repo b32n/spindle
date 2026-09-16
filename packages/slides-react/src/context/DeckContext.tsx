@@ -4,7 +4,7 @@
 // panes or driven by collab.
 
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import type { DeckImpl, CommentAuthor, SlidesCommentEvent } from '@weavertime/spindle-slides-core';
+import type { DeckImpl, CommentAuthor, SlidesCommentEvent } from '@b32nio/spindle-slides-core';
 import { ElementStore } from './element-store';
 import { NodeRegistry } from '../interactions/node-registry';
 import { TransientStore } from '../interactions/transient-store';

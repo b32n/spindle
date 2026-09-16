@@ -19,8 +19,8 @@ WorkbookImpl
 Attaching hydrates a fresh `Y.Doc` from the workbook's current `WorkbookData`, subscribes to both channels, and only then calls `provider.connect(roomId)` — so every subscription is in place before the first inbound payload can arrive. The `roomId` defaults to the workbook's `id` and can be overridden via options.
 
 ```ts
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 
 const workbook = new WorkbookImpl('wb_1', 'Quarterly Plan');
 workbook.setData(savedJson);

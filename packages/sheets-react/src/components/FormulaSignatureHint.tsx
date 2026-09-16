@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import type { FunctionDoc } from '@weavertime/spindle-sheets-core';
+import type { FunctionDoc } from '@b32nio/spindle-sheets-core';
 
 interface FormulaSignatureHintProps {
   doc: FunctionDoc;

@@ -6,7 +6,7 @@
 // cell being edited. Grid lines use the element's border stroke.
 
 import React, { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import { resolveColor, resolveFill, type Color, type TableElement, type ThemeData } from '@weavertime/spindle-slides-core';
+import { resolveColor, resolveFill, type Color, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../../context/DeckContext';
 import { inSelection } from '../../interactions/table-selection-store';
 import { StaticRichText } from './StaticRichText';

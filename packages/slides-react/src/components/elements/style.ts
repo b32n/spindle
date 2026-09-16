@@ -1,6 +1,6 @@
 // Small helpers turning scene styling into concrete SVG/CSS attributes.
 
-import { resolveColor, type Stroke, type ThemeData } from '@weavertime/spindle-slides-core';
+import { resolveColor, type Stroke, type ThemeData } from '@b32nio/spindle-slides-core';
 
 export interface StrokeAttrs {
   stroke: string;

@@ -1,5 +1,5 @@
 // PDF export via the browser print pipeline — CLIENT-owned, on purpose. Export
-// (print/rasterization/file IO) is kept out of the @weavertime/spindle-*
+// (print/rasterization/file IO) is kept out of the @b32nio/spindle-*
 // packages; apps wire it up themselves from the public rendering API. Renders
 // every slide at native size into a hidden, slide-sized off-screen iframe with
 // `@page { size: WxH; margin: 0 }` + a page break per slide, then print(); the
@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { DeckProvider, SlideView } from '@weavertime/spindle-slides-react';
-import type { DeckImpl } from '@weavertime/spindle-slides-core';
+import { DeckProvider, SlideView } from '@b32nio/spindle-slides-react';
+import type { DeckImpl } from '@b32nio/spindle-slides-core';
 
 function PrintDeck({ deck }: { deck: DeckImpl }): React.ReactElement {
   const ids = deck.getSlideIds();

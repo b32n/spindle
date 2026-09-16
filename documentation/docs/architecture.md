@@ -2,14 +2,14 @@
 
 Spindle Docs is a high-performance document editor library for React, providing a Google Docs-like editing experience with true page-based layout and real-time pagination. For a high-level tour of the two packages and the design principles behind them, start with the **[Overview](overview.md)**; this page covers the internals of each package.
 
-## Core Package (@weavertime/spindle-docs-core)
+## Core Package (@b32nio/spindle-docs-core)
 
 The core package provides the framework-agnostic document engine:
 
 ### Document Model
 
 ```typescript
-import { DocumentImpl, createDocument } from '@weavertime/spindle-docs-core';
+import { DocumentImpl, createDocument } from '@b32nio/spindle-docs-core';
 
 // Create a new document
 const doc = new DocumentImpl('doc_1', 'My Document');
@@ -35,7 +35,7 @@ doc.setSectionBlocks(sectionId, newBlocks);
 The core package provides full ProseMirror integration:
 
 ```typescript
-import { docsSchema, createPlugins, createCommands } from '@weavertime/spindle-docs-core';
+import { docsSchema, createPlugins, createCommands } from '@b32nio/spindle-docs-core';
 
 // Schema defines document structure
 const schema = docsSchema;
@@ -107,7 +107,7 @@ if (doc.canUndo()) doc.undo();
 if (doc.canRedo()) doc.redo();
 ```
 
-## React Package (@weavertime/spindle-docs-react)
+## React Package (@b32nio/spindle-docs-react)
 
 ### True Layout Architecture
 
@@ -257,8 +257,8 @@ const header: HeaderFooterContent = {
 ## Basic Usage
 
 ```tsx
-import { DocumentImpl } from '@weavertime/spindle-docs-core';
-import { DocumentProvider, DocumentEditor } from '@weavertime/spindle-docs-react';
+import { DocumentImpl } from '@b32nio/spindle-docs-core';
+import { DocumentProvider, DocumentEditor } from '@b32nio/spindle-docs-react';
 
 // Create document
 const doc = new DocumentImpl('doc_1', 'My Document');
@@ -278,8 +278,8 @@ function App() {
 ### Using TrueLayoutEditor Directly
 
 ```tsx
-import { TrueLayoutEditor } from '@weavertime/spindle-docs-react';
-import type { Block } from '@weavertime/spindle-docs-core';
+import { TrueLayoutEditor } from '@b32nio/spindle-docs-react';
+import type { Block } from '@b32nio/spindle-docs-core';
 
 function Editor({ blocks }: { blocks: Block[] }) {
   const handleDocChange = (newBlocks: Block[]) => {

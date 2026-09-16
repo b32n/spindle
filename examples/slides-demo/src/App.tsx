@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DeckProvider, SlidesEditor } from '@weavertime/spindle-slides-react';
-import { DeckImpl } from '@weavertime/spindle-slides-core';
-import type { SlidesCommentEvent } from '@weavertime/spindle-slides-core';
-import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@weavertime/spindle-shared';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+import { DeckProvider, SlidesEditor } from '@b32nio/spindle-slides-react';
+import { DeckImpl } from '@b32nio/spindle-slides-core';
+import type { SlidesCommentEvent } from '@b32nio/spindle-slides-core';
+import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import { buildSampleDeck } from './sampleDeck';
 
 const DEMO_USERS = [

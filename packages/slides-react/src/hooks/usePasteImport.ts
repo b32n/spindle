@@ -6,7 +6,7 @@
 
 import { useCallback } from 'react';
 import type React from 'react';
-import { richTextFromPlainText, type NewElementSpec, type TableCell, type DeckImpl } from '@weavertime/spindle-slides-core';
+import { richTextFromPlainText, type NewElementSpec, type TableCell, type DeckImpl } from '@b32nio/spindle-slides-core';
 import { useDeck } from './index';
 import { useDeckContext } from '../context/DeckContext';
 import { pasteElements, hasClipboardContent } from './useClipboard';

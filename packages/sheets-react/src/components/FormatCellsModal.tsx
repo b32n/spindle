@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
-import type { CellFormat, FormatType } from '@weavertime/spindle-sheets-core';
-import { formatNumber, getDefaultFormatForType } from '@weavertime/spindle-sheets-core';
+import type { CellFormat, FormatType } from '@b32nio/spindle-sheets-core';
+import { formatNumber, getDefaultFormatForType } from '@b32nio/spindle-sheets-core';
 
 interface FormatCellsModalProps {
   isOpen: boolean;

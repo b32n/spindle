@@ -7,11 +7,11 @@ import {
   createCommands,
   undo as pmUndo,
   redo as pmRedo,
-} from '@weavertime/spindle-docs-core';
-import type { HeadingLevel } from '@weavertime/spindle-docs-core';
+} from '@b32nio/spindle-docs-core';
+import type { HeadingLevel } from '@b32nio/spindle-docs-core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { CellSelection } from '../core';
-import { ResponsiveToolbar, useToolbarMenu, MenuRow } from '@weavertime/spindle-shared/react';
+import { ResponsiveToolbar, useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { LinkDialog } from './LinkDialog';
 import { ImageDialog } from './ImageDialog';
 import { TableSizePicker } from './TableSizePicker';

@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 **Which package(s)?**
-e.g. `@weavertime/spindle-sheets-core`, `@weavertime/spindle-docs-react`
+e.g. `@b32nio/spindle-sheets-core`, `@b32nio/spindle-docs-react`
 
 **Describe the bug**
 A clear and concise description of what the bug is.

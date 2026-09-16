@@ -9,7 +9,7 @@ import {
   BetweenHorizontalStart, BetweenHorizontalEnd, BetweenVerticalStart, BetweenVerticalEnd,
   Trash2, PaintBucket,
 } from 'lucide-react';
-import { resolveColor, type Color, type Stroke, type TableElement } from '@weavertime/spindle-slides-core';
+import { resolveColor, type Color, type Stroke, type TableElement } from '@b32nio/spindle-slides-core';
 import { useDeck, useTheme, useSelection, useElement } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { cellsInSelection, selectionRect } from '../interactions/table-selection-store';

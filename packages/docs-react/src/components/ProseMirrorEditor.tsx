@@ -10,8 +10,8 @@ import {
   activeMarksPluginKey,
   type DocsCommands,
   type ActiveState,
-} from '@weavertime/spindle-docs-core';
-import type { CollabHandle } from '@weavertime/spindle-docs-core/collab';
+} from '@b32nio/spindle-docs-core';
+import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 
 // ProseMirror CSS (basic styles)
 const proseMirrorStyles = `

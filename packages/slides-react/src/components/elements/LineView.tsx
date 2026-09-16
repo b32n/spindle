@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveColor, type LineElement, type ArrowHead, type ThemeData } from '@weavertime/spindle-slides-core';
+import { resolveColor, type LineElement, type ArrowHead, type ThemeData } from '@b32nio/spindle-slides-core';
 import { strokeAttrs } from './style';
 
 function ArrowMarker({ id, head, color, place }: { id: string; head: ArrowHead; color: string; place: 'start' | 'end' }): React.ReactElement | null {

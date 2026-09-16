@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@weavertime/spindle-docs-core': path.resolve(__dirname, '../../packages/docs-core/src'),
-      '@weavertime/spindle-docs-react': path.resolve(__dirname, '../../packages/docs-react/src'),
-      '@weavertime/spindle-shared': path.resolve(__dirname, '../../packages/shared/src'),
-      '@weavertime/spindle-transport-websocket': path.resolve(__dirname, '../../packages/transport-websocket/src'),
+      '@b32nio/spindle-docs-core': path.resolve(__dirname, '../../packages/docs-core/src'),
+      '@b32nio/spindle-docs-react': path.resolve(__dirname, '../../packages/docs-react/src'),
+      '@b32nio/spindle-shared': path.resolve(__dirname, '../../packages/shared/src'),
+      '@b32nio/spindle-transport-websocket': path.resolve(__dirname, '../../packages/transport-websocket/src'),
     },
   },
   server: {

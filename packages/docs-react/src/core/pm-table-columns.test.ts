@@ -1,6 +1,6 @@
 import { Node as PmNode } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
-import { docsSchema } from '@weavertime/spindle-docs-core';
+import { docsSchema } from '@b32nio/spindle-docs-core';
 import {
   applyInsertColumn,
   applyDeleteColumn,

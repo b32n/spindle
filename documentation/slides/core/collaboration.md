@@ -3,7 +3,7 @@
 Real-time editing is opt-in and lives behind `deck.attachCollab()`. The base engine never imports Yjs — the binding is a lazily-loaded chunk, so consumers who don't collaborate never pay for it.
 
 ```ts
-import { InMemoryProvider } from '@weavertime/spindle-shared';
+import { InMemoryProvider } from '@b32nio/spindle-shared';
 
 const handle = await deck.attachCollab(
   new InMemoryProvider(),            // or a WebSocket CollabProvider

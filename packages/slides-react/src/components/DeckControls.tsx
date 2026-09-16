@@ -5,8 +5,8 @@
 
 import React, { useRef, useState } from 'react';
 import { Plus, Palette, ChevronDown, SquareDashed } from 'lucide-react';
-import { BUILTIN_THEMES, getBuiltinTheme } from '@weavertime/spindle-slides-core';
-import { useToolbarMenu, MenuRow } from '@weavertime/spindle-shared/react';
+import { BUILTIN_THEMES, getBuiltinTheme } from '@b32nio/spindle-slides-core';
+import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { useDeck, useActiveSlideId, useTheme, useSlide } from '../hooks';
 import { Popover } from './Popover';
 import { LayoutThumb } from './LayoutThumb';

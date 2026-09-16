@@ -6,7 +6,7 @@ import {
   isRichTextEmpty,
   type TextElement,
   type ThemeData,
-} from '@weavertime/spindle-slides-core';
+} from '@b32nio/spindle-slides-core';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
 import { useDeck, useEditingId } from '../../hooks';

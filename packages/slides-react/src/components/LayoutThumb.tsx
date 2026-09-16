@@ -3,7 +3,7 @@
 // placeholders render as a solid bar; body placeholders as a few text lines.
 
 import React from 'react';
-import type { LayoutData, PlaceholderDef } from '@weavertime/spindle-slides-core';
+import type { LayoutData, PlaceholderDef } from '@b32nio/spindle-slides-core';
 
 const BAR = '#aeb9cc';
 const SUBTLE = '#cdd5e1';

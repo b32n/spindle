@@ -5,7 +5,7 @@
 // handles are untouched — these dots are a separate, hover-only affordance.
 
 import React, { useSyncExternalStore } from 'react';
-import { anchorPoints, type AnchorId, type Frame } from '@weavertime/spindle-slides-core';
+import { anchorPoints, type AnchorId, type Frame } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 
 const ACCENT = '#2d7ff9';

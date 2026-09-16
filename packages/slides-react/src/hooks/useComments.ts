@@ -3,7 +3,7 @@
 // the provider's currentUser.
 
 import { useEffect, useReducer } from 'react';
-import type { CommentAuthor, ElementCommentAnchor, SlidesCommentThread } from '@weavertime/spindle-slides-core';
+import type { CommentAuthor, ElementCommentAnchor, SlidesCommentThread } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 
 export interface UseComments {

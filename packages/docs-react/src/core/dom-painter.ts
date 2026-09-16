@@ -39,14 +39,14 @@ export type {
   HeaderFooterInlineContent,
   HeaderFooterParagraph,
   HeaderFooterContent,
-} from '@weavertime/spindle-docs-core';
+} from '@b32nio/spindle-docs-core';
 
 // Import types for local use
 import type {
   DynamicFieldRun,
   HeaderFooterParagraph,
   HeaderFooterContent,
-} from '@weavertime/spindle-docs-core';
+} from '@b32nio/spindle-docs-core';
 
 /**
  * Context for resolving dynamic fields

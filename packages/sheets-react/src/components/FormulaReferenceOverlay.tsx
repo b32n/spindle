@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
-import type { Sheet } from '@weavertime/spindle-sheets-core';
-import type { FormulaRange } from '@weavertime/spindle-sheets-core';
+import type { Sheet } from '@b32nio/spindle-sheets-core';
+import type { FormulaRange } from '@b32nio/spindle-sheets-core';
 
 interface FormulaReferenceOverlayProps {
   formulaRanges: FormulaRange[];

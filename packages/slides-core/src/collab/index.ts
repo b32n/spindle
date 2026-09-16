@@ -1,4 +1,4 @@
-// Collaboration entry (@weavertime/spindle-slides-core/collab).
+// Collaboration entry (@b32nio/spindle-slides-core/collab).
 //
 // This subpath is the only place that imports Yjs, keeping it out of the base
 // bundle. DeckImpl.attachCollab() lazy-imports the binding, so consumers who

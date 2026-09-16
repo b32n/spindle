@@ -1,6 +1,6 @@
 # Docs Data Structures
 
-Complete type definitions for the `@weavertime/spindle-docs-core` package.
+Complete type definitions for the `@b32nio/spindle-docs-core` package.
 
 ## Document Structure
 
@@ -515,7 +515,7 @@ interface ParagraphStylePool {
 ### Usage
 
 ```typescript
-import { TextStylePoolImpl } from '@weavertime/spindle-docs-core';
+import { TextStylePoolImpl } from '@b32nio/spindle-docs-core';
 
 const pool = new TextStylePoolImpl();
 
@@ -604,7 +604,7 @@ if (doc.canRedo()) {
 
 ## Layout Types (React Package)
 
-Types from `@weavertime/spindle-docs-react` for the layout engine:
+Types from `@b32nio/spindle-docs-react` for the layout engine:
 
 ### FlowBlock
 
@@ -698,7 +698,7 @@ import {
   createHeading,
   createListItem,
   createTable,
-} from '@weavertime/spindle-docs-core';
+} from '@b32nio/spindle-docs-core';
 
 // Create paragraph
 const para = createParagraphFromText('Hello, world!');
@@ -716,7 +716,7 @@ const table = createTable(3, 3); // 3 rows, 3 columns
 ### Creating Documents
 
 ```typescript
-import { DocumentImpl, createDocument, createSection } from '@weavertime/spindle-docs-core';
+import { DocumentImpl, createDocument, createSection } from '@b32nio/spindle-docs-core';
 
 // Using class
 const doc = new DocumentImpl('doc_1', 'My Document');

@@ -1,5 +1,5 @@
-// @weavertime/spindle-slides-core
-// Core presentation engine (no Yjs — import '@weavertime/spindle-slides-core/collab' for that).
+// @b32nio/spindle-slides-core
+// Core presentation engine (no Yjs — import '@b32nio/spindle-slides-core/collab' for that).
 
 // Deck-layer types + events
 export * from './types';
@@ -39,4 +39,4 @@ export { normalizeDeckData } from './serialization';
 
 // Utilities re-exported for convenience
 export { generateId } from './utils/id';
-export { EventEmitter } from '@weavertime/spindle-shared';
+export { EventEmitter } from '@b32nio/spindle-shared';

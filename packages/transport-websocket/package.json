@@ -1,14 +1,14 @@
 {
-  "name": "@weavertime/spindle-transport-websocket",
+  "name": "@b32nio/spindle-transport-websocket",
   "version": "0.3.0",
   "description": "WebSocket-backed CollabProvider for Spindle collaboration",
   "repository": {
     "type": "git",
-    "url": "https://github.com/weavertime/spindle.git",
+    "url": "https://github.com/b32n/spindle.git",
     "directory": "packages/transport-websocket"
   },
   "bugs": {
-    "url": "https://github.com/weavertime/spindle/issues"
+    "url": "https://github.com/b32n/spindle/issues"
   },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -42,7 +42,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@weavertime/spindle-shared": "^0.3.0"
+    "@b32nio/spindle-shared": "^0.3.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.0",

@@ -1,24 +1,24 @@
-# @weavertime/spindle-transport-websocket
+# @b32nio/spindle-transport-websocket
 
-A WebSocket-backed [`CollabProvider`](https://github.com/weavertime/spindle) for
+A WebSocket-backed [`CollabProvider`](https://github.com/b32n/spindle) for
 Spindle real-time collaboration. Plug it into a `WorkbookImpl`, `DocumentImpl`,
 or `DeckImpl` via `attachCollab` to sync edits, presence, and remote cursors
 across clients over a WebSocket relay.
 
-Part of [Spindle](https://spindle.weavertime.com) — open-source spreadsheet,
+Part of [Spindle](https://spindle.b32n.io) — open-source spreadsheet,
 document, and slide editing libraries for React.
 
 ## Installation
 
 ```bash
-npm install @weavertime/spindle-transport-websocket
+npm install @b32nio/spindle-transport-websocket
 ```
 
 ## Usage
 
 ```ts
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 
 const workbook = new WorkbookImpl('wb_1', 'Quarterly Plan');
 workbook.setData(savedJson);
@@ -47,8 +47,8 @@ end-to-end encryption is a thin layer on top.
 | `maxReconnectDelayMs` | `10000` | Maximum reconnect backoff delay. |
 
 A reference relay server lives in
-[`examples/collab-server`](https://github.com/weavertime/spindle/tree/master/examples/collab-server).
-See the [Collaboration Guide](https://github.com/weavertime/spindle/blob/master/documentation/collaboration.md)
+[`examples/collab-server`](https://github.com/b32n/spindle/tree/master/examples/collab-server).
+See the [Collaboration Guide](https://github.com/b32n/spindle/blob/master/documentation/collaboration.md)
 for transports, offline persistence, and an end-to-end encryption recipe.
 
 ## License

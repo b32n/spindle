@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { EditorView } from 'prosemirror-view';
-import { docsSchema, createCommands } from '@weavertime/spindle-docs-core';
+import { docsSchema, createCommands } from '@b32nio/spindle-docs-core';
 
 interface ImageDialogProps {
   /** ProseMirror editor view */

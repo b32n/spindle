@@ -5,8 +5,8 @@
 
 import React, { useRef, useState } from 'react';
 import { Shapes as ShapesIcon, ChevronDown } from 'lucide-react';
-import type { ShapePreset, NewElementSpec } from '@weavertime/spindle-slides-core';
-import { useToolbarMenu, MenuRow } from '@weavertime/spindle-shared/react';
+import type { ShapePreset, NewElementSpec } from '@b32nio/spindle-slides-core';
+import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { shapeGeom } from './elements/shapes';
 import { useDeck } from '../hooks';
 import { Popover } from './Popover';

@@ -17,8 +17,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@weavertime/spindle-sheets-core": ["../../packages/sheets-core/src"],
-      "@weavertime/spindle-sheets-react": ["../../packages/sheets-react/src"]
+      "@b32nio/spindle-sheets-core": ["../../packages/sheets-core/src"],
+      "@b32nio/spindle-sheets-react": ["../../packages/sheets-react/src"]
     }
   },
   "include": ["src"],

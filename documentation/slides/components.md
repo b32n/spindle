@@ -1,6 +1,6 @@
 # Components
 
-`@weavertime/spindle-slides-react` is a thin, composable layer over the engine. Everything hangs off a single provider.
+`@b32nio/spindle-slides-react` is a thin, composable layer over the engine. Everything hangs off a single provider.
 
 ## Provider
 

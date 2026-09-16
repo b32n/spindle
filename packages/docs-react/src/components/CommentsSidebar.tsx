@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { X, Check, RotateCcw, Trash2, MessageSquare } from 'lucide-react';
-import type { Comment, CommentAuthor, DocsCommentThread } from '@weavertime/spindle-docs-core';
+import type { Comment, CommentAuthor, DocsCommentThread } from '@b32nio/spindle-docs-core';
 import { useDocument } from '../context/DocumentContext';
 
 // ============================================================================

@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { DocumentProvider, DocumentEditor } from '@weavertime/spindle-docs-react';
+import { DocumentProvider, DocumentEditor } from '@b32nio/spindle-docs-react';
 import {
   DocumentImpl,
   type DocumentData,
   type HeaderFooterContent,
   type CommentAuthor,
-} from '@weavertime/spindle-docs-core';
+} from '@b32nio/spindle-docs-core';
 import DemoChrome from './DemoChrome';
 
 const USERS: CommentAuthor[] = [

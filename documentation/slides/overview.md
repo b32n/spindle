@@ -2,8 +2,8 @@
 
 Spindle Slides is a React presentation editor built on a standalone, framework-agnostic engine. Unlike the docs surface — a linear flowing block tree — slides needs positioned elements, z-order, rotation, and groups, so it ships as its own pair of packages rather than reusing the document engine.
 
-- **`@weavertime/spindle-slides-core`** — the engine. Zero React. Owns the deck model, the scene layer (elements, geometry, transforms, snapping, z-order, groups), rich text, themes/layouts, and the optional Yjs collaboration binding.
-- **`@weavertime/spindle-slides-react`** — the editor. Hooks + DOM components: the interactive stage, gestures, overlays, toolbar, live rich-text editor, present mode, and PDF export.
+- **`@b32nio/spindle-slides-core`** — the engine. Zero React. Owns the deck model, the scene layer (elements, geometry, transforms, snapping, z-order, groups), rich text, themes/layouts, and the optional Yjs collaboration binding.
+- **`@b32nio/spindle-slides-react`** — the editor. Hooks + DOM components: the interactive stage, gestures, overlays, toolbar, live rich-text editor, present mode, and PDF export.
 
 ## Why a separate engine
 
@@ -24,8 +24,8 @@ The document model is a single flowing sequence of blocks; a slide is a bag of a
 ## Quick start
 
 ```tsx
-import { DeckImpl } from '@weavertime/spindle-slides-core';
-import { DeckProvider, SlidesEditor } from '@weavertime/spindle-slides-react';
+import { DeckImpl } from '@b32nio/spindle-slides-core';
+import { DeckProvider, SlidesEditor } from '@b32nio/spindle-slides-react';
 
 const deck = new DeckImpl('my-deck', 'Untitled deck');
 // deck.setData({ ... })  // optional: hydrate from JSON

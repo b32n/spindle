@@ -22,7 +22,7 @@ import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history, undo, redo } from 'prosemirror-history';
 import { ySyncPlugin, yUndoPlugin, undo as yUndo, redo as yRedo } from 'y-prosemirror';
-import { slidesSchema, resolveColor, resolveFont, emptyRichText, type ThemeData, type BodyStyle, type RichTextDoc } from '@weavertime/spindle-slides-core';
+import { slidesSchema, resolveColor, resolveFont, emptyRichText, type ThemeData, type BodyStyle, type RichTextDoc } from '@b32nio/spindle-slides-core';
 import { useDeck } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 

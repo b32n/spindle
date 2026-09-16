@@ -5,9 +5,9 @@ authentication.
 
 | Demo | Directory | Showcases |
 |------|-----------|-----------|
-| Docs | [`docs-demo/`](docs-demo/) | The document editor (`@weavertime/spindle-docs-react`) |
-| Sheets | [`sheets-demo/`](sheets-demo/) | The spreadsheet (`@weavertime/spindle-sheets-react`) |
-| Slides | [`slides-demo/`](slides-demo/) | The presentation editor (`@weavertime/spindle-slides-react`) |
+| Docs | [`docs-demo/`](docs-demo/) | The document editor (`@b32nio/spindle-docs-react`) |
+| Sheets | [`sheets-demo/`](sheets-demo/) | The spreadsheet (`@b32nio/spindle-sheets-react`) |
+| Slides | [`slides-demo/`](slides-demo/) | The presentation editor (`@b32nio/spindle-slides-react`) |
 | Collab server | [`collab-server/`](collab-server/) | A local WebSocket relay for trying real-time collaboration across the three editors |
 
 ## Run a demo

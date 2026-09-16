@@ -1,6 +1,6 @@
 name: Deploy Website
 
-# Builds the marketing site (spindle.weavertime.com) and deploys it to
+# Builds the marketing site (spindle.b32n.io) and deploys it to
 # Cloudflare Pages on every push to master that touches the website or the docs.
 # The site renders the repo-root `documentation/` markdown (bundled at build
 # time) and consumes the spindle packages via file: deps, so all package dist is

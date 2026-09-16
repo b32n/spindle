@@ -1,4 +1,4 @@
-// @weavertime/spindle-slides-react
+// @b32nio/spindle-slides-react
 // React components + hooks for Spindle Slides.
 
 // Context

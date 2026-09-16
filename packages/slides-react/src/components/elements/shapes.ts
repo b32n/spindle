@@ -3,7 +3,7 @@
 // ShapeView renders inside a `viewBox="0 0 w h"`. Kept framework-free so it can
 // be unit-tested and reused by the PDF/print path.
 
-import type { ShapePreset } from '@weavertime/spindle-slides-core';
+import type { ShapePreset } from '@b32nio/spindle-slides-core';
 
 export type ShapeGeom =
   | { type: 'path'; d: string }
