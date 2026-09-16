@@ -5,7 +5,6 @@
 
 import { useCallback } from 'react';
 import type React from 'react';
-import { useDeck } from './index';
 import { useDeckContext } from '../context/DeckContext';
 import { copyElements } from './useClipboard';
 
@@ -20,8 +19,7 @@ function isTextEntry(target: EventTarget | null): boolean {
 }
 
 export function useKeyboardShortcuts(): { onKeyDown: (e: React.KeyboardEvent) => void } {
-  const deck = useDeck();
-  const { editing } = useDeckContext();
+  const { deck, editing } = useDeckContext();
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

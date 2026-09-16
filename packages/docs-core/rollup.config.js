@@ -15,10 +15,16 @@ const tsPluginMain = typescript({
   declaration: true,
   declarationDir: './dist',
   rootDir: './src',
+  outputToFilesystem: true,
 });
 const tsPluginNoDecl = typescript({
   tsconfig: './tsconfig.json',
   declaration: false,
+  declarationMap: false,
+  // tsconfig has composite: true, which requires declaration emit; disable it
+  // here too so this pass doesn't conflict with declaration: false above (TS6304).
+  composite: false,
+  outputToFilesystem: true,
 });
 
 const external = [
