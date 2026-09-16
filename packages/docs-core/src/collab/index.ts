@@ -1,4 +1,4 @@
-// @weavertime/spindle-docs-core/collab — Yjs-backed collaboration binding.
+// @b32nio/spindle-docs-core/collab — Yjs-backed collaboration binding.
 
 export {
   getYDocFields,

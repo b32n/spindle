@@ -2,7 +2,7 @@
 // slide box, whose bounding rect's top-left is slide (0, 0) and whose CSS
 // scale relates screen px to slide px.
 
-import type { Point } from '@weavertime/spindle-slides-core';
+import type { Point } from '@b32nio/spindle-slides-core';
 
 export interface StageMetrics {
   /** Bounding client rect of the scaled slide surface. */

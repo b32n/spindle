@@ -3,7 +3,7 @@
 // dragging a new connector. Kept out of React commits; only the connection
 // overlay subscribes, so hover/drag never re-render the slide's elements.
 
-import type { AnchorId, Point } from '@weavertime/spindle-slides-core';
+import type { AnchorId, Point } from '@b32nio/spindle-slides-core';
 
 export interface ConnectorDraft {
   fromElementId: string;

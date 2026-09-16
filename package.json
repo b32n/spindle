@@ -17,18 +17,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/weavertime/spindle"
+    "url": "https://github.com/b32n/spindle"
   },
   "bugs": {
-    "url": "https://github.com/weavertime/spindle/issues"
+    "url": "https://github.com/b32n/spindle/issues"
   },
-  "homepage": "https://spindle.weavertime.com",
+  "homepage": "https://spindle.b32n.io",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @weavertime/spindle-shared && npm run build -w @weavertime/spindle-docs-core -w @weavertime/spindle-sheets-core -w @weavertime/spindle-slides-core -w @weavertime/spindle-transport-websocket && npm run build -w @weavertime/spindle-docs-react -w @weavertime/spindle-sheets-react -w @weavertime/spindle-slides-react",
+    "build": "npm run build -w @b32nio/spindle-shared && npm run build -w @b32nio/spindle-docs-core -w @b32nio/spindle-sheets-core -w @b32nio/spindle-slides-core -w @b32nio/spindle-transport-websocket && npm run build -w @b32nio/spindle-docs-react -w @b32nio/spindle-sheets-react -w @b32nio/spindle-slides-react",
     "dev": "npm run dev --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint --ext .ts,.tsx packages",

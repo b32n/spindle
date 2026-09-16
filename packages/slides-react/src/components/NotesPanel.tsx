@@ -3,7 +3,7 @@
 // a follow-up. Commits on change.
 
 import React from 'react';
-import { richTextFromPlainText, richTextToPlainText } from '@weavertime/spindle-slides-core';
+import { richTextFromPlainText, richTextToPlainText } from '@b32nio/spindle-slides-core';
 import { useDeck, useActiveSlideId, useSlide } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 

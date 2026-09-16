@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from 'react';
-import type { PageConfig, PageSizeKey } from '@weavertime/spindle-docs-core';
-import { PAGE_SIZES } from '@weavertime/spindle-docs-core';
+import type { PageConfig, PageSizeKey } from '@b32nio/spindle-docs-core';
+import { PAGE_SIZES } from '@b32nio/spindle-docs-core';
 
 interface PageSetupModalProps {
   isOpen: boolean;

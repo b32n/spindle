@@ -4,7 +4,7 @@
 // the editor stage, the filmstrip thumbnails, present mode, and PDF export.
 
 import React from 'react';
-import { resolveFill } from '@weavertime/spindle-slides-core';
+import { resolveFill } from '@b32nio/spindle-slides-core';
 import { useDeck, useSlide, useSlideElementIds, useTheme } from '../hooks';
 import { ElementView } from './elements/ElementView';
 

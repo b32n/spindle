@@ -12,7 +12,7 @@
 // file instead of threading another effect through CanvasGrid.
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { Sheet, Range, Selection, WorkbookImpl } from '@weavertime/spindle-sheets-core';
+import type { Sheet, Range, Selection, WorkbookImpl } from '@b32nio/spindle-sheets-core';
 import type { Awareness } from 'y-protocols/awareness';
 
 interface RemotePeer {

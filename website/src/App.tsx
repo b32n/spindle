@@ -24,9 +24,9 @@ function SheetShell({ note }: { note: string }) {
   );
 }
 
-const REPO = 'https://github.com/weavertime/spindle';
-const NPM_ORG = 'https://www.npmjs.com/org/weavertime';
-const INSTALL = 'npm i @weavertime/spindle-sheets-react';
+const REPO = 'https://github.com/b32n/spindle';
+const NPM_ORG = 'https://www.npmjs.com/org/b32nio';
+const INSTALL = 'npm i @b32nio/spindle-sheets-react';
 
 const FEATURES = [
   { fi: 'Rendering', h: 'Painted to canvas', p: 'Cells and glyphs draw straight to a canvas with virtual scrolling, so tens of thousands of rows stay smooth.' },
@@ -38,9 +38,9 @@ const FEATURES = [
 ];
 
 const SURFACES = [
-  { kind: 'sheet' as const, h: 'Sheets', pkg: '@weavertime/spindle-sheets-react', soon: false, demo: '/demo/sheets', p: 'Formulas, filters, cell formatting, frozen panes, and a canvas grid that scrolls like native.' },
-  { kind: 'doc' as const, h: 'Docs', pkg: '@weavertime/spindle-docs-react', soon: false, demo: '/demo/docs', p: 'Paginated, print-true documents on a ProseMirror engine with a line-level “True Layout” paginator.' },
-  { kind: 'slide' as const, h: 'Slides', pkg: '@weavertime/spindle-slides-react', soon: false, demo: '/demo/slides', p: 'Positioned elements, shapes, and rich text on a standalone scene engine. Drag, present, and co-edit in real time.' },
+  { kind: 'sheet' as const, h: 'Sheets', pkg: '@b32nio/spindle-sheets-react', soon: false, demo: '/demo/sheets', p: 'Formulas, filters, cell formatting, frozen panes, and a canvas grid that scrolls like native.' },
+  { kind: 'doc' as const, h: 'Docs', pkg: '@b32nio/spindle-docs-react', soon: false, demo: '/demo/docs', p: 'Paginated, print-true documents on a ProseMirror engine with a line-level “True Layout” paginator.' },
+  { kind: 'slide' as const, h: 'Slides', pkg: '@b32nio/spindle-slides-react', soon: false, demo: '/demo/slides', p: 'Positioned elements, shapes, and rich text on a standalone scene engine. Drag, present, and co-edit in real time.' },
 ];
 
 const PACKAGES = [
@@ -144,8 +144,8 @@ function Install() {
           <div className="cap"><i /><i /><i /></div>
           <pre>
 <span className="c1"># the spreadsheet library</span>{'\n'}
-<span className="k">npm</span> i <span className="t">@weavertime/spindle-sheets-react</span>{'\n\n'}
-<span className="k">import</span> {'{ WorkbookProvider, WorkbookCanvas }'} <span className="k">from</span> <span className="s">'@weavertime/spindle-sheets-react'</span>;{'\n\n'}
+<span className="k">npm</span> i <span className="t">@b32nio/spindle-sheets-react</span>{'\n\n'}
+<span className="k">import</span> {'{ WorkbookProvider, WorkbookCanvas }'} <span className="k">from</span> <span className="s">'@b32nio/spindle-sheets-react'</span>;{'\n\n'}
 <span className="k">export function</span> <span className="t">Editor</span>({'{ workbook }'}) {'{'}{'\n'}
 {'  '}<span className="k">return</span> ({'\n'}
 {'    '}&lt;<span className="t">WorkbookProvider</span> workbook={'{workbook}'}&gt;{'\n'}
@@ -211,7 +211,7 @@ function Packages() {
         <tbody>
           {PACKAGES.map(([name, role]) => (
             <tr key={name}>
-              <td className="p">@weavertime/<b>{name}</b></td>
+              <td className="p">@b32nio/<b>{name}</b></td>
               <td className="d">{role}</td>
               <td className="v">0.3.0</td>
             </tr>
@@ -247,12 +247,12 @@ function Footer() {
         <div className="about">
           <div className="fbrand">Spindle</div>
           The open-source editing layer for the modern web: spreadsheets, documents, and slides as React libraries.
-          Part of the <strong style={{ color: 'var(--linen)' }}>Weavertime</strong> family, alongside <strong style={{ color: 'var(--linen)' }}>Weaversuite</strong>, the encrypted drive it was spun for.
+          Built by <strong style={{ color: 'var(--linen)' }}>b32n</strong>.
         </div>
         <div>
           <h4>Project</h4>
           <a href={REPO}>GitHub repository</a>
-          <a href={NPM_ORG}>npm · @weavertime</a>
+          <a href={NPM_ORG}>npm · @b32nio</a>
           <a href="#packages">Packages</a>
           <a href="#features">Features</a>
         </div>
@@ -265,8 +265,8 @@ function Footer() {
         </div>
       </div>
       <div className="legal">
-        <span>MIT © 2026 Weavertime</span>
-        <span>spindle.weavertime.com</span>
+        <span>MIT © 2026 b32n</span>
+        <span>spindle.b32n.io</span>
       </div>
     </div></footer>
   );

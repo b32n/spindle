@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const REPO = 'https://github.com/weavertime/spindle';
+const REPO = 'https://github.com/b32n/spindle';
 
 /**
  * Full-page frame for the live demos: a thin header (home · switch surface ·

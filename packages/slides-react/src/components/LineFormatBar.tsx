@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Minus, MoveLeft, MoveRight, MoveHorizontal } from 'lucide-react';
-import type { ArrowHead, LineElement } from '@weavertime/spindle-slides-core';
+import type { ArrowHead, LineElement } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useElement } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
 

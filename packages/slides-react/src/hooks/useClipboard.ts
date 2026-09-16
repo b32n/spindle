@@ -4,7 +4,7 @@
 // re-adds them to the active slide with a small offset and selects them.
 
 import { useCallback } from 'react';
-import type { DeckImpl, NewElementSpec, SlideElement } from '@weavertime/spindle-slides-core';
+import type { DeckImpl, NewElementSpec, SlideElement } from '@b32nio/spindle-slides-core';
 import { useDeck } from './index';
 
 // Module-scoped so copy in one place and paste in another share it.

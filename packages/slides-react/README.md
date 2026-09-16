@@ -1,10 +1,10 @@
-# @weavertime/spindle-slides-react
+# @b32nio/spindle-slides-react
 
-React components and hooks for [Spindle Slides](https://spindle.weavertime.com) — a full presentation editor over the [`@weavertime/spindle-slides-core`](https://www.npmjs.com/package/@weavertime/spindle-slides-core) engine.
+React components and hooks for [Spindle Slides](https://spindle.b32n.io) — a full presentation editor over the [`@b32nio/spindle-slides-core`](https://www.npmjs.com/package/@b32nio/spindle-slides-core) engine.
 
 ```tsx
-import { DeckImpl } from '@weavertime/spindle-slides-core';
-import { DeckProvider, SlidesEditor } from '@weavertime/spindle-slides-react';
+import { DeckImpl } from '@b32nio/spindle-slides-core';
+import { DeckProvider, SlidesEditor } from '@b32nio/spindle-slides-react';
 
 const deck = new DeckImpl('my-deck', 'Untitled deck');
 
@@ -21,6 +21,6 @@ Includes the interactive stage (selection, move/resize/rotate gestures with smar
 
 Compose the whole editor with `SlidesEditor`, or drop down to `SlideStage`, `SlideView`, `Filmstrip`, `PresentMode`, and the `useDeck` / `useElement` / `useSelection` / `useComments` hooks.
 
-Peer dependencies: `react` and `react-dom` (>= 18). Full docs: <https://spindle.weavertime.com/docs/slides/components>.
+Peer dependencies: `react` and `react-dom` (>= 18). Full docs: <https://spindle.b32n.io/docs/slides/components>.
 
 MIT licensed.

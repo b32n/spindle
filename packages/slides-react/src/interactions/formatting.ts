@@ -4,7 +4,7 @@
 
 import { toggleMark } from 'prosemirror-commands';
 import type { EditorView } from 'prosemirror-view';
-import type { DeckImpl, TextFormatSpec } from '@weavertime/spindle-slides-core';
+import type { DeckImpl, TextFormatSpec } from '@b32nio/spindle-slides-core';
 
 function applyToView(view: EditorView, spec: TextFormatSpec): void {
   const { state } = view;

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { DocumentProvider, DocumentEditor } from '@weavertime/spindle-docs-react';
+import { DocumentProvider, DocumentEditor } from '@b32nio/spindle-docs-react';
 import {
   DocumentImpl,
   type DocumentData,
   type HeaderFooterContent,
   type CommentAuthor,
   type DocsCommentEvent,
-} from '@weavertime/spindle-docs-core';
-import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@weavertime/spindle-shared';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+} from '@b32nio/spindle-docs-core';
+import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
 
 // Sample directory of users that can be @-mentioned in comments.
@@ -281,9 +281,9 @@ const sampleDocumentData: DocumentData = {
           level: 0,
           content: [
             { type: 'text', text: 'Install ' },
-            { type: 'text', text: '@weavertime/spindle-docs-core', styleId: 'style_code' },
+            { type: 'text', text: '@b32nio/spindle-docs-core', styleId: 'style_code' },
             { type: 'text', text: ' and ' },
-            { type: 'text', text: '@weavertime/spindle-docs-react', styleId: 'style_code' },
+            { type: 'text', text: '@b32nio/spindle-docs-react', styleId: 'style_code' },
           ],
         },
         {

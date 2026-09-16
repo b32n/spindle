@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import type { CommentAuthor, SheetCommentEvent } from '@weavertime/spindle-sheets-core';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import type { CommentAuthor, SheetCommentEvent } from '@b32nio/spindle-sheets-core';
 
 interface WorkbookContextValue {
   workbook: WorkbookImpl;

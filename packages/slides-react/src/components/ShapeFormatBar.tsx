@@ -3,7 +3,7 @@
 // model already carries `fill` and `stroke`; this is the UI for them.
 
 import React from 'react';
-import { resolveColor, type Color, type ShapeElement, type StrokeDash, type ThemeData } from '@weavertime/spindle-slides-core';
+import { resolveColor, type Color, type ShapeElement, type StrokeDash, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useElement, useTheme } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
 

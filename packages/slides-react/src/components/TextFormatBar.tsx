@@ -7,7 +7,7 @@
 
 import React, { useSyncExternalStore } from 'react';
 import { Bold, Italic, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Highlighter } from 'lucide-react';
-import type { TextFormatSpec, TextAlign, ListType } from '@weavertime/spindle-slides-core';
+import type { TextFormatSpec, TextAlign, ListType } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useEditingId } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { applyFormat } from '../interactions/formatting';

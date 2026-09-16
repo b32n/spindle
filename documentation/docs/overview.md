@@ -8,8 +8,8 @@ The library is structured as two packages with a clear separation of concerns:
 
 ```mermaid
 graph TD
-    A[Spindle Docs] --> B[@weavertime/spindle-docs-core]
-    A --> C[@weavertime/spindle-docs-react]
+    A[Spindle Docs] --> B[@b32nio/spindle-docs-core]
+    A --> C[@b32nio/spindle-docs-react]
     B --> D[Document Model]
     B --> E[ProseMirror Integration]
     B --> F[Block Types]
@@ -19,7 +19,7 @@ graph TD
     C --> J[DOM Painter]
 ```
 
-### Core Package (`@weavertime/spindle-docs-core`)
+### Core Package (`@b32nio/spindle-docs-core`)
 
 The framework-agnostic document engine:
 
@@ -28,7 +28,7 @@ The framework-agnostic document engine:
 - **Block types** — paragraphs, headings, lists, tables, images, and more
 - **True Layout paginator** — line-level pagination that mirrors print output
 
-### React Package (`@weavertime/spindle-docs-react`)
+### React Package (`@b32nio/spindle-docs-react`)
 
 The React editor built on the core engine:
 

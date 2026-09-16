@@ -1,4 +1,4 @@
-# @weavertime/spindle-docs-react
+# @b32nio/spindle-docs-react
 
 React components for Spindle Docs with paginated document rendering.
 
@@ -30,8 +30,8 @@ Lower-level component for custom implementations. Handles:
 ## Usage
 
 ```typescript
-import { DocumentProvider, DocumentEditor } from '@weavertime/spindle-docs-react';
-import { DocumentImpl } from '@weavertime/spindle-docs-core';
+import { DocumentProvider, DocumentEditor } from '@b32nio/spindle-docs-react';
+import { DocumentImpl } from '@b32nio/spindle-docs-core';
 
 const doc = new DocumentImpl('doc_1', 'My Document');
 
@@ -71,7 +71,7 @@ DocumentEditor (React)
 ## Hooks
 
 ```typescript
-import { useDocument, useSections, useHistory } from '@weavertime/spindle-docs-react';
+import { useDocument, useSections, useHistory } from '@b32nio/spindle-docs-react';
 
 // Access document model
 const { document, zoom, setZoom } = useDocument();

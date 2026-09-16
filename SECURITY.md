@@ -3,7 +3,7 @@
 ## Supported versions
 
 Spindle is pre-1.0 and under active development. Security fixes are applied to
-the latest published release of each `@weavertime/spindle-*` package. Please
+the latest published release of each `@b32nio/spindle-*` package. Please
 make sure you are on the most recent version before reporting an issue.
 
 ## Reporting a vulnerability
@@ -12,7 +12,7 @@ Please **do not** open a public GitHub issue for security vulnerabilities.
 
 Instead, report privately through either of:
 
-- GitHub's [private vulnerability reporting](https://github.com/weavertime/spindle/security/advisories/new)
+- GitHub's [private vulnerability reporting](https://github.com/b32n/spindle/security/advisories/new)
   (Security → Report a vulnerability), or
 - email **hello@bharatnadkarni.com** with the subject line `SECURITY: Spindle`.
 

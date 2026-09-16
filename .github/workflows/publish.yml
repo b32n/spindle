@@ -1,6 +1,6 @@
 name: Publish Packages
 
-# Publishes all @weavertime/spindle-* packages to npm when a GitHub Release is
+# Publishes all @b32nio/spindle-* packages to npm when a GitHub Release is
 # published. Cutting the Release is the single action that both generates the
 # changelog (auto-notes — see .github/release.yml) and ships the packages.
 #

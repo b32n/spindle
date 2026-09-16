@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { WorkbookProvider, WorkbookCanvas } from '@weavertime/spindle-sheets-react';
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
+import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
 import DemoChrome from './DemoChrome';
 
 // A realistic workbook: a studio's Q3 plan. Every total is a live formula

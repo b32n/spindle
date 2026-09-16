@@ -1,4 +1,4 @@
-// @weavertime/spindle-docs-core
+// @b32nio/spindle-docs-core
 // Core document editor engine
 
 // Types

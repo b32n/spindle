@@ -6,14 +6,14 @@ Spindle is a suite of high-performance productivity components for React, provid
 
 | Package | Description |
 |---------|-------------|
-| `@weavertime/spindle-docs-core` | Framework-agnostic document engine |
-| `@weavertime/spindle-docs-react` | React document editor with true page layout |
-| `@weavertime/spindle-sheets-core` | Framework-agnostic spreadsheet engine |
-| `@weavertime/spindle-sheets-react` | React spreadsheet with canvas rendering |
-| `@weavertime/spindle-slides-core` | Framework-agnostic presentation engine |
-| `@weavertime/spindle-slides-react` | React slides editor with DOM rendering |
-| `@weavertime/spindle-shared` | Shared utilities, types, and React UI |
-| `@weavertime/spindle-transport-websocket` | WebSocket `CollabProvider` for real-time collaboration |
+| `@b32nio/spindle-docs-core` | Framework-agnostic document engine |
+| `@b32nio/spindle-docs-react` | React document editor with true page layout |
+| `@b32nio/spindle-sheets-core` | Framework-agnostic spreadsheet engine |
+| `@b32nio/spindle-sheets-react` | React spreadsheet with canvas rendering |
+| `@b32nio/spindle-slides-core` | Framework-agnostic presentation engine |
+| `@b32nio/spindle-slides-react` | React slides editor with DOM rendering |
+| `@b32nio/spindle-shared` | Shared utilities, types, and React UI |
+| `@b32nio/spindle-transport-websocket` | WebSocket `CollabProvider` for real-time collaboration |
 
 ---
 
@@ -47,8 +47,8 @@ A Google Docs-like document editor with true page-based layout and real-time pag
 ### Quick Start
 
 ```typescript
-import { DocumentImpl } from '@weavertime/spindle-docs-core';
-import { DocumentProvider, DocumentEditor } from '@weavertime/spindle-docs-react';
+import { DocumentImpl } from '@b32nio/spindle-docs-core';
+import { DocumentProvider, DocumentEditor } from '@b32nio/spindle-docs-react';
 
 // Create document
 const doc = new DocumentImpl('doc_1', 'My Document');
@@ -91,8 +91,8 @@ A Google Sheets-like spreadsheet with high-performance canvas rendering.
 ### Quick Start
 
 ```typescript
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import { WorkbookProvider, WorkbookCanvas } from '@weavertime/spindle-sheets-react';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
 
 // Create workbook
 const workbook = new WorkbookImpl('workbook_1', 'My Workbook');
@@ -115,7 +115,7 @@ function App() {
 - **Sorting & Filtering**: Column operations
 - **CSV Export/Import**: Data interchange
 
-See the [issue tracker](https://github.com/weavertime/spindle/issues) for planned work.
+See the [issue tracker](https://github.com/b32n/spindle/issues) for planned work.
 
 ---
 
@@ -135,8 +135,8 @@ and present mode.
 ### Quick Start
 
 ```typescript
-import { DeckImpl } from '@weavertime/spindle-slides-core';
-import { DeckProvider, SlidesEditor } from '@weavertime/spindle-slides-react';
+import { DeckImpl } from '@b32nio/spindle-slides-core';
+import { DeckProvider, SlidesEditor } from '@b32nio/spindle-slides-react';
 
 // Create a deck
 const deck = new DeckImpl('deck_1', 'My Deck');
@@ -159,7 +159,7 @@ function App() {
 - **Present Mode**: fullscreen 16:9, keyboard nav, cross-fade, and presenter view (timer, notes, next-slide preview)
 - **Comments & Collaboration**: element-anchored threads and Yjs real-time sync
 
-See the [issue tracker](https://github.com/weavertime/spindle/issues) for planned work.
+See the [issue tracker](https://github.com/b32n/spindle/issues) for planned work.
 
 ---
 

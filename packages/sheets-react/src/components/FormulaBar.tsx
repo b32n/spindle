@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { useWorkbook } from '../context/WorkbookContext';
-import { columnIndexToLabel, excelDateToJS, formatJSDate } from '@weavertime/spindle-sheets-core';
-import type { Cell, WorkbookImpl } from '@weavertime/spindle-sheets-core';
+import { columnIndexToLabel, excelDateToJS, formatJSDate } from '@b32nio/spindle-sheets-core';
+import type { Cell, WorkbookImpl } from '@b32nio/spindle-sheets-core';
 import { FormulaAutocomplete } from './FormulaAutocomplete';
 import { FormulaSignatureHint } from './FormulaSignatureHint';
 import { useFormulaAssist } from '../hooks/useFormulaAssist';

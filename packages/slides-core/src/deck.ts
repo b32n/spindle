@@ -11,7 +11,7 @@
 // convenience but are LOCAL ONLY — never mirrored into the CRDT doc (a hard
 // project rule).
 
-import { EventEmitter } from '@weavertime/spindle-shared';
+import { EventEmitter } from '@b32nio/spindle-shared';
 import { indexBetween, indexesBetween, sortByIndex } from './scene/fractional-index';
 import { buildPlaceholderElement } from './theme/materialize';
 import type { PlaceholderMeta } from './scene/types';
@@ -48,7 +48,7 @@ import { DeckHistory, type DeckSnapshot } from './history';
 import { normalizeDeckData } from './serialization';
 import { SlidesCommentStore } from './comments';
 import type { CollabHandle, AttachCollabOptions } from './collab/binding';
-import type { CollabIdentity, CollabProvider } from '@weavertime/spindle-shared';
+import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
 import type {
   Slide,
   DeckData,

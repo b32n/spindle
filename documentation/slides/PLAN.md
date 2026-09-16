@@ -16,7 +16,7 @@ Research confirmed the niche is empty — no React + permissive-OSS + Yjs-collab
 
 ## Locked decisions
 
-1. **Two new packages**: `packages/slides-core` (`@weavertime/spindle-slides-core`, zero React) + `packages/slides-react` (`@weavertime/spindle-slides-react`), following existing monorepo conventions (rollup dual cjs/esm, declarations from main entry only, `./collab` subpath keeps Yjs out of the base bundle, strict TS, co-located Jest tests).
+1. **Two new packages**: `packages/slides-core` (`@b32nio/spindle-slides-core`, zero React) + `packages/slides-react` (`@b32nio/spindle-slides-react`), following existing monorepo conventions (rollup dual cjs/esm, declarations from main entry only, `./collab` subpath keeps Yjs out of the base bundle, strict TS, co-located Jest tests).
 2. **Slides-first, canvas-ready**: slides-core internally layered — container-agnostic **scene layer** (elements, transforms, selection math, snapping, z-order, groups, rich text) + **deck layer** (slides, order, masters/layouts/placeholders, themes, notes). Elements reference `containerId`; camera/viewport never enters the data model. A future Miro-style `spindle-canvas` reuses the scene layer.
 3. **Rendering: DOM** — absolutely-positioned HTML per element, inline SVG shape geometry, CSS-transform zoom. Not canvas. (Basis: editable rich text requires contentEditable; every shipped slides editor with rich text is DOM; slides show 10–50 elements, far below canvas-justifying scale.)
 4. **Rich text: raw ProseMirror** (already in-repo via docs-core). PM-JSON stored in the model; idle elements render statically; exactly one live PM editor mounts on the actively-edited element (tldraw's shipped pattern).
@@ -184,7 +184,7 @@ Frame props as individual Y.Map keys → concurrent move/rotate/z-reorder on one
    *Exit*: y-schema round-trip tests; two-DeckImpl convergence over `InMemoryProvider` (concurrent moves, reorders, text in different elements → `getData()` deep-equal); undo-after-remote-edit test; fragment-created-after-UndoManager test; demo two-pane + `?ws=` modes work against collab-server (unchanged).
 6. **Comments** — store + Y mirroring + panel + badges + onCommentEvent plumbing.
    *Exit*: ported store tests; threads sync in two-pane demo; orphaning verified.
-7. **Demos, website, docs** — finish `examples/slides-demo` (sheets-demo parity: single/two-pane/`?ws=` modes), `website/src/demo/SlidesDemo.tsx` + route, `website/src/App.tsx` slide card (`pkg: '@weavertime/spindle-slides-react'`, `soon: false`, demo link) + packages-list rows + docs-core blurb fix, `CONTRIBUTING.md:16` ("Document & slides engine" → separate slides-core/slides-react lines), `documentation/slides/` (overview, core/architecture, core/collaboration, components, data-structures, TODO listing deferred Tier-3 items + manual QA checklist), package READMEs.
+7. **Demos, website, docs** — finish `examples/slides-demo` (sheets-demo parity: single/two-pane/`?ws=` modes), `website/src/demo/SlidesDemo.tsx` + route, `website/src/App.tsx` slide card (`pkg: '@b32nio/spindle-slides-react'`, `soon: false`, demo link) + packages-list rows + docs-core blurb fix, `CONTRIBUTING.md:16` ("Document & slides engine" → separate slides-core/slides-react lines), `documentation/slides/` (overview, core/architecture, core/collaboration, components, data-structures, TODO listing deferred Tier-3 items + manual QA checklist), package READMEs.
    *Exit*: website builds with live slides demo; root scripts green.
 
 ## Reference files (read before implementing each area)

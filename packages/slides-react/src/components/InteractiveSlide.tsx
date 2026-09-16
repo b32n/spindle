@@ -5,7 +5,7 @@
 // only re-renders on the commit at pointerup.
 
 import React, { useEffect, useRef } from 'react';
-import { anchorPoint, connectorBox, resolveEndpoints, toLocal, type AnchorId, type DeckImpl, type Frame, type NewElementSpec, type ResizeHandle, type TableElement, type Point } from '@weavertime/spindle-slides-core';
+import { anchorPoint, connectorBox, resolveEndpoints, toLocal, type AnchorId, type DeckImpl, type Frame, type NewElementSpec, type ResizeHandle, type TableElement, type Point } from '@b32nio/spindle-slides-core';
 import { useDeck } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { SlideView } from './SlideView';

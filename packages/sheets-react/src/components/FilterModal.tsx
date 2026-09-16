@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
-import type { ColumnFilter, FilterCriteria, Sheet } from '@weavertime/spindle-sheets-core';
-import { FilterManager } from '@weavertime/spindle-sheets-core';
+import type { ColumnFilter, FilterCriteria, Sheet } from '@b32nio/spindle-sheets-core';
+import { FilterManager } from '@b32nio/spindle-sheets-core';
 
 interface FilterModalProps {
   isOpen: boolean;

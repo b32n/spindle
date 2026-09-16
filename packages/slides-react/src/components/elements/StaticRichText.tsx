@@ -12,7 +12,7 @@ import {
   type RichTextInline,
   type ThemeData,
   type Color,
-} from '@weavertime/spindle-slides-core';
+} from '@b32nio/spindle-slides-core';
 
 const INDENT_PX = 28;
 

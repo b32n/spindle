@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { DocumentImpl } from '@weavertime/spindle-docs-core';
-import type { CommentAuthor, DocsCommentEvent } from '@weavertime/spindle-docs-core';
+import { DocumentImpl } from '@b32nio/spindle-docs-core';
+import type { CommentAuthor, DocsCommentEvent } from '@b32nio/spindle-docs-core';
 
 interface DocumentContextValue {
   document: DocumentImpl;

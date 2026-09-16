@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { useElement, useTheme } from '../../hooks';
 import { useDeckContext } from '../../context/DeckContext';
-import type { SlideElement } from '@weavertime/spindle-slides-core';
+import type { SlideElement } from '@b32nio/spindle-slides-core';
 import { TextView } from './TextView';
 import { ShapeView } from './ShapeView';
 import { ImageView } from './ImageView';

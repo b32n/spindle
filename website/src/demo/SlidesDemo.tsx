@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { DeckProvider, SlidesEditor } from '@weavertime/spindle-slides-react';
-import { DeckImpl, richTextFromPlainText, getBuiltinTheme } from '@weavertime/spindle-slides-core';
-import type { DeckData } from '@weavertime/spindle-slides-core';
+import { DeckProvider, SlidesEditor } from '@b32nio/spindle-slides-react';
+import { DeckImpl, richTextFromPlainText, getBuiltinTheme } from '@b32nio/spindle-slides-core';
+import type { DeckData } from '@b32nio/spindle-slides-core';
 import DemoChrome from './DemoChrome';
 import { exportDeckToPdf } from './export-pdf';
 

@@ -1,7 +1,7 @@
 # Spindle website
 
-The marketing site for [Spindle](https://github.com/weavertime/spindle), served at
-**spindle.weavertime.com**. A small React SPA built with Vite.
+The marketing site for [Spindle](https://github.com/b32n/spindle), served at
+**spindle.b32n.io**. A small React SPA built with Vite.
 
 ## Develop
 
@@ -20,7 +20,7 @@ npm run preview    # preview the production build locally
 
 ## Deploy — Cloudflare Pages
 
-Connect the `weavertime/spindle` repo in the Cloudflare Pages dashboard and set:
+Connect the `b32n/spindle` repo in the Cloudflare Pages dashboard and set:
 
 | Setting | Value |
 | --- | --- |
@@ -30,5 +30,5 @@ Connect the `weavertime/spindle` repo in the Cloudflare Pages dashboard and set:
 | Root directory | `website` |
 
 `public/_redirects` sends every path to `index.html` (SPA fallback). Add
-`spindle.weavertime.com` as a custom domain in the Pages project once the first
+`spindle.b32n.io` as a custom domain in the Pages project once the first
 deploy is green.

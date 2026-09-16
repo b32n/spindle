@@ -1,4 +1,4 @@
-import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@weavertime/spindle-shared';
+import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
 import { WorkbookImpl } from '../workbook';
 
 const identity = (name: string): CollabIdentity => ({ userId: name, displayName: name, color: '#123456' });

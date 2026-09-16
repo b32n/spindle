@@ -18,7 +18,7 @@ packages/
   spindle-slides-core          Presentation engine (scene layer, fractional index) — zero React
   spindle-slides-react         React slide editor: stage, gestures, present mode
   spindle-transport-websocket  WebSocket CollabProvider for real-time collaboration
-website/                       The spindle.weavertime.com marketing + docs site (standalone)
+website/                       The spindle.b32n.io marketing + docs site (standalone)
 documentation/                 Markdown docs (rendered by the website)
 examples/                      Runnable demos
 ```

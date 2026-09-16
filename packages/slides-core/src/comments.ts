@@ -10,11 +10,11 @@
 // listener to emit `commentChange` (UI) + `commentEvent` (host hook, local
 // actions only); the collab binding mirrors threads into the Y.Doc.
 
-import type { Comment } from '@weavertime/spindle-shared';
+import type { Comment } from '@b32nio/spindle-shared';
 import { generateId } from './utils/id';
 import type { ElementCommentAnchor, SlidesCommentThread } from './types';
 
-export type { Comment, CommentThread, CommentStatus } from '@weavertime/spindle-shared';
+export type { Comment, CommentThread, CommentStatus } from '@b32nio/spindle-shared';
 export type { ElementCommentAnchor, SlidesCommentThread } from './types';
 
 /** Identity of whoever is creating a comment or resolving a thread. */

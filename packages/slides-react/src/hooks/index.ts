@@ -9,7 +9,7 @@ import type {
   SlideElement,
   ThemeData,
   DeckSelection,
-} from '@weavertime/spindle-slides-core';
+} from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 
 export function useDeck(): DeckImpl {

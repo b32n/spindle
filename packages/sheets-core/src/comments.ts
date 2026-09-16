@@ -11,12 +11,12 @@
 // event for the UI, and emit a `commentEvent` the host app can hook for
 // notifications.
 
-import type { Comment, CommentThread } from '@weavertime/spindle-shared';
+import type { Comment, CommentThread } from '@b32nio/spindle-shared';
 import { generateId } from './utils/id';
 
 // Re-export the shared comment vocabulary so consumers of sheets-core get the
-// full set of types without depending on @weavertime/spindle-shared directly.
-export type { Comment, CommentThread, CommentStatus } from '@weavertime/spindle-shared';
+// full set of types without depending on @b32nio/spindle-shared directly.
+export type { Comment, CommentThread, CommentStatus } from '@b32nio/spindle-shared';
 
 /** Stable-ID pointer to the cell a thread is anchored to. */
 export interface CellCommentAnchor {

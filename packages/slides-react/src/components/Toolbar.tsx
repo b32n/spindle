@@ -10,8 +10,8 @@ import {
   AlignStartVertical, AlignEndVertical, AlignStartHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
 } from 'lucide-react';
-import type { NewElementSpec, AlignMode } from '@weavertime/spindle-slides-core';
-import { ResponsiveToolbar } from '@weavertime/spindle-shared/react';
+import type { NewElementSpec, AlignMode } from '@b32nio/spindle-slides-core';
+import { ResponsiveToolbar } from '@b32nio/spindle-shared/react';
 import { useDeck, useSelection, useEditingId, useFilmstripOpen } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { DeckControls } from './DeckControls';

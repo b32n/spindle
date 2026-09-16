@@ -4,7 +4,7 @@ import { docLoaders, NAV, ORDER, titleFor } from './manifest';
 import { renderDoc, type TocItem } from './markdown';
 import { renderMermaid } from './mermaid';
 
-const REPO = 'https://github.com/weavertime/spindle';
+const REPO = 'https://github.com/b32n/spindle';
 
 type Rendered = { html: string; toc: TocItem[]; hasMermaid: boolean };
 

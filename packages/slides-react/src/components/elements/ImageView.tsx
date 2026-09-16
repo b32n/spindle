@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ImageElement } from '@weavertime/spindle-slides-core';
+import type { ImageElement } from '@b32nio/spindle-slides-core';
 
 export function ImageView({ el }: { el: ImageElement }): React.ReactElement {
   const flip = el.flipH || el.flipV ? `scale(${el.flipH ? -1 : 1}, ${el.flipV ? -1 : 1})` : undefined;

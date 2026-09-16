@@ -7,7 +7,7 @@
 // reads them on pointerdown to start the right gesture.
 
 import React, { useEffect, useReducer, useSyncExternalStore } from 'react';
-import { unionAABB, resolveEndpoints, type Frame, type LineElement, type Point, type Rect } from '@weavertime/spindle-slides-core';
+import { unionAABB, resolveEndpoints, type Frame, type LineElement, type Point, type Rect } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 import { useSelection } from '../hooks';
 

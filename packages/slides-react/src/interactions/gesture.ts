@@ -22,7 +22,7 @@ import {
   type Point,
   type Rect,
   type ResizeHandle,
-} from '@weavertime/spindle-slides-core';
+} from '@b32nio/spindle-slides-core';
 import { NodeRegistry } from './node-registry';
 import { TransientStore } from './transient-store';
 
