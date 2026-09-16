@@ -1648,8 +1648,8 @@ export class WorkbookImpl implements Workbook {
    * Idempotent guard: throws if already attached.
    */
   async attachCollab(
-    provider: import('@weavertime/spindle-shared').CollabProvider,
-    identity: import('@weavertime/spindle-shared').CollabIdentity,
+    provider: import('@b32nio/spindle-shared').CollabProvider,
+    identity: import('@b32nio/spindle-shared').CollabIdentity,
     options?: AttachCollabOptions,
   ): Promise<CollabHandle> {
     if (this.collabHandle) {

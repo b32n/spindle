@@ -1,6 +1,6 @@
 // Reference WebSocket relay server for Spindle collaboration.
 //
-// Wire protocol (matches @weavertime/spindle-transport-websocket):
+// Wire protocol (matches @b32nio/spindle-transport-websocket):
 //   Connect:  ws://host:PORT/<roomId>
 //   Each frame: 1 byte channel tag + opaque payload.
 //     tag 0 = doc        (durable — logged and replayed to newcomers)

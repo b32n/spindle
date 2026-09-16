@@ -1,7 +1,7 @@
 import React, { memo, useState, useEffect, useRef, useMemo } from 'react';
-import { ResponsiveToolbar, useToolbarMenu, MenuRow } from '@weavertime/spindle-shared/react';
+import { ResponsiveToolbar, useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { HyperlinkModal } from './HyperlinkModal';
-import type { FormatType } from '@weavertime/spindle-sheets-core';
+import type { FormatType } from '@b32nio/spindle-sheets-core';
 import {
   Undo2,
   Redo2,

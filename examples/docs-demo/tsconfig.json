@@ -16,8 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@weavertime/spindle-docs-core": ["../../packages/docs-core/src"],
-      "@weavertime/spindle-docs-react": ["../../packages/docs-react/src"]
+      "@b32nio/spindle-docs-core": ["../../packages/docs-core/src"],
+      "@b32nio/spindle-docs-react": ["../../packages/docs-react/src"]
     }
   },
   "include": ["src"],

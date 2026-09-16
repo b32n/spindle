@@ -1,6 +1,6 @@
 # Docs Component Reference
 
-Complete guide to all React components in the `@weavertime/spindle-docs-react` package.
+Complete guide to all React components in the `@b32nio/spindle-docs-react` package.
 
 ## High-Level Components
 
@@ -9,7 +9,7 @@ Complete guide to all React components in the `@weavertime/spindle-docs-react` p
 The main document editor component providing a complete editing experience with toolbar, rulers, and paginated content.
 
 ```tsx
-import { DocumentEditor } from '@weavertime/spindle-docs-react';
+import { DocumentEditor } from '@b32nio/spindle-docs-react';
 
 <DocumentEditor
   width={800}
@@ -44,8 +44,8 @@ import { DocumentEditor } from '@weavertime/spindle-docs-react';
 The core editor component with true line-level pagination. This is the recommended component for custom implementations.
 
 ```tsx
-import { TrueLayoutEditor } from '@weavertime/spindle-docs-react';
-import type { TrueLayoutEditorHandle } from '@weavertime/spindle-docs-react';
+import { TrueLayoutEditor } from '@b32nio/spindle-docs-react';
+import type { TrueLayoutEditorHandle } from '@b32nio/spindle-docs-react';
 
 const editorRef = useRef<TrueLayoutEditorHandle>(null);
 
@@ -118,8 +118,8 @@ interface TrueLayoutEditorHandle {
 Context provider for document state management.
 
 ```tsx
-import { DocumentImpl } from '@weavertime/spindle-docs-core';
-import { DocumentProvider } from '@weavertime/spindle-docs-react';
+import { DocumentImpl } from '@b32nio/spindle-docs-core';
+import { DocumentProvider } from '@b32nio/spindle-docs-react';
 
 const doc = new DocumentImpl('doc_1', 'My Document');
 
@@ -161,7 +161,7 @@ const { canUndo, canRedo, undo, redo } = useHistory();
 The formatting toolbar with all editing controls.
 
 ```tsx
-import { Toolbar } from '@weavertime/spindle-docs-react';
+import { Toolbar } from '@b32nio/spindle-docs-react';
 
 <Toolbar
   editorView={editorView}
@@ -204,7 +204,7 @@ import { Toolbar } from '@weavertime/spindle-docs-react';
 Color selection dropdown for text and background colors.
 
 ```tsx
-import { ColorPicker } from '@weavertime/spindle-docs-react';
+import { ColorPicker } from '@b32nio/spindle-docs-react';
 
 <ColorPicker
   currentColor={activeMarks?.textStyle?.color}
@@ -222,7 +222,7 @@ import { ColorPicker } from '@weavertime/spindle-docs-react';
 Grid-based table size selection.
 
 ```tsx
-import { TableSizePicker } from '@weavertime/spindle-docs-react';
+import { TableSizePicker } from '@b32nio/spindle-docs-react';
 
 <TableSizePicker
   editorView={editorView}
@@ -240,7 +240,7 @@ import { TableSizePicker } from '@weavertime/spindle-docs-react';
 Modal for inserting and editing hyperlinks.
 
 ```tsx
-import { LinkDialog } from '@weavertime/spindle-docs-react';
+import { LinkDialog } from '@b32nio/spindle-docs-react';
 
 <LinkDialog
   editorView={editorView}
@@ -259,7 +259,7 @@ import { LinkDialog } from '@weavertime/spindle-docs-react';
 Modal for inserting images by URL.
 
 ```tsx
-import { ImageDialog } from '@weavertime/spindle-docs-react';
+import { ImageDialog } from '@b32nio/spindle-docs-react';
 
 <ImageDialog
   editorView={editorView}
@@ -275,7 +275,7 @@ import { ImageDialog } from '@weavertime/spindle-docs-react';
 Modal for configuring page size, orientation, and margins.
 
 ```tsx
-import { PageSetupModal } from '@weavertime/spindle-docs-react';
+import { PageSetupModal } from '@b32nio/spindle-docs-react';
 
 <PageSetupModal
   isOpen={showPageSetup}
@@ -303,7 +303,7 @@ import { PageSetupModal } from '@weavertime/spindle-docs-react';
 Displays page width with margin handles.
 
 ```tsx
-import { Ruler } from '@weavertime/spindle-docs-react';
+import { Ruler } from '@b32nio/spindle-docs-react';
 
 <Ruler
   pageConfig={currentPageConfig}
@@ -318,7 +318,7 @@ import { Ruler } from '@weavertime/spindle-docs-react';
 Displays page height with margin handles, synchronized with scroll position.
 
 ```tsx
-import { VerticalRuler } from '@weavertime/spindle-docs-react';
+import { VerticalRuler } from '@b32nio/spindle-docs-react';
 
 <VerticalRuler
   pageConfig={currentPageConfig}
@@ -339,7 +339,7 @@ import { VerticalRuler } from '@weavertime/spindle-docs-react';
 In-place editor for header and footer content.
 
 ```tsx
-import { HeaderFooterEditor } from '@weavertime/spindle-docs-react';
+import { HeaderFooterEditor } from '@b32nio/spindle-docs-react';
 
 <HeaderFooterEditor
   type="header"
@@ -362,7 +362,7 @@ import { HeaderFooterEditor } from '@weavertime/spindle-docs-react';
 Direct access to ProseMirror for advanced use cases.
 
 ```tsx
-import { ProseMirrorEditor } from '@weavertime/spindle-docs-react';
+import { ProseMirrorEditor } from '@b32nio/spindle-docs-react';
 
 <ProseMirrorEditor
   initialDoc={pmDoc}
@@ -379,7 +379,7 @@ import { ProseMirrorEditor } from '@weavertime/spindle-docs-react';
 Renders a single page with content.
 
 ```tsx
-import { PageView } from '@weavertime/spindle-docs-react';
+import { PageView } from '@b32nio/spindle-docs-react';
 
 <PageView
   pageConfig={pageConfig}

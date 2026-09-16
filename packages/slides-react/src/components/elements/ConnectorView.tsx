@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { useSyncExternalStore } from 'react';
-import { connectorBox, resolveEndpoints, type Frame, type LineElement } from '@weavertime/spindle-slides-core';
+import { connectorBox, resolveEndpoints, type Frame, type LineElement } from '@b32nio/spindle-slides-core';
 import { useElement, useTheme } from '../../hooks';
 import { useDeckContext } from '../../context/DeckContext';
 import { LineView } from './LineView';

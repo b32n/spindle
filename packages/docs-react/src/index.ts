@@ -1,4 +1,4 @@
-// @weavertime/spindle-docs-react
+// @b32nio/spindle-docs-react
 // React components for Spindle Docs
 
 // Context

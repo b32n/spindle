@@ -1,6 +1,6 @@
 # Formula System
 
-The formula system gives `@weavertime/spindle-sheets-core` spreadsheet calculation:
+The formula system gives `@b32nio/spindle-sheets-core` spreadsheet calculation:
 a parser, a library of **146 built-in functions**, a dependency graph with
 **topological recalculation**, **dynamic arrays (spill)**, and the metadata
 that powers **formula autocomplete**. Everything lives under

@@ -1,7 +1,7 @@
 import { marked } from 'marked';
 import { hasDoc } from './manifest';
 
-const REPO_TREE = 'https://github.com/weavertime/spindle/tree/master/documentation';
+const REPO_TREE = 'https://github.com/b32n/spindle/tree/master/documentation';
 
 export interface TocItem {
   id: string;

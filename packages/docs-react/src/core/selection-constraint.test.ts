@@ -1,5 +1,5 @@
 import { Node as PmNode } from 'prosemirror-model';
-import { docsSchema as schema } from '@weavertime/spindle-docs-core';
+import { docsSchema as schema } from '@b32nio/spindle-docs-core';
 import { constrainSelectionToIsolatingBlock } from './selection-constraint';
 
 // doc: paragraph("before") + table[ row[ cell("AAA"), cell("BBB") ] ] + paragraph("after")

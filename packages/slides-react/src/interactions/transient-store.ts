@@ -4,7 +4,7 @@
 // straight to the DOM (see gesture.ts); this store carries just what overlays
 // need to paint.
 
-import type { GuideLine, Rect, Frame } from '@weavertime/spindle-slides-core';
+import type { GuideLine, Rect, Frame } from '@b32nio/spindle-slides-core';
 
 export interface TransientState {
   guides: GuideLine[];

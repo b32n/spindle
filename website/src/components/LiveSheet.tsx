@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { WorkbookProvider, WorkbookCanvas } from '@weavertime/spindle-sheets-react';
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
+import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
 
 // A real, on-brand workbook: a yarn inventory whose Total column and grand
 // total are live formulas evaluated by the actual Spindle engine.

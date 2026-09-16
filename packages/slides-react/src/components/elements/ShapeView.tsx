@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveFill, type ShapeElement, type ThemeData } from '@weavertime/spindle-slides-core';
+import { resolveFill, type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { shapeGeom } from './shapes';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';

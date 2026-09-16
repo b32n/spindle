@@ -5,7 +5,7 @@
 // [row, col] that was clicked.
 
 import React, { useSyncExternalStore } from 'react';
-import { resolveColor, type Color, type TableElement } from '@weavertime/spindle-slides-core';
+import { resolveColor, type Color, type TableElement } from '@b32nio/spindle-slides-core';
 import { useDeck, useTheme, useElement } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { selectionRect, inSelection, cellsInSelection } from '../interactions/table-selection-store';

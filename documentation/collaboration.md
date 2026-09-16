@@ -26,8 +26,8 @@ DocumentImpl / WorkbookImpl
 ## Quick start
 
 ```ts
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 
 const workbook = new WorkbookImpl('wb_1', 'Quarterly Plan');
 workbook.setData(savedJson); // your persisted WorkbookData
@@ -71,8 +71,8 @@ between peers can be a provider.
 
 | Provider | Package | Use |
 |---|---|---|
-| `InMemoryProvider` | `@weavertime/spindle-shared` | Tests / in-process demos. Rooms are a module-level registry. |
-| `WebSocketProvider` | `@weavertime/spindle-transport-websocket` | Real cross-tab / cross-machine sync via a relay server. |
+| `InMemoryProvider` | `@b32nio/spindle-shared` | Tests / in-process demos. Rooms are a module-level registry. |
+| `WebSocketProvider` | `@b32nio/spindle-transport-websocket` | Real cross-tab / cross-machine sync via a relay server. |
 
 A reference relay server lives in `examples/collab-server` — a dumb
 per-room broadcast hub. **It has no auth or persistence by design.** A
@@ -138,7 +138,7 @@ import type {
   CollabProvider,
   CollabStatus,
   CollabStatusHandler,
-} from '@weavertime/spindle-shared';
+} from '@b32nio/spindle-shared';
 
 /**
  * Wraps any CollabProvider, encrypting every payload with AES-GCM before

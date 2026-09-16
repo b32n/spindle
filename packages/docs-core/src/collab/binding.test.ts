@@ -1,4 +1,4 @@
-import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@weavertime/spindle-shared';
+import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
 import { DocumentImpl } from '../document';
 import { createParagraphFromText } from '../blocks/paragraph';
 import { getYDocFields } from './y-schema';

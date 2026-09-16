@@ -7,12 +7,12 @@ import {
   type ResizeHandle,
   type CursorType,
   type FormulaRangeHighlight,
-} from '@weavertime/spindle-sheets-core';
-import type { Selection, Range, Cell, CellValue } from '@weavertime/spindle-sheets-core';
-import { extractFormulaRanges, columnIndexToLabel, adjustFormula, type FormulaRange } from '@weavertime/spindle-sheets-core';
-import { detectSeries, extrapolate } from '@weavertime/spindle-sheets-core';
+} from '@b32nio/spindle-sheets-core';
+import type { Selection, Range, Cell, CellValue } from '@b32nio/spindle-sheets-core';
+import { extractFormulaRanges, columnIndexToLabel, adjustFormula, type FormulaRange } from '@b32nio/spindle-sheets-core';
+import { detectSeries, extrapolate } from '@b32nio/spindle-sheets-core';
 import { encodeTsv, parseTsv } from './tsv';
-import { FilterManager } from '@weavertime/spindle-sheets-core';
+import { FilterManager } from '@b32nio/spindle-sheets-core';
 import { RemoteSelectionOverlay } from './RemoteSelectionOverlay';
 
 export type ContextMenuType =

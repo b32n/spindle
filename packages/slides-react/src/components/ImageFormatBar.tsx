@@ -5,7 +5,7 @@
 
 import React, { useRef } from 'react';
 import { ImageUp, Link2, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
-import type { ImageElement } from '@weavertime/spindle-slides-core';
+import type { ImageElement } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useElement } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
 

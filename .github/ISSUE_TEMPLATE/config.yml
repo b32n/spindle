@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Question or discussion
-    url: https://github.com/weavertime/spindle/discussions
+    url: https://github.com/b32n/spindle/discussions
     about: Ask questions and discuss ideas with the community.
   - name: Security vulnerability
-    url: https://github.com/weavertime/spindle/security/advisories/new
+    url: https://github.com/b32n/spindle/security/advisories/new
     about: Please report security issues privately, not as public issues.

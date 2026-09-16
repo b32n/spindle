@@ -16,7 +16,7 @@ import { TextSelection } from 'prosemirror-state';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { history, undo, redo } from 'prosemirror-history';
-import type { HeaderFooterContent, HeaderFooterParagraph, DynamicFieldType, HeaderFooterImageRun } from '@weavertime/spindle-docs-core';
+import type { HeaderFooterContent, HeaderFooterParagraph, DynamicFieldType, HeaderFooterImageRun } from '@b32nio/spindle-docs-core';
 import { 
   FileText, CalendarDays, Clock, Hash, Layers,
   Bold, Italic, Underline, 

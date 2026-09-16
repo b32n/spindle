@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { WorkbookProvider, WorkbookCanvas } from '@weavertime/spindle-sheets-react';
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import type { CommentAuthor, SheetCommentEvent } from '@weavertime/spindle-sheets-core';
-import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@weavertime/spindle-shared';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import type { CommentAuthor, SheetCommentEvent } from '@b32nio/spindle-sheets-core';
+import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
 
 // Sample directory of users that can be @-mentioned in comments.

@@ -3,8 +3,8 @@
 // dragged endpoint to. Connectors can start from / attach to any non-line
 // element; lines themselves are never connection targets.
 
-import { anchorPoints, pointInFrame } from '@weavertime/spindle-slides-core';
-import type { AnchorId, Frame, Point, DeckImpl } from '@weavertime/spindle-slides-core';
+import { anchorPoints, pointInFrame } from '@b32nio/spindle-slides-core';
+import type { AnchorId, Frame, Point, DeckImpl } from '@b32nio/spindle-slides-core';
 
 function frameOf(el: { x: number; y: number; w: number; h: number; rotation: number }): Frame {
   return { x: el.x, y: el.y, w: el.w, h: el.h, rotation: el.rotation };

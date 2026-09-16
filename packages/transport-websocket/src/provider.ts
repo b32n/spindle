@@ -18,7 +18,7 @@ import type {
   CollabProvider,
   CollabStatus,
   CollabStatusHandler,
-} from '@weavertime/spindle-shared';
+} from '@b32nio/spindle-shared';
 
 const CHANNEL_DOC = 0;
 const CHANNEL_AWARENESS = 1;

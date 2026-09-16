@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@weavertime/spindle-shared';
+import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
 import { DeckImpl } from '../deck';
 import { getBuiltinTheme } from '../theme/builtin';
 import { richTextFromPlainText, richTextToPlainText, type RichTextDoc } from '../text/model';

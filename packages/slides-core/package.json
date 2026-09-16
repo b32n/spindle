@@ -1,14 +1,14 @@
 {
-  "name": "@weavertime/spindle-slides-core",
+  "name": "@b32nio/spindle-slides-core",
   "version": "0.3.0",
   "description": "Core presentation editor engine for Spindle Slides",
   "repository": {
     "type": "git",
-    "url": "https://github.com/weavertime/spindle.git",
+    "url": "https://github.com/b32n/spindle.git",
     "directory": "packages/slides-core"
   },
   "bugs": {
-    "url": "https://github.com/weavertime/spindle/issues"
+    "url": "https://github.com/b32n/spindle/issues"
   },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -47,7 +47,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@weavertime/spindle-shared": "^0.3.0",
+    "@b32nio/spindle-shared": "^0.3.0",
     "lib0": "^0.2.117",
     "prosemirror-model": "^1.19.0",
     "y-indexeddb": "^9.0.12",

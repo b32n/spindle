@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { X, Check, CornerUpLeft, Trash2 } from 'lucide-react';
-import type { SlidesCommentThread } from '@weavertime/spindle-slides-core';
+import type { SlidesCommentThread } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useActiveSlideId } from '../hooks';
 import { useComments } from '../hooks/useComments';
 

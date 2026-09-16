@@ -12,8 +12,8 @@
  */
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import type { PageConfig, PageMargins, Block, HeaderFooterContent } from '@weavertime/spindle-docs-core';
-import { activeMarksPluginKey, createCommands, docsSchema } from '@weavertime/spindle-docs-core';
+import type { PageConfig, PageMargins, Block, HeaderFooterContent } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, createCommands, docsSchema } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';

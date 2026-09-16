@@ -9,7 +9,7 @@
 
 import React, { useEffect, useReducer, useSyncExternalStore } from 'react';
 import { Move } from 'lucide-react';
-import type { TableElement } from '@weavertime/spindle-slides-core';
+import type { TableElement } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 import { useSelection } from '../hooks';
 import { selectionRect } from '../interactions/table-selection-store';

@@ -11,7 +11,7 @@ import {
   type RichTextDoc,
   type RichTextInline,
   type Color,
-} from '@weavertime/spindle-slides-core';
+} from '@b32nio/spindle-slides-core';
 
 // Base fields every element needs; normalization replaces the empty strings.
 const base = { id: '', containerId: '', index: '' };

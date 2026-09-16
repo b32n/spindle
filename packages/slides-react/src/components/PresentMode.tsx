@@ -5,7 +5,7 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { richTextToPlainText } from '@weavertime/spindle-slides-core';
+import { richTextToPlainText } from '@b32nio/spindle-slides-core';
 import { useDeck, useSlideIds, useActiveSlideId } from '../hooks';
 import { SlideView, ScaledSlide } from './SlideView';
 import { requestGo, commitGo, type FadeNavState } from './present-navigation';

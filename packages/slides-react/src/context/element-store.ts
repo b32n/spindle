@@ -22,7 +22,7 @@ import type {
   SlideChangePayload,
   SelectionChangePayload,
   ActiveSlideChangePayload,
-} from '@weavertime/spindle-slides-core';
+} from '@b32nio/spindle-slides-core';
 
 type Listener = () => void;
 

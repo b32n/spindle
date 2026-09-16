@@ -8,15 +8,15 @@ The library is structured as a monorepo with two main packages:
 
 ```mermaid
 graph TD
-    A[Spindle] --> B[@weavertime/spindle-sheets-core]
-    A --> C[@weavertime/spindle-sheets-react]
+    A[Spindle] --> B[@b32nio/spindle-sheets-core]
+    A --> C[@b32nio/spindle-sheets-react]
     B --> D[Zero React dependencies]
     C --> E[React components]
     B --> F[Framework agnostic]
     C --> G[Canvas-based rendering]
 ```
 
-### Core Package (@weavertime/spindle-sheets-core)
+### Core Package (@b32nio/spindle-sheets-core)
 
 The core package contains all spreadsheet logic and is framework-agnostic:
 
@@ -27,7 +27,7 @@ The core package contains all spreadsheet logic and is framework-agnostic:
 - **Collaboration**: Real-time synchronization providers
 - **Storage**: Sparse cell storage, style/format pooling
 
-### Sheets Package (@weavertime/spindle-sheets-react)
+### Sheets Package (@b32nio/spindle-sheets-react)
 
 The sheets package provides React components that use the core package:
 
@@ -142,8 +142,8 @@ interface Sheet {
 ### Basic Usage
 
 ```typescript
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
-import { WorkbookProvider, WorkbookCanvas } from '@weavertime/spindle-sheets-react';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
 
 const workbook = new WorkbookImpl('workbook_1', 'My Workbook');
 
@@ -160,8 +160,8 @@ function App() {
 ### Advanced Usage
 
 ```typescript
-import { WorkbookImpl, exportToCSV } from '@weavertime/spindle-sheets-core';
-import { WebSocketProvider } from '@weavertime/spindle-transport-websocket';
+import { WorkbookImpl, exportToCSV } from '@b32nio/spindle-sheets-core';
+import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 
 // Load existing data
 workbook.setData(workbookData);

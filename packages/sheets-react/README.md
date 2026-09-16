@@ -1,4 +1,4 @@
-# @weavertime/spindle-sheets-react
+# @b32nio/spindle-sheets-react
 
 React components for Spindle Sheets with Canvas-based rendering.
 
@@ -29,8 +29,8 @@ DOM-based input overlay for cell editing.
 ## Usage
 
 ```typescript
-import { Workbook, WorkbookProvider } from '@weavertime/spindle-sheets-react';
-import { WorkbookImpl } from '@weavertime/spindle-sheets-core';
+import { Workbook, WorkbookProvider } from '@b32nio/spindle-sheets-react';
+import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
 
 const workbook = new WorkbookImpl('workbook_1', 'My Workbook');
 

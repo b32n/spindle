@@ -1,7 +1,7 @@
 // Deck layer types — slides, the serializable DeckData shape, comment types,
 // and the semantic event union.
 
-import type { CommentThread } from '@weavertime/spindle-shared';
+import type { CommentThread } from '@b32nio/spindle-shared';
 import type { Fill, SlideElement } from './scene/types';
 import type { RichTextDoc } from './text/model';
 import type { ThemeData, LayoutData } from './theme/types';
