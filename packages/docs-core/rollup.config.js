@@ -28,6 +28,7 @@ const tsPluginNoDecl = typescript({
 });
 
 const external = [
+  '@b32nio/spindle-shared',
   'yjs',
   'y-protocols',
   'y-protocols/awareness',
