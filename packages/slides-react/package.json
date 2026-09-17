@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-slides-react",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "React components for Spindle Slides",
   "repository": {
     "type": "git",

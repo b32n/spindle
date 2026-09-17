@@ -46,6 +46,8 @@ export interface CanvasGridProps {
   }) => void;
   /** Exposes a "select this cell and scroll it into view" function to the parent. */
   onNavigateReady?: (navigate: (cell: CellPosition) => void) => void;
+  /** Disables all mutating interactions (editing, paste, cut, fill, resize, context menu). */
+  readOnly?: boolean;
 }
 
 export const CanvasGrid = memo(function CanvasGrid({
@@ -69,6 +71,7 @@ export const CanvasGrid = memo(function CanvasGrid({
   onContextMenu,
   onClipboardReady,
   onNavigateReady,
+  readOnly = false,
 }: CanvasGridProps) {
   const { workbook } = useWorkbook();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -417,7 +420,7 @@ export const CanvasGrid = memo(function CanvasGrid({
     const y = e.clientY - rect.top;
     
     // Check for resize handle
-    const resizeHandleHit = renderer.getResizeHandleAtPoint(x, y);
+    const resizeHandleHit = !readOnly && renderer.getResizeHandleAtPoint(x, y);
     if (resizeHandleHit) {
       // Record history before resize for undo/redo
       workbook.recordHistory();
@@ -439,7 +442,7 @@ export const CanvasGrid = memo(function CanvasGrid({
     }
     
     // Check for fill handle
-    if (renderer.isFillHandleAtPoint(x, y) && selection.ranges.length > 0) {
+    if (!readOnly && renderer.isFillHandleAtPoint(x, y) && selection.ranges.length > 0) {
       setIsFilling(true);
       setFillStart(selection.activeCell);
       // Capture the source pattern (normalized) before the drag mutates it.
@@ -542,7 +545,7 @@ export const CanvasGrid = memo(function CanvasGrid({
       onSelectionChange?.(newSelection);
       onActiveCellChange?.(newSelection.activeCell);
     }
-  }, [sheet, selection, onSelectionChange, onActiveCellChange, isEditingFormula, onInsertCellReference, workbook, originalEditingSheetId]);
+  }, [sheet, selection, onSelectionChange, onActiveCellChange, isEditingFormula, onInsertCellReference, workbook, originalEditingSheetId, readOnly]);
   
   // Handle mouse move
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -845,6 +848,7 @@ export const CanvasGrid = memo(function CanvasGrid({
 
   // Handle double click (start editing)
   const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (readOnly) return;
     const canvas = canvasRef.current;
     const renderer = rendererRef.current;
     if (!canvas || !renderer) return;
@@ -860,13 +864,14 @@ export const CanvasGrid = memo(function CanvasGrid({
 
       onCellEdit?.(cell, value);
     }
-  }, [sheet, onCellEdit, formatCellValueForEditing]);
+  }, [sheet, onCellEdit, formatCellValueForEditing, readOnly]);
   
   // Handle right-click context menu
   const handleContextMenuEvent = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    if (readOnly) return;
+
     const canvas = canvasRef.current;
     const renderer = rendererRef.current;
     if (!canvas || !renderer || !onContextMenu) return;
@@ -942,7 +947,7 @@ export const CanvasGrid = memo(function CanvasGrid({
       
       onContextMenu({ type: 'cell', cell, x: e.clientX, y: e.clientY });
     }
-  }, [sheet, selection, onContextMenu, onSelectionChange, onActiveCellChange]);
+  }, [sheet, selection, onContextMenu, onSelectionChange, onActiveCellChange, readOnly]);
   
   // Copy selection to clipboard
   const handleCopy = useCallback(() => {
@@ -1015,6 +1020,7 @@ export const CanvasGrid = memo(function CanvasGrid({
 
   // Paste from clipboard
   const handlePaste = useCallback(async (targetCell?: CellPosition) => {
+    if (readOnly) return;
     const pasteTarget = targetCell || activeCell;
     if (!pasteTarget) return;
 
@@ -1065,10 +1071,11 @@ export const CanvasGrid = memo(function CanvasGrid({
     if (clipboard && clipboard.cells.length > 0) {
       pasteInternalClipboard(clipboard.cells, pasteTarget);
     }
-  }, [activeCell, sheet, workbook, clipboard, onContentChange, pasteInternalClipboard]);
+  }, [activeCell, sheet, workbook, clipboard, onContentChange, pasteInternalClipboard, readOnly]);
 
   // Cut selection (copy + delete)
   const handleCut = useCallback(() => {
+    if (readOnly) return;
     handleCopy();
     // Delete the cells after copying
     if (selection.ranges.length > 0) {
@@ -1087,7 +1094,7 @@ export const CanvasGrid = memo(function CanvasGrid({
       });
       onContentChange?.();
     }
-  }, [handleCopy, selection, workbook, onContentChange]);
+  }, [handleCopy, selection, workbook, onContentChange, readOnly]);
   
   // Expose clipboard handlers to parent component
   useEffect(() => {
@@ -1313,7 +1320,7 @@ export const CanvasGrid = memo(function CanvasGrid({
     }
     
     // Enter to start editing
-    if (key === 'Enter' && !editingCell) {
+    if (key === 'Enter' && !editingCell && !readOnly) {
       e.preventDefault();
       if (activeCell) {
         const cellData = sheet.getCell(activeCell.row, activeCell.col);
@@ -1355,7 +1362,8 @@ export const CanvasGrid = memo(function CanvasGrid({
       !editingCell &&
       !modifier &&
       key.length === 1 &&
-      activeCell
+      activeCell &&
+      !readOnly
     ) {
       e.preventDefault();
       onCellEdit?.(activeCell, key);
@@ -1369,6 +1377,7 @@ export const CanvasGrid = memo(function CanvasGrid({
     onSelectionChange,
     onActiveCellChange,
     scrollToCellIfNeeded,
+    readOnly,
   ]);
   
   // Add global mouse up handler for drag operations

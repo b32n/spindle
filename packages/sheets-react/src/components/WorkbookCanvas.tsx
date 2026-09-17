@@ -26,6 +26,8 @@ export interface WorkbookCanvasProps {
   height?: number;
   rowHeight?: number;
   colWidth?: number;
+  /** Disables all editing: cell edits, paste/cut, formatting, structural changes, and comments. */
+  readOnly?: boolean;
 }
 
 export const WorkbookCanvas = memo(function WorkbookCanvas({
@@ -35,6 +37,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   height = 600,
   rowHeight = 20,
   colWidth = 100,
+  readOnly = false,
 }: WorkbookCanvasProps) {
   const { workbook } = useWorkbook();
   const [activeCell, setActiveCell] = useState<CellPosition | null>(null);
@@ -353,6 +356,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 
   // Handle cell edit start from canvas
   const handleCellEdit = useCallback((cell: CellPosition, value: string) => {
+    if (readOnly) return;
     // A spilled cell is read-only — editing happens on the anchor formula.
     if (workbook.isSpilledCell(undefined, cell.row, cell.col)) return;
 
@@ -385,8 +389,8 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       width: sheet.getColWidth(cell.col),
       height: sheet.getRowHeight(cell.row),
     };
-  }, [workbook, colWidth, headerHeight]);
-  
+  }, [workbook, colWidth, headerHeight, readOnly]);
+
   // Handle inserting cell reference into formula
   const handleInsertCellReference = useCallback((reference: string, isNewSelection?: boolean) => {
     if (isEditingFormula) {
@@ -460,8 +464,9 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 
   // Handle context menu open
   const handleContextMenu = useCallback((menu: ContextMenuType) => {
+    if (readOnly) return;
     setContextMenu(menu);
-  }, []);
+  }, [readOnly]);
 
   // Handle context menu close
   const handleContextMenuClose = useCallback(() => {
@@ -524,6 +529,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   }, [findReplaceMatches, activeMatchIndex]);
 
   const handleReplace = useCallback(() => {
+    if (readOnly) return;
     if (!findReplace.query || findReplaceMatches.length === 0) return;
     const idx = activeMatchIndex >= 0 ? activeMatchIndex : 0;
     const m = findReplaceMatches[idx];
@@ -547,9 +553,10 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       }
     });
     setDimensionVersion((v) => v + 1);
-  }, [findReplace, findReplaceMatches, activeMatchIndex, workbook]);
+  }, [findReplace, findReplaceMatches, activeMatchIndex, workbook, readOnly]);
 
   const handleReplaceAll = useCallback(() => {
+    if (readOnly) return;
     if (!findReplace.query) return;
     const opts = {
       matchCase: findReplace.matchCase,
@@ -575,7 +582,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       }
     });
     setDimensionVersion((v) => v + 1);
-  }, [findReplace, workbook]);
+  }, [findReplace, workbook, readOnly]);
 
   // Cancel edit
   const cancelEdit = useCallback(() => {
@@ -620,6 +627,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   // Helper function to apply style to selection
   const applyStyleToSelection = useCallback(
     (styleUpdater: (currentStyle: CellStyle) => CellStyle) => {
+      if (readOnly) return;
       const selection = workbook.getSelection();
       if (selection.ranges.length > 0) {
         // Record history before style changes for undo/redo
@@ -645,12 +653,13 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
         setDimensionVersion(v => v + 1);
       }
     },
-    [workbook]
+    [workbook, readOnly]
   );
 
   // Helper function to apply format to selection
   const applyFormatToSelection = useCallback(
     (format: CellFormat) => {
+      if (readOnly) return;
       const selection = workbook.getSelection();
       if (selection.ranges.length > 0) {
         // Record history before format changes for undo/redo
@@ -683,7 +692,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
         setDimensionVersion(v => v + 1);
       }
     },
-    [workbook]
+    [workbook, readOnly]
   );
 
   const editPosition = getEditOverlayPosition();
@@ -747,6 +756,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
         switch (key) {
           case 'z':
             e.preventDefault();
+            if (readOnly) break;
             if (shiftKey) {
               // Ctrl+Shift+Z to redo
               workbook.redo();
@@ -756,29 +766,31 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
             }
             setDimensionVersion(v => v + 1);
             break;
-            
+
           case 'y':
             // Ctrl+Y to redo
             e.preventDefault();
+            if (readOnly) break;
             workbook.redo();
             setDimensionVersion(v => v + 1);
             break;
-            
+
           case 'c':
             // Ctrl+C to copy
             e.preventDefault();
             clipboardHandlersRef.current?.copy();
             break;
-            
+
           case 'v':
             // Ctrl+V to paste
             e.preventDefault();
             clipboardHandlersRef.current?.paste();
             break;
-            
+
           case 'x':
             // Ctrl+X to cut
             e.preventDefault();
+            if (readOnly) break;
             clipboardHandlersRef.current?.cut();
             setDimensionVersion(v => v + 1);
             break;
@@ -833,7 +845,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       }
       
       // Handle Delete/Backspace to clear cells (non-modifier)
-      if (key === 'delete' || key === 'backspace') {
+      if ((key === 'delete' || key === 'backspace') && !readOnly) {
         // Only handle if focus is explicitly in container (not when on body, to avoid conflicts)
         if (isInContainer) {
           const selection = workbook.getSelection();
@@ -880,7 +892,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       document.removeEventListener('keydown', handleGlobalKeyDown);
       container?.removeEventListener('focusout', handleFocusOut);
     };
-  }, [workbook, editingCell, applyStyleToSelection]);
+  }, [workbook, editingCell, applyStyleToSelection, readOnly]);
 
   return (
     <div
@@ -903,8 +915,8 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       onMouseDown={handleContainerInteraction}
       onFocus={handleContainerInteraction}
     >
-      {/* Toolbar */}
-      <Toolbar
+      {/* Toolbar — hidden entirely in read-only mode, since every action it exposes mutates the workbook */}
+      {!readOnly && <Toolbar
         onUndo={() => {
           workbook.undo();
           setDimensionVersion(v => v + 1);
@@ -1062,10 +1074,10 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
               })()
             : undefined
         }
-      />
+      />}
 
       {/* Formula Bar */}
-      <FormulaBar activeCell={activeCell} onFormulaChange={handleFormulaChange} />
+      <FormulaBar activeCell={activeCell} onFormulaChange={handleFormulaChange} readOnly={readOnly} />
 
       {/* Canvas Grid Area */}
       <div
@@ -1096,6 +1108,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
           onContextMenu={handleContextMenu}
           onClipboardReady={handleClipboardReady}
           onNavigateReady={handleNavigateReady}
+          readOnly={readOnly}
         />
         
         {/* Edit Overlay - only show when on the original sheet */}
@@ -1267,11 +1280,12 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
             workbook.setActiveSheet(sheetId);
             setDimensionVersion(v => v + 1);
           }}
+          readOnly={readOnly}
         />
       </div>
 
       {/* Comments panel — floating drawer above the sheet tabs */}
-      {showComments && (
+      {!readOnly && showComments && (
         <div
           style={{
             position: 'absolute',

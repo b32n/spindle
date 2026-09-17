@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-slides-core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Core presentation editor engine for Spindle Slides",
   "repository": {
     "type": "git",

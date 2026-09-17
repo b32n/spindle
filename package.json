@@ -1,6 +1,6 @@
 {
   "name": "spindle",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A forever-free, open-source library that delivers the full editing experience you'd expect from commercial suites like Google Workspace or Microsoft Office, but built for developers who value performance, flexibility, and complete control over their tools.",
   "license": "MIT",
   "keywords": [

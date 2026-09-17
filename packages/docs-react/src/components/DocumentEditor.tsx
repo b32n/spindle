@@ -30,6 +30,8 @@ interface DocumentEditorProps {
   height?: number;
   showToolbar?: boolean;
   showRuler?: boolean;
+  /** Disables editing: content, margins/header/footer, and comments become view-only. */
+  readOnly?: boolean;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -61,6 +63,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   height,
   showToolbar = true,
   showRuler = true,
+  readOnly = false,
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -89,22 +92,25 @@ export const DocumentEditor = memo(function DocumentEditor({
   
   // Handle header changes - update document model
   const handleHeaderChange = useCallback((content: HeaderFooterContent) => {
+    if (readOnly) return;
     if (sections[0]) {
       docModel.setSectionHeader(sections[0].id, content);
       docModel.recordHistory('Update header');
     }
-  }, [docModel, sections]);
-  
+  }, [docModel, sections, readOnly]);
+
   // Handle footer changes - update document model
   const handleFooterChange = useCallback((content: HeaderFooterContent) => {
+    if (readOnly) return;
     if (sections[0]) {
       docModel.setSectionFooter(sections[0].id, content);
       docModel.recordHistory('Update footer');
     }
-  }, [docModel, sections]);
-  
+  }, [docModel, sections, readOnly]);
+
   // Handle margins change from ruler
   const handleMarginsChange = useCallback((margins: PageMargins) => {
+    if (readOnly) return;
     if (sections[0]) {
       docModel.setSectionPageConfig(sections[0].id, {
         ...sections[0].pageConfig,
@@ -112,24 +118,26 @@ export const DocumentEditor = memo(function DocumentEditor({
       });
       docModel.recordHistory('Update margins');
     }
-  }, [docModel, sections]);
-  
+  }, [docModel, sections, readOnly]);
+
   // Handle page setup confirmation
   const handlePageSetupConfirm = useCallback((config: PageConfig) => {
+    if (readOnly) return;
     if (sections[0]) {
       docModel.setSectionPageConfig(sections[0].id, config);
       docModel.recordHistory('Update page setup');
     }
     docModel.setDefaultPageConfig(config);
-  }, [docModel, sections]);
-  
+  }, [docModel, sections, readOnly]);
+
   // Handle document changes from the editor
   const handleDocChange = useCallback((blocks: Block[]) => {
+    if (readOnly) return;
     if (sections[0]) {
       docModel.setSectionBlocks(sections[0].id, blocks);
       docModel.recordHistory('Edit content');
     }
-  }, [docModel, sections]);
+  }, [docModel, sections, readOnly]);
   
   // Handle selection changes from the editor
   const handleSelectionChange = useCallback((state: EditorState) => {
@@ -253,6 +261,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   
   // Keyboard shortcuts for document-level undo/redo
   useEffect(() => {
+    if (readOnly) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
@@ -267,10 +276,10 @@ export const DocumentEditor = memo(function DocumentEditor({
         docModel.redo();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [docModel]);
+  }, [docModel, readOnly]);
   
   // Convert PageConfig to the format expected by TrueLayoutEditor
   // When orientation is landscape, swap width and height
@@ -341,8 +350,8 @@ export const DocumentEditor = memo(function DocumentEditor({
         overflow: 'hidden',
       }}
     >
-      {/* Floating Toolbar */}
-      {showToolbar && (
+      {/* Floating Toolbar — hidden in read-only mode, since every action it exposes mutates the document */}
+      {showToolbar && !readOnly && (
         <div style={{ 
           position: 'relative', 
           zIndex: 200, 
@@ -362,8 +371,8 @@ export const DocumentEditor = memo(function DocumentEditor({
         </div>
       )}
       
-      {/* Ruler container */}
-      {showRuler && (
+      {/* Ruler container — hidden in read-only mode; dragging its margin guides mutates page config */}
+      {showRuler && !readOnly && (
         <div
           style={{
             display: 'flex',
@@ -383,7 +392,7 @@ export const DocumentEditor = memo(function DocumentEditor({
       {/* Editor area with vertical ruler */}
       <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
         {/* Vertical Ruler - positioned to the left */}
-        {showRuler && activePageInfo && scrollContainer && (
+        {showRuler && !readOnly && activePageInfo && scrollContainer && (
           <div
             style={{
               position: 'relative',
@@ -411,7 +420,7 @@ export const DocumentEditor = memo(function DocumentEditor({
           initialBlocks={initialBlocks}
           pageConfig={presentationPageConfig}
           zoom={zoom / 100}
-          editable={true}
+          editable={!readOnly}
           onDocChange={handleDocChange}
           onSelectionChange={handleSelectionChange}
           onCellSelectionChange={handleCellSelectionChange}
@@ -429,7 +438,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         />
 
         {/* Comments sidebar — a floating overlay so the page + ruler stay put */}
-        {showComments && (
+        {!readOnly && showComments && (
           <div
             style={{
               position: 'absolute',

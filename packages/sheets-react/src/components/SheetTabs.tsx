@@ -6,6 +6,8 @@ interface SheetTabsProps {
   onSheetRename?: (sheetId: string, newName: string) => void;
   onSheetAdd?: () => void;
   onSheetDelete?: (sheetId: string) => void;
+  /** Disables add/rename/delete; switching the active sheet still works. */
+  readOnly?: boolean;
 }
 
 export const SheetTabs = memo(function SheetTabs({
@@ -13,6 +15,7 @@ export const SheetTabs = memo(function SheetTabs({
   onSheetRename,
   onSheetAdd,
   onSheetDelete,
+  readOnly = false,
 }: SheetTabsProps) {
   const { workbook } = useWorkbook();
   const [editingSheetId, setEditingSheetId] = useState<string | null>(null);
@@ -49,22 +52,23 @@ export const SheetTabs = memo(function SheetTabs({
 
   const handleSheetDoubleClick = useCallback(
     (sheetId: string, currentName: string) => {
+      if (readOnly) return;
       setEditingSheetId(sheetId);
       setEditingName(currentName);
     },
-    []
+    [readOnly]
   );
 
   const handleRenameSubmit = useCallback(
     (sheetId: string) => {
-      if (editingName.trim() && editingName !== workbook.getSheet(sheetId).name) {
+      if (!readOnly && editingName.trim() && editingName !== workbook.getSheet(sheetId).name) {
         workbook.renameSheet(sheetId, editingName.trim());
         onSheetRename?.(sheetId, editingName.trim());
       }
       setEditingSheetId(null);
       setEditingName('');
     },
-    [editingName, workbook, onSheetRename]
+    [editingName, workbook, onSheetRename, readOnly]
   );
 
   const handleRenameKeyDown = useCallback(
@@ -80,20 +84,22 @@ export const SheetTabs = memo(function SheetTabs({
   );
 
   const handleAddSheet = useCallback(() => {
+    if (readOnly) return;
     const newSheet = workbook.addSheet(`Sheet${sheets.length + 1}`);
     workbook.setActiveSheet(newSheet.id);
     onSheetAdd?.();
-  }, [workbook, sheets.length, onSheetAdd]);
+  }, [workbook, sheets.length, onSheetAdd, readOnly]);
 
   const handleDeleteSheet = useCallback(
     (sheetId: string, e: React.MouseEvent) => {
       e.stopPropagation();
+      if (readOnly) return;
       if (sheets.length > 1) {
         workbook.deleteSheet(sheetId);
         onSheetDelete?.(sheetId);
       }
     },
-    [workbook, sheets.length, onSheetDelete]
+    [workbook, sheets.length, onSheetDelete, readOnly]
   );
 
   return (
@@ -184,7 +190,7 @@ export const SheetTabs = memo(function SheetTabs({
                 <span style={{ flex: 1, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {sheet.name}
                 </span>
-                {sheets.length > 1 && (
+                {sheets.length > 1 && !readOnly && (
                   <button
                     onClick={(e) => handleDeleteSheet(sheet.id, e)}
                     style={{
@@ -225,7 +231,7 @@ export const SheetTabs = memo(function SheetTabs({
           </div>
         );
       })}
-      <button
+      {!readOnly && <button
         onClick={handleAddSheet}
         style={{
           padding: '0',
@@ -255,7 +261,7 @@ export const SheetTabs = memo(function SheetTabs({
         }}
       >
         +
-      </button>
+      </button>}
     </div>
   );
 });
