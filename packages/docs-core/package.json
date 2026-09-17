@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-docs-core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Core document editor engine for Spindle Docs",
   "repository": {
     "type": "git",

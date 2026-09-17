@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-transport-websocket",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "WebSocket-backed CollabProvider for Spindle collaboration",
   "repository": {
     "type": "git",

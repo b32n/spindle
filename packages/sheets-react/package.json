@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-sheets-react",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "React components for Spindle Sheets",
   "repository": {
     "type": "git",

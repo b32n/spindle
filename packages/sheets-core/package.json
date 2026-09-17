@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-sheets-core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Core spreadsheet engine for Spindle Sheets",
   "repository": {
     "type": "git",

@@ -9,6 +9,8 @@ import { useFormulaAssist } from '../hooks/useFormulaAssist';
 interface FormulaBarProps {
   activeCell: { row: number; col: number } | null;
   onFormulaChange?: (formula: string) => void;
+  /** Disables the input entirely, independent of the per-cell spill read-only state below. */
+  readOnly?: boolean;
 }
 
 /**
@@ -36,13 +38,18 @@ function getFormulaBarText(cell: Cell | undefined, workbook: WorkbookImpl): stri
 export const FormulaBar = memo(function FormulaBar({
   activeCell,
   onFormulaChange,
+  readOnly: workbookReadOnly = false,
 }: FormulaBarProps) {
   const { workbook } = useWorkbook();
   const [inputValue, setInputValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [readOnly, setReadOnly] = useState(false);
+  const [spillReadOnly, setSpillReadOnly] = useState(false);
   const [caret, setCaret] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Disabled either because the workbook itself is read-only, or because this
+  // cell is a spilled (non-anchor) cell whose formula lives on the anchor.
+  const readOnly = workbookReadOnly || spillReadOnly;
 
   // Update input value when active cell changes
   useEffect(() => {
@@ -60,11 +67,11 @@ export const FormulaBar = memo(function FormulaBar({
         // A spilled cell shows the anchor's formula, read-only.
         const anchorCell = workbook.getCell(undefined, anchor.row, anchor.col);
         setInputValue(anchorCell?.formula || '');
-        setReadOnly(true);
+        setSpillReadOnly(true);
       } else {
         const cell = workbook.getCell(undefined, activeCell.row, activeCell.col);
         setInputValue(getFormulaBarText(cell, workbook));
-        setReadOnly(false);
+        setSpillReadOnly(false);
       }
     }
   }, [activeCell, workbook, isEditing]);
