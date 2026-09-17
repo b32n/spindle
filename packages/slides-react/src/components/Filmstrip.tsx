@@ -9,7 +9,7 @@ import { ScaledSlide } from './SlideView';
 
 const THUMB_WIDTH = 168;
 
-export function Filmstrip(): React.ReactElement {
+export function Filmstrip({ readOnly = false }: { readOnly?: boolean } = {}): React.ReactElement {
   const deck = useDeck();
   const slideIds = useSlideIds();
   const activeSlideId = useActiveSlideId();
@@ -20,6 +20,7 @@ export function Filmstrip(): React.ReactElement {
   const [overId, setOverId] = useState<string | null>(null);
 
   const onDrop = (targetId: string) => {
+    if (readOnly) return;
     if (!dragId || dragId === targetId) return;
     // Drop places the dragged slide immediately after the target.
     deck.moveSlide(dragId, { afterSlideId: targetId });
@@ -32,6 +33,7 @@ export function Filmstrip(): React.ReactElement {
   };
 
   const deleteSlide = (id: string) => {
+    if (readOnly) return;
     if (slideIds.length <= 1) return;
     const i = slideIds.indexOf(id);
     const neighbor = slideIds[i + 1] ?? slideIds[i - 1];
@@ -41,6 +43,7 @@ export function Filmstrip(): React.ReactElement {
 
   const onThumbKeyDown = (e: React.KeyboardEvent, id: string, i: number) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (readOnly) return;
       e.preventDefault();
       e.stopPropagation();
       deleteSlide(id);
@@ -78,9 +81,9 @@ export function Filmstrip(): React.ReactElement {
         return (
           <div
             key={id}
-            draggable
-            onDragStart={() => setDragId(id)}
-            onDragOver={(e) => { e.preventDefault(); setOverId(id); }}
+            draggable={!readOnly}
+            onDragStart={() => { if (!readOnly) setDragId(id); }}
+            onDragOver={(e) => { if (readOnly) return; e.preventDefault(); setOverId(id); }}
             onDrop={() => onDrop(id)}
             onDragEnd={() => { setDragId(null); setOverId(null); }}
             style={{ display: 'flex', gap: 8, alignItems: 'flex-start', opacity: dragId === id ? 0.4 : 1, borderTop: overId === id && dragId ? '2px solid #2d7ff9' : '2px solid transparent' }}
@@ -99,12 +102,14 @@ export function Filmstrip(): React.ReactElement {
           </div>
         );
       })}
-      <button
-        onClick={() => { const s = deck.addSlide({ afterSlideId: activeSlideId, layoutId: 'titleContent' }); deck.setActiveSlide(s.id); }}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginLeft: 24, height: 40, border: '1px dashed #c4cad3', borderRadius: 6, background: '#fff', color: '#5b6673', cursor: 'pointer', fontSize: 13 }}
-      >
-        <Plus size={15} /> New slide
-      </button>
+      {!readOnly && (
+        <button
+          onClick={() => { const s = deck.addSlide({ afterSlideId: activeSlideId, layoutId: 'titleContent' }); deck.setActiveSlide(s.id); }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginLeft: 24, height: 40, border: '1px dashed #c4cad3', borderRadius: 6, background: '#fff', color: '#5b6673', cursor: 'pointer', fontSize: 13 }}
+        >
+          <Plus size={15} /> New slide
+        </button>
+      )}
     </div>
   );
 }
