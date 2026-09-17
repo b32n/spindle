@@ -24,6 +24,11 @@
       "import": "./dist/react/index.esm.js",
       "require": "./dist/react/index.js",
       "types": "./dist/react/index.d.ts"
+    },
+    "./export/csv": {
+      "import": "./dist/export/csv/index.esm.js",
+      "require": "./dist/export/csv/index.js",
+      "types": "./dist/export/csv/index.d.ts"
     }
   },
   "files": [
