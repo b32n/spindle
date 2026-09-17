@@ -1,17 +1,29 @@
 name: Publish Packages
 
-# Publishes all @b32nio/spindle-* packages to npm when a GitHub Release is
+# Stages all @b32nio/spindle-* packages on npm when a GitHub Release is
 # published. Cutting the Release is the single action that both generates the
-# changelog (auto-notes — see .github/release.yml) and ships the packages.
+# changelog (auto-notes — see .github/release.yml) and stages the packages.
 #
 # Auth is npm Trusted Publishing (OIDC) — there is NO token. Each package must
 # have a trusted publisher configured on npmjs.com pointing at this repo and
 # this workflow file (Package → Settings → Trusted Publisher). Provenance is
 # generated automatically.
 #
+# This calls `npm stage publish`, not `npm publish`: our trusted publishers are
+# set to allow staged publishing only (npm's recommended default as of
+# 2026-09), not direct publish — a compromised or misbehaving CI run can never
+# put a package live on its own. Staging just uploads the tarball; nothing is
+# public yet. A maintainer must then review and approve each staged version
+# with 2FA — `npm stage list` to find it, `npm stage view <stage-id>` to
+# inspect it, `npm stage approve <stage-id>` to publish it for real — or via
+# the "Versions" tab on the package's npmjs.com page.
+#
 # Versions come from each package.json — bump them (in lockstep) and commit
-# before you tag/release. A package whose version is already on npm is skipped,
-# so re-runs and partial bumps are safe.
+# before you tag/release. A package whose version is already live on npm is
+# skipped, so re-runs and partial bumps are safe. Note this check can't see a
+# version that's staged but not yet approved, so re-running before approving
+# will submit a second stage for the same version — harmless, just approve
+# whichever one and let the other expire.
 on:
   release:
     types: [published]
@@ -29,7 +41,7 @@ concurrency:
 
 jobs:
   publish:
-    name: Build & publish to npm
+    name: Build & stage on npm
     runs-on: ubuntu-latest
     # Protected environment: publishing waits for a required reviewer's manual
     # approval. Set this same name ("release") as the Environment on each
@@ -43,7 +55,8 @@ jobs:
           cache: npm
           registry-url: 'https://registry.npmjs.org'
 
-      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 22 ships npm 10.
+      # Trusted publishing (OIDC) needs npm >= 11.5.1, and `npm stage publish`
+      # is newer still; Node 22 ships npm 10.
       - run: npm install -g npm@latest
 
       - run: npm ci
@@ -57,19 +70,21 @@ jobs:
           ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
           npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
 
-      # Gate before publishing: build (also produces the dist that ships),
-      # type-check, and test. Publishing is irreversible, so verify the exact
-      # tagged commit is green even though CI already ran on master.
+      # Gate before staging: build (also produces the dist that ships),
+      # type-check, and test. The maintainer's 2FA approval is the last line
+      # of defense, but verify the exact tagged commit is green here too
+      # rather than leaning on that alone — CI already ran on master, but
+      # this is the commit that's actually about to go out.
       - run: npm run build
       - run: npm run type-check
       - run: npm test
 
       # No NODE_AUTH_TOKEN: npm detects the GitHub OIDC environment and
       # authenticates via the package's configured trusted publisher.
-      - name: Publish changed packages
+      - name: Stage changed packages
         run: |
           set -euo pipefail
-          published=0
+          staged=0
           for dir in packages/*/; do
             pkg="${dir}package.json"
             [ -f "$pkg" ] || continue
@@ -82,9 +97,9 @@ jobs:
             if npm view "$name@$version" version >/dev/null 2>&1; then
               echo "= $name@$version already on npm — skipping"
             else
-              echo "+ publishing $name@$version"
-              npm publish -w "$name"
-              published=$((published + 1))
+              echo "+ staging $name@$version"
+              npm stage publish -w "$name"
+              staged=$((staged + 1))
             fi
           done
-          echo "Published $published package(s)."
+          echo "Staged $staged package(s) — approve each with 2FA (npm stage approve <stage-id>, or the Versions tab on npmjs.com) to make them live."
