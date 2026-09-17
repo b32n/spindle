@@ -159,7 +159,7 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
       )}
       <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, gap: 12, padding: '4px 12px 12px', background: 'linear-gradient(180deg, #f1f5f9 0%, #eaeef4 100%)' }}>
         {/* Desktop: filmstrip sits inline in the layout, taking real width. */}
-        {filmstripOpen && !isMobile && <Filmstrip />}
+        {filmstripOpen && !isMobile && <Filmstrip readOnly={readOnly} />}
         <div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', minWidth: 0, gap: 12 }}>
           <SlideStage zoom={zoom === 'fit' ? undefined : zoom} interactive={!readOnly} onZoomChange={setZoom} />
           {!readOnly && <NotesPanel />}
@@ -180,7 +180,7 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
               padding: 8, animation: 'spindle-drawer-in .2s cubic-bezier(.2,.7,.3,1)',
             }}
           >
-            <Filmstrip />
+            <Filmstrip readOnly={readOnly} />
           </div>
         </div>
       )}
