@@ -1,6 +1,8 @@
 // Toolbar — insert elements, edit, arrange, and align. Enabled state follows
 // the current selection. Insertions drop near the slide centre and select the
-// new element.
+// new element. Also carries the session-level controls (Present, Comments,
+// zoom) that used to live in a separate titlebar above it — folded in here
+// for consistency with the docs/sheets editors, which have no titlebar.
 
 import React, { useRef, useSyncExternalStore } from 'react';
 import {
@@ -8,11 +10,11 @@ import {
   Trash2, Copy, Undo2, Redo2, Group, Ungroup, GalleryVerticalEnd,
   BringToFront, SendToBack, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter,
   AlignStartVertical, AlignEndVertical, AlignStartHorizontal, AlignEndHorizontal,
-  AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
+  AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, Play, MessageSquare,
 } from 'lucide-react';
 import type { NewElementSpec, AlignMode } from '@b32nio/spindle-slides-core';
 import { ResponsiveToolbar } from '@b32nio/spindle-shared/react';
-import { useDeck, useSelection, useEditingId, useFilmstripOpen } from '../hooks';
+import { useDeck, useSelection, useEditingId, useFilmstripOpen, useCommentsOpen } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { DeckControls } from './DeckControls';
 import { TextFormatBar } from './TextFormatBar';
@@ -23,12 +25,30 @@ import { TableFormatBar } from './TableFormatBar';
 import { ShapePicker } from './ShapePicker';
 import { TB, ToolbarButton as IconButton, ToolbarDivider } from './toolbarUI';
 
-export function Toolbar({ extras }: { extras?: React.ReactNode } = {}): React.ReactElement {
+export type Zoom = number | 'fit';
+export const ZOOM_PRESETS: Array<{ label: string; zoom: Zoom }> = [
+  { label: 'Fit', zoom: 'fit' },
+  { label: '50%', zoom: 0.5 },
+  { label: '100%', zoom: 1 },
+  { label: '200%', zoom: 2 },
+];
+
+export interface ToolbarProps {
+  extras?: React.ReactNode;
+  /** Rendered before Present, same spot as before the titlebar was folded in here. */
+  headerActions?: React.ReactNode;
+  zoom: Zoom;
+  onZoomChange: (zoom: Zoom) => void;
+  onPresent: () => void;
+}
+
+export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }: ToolbarProps): React.ReactElement {
   const deck = useDeck();
   const selection = useSelection();
   const { tableSel, ui } = useDeckContext();
   const cellSel = useSyncExternalStore(tableSel.subscribe, tableSel.getState);
   const filmstripOpen = useFilmstripOpen();
+  const showComments = useCommentsOpen();
   const fileRef = useRef<HTMLInputElement>(null);
   const editingId = useEditingId();
   const ids = selection.elementIds;
@@ -205,6 +225,26 @@ export function Toolbar({ extras }: { extras?: React.ReactNode } = {}): React.Re
       {/* Host-injected controls (e.g. app-specific actions). */}
       {extras}
       </ResponsiveToolbar>
+      <ToolbarDivider />
+      {/* Pinned outside ResponsiveToolbar, same treatment as the filmstrip
+          toggle — session-level controls (not deck edits) that should stay
+          visible regardless of how much room the editing controls need. */}
+      {headerActions}
+      <IconButton title="Present" label="Present" onClick={onPresent}>
+        <Play size={16} />
+      </IconButton>
+      <IconButton title="Comments" active={showComments} onClick={() => ui.toggleComments()}>
+        <MessageSquare size={16} />
+      </IconButton>
+      <ToolbarDivider />
+      {zoom !== 'fit' && !ZOOM_PRESETS.some((p) => p.zoom === zoom) && (
+        <span style={{ fontSize: 12, color: '#8a93a2', minWidth: 40, textAlign: 'right' }}>{Math.round(zoom * 100)}%</span>
+      )}
+      {ZOOM_PRESETS.map((p) => (
+        <IconButton key={p.label} title={p.label} label={p.label} active={p.zoom === zoom} onClick={() => onZoomChange(p.zoom)}>
+          {null}
+        </IconButton>
+      ))}
       </div>
     </div>
   );

@@ -3,11 +3,10 @@
 // not window) and the right-click context menu.
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Play, MessageSquare } from 'lucide-react';
 import { useDeck, useKeyboardShortcuts, useCommentsOpen, useFilmstripOpen } from '../hooks';
 import { usePasteImport } from '../hooks/usePasteImport';
 import { useDeckContext } from '../context/DeckContext';
-import { Toolbar } from './Toolbar';
+import { Toolbar, type Zoom } from './Toolbar';
 import { Filmstrip } from './Filmstrip';
 import { SlideStage } from './SlideStage';
 import { NotesPanel } from './NotesPanel';
@@ -17,27 +16,20 @@ import { TableCellMenu } from './TableCellMenu';
 import { PresentMode } from './PresentMode';
 import { CommentsPanel } from './CommentsPanel';
 
-type Zoom = number | 'fit';
-const ZOOM_PRESETS: Array<{ label: string; zoom: Zoom }> = [
-  { label: 'Fit', zoom: 'fit' },
-  { label: '50%', zoom: 0.5 },
-  { label: '100%', zoom: 1 },
-  { label: '200%', zoom: 2 },
-];
-
 export interface SlidesEditorProps {
   style?: React.CSSProperties;
   /** Read-only viewer (no toolbar, gestures, or shortcuts). */
   readOnly?: boolean;
   /**
-   * Extra buttons for the header's action group (rendered before Present).
-   * App-level concerns like PDF/PNG export live here — export is intentionally
-   * kept out of this package; the host wires it up from the public render API.
+   * Extra buttons pinned at the end of the toolbar, before Present. App-level
+   * concerns like PDF/PNG export live here — export is intentionally kept out
+   * of this package; the host wires it up from the public render API.
    */
   headerActions?: React.ReactNode;
   /**
-   * Extra controls appended to the toolbar (after the format bars). Same
-   * host-injection story as headerActions — app-specific toolbar buttons.
+   * Extra controls appended to the toolbar's scrollable region (after the
+   * format bars, before Present). Same host-injection story as
+   * headerActions — app-specific toolbar buttons.
    */
   toolbarExtras?: React.ReactNode;
 }
@@ -156,47 +148,15 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
         ...style,
       }}
     >
-      <header style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '8px 16px', borderBottom: '1px solid #e2e4e8', background: '#fff' }}>
-        <strong style={{ fontSize: 15 }}>{deck.getTitle()}</strong>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
-          {!readOnly && (
-            <>
-              {headerActions}
-              <button
-                onClick={() => setPresenting(true)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 'none', background: '#2d7ff9', color: '#fff', borderRadius: 5, padding: '6px 12px', fontSize: 13, cursor: 'pointer' }}
-              >
-                <Play size={14} /> Present
-              </button>
-              <button
-                onClick={() => ui.toggleComments()}
-                title="Comments"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid #d5d9e0', background: showComments ? '#eef4ff' : '#fff', color: '#3e4c59', borderRadius: 5, padding: '6px 10px', fontSize: 13, cursor: 'pointer' }}
-              >
-                <MessageSquare size={14} />
-              </button>
-            </>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          {zoom !== 'fit' && !ZOOM_PRESETS.some((p) => p.zoom === zoom) && (
-            <span style={{ fontSize: 12, color: '#8a93a2', minWidth: 40, textAlign: 'right' }}>{Math.round(zoom * 100)}%</span>
-          )}
-          {ZOOM_PRESETS.map((p) => {
-            const active = p.zoom === zoom;
-            return (
-              <button
-                key={p.label}
-                onClick={() => setZoom(p.zoom)}
-                style={{ border: '1px solid #d5d9e0', background: active ? '#2d7ff9' : '#fff', color: active ? '#fff' : '#3e4c59', borderRadius: 4, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}
-              >
-                {p.label}
-              </button>
-            );
-          })}
-        </div>
-      </header>
-      {!readOnly && <Toolbar extras={toolbarExtras} />}
+      {!readOnly && (
+        <Toolbar
+          extras={toolbarExtras}
+          headerActions={headerActions}
+          zoom={zoom}
+          onZoomChange={setZoom}
+          onPresent={() => setPresenting(true)}
+        />
+      )}
       <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, gap: 12, padding: '4px 12px 12px', background: 'linear-gradient(180deg, #f1f5f9 0%, #eaeef4 100%)' }}>
         {/* Desktop: filmstrip sits inline in the layout, taking real width. */}
         {filmstripOpen && !isMobile && <Filmstrip />}

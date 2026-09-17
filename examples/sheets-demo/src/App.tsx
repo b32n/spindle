@@ -317,6 +317,7 @@ function StatusDot({ status }: { status: CollabStatus }) {
 
 function App() {
   const [collabMode, setCollabMode] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [wsConfig] = useState<WsConfig | null>(() => parseWsConfig());
   const [workbook] = useState(() => makeWorkbookFromSample());
 
@@ -345,7 +346,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Pagent Sheets Demo</h1>
+        <h1>Spindle Sheets Demo</h1>
         <p>Standalone demo of Spindle Sheets library - No backend required</p>
         <button onClick={handleSave} style={{ marginTop: '10px', padding: '8px 16px' }}>
           Save Workbook Data
@@ -356,6 +357,19 @@ function App() {
         >
           {collabMode ? 'Single editor' : 'Collab demo'}
         </button>
+        {!collabMode && !wsConfig && (
+          <button
+            onClick={() => setReadOnly((v) => !v)}
+            style={{
+              marginTop: '10px',
+              marginLeft: '8px',
+              padding: '8px 16px',
+              background: readOnly ? '#fde68a' : undefined,
+            }}
+          >
+            {readOnly ? 'Read-only: ON' : 'Read-only: OFF'}
+          </button>
+        )}
       </header>
       <main className="app-main">
         {wsConfig ? (
@@ -369,7 +383,7 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas width={dimensions.width} height={dimensions.height} />
+            <WorkbookCanvas width={dimensions.width} height={dimensions.height} readOnly={readOnly} />
           </WorkbookProvider>
         )}
       </main>
