@@ -126,7 +126,7 @@ const sampleDocumentData: DocumentData = {
           type: 'heading',
           level: 1,
           alignment: 'center',
-          content: [{ type: 'text', text: 'Welcome to Pagent Docs' }],
+          content: [{ type: 'text', text: 'Welcome to Spindle Docs' }],
         },
         // Intro paragraph with mixed styling
         {
@@ -584,6 +584,7 @@ function StatusDot({ status }: { status: CollabStatus }) {
 function App() {
   const [collabMode, setCollabMode] = useState(false);
   const [wsConfig] = useState<WsConfig | null>(() => parseWsConfig());
+  const [readOnly, setReadOnly] = useState(false);
 
   const [document] = useState(() => {
     // Create a new document and load the sample data
@@ -646,7 +647,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-left">
-          <h1>Pagent Docs Demo</h1>
+          <h1>Spindle Docs Demo</h1>
           <p>Standalone demo of Spindle Docs library - No backend required</p>
         </div>
         <div className="header-right">
@@ -659,6 +660,15 @@ function App() {
           <button className="header-button" onClick={() => setCollabMode((v) => !v)}>
             {collabMode ? 'Single editor' : 'Collab demo'}
           </button>
+          {!collabMode && !wsConfig && (
+            <button
+              className="header-button"
+              onClick={() => setReadOnly((v) => !v)}
+              style={{ background: readOnly ? '#fde68a' : undefined }}
+            >
+              {readOnly ? 'Read-only: ON' : 'Read-only: OFF'}
+            </button>
+          )}
         </div>
       </header>
       <main className="app-main">
@@ -687,6 +697,7 @@ function App() {
               height={dimensions.height}
               showToolbar={true}
               showRuler={true}
+              readOnly={readOnly}
             />
           </DocumentProvider>
         )}

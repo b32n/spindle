@@ -60,8 +60,9 @@ const styles = {
     fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
     position: 'relative' as const,
     zIndex: 100,
-    margin: '8px 0',
-    width: '100%',
+    // Inset from the container edges to match the docs/slides toolbars,
+    // which float in a padded strip rather than spanning edge-to-edge.
+    margin: '8px 12px',
     boxSizing: 'border-box' as const,
   } as React.CSSProperties,
 
