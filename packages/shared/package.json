@@ -29,6 +29,11 @@
       "import": "./dist/export/csv/index.esm.js",
       "require": "./dist/export/csv/index.js",
       "types": "./dist/export/csv/index.d.ts"
+    },
+    "./export/xlsx": {
+      "import": "./dist/export/xlsx/index.esm.js",
+      "require": "./dist/export/xlsx/index.js",
+      "types": "./dist/export/xlsx/index.d.ts"
     }
   },
   "files": [
@@ -51,7 +56,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"

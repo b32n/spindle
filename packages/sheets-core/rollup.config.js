@@ -30,6 +30,7 @@ const tsPluginNoDecl = typescript({
 const external = [
   '@b32nio/spindle-shared',
   '@b32nio/spindle-shared/export/csv',
+  '@b32nio/spindle-shared/export/xlsx',
   'yjs',
   'y-protocols',
   'y-protocols/awareness',
