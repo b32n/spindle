@@ -1,14 +1,18 @@
-import { exportXlsx } from '@b32nio/spindle-shared/export/xlsx';
+import { exportXlsx, importXlsx } from '@b32nio/spindle-shared/export/xlsx';
 import type {
   SpreadsheetBorder,
   SpreadsheetCell,
   SpreadsheetCellStyle,
+  SpreadsheetImportResult,
   SpreadsheetMergedRange,
   SpreadsheetSheet,
 } from '@b32nio/spindle-shared/export/xlsx';
-import type { Cell, CellStyle, Sheet } from '../types';
+import type { Cell, CellStyle, SheetData, Sheet, WorkbookData } from '../types';
 import type { WorkbookImpl } from '../workbook';
-import { toExcelNumberFormatCode } from './xlsx-number-format';
+import { StylePool } from '../style-pool';
+import { FormatPool } from '../format-pool';
+import { generateId } from '../utils/id';
+import { toExcelNumberFormatCode, fromExcelNumberFormatCode } from './xlsx-number-format';
 
 export async function exportToXlsx(workbook: WorkbookImpl): Promise<Uint8Array> {
   const sheetIds = Array.from(workbook.sheets.keys());
@@ -132,4 +136,126 @@ function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['st
   if (widthPx >= 3) return 'thick';
   if (widthPx === 2) return 'medium';
   return 'thin';
+}
+
+// ---------------------------------------------------------------------------
+// Import
+// ---------------------------------------------------------------------------
+
+/**
+ * Replace `workbook`'s entire contents with what's in the xlsx file at
+ * `bytes` — every existing sheet is discarded, matching what "import a file"
+ * should mean. Merges are applied after the bulk load via the live
+ * mergeCells API rather than through setData's config, since merged regions
+ * (unlike cells/widths/heights) only accept stable row/col IDs, not the
+ * numeric indices this adapter otherwise works in.
+ */
+export async function importFromXlsx(bytes: Uint8Array, workbook: WorkbookImpl): Promise<{ warnings: string[] }> {
+  const result = await importXlsx(bytes);
+  const { data, sheetIds } = toWorkbookData(result, workbook);
+  workbook.setData(data);
+  result.sheets.forEach((sheet, i) => {
+    sheet.mergedRanges?.forEach((range) => workbook.mergeCells(range, sheetIds[i]));
+  });
+  return { warnings: result.warnings };
+}
+
+function toWorkbookData(
+  result: SpreadsheetImportResult,
+  workbook: WorkbookImpl
+): { data: WorkbookData; sheetIds: string[] } {
+  const stylePool = new StylePool();
+  const formatPool = new FormatPool();
+  const sheetIds = result.sheets.map(() => generateId());
+  const sheets: SheetData[] = result.sheets.map((sheet, i) => toSheetData(sheet, sheetIds[i], stylePool, formatPool));
+
+  const activeIndex = result.activeSheetIndex ?? 0;
+  const data: WorkbookData = {
+    id: workbook.id,
+    name: workbook.name,
+    activeSheetId: sheetIds[activeIndex] ?? sheetIds[0],
+    defaultRowHeight: workbook.defaultRowHeight,
+    defaultColWidth: workbook.defaultColWidth,
+    stylePool: Object.fromEntries(stylePool.getAllStyles()),
+    formatPool: Object.fromEntries(formatPool.getAllFormats()),
+    sheets,
+  };
+  return { data, sheetIds };
+}
+
+function toSheetData(sheet: SpreadsheetSheet, id: string, stylePool: StylePool, formatPool: FormatPool): SheetData {
+  const cells: SheetData['cells'] = [];
+  let maxRow = 0;
+  let maxCol = 0;
+
+  for (const [key, spreadsheetCell] of sheet.cells) {
+    const [rowStr, colStr] = key.split(':');
+    maxRow = Math.max(maxRow, Number(rowStr));
+    maxCol = Math.max(maxCol, Number(colStr));
+
+    const cell: Cell = { value: spreadsheetCell.value };
+    if (spreadsheetCell.formula) cell.formula = `=${spreadsheetCell.formula}`;
+    if (spreadsheetCell.hyperlink) cell.hyperlink = spreadsheetCell.hyperlink;
+    if (spreadsheetCell.style) cell.styleId = stylePool.getOrCreate(fromSpreadsheetStyle(spreadsheetCell.style));
+    if (spreadsheetCell.numberFormat) {
+      const format = fromExcelNumberFormatCode(spreadsheetCell.numberFormat.code);
+      if (format.type) cell.formatId = formatPool.getOrCreate(format);
+    }
+    cells.push({ key, cell });
+  }
+
+  const config: SheetData['config'] = {
+    frozenRows: sheet.frozenRows,
+    frozenCols: sheet.frozenCols,
+  };
+  if (sheet.rowHeights?.size) config.rowHeights = Array.from(sheet.rowHeights.entries());
+  if (sheet.columnWidths?.size) config.colWidths = Array.from(sheet.columnWidths.entries());
+  if (sheet.hiddenRows?.size) config.hiddenRows = Array.from(sheet.hiddenRows);
+  if (sheet.hiddenCols?.size) config.hiddenCols = Array.from(sheet.hiddenCols);
+
+  return {
+    id,
+    name: sheet.name,
+    cells,
+    config,
+    // Same generous default as a freshly-created sheet, at least as large as
+    // the imported data.
+    rowCount: Math.max(maxRow + 1, 1000),
+    colCount: Math.max(maxCol + 1, 100),
+  };
+}
+
+function fromSpreadsheetStyle(style: SpreadsheetCellStyle): CellStyle {
+  const out: CellStyle = {};
+  if (style.bold != null) out.bold = style.bold;
+  if (style.italic != null) out.italic = style.italic;
+  if (style.underline) out.textDecoration = 'underline';
+  else if (style.strikethrough) out.textDecoration = 'line-through';
+  if (style.fontFamily != null) out.fontFamily = style.fontFamily;
+  if (style.fontSize != null) out.fontSize = style.fontSize;
+  if (style.fontColor != null) out.fontColor = style.fontColor;
+  if (style.backgroundColor != null) out.backgroundColor = style.backgroundColor;
+  if (style.horizontalAlign != null) out.textAlign = style.horizontalAlign;
+  if (style.verticalAlign != null) out.verticalAlign = style.verticalAlign;
+  if (style.wrapText != null) out.textWrap = style.wrapText;
+  if (style.textRotation != null) out.textRotation = style.textRotation;
+
+  if (style.border) {
+    if (style.border.top) out.borderTop = toCssBorder(style.border.top);
+    if (style.border.right) out.borderRight = toCssBorder(style.border.right);
+    if (style.border.bottom) out.borderBottom = toCssBorder(style.border.bottom);
+    if (style.border.left) out.borderLeft = toCssBorder(style.border.left);
+  }
+  return out;
+}
+
+const BORDER_WIDTH_PX: Record<SpreadsheetBorder['style'], number> = {
+  thin: 1, medium: 2, thick: 3, dashed: 1, dotted: 1, double: 3,
+};
+const BORDER_CSS_STYLE: Record<SpreadsheetBorder['style'], string> = {
+  thin: 'solid', medium: 'solid', thick: 'solid', dashed: 'dashed', dotted: 'dotted', double: 'double',
+};
+
+function toCssBorder(border: SpreadsheetBorder): string {
+  return `${BORDER_WIDTH_PX[border.style]}px ${BORDER_CSS_STYLE[border.style]} ${border.color ?? '#000000'}`;
 }

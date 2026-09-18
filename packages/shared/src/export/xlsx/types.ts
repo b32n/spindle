@@ -80,3 +80,10 @@ export interface SpreadsheetExportInput {
   sheets: SpreadsheetSheet[];
   activeSheetIndex?: number;
 }
+
+export interface SpreadsheetImportResult {
+  sheets: SpreadsheetSheet[];
+  activeSheetIndex?: number;
+  /** Non-fatal issues (unrecognized cell shape, unresolvable shared formula, etc.) — surfaced rather than silently dropped. */
+  warnings: string[];
+}
