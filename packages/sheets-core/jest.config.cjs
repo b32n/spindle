@@ -23,6 +23,7 @@ module.exports = {
           // resolver finds fine via that same exports map at runtime).
           paths: {
             '@b32nio/spindle-shared/export/csv': ['../shared/src/export/csv/index.ts'],
+            '@b32nio/spindle-shared/export/xlsx': ['../shared/src/export/xlsx/index.ts'],
           },
         },
       },
