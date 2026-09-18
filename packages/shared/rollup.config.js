@@ -6,10 +6,10 @@ import { defineConfig } from 'rollup';
 //   ./react      → React UI helpers (ResponsiveToolbar). React stays external, and
 //                  the subpath keeps React out of the pure `.` entry so non-React
 //                  consumers (the *-core packages) never pull it in.
-//   ./export/csv  → CSV read/write helpers. Each export format gets its own
-//   ./export/xlsx   subpath (same reasoning as ./react) so a consumer that
-//                    only needs CSV never bundles xlsx/docx/pptx/pdf
-//                    machinery, and vice versa.
+//   ./export/csv   → CSV/xlsx/docx read/write helpers. Each export format gets
+//   ./export/xlsx    its own subpath (same reasoning as ./react) so a
+//   ./export/docx    consumer that only needs CSV never bundles xlsx/docx/
+//                     pptx/pdf machinery, and vice versa.
 
 const tsMain = typescript({
   tsconfig: './tsconfig.json',
@@ -33,6 +33,13 @@ const tsExportCsv = typescript({
   outputToFilesystem: true,
 });
 const tsExportXlsx = typescript({
+  tsconfig: './tsconfig.json',
+  declaration: true,
+  declarationDir: './dist',
+  rootDir: './src',
+  outputToFilesystem: true,
+});
+const tsExportDocx = typescript({
   tsconfig: './tsconfig.json',
   declaration: true,
   declarationDir: './dist',
@@ -77,5 +84,14 @@ export default defineConfig([
     ],
     external: ['exceljs'],
     plugins: [tsExportXlsx],
+  },
+  {
+    input: 'src/export/docx/index.ts',
+    output: [
+      { file: 'dist/export/docx/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/export/docx/index.esm.js', format: 'esm', sourcemap: true },
+    ],
+    external: ['docx'],
+    plugins: [tsExportDocx],
   },
 ]);

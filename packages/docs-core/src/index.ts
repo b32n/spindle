@@ -13,6 +13,9 @@ export { DocumentImpl, createDocument, createSection } from './document';
 // Blocks
 export * from './blocks';
 
+// Export
+export * from './export';
+
 // Selection
 export {
   createCursorPosition,
