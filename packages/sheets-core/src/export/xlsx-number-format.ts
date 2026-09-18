@@ -122,3 +122,103 @@ function durationCode(durationFormat: CellFormat['durationFormat']): string {
       return '[hh]:mm:ss';
   }
 }
+
+function invert(map: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.entries(map).map(([k, v]) => [v, k]));
+}
+
+const REVERSE_DATE_CODES = invert(DATE_CODES); // e.g. 'mm/dd/yyyy' -> 'MM/DD/YYYY'
+const REVERSE_TIME_CODES = invert(TIME_CODES);
+
+const CURRENCY_CODE_FOR_SYMBOL: Record<string, string> = {
+  '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY', '₹': 'INR', '₩': 'KRW',
+};
+
+function countDecimalZeros(code: string): number {
+  const match = code.match(/\.(0+)/);
+  return match ? match[1].length : 0;
+}
+
+function findCurrencySymbol(code: string): string | undefined {
+  // Only a symbol we actually recognize counts — an arbitrary quoted label
+  // (e.g. custom pattern `0 "units"`) isn't a currency and must fall through
+  // to the other checks instead of being misread as one.
+  const quoted = code.match(/"([^"]+)"/);
+  if (quoted && CURRENCY_CODE_FOR_SYMBOL[quoted[1]]) return quoted[1];
+  const bare = code.match(/[$€£¥₹₩]/);
+  return bare?.[0];
+}
+
+/**
+ * Translate an Excel-syntax number format code back into a CellFormat.
+ * Best-effort: exactly reverses whatever toExcelNumberFormatCode produces
+ * (so our own round-trip is exact), and does reasonable pattern-sniffing
+ * for codes from real spreadsheet apps we didn't generate ourselves —
+ * genuinely exotic custom codes fall back to `type: 'custom'`, which
+ * preserves the raw code (if imperfectly, since our own custom-pattern
+ * renderer is a simple one) rather than losing it.
+ */
+export function fromExcelNumberFormatCode(code: string): CellFormat {
+  const trimmed = code.trim();
+  if (!trimmed || trimmed === 'General') return {};
+
+  if (REVERSE_DATE_CODES[trimmed]) return { type: 'date', dateFormat: REVERSE_DATE_CODES[trimmed] };
+  if (REVERSE_TIME_CODES[trimmed]) return { type: 'time', timeFormat: REVERSE_TIME_CODES[trimmed] };
+
+  const [datePart, timePart] = trimmed.split(' ');
+  if (timePart && REVERSE_DATE_CODES[datePart] && REVERSE_TIME_CODES[timePart]) {
+    return { type: 'datetime', dateFormat: REVERSE_DATE_CODES[datePart], timeFormat: REVERSE_TIME_CODES[timePart] };
+  }
+
+  // Generic date/time sniffing for codes we didn't author (real Excel files).
+  // No exact source pattern to recover, so these fall back to our defaults.
+  // Time first: 'm' alone is ambiguous (month vs. minute in Excel's own
+  // syntax), so check for the unambiguous time markers (AM/PM, a colon with
+  // h/s) before treating a bare 'm' as a date's month.
+  if (/am\/pm/i.test(trimmed) || (trimmed.includes(':') && /[hs]/i.test(trimmed))) {
+    return { type: 'time', timeFormat: 'h:mm AM/PM' };
+  }
+  if (!/[#0]/.test(trimmed) && /[ymd].*[ymd]/i.test(trimmed)) {
+    return { type: 'date', dateFormat: 'MM/DD/YYYY' };
+  }
+
+  if (trimmed.endsWith('%')) {
+    return { type: 'percentage', decimalPlaces: countDecimalZeros(trimmed) };
+  }
+
+  if (/E\+0+$/i.test(trimmed)) {
+    return { type: 'scientific', decimalPlaces: countDecimalZeros(trimmed) };
+  }
+
+  if (trimmed.startsWith('_(')) {
+    const symbol = findCurrencySymbol(trimmed);
+    return {
+      type: 'accounting',
+      currencyCode: symbol ? CURRENCY_CODE_FOR_SYMBOL[symbol] : undefined,
+      decimalPlaces: countDecimalZeros(trimmed),
+    };
+  }
+
+  const currencySymbol = findCurrencySymbol(trimmed);
+  if (currencySymbol) {
+    return {
+      type: 'currency',
+      currencyCode: CURRENCY_CODE_FOR_SYMBOL[currencySymbol],
+      currencySymbolPosition: trimmed.trim().startsWith('"') || trimmed.trim().startsWith(currencySymbol) ? 'prefix' : 'suffix',
+      decimalPlaces: countDecimalZeros(trimmed),
+      useThousandsSeparator: trimmed.includes(',0') || trimmed.includes('#,##0'),
+      negativeFormat: trimmed.includes('(') ? 'parentheses' : /\[red\]/i.test(trimmed) ? 'red' : 'minus',
+    };
+  }
+
+  if (/^[#0]/.test(trimmed)) {
+    return {
+      type: 'number',
+      decimalPlaces: countDecimalZeros(trimmed),
+      useThousandsSeparator: trimmed.includes(','),
+      negativeFormat: trimmed.includes('(') ? 'parentheses' : /\[red\]/i.test(trimmed) ? 'red' : 'minus',
+    };
+  }
+
+  return { type: 'custom', pattern: code };
+}

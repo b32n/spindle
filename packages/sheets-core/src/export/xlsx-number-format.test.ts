@@ -1,4 +1,4 @@
-import { toExcelNumberFormatCode } from './xlsx-number-format';
+import { fromExcelNumberFormatCode, toExcelNumberFormatCode } from './xlsx-number-format';
 
 describe('toExcelNumberFormatCode', () => {
   it('formats a plain number with and without a thousands separator', () => {
@@ -77,5 +77,77 @@ describe('toExcelNumberFormatCode', () => {
     const code = toExcelNumberFormatCode({ type: 'accounting', currencyCode: 'GBP', decimalPlaces: 2 });
     expect(code).toContain('£');
     expect(code).toContain('#,##0.00');
+  });
+});
+
+describe('fromExcelNumberFormatCode', () => {
+  it('maps General (and empty) to no format', () => {
+    expect(fromExcelNumberFormatCode('General')).toEqual({});
+    expect(fromExcelNumberFormatCode('')).toEqual({});
+  });
+
+  it('exactly reverses every date/time/datetime code our own writer produces', () => {
+    for (const dateFormat of ['MM/DD/YYYY', 'DD-MM-YYYY', 'YYYY-MM-DD', 'Month DD YYYY'] as const) {
+      const code = toExcelNumberFormatCode({ type: 'date', dateFormat });
+      expect(fromExcelNumberFormatCode(code)).toEqual({ type: 'date', dateFormat });
+    }
+    for (const timeFormat of ['HH:mm:ss', 'h:mm AM/PM', 'HH:mm'] as const) {
+      const code = toExcelNumberFormatCode({ type: 'time', timeFormat });
+      expect(fromExcelNumberFormatCode(code)).toEqual({ type: 'time', timeFormat });
+    }
+    const dtCode = toExcelNumberFormatCode({ type: 'datetime', dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' });
+    expect(fromExcelNumberFormatCode(dtCode)).toEqual({ type: 'datetime', dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' });
+  });
+
+  it('sniffs a date/time pattern from a real spreadsheet app we did not author', () => {
+    expect(fromExcelNumberFormatCode('dd/mm/yy')).toMatchObject({ type: 'date' });
+    expect(fromExcelNumberFormatCode('h:mm:ss AM/PM')).toMatchObject({ type: 'time' });
+  });
+
+  it('recovers a percentage with its decimal precision', () => {
+    expect(fromExcelNumberFormatCode('0.00%')).toEqual({ type: 'percentage', decimalPlaces: 2 });
+  });
+
+  it('recovers scientific notation', () => {
+    expect(fromExcelNumberFormatCode('0.00E+00')).toEqual({ type: 'scientific', decimalPlaces: 2 });
+  });
+
+  it('recovers a currency format with symbol, position, and thousands separator', () => {
+    expect(fromExcelNumberFormatCode('"$"#,##0.00')).toEqual({
+      type: 'currency',
+      currencyCode: 'USD',
+      currencySymbolPosition: 'prefix',
+      decimalPlaces: 2,
+      useThousandsSeparator: true,
+      negativeFormat: 'minus',
+    });
+    expect(fromExcelNumberFormatCode('0.00"€"')).toMatchObject({
+      type: 'currency',
+      currencyCode: 'EUR',
+      currencySymbolPosition: 'suffix',
+    });
+  });
+
+  it('recovers negative-format style from a currency or number code', () => {
+    expect(fromExcelNumberFormatCode('"$"0.00;("$"0.00)')).toMatchObject({ negativeFormat: 'parentheses' });
+    expect(fromExcelNumberFormatCode('0;[Red]-0')).toMatchObject({ type: 'number', negativeFormat: 'red' });
+  });
+
+  it('recovers an accounting format', () => {
+    const code = toExcelNumberFormatCode({ type: 'accounting', currencyCode: 'GBP', decimalPlaces: 2 });
+    expect(fromExcelNumberFormatCode(code)).toMatchObject({ type: 'accounting', currencyCode: 'GBP', decimalPlaces: 2 });
+  });
+
+  it('recovers a plain number format with thousands separator', () => {
+    expect(fromExcelNumberFormatCode('#,##0.00')).toEqual({
+      type: 'number',
+      decimalPlaces: 2,
+      useThousandsSeparator: true,
+      negativeFormat: 'minus',
+    });
+  });
+
+  it('falls back to custom for a pattern it cannot classify, preserving the raw code', () => {
+    expect(fromExcelNumberFormatCode('@ "units"')).toEqual({ type: 'custom', pattern: '@ "units"' });
   });
 });
