@@ -121,3 +121,10 @@ export interface DocumentExportResult {
   /** Non-fatal issues (e.g. an image whose src isn't an embeddable data: URI). */
   warnings: string[];
 }
+
+export interface DocumentImportResult {
+  title: string;
+  sections: DocSection[];
+  /** Non-fatal issues (unsupported feature, unparseable structure, etc.) — surfaced rather than silently dropped. */
+  warnings: string[];
+}
