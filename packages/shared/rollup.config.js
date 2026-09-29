@@ -91,7 +91,7 @@ export default defineConfig([
       { file: 'dist/export/docx/index.js', format: 'cjs', sourcemap: true },
       { file: 'dist/export/docx/index.esm.js', format: 'esm', sourcemap: true },
     ],
-    external: ['docx'],
+    external: ['docx', 'jszip', 'fast-xml-parser'],
     plugins: [tsExportDocx],
   },
 ]);
