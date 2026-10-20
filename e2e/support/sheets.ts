@@ -95,7 +95,11 @@ export class SheetsPage {
   }
   async cellValue(row: number, col: number) {
     return this.page.evaluate(
-      ([r, c]) => (window as any).__spindle.workbook.getCell(undefined, r, c)?.value ?? null,
+      ([r, c]) => {
+        const wb = (window as any).__spindle.workbook;
+        const spilled = wb.getSpilledValue(undefined, r, c);
+        return spilled !== undefined ? spilled : (wb.getCell(undefined, r, c)?.value ?? null);
+      },
       [row, col],
     );
   }
