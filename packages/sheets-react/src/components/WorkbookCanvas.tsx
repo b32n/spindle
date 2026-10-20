@@ -14,7 +14,7 @@ import { HeaderContextMenu } from './HeaderContextMenu';
 import { FilterModal } from './FilterModal';
 import { FormatCellsModal } from './FormatCellsModal';
 import { FindReplaceModal, type FindReplaceState } from './FindReplaceModal';
-import type { CellPosition, Range, Selection, CellFormat, ColumnFilter, CellStyle, SortOrder, FormatType } from '@b32nio/spindle-sheets-core';
+import type { Cell, CellPosition, Range, Selection, CellFormat, ColumnFilter, CellStyle, SortOrder, FormatType } from '@b32nio/spindle-sheets-core';
 import { columnIndexToLabel } from '@b32nio/spindle-sheets-core';
 import { parseDateString } from '@b32nio/spindle-sheets-core';
 import { findMatches, computeReplacement } from '@b32nio/spindle-sheets-core';
@@ -741,7 +741,10 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
           for (let r = minRow; r <= maxRow; r++) {
             for (let c = minCol; c <= maxCol; c++) {
               const cell = workbook.getCell(undefined, r, c);
-              const updatedCell = { ...cell, format };
+              // Drop the old pooled id: setCell keeps an existing formatId and
+              // would silently ignore the new `format` (e.g. currency -> percent).
+              const { formatId: _previousFormatId, ...cellWithoutFormat } = cell ?? {};
+              const updatedCell: Partial<Cell> & { format?: CellFormat } = { ...cellWithoutFormat, format };
 
               // If applying date formatting to a string value, try to parse it as a date
               if (format.type && ['date', 'time', 'datetime'].includes(format.type) &&
