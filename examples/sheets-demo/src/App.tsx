@@ -19,6 +19,14 @@ function logCommentEvent(event: SheetCommentEvent): void {
   console.log('[comment event]', event.type, event);
 }
 
+// Stand-ins for a host app reacting to Open / Download results.
+function reportFileOpened({ fileName, warnings }: { fileName: string; warnings: string[] }): void {
+  if (warnings.length > 0) console.warn(`[open] ${fileName}: ${warnings.length} import warning(s)`, warnings);
+}
+function reportFileError(error: Error, action: 'open' | 'download'): void {
+  window.alert(`Could not ${action} the file: ${error.message}`);
+}
+
 // ============================================================================
 // Cross-tab WebSocket demo helpers
 // ============================================================================
@@ -383,7 +391,14 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas width={dimensions.width} height={dimensions.height} readOnly={readOnly} />
+            <WorkbookCanvas
+              width={dimensions.width}
+              height={dimensions.height}
+              readOnly={readOnly}
+              fileActions
+              onFileOpened={reportFileOpened}
+              onFileError={reportFileError}
+            />
           </WorkbookProvider>
         )}
       </main>
