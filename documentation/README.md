@@ -273,4 +273,4 @@ npm run dev
 ---
 
 **Last Updated**: July 2026  
-**Version**: 0.3.0
+**Version**: 0.4.0

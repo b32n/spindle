@@ -213,7 +213,7 @@ function Packages() {
             <tr key={name}>
               <td className="p">@b32nio/<b>{name}</b></td>
               <td className="d">{role}</td>
-              <td className="v">0.3.0</td>
+              <td className="v">0.4.0</td>
             </tr>
           ))}
         </tbody>
