@@ -60,17 +60,15 @@ export class SlidesPage {
   async els(): Promise<ElSnapshot[]> {
     return this.page.evaluate(() => {
       const d = (window as any).__spindle.deck;
-      return d
-        .getElementsForSlide(d.getActiveSlideId())
-        .map((e: any) => ({
-          id: e.id,
-          type: e.type,
-          x: e.x,
-          y: e.y,
-          w: e.w,
-          h: e.h,
-          rotation: e.rotation ?? 0,
-        }));
+      return d.getElementsForSlide(d.getActiveSlideId()).map((e: any) => ({
+        id: e.id,
+        type: e.type,
+        x: e.x,
+        y: e.y,
+        w: e.w,
+        h: e.h,
+        rotation: e.rotation ?? 0,
+      }));
     });
   }
   async el(id: string): Promise<ElSnapshot> {

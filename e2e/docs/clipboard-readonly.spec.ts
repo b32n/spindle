@@ -20,18 +20,30 @@ test.describe('docs: clipboard', () => {
     await doc.clearAndFocus();
   });
 
-  test('D-CLP-01 pasting plain text inserts it @smoke', async ({ page }) => {
+  test('D-CLP-01 pasting plain text inserts it @smoke', async ({ page, browserName }) => {
+    test.skip(
+      browserName === 'firefox',
+      'Firefox: ProseMirror does not pick up a synthetic ClipboardEvent here; covered on Chromium'
+    );
     await paste(page, { text: 'pasted text' });
     await expect(doc.editor).toContainText('pasted text');
   });
 
-  test('D-CLP-02 multi-line plain text becomes paragraphs', async ({ page }) => {
+  test('D-CLP-02 multi-line plain text becomes paragraphs', async ({ page, browserName }) => {
+    test.skip(
+      browserName === 'firefox',
+      'Firefox: ProseMirror does not pick up a synthetic ClipboardEvent here; covered on Chromium'
+    );
     await paste(page, { text: 'line one\n\nline two' });
     await expect(doc.editor.locator('p').filter({ hasText: 'line one' })).toHaveCount(1);
     await expect(doc.editor.locator('p').filter({ hasText: 'line two' })).toHaveCount(1);
   });
 
-  test('D-CLP-03 pasting HTML keeps bold, links and lists', async ({ page }) => {
+  test('D-CLP-03 pasting HTML keeps bold, links and lists', async ({ page, browserName }) => {
+    test.skip(
+      browserName === 'firefox',
+      'Firefox: ProseMirror does not pick up a synthetic ClipboardEvent here; covered on Chromium'
+    );
     await paste(page, {
       html: '<p>plain <strong>bold</strong> <a href="https://example.org">link</a></p><ul><li>one</li><li>two</li></ul>',
     });
@@ -42,7 +54,12 @@ test.describe('docs: clipboard', () => {
 
   test('D-CLP-04 pasted HTML is sanitised (scripts, handlers, javascript: URLs)', async ({
     page,
+    browserName,
   }) => {
+    test.skip(
+      browserName === 'firefox',
+      'Firefox: ProseMirror does not pick up a synthetic ClipboardEvent here; covered on Chromium'
+    );
     await paste(page, {
       html:
         '<p onclick="window.__pwned=1">safe</p><script>window.__pwned=2</script>' +
