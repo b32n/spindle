@@ -29,7 +29,7 @@ after changing a public API, rebuild before trusting a workspace type-check.
 
 ## Getting started
 
-Requires Node `>=18`.
+Requires Node `>=22` (see `.nvmrc`; CI runs on Node 22 and 24).
 
 ```bash
 npm install            # install root + workspace deps
