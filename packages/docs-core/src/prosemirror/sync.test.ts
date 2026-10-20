@@ -56,3 +56,32 @@ describe('collab round-trip preserves table metadata', () => {
     expect(t.rows[0].cells[0].styleId).toBe('style_3');
   });
 });
+
+describe('collab round-trip preserves inline content', () => {
+  it('keeps inline images, dynamic fields, line breaks, and formatted links', () => {
+    const para: Block = {
+      id: 'p',
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'a\nb' },
+        { type: 'image', src: 'data:image/png;base64,QQ==', width: 10, height: 20, alt: 'x' },
+        { type: 'dynamicField', fieldType: 'date', format: 'YYYY' },
+        { type: 'link', text: 'l', href: 'https://example.com', bold: true },
+      ],
+    };
+    const out = roundTrip([para]);
+    expect(out[0]).toMatchObject({ content: para.content });
+  });
+
+  it('resolves styleId runs from the pool when no pool is passed explicitly', () => {
+    const pm = blocksToPmDoc([
+      { id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'hi', styleId: 's1' }] },
+    ], {
+      styles: new Map(),
+      getOrCreate: () => 's1',
+      get: (id: string) => (id === 's1' ? { bold: true } : undefined),
+      getAllStyles: () => new Map(),
+    });
+    expect(pm.firstChild!.firstChild!.marks.map((m) => m.type.name)).toEqual(['bold']);
+  });
+});

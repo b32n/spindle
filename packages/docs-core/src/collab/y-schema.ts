@@ -19,6 +19,7 @@ import {
   yXmlFragmentToProseMirrorRootNode,
 } from 'y-prosemirror';
 import { docsSchema } from '../prosemirror/schema';
+import { TextStylePoolImpl } from '../style-pool';
 import {
   blocksToPmDoc,
   proseMirrorToDocument,
@@ -123,7 +124,11 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
     // blocksToPmDoc — which performs the list-item grouping pass that the
     // raw documentToProseMirror converter skips (the latter emits an
     // internal "__list_item__" sentinel meant for that grouping step).
-    const pmDoc = blocksToPmDoc(data.sections[0].blocks);
+    // Runs may reference the text style pool by id; resolve them to marks here
+    // or the formatting is silently dropped when the body is seeded.
+    const textPool = new TextStylePoolImpl();
+    textPool.setFromData(data.textStylePool ?? {});
+    const pmDoc = blocksToPmDoc(data.sections[0].blocks, textPool);
     prosemirrorToYXmlFragment(pmDoc, fields.content);
   });
 }

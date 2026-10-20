@@ -14,6 +14,7 @@ import type {
   TableRow,
   TableCell,
   ListType,
+  DynamicFieldType,
 } from '../types';
 
 /**
@@ -32,6 +33,8 @@ export interface PmNodeJSON {
    * themselves are never handed to ProseMirror.
    */
   listType?: ListType;
+  /** Internal marker field: first number of a synthetic '__list_item__' list. */
+  listStart?: number;
 }
 
 /** Loosely-typed ProseMirror mark JSON. */
@@ -101,6 +104,7 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
       return {
         type: '__list_item__',  // Special marker - will be grouped into lists by blocksToPmDoc
         listType: block.listType,
+        listStart: block.start,
         content: [{
           type: 'list_item',
           attrs: { level: block.level ?? 0 }, // preserve nesting depth across the round-trip
@@ -119,11 +123,13 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
           type: 'table_row',
           attrs: { height: row.height ?? null },
           content: row.cells.map(cell => ({
-            type: 'table_cell',
+            type: cell.isHeader ? 'table_header' : 'table_cell',
             attrs: {
               colspan: cell.colspan || 1,
               rowspan: cell.rowspan || 1,
               styleId: cell.styleId ?? null,
+              backgroundColor: cell.backgroundColor ?? null,
+              colwidth: cell.colwidth ?? null,
             },
             content: [{
               type: 'paragraph',
@@ -139,6 +145,7 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
         attrs: {
           src: block.src,
           alt: block.alt || '',
+          title: block.title ?? null,
           width: block.width,
           height: block.height,
           alignment: block.alignment || 'center',
@@ -184,6 +191,38 @@ function styleToMarks(style: TextStyle): PmMarkJSON[] {
   return marks;
 }
 
+/** The character-formatting fields of a link (same names as TextRun's). */
+function linkInlineStyle(link: InlineLink): TextStyle {
+  const style: TextStyle = {};
+  if (link.bold) style.bold = true;
+  if (link.italic) style.italic = true;
+  if (link.underline) style.underline = true;
+  if (link.strikethrough) style.strikethrough = true;
+  if (link.superscript) style.superscript = true;
+  if (link.subscript) style.subscript = true;
+  if (link.smallCaps) style.smallCaps = true;
+  if (link.color) style.color = link.color;
+  if (link.backgroundColor) style.backgroundColor = link.backgroundColor;
+  if (link.fontSize) style.fontSize = link.fontSize;
+  if (link.fontFamily) style.fontFamily = link.fontFamily;
+  return style;
+}
+
+/**
+ * Emit a text run as PM nodes. A '\n' in the model is a line break, which PM
+ * represents as a `hard_break` node (PM text nodes cannot contain it).
+ */
+function textWithBreaks(text: string, marks: PmMarkJSON[]): PmNodeJSON[] {
+  const out: PmNodeJSON[] = [];
+  text.split('\n').forEach((part, i) => {
+    if (i > 0) out.push({ type: 'hard_break' });
+    if (part.length > 0) {
+      out.push(marks.length > 0 ? { type: 'text', text: part, marks } : { type: 'text', text: part });
+    }
+  });
+  return out;
+}
+
 /**
  * Convert inline content array to ProseMirror content
  * @param content - The inline content array
@@ -196,7 +235,6 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
   
   return content.map(item => {
     if (item.type === 'text') {
-      const result: PmNodeJSON = { type: 'text', text: item.text };
       let marks: PmMarkJSON[] = [];
       
       // Check if using styleId (style pool reference)
@@ -227,24 +265,43 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
 
-      if (marks.length > 0) {
-        result.marks = marks;
-      }
-      
-      return result;
+      return textWithBreaks(item.text, marks);
     }
     
     if (item.type === 'link') {
-      const marks: PmMarkJSON[] = [{ type: 'link', attrs: { href: item.href } }];
+      const linkAttrs: Record<string, unknown> = { href: item.href };
+      if (item.title) linkAttrs.title = item.title;
+      const marks: PmMarkJSON[] = [{ type: 'link', attrs: linkAttrs }];
+      // Keep character formatting that was applied on top of the link.
+      const poolStyle = item.styleId && stylePool ? stylePool.get(item.styleId) : undefined;
+      marks.push(...styleToMarks(poolStyle ?? linkInlineStyle(item)));
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
-      return { type: 'text', text: item.text, marks };
+      return textWithBreaks(item.text, marks);
     }
-    
-    // Inline images would need special handling
+
+    if (item.type === 'image') {
+      return {
+        type: 'inline_image',
+        attrs: {
+          src: item.src,
+          alt: item.alt ?? '',
+          width: item.width,
+          height: item.height,
+        },
+      };
+    }
+
+    if (item.type === 'dynamicField') {
+      return {
+        type: 'dynamic_field',
+        attrs: { fieldType: item.fieldType, format: item.format ?? null },
+      };
+    }
+
     return null;
-  }).filter((node): node is PmNodeJSON => node !== null);
+  }).flat().filter((node): node is PmNodeJSON => node !== null);
 }
 
 /**
@@ -342,11 +399,13 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
           }
         });
         
+        const start = node.attrs.start as number | undefined;
         blocks.push({
           id: `block_${startIndex + index}_${Date.now()}`,
           type: 'list-item',
           listType,
           level: (listItem.attrs.level as number) ?? 0,
+          ...(index === 0 && listType === 'numbered' && start && start !== 1 ? { start } : {}),
           content,
         });
       });
@@ -370,7 +429,10 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
             content,
             colspan: cellNode.attrs.colspan,
             rowspan: cellNode.attrs.rowspan,
+            ...(cellNode.type.name === 'table_header' ? { isHeader: true } : {}),
             ...(cellNode.attrs.styleId ? { styleId: cellNode.attrs.styleId as string } : {}),
+            ...(cellNode.attrs.backgroundColor ? { backgroundColor: cellNode.attrs.backgroundColor as string } : {}),
+            ...(cellNode.attrs.colwidth ? { colwidth: cellNode.attrs.colwidth as number[] } : {}),
           });
         });
         rows.push({
@@ -395,6 +457,7 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
         type: 'image',
         src: node.attrs.src,
         alt: node.attrs.alt,
+        ...(node.attrs.title ? { title: node.attrs.title as string } : {}),
         width: node.attrs.width || 300,
         height: node.attrs.height || 200,
         alignment: node.attrs.alignment,
@@ -473,51 +536,89 @@ function extractStyleFromMarks(marks: readonly Mark[]): TextStyle | null {
  */
 function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineContent[] {
   const content: InlineContent[] = [];
-  
+
   node.forEach((child) => {
-    if (child.isText) {
-      const text = child.text || '';
+    if (child.type.name === 'inline_image') {
+      content.push({
+        type: 'image',
+        src: child.attrs.src as string,
+        width: (child.attrs.width as number | null) ?? 100,
+        height: (child.attrs.height as number | null) ?? 100,
+        ...(child.attrs.alt ? { alt: child.attrs.alt as string } : {}),
+      });
+      return;
+    }
 
-      // A comment mark anchors a thread to this run.
-      const commentMark = child.marks.find((m) => m.type.name === 'comment');
-      const commentThreadId = commentMark
-        ? (commentMark.attrs.threadId as string)
-        : undefined;
+    if (child.type.name === 'dynamic_field') {
+      content.push({
+        type: 'dynamicField',
+        fieldType: child.attrs.fieldType as DynamicFieldType,
+        ...(child.attrs.format ? { format: child.attrs.format as string } : {}),
+      });
+      return;
+    }
 
-      // Check for link mark
-      const linkMark = child.marks.find(m => m.type.name === 'link');
-      let item: InlineContent;
-      if (linkMark) {
-        item = {
-          type: 'link',
-          text,
-          href: linkMark.attrs.href,
-        } as InlineLink;
+    // A hard break is a '\n' in the model; fold it into the previous plain
+    // run when possible so a paragraph with soft breaks stays compact.
+    if (child.type.name === 'hard_break') {
+      const prev = content[content.length - 1];
+      if (prev && prev.type === 'text' && !prev.styleId && !hasRunFormatting(prev)) {
+        prev.text += '\n';
       } else {
-        // Extract style from marks
-        const style = extractStyleFromMarks(child.marks);
-
-        if (style && stylePool) {
-          // Use style pool for deduplication (recommended for large documents)
-          const styleId = stylePool.getOrCreate(style);
-          item = { type: 'text', text, styleId } as TextRun;
-        } else if (style) {
-          // Inline styles (fallback when no style pool provided)
-          item = { type: 'text', text, ...style } as TextRun;
-        } else {
-          // Plain text with no styling
-          item = { type: 'text', text } as TextRun;
-        }
+        content.push({ type: 'text', text: '\n' });
       }
+      return;
+    }
 
-      if (commentThreadId) {
-        (item as TextRun | InlineLink).commentThreadId = commentThreadId;
-      }
+    if (!child.isText) return;
+
+    const text = child.text || '';
+
+    // A comment mark anchors a thread to this run.
+    const commentMark = child.marks.find((m) => m.type.name === 'comment');
+    const commentThreadId = commentMark ? (commentMark.attrs.threadId as string) : undefined;
+
+    const style = extractStyleFromMarks(child.marks);
+    const linkMark = child.marks.find((m) => m.type.name === 'link');
+    let item: InlineContent;
+    if (linkMark) {
+      const link: InlineLink = { type: 'link', text, href: linkMark.attrs.href };
+      if (linkMark.attrs.title) link.title = linkMark.attrs.title as string;
+      if (style && stylePool) link.styleId = stylePool.getOrCreate(style);
+      else if (style) Object.assign(link, style);
+      item = link;
+    } else if (style && stylePool) {
+      // Use style pool for deduplication (recommended for large documents)
+      item = { type: 'text', text, styleId: stylePool.getOrCreate(style) } as TextRun;
+    } else if (style) {
+      // Inline styles (fallback when no style pool provided)
+      item = { type: 'text', text, ...style } as TextRun;
+    } else {
+      item = { type: 'text', text } as TextRun;
+    }
+
+    if (commentThreadId) {
+      (item as TextRun | InlineLink).commentThreadId = commentThreadId;
+    }
+    // Text following a folded line break continues the same plain run.
+    const prev = content[content.length - 1];
+    if (
+      item.type === 'text' && !hasRunFormatting(item) &&
+      prev && prev.type === 'text' && !hasRunFormatting(prev) && prev.text.endsWith('\n')
+    ) {
+      prev.text += item.text;
+    } else {
       content.push(item);
     }
   });
-  
+
   return content;
+}
+
+/** True if a text run carries any formatting or comment anchor. */
+function hasRunFormatting(run: TextRun): boolean {
+  const { type: _type, text: _text, ...rest } = run;
+  return Object.keys(rest).length > 0;
 }
 
 /**
@@ -539,7 +640,17 @@ export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNod
 
   // Group consecutive list items into single list nodes
   const content: PmNodeJSON[] = [];
-  let currentList: { type: string; listType: ListType | undefined; items: PmNodeJSON[] } | null = null;
+  let currentList: {
+    type: string;
+    listType: ListType | undefined;
+    start?: number;
+    items: PmNodeJSON[];
+  } | null = null;
+  const listNode = (l: NonNullable<typeof currentList>): PmNodeJSON => ({
+    type: l.type,
+    ...(l.start && l.start !== 1 ? { attrs: { start: l.start } } : {}),
+    content: l.items,
+  });
   
   for (const node of rawNodes) {
     if (node.type === '__list_item__') {
@@ -551,26 +662,19 @@ export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNod
         currentList.items.push(...(node.content ?? []));
       } else {
         // Finish previous list if any
-        if (currentList) {
-          content.push({
-            type: currentList.type,
-            content: currentList.items,
-          });
-        }
+        if (currentList) content.push(listNode(currentList));
         // Start new list
         currentList = {
           type: listType,
           listType: node.listType,
+          start: node.listStart,
           items: [...(node.content ?? [])],
         };
       }
     } else {
       // Regular node - flush any pending list
       if (currentList) {
-        content.push({
-          type: currentList.type,
-          content: currentList.items,
-        });
+        content.push(listNode(currentList));
         currentList = null;
       }
       content.push(node);
@@ -578,12 +682,7 @@ export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNod
   }
   
   // Flush final list if any
-  if (currentList) {
-    content.push({
-      type: currentList.type,
-      content: currentList.items,
-    });
-  }
+  if (currentList) content.push(listNode(currentList));
   
   const json = {
     type: 'doc',
