@@ -658,8 +658,11 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       const pPr = find(childrenOf(node), 'w:pPr');
       const inlineSectPr = pPr ? find(childrenOf(pPr), 'w:sectPr') : undefined;
       if (inlineSectPr) {
-        // A sectPr nested in a paragraph's pPr ends that section; the
-        // paragraph itself carries no visible content in that case.
+        // A sectPr nested in a paragraph's pPr ends that section, and per
+        // OOXML the paragraph is the section's last and keeps its content
+        // (Word and docx >= 9.12 emit it this way; older docx used an empty
+        // carrier paragraph).
+        currentBlocks.push(parseParagraph(node, styleNames, numbering, ctx, warnings));
         await flushSection(inlineSectPr);
         continue;
       }
