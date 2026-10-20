@@ -16,6 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
       "@b32nio/spindle-docs-core": ["../../packages/docs-core/src"],
       "@b32nio/spindle-docs-react": ["../../packages/docs-react/src"]
     }
