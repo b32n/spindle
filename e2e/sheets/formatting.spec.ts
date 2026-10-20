@@ -37,7 +37,9 @@ test.describe('sheets: formatting toolbar & shortcuts', () => {
 
   test('S-FMT-04 Strikethrough button', async () => {
     await sheet.toolbar('Strikethrough').click();
-    await expect.poll(async () => (await sheet.cellStyle(1, 1)).textDecoration).toBe('line-through');
+    await expect
+      .poll(async () => (await sheet.cellStyle(1, 1)).textDecoration)
+      .toBe('line-through');
   });
 
   test('S-FMT-05 horizontal alignment buttons', async () => {
@@ -78,7 +80,13 @@ test.describe('sheets: formatting toolbar & shortcuts', () => {
   test('S-FMT-09 formatting applies to a multi-cell range', async () => {
     await sheet.drag(await sheet.cellCenter(1, 0), await sheet.cellCenter(2, 1));
     await sheet.toolbar(/^Bold/).click();
-    for (const [r, c] of [[1, 0], [1, 1], [2, 0], [2, 1]]) await sheet.expectBold(r, c);
+    for (const [r, c] of [
+      [1, 0],
+      [1, 1],
+      [2, 0],
+      [2, 1],
+    ])
+      await sheet.expectBold(r, c);
     await sheet.expectBold(3, 0, false);
   });
 

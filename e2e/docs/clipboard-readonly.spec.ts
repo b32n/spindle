@@ -40,7 +40,9 @@ test.describe('docs: clipboard', () => {
     await expect(doc.editor.locator('ul > li')).toHaveCount(2);
   });
 
-  test('D-CLP-04 pasted HTML is sanitised (scripts, handlers, javascript: URLs)', async ({ page }) => {
+  test('D-CLP-04 pasted HTML is sanitised (scripts, handlers, javascript: URLs)', async ({
+    page,
+  }) => {
     await paste(page, {
       html:
         '<p onclick="window.__pwned=1">safe</p><script>window.__pwned=2</script>' +
@@ -50,11 +52,19 @@ test.describe('docs: clipboard', () => {
     await expect(doc.editor.locator('script')).toHaveCount(0);
     await expect(doc.editor.locator('[onclick], [onerror]')).toHaveCount(0);
     await expect(doc.editor.locator('a[href^="javascript:"]')).toHaveCount(0);
-    expect(await page.evaluate(() => (window as unknown as { __pwned?: number }).__pwned)).toBeUndefined();
+    expect(
+      await page.evaluate(() => (window as unknown as { __pwned?: number }).__pwned)
+    ).toBeUndefined();
   });
 
-  test('D-CLP-05 copy and paste within the document (keyboard) @smoke', async ({ page, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit headless does not expose the OS clipboard to keyboard copy/paste');
+  test('D-CLP-05 copy and paste within the document (keyboard) @smoke', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === 'webkit',
+      'WebKit headless does not expose the OS clipboard to keyboard copy/paste'
+    );
     await doc.typeText('copy me');
     await doc.press(`${MOD}+a`);
     await doc.press(`${MOD}+c`);
@@ -64,8 +74,14 @@ test.describe('docs: clipboard', () => {
     await expect.poll(() => doc.text()).toMatch(/copy me\s*copy me/);
   });
 
-  test('D-CLP-06 cut removes the selection and paste restores it', async ({ page, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit headless does not expose the OS clipboard to keyboard copy/paste');
+  test('D-CLP-06 cut removes the selection and paste restores it', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === 'webkit',
+      'WebKit headless does not expose the OS clipboard to keyboard copy/paste'
+    );
     await doc.typeText('cut me');
     await doc.press(`${MOD}+a`);
     await doc.press(`${MOD}+x`);

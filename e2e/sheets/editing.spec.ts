@@ -39,7 +39,9 @@ test.describe('sheets: editing, navigation & undo/redo', () => {
     await sheet.expectValue(1, 0, 'WidgetX');
   });
 
-  test('S-EDT-06 Enter on a selected cell starts editing; F2-less editing keeps content', async ({ page }) => {
+  test('S-EDT-06 Enter on a selected cell starts editing; F2-less editing keeps content', async ({
+    page,
+  }) => {
     await sheet.select(1, 0);
     await page.keyboard.press('Enter');
     await page.keyboard.press('End');

@@ -13,7 +13,9 @@ async function peer(browser: Browser, room: string, user: string) {
 
 // Each test uses its own room so tests stay independent on the shared relay.
 test.describe('sheets: two-client live collaboration', () => {
-  test('S-COL-01 an edit made by one client appears in the other @smoke', async ({ browser }, info) => {
+  test('S-COL-01 an edit made by one client appears in the other @smoke', async ({
+    browser,
+  }, info) => {
     const room = `sheets-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
@@ -38,7 +40,9 @@ test.describe('sheets: two-client live collaboration', () => {
     await b.context.close();
   });
 
-  test('S-COL-03 concurrent edits to the same cell converge on one value', async ({ browser }, info) => {
+  test('S-COL-03 concurrent edits to the same cell converge on one value', async ({
+    browser,
+  }, info) => {
     const room = `sheets-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');

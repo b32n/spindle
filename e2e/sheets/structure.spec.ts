@@ -20,10 +20,14 @@ test.describe('sheets: freeze, merge, sort, find & replace, context menus, tabs'
     await expect.poll(() => sheetState(page, 'sh.getFrozenRows()')).toBe(1);
     await sheet.toolbar('Freeze panes').click();
     await page.getByText('Freeze first column', { exact: true }).click();
-    await expect.poll(() => sheetState(page, '[sh.getFrozenRows(), sh.getFrozenCols()]')).toEqual([0, 1]);
+    await expect
+      .poll(() => sheetState(page, '[sh.getFrozenRows(), sh.getFrozenCols()]'))
+      .toEqual([0, 1]);
     await sheet.toolbar('Freeze panes').click();
     await page.getByText('Freeze first row & column', { exact: true }).click();
-    await expect.poll(() => sheetState(page, '[sh.getFrozenRows(), sh.getFrozenCols()]')).toEqual([1, 1]);
+    await expect
+      .poll(() => sheetState(page, '[sh.getFrozenRows(), sh.getFrozenCols()]'))
+      .toEqual([1, 1]);
   });
 
   test('S-FRZ-02 selection still works with frozen panes', async ({ page }) => {
@@ -61,7 +65,9 @@ test.describe('sheets: freeze, merge, sort, find & replace, context menus, tabs'
     await sheet.expectValue(1, 0, 'Widget');
   });
 
-  test('S-FND-01 find highlights matches and Next navigates; Escape-free close @smoke', async ({ page }) => {
+  test('S-FND-01 find highlights matches and Next navigates; Escape-free close @smoke', async ({
+    page,
+  }) => {
     await sheet.select(0, 0);
     await page.keyboard.press(`${MOD}+f`);
     const dialog = page.getByPlaceholder('Find');
@@ -129,7 +135,9 @@ test.describe('sheets: freeze, merge, sort, find & replace, context menus, tabs'
     await page.mouse.click(p.x, p.y, { button: 'right' });
     await expect(sheet.canvas).toHaveAttribute('data-selection', 'B:B');
     await page.getByText('Hide Column').click();
-    await expect.poll(() => sheetState(page, 'sh.isColHidden ? sh.isColHidden(1) : true')).toBe(true);
+    await expect
+      .poll(() => sheetState(page, 'sh.isColHidden ? sh.isColHidden(1) : true'))
+      .toBe(true);
   });
 
   test('S-CTX-04 context menu Delete clears the selected cells', async ({ page }) => {

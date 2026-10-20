@@ -76,7 +76,10 @@ test.describe('sheets: clipboard', () => {
     await sheet.expectValue(6, 0, null);
   });
 
-  test('S-CLP-08 pasting plain tab-separated text from the system clipboard', async ({ page, browserName }) => {
+  test('S-CLP-08 pasting plain tab-separated text from the system clipboard', async ({
+    page,
+    browserName,
+  }) => {
     test.skip(browserName !== 'chromium', 'clipboard-read/write permissions are Chromium-only');
     await page.evaluate(() => navigator.clipboard.writeText('a\tb\n1\t2'));
     await sheet.select(12, 0);
@@ -91,7 +94,9 @@ test.describe('sheets: clipboard', () => {
     test.skip(browserName !== 'chromium', 'clipboard-read/write permissions are Chromium-only');
     await sheet.drag(await sheet.cellCenter(0, 0), await sheet.cellCenter(1, 1));
     await page.keyboard.press(`${MOD}+c`);
-    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('Product\tPrice\nWidget\t10');
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toBe('Product\tPrice\nWidget\t10');
   });
 
   test('S-CLP-10 context menu copy and paste', async ({ page }) => {

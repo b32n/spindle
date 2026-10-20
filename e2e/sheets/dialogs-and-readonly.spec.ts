@@ -15,7 +15,9 @@ test.describe('sheets: filter, comments, hyperlinks, format dialog', () => {
       return !FilterManager.getFilteredRows(sh, sh.getFilters()).has(r);
     }, row);
 
-  test('S-FLT-01 filter a column by value hides non-matching rows; clear restores them @smoke', async ({ page }) => {
+  test('S-FLT-01 filter a column by value hides non-matching rows; clear restores them @smoke', async ({
+    page,
+  }) => {
     await sheet.select(1, 1);
     await sheet.toolbar(/Filter column/).click();
     await expect(page.getByRole('heading', { name: /Filter Column/ })).toBeVisible();
@@ -83,7 +85,9 @@ test.describe('sheets: filter, comments, hyperlinks, format dialog', () => {
     await page.getByPlaceholder('https://example.com').fill('https://example.org');
     await page.getByRole('button', { name: 'Insert', exact: true }).click();
     await expect
-      .poll(() => page.evaluate(() => (window as any).__spindle.workbook.getCell(undefined, 5, 0)?.hyperlink))
+      .poll(() =>
+        page.evaluate(() => (window as any).__spindle.workbook.getCell(undefined, 5, 0)?.hyperlink)
+      )
       .toBe('https://example.org');
   });
 
@@ -144,6 +148,8 @@ test.describe('sheets: read-only mode', () => {
     await expect(page.getByText('Insert Row Above')).toBeHidden();
     const edge = await sheet.point(200, 10);
     await sheet.drag(edge, { x: edge.x + 50, y: edge.y });
-    expect(await page.evaluate(() => (window as any).__spindle.workbook.getSheet().getColWidth(0))).toBe(100);
+    expect(
+      await page.evaluate(() => (window as any).__spindle.workbook.getSheet().getColWidth(0))
+    ).toBe(100);
   });
 });

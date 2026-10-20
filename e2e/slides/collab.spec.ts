@@ -13,7 +13,9 @@ async function peer(browser: Browser, room: string, user: string) {
 }
 
 test.describe('slides: two-client live collaboration', () => {
-  test('SL-COL-01 an element moved by one client moves for the other @smoke', async ({ browser }, info) => {
+  test('SL-COL-01 an element moved by one client moves for the other @smoke', async ({
+    browser,
+  }, info) => {
     const room = `slides-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
@@ -68,7 +70,9 @@ test.describe('slides: two-client live collaboration', () => {
     await a.page.keyboard.press(`${MOD}+a`);
     await a.page.keyboard.type('Edited by Alice');
     await a.page.keyboard.press('Escape');
-    await expect(b.s.stage.locator(`[data-element-id="${text.id}"]`)).toContainText('Edited by Alice');
+    await expect(b.s.stage.locator(`[data-element-id="${text.id}"]`)).toContainText(
+      'Edited by Alice'
+    );
     await a.context.close();
     await b.context.close();
   });
@@ -78,7 +82,9 @@ test.describe('slides: two-client live collaboration', () => {
   // so slide-count / slide-index based assertions are unreliable. The docs
   // editor shows the same symptom intermittently (D-COL-05b). Joiners are meant
   // to seed nothing (see docs-core/slides-core collab binding "Connect + seed").
-  test.fixme('SL-COL-05 a late joiner receives the current deck without duplicated slides', async ({ browser }, info) => {
+  test.fixme('SL-COL-05 a late joiner receives the current deck without duplicated slides', async ({
+    browser,
+  }, info) => {
     const room = `slides-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     await a.page.getByRole('button', { name: 'New slide' }).click();
@@ -97,7 +103,9 @@ test.describe('slides: two-client live collaboration', () => {
   // so slide-count / slide-index based assertions are unreliable. The docs
   // editor shows the same symptom intermittently (D-COL-05b). Joiners are meant
   // to seed nothing (see docs-core/slides-core collab binding "Connect + seed").
-  test.fixme('SL-COL-06 concurrent moves of different elements converge', async ({ browser }, info) => {
+  test.fixme('SL-COL-06 concurrent moves of different elements converge', async ({
+    browser,
+  }, info) => {
     const room = `slides-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
@@ -106,7 +114,10 @@ test.describe('slides: two-client live collaboration', () => {
     const shapes = (await a.s.els()).filter((e) => e.type === 'shape');
     await a.s.click(shapes[0].id);
     await b.s.click(shapes[1].id);
-    await Promise.all([a.page.keyboard.press('Shift+ArrowLeft'), b.page.keyboard.press('Shift+ArrowDown')]);
+    await Promise.all([
+      a.page.keyboard.press('Shift+ArrowLeft'),
+      b.page.keyboard.press('Shift+ArrowDown'),
+    ]);
     for (const p of [a, b]) {
       await expect.poll(async () => (await p.s.el(shapes[0].id)).x).toBe(shapes[0].x - 10);
       await expect.poll(async () => (await p.s.el(shapes[1].id)).y).toBe(shapes[1].y + 10);

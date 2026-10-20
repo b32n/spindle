@@ -8,7 +8,9 @@ test.describe('docs: typing, selection & formatting', () => {
     await doc.goto();
   });
 
-  test('D-TXT-01 demo document renders with header/footer placeholders @smoke', async ({ page }) => {
+  test('D-TXT-01 demo document renders with header/footer placeholders @smoke', async ({
+    page,
+  }) => {
     await expect(page.getByRole('heading', { name: /Spindle Docs Demo/ })).toBeVisible();
     await expect(doc.pages.first()).toContainText('Welcome to Spindle Docs');
     await expect(page.locator('.page-footer').first()).toContainText('Page 1 of');

@@ -5,11 +5,16 @@ const WS = 'ws://127.0.0.1:1234';
 
 /** Block text without the remote-cursor widgets (name labels) that peers render into the DOM. */
 async function headingText(doc: DocsPage, selector = 'h1'): Promise<string> {
-  return doc.editor.locator(selector).first().evaluate((el) => {
-    const clone = el.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll('.ProseMirror-yjs-cursor, .ProseMirror-widget').forEach((n) => n.remove());
-    return clone.textContent ?? '';
-  });
+  return doc.editor
+    .locator(selector)
+    .first()
+    .evaluate((el) => {
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone
+        .querySelectorAll('.ProseMirror-yjs-cursor, .ProseMirror-widget')
+        .forEach((n) => n.remove());
+      return clone.textContent ?? '';
+    });
 }
 
 async function peer(browser: Browser, room: string, user: string) {
@@ -22,7 +27,9 @@ async function peer(browser: Browser, room: string, user: string) {
 }
 
 test.describe('docs: two-client live collaboration', () => {
-  test('D-COL-01 text typed by one client appears in the other @smoke', async ({ browser }, info) => {
+  test('D-COL-01 text typed by one client appears in the other @smoke', async ({
+    browser,
+  }, info) => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
@@ -35,7 +42,9 @@ test.describe('docs: two-client live collaboration', () => {
     await b.context.close();
   });
 
-  test('D-COL-02 both directions: concurrent edits in different paragraphs converge', async ({ browser }, info) => {
+  test('D-COL-02 both directions: concurrent edits in different paragraphs converge', async ({
+    browser,
+  }, info) => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
@@ -52,7 +61,9 @@ test.describe('docs: two-client live collaboration', () => {
     await b.context.close();
   });
 
-  test('D-COL-03 concurrent typing at the same spot converges to identical text', async ({ browser }, info) => {
+  test('D-COL-03 concurrent typing at the same spot converges to identical text', async ({
+    browser,
+  }, info) => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
@@ -106,7 +117,9 @@ test.describe('docs: two-client live collaboration', () => {
   // StrictMode double-mount racing two attachCollab() calls on the same room /
   // IndexedDB persistence key, or a connect() that resolves before the replay is
   // applied. Not reproducible serially.
-  test.fixme('D-COL-05b a late joiner never ends up with duplicated seed content', async ({ browser }, info) => {
+  test.fixme('D-COL-05b a late joiner never ends up with duplicated seed content', async ({
+    browser,
+  }, info) => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     await a.doc.clickText('Welcome to Spindle Docs');

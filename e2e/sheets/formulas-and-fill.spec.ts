@@ -46,7 +46,9 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(8, 0, 14);
   });
 
-  test('S-FRM-07 clicking a cell while typing a formula inserts its reference', async ({ page }) => {
+  test('S-FRM-07 clicking a cell while typing a formula inserts its reference', async ({
+    page,
+  }) => {
     await sheet.select(6, 0);
     await page.keyboard.type('=');
     await sheet.clickCell(1, 1);
@@ -103,7 +105,8 @@ test.describe('sheets: formulas, autofill, resize', () => {
   });
 
   test('S-RSZ-01 dragging a column header border resizes the column', async ({ page }) => {
-    const width = () => page.evaluate(() => (window as any).__spindle.workbook.getSheet().getColWidth(0));
+    const width = () =>
+      page.evaluate(() => (window as any).__spindle.workbook.getSheet().getColWidth(0));
     expect(await width()).toBe(100);
     const edge = await sheet.point(HEADER_W + COL_W, HEADER_H / 2);
     await sheet.drag(edge, { x: edge.x + 60, y: edge.y });
@@ -111,14 +114,16 @@ test.describe('sheets: formulas, autofill, resize', () => {
   });
 
   test('S-RSZ-02 dragging a row header border resizes the row', async ({ page }) => {
-    const height = () => page.evaluate(() => (window as any).__spindle.workbook.getSheet().getRowHeight(0));
+    const height = () =>
+      page.evaluate(() => (window as any).__spindle.workbook.getSheet().getRowHeight(0));
     const edge = await sheet.point(HEADER_W / 2, HEADER_H + ROW_H);
     await sheet.drag(edge, { x: edge.x, y: edge.y + 20 });
     await expect.poll(height).toBe(40);
   });
 
   test('S-RSZ-03 resize is undoable', async ({ page }) => {
-    const width = () => page.evaluate(() => (window as any).__spindle.workbook.getSheet().getColWidth(0));
+    const width = () =>
+      page.evaluate(() => (window as any).__spindle.workbook.getSheet().getColWidth(0));
     const edge = await sheet.point(HEADER_W + COL_W, HEADER_H / 2);
     await sheet.drag(edge, { x: edge.x + 60, y: edge.y });
     await expect.poll(width).toBe(160);

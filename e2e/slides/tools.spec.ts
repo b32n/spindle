@@ -31,7 +31,9 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
     await expect(s.stage.locator(`[data-element-id="${created.id}"]`)).toBeVisible();
   });
 
-  test('SL-INS-02 Enter on a freshly inserted text box starts editing; typing stores the text', async ({ page }) => {
+  test('SL-INS-02 Enter on a freshly inserted text box starts editing; typing stores the text', async ({
+    page,
+  }) => {
     const before = await ids();
     await s.toolbar('Text box').click();
     await expect.poll(async () => (await added(before)).length).toBe(1);
@@ -41,7 +43,9 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
     await expect(page.locator('.ProseMirror[contenteditable="true"]')).toBeFocused();
     await page.keyboard.type('Hello slides');
     await page.keyboard.press('Escape');
-    await expect(s.stage.locator(`[data-element-id="${created.id}"]`)).toContainText('Hello slides');
+    await expect(s.stage.locator(`[data-element-id="${created.id}"]`)).toContainText(
+      'Hello slides'
+    );
   });
 
   test('SL-INS-03 Shapes picker inserts the chosen shape preset @smoke', async ({ page }) => {
@@ -104,7 +108,9 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
     await expect.poll(async () => (await s.els()).length).toBe(before.length + 1);
   });
 
-  test('SL-TXT-01 double-clicking a text element enters editing; typing edits it', async ({ page }) => {
+  test('SL-TXT-01 double-clicking a text element enters editing; typing edits it', async ({
+    page,
+  }) => {
     const text = await s.firstOfType('text');
     const c = await s.elementCenter(text.id);
     await page.mouse.dblclick(c.x, c.y);
@@ -131,7 +137,12 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
     await page.keyboard.press(`${MOD}+b`);
     await page.keyboard.press('Escape');
     await expect
-      .poll(() => page.evaluate((id) => JSON.stringify((window as any).__spindle.deck.getElement(id).richText), text.id))
+      .poll(() =>
+        page.evaluate(
+          (id) => JSON.stringify((window as any).__spindle.deck.getElement(id).richText),
+          text.id
+        )
+      )
       .toMatch(/bold|strong/);
   });
 
@@ -152,10 +163,12 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
     await bg.fill('#ff0000');
     await bg.press('Enter');
     await expect
-      .poll(() => page.evaluate(() => {
-        const d = (window as any).__spindle.deck;
-        return JSON.stringify(d.getSlide(d.getActiveSlideId()).background ?? null);
-      }))
+      .poll(() =>
+        page.evaluate(() => {
+          const d = (window as any).__spindle.deck;
+          return JSON.stringify(d.getSlide(d.getActiveSlideId()).background ?? null);
+        })
+      )
       .toContain('ff0000');
   });
 

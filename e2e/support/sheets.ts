@@ -27,7 +27,9 @@ export class SheetsPage {
     await this.page.goto(`${SHEETS_URL}/${query}`);
     await expect(this.canvas).toBeVisible();
     // The model handle is installed by the demo once React has mounted.
-    await this.page.waitForFunction(() => !!(window as unknown as { __spindle?: unknown }).__spindle);
+    await this.page.waitForFunction(
+      () => !!(window as unknown as { __spindle?: unknown }).__spindle
+    );
   }
 
   // ---- geometry -----------------------------------------------------------
@@ -50,7 +52,11 @@ export class SheetsPage {
   }
 
   // ---- interactions -------------------------------------------------------
-  async clickCell(row: number, col: number, opts: { modifiers?: Array<'Shift' | 'Control' | 'Meta' | 'Alt'> } = {}) {
+  async clickCell(
+    row: number,
+    col: number,
+    opts: { modifiers?: Array<'Shift' | 'Control' | 'Meta' | 'Alt'> } = {}
+  ) {
     await this.click(await this.cellCenter(row, col), opts.modifiers);
   }
   async dblClickCell(row: number, col: number) {
@@ -100,22 +106,25 @@ export class SheetsPage {
         const spilled = wb.getSpilledValue(undefined, r, c);
         return spilled !== undefined ? spilled : (wb.getCell(undefined, r, c)?.value ?? null);
       },
-      [row, col],
+      [row, col]
     );
   }
   async cellFormula(row: number, col: number) {
     return this.page.evaluate(
       ([r, c]) => (window as any).__spindle.workbook.getCell(undefined, r, c)?.formula ?? null,
-      [row, col],
+      [row, col]
     );
   }
   async cellStyle(row: number, col: number): Promise<Record<string, unknown>> {
-    return this.page.evaluate(([r, c]) => {
-      const wb = (window as any).__spindle.workbook;
-      const cell = wb.getCell(undefined, r, c);
-      if (!cell?.styleId) return {};
-      return wb.getStylePool().get(cell.styleId) ?? {};
-    }, [row, col]);
+    return this.page.evaluate(
+      ([r, c]) => {
+        const wb = (window as any).__spindle.workbook;
+        const cell = wb.getCell(undefined, r, c);
+        if (!cell?.styleId) return {};
+        return wb.getStylePool().get(cell.styleId) ?? {};
+      },
+      [row, col]
+    );
   }
   async expectValue(row: number, col: number, value: unknown) {
     await expect.poll(() => this.cellValue(row, col)).toEqual(value);

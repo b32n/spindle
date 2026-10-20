@@ -36,7 +36,10 @@
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
     "install:all": "npm install && npm install --workspaces",
     "test:e2e": "playwright test",
-    "test:e2e:smoke": "playwright test --grep @smoke"
+    "test:e2e:smoke": "playwright test --grep @smoke",
+    "prepare": "node scripts/hooks/install.mjs",
+    "type-check:e2e": "tsc -p e2e --noEmit",
+    "test:e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
@@ -63,5 +66,25 @@
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged",
+    "pre-push": "node scripts/hooks/pre-push.mjs"
+  },
+  "lint-staged": {
+    "packages/*/src/**/*.{ts,tsx}": [
+      "eslint --fix --max-warnings=100",
+      "node scripts/hooks/affected.mjs"
+    ],
+    "e2e/**/*.ts": [
+      "prettier --write",
+      "bash -c \"npm run type-check:e2e\""
+    ],
+    "playwright.config.ts": [
+      "prettier --write"
+    ],
+    "docs/testing/*.md": [
+      "prettier --write"
+    ]
   }
 }

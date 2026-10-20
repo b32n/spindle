@@ -17,7 +17,9 @@ export class DocsPage {
   async goto(query = ''): Promise<void> {
     await this.page.goto(`${DOCS_URL}/${query}`);
     await expect(this.pages.first()).toBeVisible();
-    await this.page.waitForFunction(() => !!(window as unknown as { __spindle?: unknown }).__spindle);
+    await this.page.waitForFunction(
+      () => !!(window as unknown as { __spindle?: unknown }).__spindle
+    );
   }
 
   toolbar(name: string | RegExp) {
@@ -40,8 +42,13 @@ export class DocsPage {
     await this.page.waitForFunction((t) => {
       const sel = window.getSelection();
       const ed = document.querySelector('.ProseMirror');
-      return !!sel && !!ed && !!sel.anchorNode && ed.contains(sel.anchorNode) &&
-        (sel.anchorNode.textContent ?? '').includes(t);
+      return (
+        !!sel &&
+        !!ed &&
+        !!sel.anchorNode &&
+        ed.contains(sel.anchorNode) &&
+        (sel.anchorNode.textContent ?? '').includes(t)
+      );
     }, text);
   }
 
@@ -59,7 +66,7 @@ export class DocsPage {
       return !!sel && !!ed && !!sel.anchorNode && ed.contains(sel.anchorNode);
     });
     await this.page.evaluate(
-      () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))),
+      () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
     );
   }
 
@@ -79,8 +86,13 @@ export class DocsPage {
     await this.page.waitForFunction((t) => {
       const sel = window.getSelection();
       const n = sel?.anchorNode;
-      return !!sel && !!n && sel.isCollapsed && (n.textContent ?? '').endsWith(t) &&
-        sel.anchorOffset === (n.textContent ?? '').length;
+      return (
+        !!sel &&
+        !!n &&
+        sel.isCollapsed &&
+        (n.textContent ?? '').endsWith(t) &&
+        sel.anchorOffset === (n.textContent ?? '').length
+      );
     }, text);
     await this.settle();
   }

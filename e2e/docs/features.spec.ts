@@ -118,7 +118,11 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
   });
 
   test('D-ZOOM-01 zoom menu scales the page', async ({ page }) => {
-    const width = () => page.locator('.page').first().evaluate((e) => e.getBoundingClientRect().width);
+    const width = () =>
+      page
+        .locator('.page')
+        .first()
+        .evaluate((e) => e.getBoundingClientRect().width);
     expect(await width()).toBeCloseTo(816, 0);
     await doc.toolbar('100%').click();
     await page.getByText('50%', { exact: true }).click();
@@ -134,7 +138,14 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
     await expect(page.getByRole('heading', { name: 'Page Setup' })).toBeVisible();
     await page.getByRole('button', { name: 'Landscape' }).click();
     await page.getByRole('button', { name: 'Apply' }).click();
-    await expect.poll(() => page.locator('.page').first().evaluate((e) => e.getBoundingClientRect().width)).toBeCloseTo(1056, 0);
+    await expect
+      .poll(() =>
+        page
+          .locator('.page')
+          .first()
+          .evaluate((e) => e.getBoundingClientRect().width)
+      )
+      .toBeCloseTo(1056, 0);
   });
 
   test('D-PGS-02 page setup can be cancelled', async ({ page }) => {

@@ -58,7 +58,9 @@ test.describe('slides: filmstrip, selection and element manipulation', () => {
     await expect(page.locator('[data-rotate]')).toHaveCount(1);
   });
 
-  test('SL-SEL-02 clicking empty space or pressing Escape clears the selection', async ({ page }) => {
+  test('SL-SEL-02 clicking empty space or pressing Escape clears the selection', async ({
+    page,
+  }) => {
     const [first] = await s.els();
     await s.click(first.id);
     await s.expectSelection([first.id]);
@@ -105,7 +107,9 @@ test.describe('slides: filmstrip, selection and element manipulation', () => {
     const c = await s.elementCenter(shape.id);
     const { scale } = await s.toPage(0, 0);
     await s.drag(c, { x: c.x + 100 * scale, y: c.y + 40 * scale });
-    await expect.poll(async () => Math.round((await s.el(shape.id)).x - shape.x)).toBeGreaterThanOrEqual(90);
+    await expect
+      .poll(async () => Math.round((await s.el(shape.id)).x - shape.x))
+      .toBeGreaterThanOrEqual(90);
     const moved = await s.el(shape.id);
     expect(moved.x - shape.x).toBeCloseTo(100, -1);
     expect(moved.y - shape.y).toBeCloseTo(40, -1);
@@ -126,8 +130,13 @@ test.describe('slides: filmstrip, selection and element manipulation', () => {
     const handle = page.locator('[data-handle="se"]');
     const hb = (await handle.boundingBox())!;
     const { scale } = await s.toPage(0, 0);
-    await s.drag({ x: hb.x + hb.width / 2, y: hb.y + hb.height / 2 }, { x: hb.x + hb.width / 2 + 60 * scale, y: hb.y + hb.height / 2 + 30 * scale });
-    await expect.poll(async () => Math.round((await s.el(shape.id)).w - shape.w)).toBeGreaterThan(40);
+    await s.drag(
+      { x: hb.x + hb.width / 2, y: hb.y + hb.height / 2 },
+      { x: hb.x + hb.width / 2 + 60 * scale, y: hb.y + hb.height / 2 + 30 * scale }
+    );
+    await expect
+      .poll(async () => Math.round((await s.el(shape.id)).w - shape.w))
+      .toBeGreaterThan(40);
     const after = await s.el(shape.id);
     expect(after.x).toBeCloseTo(shape.x, 0);
     expect(after.h).toBeGreaterThan(shape.h);
@@ -172,7 +181,12 @@ test.describe('slides: filmstrip, selection and element manipulation', () => {
     await page.keyboard.press(`${MOD}+g`);
     const grouped = await page.evaluate(() => {
       const d = (window as any).__spindle.deck;
-      return new Set(d.getElementsForSlide(d.getActiveSlideId()).map((e: any) => e.groupId).filter(Boolean)).size;
+      return new Set(
+        d
+          .getElementsForSlide(d.getActiveSlideId())
+          .map((e: any) => e.groupId)
+          .filter(Boolean)
+      ).size;
     });
     expect(grouped).toBe(1);
     // Clicking one member selects the whole group.
@@ -188,10 +202,11 @@ test.describe('slides: filmstrip, selection and element manipulation', () => {
   });
 
   test('SL-ORD-01 bring to front / send to back change z-order', async ({ page }) => {
-    const order = () => page.evaluate(() => {
-      const d = (window as any).__spindle.deck;
-      return d.getElementIdsForSlide(d.getActiveSlideId());
-    });
+    const order = () =>
+      page.evaluate(() => {
+        const d = (window as any).__spindle.deck;
+        return d.getElementIdsForSlide(d.getActiveSlideId());
+      });
     const before: string[] = await order();
     await s.click(before[0]);
     await page.keyboard.press(`${MOD}+Shift+]`);

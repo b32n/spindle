@@ -10,7 +10,9 @@ test.describe('slides: present mode', () => {
 
   const counter = (page: import('@playwright/test').Page) => page.getByText(/^\d+ \/ \d+$/);
 
-  test('SL-PRS-01 Present opens full-screen present mode on the active slide @smoke', async ({ page }) => {
+  test('SL-PRS-01 Present opens full-screen present mode on the active slide @smoke', async ({
+    page,
+  }) => {
     await s.toolbar('Present').click();
     await expect(page.getByRole('button', { name: 'Exit (Esc)' })).toBeVisible();
     await expect(counter(page)).toHaveText('1 / 3');
@@ -36,7 +38,9 @@ test.describe('slides: present mode', () => {
     await expect(counter(page)).toHaveText('2 / 3');
   });
 
-  test('SL-PRS-03 clicking the stage advances; typing a number then Enter jumps', async ({ page }) => {
+  test('SL-PRS-03 clicking the stage advances; typing a number then Enter jumps', async ({
+    page,
+  }) => {
     await s.toolbar('Present').click();
     await expect(counter(page)).toHaveText('1 / 3');
     await page.mouse.click(640, 300);
@@ -101,12 +105,18 @@ test.describe('slides: comments, clipboard, read-only', () => {
     await s.click(first.id);
     const box = page.getByPlaceholder(/comment/i).first();
     await box.fill('Please tighten the title');
-    await page.getByRole('button', { name: /^(Comment|Post|Add|Send|Reply)/ }).first().click();
+    await page
+      .getByRole('button', { name: /^(Comment|Post|Add|Send|Reply)/ })
+      .first()
+      .click();
     await expect(page.getByText('Please tighten the title')).toBeVisible();
   });
 
   test('SL-CLP-01 copy and paste an element (keyboard)', async ({ page, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit headless does not expose the OS clipboard to keyboard copy/paste');
+    test.skip(
+      browserName === 'webkit',
+      'WebKit headless does not expose the OS clipboard to keyboard copy/paste'
+    );
     await s.gotoSlide(2);
     const shape = await s.firstOfType('shape');
     const n = (await s.els()).length;
@@ -116,8 +126,14 @@ test.describe('slides: comments, clipboard, read-only', () => {
     await expect.poll(async () => (await s.els()).length).toBe(n + 1);
   });
 
-  test('SL-CLP-02 cut removes the element and paste brings it back', async ({ page, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit headless does not expose the OS clipboard to keyboard copy/paste');
+  test('SL-CLP-02 cut removes the element and paste brings it back', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName === 'webkit',
+      'WebKit headless does not expose the OS clipboard to keyboard copy/paste'
+    );
     await s.gotoSlide(2);
     const shape = await s.firstOfType('shape');
     const n = (await s.els()).length;

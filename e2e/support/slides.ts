@@ -30,7 +30,9 @@ export class SlidesPage {
   async goto(query = ''): Promise<void> {
     await this.page.goto(`${SLIDES_URL}/${query}`);
     await expect(this.slide).toBeVisible();
-    await this.page.waitForFunction(() => !!(window as unknown as { __spindle?: unknown }).__spindle);
+    await this.page.waitForFunction(
+      () => !!(window as unknown as { __spindle?: unknown }).__spindle
+    );
   }
 
   toolbar(name: string | RegExp) {
@@ -60,7 +62,15 @@ export class SlidesPage {
       const d = (window as any).__spindle.deck;
       return d
         .getElementsForSlide(d.getActiveSlideId())
-        .map((e: any) => ({ id: e.id, type: e.type, x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation ?? 0 }));
+        .map((e: any) => ({
+          id: e.id,
+          type: e.type,
+          x: e.x,
+          y: e.y,
+          w: e.w,
+          h: e.h,
+          rotation: e.rotation ?? 0,
+        }));
     });
   }
   async el(id: string): Promise<ElSnapshot> {
@@ -89,7 +99,9 @@ export class SlidesPage {
     await expect(this.slide).toHaveAttribute('data-slide-id', id);
   }
   async expectSelection(ids: string[]) {
-    await expect.poll(async () => (await this.selection()).slice().sort()).toEqual(ids.slice().sort());
+    await expect
+      .poll(async () => (await this.selection()).slice().sort())
+      .toEqual(ids.slice().sort());
   }
 
   async click(id: string, modifiers: readonly string[] = []) {
