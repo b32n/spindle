@@ -39,7 +39,9 @@
     "test:e2e:smoke": "playwright test --grep @smoke",
     "prepare": "node scripts/hooks/install.mjs",
     "type-check:e2e": "tsc -p e2e --noEmit",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "docs:scenarios": "node scripts/testing/scenarios.mjs",
+    "docs:scenarios:check": "node scripts/testing/scenarios.mjs --check"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
@@ -81,9 +83,6 @@
       "bash -c \"npm run type-check:e2e\""
     ],
     "playwright.config.ts": [
-      "prettier --write"
-    ],
-    "docs/testing/*.md": [
       "prettier --write"
     ]
   }
