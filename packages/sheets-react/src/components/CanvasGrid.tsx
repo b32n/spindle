@@ -436,6 +436,9 @@ export const CanvasGrid = memo(function CanvasGrid({
     const canvas = canvasRef.current;
     const renderer = rendererRef.current;
     if (!canvas || !renderer) return;
+    // Only the primary button selects/drags; a right-click must leave the
+    // selection alone so the context menu acts on the existing range.
+    if (e.button !== 0) return;
     
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
