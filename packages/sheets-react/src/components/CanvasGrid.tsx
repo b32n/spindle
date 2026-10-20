@@ -88,6 +88,8 @@ export const CanvasGrid = memo(function CanvasGrid({
   });
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<CellPosition | null>(null);
+  // Row/column header drag in progress: which axis and the header it started on.
+  const [headerDrag, setHeaderDrag] = useState<{ type: 'row' | 'column'; anchor: number } | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
   const [resizeStart, setResizeStart] = useState<{ pos: number; size: number } | null>(null);
@@ -120,15 +122,13 @@ export const CanvasGrid = memo(function CanvasGrid({
   // This ensures the selection rectangle follows the active cell when changed externally
   useEffect(() => {
     if (externalActiveCell) {
-      // Check if the current selection doesn't match the external active cell
-      const currentRange = selection.ranges[0];
-      const needsSync = !currentRange || 
-        currentRange.startRow !== externalActiveCell.row ||
-        currentRange.endRow !== externalActiveCell.row ||
-        currentRange.startCol !== externalActiveCell.col ||
-        currentRange.endCol !== externalActiveCell.col ||
+      // Only resync when the active cell itself differs. Comparing the whole
+      // range here would collapse row/column/select-all/drag selections back to
+      // a single cell, because those keep the active cell inside a larger range.
+      const needsSync =
         selection.activeCell?.row !== externalActiveCell.row ||
-        selection.activeCell?.col !== externalActiveCell.col;
+        selection.activeCell?.col !== externalActiveCell.col ||
+        selection.ranges.length === 0;
       
       if (needsSync) {
         setSelection({
@@ -410,6 +410,27 @@ export const CanvasGrid = memo(function CanvasGrid({
     return 'default';
   }, []);
   
+  // Build a whole-row / whole-column selection spanning headers `from`..`to`.
+  const headerSelection = useCallback((type: 'row' | 'column', from: number, to: number): Selection => {
+    const lo = Math.min(from, to);
+    const hi = Math.max(from, to);
+    return type === 'column'
+      ? {
+          ranges: [{ startRow: 0, endRow: sheet.rowCount - 1, startCol: lo, endCol: hi }],
+          activeCell: { row: 0, col: from },
+        }
+      : {
+          ranges: [{ startRow: lo, endRow: hi, startCol: 0, endCol: sheet.colCount - 1 }],
+          activeCell: { row: from, col: 0 },
+        };
+  }, [sheet]);
+
+  const applySelection = useCallback((next: Selection, notifyActive: boolean) => {
+    setSelection(next);
+    onSelectionChange?.(next);
+    if (notifyActive) onActiveCellChange?.(next.activeCell);
+  }, [onSelectionChange, onActiveCellChange]);
+
   // Handle mouse down
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -458,37 +479,25 @@ export const CanvasGrid = memo(function CanvasGrid({
       return;
     }
     
-    // Check for header click
+    // Select-all corner
+    if (x <= colWidth && y <= headerHeight) {
+      applySelection({
+        ranges: [{ startRow: 0, endRow: sheet.rowCount - 1, startCol: 0, endCol: sheet.colCount - 1 }],
+        activeCell: { row: 0, col: 0 },
+      }, true);
+      return;
+    }
+
+    // Header click: select the whole row/column. Shift extends from the
+    // current anchor; dragging across headers extends the range.
     const header = renderer.getHeaderAtPoint(x, y);
     if (header && !header.isResize) {
-      // Select entire row or column
-      if (header.type === 'column') {
-        const newSelection: Selection = {
-          ranges: [{
-            startRow: 0,
-            endRow: sheet.rowCount - 1,
-            startCol: header.index,
-            endCol: header.index,
-          }],
-          activeCell: { row: 0, col: header.index },
-        };
-        setSelection(newSelection);
-        onSelectionChange?.(newSelection);
-        onActiveCellChange?.({ row: 0, col: header.index });
-      } else {
-        const newSelection: Selection = {
-          ranges: [{
-            startRow: header.index,
-            endRow: header.index,
-            startCol: 0,
-            endCol: sheet.colCount - 1,
-          }],
-          activeCell: { row: header.index, col: 0 },
-        };
-        setSelection(newSelection);
-        onSelectionChange?.(newSelection);
-        onActiveCellChange?.({ row: header.index, col: 0 });
-      }
+      const prior = selection.activeCell;
+      const anchor = e.shiftKey && prior
+        ? (header.type === 'column' ? prior.col : prior.row)
+        : header.index;
+      setHeaderDrag({ type: header.type, anchor });
+      applySelection(headerSelection(header.type, anchor, header.index), true);
       return;
     }
     
@@ -546,7 +555,7 @@ export const CanvasGrid = memo(function CanvasGrid({
       onSelectionChange?.(newSelection);
       onActiveCellChange?.(newSelection.activeCell);
     }
-  }, [sheet, selection, onSelectionChange, onActiveCellChange, isEditingFormula, onInsertCellReference, workbook, originalEditingSheetId, readOnly]);
+  }, [sheet, selection, onSelectionChange, onActiveCellChange, isEditingFormula, onInsertCellReference, workbook, originalEditingSheetId, readOnly, applySelection, headerSelection, colWidth, headerHeight]);
   
   // Handle mouse move
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -610,6 +619,15 @@ export const CanvasGrid = memo(function CanvasGrid({
       return;
     }
     
+    // Handle header drag (row/column range)
+    if (headerDrag) {
+      const h = renderer.getHeaderAtPoint(x, y);
+      if (h && h.type === headerDrag.type && !h.isResize) {
+        applySelection(headerSelection(headerDrag.type, headerDrag.anchor, h.index), false);
+      }
+      return;
+    }
+
     // Handle selection drag
     if (isSelecting && selectionStart) {
       const cell = renderer.getCellAtPoint(x, y);
@@ -678,10 +696,14 @@ export const CanvasGrid = memo(function CanvasGrid({
     onInsertCellReference,
     workbook,
     originalEditingSheetId,
+    headerDrag,
+    applySelection,
+    headerSelection,
   ]);
   
   // Handle mouse up
   const handleMouseUp = useCallback(() => {
+    if (headerDrag) setHeaderDrag(null);
     if (isResizing) {
       setIsResizing(false);
       setResizeHandle(null);
@@ -884,39 +906,18 @@ export const CanvasGrid = memo(function CanvasGrid({
     // Check for header click first
     const header = renderer.getHeaderAtPoint(x, y);
     if (header) {
-      if (header.type === 'column') {
-        // Select the column
-        const newSelection: Selection = {
-          ranges: [{
-            startRow: 0,
-            endRow: sheet.rowCount - 1,
-            startCol: header.index,
-            endCol: header.index,
-          }],
-          activeCell: { row: 0, col: header.index },
-        };
-        setSelection(newSelection);
-        onSelectionChange?.(newSelection);
-        onActiveCellChange?.({ row: 0, col: header.index });
-        
-        onContextMenu({ type: 'column', index: header.index, x: e.clientX, y: e.clientY });
-      } else {
-        // Select the row
-        const newSelection: Selection = {
-          ranges: [{
-            startRow: header.index,
-            endRow: header.index,
-            startCol: 0,
-            endCol: sheet.colCount - 1,
-          }],
-          activeCell: { row: header.index, col: 0 },
-        };
-        setSelection(newSelection);
-        onSelectionChange?.(newSelection);
-        onActiveCellChange?.({ row: header.index, col: 0 });
-        
-        onContextMenu({ type: 'row', index: header.index, x: e.clientX, y: e.clientY });
+      // Right-clicking inside the current row/column selection keeps it (so the
+      // menu acts on the whole selection); otherwise select that header.
+      const cur = selection.ranges[0];
+      const inside = cur && (header.type === 'column'
+        ? cur.startRow === 0 && cur.endRow >= sheet.rowCount - 1 &&
+          header.index >= Math.min(cur.startCol, cur.endCol) && header.index <= Math.max(cur.startCol, cur.endCol)
+        : cur.startCol === 0 && cur.endCol >= sheet.colCount - 1 &&
+          header.index >= Math.min(cur.startRow, cur.endRow) && header.index <= Math.max(cur.startRow, cur.endRow));
+      if (!inside) {
+        applySelection(headerSelection(header.type, header.index, header.index), true);
       }
+      onContextMenu({ type: header.type, index: header.index, x: e.clientX, y: e.clientY });
       return;
     }
     
@@ -948,7 +949,7 @@ export const CanvasGrid = memo(function CanvasGrid({
       
       onContextMenu({ type: 'cell', cell, x: e.clientX, y: e.clientY });
     }
-  }, [sheet, selection, onContextMenu, onSelectionChange, onActiveCellChange, readOnly]);
+  }, [sheet, selection, onContextMenu, onSelectionChange, onActiveCellChange, readOnly, applySelection, headerSelection]);
   
   // Copy selection to clipboard
   const handleCopy = useCallback(() => {
@@ -1234,6 +1235,26 @@ export const CanvasGrid = memo(function CanvasGrid({
     const { key, shiftKey, metaKey, ctrlKey } = e;
     const modifier = metaKey || ctrlKey;
     
+    // Select all / whole column / whole row.
+    if (modifier && !shiftKey && key.toLowerCase() === 'a') {
+      e.preventDefault();
+      applySelection({
+        ranges: [{ startRow: 0, endRow: sheet.rowCount - 1, startCol: 0, endCol: sheet.colCount - 1 }],
+        activeCell: activeCell ?? { row: 0, col: 0 },
+      }, false);
+      return;
+    }
+    if (key === ' ' && (modifier || shiftKey)) {
+      e.preventDefault();
+      const at = activeCell ?? { row: 0, col: 0 };
+      if (modifier) {
+        applySelection({ ...headerSelection('column', at.col, at.col), activeCell: at }, false);
+      } else {
+        applySelection({ ...headerSelection('row', at.row, at.row), activeCell: at }, false);
+      }
+      return;
+    }
+
     // Navigation
     if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
       e.preventDefault();
@@ -1379,19 +1400,21 @@ export const CanvasGrid = memo(function CanvasGrid({
     onActiveCellChange,
     scrollToCellIfNeeded,
     readOnly,
+    applySelection,
+    headerSelection,
   ]);
   
   // Add global mouse up handler for drag operations
   useEffect(() => {
     const handleGlobalMouseUp = () => {
-      if (isResizing || isSelecting || isFilling || isSelectingFormulaRef) {
+      if (isResizing || isSelecting || isFilling || isSelectingFormulaRef || headerDrag) {
         handleMouseUp();
       }
     };
     
     window.addEventListener('mouseup', handleGlobalMouseUp);
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
-  }, [isResizing, isSelecting, isFilling, isSelectingFormulaRef, handleMouseUp]);
+  }, [isResizing, isSelecting, isFilling, isSelectingFormulaRef, headerDrag, handleMouseUp]);
   
   return (
     <div
