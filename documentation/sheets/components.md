@@ -16,6 +16,12 @@ interface WorkbookCanvasProps {
   height?: number;
   rowHeight?: number;
   colWidth?: number;
+  readOnly?: boolean;          // disables all editing and hides the toolbar
+  fileActions?: boolean;       // show Open (.xlsx/.csv) and Download (XLSX/CSV) in the toolbar; default false
+  exportFormats?: ('xlsx' | 'csv')[];   // formats offered by Download; default both
+  fileName?: string;           // base name for downloads; default: the workbook name
+  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
 
 export const WorkbookCanvas = memo(function WorkbookCanvas(props: WorkbookCanvasProps) {

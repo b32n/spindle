@@ -68,6 +68,26 @@ DocumentEditor (React)
 └── PageSetupModal
 ```
 
+## Open / Download (DOCX)
+
+`DocumentEditor` can show **Open** (a local `.docx` file picker) and **Download**
+(`.docx`) buttons in its toolbar. It is opt-in:
+
+```tsx
+<DocumentEditor
+  fileActions
+  fileName="Quarterly plan"                 // optional; defaults to the document title
+  onFileOpened={({ fileName, warnings }) => {}}
+  onFileError={(error, action) => {}}       // action: 'open' | 'download'
+/>
+```
+
+Opening a file replaces the whole document (and fails while collaboration is
+attached). Files are read locally via `<input type="file">`; nothing is
+uploaded. For a host-owned button use the exported helpers
+`exportDocumentFile(doc, 'docx')` and `importDocumentFile(doc, file)`, or the
+`Toolbar` props `onOpenFile` / `onDownload` / `downloadFormats`.
+
 ## Hooks
 
 ```typescript
@@ -88,7 +108,7 @@ const { canUndo, canRedo, undo, redo } = useHistory();
 - No spell-check (browser spellcheck is disabled)
 - No track changes / suggestions mode (comment threads are supported)
 - Tables support column & row resize but not cell merge/split
-- No find & replace, word count, or export (PDF/DOCX)
+- No find & replace, word count, or PDF export (DOCX import/export is supported)
 - Multi-section documents render only the first section in the UI
 
 Real-time collaboration, comments, and image upload (file / drag-drop / URL)

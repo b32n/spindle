@@ -369,106 +369,48 @@ export function getScrollForRegion(
 }
 ```
 
-## Export Functionality
+## Import / Export Functionality
 
-### CSV Export
+All formats are read and written locally (no network). The format-level
+parsers/writers live in `@b32nio/spindle-shared/export/{csv,xlsx}` and know
+nothing about the workbook; `sheets-core` adapts the workbook model onto them.
 
-The export system supports CSV format with proper escaping:
-
-```typescript
-// packages/sheets-core/src/export/csv.ts
-export function exportToCSV(workbook: WorkbookImpl, sheetId?: string): string {
-  const sheet = workbook.getSheet(sheetId);
-  const rows: string[][] = [];
-
-  // Find data bounds
-  let maxRow = 0;
-  let maxCol = 0;
-  for (const [key] of sheet.cells) {
-    const [row, col] = key.split(':').map(Number);
-    maxRow = Math.max(maxRow, row);
-    maxCol = Math.max(maxCol, col);
-  }
-
-  // Generate CSV rows
-  for (let row = 0; row <= maxRow; row++) {
-    const csvRow: string[] = [];
-    for (let col = 0; col <= maxCol; col++) {
-      const cell = sheet.cells.get(getCellKey(row, col));
-      let value = '';
-
-      if (cell) {
-        if (cell.formula) {
-          value = cell.formula;  // Export formula
-        } else {
-          value = cell.value?.toString() || '';
-        }
-      }
-
-      // CSV escaping
-      if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-        value = `"${value.replace(/"/g, '""')}"`;
-      }
-
-      csvRow.push(value);
-    }
-    rows.push(csvRow);
-  }
-
-  return rows.map(row => row.join(',')).join('\n');
-}
-```
-
-### CSV Import
-
-Basic CSV parsing with quote handling:
+### CSV
 
 ```typescript
-export function importFromCSV(csv: string, sheet: Sheet): void {
-  const lines = csv.split('\n');
+import { exportToCSV, importFromCSV } from '@b32nio/spindle-sheets-core';
 
-  for (let row = 0; row < lines.length; row++) {
-    const line = lines[row].trim();
-    if (!line) continue;
-
-    const values = parseCSVLine(line);
-    values.forEach((value, col) => {
-      if (value.trim()) {
-        sheet.cells.set(getCellKey(row, col), { value });
-      }
-    });
-  }
-}
-
-function parseCSVLine(line: string): string[] {
-  const values: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
-
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        // Escaped quote
-        current += '"';
-        i++; // Skip next quote
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === ',' && !inQuotes) {
-      values.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-
-  values.push(current);
-  return values;
-}
+const csv = exportToCSV(workbook);          // active sheet, or exportToCSV(workbook, sheetId)
+importFromCSV(csv, workbook.getSheet());    // writes into an existing sheet
 ```
+
+Export emits formulas (not their results) for formula cells, quotes fields that
+contain commas, quotes or newlines, and is bounded by the last cell with data.
+Import handles quoted fields, escaped quotes, embedded newlines and CRLF.
+
+### XLSX
+
+```typescript
+import { exportToXlsx, importFromXlsx } from '@b32nio/spindle-sheets-core';
+
+const bytes = await exportToXlsx(workbook);   // Uint8Array, every sheet
+
+// Replaces the workbook's entire contents with the file's.
+const { warnings } = await importFromXlsx(bytes, workbook);
+```
+
+Carried over: values, formulas, cell styles, number formats, merged cells,
+column widths, row heights, hidden rows/columns, freeze panes, hyperlinks, and
+the active sheet. Not carried over: charts, conditional formatting, data
+validation, pivot tables. Anything the importer has to drop is reported in
+`warnings`. Number formats are translated to and from Excel format codes
+(`xlsx-number-format.ts`).
+
+### In the UI
+
+`WorkbookCanvas` shows Open (`.xlsx` / `.csv`) and Download (XLSX / CSV) in its
+toolbar when given the `fileActions` prop; see the
+[`sheets-react` README](../../../packages/sheets-react/README.md).
 
 ## Integration with Workbook
 

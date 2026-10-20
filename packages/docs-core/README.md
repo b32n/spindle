@@ -61,12 +61,29 @@ const pmDoc = blocksToPmDoc(blocks, schema);
 const docModel = proseMirrorToDocument(pmNode, existingDoc);
 ```
 
+## DOCX import / export
+
+```typescript
+import { DocumentImpl, exportToDocx, importFromDocx } from '@b32nio/spindle-docs-core';
+
+const { bytes, warnings } = await exportToDocx(doc); // Uint8Array (.docx)
+
+// Replaces the document's entire contents with the file's.
+const { warnings: importWarnings } = await importFromDocx(bytes, doc);
+```
+
+`warnings` lists anything that could not be carried over (for example images
+that are not `data:` URIs on export, or floating images on import). The
+format-level reader/writer live in `@b32nio/spindle-shared/export/docx`
+(`exportDocx` / `importDocx`) and are independent of the document model.
+Everything runs locally; there are no network calls.
+
 ## Limitations
 
 - Single-section editing: multi-section documents live in the data model, but
   the editor UI renders only the first section (and collaboration is
   single-section for now)
-- No export/import (PDF, DOCX) and no find & replace
+- No PDF/HTML/Markdown export or import, and no find & replace (DOCX import/export is supported — see below)
 
 Real-time collaboration (Yjs, via `attachCollab` / the `/collab` subpath) and
 comment threads **are** supported. See

@@ -73,7 +73,7 @@ spindle/
 │   │   ├── src/
 │   │   │   ├── canvas/             # Canvas rendering system
 │   │   │   ├── collab/             # Real-time sync (Yjs binding)
-│   │   │   ├── export/             # CSV import / export
+│   │   │   ├── export/             # CSV and XLSX import / export
 │   │   │   ├── features/           # Filter, sort, freeze
 │   │   │   ├── formula-parser/     # Formula parsing & functions
 │   │   │   ├── utils/              # Shared helpers
@@ -160,7 +160,7 @@ function App() {
 ### Advanced Usage
 
 ```typescript
-import { WorkbookImpl, exportToCSV } from '@b32nio/spindle-sheets-core';
+import { WorkbookImpl, exportToCSV, exportToXlsx, importFromXlsx } from '@b32nio/spindle-sheets-core';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 
 // Load existing data
@@ -181,6 +181,8 @@ workbook.on('cellChange', (event) => {
 
 // Export data
 const csvData = exportToCSV(workbook);
+const xlsxBytes = await exportToXlsx(workbook);   // Uint8Array (.xlsx)
+await importFromXlsx(xlsxBytes, workbook);        // replaces the workbook's contents
 ```
 
 ## Extension Points

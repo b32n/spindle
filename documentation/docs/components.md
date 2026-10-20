@@ -27,6 +27,12 @@ import { DocumentEditor } from '@b32nio/spindle-docs-react';
 | `height` | `number \| string` | `'100%'` | Container height |
 | `showToolbar` | `boolean` | `true` | Show the formatting toolbar |
 | `showRuler` | `boolean` | `true` | Show horizontal and vertical rulers |
+| `readOnly` | `boolean` | `false` | View-only: hides the toolbar, rulers and comments |
+| `fileActions` | `boolean` | `false` | Show Open (`.docx`) and Download (DOCX) in the toolbar |
+| `exportFormats` | `'docx'[]` | all | Formats offered by Download |
+| `fileName` | `string` | document title | Base name for downloads |
+| `onFileOpened` | `(info: { fileName; warnings }) => void` | — | Called after a file was opened |
+| `onFileError` | `(error, action: 'open' \| 'download') => void` | — | Called when opening or downloading fails |
 
 #### Features
 
