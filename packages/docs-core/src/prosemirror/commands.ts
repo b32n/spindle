@@ -1,4 +1,4 @@
-import { toggleMark, setBlockType, lift } from 'prosemirror-commands';
+import { toggleMark, setBlockType } from 'prosemirror-commands';
 import { liftListItem, sinkListItem, wrapInList } from 'prosemirror-schema-list';
 import type { Schema, MarkType, NodeType, Attrs, Mark } from 'prosemirror-model';
 import { TextSelection } from 'prosemirror-state';
