@@ -716,7 +716,6 @@ export const CanvasGrid = memo(function CanvasGrid({
     headerDrag,
     applySelection,
     headerSelection,
-    selection,
   ]);
   
   // Handle mouse up
@@ -874,7 +873,7 @@ export const CanvasGrid = memo(function CanvasGrid({
       setIsSelectingFormulaRef(false);
       setFormulaRefStart(null);
     }
-  }, [isResizing, isSelecting, isFilling, isSelectingFormulaRef, fillStart, fillSourceRange, selection, sheet, workbook, onSelectionChange, onActiveCellChange, onContentChange]);
+  }, [isResizing, isSelecting, isFilling, isSelectingFormulaRef, headerDrag, fillStart, fillSourceRange, selection, sheet, workbook, onSelectionChange, onActiveCellChange, onContentChange]);
   
   const formatCellValueForEditing = useCallback((cellData: Cell | undefined): string => {
     if (!cellData) return '';
@@ -1430,6 +1429,7 @@ export const CanvasGrid = memo(function CanvasGrid({
     readOnly,
     applySelection,
     headerSelection,
+    selection,
   ]);
   
   // Add global mouse up handler for drag operations
