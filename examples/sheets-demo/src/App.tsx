@@ -272,6 +272,9 @@ function WsDemo({
     };
   }, [config.url, config.roomId, config.identity]);
 
+  // Handle for end-to-end tests (e2e/) to inspect model state behind the canvas.
+  if (wb) (window as unknown as { __spindle?: unknown }).__spindle = { workbook: wb, FilterManager };
+
   if (error) return <div style={{ padding: 16, color: 'crimson' }}>WS error: {error}</div>;
   if (!wb) return <div style={{ padding: 16 }}>Connecting to {config.url}…</div>;
   return (
