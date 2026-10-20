@@ -1,0 +1,106 @@
+name: E2E
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # npm ci omits Rollup's platform-native optional dep in a workspace root
+      # (npm/cli#4828); same workaround as ci.yml. Vite (the demo servers) needs it.
+      - name: Install Rollup native binary (npm workspace bug workaround)
+        run: |
+          ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
+      # The demos alias the packages' src/, but build keeps parity with ci.yml
+      # and guards against build-only breakage reaching the demos.
+      - run: npm run build
+      - name: Get Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - name: Install browsers (with system deps)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Install system deps only (browsers cached)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium firefox webkit
+      # retries=2 and the blob reporter are enabled by CI=true in playwright.config.ts.
+      - name: Run Playwright (shard ${{ matrix.shard }}/4)
+        run: npx playwright test --shard=${{ matrix.shard }}/4
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 7
+      - name: Upload traces, screenshots and videos (failures)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-artifacts-${{ matrix.shard }}
+          path: e2e/.results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  report:
+    name: Merge reports
+    if: ${{ !cancelled() }}
+    needs: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - run: npx playwright merge-reports --reporter=html ./all-blob-reports
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report
+          retention-days: 14
+
+  # Stable, single status to mark as a required check (the sharded job names
+  # above change if the matrix changes). Fails if any shard failed or was cancelled.
+  e2e-result:
+    name: e2e-result
+    if: ${{ always() }}
+    needs: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check shard results
+        run: |
+          echo "e2e result: ${{ needs.e2e.result }}"
+          [ "${{ needs.e2e.result }}" = "success" ]
