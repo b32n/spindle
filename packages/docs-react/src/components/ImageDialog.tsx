@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { docsSchema, createCommands } from '@b32nio/spindle-docs-core';
@@ -345,7 +346,7 @@ export const ImageDialog = memo(function ImageDialog({
     transition: 'all 0.2s',
   });
   
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -754,5 +755,5 @@ export const ImageDialog = memo(function ImageDialog({
         </form>
       </div>
     </div>
-  );
+  , document.body);
 });

@@ -1,7 +1,7 @@
 import { AllSelection, EditorState, TextSelection } from 'prosemirror-state';
 import type { Node as PmNode } from 'prosemirror-model';
 import { docsSchema } from './schema';
-import { toggleBulletList, toggleOrderedList } from './commands';
+import { insertPageBreak, toggleBulletList, toggleOrderedList } from './commands';
 
 const { nodes } = docsSchema;
 const p = (text: string) => nodes.paragraph.create(null, docsSchema.text(text));
@@ -57,5 +57,19 @@ describe('list toggle commands', () => {
     const doc = nodes.doc.create(null, nodes.ordered_list.create(null, [item('one'), item('two')]));
     const s = run(stateWith(doc), toggleBulletList(docsSchema));
     expect(topTypes(s)).toEqual(['bullet_list']);
+  });
+});
+
+describe('insertPageBreak', () => {
+  it('leaves the caret in a paragraph after the break so typing does not replace it', () => {
+    
+    const doc = nodes.doc.create(null, p('first'));
+    const state = stateWith(doc);
+    let next = state;
+    expect(insertPageBreak(docsSchema)(state, (tr) => { next = state.apply(tr); })).toBe(true);
+    expect(topTypes(next)).toEqual(['paragraph', 'page_break', 'paragraph']);
+    const typed = next.apply(next.tr.insertText('second'));
+    expect(topTypes(typed)).toEqual(['paragraph', 'page_break', 'paragraph']);
+    expect(typed.doc.lastChild!.textContent).toBe('second');
   });
 });

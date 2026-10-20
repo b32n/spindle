@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { docsSchema, createCommands } from '@b32nio/spindle-docs-core';
@@ -159,7 +160,7 @@ export const LinkDialog = memo(function LinkDialog({
   
   if (!isOpen) return null;
   
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -354,6 +355,6 @@ export const LinkDialog = memo(function LinkDialog({
         </form>
       </div>
     </div>
-  );
+  , document.body);
 });
 

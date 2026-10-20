@@ -279,7 +279,16 @@ export function insertPageBreak(schema: Schema): Command {
     if (!pageBreakType) return false;
     
     if (dispatch) {
-      dispatch(state.tr.replaceSelectionWith(pageBreakType.create()));
+      let tr = state.tr.replaceSelectionWith(pageBreakType.create());
+      // The break is left node-selected, so the next keystroke would replace
+      // it. Move the caret into the block after it (adding one if needed).
+      const after = tr.selection.to;
+      const next = tr.doc.nodeAt(after);
+      if (!next || !next.isTextblock) {
+        tr = tr.insert(after, schema.nodes.paragraph.create());
+      }
+      tr = tr.setSelection(TextSelection.create(tr.doc, after + 1));
+      dispatch(tr.scrollIntoView());
     }
     return true;
   };
