@@ -161,10 +161,11 @@ export interface InlineImage {
   alt?: string;
 }
 
-export interface InlineLink {
+export interface InlineLink extends TextStyle {
   type: 'link';
   text: string;
   href: string;
+  title?: string;
   styleId?: string;
   /** Thread ID when this link is covered by a comment. */
   commentThreadId?: string;
@@ -210,6 +211,8 @@ export interface ListItemBlock extends BaseBlock {
   type: 'list-item';
   listType: ListType;
   level: number; // Nesting level (0-based)
+  /** First number of a numbered list (set on the list's first item when not 1). */
+  start?: number;
   content: InlineContent[];
   styleId?: string;
 }
@@ -220,6 +223,11 @@ export interface TableCell {
   colspan?: number;
   rowspan?: number;
   styleId?: string;
+  backgroundColor?: string;
+  /** True for a header cell (`<th>`). */
+  isHeader?: boolean;
+  /** Per-column pixel widths for the columns this cell spans. */
+  colwidth?: number[];
 }
 
 export interface TableRow {
@@ -241,6 +249,7 @@ export interface ImageBlock extends BaseBlock {
   width: number;
   height: number;
   alt?: string;
+  title?: string;
   alignment?: 'left' | 'center' | 'right';
   caption?: InlineContent[];
 }

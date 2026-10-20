@@ -61,8 +61,8 @@ export function getBlockTextLength(block: Block): number {
     if (item.type === 'link') {
       return total + item.text.length;
     }
-    if (item.type === 'image') {
-      return 1; // Inline image counts as 1
+    if (item.type === 'image' || item.type === 'dynamicField') {
+      return total + 1; // Inline atoms (image, field) count as 1
     }
     return total;
   }, 0);
@@ -102,7 +102,7 @@ export function findRunAtOffset(
   const runLength = (item: InlineContent): number => {
     if (item.type === 'text') return item.text.length;
     if (item.type === 'link') return item.text.length;
-    if (item.type === 'image') return 1;
+    if (item.type === 'image' || item.type === 'dynamicField') return 1;
     return 0;
   };
 
@@ -148,7 +148,7 @@ export function runOffsetToBlockOffset(
       blockOffset += item.text.length;
     } else if (item.type === 'link') {
       blockOffset += item.text.length;
-    } else if (item.type === 'image') {
+    } else if (item.type === 'image' || item.type === 'dynamicField') {
       blockOffset += 1;
     }
   }

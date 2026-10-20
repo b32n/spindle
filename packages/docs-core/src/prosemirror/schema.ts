@@ -175,6 +175,7 @@ const nodes: Record<string, NodeSpec> = {
       rowspan: { default: 1 },
       colwidth: { default: null },
       backgroundColor: { default: null },
+      styleId: { default: null },
     },
     tableRole: 'header_cell',
     isolating: true,
@@ -262,6 +263,78 @@ const nodes: Record<string, NodeSpec> = {
     parseDOM: [{ tag: 'br' }],
     toDOM(): DOMOutputSpec {
       return ['br'];
+    },
+  },
+
+  // Inline (in-paragraph) image. Distinct from the block-level `image` node so
+  // it keeps its place in the text flow and round-trips as an InlineImage.
+  inline_image: {
+    inline: true,
+    group: 'inline',
+    atom: true,
+    draggable: true,
+    attrs: {
+      src: {},
+      alt: { default: '' },
+      width: { default: null },
+      height: { default: null },
+    },
+    parseDOM: [
+      {
+        tag: 'img[data-inline-image]',
+        getAttrs(dom: HTMLElement) {
+          const w = dom.getAttribute('width');
+          const h = dom.getAttribute('height');
+          return {
+            src: dom.getAttribute('src'),
+            alt: dom.getAttribute('alt') || '',
+            width: w ? Number(w) : null,
+            height: h ? Number(h) : null,
+          };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      const attrs: Record<string, string | number | null> = {
+        'data-inline-image': 'true',
+        src: sanitizeImageSrc(node.attrs.src as string | null),
+        alt: node.attrs.alt,
+      };
+      if (node.attrs.width) attrs.width = node.attrs.width;
+      if (node.attrs.height) attrs.height = node.attrs.height;
+      return ['img', attrs];
+    },
+  },
+
+  // Dynamic field (page number, total pages, date, ...) embedded in the text.
+  // An atom: its value is resolved at render time from `fieldType`/`format`.
+  dynamic_field: {
+    inline: true,
+    group: 'inline',
+    atom: true,
+    selectable: true,
+    attrs: {
+      fieldType: { default: 'pageNumber' },
+      format: { default: null },
+    },
+    parseDOM: [
+      {
+        tag: 'span[data-dynamic-field]',
+        getAttrs(dom: HTMLElement) {
+          return {
+            fieldType: dom.getAttribute('data-dynamic-field') || 'pageNumber',
+            format: dom.getAttribute('data-format'),
+          };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      const attrs: Record<string, string> = {
+        class: 'dynamic-field',
+        'data-dynamic-field': String(node.attrs.fieldType),
+      };
+      if (node.attrs.format) attrs['data-format'] = String(node.attrs.format);
+      return ['span', attrs, `\u2039${String(node.attrs.fieldType)}\u203A`];
     },
   },
 

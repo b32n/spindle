@@ -320,7 +320,11 @@ function extractRuns(node: PmNode): Run[] {
       runs.push(textRun);
     } else if (child.type.name === 'hard_break') {
       runs.push({ kind: 'lineBreak' });
-    } else if (child.type.name === 'image') {
+    } else if (child.type.name === 'dynamic_field') {
+      // Body fields are resolved at paint time only in headers/footers; in the
+      // body they render as a visible placeholder so they stay selectable.
+      runs.push({ kind: 'text', text: `\u2039${String(child.attrs.fieldType)}\u203A` });
+    } else if (child.type.name === 'image' || child.type.name === 'inline_image') {
       runs.push({
         kind: 'image',
         src: child.attrs.src as string || '',
