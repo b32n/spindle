@@ -43,6 +43,28 @@ function App() {
 }
 ```
 
+## Open / Download (XLSX, CSV)
+
+`WorkbookCanvas` can show **Open** (a local `.xlsx` / `.csv` file picker) and a
+**Download** menu (XLSX, CSV) in its toolbar. It is opt-in:
+
+```tsx
+<WorkbookCanvas
+  fileActions
+  exportFormats={['xlsx', 'csv']}           // optional; default is both
+  fileName="Budget"                         // optional; defaults to the workbook name
+  onFileOpened={({ fileName, warnings }) => {}}
+  onFileError={(error, action) => {}}       // action: 'open' | 'download'
+/>
+```
+
+Opening a file replaces the whole workbook (a CSV becomes a single-sheet
+workbook); CSV download exports the active sheet. Files are read locally via
+`<input type="file">`; nothing is uploaded. For a host-owned button use the
+exported helpers `exportWorkbookFile(workbook, 'xlsx')` and
+`importWorkbookFile(workbook, file)`, or the `Toolbar` props `onOpenFile` /
+`onDownload` / `downloadFormats`.
+
 ## Architecture
 
 The rendering architecture uses a canvas-based approach:

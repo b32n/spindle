@@ -1,0 +1,82 @@
+version: 2
+updates:
+  # Root + all packages/* workspaces share one lockfile at the repo root.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    groups:
+      prosemirror:
+        patterns: ['prosemirror-*']
+      yjs:
+        patterns: ['yjs', 'y-*', 'lib0']
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
+      office-formats:
+        patterns: ['exceljs', 'docx', 'jszip', 'fast-xml-parser']
+      dev-minor-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+      prod-minor-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+
+  # Website (Vite SPA) has its own lockfile.
+  - package-ecosystem: npm
+    directory: /website
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels: [dependencies]
+    groups:
+      website-minor-patch:
+        update-types: [minor, patch]
+
+  # Demos in examples/ are installed against the local workspace packages.
+  - package-ecosystem: npm
+    directory: /examples/docs-demo
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 2
+    labels: [dependencies]
+    groups:
+      docs-demo-minor-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /examples/sheets-demo
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 2
+    labels: [dependencies]
+    groups:
+      sheets-demo-minor-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /examples/slides-demo
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 2
+    labels: [dependencies]
+    groups:
+      slides-demo-minor-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /examples/collab-server
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 2
+    labels: [dependencies]
+    groups:
+      collab-server-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels: [dependencies]
+    groups:
+      actions:
+        patterns: ['*']

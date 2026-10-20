@@ -17,6 +17,12 @@ module.exports = {
           declaration: false,
           noUnusedLocals: false,
           noUnusedParameters: false,
+          // Classic 'node' resolution doesn't understand package.json "exports"
+          // maps, so type-check subpath imports against the source; Jest's own
+          // resolver handles the runtime require via the same map.
+          paths: {
+            '@b32nio/spindle-shared/react': ['../shared/src/react/index.ts'],
+          },
         },
       },
     ],

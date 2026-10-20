@@ -212,6 +212,7 @@ export default MyDocumentEditor;
 - ✅ Formula autocomplete with parameter help
 - ✅ Customizable dimensions and styling
 - ✅ Sparse data storage (only stores non-empty cells)
+- ✅ CSV and XLSX import/export, with Open / Download in the toolbar (`fileActions`)
 
 **Documents:**
 - ✅ True page layout with line-level pagination
@@ -220,6 +221,7 @@ export default MyDocumentEditor;
 - ✅ Tables with cell formatting
 - ✅ Images (block and inline)
 - ✅ Undo/redo history
+- ✅ DOCX import/export, with Open / Download in the toolbar (`fileActions`)
 
 **Slides:**
 - ✅ Element model: text, shapes, images, lines/connectors, and tables

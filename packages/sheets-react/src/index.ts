@@ -19,3 +19,6 @@ export * from './context/WorkbookContext';
 // Hooks
 export * from './hooks/useComments';
 
+
+// File open / download helpers (XLSX, CSV)
+export * from './file-io';

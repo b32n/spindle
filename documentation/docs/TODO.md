@@ -17,10 +17,13 @@ package READMEs' "Limitations" sections are stale — trust this file.
 
 Verified absent in code.
 
-- [ ] **Export — PDF / DOCX** — no export path of any kind (no `window.print`,
-      no serializer). Per project convention, export should live in the host,
-      not this package; a shared headless backend is the open question.
-- [ ] **Import — DOCX / HTML / Markdown** — none.
+- [ ] **Export — PDF / HTML / Markdown** — none. (DOCX export shipped in 0.4.0:
+      `exportToDocx`, plus a Download button in the toolbar.)
+- [ ] **Import — HTML / Markdown** — none. (DOCX import shipped in 0.4.0:
+      `importFromDocx`, plus an Open button in the toolbar.)
+- [ ] **DOCX fidelity gaps** — `data:` URI images only (remote images are
+      skipped with a warning on export), floating/anchored images are skipped
+      on import, and unsupported field codes keep no value.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Multi-section documents in the UI** — the model supports `sections[]`

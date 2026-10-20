@@ -54,7 +54,9 @@ Gaps against Excel / Google Sheets in the non-formula feature set.
 - [ ] **Row / column grouping & outline**
 - [ ] **Paste special** — values-only, formats-only, transpose (the copy/paste
       path is plain TSV only; `TRANSPOSE` exists as a function, not a paste mode)
-- [ ] **XLSX import / export** — only CSV is supported (see below)
+- [ ] **XLSX fidelity gaps** — XLSX import/export shipped in 0.4.0
+      (`exportToXlsx` / `importFromXlsx`, plus Open/Download in the toolbar), but
+      charts, conditional formatting and data validation are not carried over.
 - [ ] **Print / page setup** for sheets (PDF output)
 
 ### Engine ready, UI missing
@@ -71,6 +73,6 @@ single-column sort, per-column filters, cell styles (fonts, colors, borders,
 alignment, wrap, rotation), number formats, hyperlinks, date-entry
 auto-detection, hide/show and insert/delete rows and columns, merged cells,
 multiple sheets, undo/redo, find & replace, autofill (numbers, dates,
-month/weekday name lists and text patterns), **CSV export *and* import**, the
+month/weekday name lists and text patterns), **CSV and XLSX import/export** (with Open/Download in the toolbar), the
 146-function formula engine with dynamic arrays, and formula autocomplete with
 parameter help.

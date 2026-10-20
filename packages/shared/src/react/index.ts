@@ -3,3 +3,4 @@ export { ResponsiveToolbar } from './ResponsiveToolbar';
 export type { ResponsiveToolbarProps } from './ResponsiveToolbar';
 export { useToolbarMenu, MenuRow } from './toolbar-menu';
 export type { ToolbarMenuApi } from './toolbar-menu';
+export { downloadFile, fileExtension, stripExtension, sanitizeFileName } from './download';

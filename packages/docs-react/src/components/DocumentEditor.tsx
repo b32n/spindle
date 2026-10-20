@@ -24,6 +24,13 @@ import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
 import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
+import { downloadFile } from '@b32nio/spindle-shared/react';
+import {
+  DOCS_EXPORT_FORMATS,
+  exportDocumentFile,
+  importDocumentFile,
+  type DocsExportFormat,
+} from '../file-io';
 
 interface DocumentEditorProps {
   width?: number;
@@ -32,6 +39,21 @@ interface DocumentEditorProps {
   showRuler?: boolean;
   /** Disables editing: content, margins/header/footer, and comments become view-only. */
   readOnly?: boolean;
+  /**
+   * Show Open (.docx, read from a local file input) and Download (.docx) in
+   * the toolbar. Opening a file replaces the whole document. Default: false.
+   * Requires the toolbar (`showToolbar`) and is hidden in read-only mode;
+   * use `exportDocumentFile` for a host-side download button.
+   */
+  fileActions?: boolean;
+  /** Formats offered by Download. Default: every format in `DOCS_EXPORT_FORMATS`. */
+  exportFormats?: readonly DocsExportFormat[];
+  /** Base name for downloaded files (no extension). Default: the document title. */
+  fileName?: string;
+  /** Called after a file was opened; `warnings` lists features the importer had to drop. */
+  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
+  onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -64,6 +86,11 @@ export const DocumentEditor = memo(function DocumentEditor({
   showToolbar = true,
   showRuler = true,
   readOnly = false,
+  fileActions = false,
+  exportFormats,
+  fileName,
+  onFileOpened,
+  onFileError,
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -78,6 +105,10 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   
+  // Bumped after a file is opened: the editor only seeds from the model on
+  // mount, so remounting it is how a replaced document reaches the screen.
+  const [loadVersion, setLoadVersion] = useState(0);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<TrueLayoutEditorHandle>(null);
   
@@ -90,6 +121,33 @@ export const DocumentEditor = memo(function DocumentEditor({
   const footer = sections[0]?.footer;
   const documentTitle = docModel.getTitle();
   
+  // ---- File open / download (toolbar, opt-in via `fileActions`) ----
+  const downloadFormats = useMemo(
+    () => (exportFormats ? DOCS_EXPORT_FORMATS.filter((f) => exportFormats.includes(f.id)) : DOCS_EXPORT_FORMATS),
+    [exportFormats]
+  );
+
+  const handleOpenFile = useCallback(async (file: File) => {
+    try {
+      const { warnings } = await importDocumentFile(docModel, file);
+      setPendingComment(null);
+      setActiveThreadId(null);
+      setLoadVersion((v) => v + 1);
+      onFileOpened?.({ fileName: file.name, warnings });
+    } catch (err) {
+      onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
+    }
+  }, [docModel, onFileOpened, onFileError]);
+
+  const handleDownload = useCallback(async (format: DocsExportFormat) => {
+    try {
+      const out = await exportDocumentFile(docModel, format, fileName);
+      downloadFile(out.data, out.fileName, out.mimeType);
+    } catch (err) {
+      onFileError?.(err instanceof Error ? err : new Error(String(err)), 'download');
+    }
+  }, [docModel, fileName, onFileError]);
+
   // Handle header changes - update document model
   const handleHeaderChange = useCallback((content: HeaderFooterContent) => {
     if (readOnly) return;
@@ -367,6 +425,9 @@ export const DocumentEditor = memo(function DocumentEditor({
             activeMarks={activeMarks}
             selectedCell={selectedCell}
             onAddComment={startComment}
+            onOpenFile={fileActions ? handleOpenFile : undefined}
+            onDownload={fileActions ? handleDownload : undefined}
+            downloadFormats={downloadFormats}
           />
         </div>
       )}
@@ -416,6 +477,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         
         {/* Editor - using TrueLayoutEditor (line-level pagination) */}
         <TrueLayoutEditor
+          key={loadVersion}
           ref={editorRef}
           initialBlocks={initialBlocks}
           pageConfig={presentationPageConfig}

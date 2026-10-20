@@ -23,6 +23,24 @@ workbook.setCellValue(undefined, 0, 0, 'Hello');
 workbook.setCellValue(undefined, 0, 1, 'World');
 ```
 
+## Import / export (CSV, XLSX)
+
+```typescript
+import { exportToCSV, importFromCSV, exportToXlsx, importFromXlsx } from '@b32nio/spindle-sheets-core';
+
+const csv = exportToCSV(workbook);                 // active sheet, or pass a sheet id
+importFromCSV(csv, workbook.getSheet());           // into an existing sheet
+
+const bytes = await exportToXlsx(workbook);        // Uint8Array (.xlsx), all sheets
+// Replaces the workbook's entire contents with the file's.
+const { warnings } = await importFromXlsx(bytes, workbook);
+```
+
+XLSX carries values, formulas, styles, number formats, merges, column widths,
+row heights, hidden rows/columns, freeze panes and hyperlinks; charts, conditional formatting
+and data validation are not carried over. The format-level readers/writers
+live in `@b32nio/spindle-shared/export/{csv,xlsx}`. Everything runs locally.
+
 ## Performance
 
 - O(1) cell lookups

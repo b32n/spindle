@@ -8,13 +8,17 @@ on:
 
 jobs:
   packages:
-    name: Packages (build · type-check · test · lint)
+    name: Packages · Node ${{ matrix.node }} (build · type-check · test · lint)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       # npm ci/install omit Rollup's platform-native optional dep in a
@@ -40,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       # The website consumes every spindle package via file: deps (local
       # monorepo, pre-publish), so all of their dist must be built before the

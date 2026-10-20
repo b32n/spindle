@@ -113,7 +113,7 @@ function App() {
 - **Sparse Storage**: Efficient memory usage
 - **Freeze Panes**: Lock rows/columns while scrolling
 - **Sorting & Filtering**: Column operations
-- **CSV Export/Import**: Data interchange
+- **CSV & XLSX Export/Import**: Data interchange, with Open / Download in the toolbar (`fileActions`)
 
 See the [issue tracker](https://github.com/b32n/spindle/issues) for planned work.
 
@@ -273,4 +273,4 @@ npm run dev
 ---
 
 **Last Updated**: July 2026  
-**Version**: 0.3.0
+**Version**: 0.4.0
