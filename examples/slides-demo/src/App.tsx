@@ -111,6 +111,9 @@ function WsDemo({ config }: { config: WsConfig }) {
     return () => { cancelled = true; try { d.detachCollab(); } catch { /* ignore */ } };
   }, [config.url, config.roomId, config.identity]);
 
+  // Handle for end-to-end tests (e2e/) to inspect model state.
+  if (deck) (window as unknown as { __spindle?: unknown }).__spindle = { deck };
+
   if (!deck) return <div style={{ padding: 16 }}>Connecting to {config.url}…</div>;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -131,6 +134,10 @@ export default function App() {
   const wsConfig = useMemo(parseWsConfig, []);
   const [twoPane, setTwoPane] = useState(false);
   const singleDeck = useMemo(() => makeDeck(), []);
+  // `?readonly=1` mounts the editor read-only (used by the e2e suite).
+  const readOnly = useMemo(() => new URLSearchParams(window.location.search).get('readonly') === '1', []);
+  // Handle for end-to-end tests (e2e/) to inspect model state.
+  (window as unknown as { __spindle?: unknown }).__spindle = { deck: singleDeck };
 
   if (wsConfig) return <WsDemo config={wsConfig} />;
   if (twoPane) return <CollabDemo />;
@@ -146,7 +153,7 @@ export default function App() {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <DeckProvider deck={singleDeck} currentUser={DEMO_USERS[0]} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-          <SlidesEditor />
+          <SlidesEditor readOnly={readOnly} />
         </DeckProvider>
       </div>
     </div>
