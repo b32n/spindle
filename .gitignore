@@ -7,3 +7,10 @@ coverage/
 *.tsbuildinfo
 
 .rollup.cache/
+
+# Playwright
+e2e/.results/
+e2e/.report/
+blob-report/
+playwright-report/
+test-results/
