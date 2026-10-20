@@ -9,12 +9,12 @@
     "dev": "tsx watch src/server.ts"
   },
   "dependencies": {
-    "ws": "^8.16.0"
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@types/ws": "^8.5.0",
-    "tsx": "^4.6.0",
+    "@types/ws": "^8.18.2",
+    "tsx": "^4.23.15",
     "typescript": "^5.2.0"
   }
 }
