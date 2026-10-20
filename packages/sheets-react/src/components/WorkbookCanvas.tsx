@@ -18,6 +18,13 @@ import type { CellPosition, Selection, CellFormat, ColumnFilter, CellStyle, Sort
 import { columnIndexToLabel } from '@b32nio/spindle-sheets-core';
 import { parseDateString } from '@b32nio/spindle-sheets-core';
 import { findMatches, computeReplacement } from '@b32nio/spindle-sheets-core';
+import { downloadFile } from '@b32nio/spindle-shared/react';
+import {
+  SHEETS_EXPORT_FORMATS,
+  exportWorkbookFile,
+  importWorkbookFile,
+  type SheetsExportFormat,
+} from '../file-io';
 
 export interface WorkbookCanvasProps {
   className?: string;
@@ -28,6 +35,21 @@ export interface WorkbookCanvasProps {
   colWidth?: number;
   /** Disables all editing: cell edits, paste/cut, formatting, structural changes, and comments. */
   readOnly?: boolean;
+  /**
+   * Show Open (.xlsx / .csv, read from a local file input) and Download
+   * (.xlsx / .csv) in the toolbar. Opening a file replaces the whole
+   * workbook. Default: false. Never shown in read-only mode (the toolbar is
+   * hidden there; use `exportWorkbookFile` for a host-side download button).
+   */
+  fileActions?: boolean;
+  /** Formats offered by the Download menu. Default: every format in `SHEETS_EXPORT_FORMATS`. */
+  exportFormats?: readonly SheetsExportFormat[];
+  /** Base name for downloaded files (no extension). Default: the workbook's name. */
+  fileName?: string;
+  /** Called after a file was opened; `warnings` lists features the importer had to drop. */
+  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
+  onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
 
 export const WorkbookCanvas = memo(function WorkbookCanvas({
@@ -38,6 +60,11 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   rowHeight = 20,
   colWidth = 100,
   readOnly = false,
+  fileActions = false,
+  exportFormats,
+  fileName,
+  onFileOpened,
+  onFileError,
 }: WorkbookCanvasProps) {
   const { workbook } = useWorkbook();
   const [activeCell, setActiveCell] = useState<CellPosition | null>(null);
@@ -446,6 +473,34 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   }, [workbook]);
 
   // Handle direct sort by direction (for context menu)
+  // ---- File open / download (toolbar, opt-in via `fileActions`) ----
+  const downloadFormats = useMemo(
+    () => (exportFormats ? SHEETS_EXPORT_FORMATS.filter((f) => exportFormats.includes(f.id)) : SHEETS_EXPORT_FORMATS),
+    [exportFormats]
+  );
+
+  const handleOpenFile = useCallback(async (file: File) => {
+    try {
+      const { warnings } = await importWorkbookFile(workbook, file);
+      // setData swapped every sheet; drop any state pointing into the old one.
+      setActiveCell(null);
+      setEditingCell(null);
+      setDimensionVersion((v) => v + 1);
+      onFileOpened?.({ fileName: file.name, warnings });
+    } catch (err) {
+      onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
+    }
+  }, [workbook, onFileOpened, onFileError]);
+
+  const handleDownload = useCallback(async (format: SheetsExportFormat) => {
+    try {
+      const file = await exportWorkbookFile(workbook, format, fileName);
+      downloadFile(file.data, file.fileName, file.mimeType);
+    } catch (err) {
+      onFileError?.(err instanceof Error ? err : new Error(String(err)), 'download');
+    }
+  }, [workbook, fileName, onFileError]);
+
   const handleSortColumnByDirection = useCallback((column: number, direction: 'asc' | 'desc') => {
     // Sorting would scatter merged regions — refuse, matching Excel/Sheets.
     if (workbook.getSheet().getMergedRegions().length > 0) {
@@ -917,6 +972,9 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     >
       {/* Toolbar — hidden entirely in read-only mode, since every action it exposes mutates the workbook */}
       {!readOnly && <Toolbar
+        onOpenFile={fileActions ? handleOpenFile : undefined}
+        onDownload={fileActions ? handleDownload : undefined}
+        downloadFormats={downloadFormats}
         onUndo={() => {
           workbook.undo();
           setDimensionVersion(v => v + 1);

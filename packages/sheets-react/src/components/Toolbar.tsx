@@ -33,7 +33,10 @@ import {
   MessageSquare,
   Type,
   ALargeSmall,
+  FolderOpen,
+  Download,
 } from 'lucide-react';
+import { SHEETS_EXPORT_FORMATS, SHEETS_IMPORT_ACCEPT, type SheetsExportFormat, type SheetsExportFormatInfo } from '../file-io';
 
 // ============================================================================
 // Toolbar Styles — shared design language with the docs toolbar
@@ -395,6 +398,19 @@ const MenuButton = memo(function MenuButton({ icon, label, active, disabled, wid
   );
 });
 
+// Open button: inline it's a plain toolbar button; in the overflow menu a row.
+const OpenFileButton = memo(function OpenFileButton({ onClick }: { onClick: () => void }) {
+  const menu = useToolbarMenu();
+  if (menu.inMenu) {
+    return <MenuRow icon={<FolderOpen size={17} />} label="Open file…" onClick={() => { onClick(); menu.closeMenu(); }} />;
+  }
+  return (
+    <ToolbarButton onClick={onClick} tooltip="Open file (.xlsx, .csv)">
+      <FolderOpen size={18} strokeWidth={2} />
+    </ToolbarButton>
+  );
+});
+
 // Load the given Google Fonts on demand (used by the font picker in both modes).
 function loadGoogleFonts(fonts: string[], loaded: React.MutableRefObject<Set<string>>) {
   const toLoad = fonts.filter((f) => {
@@ -566,7 +582,13 @@ const DropdownItem = memo(function DropdownItem({
 // Toolbar
 // ============================================================================
 
-interface ToolbarProps {
+export interface ToolbarProps {
+  /** Opens a local file (.xlsx / .csv). Providing this shows the Open button. */
+  onOpenFile?: (file: File) => void;
+  /** Downloads the workbook in the chosen format. Providing this shows the Download menu. */
+  onDownload?: (format: SheetsExportFormat) => void;
+  /** Formats offered by the Download menu (default: XLSX and CSV). */
+  downloadFormats?: readonly SheetsExportFormatInfo[];
   onBold?: () => void;
   onItalic?: () => void;
   onUnderline?: () => void;
@@ -621,6 +643,9 @@ interface ToolbarProps {
 }
 
 export const Toolbar = memo(function Toolbar({
+  onOpenFile,
+  onDownload,
+  downloadFormats = SHEETS_EXPORT_FORMATS,
   onBold,
   onItalic,
   onUnderline,
@@ -658,6 +683,10 @@ export const Toolbar = memo(function Toolbar({
   const [showRotationMenu, setShowRotationMenu] = useState(false);
   const [showHyperlinkModal, setShowHyperlinkModal] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  // One file input for the whole toolbar, rendered outside ResponsiveToolbar so
+  // it survives the overflow menu mounting/unmounting its copies of the buttons.
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasFileActions = !!onOpenFile || !!onDownload;
 
   const hasFrozenPanes = frozenRows > 0 || frozenCols > 0;
   const hasActiveColumn = activeColumn !== undefined;
@@ -800,6 +829,18 @@ export const Toolbar = memo(function Toolbar({
   return (
     <div ref={toolbarRef} className="sheets-toolbar" style={styles.toolbar}>
       <ResponsiveToolbar gap={2}>
+      {/* Open / Download */}
+      {onOpenFile && <OpenFileButton onClick={() => fileInputRef.current?.click()} />}
+      {onDownload && (
+        <MenuButton icon={<Download size={18} strokeWidth={2} />} label="Download" width={230}>
+          <div style={styles.menuLabel}>Download as</div>
+          {downloadFormats.map((f) => (
+            <DropdownItem key={f.id} onClick={() => onDownload(f.id)}>{f.label}</DropdownItem>
+          ))}
+        </MenuButton>
+      )}
+      {hasFileActions && <Divider />}
+
       {/* Undo / Redo */}
       <ToolbarButton onClick={onUndo} tooltip="Undo (Ctrl+Z)">
         <Undo2 size={18} strokeWidth={2} />
@@ -1025,6 +1066,22 @@ export const Toolbar = memo(function Toolbar({
         <MessageSquare size={18} strokeWidth={2} />
       </ToolbarButton>
       </ResponsiveToolbar>
+
+      {onOpenFile && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={SHEETS_IMPORT_ACCEPT}
+          data-testid="sheets-open-file-input"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // Reset so choosing the same file again still fires onChange.
+            e.target.value = '';
+            if (file) onOpenFile(file);
+          }}
+        />
+      )}
 
       {/* Hyperlink Modal */}
       <HyperlinkModal
