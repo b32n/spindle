@@ -97,3 +97,6 @@ export type {
   ProseMirrorEditorRef,
   ActiveMarks,
 } from './components/ProseMirrorEditor';
+
+// File open / download helpers (DOCX)
+export * from './file-io';

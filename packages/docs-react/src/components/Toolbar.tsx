@@ -48,7 +48,10 @@ import {
   Type,
   ALargeSmall,
   Settings2,
+  FolderOpen,
+  Download,
 } from 'lucide-react';
+import { DOCS_EXPORT_FORMATS, DOCS_IMPORT_ACCEPT, type DocsExportFormat, type DocsExportFormatInfo } from '../file-io';
 
 // ============================================================================
 // Toolbar Styles
@@ -260,7 +263,13 @@ const injectStyles = () => {
 // Toolbar Components
 // ============================================================================
 
-interface ToolbarProps {
+export interface ToolbarProps {
+  /** Opens a local .docx file. Providing this shows the Open button. */
+  onOpenFile?: (file: File) => void;
+  /** Downloads the document in the chosen format. Providing this shows the Download control. */
+  onDownload?: (format: DocsExportFormat) => void;
+  /** Formats offered by Download (default: DOCX). With a single format the button downloads directly. */
+  downloadFormats?: readonly DocsExportFormatInfo[];
   onPageSetup?: () => void;
   editorView?: EditorView | null;
   activeMarks?: ActiveMarks;
@@ -442,10 +451,26 @@ const DropdownItemStandalone = memo(function DropdownItemStandalone({ onClick, a
   );
 });
 
+// Open button: inline it's a plain toolbar button; in the overflow menu a row.
+const OpenFileButton = memo(function OpenFileButton({ onClick }: { onClick: () => void }) {
+  const menu = useToolbarMenu();
+  if (menu.inMenu) {
+    return <MenuRow icon={<FolderOpen size={17} />} label="Open file…" onClick={() => { onClick(); menu.closeMenu(); }} />;
+  }
+  return (
+    <ToolbarButton onClick={onClick} tooltip="Open file (.docx)">
+      <FolderOpen size={18} strokeWidth={2} />
+    </ToolbarButton>
+  );
+});
+
 /**
  * Document editor toolbar - Modern floating design
  */
 export const Toolbar = memo(function Toolbar({ 
+  onOpenFile,
+  onDownload,
+  downloadFormats = DOCS_EXPORT_FORMATS,
   onPageSetup,
   onAddComment,
   editorView,
@@ -460,6 +485,10 @@ export const Toolbar = memo(function Toolbar({
   const [showTablePicker, setShowTablePicker] = useState(false);
 
   const toolbarRef = useRef<HTMLDivElement>(null);
+  // One file input for the whole toolbar, rendered outside ResponsiveToolbar so
+  // it survives the overflow menu mounting/unmounting its copies of the buttons.
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasFileActions = !!onOpenFile || !!onDownload;
 
   // Inject animation styles
   useEffect(() => {
@@ -623,6 +652,24 @@ export const Toolbar = memo(function Toolbar({
       style={styles.toolbar}
     >
       <ResponsiveToolbar gap={2}>
+      {/* Open / Download */}
+      {onOpenFile && <OpenFileButton onClick={() => fileInputRef.current?.click()} />}
+      {onDownload && downloadFormats.length === 1 && (
+        <ToolbarButton onClick={() => onDownload(downloadFormats[0].id)} tooltip={`Download as ${downloadFormats[0].label}`}>
+          <Download size={18} strokeWidth={2} />
+        </ToolbarButton>
+      )}
+      {onDownload && downloadFormats.length > 1 && (
+        <OverflowDropdown triggerIcon={<Download size={18} strokeWidth={2} />} menuLabel="Download" width={230}>
+          {downloadFormats.map((f) => (
+            <DropdownItemStandalone key={f.id} onClick={() => onDownload(f.id)} style={{ justifyContent: 'flex-start' }}>
+              {f.label}
+            </DropdownItemStandalone>
+          ))}
+        </OverflowDropdown>
+      )}
+      {hasFileActions && <Divider />}
+
       {/* Undo/Redo */}
       <ToolbarButton onClick={handleUndo} disabled={!canUndo && !editorView} tooltip="Undo">
         <Undo2 size={18} strokeWidth={2} />
@@ -805,6 +852,22 @@ export const Toolbar = memo(function Toolbar({
         <Settings2 size={18} strokeWidth={2} />
       </ToolbarButton>
       </ResponsiveToolbar>
+
+      {onOpenFile && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={DOCS_IMPORT_ACCEPT}
+          data-testid="docs-open-file-input"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // Reset so choosing the same file again still fires onChange.
+            e.target.value = '';
+            if (file) onOpenFile(file);
+          }}
+        />
+      )}
 
       {/* Dialogs */}
       <LinkDialog
