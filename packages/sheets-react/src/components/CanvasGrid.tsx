@@ -535,6 +535,23 @@ export const CanvasGrid = memo(function CanvasGrid({
         return;
       }
       
+      if (e.shiftKey && selection.activeCell && selection.ranges.length > 0) {
+        // Shift-click extends from the active cell (the anchor).
+        const a = selection.activeCell;
+        applySelection({
+          ranges: [{
+            startRow: Math.min(a.row, cell.row),
+            endRow: Math.max(a.row, cell.row),
+            startCol: Math.min(a.col, cell.col),
+            endCol: Math.max(a.col, cell.col),
+          }],
+          activeCell: a,
+        }, false);
+        setIsSelecting(true);
+        setSelectionStart(a);
+        return;
+      }
+
       setIsSelecting(true);
       setSelectionStart(cell);
 
@@ -699,6 +716,7 @@ export const CanvasGrid = memo(function CanvasGrid({
     headerDrag,
     applySelection,
     headerSelection,
+    selection,
   ]);
   
   // Handle mouse up
@@ -1259,8 +1277,18 @@ export const CanvasGrid = memo(function CanvasGrid({
     if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
       e.preventDefault();
       
-      let newRow = activeCell?.row ?? 0;
-      let newCol = activeCell?.col ?? 0;
+      // With Shift held, the moving end is the corner of the range opposite the
+      // anchor (the active cell), so repeated presses keep extending.
+      const anchorCell = activeCell ?? { row: 0, col: 0 };
+      const curRange = selection.ranges[0];
+      const focusCell: CellPosition = shiftKey && curRange
+        ? {
+            row: curRange.startRow === anchorCell.row ? curRange.endRow : curRange.startRow,
+            col: curRange.startCol === anchorCell.col ? curRange.endCol : curRange.startCol,
+          }
+        : anchorCell;
+      let newRow = focusCell.row;
+      let newCol = focusCell.col;
       
       switch (key) {
         case 'ArrowUp':
@@ -1303,7 +1331,7 @@ export const CanvasGrid = memo(function CanvasGrid({
 
       if (shiftKey) {
         // Extend selection
-        const start = selectionStart ?? activeCell ?? { row: 0, col: 0 };
+        const start = anchorCell;
         const newSelection: Selection = {
           ranges: [{
             startRow: Math.min(start.row, newRow),

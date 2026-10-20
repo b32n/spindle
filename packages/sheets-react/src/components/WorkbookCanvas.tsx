@@ -314,8 +314,9 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 
   // Commit edit and close editor
   // The value parameter comes from EditOverlay and is the most current value
-  // moveToNextCell: if true, move to the cell below after committing (Enter key behavior)
-  const commitEdit = useCallback((value?: string, moveToNextCell?: boolean) => {
+  // moveToNextCell: after committing, move down (true / 'down', Enter), right
+  // ('right', Tab) or left ('left', Shift+Tab).
+  const commitEdit = useCallback((value?: string, moveToNextCell?: boolean | 'down' | 'right' | 'left') => {
     // Use passed value if provided, otherwise fall back to editValue state
     const valueToCommit = value !== undefined ? value : editValue;
     
@@ -344,8 +345,16 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     // Move to the next cell (row below) if requested (Enter key behavior)
     if (moveToNextCell && currentEditingCell) {
       const sheet = workbook.getSheet(targetSheetId);
-      const newRow = Math.min(currentEditingCell.row + 1, sheet.rowCount - 1);
-      const newCell = { row: newRow, col: currentEditingCell.col };
+      const dir = moveToNextCell === true ? 'down' : moveToNextCell;
+      const newRow = dir === 'down'
+        ? Math.min(currentEditingCell.row + 1, sheet.rowCount - 1)
+        : currentEditingCell.row;
+      const newCol = dir === 'right'
+        ? Math.min(currentEditingCell.col + 1, sheet.colCount - 1)
+        : dir === 'left'
+          ? Math.max(currentEditingCell.col - 1, 0)
+          : currentEditingCell.col;
+      const newCell = { row: newRow, col: newCol };
       
       setActiveCell(newCell);
       
@@ -354,12 +363,13 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
         ranges: [{
           startRow: newRow,
           endRow: newRow,
-          startCol: currentEditingCell.col,
-          endCol: currentEditingCell.col,
+          startCol: newCol,
+          endCol: newCol,
         }],
         activeCell: newCell,
       };
       workbook.setSelection(newSelection);
+      setSelectionRange(newSelection.ranges[0]);
     }
     
     // Refocus the canvas so keyboard navigation continues to work

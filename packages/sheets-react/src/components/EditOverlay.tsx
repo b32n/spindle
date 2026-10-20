@@ -12,7 +12,8 @@ export interface EditOverlayRef {
 export interface EditOverlayProps {
   value: string;
   onChange: (value: string) => void;
-  onCommit: (value: string, moveToNextCell?: boolean) => void;
+  /** `move`: true / 'down' = Enter, 'right' = Tab, 'left' = Shift+Tab. */
+  onCommit: (value: string, move?: boolean | 'down' | 'right' | 'left') => void;
   onCancel: () => void;
   x: number;
   y: number;
@@ -222,8 +223,7 @@ export const EditOverlay = memo(forwardRef<EditOverlayRef, EditOverlayProps>(fun
     } else if (e.key === 'Tab') {
       e.preventDefault();
       lastInsertRef.current = null;
-      onCommit(e.currentTarget.value);
-      // Let parent handle tab navigation
+      onCommit(e.currentTarget.value, e.shiftKey ? 'left' : 'right');
     }
   }, [onCommit, onCancel, interceptKeyDown]);
 
