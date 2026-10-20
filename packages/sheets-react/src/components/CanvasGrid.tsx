@@ -9,6 +9,7 @@ import {
   type FormulaRangeHighlight,
 } from '@b32nio/spindle-sheets-core';
 import type { Selection, Range, Cell, CellValue } from '@b32nio/spindle-sheets-core';
+import { formatSelectionLabel } from './selectionLabel';
 import { extractFormulaRanges, columnIndexToLabel, adjustFormula, type FormulaRange } from '@b32nio/spindle-sheets-core';
 import { detectSeries, extrapolate } from '@b32nio/spindle-sheets-core';
 import { encodeTsv, parseTsv } from './tsv';
@@ -1404,6 +1405,9 @@ export const CanvasGrid = memo(function CanvasGrid({
     >
       <canvas
         ref={canvasRef}
+        data-testid="sheet-canvas"
+        data-selection={formatSelectionLabel(selection.ranges[0], sheet.rowCount, sheet.colCount)}
+        data-active-cell={activeCell ? `${columnIndexToLabel(activeCell.col)}${activeCell.row + 1}` : ''}
         width={width * (window.devicePixelRatio || 1)}
         height={height * (window.devicePixelRatio || 1)}
         style={{

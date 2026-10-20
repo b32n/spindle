@@ -328,6 +328,8 @@ function App() {
   const [readOnly, setReadOnly] = useState(false);
   const [wsConfig] = useState<WsConfig | null>(() => parseWsConfig());
   const [workbook] = useState(() => makeWorkbookFromSample());
+  // Handle for end-to-end tests (e2e/) to inspect model state behind the canvas.
+  (window as unknown as { __spindle?: unknown }).__spindle = { workbook };
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,

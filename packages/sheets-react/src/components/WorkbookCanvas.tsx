@@ -14,7 +14,7 @@ import { HeaderContextMenu } from './HeaderContextMenu';
 import { FilterModal } from './FilterModal';
 import { FormatCellsModal } from './FormatCellsModal';
 import { FindReplaceModal, type FindReplaceState } from './FindReplaceModal';
-import type { CellPosition, Selection, CellFormat, ColumnFilter, CellStyle, SortOrder, FormatType } from '@b32nio/spindle-sheets-core';
+import type { CellPosition, Range, Selection, CellFormat, ColumnFilter, CellStyle, SortOrder, FormatType } from '@b32nio/spindle-sheets-core';
 import { columnIndexToLabel } from '@b32nio/spindle-sheets-core';
 import { parseDateString } from '@b32nio/spindle-sheets-core';
 import { findMatches, computeReplacement } from '@b32nio/spindle-sheets-core';
@@ -68,6 +68,8 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 }: WorkbookCanvasProps) {
   const { workbook } = useWorkbook();
   const [activeCell, setActiveCell] = useState<CellPosition | null>(null);
+  // Range shown in the name box (the active selection block).
+  const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const [editingCell, setEditingCell] = useState<CellPosition | null>(null);
   const [editValue, setEditValue] = useState('');
   const [caret, setCaret] = useState(0);
@@ -470,6 +472,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   // Handle selection change
   const handleSelectionChange = useCallback((selection: Selection) => {
     workbook.setSelection(selection);
+    setSelectionRange(selection.ranges[0] ?? null);
   }, [workbook]);
 
   // Handle direct sort by direction (for context menu)
@@ -1135,7 +1138,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       />}
 
       {/* Formula Bar */}
-      <FormulaBar activeCell={activeCell} onFormulaChange={handleFormulaChange} readOnly={readOnly} />
+      <FormulaBar activeCell={activeCell} selectionRange={selectionRange} onFormulaChange={handleFormulaChange} readOnly={readOnly} />
 
       {/* Canvas Grid Area */}
       <div

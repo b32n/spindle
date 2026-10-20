@@ -1,13 +1,16 @@
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { useWorkbook } from '../context/WorkbookContext';
 import { columnIndexToLabel, excelDateToJS, formatJSDate } from '@b32nio/spindle-sheets-core';
-import type { Cell, WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import type { Cell, Range, WorkbookImpl } from '@b32nio/spindle-sheets-core';
 import { FormulaAutocomplete } from './FormulaAutocomplete';
 import { FormulaSignatureHint } from './FormulaSignatureHint';
+import { formatSelectionLabel } from './selectionLabel';
 import { useFormulaAssist } from '../hooks/useFormulaAssist';
 
 interface FormulaBarProps {
   activeCell: { row: number; col: number } | null;
+  /** Selected block, shown in the name box (e.g. "A1:C3", "B:B", "2:2"). Falls back to the active cell. */
+  selectionRange?: Range | null;
   onFormulaChange?: (formula: string) => void;
   /** Disables the input entirely, independent of the per-cell spill read-only state below. */
   readOnly?: boolean;
@@ -37,6 +40,7 @@ function getFormulaBarText(cell: Cell | undefined, workbook: WorkbookImpl): stri
 
 export const FormulaBar = memo(function FormulaBar({
   activeCell,
+  selectionRange,
   onFormulaChange,
   readOnly: workbookReadOnly = false,
 }: FormulaBarProps) {
@@ -136,9 +140,20 @@ export const FormulaBar = memo(function FormulaBar({
     [activeCell, workbook, formulaAssist]
   );
 
-  const cellReference = activeCell
-    ? `${columnIndexToLabel(activeCell.col)}${activeCell.row + 1}`
-    : '';
+  const sheet = workbook.getSheet();
+  // Ignore a stale range once the active cell has moved outside of it.
+  const rangeIsCurrent =
+    !!selectionRange &&
+    !!activeCell &&
+    activeCell.row >= Math.min(selectionRange.startRow, selectionRange.endRow) &&
+    activeCell.row <= Math.max(selectionRange.startRow, selectionRange.endRow) &&
+    activeCell.col >= Math.min(selectionRange.startCol, selectionRange.endCol) &&
+    activeCell.col <= Math.max(selectionRange.startCol, selectionRange.endCol);
+  const cellReference = rangeIsCurrent && selectionRange
+    ? formatSelectionLabel(selectionRange, sheet.rowCount, sheet.colCount)
+    : activeCell
+      ? `${columnIndexToLabel(activeCell.col)}${activeCell.row + 1}`
+      : '';
 
   return (
     <div
@@ -155,6 +170,7 @@ export const FormulaBar = memo(function FormulaBar({
     >
       <div
         className="cell-reference"
+        data-testid="name-box"
         style={{
           minWidth: '72px',
           fontSize: '12px',
