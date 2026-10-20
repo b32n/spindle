@@ -15,7 +15,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
       "@b32nio/spindle-sheets-core": ["../../packages/sheets-core/src"],
       "@b32nio/spindle-sheets-react": ["../../packages/sheets-react/src"]

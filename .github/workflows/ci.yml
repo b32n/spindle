@@ -61,3 +61,26 @@ jobs:
         working-directory: website
       - run: npm run build
         working-directory: website
+
+  examples:
+    name: Examples (build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Rollup native binary (npm workspace bug workaround)
+        run: |
+          ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
+      # Examples alias the packages' src, but type-check against built dist.
+      - run: npm run build
+      - name: Build examples
+        run: |
+          for d in docs-demo sheets-demo slides-demo; do
+            (cd examples/$d && npm ci && npm run build)
+          done
+          (cd examples/collab-server && npm ci && npx tsc --noEmit)
