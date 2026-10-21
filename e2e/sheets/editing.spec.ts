@@ -50,8 +50,7 @@ test.describe('sheets: editing, navigation & undo/redo', () => {
     await sheet.expectValue(1, 0, 'Widget!');
   });
 
-  test('S-EDT-07 Tab commits and moves right', async ({ page, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit moves browser focus on Tab (not yet investigated)');
+  test('S-EDT-07 Tab commits and moves right', async ({ page }) => {
     await sheet.select(5, 0);
     await sheet.type('a', 'Tab');
     await sheet.type('b', 'Tab');

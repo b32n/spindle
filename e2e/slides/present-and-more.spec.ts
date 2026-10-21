@@ -53,11 +53,7 @@ test.describe('slides: present mode', () => {
     await expect(counter(page)).toHaveText('1 / 3');
   });
 
-  test('SL-PRS-04 Escape and the Exit button leave present mode', async ({ page, browserName }) => {
-    test.skip(
-      browserName !== 'chromium',
-      'fullscreen exit / OS clipboard behave differently outside Chromium (not yet investigated)'
-    );
+  test('SL-PRS-04 Escape and the Exit button leave present mode', async ({ page }) => {
     await s.toolbar('Present').click();
     await expect(page.getByRole('button', { name: 'Exit (Esc)' })).toBeVisible();
     await page.keyboard.press('Escape');
@@ -116,15 +112,7 @@ test.describe('slides: comments, clipboard, read-only', () => {
     await expect(page.getByText('Please tighten the title')).toBeVisible();
   });
 
-  test('SL-CLP-01 copy and paste an element (keyboard)', async ({ page, browserName }) => {
-    test.skip(
-      browserName !== 'chromium',
-      'fullscreen exit / OS clipboard behave differently outside Chromium (not yet investigated)'
-    );
-    test.skip(
-      browserName === 'webkit',
-      'WebKit headless does not expose the OS clipboard to keyboard copy/paste'
-    );
+  test('SL-CLP-01 copy and paste an element (keyboard)', async ({ page }) => {
     await s.gotoSlide(2);
     const shape = await s.firstOfType('shape');
     const n = (await s.els()).length;
@@ -134,18 +122,7 @@ test.describe('slides: comments, clipboard, read-only', () => {
     await expect.poll(async () => (await s.els()).length).toBe(n + 1);
   });
 
-  test('SL-CLP-02 cut removes the element and paste brings it back', async ({
-    page,
-    browserName,
-  }) => {
-    test.skip(
-      browserName !== 'chromium',
-      'fullscreen exit / OS clipboard behave differently outside Chromium (not yet investigated)'
-    );
-    test.skip(
-      browserName === 'webkit',
-      'WebKit headless does not expose the OS clipboard to keyboard copy/paste'
-    );
+  test('SL-CLP-02 cut removes the element and paste brings it back', async ({ page }) => {
     await s.gotoSlide(2);
     const shape = await s.firstOfType('shape');
     const n = (await s.els()).length;

@@ -71,6 +71,7 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
 
   // Bug: there is no Tab key binding for table cells, so Tab does not move to the
   // next cell (Word / Google Docs behaviour); it leaves the caret in place.
+  // https://github.com/b32n/spindle/issues/70
   test.fixme('D-INS-06 Tab moves to the next table cell', async ({ page }) => {
     await doc.clearAndFocus();
     await doc.typeText('x');
