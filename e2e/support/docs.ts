@@ -54,6 +54,23 @@ export class DocsPage {
   }
 
   /**
+   * Click the rendered line whose text starts with `prefix`. Unlike
+   * `clickText`, this tolerates remote-cursor name labels that collaborators
+   * add inside the line (which break exact text matching).
+   */
+  async clickLine(prefix: string) {
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await this.pages
+      .locator('.line')
+      .filter({ hasText: new RegExp('^' + escaped) })
+      .first()
+      .click();
+    await expect(this.editor).toBeFocused();
+    await this.waitForCaretIn(prefix);
+    await this.settle();
+  }
+
+  /**
    * Wait for the click's selection to be mirrored into the hidden editor's DOM.
    * ProseMirror applies it ~20ms after focus (a timer in prosemirror-view), and
    * native keys such as Home/End act on that DOM selection, so sending them
@@ -84,6 +101,7 @@ export class DocsPage {
     await this.page.keyboard.type(text);
     await expect(this.editor).toContainText(text);
     // Caret must have been mirrored to the end of what we typed before further native keys.
+    // (Content after the caret, e.g. a collaborator's cursor label, is allowed.)
     await this.page.waitForFunction((t) => {
       const sel = window.getSelection();
       const n = sel?.anchorNode;
@@ -91,8 +109,7 @@ export class DocsPage {
         !!sel &&
         !!n &&
         sel.isCollapsed &&
-        (n.textContent ?? '').endsWith(t) &&
-        sel.anchorOffset === (n.textContent ?? '').length
+        (n.textContent ?? '').slice(0, sel.anchorOffset).endsWith(t)
       );
     }, text);
     await this.settle();

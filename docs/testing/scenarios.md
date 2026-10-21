@@ -132,7 +132,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-COL-03 | concurrent typing at the same spot converges to identical text | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-04 | formatting propagates | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-05 | a late joiner receives the current document | covered |  |  | `e2e/docs/collab.spec.ts` |
-| D-COL-05b | a late joiner never ends up with duplicated seed content | fixme + bug |  | under CPU load (e.g. several workers) a late joiner occasionally ends up with the demo seed content twice (the whole document repeated after the real one) - observed ~2 in 10 runs of this scenario with 4 workers. Joiners are meant to seed nothing (binding.ts "Connect + seed"); suspect the demo's StrictMode double-mount racing two attachCollab() calls on the same room / IndexedDB persistence key, or a connect() that resolves before the replay is applied. Not reproducible serially. | `e2e/docs/collab.spec.ts` |
+| D-COL-05b | a late joiner never ends up with duplicated seed content | fixme + bug |  | a late joiner occasionally ends up with the demo seed content twice (the whole document repeated after the real one), even after the relay verifiably holds the creator's seed (~2 in 4 runs with 4 workers; not seen in single serial runs of the happy path). Joiners are meant to seed nothing (binding.ts "Connect + seed"); suspect connect() resolving before the replayed frames are applied. | `e2e/docs/collab.spec.ts` |
 | D-COL-06 | list and structural edits propagate | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-07 | two-pane in-process demo mounts two editors | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-TXT-01 | demo document renders with header/footer placeholders | covered | yes |  | `e2e/docs/editing.spec.ts` |
@@ -179,10 +179,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 |---|---|---|---|---|---|
 | SL-COL-01 | an element moved by one client moves for the other | covered | yes |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-02 | inserted elements and deletions propagate | covered |  |  | `e2e/slides/collab.spec.ts` |
-| SL-COL-03 | new slides appear in both filmstrips | fixme + bug |  | a peer that joins an existing slides room ends up with the demo seed deck duplicated (3 + 3 slides + the new one = 7 thumbnails in both peers), so slide-count / slide-index based assertions are unreliable. The docs editor shows the same symptom intermittently (D-COL-05b). Joiners are meant to seed nothing (see docs-core/slides-core collab binding "Connect + seed"). | `e2e/slides/collab.spec.ts` |
+| SL-COL-03 | new slides appear in both filmstrips | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-04 | text edits propagate | covered |  |  | `e2e/slides/collab.spec.ts` |
-| SL-COL-05 | a late joiner receives the current deck without duplicated slides | fixme + bug |  | a peer that joins an existing slides room ends up with the demo seed deck duplicated (3 + 3 slides + the new one = 7 thumbnails in both peers), so slide-count / slide-index based assertions are unreliable. The docs editor shows the same symptom intermittently (D-COL-05b). Joiners are meant to seed nothing (see docs-core/slides-core collab binding "Connect + seed"). | `e2e/slides/collab.spec.ts` |
-| SL-COL-06 | concurrent moves of different elements converge | fixme + bug |  | a peer that joins an existing slides room ends up with the demo seed deck duplicated (3 + 3 slides + the new one = 7 thumbnails in both peers), so slide-count / slide-index based assertions are unreliable. The docs editor shows the same symptom intermittently (D-COL-05b). Joiners are meant to seed nothing (see docs-core/slides-core collab binding "Connect + seed"). | `e2e/slides/collab.spec.ts` |
+| SL-COL-05 | a late joiner receives the current deck without duplicated slides | fixme + bug |  | same joiner-seed duplication as docs D-COL-05b: a late joiner occasionally ends up with the demo deck seeded twice (7 thumbnails instead of 4), even after the relay holds the creator's seed (~1 in 4 runs with 4 workers). | `e2e/slides/collab.spec.ts` |
+| SL-COL-06 | concurrent moves of different elements converge | fixme + bug |  | same joiner-seed duplication as SL-COL-05: when the second peer's deck is seeded twice, slide 2 has more shapes than the test expects (flaky, ~1 in 3 runs). | `e2e/slides/collab.spec.ts` |
 | SL-COL-07 | the in-process two-pane demo mounts two editors | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-LOAD-01 | demo deck loads with three slides | covered | yes |  | `e2e/slides/editing.spec.ts` |
 | SL-FLM-01 | clicking a filmstrip thumbnail switches slides | covered | yes |  | `e2e/slides/editing.spec.ts` |
@@ -237,7 +237,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 193
-- fixme + bug: 6
+- covered: 194
+- fixme + bug: 5
 - not covered: 6
 - n/a: 8

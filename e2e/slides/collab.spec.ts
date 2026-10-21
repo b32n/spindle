@@ -1,5 +1,6 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { SlidesPage, MOD } from '../support/slides';
+import { roomName, waitForRoomSeed } from '../support/collab';
 
 const WS = 'ws://127.0.0.1:1234';
 
@@ -16,8 +17,9 @@ test.describe('slides: two-client live collaboration', () => {
   test('SL-COL-01 an element moved by one client moves for the other @smoke', async ({
     browser,
   }, info) => {
-    const room = `slides-${info.testId}`;
+    const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await a.s.gotoSlide(2);
     await b.s.gotoSlide(2);
@@ -30,8 +32,9 @@ test.describe('slides: two-client live collaboration', () => {
   });
 
   test('SL-COL-02 inserted elements and deletions propagate', async ({ browser }, info) => {
-    const room = `slides-${info.testId}`;
+    const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     const n = (await b.s.els()).length;
     await a.s.toolbar('Table (3×3)').click();
@@ -43,14 +46,10 @@ test.describe('slides: two-client live collaboration', () => {
     await b.context.close();
   });
 
-  // Bug: a peer that joins an existing slides room ends up with the demo seed
-  // deck duplicated (3 + 3 slides + the new one = 7 thumbnails in both peers),
-  // so slide-count / slide-index based assertions are unreliable. The docs
-  // editor shows the same symptom intermittently (D-COL-05b). Joiners are meant
-  // to seed nothing (see docs-core/slides-core collab binding "Connect + seed").
-  test.fixme('SL-COL-03 new slides appear in both filmstrips', async ({ browser }, info) => {
-    const room = `slides-${info.testId}`;
+  test('SL-COL-03 new slides appear in both filmstrips', async ({ browser }, info) => {
+    const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await a.page.getByRole('button', { name: 'New slide' }).click();
     await expect(a.s.thumbs).toHaveCount(4);
@@ -60,8 +59,9 @@ test.describe('slides: two-client live collaboration', () => {
   });
 
   test('SL-COL-04 text edits propagate', async ({ browser }, info) => {
-    const room = `slides-${info.testId}`;
+    const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     const text = await a.s.firstOfType('text');
     const c = await a.s.elementCenter(text.id);
@@ -77,16 +77,15 @@ test.describe('slides: two-client live collaboration', () => {
     await b.context.close();
   });
 
-  // Bug: a peer that joins an existing slides room ends up with the demo seed
-  // deck duplicated (3 + 3 slides + the new one = 7 thumbnails in both peers),
-  // so slide-count / slide-index based assertions are unreliable. The docs
-  // editor shows the same symptom intermittently (D-COL-05b). Joiners are meant
-  // to seed nothing (see docs-core/slides-core collab binding "Connect + seed").
+  // Bug: same joiner-seed duplication as docs D-COL-05b: a late joiner occasionally ends up
+  // with the demo deck seeded twice (7 thumbnails instead of 4), even after the relay
+  // holds the creator's seed (~1 in 4 runs with 4 workers).
   test.fixme('SL-COL-05 a late joiner receives the current deck without duplicated slides', async ({
     browser,
   }, info) => {
-    const room = `slides-${info.testId}`;
+    const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     await a.page.getByRole('button', { name: 'New slide' }).click();
     await expect(a.s.thumbs).toHaveCount(4);
     const witness = await peer(browser, room, 'Bob');
@@ -98,16 +97,14 @@ test.describe('slides: two-client live collaboration', () => {
     await late.context.close();
   });
 
-  // Bug: a peer that joins an existing slides room ends up with the demo seed
-  // deck duplicated (3 + 3 slides + the new one = 7 thumbnails in both peers),
-  // so slide-count / slide-index based assertions are unreliable. The docs
-  // editor shows the same symptom intermittently (D-COL-05b). Joiners are meant
-  // to seed nothing (see docs-core/slides-core collab binding "Connect + seed").
+  // Bug: same joiner-seed duplication as SL-COL-05: when the second peer's deck is
+  // seeded twice, slide 2 has more shapes than the test expects (flaky, ~1 in 3 runs).
   test.fixme('SL-COL-06 concurrent moves of different elements converge', async ({
     browser,
   }, info) => {
-    const room = `slides-${info.testId}`;
+    const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await a.s.gotoSlide(2);
     await b.s.gotoSlide(2);

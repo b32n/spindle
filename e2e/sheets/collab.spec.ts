@@ -1,5 +1,6 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { SheetsPage } from '../support/sheets';
+import { roomName, waitForRoomSeed } from '../support/collab';
 
 const WS = 'ws://127.0.0.1:1234';
 
@@ -16,8 +17,9 @@ test.describe('sheets: two-client live collaboration', () => {
   test('S-COL-01 an edit made by one client appears in the other @smoke', async ({
     browser,
   }, info) => {
-    const room = `sheets-${info.testId}`;
+    const room = roomName('sheets', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await a.sheet.enter(6, 0, 'from alice');
     await b.sheet.expectValue(6, 0, 'from alice');
@@ -28,8 +30,9 @@ test.describe('sheets: two-client live collaboration', () => {
   });
 
   test('S-COL-02 concurrent edits to different cells converge', async ({ browser }, info) => {
-    const room = `sheets-${info.testId}`;
+    const room = roomName('sheets', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await Promise.all([a.sheet.enter(10, 0, 'A-side'), b.sheet.enter(11, 0, 'B-side')]);
     for (const p of [a, b]) {
@@ -43,8 +46,9 @@ test.describe('sheets: two-client live collaboration', () => {
   test('S-COL-03 concurrent edits to the same cell converge on one value', async ({
     browser,
   }, info) => {
-    const room = `sheets-${info.testId}`;
+    const room = roomName('sheets', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await Promise.all([a.sheet.enter(12, 2, 'alice'), b.sheet.enter(12, 2, 'bob')]);
     await expect
@@ -58,8 +62,9 @@ test.describe('sheets: two-client live collaboration', () => {
   });
 
   test('S-COL-04 formatting and formulas propagate', async ({ browser }, info) => {
-    const room = `sheets-${info.testId}`;
+    const room = roomName('sheets', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await a.sheet.enter(8, 0, '=B2+B3');
     await b.sheet.expectValue(8, 0, 30);
@@ -74,8 +79,9 @@ test.describe('sheets: two-client live collaboration', () => {
   });
 
   test('S-COL-05 a late joiner receives existing state', async ({ browser }, info) => {
-    const room = `sheets-${info.testId}`;
+    const room = roomName('sheets', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     await a.sheet.enter(9, 0, 'history');
     const late = await peer(browser, room, 'Carol');
     await late.sheet.expectValue(9, 0, 'history');
@@ -86,8 +92,9 @@ test.describe('sheets: two-client live collaboration', () => {
   });
 
   test('S-COL-06 row/column clears propagate', async ({ browser }, info) => {
-    const room = `sheets-${info.testId}`;
+    const room = roomName('sheets', info.testId);
     const a = await peer(browser, room, 'Alice');
+    await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await b.sheet.expectValue(1, 1, 10);
     await a.sheet.click(await a.sheet.colHeaderCenter(1));
@@ -100,8 +107,8 @@ test.describe('sheets: two-client live collaboration', () => {
   });
 
   test('S-COL-07 separate rooms are isolated', async ({ browser }, info) => {
-    const a = await peer(browser, `sheets-${info.testId}-1`, 'Alice');
-    const b = await peer(browser, `sheets-${info.testId}-2`, 'Bob');
+    const a = await peer(browser, roomName('sheets', info.testId) + '-1', 'Alice');
+    const b = await peer(browser, roomName('sheets', info.testId) + '-2', 'Bob');
     await a.sheet.enter(6, 0, 'only in room 1');
     await a.sheet.expectValue(6, 0, 'only in room 1');
     await expect.poll(() => b.sheet.cellValue(6, 0)).toBe(null);
