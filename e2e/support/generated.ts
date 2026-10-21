@@ -11,16 +11,12 @@ export function bigCsv(rows: number): Buffer {
 
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
-/** A minimal .docx of `paragraphs` one-to-two line paragraphs, with a heading every 40th. */
+/** A minimal .docx of `paragraphs` one-to-two line paragraphs,. */
 export async function bigDocx(paragraphs: number): Promise<Buffer> {
   const body: string[] = [];
   for (let i = 1; i <= paragraphs; i++) {
     const text = `Paragraph ${i}: the quick brown fox jumps over the lazy dog and keeps running along the river bank.`;
-    body.push(
-      i % 40 === 1
-        ? `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Section ${Math.ceil(i / 40)}</w:t></w:r></w:p>`
-        : `<w:p><w:r><w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`
-    );
+    body.push(`<w:p><w:r><w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`);
   }
   const zip = new JSZip();
   zip.file(
