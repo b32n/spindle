@@ -286,6 +286,11 @@ function toHeaderFooterInline(item: HeaderFooterInlineContent, title: string): D
  */
 export async function importFromDocx(bytes: Uint8Array, document: DocumentImpl): Promise<{ warnings: string[] }> {
   const result = await importDocx(bytes);
+  // A zip that isn't a .docx imports as "no sections" plus a warning; applying that would wipe
+  // the open document, so refuse it before touching the document.
+  if (result.sections.length === 0) {
+    throw new Error(result.warnings[0] ?? 'The file contains no document content.');
+  }
   const data = toDocumentData(result, document);
   document.setData(data);
   return { warnings: result.warnings };

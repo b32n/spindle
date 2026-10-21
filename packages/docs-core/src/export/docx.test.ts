@@ -239,6 +239,16 @@ describe('exportToDocx', () => {
 });
 
 describe('importFromDocx', () => {
+  it('rejects a zip that is not a .docx and leaves the open document untouched', async () => {
+    const doc = docWith({
+      sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'old', type: 'paragraph', content: [{ type: 'text', text: 'Original' }] }] }],
+    });
+    const zip = new JSZip();
+    zip.file('hello.txt', 'not a docx');
+    await expect(importFromDocx(await zip.generateAsync({ type: 'uint8array' }), doc)).rejects.toThrow(/word\/document\.xml is missing/);
+    expect(doc.getData().sections[0].blocks[0]).toMatchObject({ id: 'old' });
+  });
+
   it('replaces the document contents and preserves id/createdAt', async () => {
     const doc = docWith({
       id: 'doc',

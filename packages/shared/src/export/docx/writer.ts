@@ -140,7 +140,8 @@ class DocxBuilder {
     }
     const ext = match[1].toLowerCase();
     const type = ext === 'jpeg' ? 'jpg' : (ext as 'png' | 'jpg' | 'gif' | 'bmp');
-    const data = Buffer.from(match[2], 'base64');
+    // atob + Uint8Array, not Buffer: Buffer does not exist in browsers.
+    const data = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
     return new ImageRun({
       type,
       data,
@@ -293,6 +294,8 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
     numbering: numberingConfig(),
     sections: input.sections.map((s) => builder.buildSection(s)),
   });
-  const buffer = await Packer.toBuffer(doc);
+  // toArrayBuffer, not toBuffer: JSZip's "nodebuffer" output does not exist in browsers,
+  // so toBuffer made every in-browser DOCX download fail.
+  const buffer = await Packer.toArrayBuffer(doc);
   return { bytes: new Uint8Array(buffer), warnings: builder.warnings };
 }

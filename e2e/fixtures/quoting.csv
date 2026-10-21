@@ -1,0 +1,8 @@
+id,name,notes,amount
+1,"Smith, John","He said ""hello"" twice",1234.5
+2,"Multi
+line cell","Line one
+Line two",-7
+3,plain,,0.1
+4,"  padded  ","trailing comma,",007
+5,"=1+1 text","quote "" at end""",1e3

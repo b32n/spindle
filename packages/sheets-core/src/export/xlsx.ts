@@ -152,6 +152,9 @@ function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['st
  */
 export async function importFromXlsx(bytes: Uint8Array, workbook: WorkbookImpl): Promise<{ warnings: string[] }> {
   const result = await importXlsx(bytes);
+  // setData() replaces the whole workbook; a file with no worksheets (e.g. a zip that isn't
+  // really a workbook) would leave it with no sheets at all, so refuse it up front.
+  if (result.sheets.length === 0) throw new Error('The file contains no worksheets.');
   const { data, sheetIds } = toWorkbookData(result, workbook);
   workbook.setData(data);
   result.sheets.forEach((sheet, i) => {
