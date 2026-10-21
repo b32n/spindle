@@ -34,6 +34,7 @@ export class DocsPage {
     // keystrokes sent before that land nowhere.
     await expect(this.editor).toBeFocused();
     if (typeof text === 'string') await this.waitForCaretIn(text);
+    else await this.waitForCaretIn(text.source);
     await this.settle();
   }
 

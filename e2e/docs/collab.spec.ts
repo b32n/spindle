@@ -33,7 +33,7 @@ test.describe('docs: two-client live collaboration', () => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
-    await a.doc.clickText('Welcome to Spindle Docs');
+    await a.doc.clickText(/Welcome to Spindle Docs/);
     await a.doc.press('End');
     await a.doc.typeText(' from Alice');
     await expect.poll(() => headingText(b.doc)).toBe('Welcome to Spindle Docs from Alice');
@@ -72,17 +72,19 @@ test.describe('docs: two-client live collaboration', () => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
-    await a.doc.clickText('Welcome to Spindle Docs');
+    await a.doc.clickText(/Welcome to Spindle Docs/);
     await a.doc.press('End');
-    await b.doc.clickText('Welcome to Spindle Docs');
+    // Alice's remote cursor label is now part of the rendered heading text, so
+    // match loosely rather than exactly.
+    await b.doc.clickText(/Welcome to Spindle Docs/);
     await b.doc.press('End');
     await Promise.all([a.page.keyboard.type('-aaa'), b.page.keyboard.type('-bbb')]);
     await expect
       .poll(async () => {
         const [x, y] = [await headingText(a.doc), await headingText(b.doc)];
-        return x === y && x.includes('aaa') && x.includes('bbb');
+        return x === y && x.includes('aaa') && x.includes('bbb') ? 'converged' : `${x} <> ${y}`;
       })
-      .toBe(true);
+      .toBe('converged');
     await a.context.close();
     await b.context.close();
   });
@@ -91,7 +93,7 @@ test.describe('docs: two-client live collaboration', () => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
     const b = await peer(browser, room, 'Bob');
-    await a.doc.clickText('Welcome to Spindle Docs');
+    await a.doc.clickText(/Welcome to Spindle Docs/);
     await a.doc.press(`${MOD}+a`);
     await a.page.keyboard.press(`${MOD}+i`);
     await expect(b.doc.editor.locator('h1 em').first()).toContainText('Welcome to Spindle Docs');
@@ -102,7 +104,7 @@ test.describe('docs: two-client live collaboration', () => {
   test('D-COL-05 a late joiner receives the current document', async ({ browser }, info) => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
-    await a.doc.clickText('Welcome to Spindle Docs');
+    await a.doc.clickText(/Welcome to Spindle Docs/);
     await a.doc.press('End');
     await a.doc.typeText(' (edited)');
     // A witness confirms the edit reached the relay before the late joiner connects.
@@ -127,7 +129,7 @@ test.describe('docs: two-client live collaboration', () => {
   }, info) => {
     const room = `docs-${info.testId}`;
     const a = await peer(browser, room, 'Alice');
-    await a.doc.clickText('Welcome to Spindle Docs');
+    await a.doc.clickText(/Welcome to Spindle Docs/);
     await a.doc.press('End');
     await a.doc.typeText(' (edited)');
     const witness = await peer(browser, room, 'Bob');

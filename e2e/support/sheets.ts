@@ -82,7 +82,12 @@ export class SheetsPage {
   /** Type into the active cell (starts edit mode) and commit with Enter. */
   async type(text: string, commit: 'Enter' | 'Tab' | 'Escape' | null = 'Enter') {
     await this.page.keyboard.type(text);
-    if (commit) await this.page.keyboard.press(commit);
+    if (commit) {
+      await this.page.keyboard.press(commit);
+      // Committing hands focus back to the canvas on the next frame; keys sent
+      // before that are lost.
+      await expect(this.canvas).toBeFocused();
+    }
   }
   async enter(row: number, col: number, text: string) {
     await this.select(row, col);
