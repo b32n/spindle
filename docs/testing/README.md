@@ -78,6 +78,21 @@ The demos expose `window.__spindle` purely as a test hook (no network, no teleme
   adding a late joiner. Compare text with the remote-cursor widgets stripped (docs `headingText`).
 - Chromium-only features (real clipboard read/write) use `test.skip(browserName !== 'chromium', reason)`.
 
+## Resilience, large data and touch
+
+- **Collaboration outages** (`e2e/*/resilience.spec.ts`): `e2e/support/relay.ts` has `NetworkProxy`
+  (a TCP proxy in front of the shared relay: `stop()`/`start()` simulate an outage, `drop()` cuts
+  open connections; the relay keeps its room) and `RelayProcess` (the real `examples/collab-server`
+  as a child process you can `kill()` and `start()` again, which loses the room like a crash).
+  Point the demo at them with `?ws=<proxy.url>`. Wait for the status text (`· offline` /
+  `· connected`) instead of sleeping.
+- **Large data** (`*/large-data.spec.ts`): inputs are generated at test time (`e2e/support/generated.ts`).
+  Budgets are deliberately generous (at least ~5x the measured time) and assert *usability*, not speed;
+  the measured numbers are logged (`[S-BIG-01] load ... ms`). Tighten them only with data.
+- **Touch** (`e2e/mobile/*.spec.ts`, tagged `@mobile`): run by the `mobile-chrome` (Pixel 7) and
+  `mobile-safari` (iPhone 14) projects only; the desktop projects ignore that folder. Use
+  `page.touchscreen.tap`; raw drags need CDP `Input.dispatchTouchEvent` (Chromium only).
+
 ## Adding a scenario
 
 1. Pick the area file in `e2e/<editor>/` (or add one) and an unused ID: `S-` sheets, `D-` docs, `SL-` slides,

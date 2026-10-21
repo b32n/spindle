@@ -511,10 +511,9 @@ function WsDemo({
     let cancelled = false;
     let provider: WebSocketProvider | null = null;
     let document: DocumentImpl | null = null;
-    // Start on the next tick: React StrictMode (dev) mounts, cleans up and re-mounts
-    // synchronously, and an attach that has already started cannot be cancelled, so the
-    // aborted first attempt would still connect to the empty room and seed it a second time.
-    const startTimer = window.setTimeout(async () => {
+    // StrictMode's discarded first mount calls detachCollab(), which aborts this attach
+    // before it can seed the room (see #72), so no start-up delay is needed.
+    void (async () => {
       try {
         document = new DocumentImpl();
         document.setData(initialData);
@@ -534,10 +533,9 @@ function WsDemo({
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
       }
-    }, 0);
+    })();
     return () => {
       cancelled = true;
-      window.clearTimeout(startTimer);
       try { document?.detachCollab(); } catch { /* ignore */ }
     };
   }, [initialData, config.url, config.roomId, config.identity]);

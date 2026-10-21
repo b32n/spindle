@@ -11,7 +11,7 @@
 // convenience but are LOCAL ONLY — never mirrored into the CRDT doc (a hard
 // project rule).
 
-import { EventEmitter } from '@b32nio/spindle-shared';
+import { EventEmitter, createAttachAbortError } from '@b32nio/spindle-shared';
 import { indexBetween, indexesBetween, sortByIndex } from './scene/fractional-index';
 import { buildPlaceholderElement } from './theme/materialize';
 import type { PlaceholderMeta } from './scene/types';
@@ -96,6 +96,8 @@ export class DeckImpl {
   private isRestoring = false;
   /** Set by attachCollab. Non-null means a Y.Doc mirror is active. */
   private collabHandle: CollabHandle | null = null;
+  /** An attachCollab() that has not resolved yet; detachCollab() aborts it. */
+  private pendingAttach: { abort: AbortController; promise: Promise<CollabHandle> } | null = null;
 
   constructor(id?: string, title = 'Untitled deck') {
     this.id = id ?? generateId();
@@ -970,13 +972,30 @@ export class DeckImpl {
   /** Attach a Yjs mirror over a provider. Lazy-loads ./collab (keeps Yjs out of the base bundle). */
   async attachCollab(provider: CollabProvider, identity: CollabIdentity, options?: AttachCollabOptions): Promise<CollabHandle> {
     if (this.collabHandle) return this.collabHandle;
-    const { attachCollabToDeck } = await import('./collab/binding');
-    this.collabHandle = await attachCollabToDeck(this, provider, identity, options);
-    this.history.clear(); // collab uses Y.UndoManager
-    return this.collabHandle;
+    if (this.pendingAttach) return this.pendingAttach.promise;
+    // detachCollab() aborts this controller, so an attach still connecting can
+    // neither seed the room nor leave a live socket behind (rejects with AbortError).
+    const abort = new AbortController();
+    const promise = (async () => {
+      const { attachCollabToDeck } = await import('./collab/binding');
+      if (abort.signal.aborted) throw createAttachAbortError();
+      const handle = await attachCollabToDeck(this, provider, identity, { ...options, signal: abort.signal });
+      this.collabHandle = handle;
+      this.history.clear(); // collab uses Y.UndoManager
+      return handle;
+    })();
+    const pending = { abort, promise };
+    this.pendingAttach = pending;
+    try {
+      return await promise;
+    } finally {
+      if (this.pendingAttach === pending) this.pendingAttach = null;
+    }
   }
 
   detachCollab(): void {
+    this.pendingAttach?.abort.abort();
+    this.pendingAttach = null;
     this.collabHandle?.detach();
     this.collabHandle = null;
   }

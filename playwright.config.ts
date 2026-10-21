@@ -34,9 +34,14 @@ export default defineConfig({
     viewport: { width: 1280, height: 800 },
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: '**/mobile/**',
+    },
     {
       name: 'firefox',
+      testIgnore: '**/mobile/**',
       // Firefox/WebKit do not support the clipboard-read/write permissions.
       use: { ...devices['Desktop Firefox'], permissions: [] },
     },
@@ -45,7 +50,19 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'], permissions: [] },
       // The docs editor drives a hidden ProseMirror whose selection/focus timing
       // differs in WebKit (most typing scenarios fail there); tracked as a known gap.
-      testIgnore: '**/docs/**',
+      testIgnore: ['**/docs/**', '**/mobile/**'],
+    },
+    // Touch/mobile smoke: a small @mobile set per app (e2e/mobile) on emulated phones. These
+    // run in the same shards as the desktop projects, so CI time grows by seconds, not a job.
+    {
+      name: 'mobile-chrome',
+      testMatch: '**/mobile/**/*.spec.ts',
+      use: { ...devices['Pixel 7'], permissions: [] },
+    },
+    {
+      name: 'mobile-safari',
+      testMatch: '**/mobile/**/*.spec.ts',
+      use: { ...devices['iPhone 14'], permissions: [] },
     },
   ],
   webServer: [

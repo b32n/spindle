@@ -23,6 +23,7 @@ import * as encoding from 'lib0/encoding';
 import * as decoding from 'lib0/decoding';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
+import { connectAbortable, createAttachAbortError } from '@b32nio/spindle-shared';
 
 import {
   getDeckYTypes,
@@ -59,6 +60,12 @@ export interface AttachCollabOptions {
   roomId?: string;
   /** Mirror the Y.Doc to IndexedDB under this key (browser-only). */
   persistenceKey?: string;
+  /**
+   * Aborts an in-flight attach: it tears down everything it set up, never seeds
+   * the room, and rejects with an `AbortError`. The core classes pass one so that
+   * `detachCollab()` cancels a pending `attachCollab()`.
+   */
+  signal?: AbortSignal;
 }
 
 const SCALAR_KEYS = new Set(['containerId', 'type', 'x', 'y', 'w', 'h', 'rotation', 'index', 'groupId', 'locked', 'opacity', 'placeholder']);
@@ -76,6 +83,11 @@ export async function attachCollabToDeck(
   if (options.persistenceKey) {
     persistence = new IndexeddbPersistence(options.persistenceKey, ydoc);
     await persistence.whenSynced;
+    if (options.signal?.aborted) {
+      void persistence.destroy();
+      ydoc.destroy();
+      throw createAttachAbortError();
+    }
   }
 
   const y = getDeckYTypes(ydoc);
@@ -308,7 +320,21 @@ export async function attachCollabToDeck(
     applyAwarenessUpdate(awareness, payload, provider);
   });
 
-  await provider.connect(roomId);
+  try {
+    await connectAbortable(provider, roomId, options.signal);
+  } catch (err) {
+    // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
+    ydoc.off('update', onDocUpdate);
+    awareness.off('update', onAwarenessUpdate);
+    unsubDoc();
+    unsubAwareness();
+    undoManager.destroy();
+    awareness.destroy();
+    provider.disconnect();
+    void persistence?.destroy();
+    ydoc.destroy();
+    throw err;
+  }
 
   // connect() replays the room's existing state before it resolves. Seed only
   // if never seeded (a persistent marker) AND the room is empty — a joiner (or
