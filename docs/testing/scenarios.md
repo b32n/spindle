@@ -30,6 +30,20 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-COL-06 | row/column clears propagate | covered |  |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-07 | separate rooms are isolated | covered |  |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-08 | the in-process two-pane demo mounts two independent editors | covered |  |  | `e2e/sheets/collab.spec.ts` |
+| S-FMC-02 | Number category: decimal places apply to the cell and the preview shows them | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-FMC-03 | Date/Time category: a date pattern is stored on the cell | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-FMC-04 | Custom category: a supported pattern is stored and previewed | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-FMC-04b | Custom category: a pattern with a literal suffix renders 7.00 pts | fixme + bug |  | Custom number formats are a stub: only #,##0.00, 0.0% and MM/DD/YYYY are recognised, any other pattern prints the pattern with every 0 replaced by the value, e.g. 7.77" pts" (https://github.com/b32n/spindle/issues/83). | `e2e/sheets/depth.spec.ts` |
+| S-FMC-05 | Format Cells applies to the whole selected range, and undo reverts it | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-CLR-01 | fill colour and text colour are stored on the whole selection | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-BRD-01 | border menu: all / bottom / none set and clear the cell borders | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-FNT-01 | font family from the picker is stored on the cell | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-TAB-02 | double-click renames a sheet; Escape cancels; the data stays | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-TAB-03 | deleting a sheet removes it and falls back to the remaining one; the last sheet cannot be deleted | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-MRG-02 | editing and selecting through a merged region uses its top-left cell | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-UND-01 | undo / redo of insert row, delete row and merge | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-UND-02 | undo of a sort restores the original order | covered |  |  | `e2e/sheets/depth.spec.ts` |
+| S-UND-03 | undo of a column filter shows the hidden rows again | covered |  |  | `e2e/sheets/depth.spec.ts` |
 | S-FLT-01 | filter a column by value hides non-matching rows; clear restores them | covered | yes |  | `e2e/sheets/dialogs-and-readonly.spec.ts` |
 | S-FLT-02 | filter with Greater than | covered |  |  | `e2e/sheets/dialogs-and-readonly.spec.ts` |
 | S-FLT-03 | Cancel leaves rows untouched | covered |  |  | `e2e/sheets/dialogs-and-readonly.spec.ts` |
@@ -170,6 +184,11 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-COL-05b | a late joiner never ends up with duplicated seed content | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-06 | list and structural edits propagate | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-07 | two-pane in-process demo mounts two editors | covered |  |  | `e2e/docs/collab.spec.ts` |
+| D-TBL-01 | table context menu inserts rows and columns where asked and deletes them | covered |  |  | `e2e/docs/depth.spec.ts` |
+| D-LNK-01 | an existing link can be edited (Update) and removed | covered |  |  | `e2e/docs/depth.spec.ts` |
+| D-PGS-03 | page size A4 changes the page dimensions | covered |  |  | `e2e/docs/depth.spec.ts` |
+| D-PGS-04 | wider margins narrow the text column and re-flow onto more pages | covered |  |  | `e2e/docs/depth.spec.ts` |
+| D-FMT-12 | subscript, text colour, highlight and font family apply to the selection | covered |  |  | `e2e/docs/depth.spec.ts` |
 | D-TXT-01 | demo document renders with header/footer placeholders | covered | yes |  | `e2e/docs/editing.spec.ts` |
 | D-TXT-02 | typing inserts text at the caret | covered | yes |  | `e2e/docs/editing.spec.ts` |
 | D-TXT-03 | Enter splits a paragraph; Backspace merges it back | covered |  |  | `e2e/docs/editing.spec.ts` |
@@ -246,6 +265,15 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-COL-05 | a late joiner receives the current deck without duplicated slides | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-06 | concurrent moves of different elements converge | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-07 | the in-process two-pane demo mounts two editors | covered |  |  | `e2e/slides/collab.spec.ts` |
+| SL-TXT-04 | italic, underline and strikethrough from the format bar apply to every run and toggle off | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-TXT-05 | font size and text colour apply to the selected text | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-TXT-06 | numbered and bulleted lists, alignment and line spacing change the paragraphs | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-THM-01 | choosing another theme re-colours the deck and is undoable | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-LAY-01 | New slide with a chosen layout creates that layout's placeholders | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-ALN-01 | align left / right / top / bottom / centre / middle line the selection up | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-ALN-02 | a single element aligns to the slide edges | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-ALN-03 | distribute horizontally and vertically equalises the gaps | covered |  |  | `e2e/slides/depth.spec.ts` |
+| SL-SNP-01 | dragging near another element snaps to its edge and shows a guide | covered |  |  | `e2e/slides/depth.spec.ts` |
 | SL-LOAD-01 | demo deck loads with three slides | covered | yes |  | `e2e/slides/editing.spec.ts` |
 | SL-FLM-01 | clicking a filmstrip thumbnail switches slides | covered | yes |  | `e2e/slides/editing.spec.ts` |
 | SL-FLM-02 | arrow keys navigate slides when nothing is selected | covered |  |  | `e2e/slides/editing.spec.ts` |
@@ -321,7 +349,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 268
-- fixme + bug: 10
+- covered: 295
+- fixme + bug: 11
 - not covered: 8
 - n/a: 6
