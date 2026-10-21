@@ -103,10 +103,14 @@ export function PresentMode({ onExit }: { onExit: () => void }): React.ReactElem
   onExitRef.current = onExit;
   useEffect(() => {
     const el = containerRef.current;
-    let entered = false;
+    // Any fullscreenchange that leaves `el` out of fullscreen means the user left fullscreen
+    // (Esc is consumed by the browser). Do not wait to have *seen* the enter event first: the
+    // browser may dispatch the enter and exit events back to back after a fast Esc, and by then
+    // `document.fullscreenElement` is already null for both, so tracking "entered" misses the exit.
+    // A denied request only fires `fullscreenerror`, never `fullscreenchange`, so this does not
+    // end the presentation when fullscreen is unavailable.
     const onFullscreenChange = () => {
-      if (document.fullscreenElement === el) entered = true;
-      else if (entered) onExitRef.current();
+      if (document.fullscreenElement !== el) onExitRef.current();
     };
     document.addEventListener('fullscreenchange', onFullscreenChange);
     el?.requestFullscreen?.().catch(() => {});
