@@ -21,17 +21,17 @@ const EDITORS = {
 
 /** Scenarios with no E2E test: status is `n/a` (nothing to test) or `not covered` (todo). */
 const GAPS = [
-  ['sheets', 'S-GAP-01', 'Import / export (CSV, XLSX) UI', 'not covered', 'The toolbar has Open / Download (`fileActions`, enabled in the demo); E2E coverage is pending. Format round-trips are covered by sheets-core unit tests.'],
+  ['sheets', 'S-GAP-01', 'Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images)', 'not covered', 'Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read.'],
   ['sheets', 'S-GAP-02', 'Ctrl/Cmd-click multi-range selection', 'n/a', 'The grid supports a single selection range only.'],
   ['sheets', 'S-GAP-03', 'HTML clipboard paste', 'n/a', 'Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path.'],
   ['sheets', 'S-GAP-04', 'Touch gestures', 'not covered', 'Touch / mobile is untested (see the maintenance plan).'],
   ['sheets', 'S-GAP-05', 'Formula engine semantics (146 functions)', 'n/a', 'Deliberately kept in fast unit tests (sheets-core).'],
-  ['docs', 'D-GAP-01', 'Import / export (DOCX) UI', 'not covered', 'The toolbar has Open / Download (`fileActions`, enabled in the demo); E2E coverage is pending. DOCX round-trips are covered by docs-core unit tests.'],
+  ['docs', 'D-GAP-01', 'DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes', 'not covered', 'Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet.'],
   ['docs', 'D-GAP-02', 'Triple-click paragraph selection and mouse drag selection', 'not covered', 'Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02).'],
   ['docs', 'D-GAP-03', 'Ruler margin handles, table column resize, image resize handles', 'not covered', 'Pointer gestures on the canvas-like page layer; to add.'],
   ['docs', 'D-GAP-04', 'Headers/footers in additional sections, odd/even pages', 'n/a', 'Not supported by the product yet.'],
   ['docs', 'D-GAP-05', 'Suggestion / review mode', 'n/a', 'Not implemented (missing everywhere).'],
-  ['slides', 'SL-GAP-01', 'Import / export (PPTX / PDF) UI', 'n/a', 'No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests.'],
+  ['slides', 'SL-GAP-01', 'Import / export (PPTX / PDF) UI', 'n/a', 'No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests. Image upload is covered (SL-IMG-*, SL-INS-07).'],
   ['slides', 'SL-GAP-02', 'Presenter view in a separate window', 'not covered', 'Opens a popup window; only the S-key notes panel is covered (SL-PRS-06).'],
   ['slides', 'SL-GAP-03', 'Connector snapping to anchors, table cell selection gestures', 'not covered', 'Complex pointer gestures; to add.'],
   ['slides', 'SL-GAP-04', 'Slide drag-reorder in the filmstrip', 'not covered', 'To add.'],

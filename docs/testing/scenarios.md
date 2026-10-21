@@ -57,6 +57,30 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-UND-01 | undo and redo via shortcuts and toolbar | covered | yes |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-02 | undo reverts formatting | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-03 | undo reverts a clear | covered |  |  | `e2e/sheets/editing.spec.ts` |
+| S-ERR-01 | a truncated .xlsx is rejected with an alert and the workbook is untouched | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-02 | random bytes named .xlsx are rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-03 | a 0-byte .xlsx is rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-04 | a .txt file is rejected as an unsupported type | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-05 | a .png file is rejected as an unsupported type | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-06 | a .docx handed to the sheets Open is rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-07 | a file without an extension is rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-08 | a PNG renamed to .xlsx is rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-10 | a valid zip that is not a workbook is rejected and the workbook is untouched | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-09 | a 0-byte .csv is a valid empty file: it opens as an empty sheet without an alert | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-FIO-01 | opening a LibreOffice .xlsx shows sheets, values, formulas, formats, merges and styles | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-02 | sheet tabs switch between imported sheets | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-03 | opening an exceljs-written .xlsx restores frozen panes and column widths | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-04 | XLSX -> XLSX: the downloaded file keeps sheets, formulas, formats, merges and styles | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-05 | XLSX -> XLSX keeps frozen panes and widths | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-06 | an edit made after opening is part of the downloaded .xlsx | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-07 | CSV with quotes, commas and newlines opens into the right cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-08 | CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-09 | unicode CSV (accents, CJK, emoji, RTL, CRLF) round-trips byte for byte | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-10 | XLSX -> CSV exports only the active sheet, with raw (unformatted) numbers | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-14 | XLSX -> CSV exports computed values for formula cells | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/77): CSV export writes the formula text, guarded with a leading apostrophe (`'=B2*C2`), for formula cells instead of their computed values (25), so the CSV is not usable elsewhere. | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-11 | CSV -> XLSX: values, text with newlines/unicode and numbers survive | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-12 | semicolon- and tab-delimited CSV are not split (no delimiter detection) | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-13 | opening a 10,000-row CSV stays within budget and the grid stays usable | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FMT-01 | Bold button and Ctrl/Cmd+B toggle bold | covered | yes |  | `e2e/sheets/formatting.spec.ts` |
 | S-FMT-02 | Italic via button and shortcut | covered |  |  | `e2e/sheets/formatting.spec.ts` |
 | S-FMT-03 | Underline via button and shortcut | covered |  |  | `e2e/sheets/formatting.spec.ts` |
@@ -112,7 +136,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CTX-03 | header context menu keeps selection and hides a column | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-CTX-04 | context menu Delete clears the selected cells | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-TAB-01 | add a sheet tab and switch between tabs | covered |  |  | `e2e/sheets/structure.spec.ts` |
-| S-GAP-01 | Import / export (CSV, XLSX) UI | not covered | | The toolbar has Open / Download (`fileActions`, enabled in the demo); E2E coverage is pending. Format round-trips are covered by sheets-core unit tests. | |
+| S-GAP-01 | Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images) | not covered | | Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read. | |
 | S-GAP-02 | Ctrl/Cmd-click multi-range selection | n/a | | The grid supports a single selection range only. | |
 | S-GAP-03 | HTML clipboard paste | n/a | | Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path. | |
 | S-GAP-04 | Touch gestures | not covered | | Touch / mobile is untested (see the maintenance plan). | |
@@ -171,7 +195,26 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-PGS-02 | page setup can be cancelled | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-CMT-01 | add a comment to selected text | covered | yes |  | `e2e/docs/features.spec.ts` |
 | D-CMT-02 | comment can be cancelled and the panel closes | covered |  |  | `e2e/docs/features.spec.ts` |
-| D-GAP-01 | Import / export (DOCX) UI | not covered | | The toolbar has Open / Download (`fileActions`, enabled in the demo); E2E coverage is pending. DOCX round-trips are covered by docs-core unit tests. | |
+| D-ERR-01 | a truncated .docx is rejected with an alert and the document is untouched | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-02 | random bytes named .docx are rejected | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-03 | a 0-byte .docx is rejected | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-04 | a valid zip that is not a Word document is rejected | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-05 | a .txt file is rejected as an unsupported type | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-06 | a .png file is rejected as an unsupported type | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-07 | an .xlsx handed to the docs Open is rejected | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-08 | a PNG renamed to .docx is rejected | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-ERR-09 | a multi-MB .docx (800 paragraphs + a 3 MB image) opens within budget and stays responsive | covered |  |  | `e2e/docs/file-errors.spec.ts` |
+| D-FIO-01 | opening a LibreOffice .docx shows headings, marks, lists, table, link, image, page break, header and footer | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-FIO-02 | DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-FIO-03 | text typed after opening is part of the downloaded .docx | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-FIO-04 | a document built in the editor downloads and re-opens identically | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/76): LibreOffice writes a page break as a trailing <w:br w:type="page"/> run inside the preceding paragraph (here the one holding the image). The importer only maps a break to a page-break block when the paragraph is otherwise empty, so the break is silently dropped. | `e2e/docs/file-io.spec.ts` |
+| D-FIO-06 | a page break inserted in the editor exports as w:br and re-opens as a page break | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-IMG-03 | after a failed preview the Insert button is disabled, so no broken image enters the document | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-GAP-01 | DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes | not covered | | Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet. | |
 | D-GAP-02 | Triple-click paragraph selection and mouse drag selection | not covered | | Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02). | |
 | D-GAP-03 | Ruler margin handles, table column resize, image resize handles | not covered | | Pointer gestures on the canvas-like page layer; to add. | |
 | D-GAP-04 | Headers/footers in additional sections, odd/even pages | n/a | | Not supported by the product yet. | |
@@ -207,6 +250,11 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-GRP-01 | group and ungroup with Ctrl/Cmd+G | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-ORD-01 | bring to front / send to back change z-order | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-TAB-01 | Tab cycles element selection | covered |  |  | `e2e/slides/editing.spec.ts` |
+| SL-IMG-06 | a 4000x3000 image is inserted scaled to fit the slide and keeps its aspect ratio | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-07 | cancelling the file chooser inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-09 | a corrupt "image" (random bytes named .png) inserts nothing and raises no error | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-10 | a non-image file chosen anyway (bypassing accept) inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-PRS-01 | Present opens full-screen present mode on the active slide | covered | yes |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-02 | arrow keys, space, PageDown/Up, Home and End navigate | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-03 | clicking the stage advances; typing a number then Enter jumps | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
@@ -234,14 +282,14 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-ZOOM-01 | zoom buttons rescale the slide | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-BGD-01 | background colour input recolours the slide | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-NTS-01 | speaker notes are stored per slide | covered |  |  | `e2e/slides/tools.spec.ts` |
-| SL-GAP-01 | Import / export (PPTX / PDF) UI | n/a | | No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests. | |
+| SL-GAP-01 | Import / export (PPTX / PDF) UI | n/a | | No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests. Image upload is covered (SL-IMG-*, SL-INS-07). | |
 | SL-GAP-02 | Presenter view in a separate window | not covered | | Opens a popup window; only the S-key notes panel is covered (SL-PRS-06). | |
 | SL-GAP-03 | Connector snapping to anchors, table cell selection gestures | not covered | | Complex pointer gestures; to add. | |
 | SL-GAP-04 | Slide drag-reorder in the filmstrip | not covered | | To add. | |
 
 ## Summary
 
-- covered: 197
-- fixme + bug: 6
+- covered: 243
+- fixme + bug: 8
 - not covered: 8
 - n/a: 6
