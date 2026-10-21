@@ -49,7 +49,8 @@ jobs:
       - name: Install system deps only (browsers cached)
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium firefox webkit
-      # retries=2 and the blob reporter are enabled by CI=true in playwright.config.ts.
+      # retries=2, failOnFlakyTests and the blob reporter are enabled by CI=true in
+      # playwright.config.ts: a test that only passes on a retry fails its shard.
       - name: Run Playwright (shard ${{ matrix.shard }}/4)
         run: npx playwright test --shard=${{ matrix.shard }}/4
       - name: Upload blob report
@@ -86,21 +87,87 @@ jobs:
           pattern: blob-report-*
           merge-multiple: true
       - run: npx playwright merge-reports --reporter=html ./all-blob-reports
+      # List flaky tests (passed only on a retry) in the job summary. The shards already
+      # fail on them (failOnFlakyTests); this makes the culprits easy to find.
+      - name: Flaky test summary
+        run: |
+          PLAYWRIGHT_JSON_OUTPUT_NAME=report.json npx playwright merge-reports --reporter=json ./all-blob-reports
+          node scripts/testing/flaky-summary.mjs report.json
       - uses: actions/upload-artifact@v4
         with:
           name: playwright-html-report
           path: playwright-report
           retention-days: 14
 
+  # Production-build smoke: the @smoke subset on Chromium against `vite build` + `vite preview`
+  # of the three demos, so build-only breakage (minification, tree-shaking, chunking, missing
+  # assets) is caught, not just what the dev servers serve.
+  preview-smoke:
+    name: Production build smoke (@smoke, chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Rollup native binary (npm workspace bug workaround)
+        run: |
+          ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
+      - run: npm run build:demos
+      - name: Get Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - name: Install Chromium (with system deps)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install system deps only (browser cached)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Run @smoke against the production builds
+        run: npx playwright test --grep @smoke --project=chromium
+        env:
+          PW_TARGET: preview
+      - name: Upload traces, screenshots and videos (failures)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-smoke-failure-artifacts
+          path: e2e/.results
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Stable, single status to mark as a required check (the sharded job names
-  # above change if the matrix changes). Fails if any shard failed or was cancelled.
+  # above change if the matrix changes). Fails if any shard or the production
+  # smoke failed or was cancelled, or if the generated scenario map is stale.
   e2e-result:
     name: e2e-result
     if: ${{ always() }}
-    needs: e2e
+    needs: [e2e, preview-smoke]
     runs-on: ubuntu-latest
     steps:
-      - name: Check shard results
+      - name: Check job results
         run: |
-          echo "e2e result: ${{ needs.e2e.result }}"
-          [ "${{ needs.e2e.result }}" = "success" ]
+          echo "e2e: ${{ needs.e2e.result }}"
+          echo "preview-smoke: ${{ needs.preview-smoke.result }}"
+          [ "${{ needs.e2e.result }}" = "success" ] && [ "${{ needs.preview-smoke.result }}" = "success" ]
+      # docs/testing/scenarios.md is generated from the specs; fail if it drifted.
+      # (Plain node script, no install needed.)
+      - uses: actions/checkout@v4
+        if: ${{ always() }}
+      - uses: actions/setup-node@v4
+        if: ${{ always() }}
+        with:
+          node-version: 22
+      - name: Scenario map is up to date
+        if: ${{ always() }}
+        run: node scripts/testing/scenarios.mjs --check || { echo "::error::docs/testing/scenarios.md is stale; run 'npm run docs:scenarios' and commit"; exit 1; }
