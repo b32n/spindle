@@ -106,14 +106,12 @@ function WsDemo({ config }: { config: WsConfig }) {
     const d = makeDeck('collab-deck');
     const provider = new WebSocketProvider({ url: config.url });
     provider.onStatusChange?.((s) => { if (!cancelled) setStatus(s); });
-    // Start on the next tick: React StrictMode (dev) mounts, cleans up and re-mounts
-    // synchronously, and an attach that has already started cannot be cancelled, so the
-    // aborted first attempt would still connect to the empty room and seed it a second time.
-    const startTimer = window.setTimeout(() => {
-      d.attachCollab(provider, config.identity, { roomId: config.roomId, persistenceKey: `slides-demo:${config.roomId}` })
-        .then(() => { if (cancelled) { d.detachCollab(); return; } setDeck(d); });
-    }, 0);
-    return () => { cancelled = true; window.clearTimeout(startTimer); try { d.detachCollab(); } catch { /* ignore */ } };
+    // StrictMode's discarded first mount calls detachCollab(), which aborts this attach
+    // before it can seed the room (see #72), so no start-up delay is needed.
+    d.attachCollab(provider, config.identity, { roomId: config.roomId, persistenceKey: `slides-demo:${config.roomId}` })
+      .then(() => { if (cancelled) { d.detachCollab(); return; } setDeck(d); })
+      .catch(() => { /* aborted by detachCollab() (unmount) or the transport failed; status shows it */ });
+    return () => { cancelled = true; try { d.detachCollab(); } catch { /* ignore */ } };
   }, [config.url, config.roomId, config.identity]);
 
   // Handle for end-to-end tests (e2e/) to inspect model state.

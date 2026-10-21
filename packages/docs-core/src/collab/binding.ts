@@ -24,6 +24,7 @@ import * as encoding from 'lib0/encoding';
 import * as decoding from 'lib0/decoding';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
+import { connectAbortable, createAttachAbortError } from '@b32nio/spindle-shared';
 
 import { getYDocFields, hydrateYDocFromData } from './y-schema';
 import type { DocumentData } from '../types';
@@ -56,6 +57,12 @@ export interface AttachCollabOptions {
    * browser, so leave it unset for server-side rendering.
    */
   persistenceKey?: string;
+  /**
+   * Aborts an in-flight attach: it tears down everything it set up, never seeds
+   * the room, and rejects with an `AbortError`. The core classes pass one so that
+   * `detachCollab()` cancels a pending `attachCollab()`.
+   */
+  signal?: AbortSignal;
 }
 
 /**
@@ -81,6 +88,11 @@ export async function attachCollabToYDoc(
   if (options.persistenceKey) {
     persistence = new IndexeddbPersistence(options.persistenceKey, ydoc);
     await persistence.whenSynced;
+    if (options.signal?.aborted) {
+      void persistence.destroy();
+      ydoc.destroy();
+      throw createAttachAbortError();
+    }
   }
   // Only content restored from local persistence (applied before onDocUpdate is
   // wired) might be missing from the relay and need re-contributing on connect.
@@ -154,7 +166,20 @@ export async function attachCollabToYDoc(
   // which prevents duplicated content in the common case. (Two peers creating
   // the *same* brand-new room within one round-trip can still both seed — that
   // needs relay-side arbitration, which an opaque relay can't provide.)
-  await provider.connect(roomId);
+  try {
+    await connectAbortable(provider, roomId, options.signal);
+  } catch (err) {
+    // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
+    ydoc.off('update', onDocUpdate);
+    awareness.off('update', onAwarenessUpdate);
+    unsubDoc();
+    unsubAwareness();
+    awareness.destroy();
+    provider.disconnect();
+    void persistence?.destroy();
+    ydoc.destroy();
+    throw err;
+  }
 
   // Seed only if the room has never been seeded (a persistent marker) AND the
   // doc is still empty. The marker means a joiner to a room whose content was

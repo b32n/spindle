@@ -49,3 +49,59 @@ describe('docs collab seeding marker', () => {
     ha.detach();
   });
 });
+
+// A provider whose connect() stays pending until released — an attach in flight.
+class GatedProvider extends InMemoryProvider {
+  disconnected = false;
+  private release!: () => void;
+  private gate = new Promise<void>((r) => (this.release = r));
+  override async connect(roomId: string): Promise<void> {
+    await this.gate;
+    return super.connect(roomId);
+  }
+  override disconnect(): void {
+    this.disconnected = true;
+    super.disconnect();
+  }
+  open(): void {
+    this.release();
+  }
+}
+
+describe('detachCollab() cancels an in-flight attachCollab()', () => {
+  it('the aborted attach never seeds the room, leaves no socket, and rejects with AbortError', async () => {
+    __resetInMemoryRooms();
+    const first = seeded();
+    const gated = new GatedProvider();
+    const pending = first.attachCollab(gated, identity('A'), { roomId: 'room' });
+    const settled = pending.then(() => 'resolved', (e: Error) => e.name);
+    first.detachCollab();
+    // The gate opens only AFTER the detach — the old code seeded the room right here.
+    gated.open();
+    expect(await settled).toBe('AbortError');
+    expect(gated.disconnected).toBe(true);
+    expect(first.getCollabHandle()).toBeNull();
+
+    // The room was never seeded, so the next attach is the one and only creator.
+    const second = seeded();
+    const h2 = await second.attachCollab(new InMemoryProvider(), identity('A'), { roomId: 'room' });
+    const joiner = new DocumentImpl('joiner', 'Doc');
+    const h3 = await joiner.attachCollab(new InMemoryProvider(), identity('B'), { roomId: 'room' });
+    expect(getYDocFields(h3.ydoc).content.length).toBe(2);
+    h2.detach();
+    h3.detach();
+  });
+
+  it('a detach/attach pair (React StrictMode) seeds exactly once', async () => {
+    __resetInMemoryRooms();
+    const d = seeded();
+    const gated = new GatedProvider();
+    const stale = d.attachCollab(gated, identity('A'), { roomId: 'room' }).catch((e: Error) => e.name);
+    d.detachCollab();
+    const handle = await d.attachCollab(new InMemoryProvider(), identity('A'), { roomId: 'room' });
+    gated.open();
+    expect(await stale).toBe('AbortError');
+    expect(getYDocFields(handle.ydoc).content.length).toBe(2);
+    handle.detach();
+  });
+});

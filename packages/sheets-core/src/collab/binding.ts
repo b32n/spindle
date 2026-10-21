@@ -32,6 +32,7 @@ import * as encoding from 'lib0/encoding';
 import * as decoding from 'lib0/decoding';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
+import { connectAbortable, createAttachAbortError } from '@b32nio/spindle-shared';
 
 import { getWorkbookYTypes, hydrateYDocFromData, serializeYDocToData } from './y-schema';
 import type { WorkbookData } from '../types';
@@ -68,6 +69,12 @@ export interface AttachCollabOptions {
    * workbook's data. Browser-only — leave unset for server-side rendering.
    */
   persistenceKey?: string;
+  /**
+   * Aborts an in-flight attach: it tears down everything it set up, never seeds
+   * the room, and rejects with an `AbortError`. The core classes pass one so that
+   * `detachCollab()` cancels a pending `attachCollab()`.
+   */
+  signal?: AbortSignal;
 }
 
 /**
@@ -93,6 +100,11 @@ export async function attachCollabToWorkbook(
   if (options.persistenceKey) {
     persistence = new IndexeddbPersistence(options.persistenceKey, ydoc);
     await persistence.whenSynced;
+    if (options.signal?.aborted) {
+      void persistence.destroy();
+      ydoc.destroy();
+      throw createAttachAbortError();
+    }
   }
   // Only locally-restored content might be missing from the relay and need
   // re-contributing; a joiner's replay and a creator's seed already reach it,
@@ -185,7 +197,21 @@ export async function attachCollabToWorkbook(
   // A joiner (or a reconnecting peer whose state was restored) seeds nothing,
   // which is what prevents duplicated content. The seed runs under SEED_ORIGIN
   // so it lands on the wire (via onDocUpdate) but stays out of the undo stack.
-  await provider.connect(roomId);
+  try {
+    await connectAbortable(provider, roomId, options.signal);
+  } catch (err) {
+    // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
+    ydoc.off('update', onDocUpdate);
+    awareness.off('update', onAwarenessUpdate);
+    unsubDoc();
+    unsubAwareness();
+    undoManager.destroy();
+    awareness.destroy();
+    provider.disconnect();
+    void persistence?.destroy();
+    ydoc.destroy();
+    throw err;
+  }
 
   // Seed only if never seeded (persistent marker) AND still empty, so a joiner
   // to an emptied room doesn't resurrect it and a restored doc isn't re-seeded.

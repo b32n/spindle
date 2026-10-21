@@ -75,6 +75,8 @@ export class DocumentImpl {
   // (history snapshots, addBlock, etc.) keep working on this.document but
   // the React editor binds to handle.xmlFragment via ySyncPlugin.
   private collabHandle: import('./collab/binding').CollabHandle | null = null;
+  /** Abort controller of an attachCollab() that has not resolved yet. */
+  private pendingAttach: AbortController | null = null;
   // Comment threads. The `comment` mark in the body is the position anchor;
   // this store holds thread content (comments, replies, status).
   private commentStore: DocsCommentStore = new DocsCommentStore();
@@ -541,12 +543,22 @@ export class DocumentImpl {
     if (this.collabHandle) {
       throw new Error('Collaboration is already attached to this document.');
     }
-    const handle = await attachCollabToYDoc(
-      this.getData(),
-      provider,
-      identity,
-      options,
-    );
+    if (this.pendingAttach) {
+      throw new Error('Collaboration is already being attached to this document.');
+    }
+    // detachCollab() aborts this controller, so an attach still connecting can
+    // neither seed the room nor leave a live socket behind (rejects with AbortError).
+    const abort = new AbortController();
+    this.pendingAttach = abort;
+    let handle: import('./collab/binding').CollabHandle;
+    try {
+      handle = await attachCollabToYDoc(this.getData(), provider, identity, {
+        ...options,
+        signal: abort.signal,
+      });
+    } finally {
+      if (this.pendingAttach === abort) this.pendingAttach = null;
+    }
     this.collabHandle = handle;
 
     // Reconcile the comment store with the Y.Doc's threads map, then keep it
@@ -570,6 +582,8 @@ export class DocumentImpl {
 
   /** Detach from the current collaboration session. */
   detachCollab(): void {
+    this.pendingAttach?.abort();
+    this.pendingAttach = null;
     if (!this.collabHandle) return;
     if (this.threadsObserver) {
       getYDocFields(this.collabHandle.ydoc).threads.unobserve(this.threadsObserver);
