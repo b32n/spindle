@@ -106,9 +106,14 @@ function WsDemo({ config }: { config: WsConfig }) {
     const d = makeDeck('collab-deck');
     const provider = new WebSocketProvider({ url: config.url });
     provider.onStatusChange?.((s) => { if (!cancelled) setStatus(s); });
-    d.attachCollab(provider, config.identity, { roomId: config.roomId, persistenceKey: `slides-demo:${config.roomId}` })
-      .then(() => { if (cancelled) { d.detachCollab(); return; } setDeck(d); });
-    return () => { cancelled = true; try { d.detachCollab(); } catch { /* ignore */ } };
+    // Start on the next tick: React StrictMode (dev) mounts, cleans up and re-mounts
+    // synchronously, and an attach that has already started cannot be cancelled, so the
+    // aborted first attempt would still connect to the empty room and seed it a second time.
+    const startTimer = window.setTimeout(() => {
+      d.attachCollab(provider, config.identity, { roomId: config.roomId, persistenceKey: `slides-demo:${config.roomId}` })
+        .then(() => { if (cancelled) { d.detachCollab(); return; } setDeck(d); });
+    }, 0);
+    return () => { cancelled = true; window.clearTimeout(startTimer); try { d.detachCollab(); } catch { /* ignore */ } };
   }, [config.url, config.roomId, config.identity]);
 
   // Handle for end-to-end tests (e2e/) to inspect model state.
