@@ -292,6 +292,12 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       } else if (pieceTag === 'w:drawing') {
         const image = parseDrawing(piece, ctx.media, warnings);
         if (image) out.push(image);
+      } else if (pieceTag === 'mc:AlternateContent') {
+        // LibreOffice (and Word for some shapes) wrap the drawing in
+        // <mc:AlternateContent><mc:Choice><w:drawing>; the Fallback is legacy VML.
+        const drawing = findDeep(piece, 'w:drawing');
+        const image = drawing && parseDrawing(drawing, ctx.media, warnings);
+        if (image) out.push(image);
       }
     }
     if (text) {

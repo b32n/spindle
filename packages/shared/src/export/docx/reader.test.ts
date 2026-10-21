@@ -175,6 +175,23 @@ describe('importDocx', () => {
     expect(result.warnings).toEqual([]);
   });
 
+  it('reads an image wrapped in mc:AlternateContent (LibreOffice output)', async () => {
+    const exported = await exportDocx(
+      section([{ type: 'paragraph', content: [{ type: 'text', text: 'Caption: ' }, { type: 'image', src: ONE_PX_PNG, width: 5, height: 5 }] }])
+    );
+    const zip = await JSZip.loadAsync(exported.bytes);
+    let xml = await zip.file('word/document.xml')!.async('string');
+    xml = xml
+      .replace(/<w:document /, '<w:document xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" ')
+      .replace(/(<w:drawing>[\s\S]*?<\/w:drawing>)/, '<mc:AlternateContent><mc:Choice Requires="wps">$1</mc:Choice><mc:Fallback><w:pict/></mc:Fallback></mc:AlternateContent>');
+    expect(xml).toContain('<mc:AlternateContent>');
+    zip.file('word/document.xml', xml);
+    const result = await importDocx(await zip.generateAsync({ type: 'uint8array' }));
+    expect(result.sections[0].blocks).toEqual([
+      { type: 'paragraph', content: [{ type: 'text', text: 'Caption: ' }, { type: 'image', src: ONE_PX_PNG, width: 5, height: 5 }] },
+    ]);
+  });
+
   it('round-trips a page break and a horizontal rule', async () => {
     const result = await roundTrip(
       section([
