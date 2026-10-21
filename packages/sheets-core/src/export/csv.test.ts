@@ -7,6 +7,14 @@ function freshSheet() {
 }
 
 describe('CSV import', () => {
+  it('grows the sheet so rows and columns beyond the 1000x100 default stay reachable', () => {
+    const { sheet } = freshSheet();
+    const rows = Array.from({ length: 1500 }, (_, i) => `${i},x`);
+    importFromCSV(rows.join('\n') + '\n' + ','.repeat(119) + 'z', sheet);
+    expect(sheet.rowCount).toBe(1501);
+    expect(sheet.colCount).toBe(120);
+  });
+
   it('handles CRLF line endings without a trailing \\r on the last column', () => {
     const { wb, sheet } = freshSheet();
     importFromCSV('a,b\r\nc,d\r\n', sheet);
