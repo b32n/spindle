@@ -69,10 +69,64 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # Visual regression: toHaveScreenshot on Chromium only (e2e/visual). The baselines in
+  # e2e/visual/__screenshots__ are made by this very job on this image; see docs/testing to update them.
+  visual:
+    name: Visual (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Rollup native binary (npm workspace bug workaround)
+        run: |
+          ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
+      - name: Get Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - name: Install Chromium (with system deps)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install system deps only (browser cached)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Run the visual project
+        run: npx playwright test --project=visual
+        env:
+          PW_VISUAL: '1'
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-visual
+          path: blob-report
+          retention-days: 7
+      # On a mismatch (or a missing baseline) this holds the *-actual.png / *-diff.png files:
+      # copy the *-actual.png over e2e/visual/__screenshots__/<name>.png to accept a change.
+      - name: Upload actual/diff images and traces (failures)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-failure-artifacts
+          path: e2e/.results
+          retention-days: 7
+          if-no-files-found: ignore
+
   report:
     name: Merge reports
     if: ${{ !cancelled() }}
-    needs: e2e
+    needs: [e2e, visual]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -147,19 +201,20 @@ jobs:
           if-no-files-found: ignore
 
   # Stable, single status to mark as a required check (the sharded job names
-  # above change if the matrix changes). Fails if any shard or the production
+  # above change if the matrix changes). Fails if any shard, the visual job or the production
   # smoke failed or was cancelled, or if the generated scenario map is stale.
   e2e-result:
     name: e2e-result
     if: ${{ always() }}
-    needs: [e2e, preview-smoke]
+    needs: [e2e, preview-smoke, visual]
     runs-on: ubuntu-latest
     steps:
       - name: Check job results
         run: |
           echo "e2e: ${{ needs.e2e.result }}"
           echo "preview-smoke: ${{ needs.preview-smoke.result }}"
-          [ "${{ needs.e2e.result }}" = "success" ] && [ "${{ needs.preview-smoke.result }}" = "success" ]
+          echo "visual: ${{ needs.visual.result }}"
+          [ "${{ needs.e2e.result }}" = "success" ] && [ "${{ needs.preview-smoke.result }}" = "success" ] && [ "${{ needs.visual.result }}" = "success" ]
       # docs/testing/scenarios.md is generated from the specs; fail if it drifted.
       # (Plain node script, no install needed.)
       - uses: actions/checkout@v4

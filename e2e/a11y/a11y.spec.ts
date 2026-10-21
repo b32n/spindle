@@ -74,12 +74,12 @@ test.describe('a11y (axe)', () => {
     ).toEqual([]);
   }
 
-  test('A11Y-SHEETS-01 initial load', async ({ page }) => {
+  test('AX-SHEETS-01 initial load', async ({ page }) => {
     await new SheetsPage(page).goto();
     await check(page, 'sheets/initial');
   });
 
-  test('A11Y-SHEETS-02 Format Cells dialog', async ({ page }) => {
+  test('AX-SHEETS-02 Format Cells dialog', async ({ page }) => {
     const sheet = new SheetsPage(page);
     await sheet.goto();
     const p = await sheet.cellCenter(1, 1);
@@ -89,7 +89,7 @@ test.describe('a11y (axe)', () => {
     await check(page, 'sheets/format-cells-dialog');
   });
 
-  test('A11Y-SHEETS-03 comments panel', async ({ page }) => {
+  test('AX-SHEETS-03 comments panel', async ({ page }) => {
     const sheet = new SheetsPage(page);
     await sheet.goto();
     await sheet.select(1, 1);
@@ -98,12 +98,12 @@ test.describe('a11y (axe)', () => {
     await check(page, 'sheets/comments-panel');
   });
 
-  test('A11Y-DOCS-01 initial load', async ({ page }) => {
+  test('AX-DOCS-01 initial load', async ({ page }) => {
     await new DocsPage(page).goto();
     await check(page, 'docs/initial');
   });
 
-  test('A11Y-DOCS-02 Insert link dialog', async ({ page }) => {
+  test('AX-DOCS-02 Insert link dialog', async ({ page }) => {
     const doc = new DocsPage(page);
     await doc.goto();
     await doc.toolbar('Insert link').click();
@@ -111,7 +111,7 @@ test.describe('a11y (axe)', () => {
     await check(page, 'docs/insert-link-dialog');
   });
 
-  test('A11Y-DOCS-03 Insert image dialog', async ({ page }) => {
+  test('AX-DOCS-03 Insert image dialog', async ({ page }) => {
     const doc = new DocsPage(page);
     await doc.goto();
     await doc.toolbar('Insert image').click();
@@ -119,12 +119,12 @@ test.describe('a11y (axe)', () => {
     await check(page, 'docs/insert-image-dialog');
   });
 
-  test('A11Y-SLIDES-01 initial load', async ({ page }) => {
+  test('AX-SLIDES-01 initial load', async ({ page }) => {
     await new SlidesPage(page).goto();
     await check(page, 'slides/initial');
   });
 
-  test('A11Y-SLIDES-02 comments panel', async ({ page }) => {
+  test('AX-SLIDES-02 comments panel', async ({ page }) => {
     const s = new SlidesPage(page);
     await s.goto();
     await s.toolbar('Comments').click();
@@ -132,7 +132,7 @@ test.describe('a11y (axe)', () => {
     await check(page, 'slides/comments-panel');
   });
 
-  test('A11Y-SLIDES-03 present mode', async ({ page }) => {
+  test('AX-SLIDES-03 present mode', async ({ page }) => {
     const s = new SlidesPage(page);
     await s.goto();
     await s.toolbar('Present').click();

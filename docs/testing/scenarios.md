@@ -347,9 +347,34 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | M-SLIDES-01 | tapping an element selects it, tapping the background clears it @mobile | covered |  |  | `e2e/mobile/slides.spec.ts` |
 | M-SLIDES-02 | dragging a selected element with a finger moves it @mobile | covered |  |  | `e2e/mobile/slides.spec.ts` |
 
+## Accessibility (axe, ratcheting baseline)
+
+| ID | Scenario | Status | Smoke | Notes | Spec |
+|---|---|---|---|---|---|
+| AX-SHEETS-01 | initial load | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-SHEETS-02 | Format Cells dialog | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-SHEETS-03 | comments panel | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-DOCS-01 | initial load | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-DOCS-02 | Insert link dialog | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-DOCS-03 | Insert image dialog | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-SLIDES-01 | initial load | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-SLIDES-02 | comments panel | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+| AX-SLIDES-03 | present mode | covered |  |  | `e2e/a11y/a11y.spec.ts` |
+
+## Visual regression (Chromium, CI baselines)
+
+| ID | Scenario | Status | Smoke | Notes | Spec |
+|---|---|---|---|---|---|
+| V-SHEETS-01 | toolbar | covered |  |  | `e2e/visual/visual.spec.ts` |
+| V-SHEETS-02 | a formatted region | covered |  |  | `e2e/visual/visual.spec.ts` |
+| V-DOCS-01 | toolbar | covered |  |  | `e2e/visual/visual.spec.ts` |
+| V-DOCS-02 | a paginated page | covered |  |  | `e2e/visual/visual.spec.ts` |
+| V-SLIDES-01 | toolbar | covered |  |  | `e2e/visual/visual.spec.ts` |
+| V-SLIDES-02 | a slide with shapes | covered |  |  | `e2e/visual/visual.spec.ts` |
+
 ## Summary
 
-- covered: 295
+- covered: 310
 - fixme + bug: 11
 - not covered: 8
 - n/a: 6

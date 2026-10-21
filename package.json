@@ -44,7 +44,8 @@
     "docs:scenarios:check": "node scripts/testing/scenarios.mjs --check",
     "build:demos": "vite build examples/sheets-demo && vite build examples/docs-demo && vite build examples/slides-demo",
     "test:e2e:preview": "PW_TARGET=preview playwright test --grep @smoke --project=chromium",
-    "a11y:baseline": "A11Y_UPDATE=1 playwright test e2e/a11y --project=chromium --workers=1"
+    "a11y:baseline": "A11Y_UPDATE=1 playwright test e2e/a11y --project=chromium --workers=1",
+    "test:visual": "PW_VISUAL=1 playwright test --project=visual"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
