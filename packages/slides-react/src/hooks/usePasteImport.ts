@@ -5,7 +5,6 @@
 // text pasting still works.
 
 import { useCallback } from 'react';
-import type React from 'react';
 import { richTextFromPlainText, type NewElementSpec, type TableCell, type DeckImpl } from '@b32nio/spindle-slides-core';
 import { useDeck } from './index';
 import { useDeckContext } from '../context/DeckContext';
@@ -42,12 +41,20 @@ function insertTableFromGrid(deck: DeckImpl, grid: string[][]): void {
   deck.setSelection({ slideId, elementIds: [el.id] });
 }
 
-export function usePasteImport(): { onPaste: (e: React.ClipboardEvent) => void } {
+/** The slice of a paste event the handler needs: satisfied by both React's synthetic
+ *  ClipboardEvent and the native one (see SlidesEditor's retargeted-paste listener). */
+export interface PasteEventLike {
+  target: EventTarget | null;
+  clipboardData: DataTransfer | null;
+  preventDefault(): void;
+}
+
+export function usePasteImport(): { onPaste: (e: PasteEventLike) => void } {
   const deck = useDeck();
   const { editing } = useDeckContext();
 
   const onPaste = useCallback(
-    (e: React.ClipboardEvent) => {
+    (e: PasteEventLike) => {
       // Editing text (a cell, a text box, or any input) → let the editor paste.
       if (isTextEntry(e.target) || editing.getEditingId()) return;
       const cd = e.clipboardData;
