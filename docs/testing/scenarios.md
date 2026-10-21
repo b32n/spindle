@@ -21,7 +21,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CLP-08 | pasting plain tab-separated text from the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-09 | copy writes TSV to the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-10 | context menu copy and paste | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
-| S-CLP-11 | paste preserves cell formatting | fixme + bug |  | internal paste only carries values/formulas, not cell styles. | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-11 | paste preserves cell formatting | fixme + bug |  | internal paste only carries values/formulas, not cell styles. https://github.com/b32n/spindle/issues/69 | `e2e/sheets/clipboard.spec.ts` |
 | S-COL-01 | an edit made by one client appears in the other | covered | yes |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-02 | concurrent edits to different cells converge | covered |  |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-03 | concurrent edits to the same cell converge on one value | covered |  |  | `e2e/sheets/collab.spec.ts` |
@@ -76,6 +76,9 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FRM-07 | clicking a cell while typing a formula inserts its reference | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-08 | formula autocomplete suggests functions | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-09 | array formulas spill into neighbouring cells | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-10 | ISBLANK of an empty cell is TRUE | fixme + bug |  | ISBLANK of a reference to an empty cell returns FALSE. https://github.com/b32n/spindle/issues/66 (unit: known-formula-bugs.test.ts) | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-11 | SUMPRODUCT of an array expression multiplies element-wise | fixme + bug |  | array expressions inside SUMPRODUCT give #VALUE!. https://github.com/b32n/spindle/issues/67 | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-12 | unary minus binds tighter than ^ | fixme + bug |  | =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68 | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-01 | dragging the fill handle copies a value down | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-02 | fill extends a numeric series | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-03 | fill rebases formulas | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
@@ -109,7 +112,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CTX-03 | header context menu keeps selection and hides a column | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-CTX-04 | context menu Delete clears the selected cells | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-TAB-01 | add a sheet tab and switch between tabs | covered |  |  | `e2e/sheets/structure.spec.ts` |
-| S-GAP-01 | Import / export (CSV, XLSX) UI | n/a | | No import/export UI exists in the sheets toolbar or demo yet; file round-trips stay in sheets-core unit tests. | |
+| S-GAP-01 | Import / export (CSV, XLSX) UI | not covered | | The toolbar has Open / Download (`fileActions`, enabled in the demo); E2E coverage is pending. Format round-trips are covered by sheets-core unit tests. | |
 | S-GAP-02 | Ctrl/Cmd-click multi-range selection | n/a | | The grid supports a single selection range only. | |
 | S-GAP-03 | HTML clipboard paste | n/a | | Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path. | |
 | S-GAP-04 | Touch gestures | not covered | | Touch / mobile is untested (see the maintenance plan). | |
@@ -132,7 +135,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-COL-03 | concurrent typing at the same spot converges to identical text | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-04 | formatting propagates | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-05 | a late joiner receives the current document | covered |  |  | `e2e/docs/collab.spec.ts` |
-| D-COL-05b | a late joiner never ends up with duplicated seed content | fixme + bug |  | a late joiner occasionally ends up with the demo seed content twice (the whole document repeated after the real one), even after the relay verifiably holds the creator's seed (~2 in 4 runs with 4 workers; not seen in single serial runs of the happy path). Joiners are meant to seed nothing (binding.ts "Connect + seed"); suspect connect() resolving before the replayed frames are applied. | `e2e/docs/collab.spec.ts` |
+| D-COL-05b | a late joiner never ends up with duplicated seed content | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-06 | list and structural edits propagate | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-07 | two-pane in-process demo mounts two editors | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-TXT-01 | demo document renders with header/footer placeholders | covered | yes |  | `e2e/docs/editing.spec.ts` |
@@ -142,6 +145,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-SEL-02 | double-click selects a word; typing replaces it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-SEL-03 | Shift+Arrow extends the selection | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-01 | Bold / Italic / Underline / Strike via shortcuts | covered |  |  | `e2e/docs/editing.spec.ts` |
+| D-FMT-10 | Ctrl+I on a partly-italic selection italicises all of it | fixme + bug |  | toggling a mark on a partly-marked selection removes it; Word / Google Docs add it to the whole selection. https://github.com/b32n/spindle/issues/71 | `e2e/docs/editing.spec.ts` |
 | D-FMT-02 | toolbar Bold toggles on and off | covered | yes |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-03 | toolbar Italic, Underline, Strikethrough | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-04 | heading styles from the Paragraph menu | covered |  |  | `e2e/docs/editing.spec.ts` |
@@ -157,7 +161,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-INS-03 | insert an image from a URL | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-04 | insert a table from the size picker | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-05 | double-clicking a table cell lets you type into it | covered |  |  | `e2e/docs/features.spec.ts` |
-| D-INS-06 | Tab moves to the next table cell | fixme + bug |  | there is no Tab key binding for table cells, so Tab does not move to the next cell (Word / Google Docs behaviour); it leaves the caret in place. | `e2e/docs/features.spec.ts` |
+| D-INS-06 | Tab moves to the next table cell | fixme + bug |  | there is no Tab key binding for table cells, so Tab does not move to the next cell (Word / Google Docs behaviour); it leaves the caret in place. https://github.com/b32n/spindle/issues/70 | `e2e/docs/features.spec.ts` |
 | D-PAG-01 | the demo paginates into several pages with page-number footers | covered | yes |  | `e2e/docs/features.spec.ts` |
 | D-PAG-02 | explicit page break starts a new page and footers update | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-03 | typing enough paragraphs flows onto a new page | covered |  |  | `e2e/docs/features.spec.ts` |
@@ -167,7 +171,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-PGS-02 | page setup can be cancelled | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-CMT-01 | add a comment to selected text | covered | yes |  | `e2e/docs/features.spec.ts` |
 | D-CMT-02 | comment can be cancelled and the panel closes | covered |  |  | `e2e/docs/features.spec.ts` |
-| D-GAP-01 | Import / export (DOCX) UI | n/a | | No import/export UI exists in docs-react / the demo yet; round-trips stay in docs-core unit tests. | |
+| D-GAP-01 | Import / export (DOCX) UI | not covered | | The toolbar has Open / Download (`fileActions`, enabled in the demo); E2E coverage is pending. DOCX round-trips are covered by docs-core unit tests. | |
 | D-GAP-02 | Triple-click paragraph selection and mouse drag selection | not covered | | Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02). | |
 | D-GAP-03 | Ruler margin handles, table column resize, image resize handles | not covered | | Pointer gestures on the canvas-like page layer; to add. | |
 | D-GAP-04 | Headers/footers in additional sections, odd/even pages | n/a | | Not supported by the product yet. | |
@@ -181,8 +185,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-COL-02 | inserted elements and deletions propagate | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-03 | new slides appear in both filmstrips | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-04 | text edits propagate | covered |  |  | `e2e/slides/collab.spec.ts` |
-| SL-COL-05 | a late joiner receives the current deck without duplicated slides | fixme + bug |  | same joiner-seed duplication as docs D-COL-05b: a late joiner occasionally ends up with the demo deck seeded twice (7 thumbnails instead of 4), even after the relay holds the creator's seed (~1 in 4 runs with 4 workers). | `e2e/slides/collab.spec.ts` |
-| SL-COL-06 | concurrent moves of different elements converge | fixme + bug |  | same joiner-seed duplication as SL-COL-05: when the second peer's deck is seeded twice, slide 2 has more shapes than the test expects (flaky, ~1 in 3 runs). | `e2e/slides/collab.spec.ts` |
+| SL-COL-05 | a late joiner receives the current deck without duplicated slides | covered |  |  | `e2e/slides/collab.spec.ts` |
+| SL-COL-06 | concurrent moves of different elements converge | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-07 | the in-process two-pane demo mounts two editors | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-LOAD-01 | demo deck loads with three slides | covered | yes |  | `e2e/slides/editing.spec.ts` |
 | SL-FLM-01 | clicking a filmstrip thumbnail switches slides | covered | yes |  | `e2e/slides/editing.spec.ts` |
@@ -230,14 +234,14 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-ZOOM-01 | zoom buttons rescale the slide | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-BGD-01 | background colour input recolours the slide | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-NTS-01 | speaker notes are stored per slide | covered |  |  | `e2e/slides/tools.spec.ts` |
-| SL-GAP-01 | Import / export (PPTX / PDF) UI | n/a | | No import/export UI exists in slides-react / the demo. | |
+| SL-GAP-01 | Import / export (PPTX / PDF) UI | n/a | | No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests. | |
 | SL-GAP-02 | Presenter view in a separate window | not covered | | Opens a popup window; only the S-key notes panel is covered (SL-PRS-06). | |
 | SL-GAP-03 | Connector snapping to anchors, table cell selection gestures | not covered | | Complex pointer gestures; to add. | |
 | SL-GAP-04 | Slide drag-reorder in the filmstrip | not covered | | To add. | |
 
 ## Summary
 
-- covered: 194
-- fixme + bug: 5
-- not covered: 6
-- n/a: 8
+- covered: 197
+- fixme + bug: 6
+- not covered: 8
+- n/a: 6

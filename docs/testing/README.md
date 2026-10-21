@@ -85,7 +85,7 @@ The demos expose `window.__spindle` purely as a test hook (no network, no teleme
 2. Write `test('S-FRZ-03 freeze survives undo', async ...)`. Add `@smoke` to the title only for
    the handful of fast, high-value happy paths.
 3. If the product is broken, write the test anyway, mark it `test.fixme('ID title', ...)`, and put a
-   `// Bug: ...` comment directly above it describing the bug. File an issue.
+   `// Bug: ...` comment directly above it describing the bug plus the issue URL. File the issue first.
 4. Regenerate the map: `npm run docs:scenarios` (CI-friendly check: `npm run docs:scenarios:check`).
    Add intentional gaps to `GAPS` in `scripts/testing/scenarios.mjs`.
 5. Run it repeatedly: `npx playwright test -g "S-FRZ-03" --repeat-each=10 --workers=4`.
@@ -99,9 +99,19 @@ The demos expose `window.__spindle` purely as a test hook (no network, no teleme
 ## CI
 
 `.github/workflows/e2e.yml` runs on every pull request and push to `master`: Node 22, `npm ci`, build,
-cached Playwright browsers, 4 shards (retries = 2 in CI only), blob reports merged into an HTML report, and
-traces/screenshots/videos uploaded on failure. The aggregate job **`e2e-result`** is the single check to
-require (see below).
+cached Playwright browsers, 4 shards, blob reports merged into an HTML report, and
+traces/screenshots/videos uploaded on failure. It also builds the three demos for production and runs the
+`@smoke` subset on Chromium against `vite preview` (`npm run build:demos` then `npm run test:e2e:preview`
+locally). The aggregate job **`e2e-result`** is the single check to require (see below); it fails if any
+shard or the production smoke failed, or if `docs/testing/scenarios.md` is stale.
+
+**Flaky tests fail the run.** CI keeps `retries: 2` so a failure still produces traces, but
+`failOnFlakyTests` makes a test that only passed on a retry fail its shard; the flaky tests are listed in the
+job summary of the *Merge reports* job. Fix the test (or product race), do not retry around it.
+
+`.github/workflows/e2e-nightly.yml` (nightly + manual `workflow_dispatch`) runs everything on all three
+browsers with `--retries=0 --repeat-each=5` in 6 shards and lists every test that failed in any repeat.
+Reproduce locally with `npx playwright test -g "ID" --repeat-each=10 --workers=4`.
 
 ### Making `e2e-result` required
 
