@@ -85,9 +85,27 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
   });
 
   test('D-PAG-01 the demo paginates into several pages with page-number footers @smoke', async () => {
-    await expect(doc.pages).toHaveCount(2);
-    await expect(doc.page.locator('.page-footer').nth(0)).toContainText('Page 1 of 2');
-    await expect(doc.page.locator('.page-footer').nth(1)).toContainText('Page 2 of 2');
+    // The page count depends on the fonts installed on the machine (the demo's Arial resolves to
+    // different fallbacks on CI than locally), so assert "several" rather than an exact count.
+    await expect.poll(() => doc.pages.count()).toBeGreaterThanOrEqual(2);
+    const total = await doc.pages.count();
+    const footers = doc.page.locator('.page-footer');
+    await expect(footers).toHaveCount(total);
+    for (let i = 0; i < total; i++) {
+      await expect(footers.nth(i)).toContainText(`Page ${i + 1} of ${total}`);
+      // No blank pages: every page carries body text besides its header/footer.
+      const bodyText = await doc.pages
+        .nth(i)
+        .locator('p, h1, h2, h3, li')
+        .evaluateAll((els) =>
+          els
+            .filter((e) => !e.closest('.page-header, .page-footer'))
+            .map((e) => e.textContent ?? '')
+            .join('')
+            .trim()
+        );
+      expect(bodyText.length, `page ${i + 1} body text`).toBeGreaterThan(0);
+    }
   });
 
   test('D-PAG-02 explicit page break starts a new page and footers update', async ({ page }) => {
