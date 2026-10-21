@@ -472,7 +472,10 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
           if (floatingInputRef.current) {
             const newCursorPos = start + reference.length;
             floatingInputRef.current.focus();
-            floatingInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+            // Don't move the caret back if the user already typed past the inserted reference.
+            if (floatingInputRef.current.value === newValue) {
+              floatingInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+            }
           }
         });
       }
