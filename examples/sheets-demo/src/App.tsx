@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
-import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
+import { WorkbookImpl, FilterManager } from '@b32nio/spindle-sheets-core';
 import type { CommentAuthor, SheetCommentEvent } from '@b32nio/spindle-sheets-core';
 import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
@@ -272,6 +272,9 @@ function WsDemo({
     };
   }, [config.url, config.roomId, config.identity]);
 
+  // Handle for end-to-end tests (e2e/) to inspect model state behind the canvas.
+  if (wb) (window as unknown as { __spindle?: unknown }).__spindle = { workbook: wb, FilterManager };
+
   if (error) return <div style={{ padding: 16, color: 'crimson' }}>WS error: {error}</div>;
   if (!wb) return <div style={{ padding: 16 }}>Connecting to {config.url}…</div>;
   return (
@@ -328,6 +331,8 @@ function App() {
   const [readOnly, setReadOnly] = useState(false);
   const [wsConfig] = useState<WsConfig | null>(() => parseWsConfig());
   const [workbook] = useState(() => makeWorkbookFromSample());
+  // Handle for end-to-end tests (e2e/) to inspect model state behind the canvas.
+  (window as unknown as { __spindle?: unknown }).__spindle = { workbook, FilterManager };
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,

@@ -14,7 +14,7 @@ import { HeaderContextMenu } from './HeaderContextMenu';
 import { FilterModal } from './FilterModal';
 import { FormatCellsModal } from './FormatCellsModal';
 import { FindReplaceModal, type FindReplaceState } from './FindReplaceModal';
-import type { CellPosition, Selection, CellFormat, ColumnFilter, CellStyle, SortOrder, FormatType } from '@b32nio/spindle-sheets-core';
+import type { Cell, CellPosition, Range, Selection, CellFormat, ColumnFilter, CellStyle, SortOrder, FormatType } from '@b32nio/spindle-sheets-core';
 import { columnIndexToLabel } from '@b32nio/spindle-sheets-core';
 import { parseDateString } from '@b32nio/spindle-sheets-core';
 import { findMatches, computeReplacement } from '@b32nio/spindle-sheets-core';
@@ -68,6 +68,8 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 }: WorkbookCanvasProps) {
   const { workbook } = useWorkbook();
   const [activeCell, setActiveCell] = useState<CellPosition | null>(null);
+  // Range shown in the name box (the active selection block).
+  const [selectionRange, setSelectionRange] = useState<Range | null>(null);
   const [editingCell, setEditingCell] = useState<CellPosition | null>(null);
   const [editValue, setEditValue] = useState('');
   const [caret, setCaret] = useState(0);
@@ -312,8 +314,9 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 
   // Commit edit and close editor
   // The value parameter comes from EditOverlay and is the most current value
-  // moveToNextCell: if true, move to the cell below after committing (Enter key behavior)
-  const commitEdit = useCallback((value?: string, moveToNextCell?: boolean) => {
+  // moveToNextCell: after committing, move down (true / 'down', Enter), right
+  // ('right', Tab) or left ('left', Shift+Tab).
+  const commitEdit = useCallback((value?: string, moveToNextCell?: boolean | 'down' | 'right' | 'left') => {
     // Use passed value if provided, otherwise fall back to editValue state
     const valueToCommit = value !== undefined ? value : editValue;
     
@@ -342,8 +345,16 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     // Move to the next cell (row below) if requested (Enter key behavior)
     if (moveToNextCell && currentEditingCell) {
       const sheet = workbook.getSheet(targetSheetId);
-      const newRow = Math.min(currentEditingCell.row + 1, sheet.rowCount - 1);
-      const newCell = { row: newRow, col: currentEditingCell.col };
+      const dir = moveToNextCell === true ? 'down' : moveToNextCell;
+      const newRow = dir === 'down'
+        ? Math.min(currentEditingCell.row + 1, sheet.rowCount - 1)
+        : currentEditingCell.row;
+      const newCol = dir === 'right'
+        ? Math.min(currentEditingCell.col + 1, sheet.colCount - 1)
+        : dir === 'left'
+          ? Math.max(currentEditingCell.col - 1, 0)
+          : currentEditingCell.col;
+      const newCell = { row: newRow, col: newCol };
       
       setActiveCell(newCell);
       
@@ -352,12 +363,13 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
         ranges: [{
           startRow: newRow,
           endRow: newRow,
-          startCol: currentEditingCell.col,
-          endCol: currentEditingCell.col,
+          startCol: newCol,
+          endCol: newCol,
         }],
         activeCell: newCell,
       };
       workbook.setSelection(newSelection);
+      setSelectionRange(newSelection.ranges[0]);
     }
     
     // Refocus the canvas so keyboard navigation continues to work
@@ -470,6 +482,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   // Handle selection change
   const handleSelectionChange = useCallback((selection: Selection) => {
     workbook.setSelection(selection);
+    setSelectionRange(selection.ranges[0] ?? null);
   }, [workbook]);
 
   // Handle direct sort by direction (for context menu)
@@ -728,7 +741,10 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
           for (let r = minRow; r <= maxRow; r++) {
             for (let c = minCol; c <= maxCol; c++) {
               const cell = workbook.getCell(undefined, r, c);
-              const updatedCell = { ...cell, format };
+              // Drop the old pooled id: setCell keeps an existing formatId and
+              // would silently ignore the new `format` (e.g. currency -> percent).
+              const { formatId: _previousFormatId, ...cellWithoutFormat } = cell ?? {};
+              const updatedCell: Partial<Cell> & { format?: CellFormat } = { ...cellWithoutFormat, format };
 
               // If applying date formatting to a string value, try to parse it as a date
               if (format.type && ['date', 'time', 'datetime'].includes(format.type) &&
@@ -1135,7 +1151,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
       />}
 
       {/* Formula Bar */}
-      <FormulaBar activeCell={activeCell} onFormulaChange={handleFormulaChange} readOnly={readOnly} />
+      <FormulaBar activeCell={activeCell} selectionRange={selectionRange} onFormulaChange={handleFormulaChange} readOnly={readOnly} />
 
       {/* Canvas Grid Area */}
       <div

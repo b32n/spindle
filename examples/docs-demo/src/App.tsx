@@ -538,6 +538,9 @@ function WsDemo({
     };
   }, [initialData, config.url, config.roomId, config.identity]);
 
+  // Handle for end-to-end tests (e2e/) to inspect model state.
+  if (doc) (window as unknown as { __spindle?: unknown }).__spindle = { document: doc };
+
   if (error) return <div style={{ padding: 16, color: 'crimson' }}>WS error: {error}</div>;
   if (!doc) return <div style={{ padding: 16 }}>Connecting to {config.url}…</div>;
   return (
@@ -600,6 +603,9 @@ function App() {
     doc.setData(sampleDocumentData);
     return doc;
   });
+
+  // Handle for end-to-end tests (e2e/) to inspect model state.
+  (window as unknown as { __spindle?: unknown }).__spindle = { document };
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,

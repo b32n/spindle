@@ -1,4 +1,4 @@
-import { toggleMark, setBlockType, lift } from 'prosemirror-commands';
+import { toggleMark, setBlockType } from 'prosemirror-commands';
 import { liftListItem, sinkListItem, wrapInList } from 'prosemirror-schema-list';
 import type { Schema, MarkType, NodeType, Attrs, Mark } from 'prosemirror-model';
 import { TextSelection } from 'prosemirror-state';
@@ -83,53 +83,64 @@ export function setBlockTypeCommand(nodeType: NodeType, attrs?: Attrs): Command 
 }
 
 /**
+ * Toggle a list type over the selection:
+ *  - already in a list of this type: lift the selected items out of it;
+ *  - in a list of the other type: convert that list to this type;
+ *  - otherwise: wrap the selected blocks in a new list.
+ */
+function toggleListType(schema: Schema, listType: NodeType): Command {
+  const listTypes = [schema.nodes.bullet_list, schema.nodes.ordered_list].filter(Boolean);
+  return (state, dispatch) => {
+    const { $from, $to } = state.selection;
+    if (!$from.blockRange($to)) return false;
+
+    // Lists the selection touches: the enclosing one (caret inside an item)
+    // plus any it spans (e.g. select-all, where $from sits at the doc level).
+    const touched: Array<{ pos: number; type: NodeType }> = [];
+    for (let d = $from.depth; d > 0; d--) {
+      if (listTypes.includes($from.node(d).type)) {
+        touched.push({ pos: $from.before(d), type: $from.node(d).type });
+        break;
+      }
+    }
+    state.doc.nodesBetween($from.pos, $to.pos, (node, pos) => {
+      if (listTypes.includes(node.type)) {
+        if (!touched.some((t) => t.pos === pos)) touched.push({ pos, type: node.type });
+        return false;
+      }
+      return true;
+    });
+
+    if (touched.length > 0) {
+      if (touched.every((t) => t.type === listType)) {
+        return liftListItem(schema.nodes.list_item)(state, dispatch);
+      }
+      if (dispatch) {
+        const tr = state.tr;
+        for (const t of touched) {
+          if (t.type !== listType) tr.setNodeMarkup(t.pos, listType);
+        }
+        dispatch(tr.scrollIntoView());
+      }
+      return true;
+    }
+
+    return wrapInList(listType)(state, dispatch);
+  };
+}
+
+/**
  * Command to toggle bullet list
  */
 export function toggleBulletList(schema: Schema): Command {
-  const listType = schema.nodes.bullet_list;
-  
-  return (state, dispatch) => {
-    // Check if we're already in a bullet list
-    const { $from, $to } = state.selection;
-    const range = $from.blockRange($to);
-    
-    if (!range) return false;
-    
-    // Check if parent is already a bullet list
-    const parentList = $from.node(-1);
-    if (parentList && parentList.type === listType) {
-      // Lift out of list
-      return lift(state, dispatch);
-    }
-    
-    // Wrap in list
-    return wrapInList(listType)(state, dispatch);
-  };
+  return toggleListType(schema, schema.nodes.bullet_list);
 }
 
 /**
  * Command to toggle ordered list
  */
 export function toggleOrderedList(schema: Schema): Command {
-  const listType = schema.nodes.ordered_list;
-  
-  return (state, dispatch) => {
-    // Check if we're already in an ordered list
-    const { $from, $to } = state.selection;
-    const range = $from.blockRange($to);
-    
-    if (!range) return false;
-    
-    // Check if parent is already an ordered list
-    const parentList = $from.node(-1);
-    if (parentList && parentList.type === listType) {
-      // Lift out of list
-      return lift(state, dispatch);
-    }
-    
-    // Wrap in list
-    return wrapInList(listType)(state, dispatch);
-  };
+  return toggleListType(schema, schema.nodes.ordered_list);
 }
 
 /**
@@ -268,7 +279,16 @@ export function insertPageBreak(schema: Schema): Command {
     if (!pageBreakType) return false;
     
     if (dispatch) {
-      dispatch(state.tr.replaceSelectionWith(pageBreakType.create()));
+      let tr = state.tr.replaceSelectionWith(pageBreakType.create());
+      // The break is left node-selected, so the next keystroke would replace
+      // it. Move the caret into the block after it (adding one if needed).
+      const after = tr.selection.to;
+      const next = tr.doc.nodeAt(after);
+      if (!next || !next.isTextblock) {
+        tr = tr.insert(after, schema.nodes.paragraph.create());
+      }
+      tr = tr.setSelection(TextSelection.create(tr.doc, after + 1));
+      dispatch(tr.scrollIntoView());
     }
     return true;
   };

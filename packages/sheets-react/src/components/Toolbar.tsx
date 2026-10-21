@@ -1043,8 +1043,8 @@ export const Toolbar = memo(function Toolbar({
       {/* Freeze Panes */}
       <MenuButton icon={<Snowflake size={18} strokeWidth={2} />} label="Freeze panes" active={hasFrozenPanes} width={210}>
         <div style={styles.menuLabel}>Freeze panes</div>
-        <DropdownItem onClick={() => onFreezeRows?.(1)} active={frozenRows === 1 && frozenCols === 0}>Freeze top row</DropdownItem>
-        <DropdownItem onClick={() => onFreezeCols?.(1)} active={frozenCols === 1 && frozenRows === 0}>Freeze first column</DropdownItem>
+        <DropdownItem onClick={() => { onFreezeRows?.(1); if (frozenCols > 0) onFreezeCols?.(0); }} active={frozenRows === 1 && frozenCols === 0}>Freeze top row</DropdownItem>
+        <DropdownItem onClick={() => { onFreezeCols?.(1); if (frozenRows > 0) onFreezeRows?.(0); }} active={frozenCols === 1 && frozenRows === 0}>Freeze first column</DropdownItem>
         <DropdownItem onClick={() => { onFreezeRows?.(1); onFreezeCols?.(1); }} active={frozenRows === 1 && frozenCols === 1}>Freeze first row &amp; column</DropdownItem>
         {hasFrozenPanes && (
           <>
