@@ -120,6 +120,17 @@ describe('exportToXlsx', () => {
   });
 });
 
+describe('importFromXlsx on a file without worksheets', () => {
+  it('rejects it and leaves the workbook untouched', async () => {
+    const empty = new ExcelJS.Workbook();
+    const bytes = new Uint8Array(await empty.xlsx.writeBuffer());
+    const wb = freshWorkbook();
+    wb.setCellValue(undefined, 0, 0, 'keep');
+    await expect(importFromXlsx(bytes, wb)).rejects.toThrow(/no worksheets/);
+    expect(wb.getCellValue(undefined, 0, 0)).toBe('keep');
+  });
+});
+
 describe('exportToXlsx -> importFromXlsx round-trips', () => {
   it('round-trips plain values, formulas, and every sheet', async () => {
     const wb = freshWorkbook();
