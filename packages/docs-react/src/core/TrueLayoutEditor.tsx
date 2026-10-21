@@ -458,6 +458,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
           class: 'true-layout-hidden-editor',
           role: 'textbox',
           'aria-multiline': 'true',
+          'aria-label': 'Document',
         },
       });
       

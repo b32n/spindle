@@ -501,7 +501,7 @@ const FontSizeControl = memo(function FontSizeControl({ value, sizes, onPick }: 
     <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
       <ToolbarButton onClick={() => step('down')} tooltip="Decrease font size"><Minus size={14} strokeWidth={2.5} /></ToolbarButton>
       <div style={{ position: 'relative' }}>
-        <input type="text" value={value} readOnly onClick={() => setOpen((o) => !o)} style={styles.fontSizeInput} />
+        <input type="text" aria-label="Font size" value={value} readOnly onClick={() => setOpen((o) => !o)} style={styles.fontSizeInput} />
         {open && (
           <div style={{ ...styles.dropdown, left: '50%', transform: 'translateX(-50%)', minWidth: 64, maxHeight: 240, overflowY: 'auto' }} onMouseLeave={() => setOpen(false)}>
             {sizes.map((s) => (
