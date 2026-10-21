@@ -1,6 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const CI = !!process.env.CI;
+// PW_TARGET=preview runs the suite against production builds served by `vite preview`
+// (build first: `npm run build:demos`) instead of the dev servers.
+const PREVIEW = process.env.PW_TARGET === 'preview';
+const serve = (demo: string, port: number) =>
+  `npx vite ${PREVIEW ? 'preview' : ''} examples/${demo} --port ${port} --strictPort --host 127.0.0.1`;
 
 // Fixed ports so tests can derive URLs; chosen to avoid the demos' dev ports.
 export const PORTS = { sheets: 5175, docs: 5176, slides: 5177, collab: 1234 } as const;
@@ -10,7 +15,11 @@ export default defineConfig({
   outputDir: './e2e/.results',
   fullyParallel: true,
   forbidOnly: CI,
+  // Retries stay on in CI so a flaky test is still diagnosed (traces/videos of the failed
+  // attempt), but `failOnFlakyTests` turns "passed on retry" into a failing run so flakiness
+  // is fixed instead of silently absorbed. Override locally/nightly with --retries=0.
   retries: CI ? 2 : 0,
+  failOnFlakyTests: CI,
   workers: CI ? 2 : undefined,
   reporter: CI
     ? [['blob'], ['github']]
@@ -41,17 +50,17 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `npx vite examples/sheets-demo --port ${PORTS.sheets} --strictPort --host 127.0.0.1`,
+      command: serve('sheets-demo', PORTS.sheets),
       url: `http://127.0.0.1:${PORTS.sheets}`,
       reuseExistingServer: !CI,
     },
     {
-      command: `npx vite examples/docs-demo --port ${PORTS.docs} --strictPort --host 127.0.0.1`,
+      command: serve('docs-demo', PORTS.docs),
       url: `http://127.0.0.1:${PORTS.docs}`,
       reuseExistingServer: !CI,
     },
     {
-      command: `npx vite examples/slides-demo --port ${PORTS.slides} --strictPort --host 127.0.0.1`,
+      command: serve('slides-demo', PORTS.slides),
       url: `http://127.0.0.1:${PORTS.slides}`,
       reuseExistingServer: !CI,
     },

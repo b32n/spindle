@@ -144,7 +144,11 @@ export const EditOverlay = memo(forwardRef<EditOverlayRef, EditOverlayProps>(fun
         if (inputRef.current) {
           const newCursorPos = start + text.length;
           inputRef.current.focus();
-          inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+          // Skip if the user already typed on (e.g. the `+` after `=B2`): moving the caret back
+          // would make the next inserted reference land before that character.
+          if (inputRef.current.value === newValue) {
+            inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+          }
         }
       });
     },

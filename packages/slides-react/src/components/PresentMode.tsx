@@ -97,9 +97,21 @@ export function PresentMode({ onExit }: { onExit: () => void }): React.ReactElem
   // Enter fullscreen once on mount; exit only on unmount. Doing this per
   // navigation would exit fullscreen on every slide change (and the re-request
   // is rejected outside a user gesture) — the slide would drop out of fullscreen.
+  // Browsers that reserve Esc for leaving fullscreen (Firefox) never deliver the
+  // keydown, so also end the presentation when fullscreen is left from outside.
+  const onExitRef = useRef(onExit);
+  onExitRef.current = onExit;
   useEffect(() => {
-    containerRef.current?.requestFullscreen?.().catch(() => {});
+    const el = containerRef.current;
+    let entered = false;
+    const onFullscreenChange = () => {
+      if (document.fullscreenElement === el) entered = true;
+      else if (entered) onExitRef.current();
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    el?.requestFullscreen?.().catch(() => {});
     return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
       if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
     };
   }, []);

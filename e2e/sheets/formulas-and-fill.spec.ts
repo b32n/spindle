@@ -48,12 +48,7 @@ test.describe('sheets: formulas, autofill, resize', () => {
 
   test('S-FRM-07 clicking a cell while typing a formula inserts its reference', async ({
     page,
-    browserName,
   }) => {
-    test.skip(
-      browserName !== 'chromium',
-      'click-to-insert reference races the edit input focus outside Chromium (not yet investigated)'
-    );
     await sheet.select(6, 0);
     await page.keyboard.type('=');
     await sheet.clickCell(1, 1);
@@ -78,6 +73,30 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(5, 5, 1);
     await sheet.expectValue(6, 5, 2);
     await sheet.expectValue(7, 5, 3);
+  });
+
+  // Bug: ISBLANK of a reference to an empty cell returns FALSE.
+  // https://github.com/b32n/spindle/issues/66 (unit: known-formula-bugs.test.ts)
+  test.fixme('S-FRM-10 ISBLANK of an empty cell is TRUE', async () => {
+    await sheet.enter(5, 0, '=ISBLANK(F9)');
+    await sheet.expectValue(5, 0, true);
+  });
+
+  // Bug: array expressions inside SUMPRODUCT give #VALUE!.
+  // https://github.com/b32n/spindle/issues/67
+  test.fixme('S-FRM-11 SUMPRODUCT of an array expression multiplies element-wise', async () => {
+    for (const [i, v] of [1, 2, 3].entries()) {
+      await sheet.enter(5 + i, 6, String(v));
+      await sheet.enter(5 + i, 7, String(v + 3));
+    }
+    await sheet.enter(9, 0, '=SUMPRODUCT(G6:G8*H6:H8)');
+    await sheet.expectValue(9, 0, 32);
+  });
+
+  // Bug: =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68
+  test.fixme('S-FRM-12 unary minus binds tighter than ^', async () => {
+    await sheet.enter(5, 0, '=-2^2');
+    await sheet.expectValue(5, 0, 4);
   });
 
   test('S-FIL-01 dragging the fill handle copies a value down', async ({ page }) => {

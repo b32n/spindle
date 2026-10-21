@@ -72,6 +72,21 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
     if (!readOnly) rootRef.current?.focus();
   }, [readOnly]);
 
+  // Firefox dispatches `paste` to <body> (not the focused, non-editable editor
+  // root) when nothing editable has focus, so React's onPaste never fires for
+  // Ctrl/Cmd+V on a selected element. Forward those retargeted pastes.
+  useEffect(() => {
+    if (readOnly) return;
+    const onDocPaste = (e: ClipboardEvent) => {
+      const t = e.target;
+      if (t !== document.body && t !== document.documentElement) return;
+      if (!rootRef.current?.contains(document.activeElement)) return;
+      onPaste(e);
+    };
+    document.addEventListener('paste', onDocPaste);
+    return () => document.removeEventListener('paste', onDocPaste);
+  }, [readOnly, onPaste]);
+
   useEffect(() => { ensureDrawerStyles(); }, []);
 
   // The filmstrip eats horizontal room that's scarce on phones, so its default

@@ -66,12 +66,7 @@ test.describe('docs: two-client live collaboration', () => {
 
   test('D-COL-03 concurrent typing at the same spot converges to identical text', async ({
     browser,
-    browserName,
   }, info) => {
-    test.skip(
-      browserName !== 'chromium',
-      'same-spot concurrent typing assertion is timing-sensitive outside Chromium (not yet investigated)'
-    );
     const room = roomName('docs', info.testId);
     const a = await peer(browser, room, 'Alice');
     await waitForRoomSeed(room);
@@ -135,12 +130,7 @@ test.describe('docs: two-client live collaboration', () => {
     await late.context.close();
   });
 
-  // Bug: a late joiner occasionally ends up with the demo seed content twice (the whole
-  // document repeated after the real one), even after the relay verifiably holds the
-  // creator's seed (~2 in 4 runs with 4 workers; not seen in single serial runs of
-  // the happy path). Joiners are meant to seed nothing (binding.ts "Connect + seed");
-  // suspect connect() resolving before the replayed frames are applied.
-  test.fixme('D-COL-05b a late joiner never ends up with duplicated seed content', async ({
+  test('D-COL-05b a late joiner never ends up with duplicated seed content', async ({
     browser,
   }, info) => {
     const room = roomName('docs', info.testId);

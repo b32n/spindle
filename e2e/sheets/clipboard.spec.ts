@@ -111,6 +111,7 @@ test.describe('sheets: clipboard', () => {
   });
 
   // Bug: internal paste only carries values/formulas, not cell styles.
+  // https://github.com/b32n/spindle/issues/69
   test.fixme('S-CLP-11 paste preserves cell formatting', async ({ page }) => {
     await sheet.select(1, 0);
     await page.keyboard.press(`${MOD}+b`);

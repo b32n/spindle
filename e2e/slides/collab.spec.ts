@@ -14,13 +14,6 @@ async function peer(browser: Browser, room: string, user: string) {
 }
 
 test.describe('slides: two-client live collaboration', () => {
-  // Multi-peer timing is flaky under load in Firefox/WebKit (not yet investigated);
-  // the collaboration protocol itself is browser-independent and covered on Chromium.
-  test.skip(
-    ({ browserName }) => browserName !== 'chromium',
-    'collab timing not yet stable outside Chromium'
-  );
-
   test('SL-COL-01 an element moved by one client moves for the other @smoke', async ({
     browser,
   }, info) => {
@@ -84,10 +77,7 @@ test.describe('slides: two-client live collaboration', () => {
     await b.context.close();
   });
 
-  // Bug: same joiner-seed duplication as docs D-COL-05b: a late joiner occasionally ends up
-  // with the demo deck seeded twice (7 thumbnails instead of 4), even after the relay
-  // holds the creator's seed (~1 in 4 runs with 4 workers).
-  test.fixme('SL-COL-05 a late joiner receives the current deck without duplicated slides', async ({
+  test('SL-COL-05 a late joiner receives the current deck without duplicated slides', async ({
     browser,
   }, info) => {
     const room = roomName('slides', info.testId);
@@ -104,11 +94,7 @@ test.describe('slides: two-client live collaboration', () => {
     await late.context.close();
   });
 
-  // Bug: same joiner-seed duplication as SL-COL-05: when the second peer's deck is
-  // seeded twice, slide 2 has more shapes than the test expects (flaky, ~1 in 3 runs).
-  test.fixme('SL-COL-06 concurrent moves of different elements converge', async ({
-    browser,
-  }, info) => {
+  test('SL-COL-06 concurrent moves of different elements converge', async ({ browser }, info) => {
     const room = roomName('slides', info.testId);
     const a = await peer(browser, room, 'Alice');
     await waitForRoomSeed(room);
