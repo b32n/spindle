@@ -16,20 +16,21 @@ export const COLLAB_WS = 'ws://127.0.0.1:1234';
 export async function waitForRoomSeed(
   room: string,
   minBytes = 1000,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  wsBase = COLLAB_WS
 ): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const bytes = await docBytes(room);
+    const bytes = await docBytes(room, wsBase);
     if (bytes >= minBytes) return;
     await new Promise((r) => setTimeout(r, 50));
   }
   throw new Error(`relay never received ${minBytes} bytes of doc frames for room ${room}`);
 }
 
-function docBytes(room: string): Promise<number> {
+function docBytes(room: string, wsBase: string): Promise<number> {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(`${COLLAB_WS}/${encodeURIComponent(room)}`);
+    const ws = new WebSocket(`${wsBase}/${encodeURIComponent(room)}`);
     let bytes = 0;
     ws.on('message', (data: Buffer) => {
       const tag = data[0];

@@ -2,7 +2,9 @@ import type { CollabProvider } from './types';
 
 /** The error an aborted attach rejects with (`name === 'AbortError'`). */
 export function createAttachAbortError(): Error {
-  const err = new Error('Collaboration attach was aborted (detachCollab() was called while it was in flight).');
+  const err = new Error(
+    'Collaboration attach was aborted (detachCollab() was called while it was in flight).'
+  );
   err.name = 'AbortError';
   return err;
 }
