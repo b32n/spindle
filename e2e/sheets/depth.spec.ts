@@ -28,11 +28,13 @@ test.describe('sheets: Format Cells dialog, colours, borders, font', () => {
     await sheet.goto();
   });
 
+  // Rows 6-7 on purpose: the sheets context menu is not clamped to the viewport (issue #84), so
+  // "Format Cells..." is unreachable from lower rows in a short window (Firefox profile is 720px).
   test('S-FMC-02 Number category: decimal places apply to the cell and the preview shows them', async ({
     page,
   }) => {
-    await sheet.enter(8, 0, '1234.5');
-    await openFormatCells(page, sheet, 8, 0);
+    await sheet.enter(5, 0, '1234.5');
+    await openFormatCells(page, sheet, 5, 0);
     const decimals = page.locator('input[type="number"]').first();
     await decimals.fill('3');
     // The dialog previews the sample value with the chosen format before applying.
@@ -40,35 +42,35 @@ test.describe('sheets: Format Cells dialog, colours, borders, font', () => {
     await page.getByRole('button', { name: 'Apply' }).click();
     await expect(page.getByRole('heading', { name: 'Format Cells' })).toBeHidden();
     await expect
-      .poll(() => cellFormat(page, 8, 0))
+      .poll(() => cellFormat(page, 5, 0))
       .toMatchObject({ type: 'number', decimalPlaces: 3 });
-    await sheet.expectValue(8, 0, 1234.5); // formatting never changes the stored value
+    await sheet.expectValue(5, 0, 1234.5); // formatting never changes the stored value
   });
 
   test('S-FMC-03 Date/Time category: a date pattern is stored on the cell', async ({ page }) => {
-    await sheet.enter(8, 0, '45000');
-    await openFormatCells(page, sheet, 8, 0);
+    await sheet.enter(5, 0, '45000');
+    await openFormatCells(page, sheet, 5, 0);
     await page.getByRole('button', { name: 'Date/Time', exact: true }).click();
     await page.locator('select').nth(1).selectOption('YYYY-MM-DD');
     await expect(page.getByText('2023-03-15', { exact: true })).toBeVisible(); // serial 45000
     await page.getByRole('button', { name: 'Apply' }).click();
     await expect
-      .poll(() => cellFormat(page, 8, 0))
+      .poll(() => cellFormat(page, 5, 0))
       .toMatchObject({ type: 'date', dateFormat: 'YYYY-MM-DD' });
-    await sheet.expectValue(8, 0, 45000);
+    await sheet.expectValue(5, 0, 45000);
   });
 
   test('S-FMC-04 Custom category: a supported pattern is stored and previewed', async ({
     page,
   }) => {
-    await sheet.enter(8, 0, '1234.5');
-    await openFormatCells(page, sheet, 8, 0);
+    await sheet.enter(5, 0, '1234.5');
+    await openFormatCells(page, sheet, 5, 0);
     await page.getByRole('button', { name: 'Custom', exact: true }).click();
     await page.getByPlaceholder(/Enter format pattern/).fill('#,##0.00');
     await expect(page.getByText('1,234.50', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Apply' }).click();
     await expect
-      .poll(() => cellFormat(page, 8, 0))
+      .poll(() => cellFormat(page, 5, 0))
       .toMatchObject({ type: 'custom', pattern: '#,##0.00' });
   });
 
@@ -76,8 +78,8 @@ test.describe('sheets: Format Cells dialog, colours, borders, font', () => {
   test.fixme('S-FMC-04b Custom category: a pattern with a literal suffix renders 7.00 pts', async ({
     page,
   }) => {
-    await sheet.enter(8, 0, '7');
-    await openFormatCells(page, sheet, 8, 0);
+    await sheet.enter(5, 0, '7');
+    await openFormatCells(page, sheet, 5, 0);
     await page.getByRole('button', { name: 'Custom', exact: true }).click();
     await page.getByPlaceholder(/Enter format pattern/).fill('0.00" pts"');
     await expect(page.getByText('7.00 pts', { exact: true })).toBeVisible();
@@ -86,17 +88,17 @@ test.describe('sheets: Format Cells dialog, colours, borders, font', () => {
   test('S-FMC-05 Format Cells applies to the whole selected range, and undo reverts it', async ({
     page,
   }) => {
-    await sheet.enter(8, 0, '1');
-    await sheet.enter(9, 0, '2');
-    await sheet.drag(await sheet.cellCenter(8, 0), await sheet.cellCenter(9, 0));
-    await openFormatCells(page, sheet, 9, 0);
+    await sheet.enter(5, 0, '1');
+    await sheet.enter(6, 0, '2');
+    await sheet.drag(await sheet.cellCenter(5, 0), await sheet.cellCenter(6, 0));
+    await openFormatCells(page, sheet, 6, 0);
     await page.locator('input[type="number"]').first().fill('4');
     await page.getByRole('button', { name: 'Apply' }).click();
-    for (const r of [8, 9])
+    for (const r of [5, 6])
       await expect.poll(() => cellFormat(page, r, 0)).toMatchObject({ decimalPlaces: 4 });
     await sheet.focusGrid();
     await page.keyboard.press(`${MOD}+z`);
-    for (const r of [8, 9]) await expect.poll(() => cellFormat(page, r, 0)).toBeNull();
+    for (const r of [5, 6]) await expect.poll(() => cellFormat(page, r, 0)).toBeNull();
   });
 
   test('S-CLR-01 fill colour and text colour are stored on the whole selection', async ({
