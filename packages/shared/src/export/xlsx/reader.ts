@@ -11,8 +11,9 @@ import type {
 
 export async function importXlsx(bytes: Uint8Array): Promise<SpreadsheetImportResult> {
   const workbook = new ExcelJS.Workbook();
-  // @ts-expect-error -- Buffer<ArrayBuffer> vs exceljs's plain Buffer type (see writer.test.ts)
-  await workbook.xlsx.load(Buffer.from(bytes));
+  // exceljs accepts a plain Uint8Array (JSZip reads it directly). Do NOT wrap in
+  // Node's `Buffer`: it does not exist in browsers, so Open would always fail there.
+  await workbook.xlsx.load(bytes as unknown as ExcelJS.Buffer);
   const warnings: string[] = [];
   const sheets = workbook.worksheets.map((ws) => readSheet(ws, warnings));
   const activeTab = workbook.views?.[0]?.activeTab;
