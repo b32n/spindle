@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { DocsPage, MOD } from '../support/docs';
+import { closeToolbarMenu } from '../support/toolbar';
 
 // 1x1 transparent PNG
 const PNG =
@@ -58,6 +59,7 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
     await doc.toolbar('Insert table').click();
     await page.getByRole('button', { name: /Insert 3×3 table/ }).click();
     await expect(doc.editor.locator('table')).toHaveCount(1);
+    await closeToolbarMenu(page);
     // The caret is placed after the table; double-click the first cell to edit it
     // (a single click selects the cell without entering it).
     await doc.pages.locator('td').first().dblclick();

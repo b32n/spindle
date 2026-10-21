@@ -106,7 +106,12 @@ test.describe('docs: two-client live collaboration', () => {
     await waitForRoomSeed(room);
     const b = await peer(browser, room, 'Bob');
     await a.doc.clickLine('Welcome to Spindle Docs');
-    await a.doc.press(`${MOD}+a`);
+    // Select just the heading: select-all would also span the demo's existing italic
+    // run, which makes the first toggle remove italic instead of add it.
+    const heading = 'Welcome to Spindle Docs';
+    for (let i = 0; i < heading.length; i++) await a.page.keyboard.press('ArrowLeft');
+    for (let i = 0; i < heading.length; i++) await a.page.keyboard.press('Shift+ArrowRight');
+    await a.doc.settle();
     await a.page.keyboard.press(`${MOD}+i`);
     await expect(b.doc.editor.locator('h1 em').first()).toContainText('Welcome to Spindle Docs');
     await a.context.close();

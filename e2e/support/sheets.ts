@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { toolbarButton } from './toolbar';
 
 export const SHEETS_URL = 'http://127.0.0.1:5175';
 
@@ -139,7 +140,7 @@ export class SheetsPage {
   }
 
   toolbar(name: string | RegExp) {
-    return this.page.getByRole('button', { name });
+    return toolbarButton(this.page, name);
   }
 }
 

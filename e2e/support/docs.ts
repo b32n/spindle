@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { toolbarButton } from './toolbar';
 
 export const DOCS_URL = 'http://127.0.0.1:5176';
 export const MOD = process.platform === 'darwin' ? 'Meta' : 'Control';
@@ -23,7 +24,7 @@ export class DocsPage {
   }
 
   toolbar(name: string | RegExp) {
-    return this.page.getByRole('button', { name, exact: typeof name === 'string' });
+    return toolbarButton(this.page, name);
   }
 
   /** Click the centre of a rendered text run. */
