@@ -1,7 +1,7 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { SheetsPage, MOD } from '../support/sheets';
 import { roomName, waitForRoomSeed } from '../support/collab';
-import { NetworkProxy, RelayProcess } from '../support/relay';
+import { NetworkProxy, RelayProcess, killAllRelays } from '../support/relay';
 
 async function peer(browser: Browser, wsUrl: string, room: string, user: string) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
@@ -19,6 +19,8 @@ const sheetCount = (p: Peer) =>
   p.page.evaluate(() => (window as any).__spindle.workbook.getData().sheets.length);
 
 test.describe('sheets: collaboration resilience', () => {
+  test.afterEach(() => killAllRelays());
+
   test('S-RES-01 a dropped connection reconnects and edits sync both ways without duplication', async ({
     browser,
   }, info) => {
@@ -175,9 +177,9 @@ test.describe('sheets: collaboration resilience', () => {
       c.sheet.enter(12, 0, 'from C'),
     ]);
     await Promise.all([
-      a.sheet.enter(20, 5, 'same cell A'),
-      b.sheet.enter(20, 5, 'same cell B'),
-      c.sheet.enter(20, 5, 'same cell C'),
+      a.sheet.enter(2, 5, 'same cell A'),
+      b.sheet.enter(2, 5, 'same cell B'),
+      c.sheet.enter(2, 5, 'same cell C'),
     ]);
     for (const p of all) {
       await p.sheet.expectValue(10, 0, 'from A');
@@ -187,7 +189,7 @@ test.describe('sheets: collaboration resilience', () => {
     }
     await expect
       .poll(async () => {
-        const values = await Promise.all(all.map((p) => p.sheet.cellValue(20, 5)));
+        const values = await Promise.all(all.map((p) => p.sheet.cellValue(2, 5)));
         return new Set(values).size === 1 && String(values[0]).startsWith('same cell ');
       })
       .toBe(true);

@@ -73,6 +73,14 @@ export class NetworkProxy {
  * The real reference relay (examples/collab-server) as a child process the test owns, so it
  * can be killed and restarted. A restart loses the room's in-memory log, like a crash would.
  */
+const live = new Set<ChildProcess>();
+/** Kill every relay a test started (call from afterEach so a failing test cannot leak one). */
+export function killAllRelays(): void {
+  for (const c of live) c.kill('SIGKILL');
+  live.clear();
+}
+process.once('exit', killAllRelays);
+
 export class RelayProcess {
   private child: ChildProcess | null = null;
   port = 0;
@@ -93,6 +101,8 @@ export class RelayProcess {
       }
     );
     this.child = child;
+    live.add(child);
+    child.once('exit', () => live.delete(child));
     await new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('relay did not start')), 20_000);
       child.once('exit', (code) => reject(new Error(`relay exited early (${code})`)));

@@ -1,7 +1,7 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { DocsPage, MOD } from '../support/docs';
 import { roomName, waitForRoomSeed } from '../support/collab';
-import { NetworkProxy, RelayProcess } from '../support/relay';
+import { NetworkProxy, RelayProcess, killAllRelays } from '../support/relay';
 
 const WS = 'ws://127.0.0.1:1234';
 
@@ -40,6 +40,8 @@ async function typeAtEnd(p: Peer, line: string, text: string) {
 }
 
 test.describe('docs: collaboration resilience', () => {
+  test.afterEach(() => killAllRelays());
+
   test('D-RES-01 a dropped connection reconnects and edits sync both ways without duplication', async ({
     browser,
   }, info) => {

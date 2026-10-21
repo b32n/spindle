@@ -1,7 +1,7 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { SlidesPage, MOD } from '../support/slides';
 import { roomName, waitForRoomSeed } from '../support/collab';
-import { NetworkProxy, RelayProcess } from '../support/relay';
+import { NetworkProxy, RelayProcess, killAllRelays } from '../support/relay';
 
 const WS = 'ws://127.0.0.1:1234';
 
@@ -39,6 +39,8 @@ async function nudge(p: Peer, id: string, key: string, presses = 1) {
 }
 
 test.describe('slides: collaboration resilience', () => {
+  test.afterEach(() => killAllRelays());
+
   test('SL-RES-01 a dropped connection reconnects and edits sync both ways without duplication', async ({
     browser,
   }, info) => {
