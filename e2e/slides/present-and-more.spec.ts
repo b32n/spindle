@@ -56,6 +56,12 @@ test.describe('slides: present mode', () => {
   test('SL-PRS-04 Escape and the Exit button leave present mode', async ({ page }) => {
     await s.toolbar('Present').click();
     await expect(page.getByRole('button', { name: 'Exit (Esc)' })).toBeVisible();
+    // Esc pressed while the fullscreen transition is still pending is swallowed by WebKit
+    // (no keydown, no fullscreenchange), so wait until fullscreen is really entered. Browsers
+    // that refuse fullscreen fall through after the timeout and still exercise the key handler.
+    await page
+      .waitForFunction(() => !!document.fullscreenElement, null, { timeout: 3000 })
+      .catch(() => {});
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: 'Exit (Esc)' })).toBeHidden();
     await s.toolbar('Present').click();
