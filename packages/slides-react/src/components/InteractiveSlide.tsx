@@ -374,7 +374,7 @@ export function InteractiveSlide({ slideId, scale }: { slideId: string; scale: n
       onPointerMove={onHoverMove}
       onPointerLeave={() => connectors.setHover(null)}
       tabIndex={-1}
-      style={{ position: 'relative', width: w * scale, height: h * scale, flex: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.16)', outline: 'none' }}
+      style={{ position: 'relative', width: w * scale, height: h * scale, flex: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.16)', outline: 'none', touchAction: 'none' }}
     >
       <div style={{ position: 'absolute', left: 0, top: 0, transform: `scale(${scale})`, transformOrigin: 'top left', width: w, height: h }}>
         <SlideView slideId={slideId} interactive />

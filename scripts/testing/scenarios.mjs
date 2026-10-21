@@ -17,6 +17,7 @@ const EDITORS = {
   sheets: 'Sheets',
   docs: 'Docs',
   slides: 'Slides',
+  mobile: 'Mobile / touch (@mobile projects)',
 };
 
 /** Scenarios with no E2E test: status is `n/a` (nothing to test) or `not covered` (todo). */
@@ -24,7 +25,7 @@ const GAPS = [
   ['sheets', 'S-GAP-01', 'Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images)', 'not covered', 'Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read.'],
   ['sheets', 'S-GAP-02', 'Ctrl/Cmd-click multi-range selection', 'n/a', 'The grid supports a single selection range only.'],
   ['sheets', 'S-GAP-03', 'HTML clipboard paste', 'n/a', 'Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path.'],
-  ['sheets', 'S-GAP-04', 'Touch gestures', 'not covered', 'Touch / mobile is untested (see the maintenance plan).'],
+  ['sheets', 'S-GAP-04', 'Touch gestures beyond tap / double-tap (pinch zoom, long-press menu, touch drag-select)', 'not covered', 'Tap and double-tap are covered (M-SHEETS-*).'],
   ['sheets', 'S-GAP-05', 'Formula engine semantics (146 functions)', 'n/a', 'Deliberately kept in fast unit tests (sheets-core).'],
   ['docs', 'D-GAP-01', 'DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes', 'not covered', 'Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet.'],
   ['docs', 'D-GAP-02', 'Triple-click paragraph selection and mouse drag selection', 'not covered', 'Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02).'],

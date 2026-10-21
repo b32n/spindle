@@ -123,6 +123,14 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-RSZ-01 | dragging a column header border resizes the column | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-02 | dragging a row header border resizes the row | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-03 | resize is undoable | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-BIG-01 | a 10,000-row CSV opens, scrolls to the bottom and an edit near the end reflects within budget | covered |  |  | `e2e/sheets/large-data.spec.ts` |
+| S-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/sheets/resilience.spec.ts` |
+| S-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/sheets/resilience.spec.ts` |
+| S-RES-02b | concurrent first edits to different cells of the same empty row both survive | fixme + bug |  | Rows are created lazily with a random id per peer, so two peers that first touch the same empty row concurrently each create their own row id at that index; the order merge keeps only one of them and the other peer's cell silently vanishes (https://github.com/b32n/spindle/issues/79). | `e2e/sheets/resilience.spec.ts` |
+| S-RES-03 | clients survive a relay restart and keep syncing with each other | covered |  |  | `e2e/sheets/resilience.spec.ts` |
+| S-RES-04 | three clients editing at once converge | covered |  |  | `e2e/sheets/resilience.spec.ts` |
+| S-RES-05 | undo under collaboration reverts only your own edit | covered |  |  | `e2e/sheets/resilience.spec.ts` |
+| S-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/sheets/resilience.spec.ts` |
 | S-SEL-01 | clicking a column header selects the whole column | covered | yes |  | `e2e/sheets/selection.spec.ts` |
 | S-SEL-02 | clicking a row header selects the whole row | covered | yes |  | `e2e/sheets/selection.spec.ts` |
 | S-SEL-03 | shift-click on column headers extends the selection | covered |  |  | `e2e/sheets/selection.spec.ts` |
@@ -153,7 +161,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-GAP-01 | Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images) | not covered | | Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read. | |
 | S-GAP-02 | Ctrl/Cmd-click multi-range selection | n/a | | The grid supports a single selection range only. | |
 | S-GAP-03 | HTML clipboard paste | n/a | | Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path. | |
-| S-GAP-04 | Touch gestures | not covered | | Touch / mobile is untested (see the maintenance plan). | |
+| S-GAP-04 | Touch gestures beyond tap / double-tap (pinch zoom, long-press menu, touch drag-select) | not covered | | Tap and double-tap are covered (M-SHEETS-*). | |
 | S-GAP-05 | Formula engine semantics (146 functions) | n/a | | Deliberately kept in fast unit tests (sheets-core). | |
 
 ## Docs
@@ -233,6 +241,13 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-BIG-01 | a ~55-page .docx opens, paginates and typing at the end appears within budget | covered |  |  | `e2e/docs/large-data.spec.ts` |
+| D-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-RES-03 | clients survive a relay restart and keep syncing with each other | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-RES-04 | three clients editing at once converge | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-RES-05 | undo under collaboration reverts only your own typing (B5) | fixme + bug |  | B5 - undo is not scoped to the local user under collaboration, the PM history stack is used under Yjs and own edits cannot be undone after a remote edit (https://github.com/b32n/spindle/issues/80). | `e2e/docs/resilience.spec.ts` |
+| D-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-GAP-01 | DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes | not covered | | Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet. | |
 | D-GAP-02 | Triple-click paragraph selection and mouse drag selection | not covered | | Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02). | |
 | D-GAP-03 | Ruler margin handles, table column resize, image resize handles | not covered | | Pointer gestures on the canvas-like page layer; to add. | |
@@ -283,6 +298,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-09 | a corrupt "image" (random bytes named .png) inserts nothing and raises no error | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-10 | a non-image file chosen anyway (bypassing accept) inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-BIG-01 | a slide with 100 elements renders, selects, drags, multi-moves and deletes within budget | covered |  |  | `e2e/slides/large-data.spec.ts` |
 | SL-PRS-01 | Present opens full-screen present mode on the active slide | covered | yes |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-02 | arrow keys, space, PageDown/Up, Home and End navigate | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-03 | clicking the stage advances; typing a number then Enter jumps | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
@@ -295,6 +311,12 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-CLP-02 | cut removes the element and paste brings it back | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-RO-01 | read-only mode hides editing chrome and blocks edits | covered | yes |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-RO-02 | read-only can still change slides in the filmstrip | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
+| SL-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/slides/resilience.spec.ts` |
+| SL-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/slides/resilience.spec.ts` |
+| SL-RES-03 | clients survive a relay restart and keep syncing with each other | covered |  |  | `e2e/slides/resilience.spec.ts` |
+| SL-RES-04 | three clients editing at once converge | covered |  |  | `e2e/slides/resilience.spec.ts` |
+| SL-RES-05 | undo under collaboration reverts only your own edit | covered |  |  | `e2e/slides/resilience.spec.ts` |
+| SL-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/slides/resilience.spec.ts` |
 | SL-INS-01 | Text box button inserts and selects a text box | covered | yes |  | `e2e/slides/tools.spec.ts` |
 | SL-INS-02 | Enter on a freshly inserted text box starts editing; typing stores the text | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-INS-03 | Shapes picker inserts the chosen shape preset | covered | yes |  | `e2e/slides/tools.spec.ts` |
@@ -315,9 +337,19 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-GAP-03 | Connector snapping to anchors, table cell selection gestures | not covered | | Complex pointer gestures; to add. | |
 | SL-GAP-04 | Slide drag-reorder in the filmstrip | not covered | | To add. | |
 
+## Mobile / touch (@mobile projects)
+
+| ID | Scenario | Status | Smoke | Notes | Spec |
+|---|---|---|---|---|---|
+| M-DOCS-01 | tapping a line places the caret and typing inserts text @mobile | covered |  |  | `e2e/mobile/docs.spec.ts` |
+| M-SHEETS-01 | tapping a cell selects it; typing edits it @mobile | covered |  |  | `e2e/mobile/sheets.spec.ts` |
+| M-SHEETS-02 | double-tapping a cell opens the editor @mobile | covered |  |  | `e2e/mobile/sheets.spec.ts` |
+| M-SLIDES-01 | tapping an element selects it, tapping the background clears it @mobile | covered |  |  | `e2e/mobile/slides.spec.ts` |
+| M-SLIDES-02 | dragging a selected element with a finger moves it @mobile | covered |  |  | `e2e/mobile/slides.spec.ts` |
+
 ## Summary
 
-- covered: 270
-- fixme + bug: 9
+- covered: 295
+- fixme + bug: 11
 - not covered: 8
 - n/a: 6

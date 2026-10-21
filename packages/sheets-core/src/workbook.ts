@@ -79,6 +79,8 @@ export class WorkbookImpl implements Workbook {
   // Set by attachCollab; consulted in places that need to know whether the
   // workbook is currently sourcing state from a Y.Doc.
   private collabHandle: CollabHandle | null = null;
+  /** Abort controller of an attachCollab() that has not resolved yet. */
+  private pendingAttach: AbortController | null = null;
   // True while _reloadFromCollab is rebuilding internal state from a remote
   // Y.Doc update. Mirror calls in mutation methods short-circuit when set,
   // otherwise we'd echo every remote write back over the wire.
@@ -1655,13 +1657,22 @@ export class WorkbookImpl implements Workbook {
     if (this.collabHandle) {
       throw new Error('Collaboration is already attached to this workbook.');
     }
-    const handle = await attachCollabToWorkbook(
-      this.getData(),
-      this,
-      provider,
-      identity,
-      options,
-    );
+    if (this.pendingAttach) {
+      throw new Error('Collaboration is already being attached to this workbook.');
+    }
+    // detachCollab() aborts this controller, so an attach still connecting can
+    // neither seed the room nor leave a live socket behind (rejects with AbortError).
+    const abort = new AbortController();
+    this.pendingAttach = abort;
+    let handle: CollabHandle;
+    try {
+      handle = await attachCollabToWorkbook(this.getData(), this, provider, identity, {
+        ...options,
+        signal: abort.signal,
+      });
+    } finally {
+      if (this.pendingAttach === abort) this.pendingAttach = null;
+    }
     this.collabHandle = handle;
     // Wire structure-change listeners on every existing sheet so structural
     // mutations (insert rows/cols, height/width, hide, freeze, filter, sort)
@@ -1681,6 +1692,8 @@ export class WorkbookImpl implements Workbook {
 
   /** Detach from the current collaboration session. */
   detachCollab(): void {
+    this.pendingAttach?.abort();
+    this.pendingAttach = null;
     if (!this.collabHandle) return;
     for (const sheet of this.sheets.values()) {
       (sheet as SheetImpl).__setStructureChangeListener(undefined);

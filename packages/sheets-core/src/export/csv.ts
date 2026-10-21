@@ -36,6 +36,12 @@ export function exportToCSV(workbook: WorkbookImpl, sheetId?: string): string {
 
 export function importFromCSV(csv: string, sheet: Sheet): void {
   const { rows } = importCsv(csv);
+  // A sheet starts with 1000 rows x 100 columns; grow it so a larger file stays reachable
+  // in the grid (the XLSX importer does the same).
+  let widest = 0;
+  for (const values of rows) widest = Math.max(widest, values.length);
+  sheet.rowCount = Math.max(sheet.rowCount, rows.length);
+  sheet.colCount = Math.max(sheet.colCount, widest);
   rows.forEach((values, row) => {
     values.forEach((value, col) => {
       // Set any non-empty field (including whitespace-only, which is a real
