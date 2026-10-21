@@ -97,7 +97,7 @@ test.describe('docs: file open / download round-trips', () => {
     await expect(page.locator('.page').first()).toContainText('Fixture footer');
   });
 
-  test('D-FIO-02 DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer', async ({
+  test('D-FIO-02 DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer @smoke', async ({
     page,
   }) => {
     await openViaChooser(page, OPEN, fixture('rich-document.docx'));

@@ -70,11 +70,11 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FIO-01 | opening a LibreOffice .xlsx shows sheets, values, formulas, formats, merges and styles | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-02 | sheet tabs switch between imported sheets | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-03 | opening an exceljs-written .xlsx restores frozen panes and column widths | covered |  |  | `e2e/sheets/file-io.spec.ts` |
-| S-FIO-04 | XLSX -> XLSX: the downloaded file keeps sheets, formulas, formats, merges and styles | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-04 | XLSX -> XLSX: the downloaded file keeps sheets, formulas, formats, merges and styles | covered | yes |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-05 | XLSX -> XLSX keeps frozen panes and widths | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-06 | an edit made after opening is part of the downloaded .xlsx | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-07 | CSV with quotes, commas and newlines opens into the right cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
-| S-FIO-08 | CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-08 | CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells | covered | yes |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-09 | unicode CSV (accents, CJK, emoji, RTL, CRLF) round-trips byte for byte | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-10 | XLSX -> CSV exports only the active sheet, with raw (unformatted) numbers | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-14 | XLSX -> CSV exports computed values for formula cells | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/77): CSV export writes the formula text, guarded with a leading apostrophe (`'=B2*C2`), for formula cells instead of their computed values (25), so the CSV is not usable elsewhere. | `e2e/sheets/file-io.spec.ts` |
@@ -205,7 +205,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-ERR-08 | a PNG renamed to .docx is rejected | covered |  |  | `e2e/docs/file-errors.spec.ts` |
 | D-ERR-09 | a multi-MB .docx (800 paragraphs + a 3 MB image) opens within budget and stays responsive | covered |  |  | `e2e/docs/file-errors.spec.ts` |
 | D-FIO-01 | opening a LibreOffice .docx shows headings, marks, lists, table, link, image, page break, header and footer | covered |  |  | `e2e/docs/file-io.spec.ts` |
-| D-FIO-02 | DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-FIO-02 | DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer | covered | yes |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-03 | text typed after opening is part of the downloaded .docx | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-04 | a document built in the editor downloads and re-opens identically | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/76): LibreOffice writes a page break as a trailing <w:br w:type="page"/> run inside the preceding paragraph (here the one holding the image). The importer only maps a break to a page-break block when the paragraph is otherwise empty, so the break is silently dropped. | `e2e/docs/file-io.spec.ts` |

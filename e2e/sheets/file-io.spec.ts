@@ -139,7 +139,7 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(frozen.cells.A1.style).toMatchObject({ bold: true });
   });
 
-  test('S-FIO-04 XLSX -> XLSX: the downloaded file keeps sheets, formulas, formats, merges and styles', async ({
+  test('S-FIO-04 XLSX -> XLSX: the downloaded file keeps sheets, formulas, formats, merges and styles @smoke', async ({
     page,
   }) => {
     await openFixture(page, 'styled-multisheet.xlsx');
@@ -239,7 +239,7 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(s.cells.D6.value).toBe('1e3');
   });
 
-  test('S-FIO-08 CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells', async ({
+  test('S-FIO-08 CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells @smoke', async ({
     page,
   }) => {
     await openFixture(page, 'quoting.csv');
