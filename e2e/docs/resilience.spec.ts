@@ -192,7 +192,7 @@ test.describe('docs: collaboration resilience', () => {
     for (const p of [a, b, c]) await p.context.close();
   });
 
-  // B5: undo is not scoped to the local user under collaboration (https://github.com/b32n/spindle/issues/80).
+  // Bug: B5 - undo is not scoped to the local user under collaboration, the PM history stack is used under Yjs and own edits cannot be undone after a remote edit (https://github.com/b32n/spindle/issues/80).
   test.fixme('D-RES-05 undo under collaboration reverts only your own typing (B5)', async ({
     browser,
   }, info) => {

@@ -99,7 +99,7 @@ test.describe('sheets: collaboration resilience', () => {
     await proxy.stop();
   });
 
-  // Rows are created lazily with a random id per peer, so two peers that first touch the same
+  // Bug: Rows are created lazily with a random id per peer, so two peers that first touch the same
   // empty row concurrently each create their own row id at that index; the order merge keeps only one
   // of them and the other peer's cell silently vanishes (https://github.com/b32n/spindle/issues/79).
   test.fixme('S-RES-02b concurrent first edits to different cells of the same empty row both survive', async ({
