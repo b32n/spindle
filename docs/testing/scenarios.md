@@ -21,7 +21,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CLP-08 | pasting plain tab-separated text from the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-09 | copy writes TSV to the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-10 | context menu copy and paste | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
-| S-CLP-11 | paste preserves cell formatting | fixme + bug |  | internal paste only carries values/formulas, not cell styles. https://github.com/b32n/spindle/issues/69 | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-11 | paste preserves cell formatting | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-12 | paste carries number formats and colours, and the paste is one undo step | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-COL-01 | an edit made by one client appears in the other | covered | yes |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-02 | concurrent edits to different cells converge | covered |  |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-03 | concurrent edits to the same cell converge on one value | covered |  |  | `e2e/sheets/collab.spec.ts` |
@@ -402,7 +403,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 335
-- fixme + bug: 14
+- covered: 337
+- fixme + bug: 13
 - not covered: 8
 - n/a: 6
