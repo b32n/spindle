@@ -117,6 +117,28 @@ test.describe('sheets: editing, navigation & undo/redo', () => {
     await sheet.expectValue(5, 0, 'one');
   });
 
+  test('S-UND-07 a host loop of 5,000 unbatched edits stays fast and is one undo step', async ({
+    page,
+  }) => {
+    const ms = await page.evaluate(() => {
+      const wb = (window as any).__spindle.workbook;
+      const t = performance.now();
+      for (let i = 0; i < 5000; i++) wb.setCellValue(undefined, i, 40, i);
+      return performance.now() - t;
+    });
+    expect(ms).toBeLessThan(3000);
+    await sheet.select(0, 0);
+    await page.keyboard.press(`${MOD}+z`);
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const wb = (window as any).__spindle.workbook;
+          return [wb.getCellValue(undefined, 0, 40), wb.getCellValue(undefined, 4999, 40)];
+        })
+      )
+      .toEqual([null, null]);
+  });
+
   test('S-UND-02 undo reverts formatting', async ({ page }) => {
     await sheet.select(1, 0);
     await page.keyboard.press(`${MOD}+b`);
