@@ -8,6 +8,7 @@ import { useFormulaAssist } from '../hooks/useFormulaAssist';
 import { FormulaBar } from './FormulaBar';
 import { Toolbar } from './Toolbar';
 import type { FontSource } from '@b32nio/spindle-shared/react';
+import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { SheetTabs } from './SheetTabs';
 import { CommentsPanel } from './CommentsPanel';
 import { ContextMenu } from './ContextMenu';
@@ -54,7 +55,7 @@ export interface WorkbookCanvasProps {
   /** Base name for downloaded files (no extension). Default: the workbook's name. */
   fileName?: string;
   /** Called after a file was opened; `warnings` lists features the importer had to drop. */
-  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
   /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
   onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
@@ -505,12 +506,12 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
 
   const handleOpenFile = useCallback(async (file: File) => {
     try {
-      const { warnings } = await importWorkbookFile(workbook, file);
+      const { warnings, loss } = await importWorkbookFile(workbook, file);
       // setData swapped every sheet; drop any state pointing into the old one.
       setActiveCell(null);
       setEditingCell(null);
       setDimensionVersion((v) => v + 1);
-      onFileOpened?.({ fileName: file.name, warnings });
+      onFileOpened?.({ fileName: file.name, warnings, loss });
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }

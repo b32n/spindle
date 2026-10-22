@@ -24,6 +24,7 @@ import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
 import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
+import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { downloadFile, ImageHooksContext, type FontSource, type ImageHooks } from '@b32nio/spindle-shared/react';
 import {
   DOCS_EXPORT_FORMATS,
@@ -51,7 +52,7 @@ interface DocumentEditorProps {
   /** Base name for downloaded files (no extension). Default: the document title. */
   fileName?: string;
   /** Called after a file was opened; `warnings` lists features the importer had to drop. */
-  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
   /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
   onFileError?: (error: Error, action: 'open' | 'download') => void;
   /**
@@ -149,11 +150,11 @@ export const DocumentEditor = memo(function DocumentEditor({
 
   const handleOpenFile = useCallback(async (file: File) => {
     try {
-      const { warnings } = await importDocumentFile(docModel, file);
+      const { warnings, loss } = await importDocumentFile(docModel, file);
       setPendingComment(null);
       setActiveThreadId(null);
       setLoadVersion((v) => v + 1);
-      onFileOpened?.({ fileName: file.name, warnings });
+      onFileOpened?.({ fileName: file.name, warnings, loss });
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
