@@ -52,6 +52,8 @@ jobs:
         run: npx playwright install-deps chromium firefox webkit
       - name: Run Playwright (no retries, repeated)
         run: npx playwright test --shard=${{ matrix.shard }}/6 --retries=0 --repeat-each=${{ inputs.repeat_each || 5 }}
+        env:
+          PW_VISUAL: '1'
       - name: Upload blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4

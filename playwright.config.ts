@@ -10,6 +10,19 @@ const serve = (demo: string, port: number) =>
 // Fixed ports so tests can derive URLs; chosen to avoid the demos' dev ports.
 export const PORTS = { sheets: 5175, docs: 5176, slides: 5177, collab: 1234 } as const;
 
+// Visual regression (toHaveScreenshot, Chromium only) is opt-in: its baselines come from CI's Linux
+// image, so it only runs when PW_VISUAL=1 (the `Visual` CI job, the nightly, `npm run test:visual`).
+const VISUAL = process.env.PW_VISUAL === '1';
+const VISUAL_PROJECT = {
+  name: 'visual',
+  testMatch: '**/visual/**/*.spec.ts',
+  use: {
+    ...devices['Desktop Chrome'],
+    viewport: { width: 1280, height: 720 },
+    deviceScaleFactor: 1,
+  },
+};
+
 export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e/.results',
@@ -25,7 +38,12 @@ export default defineConfig({
     ? [['blob'], ['github']]
     : [['list'], ['html', { open: 'never', outputFolder: 'e2e/.report' }]],
   timeout: 30_000,
-  expect: { timeout: 7_000 },
+  expect: {
+    timeout: 7_000,
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled', caret: 'hide' },
+  },
+  // One platform-independent baseline directory: only CI's Linux image produces/uses them.
+  snapshotPathTemplate: '{testDir}/visual/__screenshots__/{arg}{ext}',
   use: {
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
@@ -34,14 +52,15 @@ export default defineConfig({
     viewport: { width: 1280, height: 800 },
   },
   projects: [
+    ...(VISUAL ? [VISUAL_PROJECT] : []),
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: '**/mobile/**',
+      testIgnore: ['**/mobile/**', '**/visual/**'],
     },
     {
       name: 'firefox',
-      testIgnore: '**/mobile/**',
+      testIgnore: ['**/mobile/**', '**/visual/**'],
       // Firefox/WebKit do not support the clipboard-read/write permissions.
       use: { ...devices['Desktop Firefox'], permissions: [] },
     },
@@ -50,7 +69,7 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'], permissions: [] },
       // The docs editor drives a hidden ProseMirror whose selection/focus timing
       // differs in WebKit (most typing scenarios fail there); tracked as a known gap.
-      testIgnore: ['**/docs/**', '**/mobile/**'],
+      testIgnore: ['**/docs/**', '**/mobile/**', '**/visual/**'],
     },
     // Touch/mobile smoke: a small @mobile set per app (e2e/mobile) on emulated phones. These
     // run in the same shards as the desktop projects, so CI time grows by seconds, not a job.

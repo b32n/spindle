@@ -18,6 +18,8 @@ const EDITORS = {
   docs: 'Docs',
   slides: 'Slides',
   mobile: 'Mobile / touch (@mobile projects)',
+  a11y: 'Accessibility (axe, ratcheting baseline)',
+  visual: 'Visual regression (Chromium, CI baselines)',
 };
 
 /** Scenarios with no E2E test: status is `n/a` (nothing to test) or `not covered` (todo). */

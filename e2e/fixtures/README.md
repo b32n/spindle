@@ -26,3 +26,9 @@ Regenerating changes the bytes of the converted files (timestamps), so only rege
 
 Not committed (generated inside the tests, to keep the repo small): the 10,000-row CSV, the multi-MB DOCX,
 the 4000x3000 PNG, truncated/corrupt/empty variants.
+
+## `fonts/`
+
+`LiberationSans-{Regular,Bold}.subset.ttf`: Liberation Sans (SIL OFL 1.1) subset to Latin-1 + common punctuation with
+`pyftsubset`. Embedded by `e2e/support/visual.ts` under every font family the demos request so screenshots do not
+depend on the fonts installed on the machine.

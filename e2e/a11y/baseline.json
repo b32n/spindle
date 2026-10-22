@@ -1,0 +1,23 @@
+{
+  "docs/insert-image-dialog/color-contrast": 1,
+  "docs/insert-image-dialog/region": 6,
+  "docs/insert-link-dialog/region": 3,
+  "sheets/comments-panel/color-contrast": 2,
+  "sheets/format-cells-dialog/color-contrast": 2,
+  "sheets/format-cells-dialog/label": 1,
+  "sheets/format-cells-dialog/select-name": 2,
+  "sheets/initial/color-contrast": 1,
+  "slides/comments-panel/color-contrast": 4,
+  "slides/comments-panel/label-content-name-mismatch": 3,
+  "slides/comments-panel/landmark-one-main": 1,
+  "slides/comments-panel/page-has-heading-one": 1,
+  "slides/comments-panel/region": 9,
+  "slides/initial/color-contrast": 2,
+  "slides/initial/label-content-name-mismatch": 3,
+  "slides/initial/landmark-one-main": 1,
+  "slides/initial/page-has-heading-one": 1,
+  "slides/initial/region": 9,
+  "slides/present-mode/color-contrast": 3,
+  "slides/present-mode/label-content-name-mismatch": 3,
+  "slides/present-mode/region": 13
+}
