@@ -209,6 +209,53 @@ describe('importDocx', () => {
     ]);
   });
 
+  describe('page breaks stored inside content paragraphs (#76)', () => {
+    const BR = '<w:r><w:br w:type="page"/></w:r>';
+    const run = (t: string) => `<w:r><w:t>${t}</w:t></w:r>`;
+
+    async function importBody(paragraphsXml: string) {
+      const exported = await exportDocx(section([{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }]));
+      const zip = await JSZip.loadAsync(exported.bytes);
+      let xml = await zip.file('word/document.xml')!.async('string');
+      xml = xml.replace(/<w:p>[\s\S]*?<\/w:p>/, paragraphsXml);
+      zip.file('word/document.xml', xml);
+      return importDocx(await zip.generateAsync({ type: 'uint8array' }));
+    }
+
+    it('trailing break run (LibreOffice) becomes a pageBreak block after the paragraph', async () => {
+      const result = await importBody(`<w:p>${run('One')}${BR}</w:p><w:p>${run('Two')}</w:p>`);
+      expect(result.sections[0].blocks).toEqual([
+        { type: 'paragraph', content: [{ type: 'text', text: 'One' }] },
+        { type: 'pageBreak' },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Two' }] },
+      ]);
+    });
+
+    it('a break after a block-level image keeps the image and adds the pageBreak', async () => {
+      const exported = await exportDocx(section([{ type: 'image', src: ONE_PX_PNG, width: 5, height: 5 }]));
+      const zip = await JSZip.loadAsync(exported.bytes);
+      let xml = await zip.file('word/document.xml')!.async('string');
+      xml = xml.replace(/<\/w:drawing><\/w:r>/, `</w:drawing></w:r>${BR}`);
+      expect(xml).toContain('w:type="page"');
+      zip.file('word/document.xml', xml);
+      const result = await importDocx(await zip.generateAsync({ type: 'uint8array' }));
+      expect(result.sections[0].blocks.map((b) => b.type)).toEqual(['image', 'pageBreak']);
+    });
+
+    it('a leading break run (page-break-before) puts the pageBreak first', async () => {
+      const result = await importBody(`<w:p>${BR}${run('Two')}</w:p>`);
+      expect(result.sections[0].blocks).toEqual([
+        { type: 'pageBreak' },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Two' }] },
+      ]);
+    });
+
+    it('an otherwise empty break paragraph is still a single pageBreak', async () => {
+      const result = await importBody(`<w:p>${BR}</w:p>`);
+      expect(result.sections[0].blocks).toEqual([{ type: 'pageBreak' }]);
+    });
+  });
+
   it('round-trips paragraph alignment, spacing, and indent', async () => {
     const result = await roundTrip(
       section([
