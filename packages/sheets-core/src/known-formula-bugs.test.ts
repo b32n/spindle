@@ -6,8 +6,8 @@ import { WorkbookImpl } from './workbook';
 // plain `it` (and un-fixme the matching E2E test in e2e/sheets/formulas-and-fill.spec.ts).
 
 describe('known formula bugs (expected failures)', () => {
-  // https://ISSUE_ISBLANK
-  test.failing('ISBLANK(ref to an empty cell) is TRUE', () => {
+  // Fixed: https://github.com/b32n/spindle/issues/66
+  it('ISBLANK(ref to an empty cell) is TRUE', () => {
     const w = new WorkbookImpl('wb', 'WB');
     w.setCellValue(undefined, 0, 0, 5); // A1 = 5; B1 stays empty
     w.setFormula(undefined, 0, 2, '=ISBLANK(B1)'); // C1

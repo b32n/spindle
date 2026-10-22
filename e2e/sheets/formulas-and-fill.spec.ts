@@ -75,9 +75,8 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(7, 5, 3);
   });
 
-  // Bug: ISBLANK of a reference to an empty cell returns FALSE.
-  // https://github.com/b32n/spindle/issues/66 (unit: known-formula-bugs.test.ts)
-  test.fixme('S-FRM-10 ISBLANK of an empty cell is TRUE', async () => {
+  // https://github.com/b32n/spindle/issues/66 (unit: formula-conformance.test.ts)
+  test('S-FRM-10 ISBLANK of an empty cell is TRUE', async () => {
     await sheet.enter(5, 0, '=ISBLANK(F9)');
     await sheet.expectValue(5, 0, true);
   });

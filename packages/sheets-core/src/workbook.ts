@@ -528,7 +528,9 @@ export class WorkbookImpl implements Workbook {
               return '#REF!';
             }
           }
-          return this.getCellCalculatedValue(targetSheetId, r, c);
+          // A blank cell is null (EMPTY), not 0: ISBLANK, &, ISNUMBER, comparisons
+          // and COUNT-style functions must tell it apart from a real 0 or "".
+          return this.getRangeCellValue(targetSheetId, r, c);
         },
         getRangeValues: (range: RangeReference, sId?: string, sheetName?: string) => {
           let targetSheetId = sId ?? sheetId;
@@ -557,7 +559,9 @@ export class WorkbookImpl implements Workbook {
         },
       };
 
-      const result = this.formulaParser.evaluate(numericAst, evaluationContext, row, col);
+      let result = this.formulaParser.evaluate(numericAst, evaluationContext, row, col);
+      // A formula that resolves to a blank cell shows 0, as in Excel (=B1 with B1 empty).
+      if (result === null || result === undefined) result = 0;
       this.evaluatingCells.delete(cellKey);
 
       // An array result spills into a block of cells.
@@ -659,7 +663,8 @@ export class WorkbookImpl implements Workbook {
    * (AVERAGE/COUNT/COUNTA/MIN/MEDIAN/COUNTBLANK/STDEV…) can distinguish an empty
    * cell from a real 0. Numeric coercion still treats null as 0 (toNum(null)===0),
    * so SUM and arithmetic are unaffected. Single-cell refs (=A1+B1) keep going
-   * through getCellValue, which still returns 0 for a blank operand.
+   * also read blank as null (EMPTY) via the evaluation context; only the public
+   * getCellCalculatedValue still reports 0 for a blank cell.
    */
   private getRangeCellValue(sheetId: string | undefined, row: number, col: number): unknown {
     const cell = this.getCell(sheetId, row, col);

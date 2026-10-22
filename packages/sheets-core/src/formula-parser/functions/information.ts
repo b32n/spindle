@@ -39,7 +39,7 @@ export const informationLazyFunctions: Record<string, LazyFn> = {
   ISBLANK: (thunks) => {
     try {
       const v = thunks[0]();
-      return v == null || v === '';
+      return v == null; // only a truly empty cell; ="" is text, not blank
     } catch {
       return false;
     }

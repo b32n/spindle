@@ -114,7 +114,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FRM-07 | clicking a cell while typing a formula inserts its reference | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-08 | formula autocomplete suggests functions | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-09 | array formulas spill into neighbouring cells | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
-| S-FRM-10 | ISBLANK of an empty cell is TRUE | fixme + bug |  | ISBLANK of a reference to an empty cell returns FALSE. https://github.com/b32n/spindle/issues/66 (unit: known-formula-bugs.test.ts) | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-10 | ISBLANK of an empty cell is TRUE | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-11 | SUMPRODUCT of an array expression multiplies element-wise | fixme + bug |  | array expressions inside SUMPRODUCT give #VALUE!. https://github.com/b32n/spindle/issues/67 | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-12 | unary minus binds tighter than ^ | fixme + bug |  | =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68 | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-01 | dragging the fill handle copies a value down | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
@@ -388,7 +388,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 318
-- fixme + bug: 17
+- covered: 319
+- fixme + bug: 16
 - not covered: 8
 - n/a: 6
