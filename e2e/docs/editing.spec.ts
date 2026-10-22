@@ -76,11 +76,8 @@ test.describe('docs: typing, selection & formatting', () => {
     await expect(doc.editor.locator('u')).toContainText('word');
   });
 
-  // Bug: toggling a mark on a partly-marked selection removes it; Word / Google Docs add it
-  // to the whole selection. https://github.com/b32n/spindle/issues/71
-  test.fixme('D-FMT-10 Ctrl+I on a partly-italic selection italicises all of it', async ({
-    page,
-  }) => {
+  // https://github.com/b32n/spindle/issues/71: Word / Google Docs add the mark to a partly-marked selection.
+  test('D-FMT-12 Ctrl+I on a partly-italic selection italicises all of it', async ({ page }) => {
     await doc.clearAndFocus();
     await doc.typeText('aa bb');
     await page.keyboard.press('Shift+ArrowLeft');

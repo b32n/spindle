@@ -8,7 +8,71 @@ import type { Command, EditorState, Transaction } from 'prosemirror-state';
  * Command to toggle a mark with optional attributes
  */
 export function toggleMarkCommand(markType: MarkType, attrs?: Attrs): Command {
-  return toggleMark(markType, attrs);
+  // On a partly-marked selection Word / Google Docs add the mark to all of it;
+  // ProseMirror's default would remove it from the part that has it.
+  return toggleMark(markType, attrs, { removeWhenPresent: false });
+}
+
+/**
+ * Tab / Shift-Tab inside a table: move the caret to the next / previous cell
+ * (reading order). Tab in the last cell appends a row. Does nothing inside a
+ * list item, where Tab indents the item instead.
+ */
+export function goToNextCell(direction: 1 | -1): Command {
+  return (state, dispatch) => {
+    const { $from } = state.selection;
+    let cellDepth = -1;
+    for (let d = $from.depth; d > 0; d--) {
+      const role = $from.node(d).type.spec.tableRole;
+      if (role === 'cell') { cellDepth = d; break; }
+      if ($from.node(d).type.name === 'list_item') return false;
+    }
+    if (cellDepth < 0) return false;
+    const tableDepth = cellDepth - 2;
+    if (tableDepth < 0 || $from.node(tableDepth).type.spec.tableRole !== 'table') return false;
+
+    const table = $from.node(tableDepth);
+    const tableStart = $from.start(tableDepth);
+    const cells: Array<{ pos: number; row: number }> = [];
+    table.forEach((rowNode, rowOffset, rowIndex) => {
+      rowNode.forEach((_cell, cellOffset) => {
+        cells.push({ pos: tableStart + rowOffset + 1 + cellOffset, row: rowIndex });
+      });
+    });
+    const currentPos = $from.before(cellDepth);
+    const index = cells.findIndex((c) => c.pos === currentPos);
+    if (index < 0) return false;
+    const target = index + direction;
+    if (target < 0) return true; // first cell: stay put (don't let Tab leave the table)
+
+    if (target < cells.length) {
+      if (dispatch) {
+        const tr = state.tr;
+        tr.setSelection(TextSelection.near(tr.doc.resolve(cells[target].pos + 1)));
+        dispatch(tr.scrollIntoView());
+      }
+      return true;
+    }
+
+    // Tab in the last cell: append a row shaped like the last one.
+    const lastRow = table.lastChild;
+    if (!lastRow) return false;
+    if (dispatch) {
+      const schema = state.schema;
+      const rowType = schema.nodes.table_row;
+      const paragraph = schema.nodes.paragraph;
+      const newCells: ReturnType<NodeType['create']>[] = [];
+      lastRow.forEach((cell) => {
+        newCells.push(cell.type.create({ ...cell.attrs, colspan: 1, rowspan: 1, backgroundColor: null }, paragraph.create()));
+      });
+      const newRow = rowType.create(null, newCells);
+      const insertAt = tableStart + table.content.size;
+      const tr = state.tr.insert(insertAt, newRow);
+      tr.setSelection(TextSelection.near(tr.doc.resolve(insertAt + 2)));
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
 }
 
 /**
