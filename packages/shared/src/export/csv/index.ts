@@ -126,3 +126,5 @@ function parseCsv(csv: string): string[][] {
   }
   return rows;
 }
+export { detectCsvLoss } from './loss';
+export * from '../loss';

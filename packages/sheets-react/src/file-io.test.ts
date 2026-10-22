@@ -1,5 +1,6 @@
 import { WorkbookImpl } from '@b32nio/spindle-sheets-core';
-import { exportWorkbookFile, importWorkbookFile, SHEETS_EXPORT_FORMATS } from './file-io';
+import JSZip from 'jszip';
+import { exportWorkbookFile, importWorkbookFile, inspectWorkbookFile, SHEETS_EXPORT_FORMATS } from './file-io';
 
 function makeWorkbook(): WorkbookImpl {
   const wb = new WorkbookImpl('wb1', 'Budget');
@@ -56,5 +57,45 @@ describe('sheets file I/O', () => {
     const target = makeWorkbook();
     await expect(importWorkbookFile(target, asFile('hi', 'notes.txt'))).rejects.toThrow(/Unsupported file type/);
     expect(target.getSheet().getCell(1, 0)?.value).toBe('Pens');
+  });
+});
+
+describe('sheets import loss report', () => {
+  async function xlsxWithConditionalFormatting(): Promise<File> {
+    const out = await exportWorkbookFile(makeWorkbook(), 'xlsx');
+    const zip = await JSZip.loadAsync(out.data as Uint8Array);
+    const xml = await zip.file('xl/worksheets/sheet1.xml')!.async('string');
+    zip.file(
+      'xl/worksheets/sheet1.xml',
+      xml.replace('</sheetData>', '</sheetData><conditionalFormatting sqref="A1"><cfRule type="cellIs" priority="1" operator="equal"><formula>1</formula></cfRule></conditionalFormatting>')
+    );
+    return asFile(await zip.generateAsync({ type: 'uint8array' }), 'cf.xlsx');
+  }
+
+  it('inspectWorkbookFile reports losses without touching the workbook', async () => {
+    const wb = makeWorkbook();
+    const report = await inspectWorkbookFile(await xlsxWithConditionalFormatting());
+    expect(report.items.map((i) => i.id)).toEqual(['xlsx.conditionalFormatting']);
+    expect(wb.getCellValue(undefined, 1, 1)).toBe(12);
+  });
+
+  it('importWorkbookFile returns the same report alongside the warnings', async () => {
+    const wb = new WorkbookImpl('wb2', 'Other');
+    const result = await importWorkbookFile(wb, await xlsxWithConditionalFormatting());
+    expect(result.loss.items.map((i) => i.id)).toEqual(['xlsx.conditionalFormatting']);
+    expect(wb.getCellValue(undefined, 1, 1)).toBe(12);
+  });
+
+  it('a clean file and a comma CSV report no loss; a semicolon CSV is flagged', async () => {
+    const clean = await exportWorkbookFile(makeWorkbook(), 'xlsx');
+    expect((await inspectWorkbookFile(asFile(clean.data, 'ok.xlsx'))).items).toEqual([]);
+    expect((await inspectWorkbookFile(asFile('a,b\n1,2', 'ok.csv'))).items).toEqual([]);
+    expect((await inspectWorkbookFile(asFile('a;b\n1;2', 'semi.csv'))).items.map((i) => i.id)).toEqual(['csv.delimiter']);
+    const wb = new WorkbookImpl('wb3', 'X');
+    expect((await importWorkbookFile(wb, asFile('a;b\n1;2', 'semi.csv'))).loss.items).toHaveLength(1);
+  });
+
+  it('rejects unsupported file types', async () => {
+    await expect(inspectWorkbookFile(asFile('x', 'a.pdf'))).rejects.toThrow(/Unsupported/);
   });
 });

@@ -8,6 +8,14 @@ lockstep.
 
 ## [Unreleased]
 
+### Added
+
+- **Import loss report.** `ImportLossReport` (in `@b32nio/spindle-shared`) lists what an .xlsx / .docx / .csv import cannot
+  preserve (conditional formats, validation, named ranges, charts, comments, tracked changes, footnotes, floating images…).
+  `inspectWorkbookFile` / `inspectDocumentFile` (react packages) and `inspectXlsx` / `inspectCsv` / `inspectDocx` (core) check a file
+  without importing it; `importWorkbookFile` / `importDocumentFile` / `importFromXlsx` / `importFromDocx` now also return `loss`, and
+  `onFileOpened` receives it. See `documentation/import-loss.md`.
+
 ### Changed
 
 - **Privacy: `fontSource` option on the sheets, docs and slides editors.** The hard-coded Google Fonts

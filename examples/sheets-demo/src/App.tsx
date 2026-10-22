@@ -28,7 +28,9 @@ function logCommentEvent(event: SheetCommentEvent): void {
 }
 
 // Stand-ins for a host app reacting to Open / Download results.
-function reportFileOpened({ fileName, warnings }: { fileName: string; warnings: string[] }): void {
+function reportFileOpened(info: { fileName: string; warnings: string[]; loss: { items: unknown[] } }): void {
+  const { fileName, warnings } = info;
+  (window as unknown as { __lastOpened?: unknown }).__lastOpened = info; // e2e hook: what the last Open reported
   if (warnings.length > 0) console.warn(`[open] ${fileName}: ${warnings.length} import warning(s)`, warnings);
 }
 function reportFileError(error: Error, action: 'open' | 'download'): void {

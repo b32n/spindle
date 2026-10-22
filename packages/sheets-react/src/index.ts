@@ -22,3 +22,7 @@ export * from './hooks/useComments';
 
 // File open / download helpers (XLSX, CSV)
 export * from './file-io';
+
+// Import loss report (what an Open would not bring across) — see inspectWorkbookFile / inspectDocumentFile.
+export { hasImportLoss, describeImportLoss } from '@b32nio/spindle-shared';
+export type { ImportLossReport, ImportLossItem, ImportLossFormat } from '@b32nio/spindle-shared';
