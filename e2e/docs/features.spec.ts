@@ -69,20 +69,44 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
     await expect(doc.editor.locator('tr').first().locator('td, th').nth(0)).toContainText('A1');
   });
 
-  // Bug: there is no Tab key binding for table cells, so Tab does not move to the
-  // next cell (Word / Google Docs behaviour); it leaves the caret in place.
   // https://github.com/b32n/spindle/issues/70
-  test.fixme('D-INS-06 Tab moves to the next table cell', async ({ page }) => {
+  test('D-INS-06 Tab moves to the next table cell', async ({ page }) => {
     await doc.clearAndFocus();
     await doc.typeText('x');
     await doc.toolbar('Insert table').click();
     await page.getByRole('button', { name: /Insert 3×3 table/ }).click();
+    await closeToolbarMenu(page);
     await doc.pages.locator('td').first().dblclick();
     await doc.settle();
     await doc.typeText('A1');
     await doc.press('Tab');
     await page.keyboard.type('B1');
     await expect(doc.editor.locator('tr').first().locator('td, th').nth(1)).toContainText('B1');
+  });
+
+  test('D-INS-07 Shift+Tab moves back a cell and Tab in the last cell adds a row', async ({
+    page,
+  }) => {
+    await doc.clearAndFocus();
+    await doc.typeText('x');
+    await doc.toolbar('Insert table').click();
+    await page.getByRole('button', { name: /Insert 3×3 table/ }).click();
+    await closeToolbarMenu(page);
+    await doc.pages.locator('td').first().dblclick();
+    await doc.settle();
+    await doc.typeText('A1');
+    await doc.press('Tab');
+    await page.keyboard.type('B1');
+    await doc.press('Shift+Tab');
+    await page.keyboard.type('!');
+    await expect(doc.editor.locator('tr').first().locator('td, th').first()).toContainText('!A1');
+    await expect(doc.editor.locator('tr')).toHaveCount(3);
+    for (let i = 0; i < 8; i++) await doc.press('Tab'); // A1 -> C3 (8 moves)
+    await expect(doc.editor.locator('tr')).toHaveCount(3);
+    await doc.press('Tab'); // last cell: appends a row
+    await expect(doc.editor.locator('tr')).toHaveCount(4);
+    await page.keyboard.type('new');
+    await expect(doc.editor.locator('tr').nth(3).locator('td, th').first()).toContainText('new');
   });
 
   test('D-PAG-01 the demo paginates into several pages with page-number footers @smoke', async () => {
