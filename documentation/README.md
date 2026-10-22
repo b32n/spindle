@@ -41,6 +41,14 @@ No image URL is fetched by the library; hosts opt in with `resolveImage` / `uplo
 
 ---
 
+## 📥 Import loss report
+
+Find out what an .xlsx / .docx / .csv import cannot preserve before it replaces the open document.
+
+- **[Import Loss Guide](import-loss.md)** — `inspectWorkbookFile`, `inspectDocumentFile`, `ImportLossReport`
+
+---
+
 ## 💬 Comments
 
 Comment threads on spreadsheet cells and document text — replies, resolve, and @-mentions.

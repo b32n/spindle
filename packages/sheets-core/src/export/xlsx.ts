@@ -1,4 +1,4 @@
-import { exportXlsx, importXlsx } from '@b32nio/spindle-shared/export/xlsx';
+import { exportXlsx, importXlsx, detectXlsxLoss, type ImportLossReport } from '@b32nio/spindle-shared/export/xlsx';
 import type {
   SpreadsheetBorder,
   SpreadsheetCell,
@@ -150,7 +150,11 @@ function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['st
  * (unlike cells/widths/heights) only accept stable row/col IDs, not the
  * numeric indices this adapter otherwise works in.
  */
-export async function importFromXlsx(bytes: Uint8Array, workbook: WorkbookImpl): Promise<{ warnings: string[] }> {
+export async function importFromXlsx(
+  bytes: Uint8Array,
+  workbook: WorkbookImpl
+): Promise<{ warnings: string[]; loss: ImportLossReport }> {
+  const loss = await detectXlsxLoss(bytes);
   const result = await importXlsx(bytes);
   // setData() replaces the whole workbook; a file with no worksheets (e.g. a zip that isn't
   // really a workbook) would leave it with no sheets at all, so refuse it up front.
@@ -160,7 +164,15 @@ export async function importFromXlsx(bytes: Uint8Array, workbook: WorkbookImpl):
   result.sheets.forEach((sheet, i) => {
     sheet.mergedRanges?.forEach((range) => workbook.mergeCells(range, sheetIds[i]));
   });
-  return { warnings: result.warnings };
+  return { warnings: result.warnings, loss };
+}
+
+/**
+ * What importing this .xlsx would not bring across (conditional formats, validation, names,
+ * charts, comments…). Read-only: nothing is imported or modified.
+ */
+export function inspectXlsx(bytes: Uint8Array): Promise<ImportLossReport> {
+  return detectXlsxLoss(bytes);
 }
 
 function toWorkbookData(
