@@ -39,18 +39,20 @@ export class DocsPage {
     await this.settle();
   }
 
-  /** Wait until the hidden editor's DOM selection (what native keys act on) sits in text containing `text`. */
+  /**
+   * Wait until the hidden editor's DOM selection (what native keys act on) sits in a block whose text
+   * contains `text`. The selection's anchor may be a text node (Chromium, Firefox) or the block element
+   * itself with a child offset (WebKit), so look at the enclosing block, not at `anchorNode.textContent`.
+   */
   async waitForCaretIn(text: string) {
     await this.page.waitForFunction((t) => {
       const sel = window.getSelection();
       const ed = document.querySelector('.ProseMirror');
-      return (
-        !!sel &&
-        !!ed &&
-        !!sel.anchorNode &&
-        ed.contains(sel.anchorNode) &&
-        (sel.anchorNode.textContent ?? '').includes(t)
-      );
+      const node = sel?.anchorNode;
+      if (!sel || !ed || !node || !ed.contains(node)) return false;
+      const el = node.nodeType === 1 ? (node as Element) : node.parentElement;
+      const block = el?.closest('p, h1, h2, h3, h4, h5, h6, li, td, th') ?? el;
+      return (block?.textContent ?? '').includes(t) || (node.textContent ?? '').includes(t);
     }, text);
   }
 
@@ -101,17 +103,19 @@ export class DocsPage {
   async typeText(text: string) {
     await this.page.keyboard.type(text);
     await expect(this.editor).toContainText(text);
-    // Caret must have been mirrored to the end of what we typed before further native keys.
-    // (Content after the caret, e.g. a collaborator's cursor label, is allowed.)
+    // Caret must have been mirrored to the end of what we typed before further native keys. The text
+    // before the caret is measured with a Range from the editor start (the anchor node can be an element
+    // in WebKit). Content after the caret, e.g. a collaborator's cursor label, is allowed.
     await this.page.waitForFunction((t) => {
       const sel = window.getSelection();
-      const n = sel?.anchorNode;
-      return (
-        !!sel &&
-        !!n &&
-        sel.isCollapsed &&
-        (n.textContent ?? '').slice(0, sel.anchorOffset).endsWith(t)
-      );
+      const ed = document.querySelector('.ProseMirror');
+      if (!sel || !ed || !sel.anchorNode || !sel.isCollapsed || !ed.contains(sel.anchorNode)) {
+        return false;
+      }
+      const range = document.createRange();
+      range.selectNodeContents(ed);
+      range.setEnd(sel.anchorNode, sel.anchorOffset);
+      return range.toString().endsWith(t);
     }, text);
     await this.settle();
   }
