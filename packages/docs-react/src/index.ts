@@ -100,3 +100,7 @@ export type {
 
 // File open / download helpers (DOCX)
 export * from './file-io';
+
+// Import loss report (what an Open would not bring across) — see inspectWorkbookFile / inspectDocumentFile.
+export { hasImportLoss, describeImportLoss } from '@b32nio/spindle-shared';
+export type { ImportLossReport, ImportLossItem, ImportLossFormat } from '@b32nio/spindle-shared';

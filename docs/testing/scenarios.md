@@ -130,6 +130,9 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-RSZ-01 | dragging a column header border resizes the column | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-02 | dragging a row header border resizes the row | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-03 | resize is undoable | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FIO-16 | opening a workbook with unsupported features reports what was not imported | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-17 | opening a plain workbook and a comma CSV reports no loss | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-18 | a semicolon-delimited CSV is flagged (it imports into one column) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
 | S-KBD-01 | navigate, enter data and a formula, format by shortcut and undo without the mouse | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-02 | Tab reaches the toolbar, the formula bar and the grid, each with a visible focus indicator | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-03 | the Insert link dialog opens from a focused button, fills and submits with keys, and Escape cancels | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
@@ -209,7 +212,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-SEL-02 | double-click selects a word; typing replaces it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-SEL-03 | Shift+Arrow extends the selection | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-01 | Bold / Italic / Underline / Strike via shortcuts | covered |  |  | `e2e/docs/editing.spec.ts` |
-| D-FMT-10 | Ctrl+I on a partly-italic selection italicises all of it | fixme + bug |  | toggling a mark on a partly-marked selection removes it; Word / Google Docs add it to the whole selection. https://github.com/b32n/spindle/issues/71 | `e2e/docs/editing.spec.ts` |
+| D-FMT-12 | Ctrl+I on a partly-italic selection italicises all of it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-02 | toolbar Bold toggles on and off | covered | yes |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-03 | toolbar Italic, Underline, Strikethrough | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-04 | heading styles from the Paragraph menu | covered |  |  | `e2e/docs/editing.spec.ts` |
@@ -225,7 +228,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-INS-03 | insert an image from a URL | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-04 | insert a table from the size picker | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-05 | double-clicking a table cell lets you type into it | covered |  |  | `e2e/docs/features.spec.ts` |
-| D-INS-06 | Tab moves to the next table cell | fixme + bug |  | there is no Tab key binding for table cells, so Tab does not move to the next cell (Word / Google Docs behaviour); it leaves the caret in place. https://github.com/b32n/spindle/issues/70 | `e2e/docs/features.spec.ts` |
+| D-INS-06 | Tab moves to the next table cell | covered |  |  | `e2e/docs/features.spec.ts` |
+| D-INS-07 | Shift+Tab moves back a cell and Tab in the last cell adds a row | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-01 | the demo paginates into several pages with page-number footers | covered | yes |  | `e2e/docs/features.spec.ts` |
 | D-PAG-02 | explicit page break starts a new page and footers update | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-03 | typing enough paragraphs flows onto a new page | covered |  |  | `e2e/docs/features.spec.ts` |
@@ -258,6 +262,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-FIO-07 | opening a document with tracked changes and footnotes reports what was not imported | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-FIO-08 | opening a plain exported-style document reports no loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-KBD-01 | Tab reaches the toolbar and then the editor; the focused control has a visible indicator | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-02 | write text, a bullet list and a link using only the keyboard | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-03 | a heading style can be applied from the keyboard | fixme + bug |  | no keyboard-only way to give a paragraph a heading style: the Paragraph dropdown items are plain divs outside the tab order, Escape does not close it, and there is no shortcut; markdown input rules ("# ") are implemented in docs-core but not installed by the editor. https://github.com/b32n/spindle/issues/91 | `e2e/docs/keyboard.spec.ts` |
@@ -404,7 +410,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 337
-- fixme + bug: 14
+- covered: 345
+- fixme + bug: 12
 - not covered: 8
 - n/a: 6
