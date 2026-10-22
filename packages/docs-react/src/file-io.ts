@@ -1,4 +1,5 @@
-import { exportToDocx, importFromDocx, type DocumentImpl } from '@b32nio/spindle-docs-core';
+import { exportToDocx, importFromDocx, inspectDocx, type DocumentImpl } from '@b32nio/spindle-docs-core';
+import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { fileExtension, sanitizeFileName, stripExtension } from '@b32nio/spindle-shared/react';
 
 /** Formats the toolbar's Download menu can produce. */
@@ -51,7 +52,10 @@ export async function exportDocumentFile(
  * Replace `document`'s contents with the .docx file's contents. The file is
  * only ever read locally.
  */
-export async function importDocumentFile(document: DocumentImpl, file: File): Promise<{ warnings: string[] }> {
+export async function importDocumentFile(
+  document: DocumentImpl,
+  file: File
+): Promise<{ warnings: string[]; loss: ImportLossReport }> {
   const ext = fileExtension(file.name);
   if (ext !== 'docx') {
     throw new Error(`Unsupported file type: ".${ext || '?'}". Open a .docx file.`);
@@ -63,4 +67,15 @@ export async function importDocumentFile(document: DocumentImpl, file: File): Pr
     document.setTitle(stripExtension(file.name));
   }
   return result;
+}
+
+/**
+ * Headless pre-check for "Open": what importing `file` would lose (tracked changes, footnotes,
+ * floating images…), without touching the document. Hosts that render their own confirmation call
+ * this, show `describeImportLoss(report)` when `hasImportLoss(report)`, then call `importDocumentFile`.
+ */
+export async function inspectDocumentFile(file: File): Promise<ImportLossReport> {
+  const ext = fileExtension(file.name);
+  if (ext !== 'docx') throw new Error(`Unsupported file type: ".${ext || '?'}". Open a .docx file.`);
+  return inspectDocx(new Uint8Array(await file.arrayBuffer()));
 }

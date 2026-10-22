@@ -1,4 +1,4 @@
-import { exportDocx, importDocx } from '@b32nio/spindle-shared/export/docx';
+import { exportDocx, importDocx, detectDocxLoss, type ImportLossReport } from '@b32nio/spindle-shared/export/docx';
 import type {
   DocBlock,
   DocHeaderFooter,
@@ -284,7 +284,11 @@ function toHeaderFooterInline(item: HeaderFooterInlineContent, title: string): D
  * own id/createdAt survive; everything else (title, sections, style pools)
  * is rebuilt from the parsed file.
  */
-export async function importFromDocx(bytes: Uint8Array, document: DocumentImpl): Promise<{ warnings: string[] }> {
+export async function importFromDocx(
+  bytes: Uint8Array,
+  document: DocumentImpl
+): Promise<{ warnings: string[]; loss: ImportLossReport }> {
+  const loss = await detectDocxLoss(bytes);
   const result = await importDocx(bytes);
   // A zip that isn't a .docx imports as "no sections" plus a warning; applying that would wipe
   // the open document, so refuse it before touching the document.
@@ -293,7 +297,15 @@ export async function importFromDocx(bytes: Uint8Array, document: DocumentImpl):
   }
   const data = toDocumentData(result, document);
   document.setData(data);
-  return { warnings: result.warnings };
+  return { warnings: result.warnings, loss };
+}
+
+/**
+ * What importing this .docx would not bring across (tracked changes, footnotes, content controls,
+ * floating images…). Read-only: nothing is imported or modified.
+ */
+export function inspectDocx(bytes: Uint8Array): Promise<ImportLossReport> {
+  return detectDocxLoss(bytes);
 }
 
 function toDocumentData(result: DocumentImportResult, document: DocumentImpl): DocumentData {
