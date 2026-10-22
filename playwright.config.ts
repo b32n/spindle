@@ -67,9 +67,7 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'], permissions: [] },
-      // The docs editor drives a hidden ProseMirror whose selection/focus timing
-      // differs in WebKit (most typing scenarios fail there); tracked as a known gap.
-      testIgnore: ['**/docs/**', '**/mobile/**', '**/visual/**'],
+      testIgnore: ['**/mobile/**', '**/visual/**'],
     },
     // Touch/mobile smoke: a small @mobile set per app (e2e/mobile) on emulated phones. These
     // run in the same shards as the desktop projects, so CI time grows by seconds, not a job.
