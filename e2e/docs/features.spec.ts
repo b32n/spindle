@@ -34,6 +34,7 @@ test.describe('docs: insert, dialogs, comments, pagination, zoom', () => {
   });
 
   test('D-INS-03 insert an image from a URL', async ({ page }) => {
+    await doc.goto('?resolveImage=1'); // the By-URL tab needs the host's resolveImage hook
     await doc.clearAndFocus();
     await doc.typeText('x');
     await doc.toolbar('Insert image').click();
