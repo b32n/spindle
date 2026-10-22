@@ -24,7 +24,7 @@ const EDITORS = {
 
 /** Scenarios with no E2E test: status is `n/a` (nothing to test) or `not covered` (todo). */
 const GAPS = [
-  ['sheets', 'S-GAP-01', 'Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images)', 'not covered', 'Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read.'],
+  ['sheets', 'S-GAP-01', 'Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images)', 'not covered', 'Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), and OOXML features the importer does not read.'],
   ['sheets', 'S-GAP-02', 'Ctrl/Cmd-click multi-range selection', 'n/a', 'The grid supports a single selection range only.'],
   ['sheets', 'S-GAP-03', 'HTML clipboard paste', 'n/a', 'Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path.'],
   ['sheets', 'S-GAP-04', 'Touch gestures beyond tap / double-tap (pinch zoom, long-press menu, touch drag-select)', 'not covered', 'Tap and double-tap are covered (M-SHEETS-*).'],

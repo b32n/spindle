@@ -306,14 +306,24 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(csv.join('\n')).not.toContain('Sales total'); // the Costs sheet is not included
   });
 
-  // Bug (https://github.com/b32n/spindle/issues/77): CSV export writes the formula text, guarded with a leading apostrophe (`'=B2*C2`),
-  // for formula cells instead of their computed values (25), so the CSV is not usable elsewhere.
-  test.fixme('S-FIO-14 XLSX -> CSV exports computed values for formula cells', async ({ page }) => {
+  // https://github.com/b32n/spindle/issues/77: CSV export used to write the formula text (guarded as `'=B2*C2`).
+  test('S-FIO-14 XLSX -> CSV exports computed values for formula cells', async ({ page }) => {
     await openFixture(page, 'styled-multisheet.xlsx');
     await sheet.expectValue(0, 0, 'Item');
     const csv = (await downloadCsv(page)).bytes.toString('utf8').split('\n');
     expect(csv[1]).toBe('Widget,10,2.5,25,0.25,45366,1234.5');
     expect(csv[4]).toBe('Total,22,,100,1,,');
+  });
+
+  test('S-FIO-15 XLSX export opens on the sheet that was active when downloading', async ({
+    page,
+  }) => {
+    await openFixture(page, 'styled-multisheet.xlsx');
+    await page.getByText('Costs', { exact: true }).click();
+    await sheet.expectValue(0, 1, 100);
+    const wb = await loadXlsx((await downloadXlsx(page)).bytes);
+    expect(wb.worksheets.map((w) => w.name)).toEqual(['Sales', 'Costs', 'Notes ünï']);
+    expect(wb.views[0].activeTab).toBe(1);
   });
 
   test('S-FIO-11 CSV -> XLSX: values, text with newlines/unicode and numbers survive', async ({

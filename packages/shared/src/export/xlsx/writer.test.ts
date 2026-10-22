@@ -13,6 +13,18 @@ async function readBack(input: SpreadsheetExportInput): Promise<ExcelJS.Workbook
 }
 
 describe('exportXlsx', () => {
+  it('opens on the active sheet', async () => {
+    const sheets = ['A', 'B', 'C'].map((name) => ({ name, cells: new Map([['0:0', { value: name }]]) }));
+    const out = await readBack({ sheets, activeSheetIndex: 2 });
+    expect(out.views[0].activeTab).toBe(2);
+  });
+
+  it('defaults to the first sheet and clamps an out-of-range index', async () => {
+    const sheets = ['A', 'B'].map((name) => ({ name, cells: new Map([['0:0', { value: name }]]) }));
+    expect((await readBack({ sheets })).views[0].activeTab).toBe(0);
+    expect((await readBack({ sheets, activeSheetIndex: 9 })).views[0].activeTab).toBe(1);
+  });
+
   it('writes plain values of every supported type', async () => {
     const workbook = await readBack({
       sheets: [
