@@ -69,6 +69,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-SEL-16 | mouse drag selects a block; shift-click extends | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-EDT-08 | typing into the formula bar edits the active cell | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-01 | undo and redo via shortcuts and toolbar | covered | yes |  | `e2e/sheets/editing.spec.ts` |
+| S-UND-07 | a host loop of 5,000 unbatched edits stays fast and is one undo step | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-02 | undo reverts formatting | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-03 | undo reverts a clear | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-ERR-01 | a truncated .xlsx is rejected with an alert and the workbook is untouched | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
@@ -400,7 +401,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 330
+- covered: 331
 - fixme + bug: 17
 - not covered: 8
 - n/a: 6
