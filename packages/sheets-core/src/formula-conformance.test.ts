@@ -24,6 +24,21 @@ function evalFormula(formula: string, cells: Cells = {}): unknown {
   return w.getCellValue(undefined, 0, 26);
 }
 
+/** The block a formula in AA1 produces (its value plus any spill), `rows` x `cols`. */
+function evalGrid(formula: string, cells: Cells, rows: number, cols: number): unknown[][] {
+  const w = new WorkbookImpl('wb', 'WB');
+  for (const [ref, v] of Object.entries(cells)) {
+    const { row, col } = a1(ref);
+    w.setCellValue(undefined, row, col, v);
+  }
+  w.setFormula(undefined, 0, 26, formula);
+  const out: unknown[][] = [];
+  for (let r = 0; r < rows; r++) {
+    out.push(Array.from({ length: cols }, (_, c) => w.getCellCalculatedValue(undefined, r, 26 + c)));
+  }
+  return out;
+}
+
 function run(rows: Row[]): void {
   it.each(rows)('%s  %j', (formula, cells, expected) => {
     expect(evalFormula(formula, cells)).toEqual(expected);
@@ -132,5 +147,55 @@ describe('conformance: operator precedence and unary signs', () => {
     expect(w.getCellValue(undefined, 1, 0)).toEqual(first);
     // and the rendered text is stable (idempotent)
     expect(w.getCell(undefined, 1, 0)!.formula).toBe(text);
+  });
+});
+
+describe('conformance: array arithmetic and broadcasting', () => {
+  const data = { A2: 1, A3: 2, A4: 3, B2: 4, B3: 5, B4: 6 };
+  run([
+    ['=SUMPRODUCT(A2:A4*B2:B4)', data, 32],
+    ['=SUMPRODUCT(A2:A4,B2:B4)', data, 32],
+    ['=SUMPRODUCT(A2:A4*B2:B4*2)', data, 64],
+    ['=SUMPRODUCT((A2:A4>1)*1)', data, 2],
+    ['=SUMPRODUCT(--(A2:A4>1))', data, 2],
+    ['=SUMPRODUCT((A2:A4>1)*(B2:B4<6))', data, 1],
+    ['=SUMPRODUCT(A2:A4+1)', data, 9],
+    ['=SUMPRODUCT(A2:A4-B2:B4)', data, -9],
+    ['=SUMPRODUCT(B2:B4/A2:A4)', data, 4 + 2.5 + 2],
+    ['=SUMPRODUCT(A2:A4^2)', data, 14],
+    ['=SUM(A2:A4*B2:B4)', data, 32],
+    ['=MAX(A2:A4*B2:B4)', data, 18],
+    ['=SUMPRODUCT(-A2:A4)', data, -6],
+    ['=SUMPRODUCT(1-(A2:A4>1))', data, 1],
+    ['=SUMPRODUCT((A2:A4>1)*B2:B4)', data, 11],
+    ['=COUNTIF(A2:A4,">1")', data, 2],
+    ['=SUMPRODUCT(A2:A4*B2:B4)', { A2: 1, A3: 'x', A4: 3, B2: 4, B3: 5, B4: 6 }, '#VALUE!'], // text element -> #VALUE! propagates
+    ['=SUMPRODUCT(A2:A4*C2:C4)', data, 0], // blank column multiplies as 0
+    ['=1+A2:A4', data, 2], // a top-level array formula shows its first element
+  ]);
+
+  it.each<[string, Cells, number, number, unknown[][]]>([
+    ['=A2:A4*2', data, 3, 1, [[2], [4], [6]]],
+    ['=A2:A4+B2:B4', data, 3, 1, [[5], [7], [9]]],
+    ['=A2:A4>1', data, 3, 1, [[false], [true], [true]]],
+    ['=A2:A4&"x"', data, 3, 1, [['1x'], ['2x'], ['3x']]],
+    ['=-A2:A4', data, 3, 1, [[-1], [-2], [-3]]],
+    ['=2*A2:B2', data, 1, 2, [[2, 8]]],
+    ['=A2:A4*E6:G6', { ...data, E6: 1, F6: 2, G6: 3 }, 3, 3, [[1, 2, 3], [2, 4, 6], [3, 6, 9]]],
+    ['=A2:A4+B2:B3', data, 3, 1, [[5], [7], ['#N/A']]], // size mismatch -> #N/A past the shorter operand
+    ['=B2:B4/(A2:A4-2)', data, 3, 1, [[-4], ['#DIV/0!'], [6]]], // a failing element does not poison the rest
+    ['=SEQUENCE(3)*10', data, 3, 1, [[10], [20], [30]]],
+  ])('%s spills element-wise', (formula, cells, rows, cols, expected) => {
+    expect(evalGrid(formula, cells, rows, cols)).toEqual(expected);
+  });
+
+  it('re-evaluates the array when an input cell changes', () => {
+    const w = new WorkbookImpl('wb', 'WB');
+    w.setCellValue(undefined, 1, 0, 1);
+    w.setCellValue(undefined, 2, 0, 2);
+    w.setFormula(undefined, 0, 2, '=SUMPRODUCT(A2:A3*A2:A3)');
+    expect(w.getCellValue(undefined, 0, 2)).toBe(5);
+    w.setCellValue(undefined, 2, 0, 3);
+    expect(w.getCellValue(undefined, 0, 2)).toBe(10);
   });
 });

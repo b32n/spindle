@@ -421,6 +421,102 @@ export class FormulaParser {
     return args;
   }
 
+  /** Apply a binary operator to two scalar values (throws a `#…` error token on failure). */
+  private applyOperator(operator: string, leftVal: unknown, rightVal: unknown): unknown {
+    // Operators that accept any types (text-aware).
+    switch (operator) {
+      // Text concatenation.
+      case '&':
+        return toText(leftVal) + toText(rightVal);
+      // Comparisons: numeric when both look numeric, otherwise
+      // case-insensitive lexical (compareValues). Equality is type-aware
+      // so "1" != 1 and "" != 0.
+      case '>':
+        return compareValues(leftVal, rightVal) > 0;
+      case '<':
+        return compareValues(leftVal, rightVal) < 0;
+      case '>=':
+        return compareValues(leftVal, rightVal) >= 0;
+      case '<=':
+        return compareValues(leftVal, rightVal) <= 0;
+      case '=':
+        return excelEqual(leftVal, rightVal);
+      case '<>':
+        return !excelEqual(leftVal, rightVal);
+    }
+
+    // Arithmetic operators require numbers
+    const leftNum = Number(leftVal);
+    const rightNum = Number(rightVal);
+
+    if (isNaN(leftNum) || isNaN(rightNum)) {
+      throw new Error('#VALUE!');
+    }
+
+    switch (operator) {
+      case '+':
+        return leftNum + rightNum;
+      case '-':
+        return leftNum - rightNum;
+      case '*':
+        return leftNum * rightNum;
+      case '/':
+        if (rightNum === 0) {
+          throw new Error('#DIV/0!');
+        }
+        return leftNum / rightNum;
+      case '^':
+        return Math.pow(leftNum, rightNum);
+      default:
+        throw new Error(`#ERROR! Unknown operator: ${operator}`);
+    }
+  }
+
+  /**
+   * Element-wise operator over arrays, with Excel's broadcasting: a scalar
+   * applies to every element and a single row/column stretches to the other
+   * operand's size. Positions with no counterpart (mismatched sizes) are #N/A;
+   * a per-element failure becomes that element's error value, so one bad cell
+   * does not discard the whole array.
+   */
+  private broadcastOperator(operator: string, leftVal: unknown, rightVal: unknown): unknown[][] {
+    const toGrid = (v: unknown): unknown[][] =>
+      Array.isArray(v) ? (v as unknown[][]).map((row) => (Array.isArray(row) ? row : [row])) : [[v]];
+    const l = toGrid(leftVal);
+    const r = toGrid(rightVal);
+    const dim = (g: unknown[][]) => ({ rows: g.length, cols: g.reduce((m, row) => Math.max(m, row.length), 0) });
+    const ld = dim(l);
+    const rd = dim(r);
+    const rows = ld.rows === 1 ? rd.rows : rd.rows === 1 ? ld.rows : Math.max(ld.rows, rd.rows);
+    const cols = ld.cols === 1 ? rd.cols : rd.cols === 1 ? ld.cols : Math.max(ld.cols, rd.cols);
+    const at = (g: unknown[][], d: { rows: number; cols: number }, i: number, j: number): unknown | undefined => {
+      const row = d.rows === 1 ? 0 : i;
+      const col = d.cols === 1 ? 0 : j;
+      if (row >= g.length || col >= g[row].length) return undefined;
+      return g[row][col];
+    };
+    const out: unknown[][] = [];
+    for (let i = 0; i < rows; i++) {
+      const outRow: unknown[] = [];
+      for (let j = 0; j < cols; j++) {
+        const a = at(l, ld, i, j);
+        const b = at(r, rd, i, j);
+        if (a === undefined || b === undefined) {
+          outRow.push('#N/A');
+          continue;
+        }
+        try {
+          outRow.push(this.applyOperator(operator, a, b));
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : '';
+          outRow.push(msg.startsWith('#') ? msg.split(' ')[0] : '#VALUE!');
+        }
+      }
+      out.push(outRow);
+    }
+    return out;
+  }
+
   evaluate(ast: ParsedFormulaNode, ctx: EvaluationContext, currentRow: number = 0, currentCol: number = 0): unknown {
     return this.evaluateNode(ast, ctx, currentRow, currentCol);
   }
@@ -456,53 +552,12 @@ export class FormulaParser {
           const leftVal = this.evaluateNode(node.left, ctx, currentRow, currentCol);
           const rightVal = this.evaluateNode(node.right, ctx, currentRow, currentCol);
           
-          // Operators that accept any types (text-aware).
-          switch (node.operator) {
-            // Text concatenation.
-            case '&':
-              return toText(leftVal) + toText(rightVal);
-            // Comparisons: numeric when both look numeric, otherwise
-            // case-insensitive lexical (compareValues). Equality is type-aware
-            // so "1" != 1 and "" != 0.
-            case '>':
-              return compareValues(leftVal, rightVal) > 0;
-            case '<':
-              return compareValues(leftVal, rightVal) < 0;
-            case '>=':
-              return compareValues(leftVal, rightVal) >= 0;
-            case '<=':
-              return compareValues(leftVal, rightVal) <= 0;
-            case '=':
-              return excelEqual(leftVal, rightVal);
-            case '<>':
-              return !excelEqual(leftVal, rightVal);
+          // Operators work element-wise when an operand is an array (a range or
+          // an array result), broadcasting a scalar or a single row/column.
+          if (Array.isArray(leftVal) || Array.isArray(rightVal)) {
+            return this.broadcastOperator(node.operator, leftVal, rightVal);
           }
-
-          // Arithmetic operators require numbers
-          const leftNum = Number(leftVal);
-          const rightNum = Number(rightVal);
-
-          if (isNaN(leftNum) || isNaN(rightNum)) {
-            throw new Error('#VALUE!');
-          }
-
-          switch (node.operator) {
-            case '+':
-              return leftNum + rightNum;
-            case '-':
-              return leftNum - rightNum;
-            case '*':
-              return leftNum * rightNum;
-            case '/':
-              if (rightNum === 0) {
-                throw new Error('#DIV/0!');
-              }
-              return leftNum / rightNum;
-            case '^':
-              return Math.pow(leftNum, rightNum);
-            default:
-              throw new Error(`#ERROR! Unknown operator: ${node.operator}`);
-          }
+          return this.applyOperator(node.operator, leftVal, rightVal);
         }
         return null;
       case 'function':

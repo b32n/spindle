@@ -81,15 +81,27 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(5, 0, true);
   });
 
-  // Bug: array expressions inside SUMPRODUCT give #VALUE!.
   // https://github.com/b32n/spindle/issues/67
-  test.fixme('S-FRM-11 SUMPRODUCT of an array expression multiplies element-wise', async () => {
+  test('S-FRM-11 SUMPRODUCT of an array expression multiplies element-wise', async () => {
     for (const [i, v] of [1, 2, 3].entries()) {
       await sheet.enter(5 + i, 6, String(v));
       await sheet.enter(5 + i, 7, String(v + 3));
     }
     await sheet.enter(9, 0, '=SUMPRODUCT(G6:G8*H6:H8)');
     await sheet.expectValue(9, 0, 32);
+    await sheet.enter(10, 0, '=SUMPRODUCT((G6:G8>1)*1)');
+    await sheet.expectValue(10, 0, 2);
+  });
+
+  test('S-FRM-14 an operator over ranges spills element-wise', async () => {
+    for (const [i, v] of [1, 2, 3].entries()) {
+      await sheet.enter(5 + i, 6, String(v));
+      await sheet.enter(5 + i, 7, String(v + 3));
+    }
+    await sheet.enter(12, 0, '=G6:G8*H6:H8');
+    await sheet.expectValue(12, 0, 4);
+    await sheet.expectValue(13, 0, 10);
+    await sheet.expectValue(14, 0, 18);
   });
 
   // https://github.com/b32n/spindle/issues/68

@@ -14,8 +14,8 @@ describe('known formula bugs (expected failures)', () => {
     expect(w.getCellValue(undefined, 0, 2)).toBe(true);
   });
 
-  // https://ISSUE_SUMPRODUCT
-  test.failing('SUMPRODUCT(A2:A4*B2:B4) multiplies the arrays element-wise', () => {
+  // Fixed: https://github.com/b32n/spindle/issues/67
+  it('SUMPRODUCT(A2:A4*B2:B4) multiplies the arrays element-wise', () => {
     const w = new WorkbookImpl('wb', 'WB');
     [1, 2, 3].forEach((v, i) => w.setCellValue(undefined, i + 1, 0, v)); // A2:A4
     [4, 5, 6].forEach((v, i) => w.setCellValue(undefined, i + 1, 1, v)); // B2:B4
