@@ -1,6 +1,6 @@
 // Workbook model
 
-import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, SortOrder, RangeDependency, CellFormat, CellStyle, EventType, EventHandler } from './types';
+import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, SortOrder, RangeDependency, CircularReferenceMode, CellFormat, CellStyle, EventType, EventHandler } from './types';
 import { SheetImpl } from './sheet';
 import { EventEmitter } from './event-emitter';
 import { FormulaGraphImpl } from './formula-graph';
@@ -69,6 +69,8 @@ export class WorkbookImpl implements Workbook {
     ranges: [],
     activeCell: { row: 0, col: 0 },
   };
+  private circularReferenceMode: CircularReferenceMode = 'zero';
+  private circularSeen: string[] = []; // cells that hit a cycle while evaluating outside a graph pass
   private evaluatingCells: Set<string> = new Set(); // Track cells being evaluated to detect circular references
   private undoStack: WorkbookSnapshot[] = [];
   private redoStack: WorkbookSnapshot[] = [];
@@ -428,6 +430,7 @@ export class WorkbookImpl implements Workbook {
       // Check for circular reference BEFORE evaluating
       if (this.evaluatingCells.has(cellKey)) {
         // This cell is already being evaluated - circular reference!
+        this.circularSeen.push(cellKey);
         return '#CIRCULAR!';
       }
       
@@ -466,6 +469,7 @@ export class WorkbookImpl implements Workbook {
 
     // Check for circular reference BEFORE adding to evaluatingCells
     if (this.evaluatingCells.has(cellKey)) {
+      this.circularSeen.push(cellKey);
       const error = '#CIRCULAR!';
       this.formulaGraph.markClean(cellKey, error);
       this.setCell(sheetId, row, col, { value: error });
@@ -685,7 +689,7 @@ export class WorkbookImpl implements Workbook {
    * footprint are fed back as seeds for another pass, so formulas that read a
    * spilled cell pick up the change. The loop runs to a fixed point.
    */
-  private recalculateDependents(cellKey: string, _sheetId: string | undefined): void {
+  private recalculateDependents(cellKey: string, _sheetId: string | undefined, extraSeeds: string[] = []): void {
     // Cell keys are globally unique, so dependents (and range corners) are
     // resolved against the whole workbook — a formula on another sheet that
     // references this cell is found and re-evaluated on its own sheet.
@@ -703,7 +707,8 @@ export class WorkbookImpl implements Workbook {
       return loc;
     };
 
-    let seeds = [cellKey, ...this.spillSeeds];
+    this.circularSeen = []; // cycles met so far are settled by this pass
+    let seeds = [cellKey, ...extraSeeds, ...this.spillSeeds];
     this.spillSeeds = [];
 
     for (let pass = 0; pass < 64 && seeds.length > 0; pass++) {
@@ -717,17 +722,70 @@ export class WorkbookImpl implements Workbook {
           this.evaluateFormula(loc.sheetId, loc.row, loc.col);
         }
       }
-      for (const key of cyclic) {
-        const loc = resolveCell(key);
-        if (!loc) continue;
-        this.formulaGraph.markClean(key, '#CIRCULAR!' as CellValue);
-        this.setCell(loc.sheetId, loc.row, loc.col, { value: '#CIRCULAR!' as CellValue });
-      }
+      if (cyclic.length > 0) this.resolveCycles(cyclic, edges, resolveCell);
 
       // Spill footprints touched this pass become the seeds for the next.
       seeds = this.spillSeeds;
       this.spillSeeds = [];
     }
+  }
+
+  /**
+   * Settle formulas that sit on (or downstream of) a dependency cycle. Cells on
+   * the cycle take the configured circular-reference value (0 like Excel, or
+   * #REF!); in those modes cells merely downstream of it are computed normally
+   * from that value. A 'circularReference' event reports the cells on the cycle.
+   */
+  private resolveCycles(
+    cyclic: string[],
+    edges: Map<string, Set<string>>,
+    resolveCell: (key: string) => { sheetId: string; row: number; col: number } | undefined
+  ): void {
+    const legacy = this.circularReferenceMode === 'error';
+    const members = legacy ? new Set(cyclic) : this.formulaGraph.cycleMembers(cyclic, edges);
+    const value = this.circularValue();
+    const reported: Array<{ sheetId: string; row: number; col: number }> = [];
+    for (const key of members) {
+      const loc = resolveCell(key);
+      if (!loc) continue;
+      this.formulaGraph.markClean(key, value);
+      this.setCell(loc.sheetId, loc.row, loc.col, { value });
+      reported.push(loc);
+    }
+    if (!legacy) {
+      const downstream = new Set(cyclic.filter((k) => !members.has(k)));
+      if (downstream.size > 0) {
+        const { ordered } = this.formulaGraph.topologicalOrder(downstream, edges);
+        for (const key of ordered) {
+          const loc = resolveCell(key);
+          if (loc) this.evaluateFormula(loc.sheetId, loc.row, loc.col);
+        }
+      }
+    }
+    if (reported.length > 0) this.events.emit('circularReference', { cells: reported });
+  }
+
+  /** What a cell on a dependency cycle evaluates to. */
+  private circularValue(): CellValue {
+    switch (this.circularReferenceMode) {
+      case 'ref':
+        return '#REF!' as CellValue;
+      case 'error':
+        return '#CIRCULAR!' as CellValue;
+      default:
+        return 0;
+    }
+  }
+
+  /** How circular references evaluate: 0 (Excel, default), `#REF!`, or the diagnostic `#CIRCULAR!` token. */
+  getCircularReferenceMode(): CircularReferenceMode {
+    return this.circularReferenceMode;
+  }
+
+  setCircularReferenceMode(mode: CircularReferenceMode): void {
+    if (mode === this.circularReferenceMode) return;
+    this.circularReferenceMode = mode;
+    this.recalculateAllFormulas();
   }
 
   /**
@@ -762,10 +820,18 @@ export class WorkbookImpl implements Workbook {
     // dependency it forward-references (in arbitrary sheet.entries() order) would
     // read the pre-change cached value (e.g. a stale number instead of #REF!).
     this.formulaGraph.markAllDirty();
+    this.circularSeen = [];
     for (const [sheetId, sheet] of this.sheets.entries()) {
       for (const [row, col, cell] of sheet.entries()) {
         if (cell.formula) this.evaluateFormula(sheetId, row, col);
       }
+    }
+    // A cycle met while evaluating in sheet order is only a marker: settle it
+    // through the dependency graph, which knows which cells are on the cycle.
+    if (this.circularSeen.length > 0) {
+      const seen = [...new Set(this.circularSeen)];
+      this.circularSeen = [];
+      this.recalculateDependents(seen[0], undefined, seen.slice(1));
     }
   }
 

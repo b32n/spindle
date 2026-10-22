@@ -249,4 +249,63 @@ export class FormulaGraphImpl implements FormulaGraph {
     }
     return { ordered, cyclic };
   }
+
+  /**
+   * Of the `cyclic` nodes returned by topologicalOrder (which also contains
+   * everything merely downstream of a cycle), the ones that actually lie on a
+   * cycle: members of a strongly connected component of more than one node, or
+   * a node that depends on itself. `edges` maps a formula to the dirty formulas
+   * it reads.
+   */
+  cycleMembers(cyclic: string[], edges: Map<string, Set<string>>): Set<string> {
+    const inSet = new Set(cyclic);
+    const index = new Map<string, number>();
+    const low = new Map<string, number>();
+    const onStack = new Set<string>();
+    const stack: string[] = [];
+    const members = new Set<string>();
+    let counter = 0;
+
+    // Iterative Tarjan: chains of dependent formulas can be long.
+    for (const root of cyclic) {
+      if (index.has(root)) continue;
+      const work: Array<{ node: string; iter: Iterator<string> }> = [];
+      const visit = (node: string) => {
+        index.set(node, counter);
+        low.set(node, counter);
+        counter++;
+        stack.push(node);
+        onStack.add(node);
+        work.push({ node, iter: (edges.get(node) ?? new Set<string>()).values() });
+      };
+      visit(root);
+      while (work.length > 0) {
+        const frame = work[work.length - 1];
+        const next = frame.iter.next();
+        if (!next.done) {
+          const dep = next.value;
+          if (!inSet.has(dep)) continue;
+          if (!index.has(dep)) visit(dep);
+          else if (onStack.has(dep)) low.set(frame.node, Math.min(low.get(frame.node)!, index.get(dep)!));
+          continue;
+        }
+        work.pop();
+        const parent = work[work.length - 1];
+        if (parent) low.set(parent.node, Math.min(low.get(parent.node)!, low.get(frame.node)!));
+        if (low.get(frame.node) === index.get(frame.node)) {
+          const component: string[] = [];
+          let top: string;
+          do {
+            top = stack.pop()!;
+            onStack.delete(top);
+            component.push(top);
+          } while (top !== frame.node);
+          if (component.length > 1 || edges.get(frame.node)?.has(frame.node)) {
+            component.forEach((n) => members.add(n));
+          }
+        }
+      }
+    }
+    return members;
+  }
 }

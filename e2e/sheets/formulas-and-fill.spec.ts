@@ -106,6 +106,15 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(7, 10, 3);
   });
 
+  test('S-FRM-16 a circular reference evaluates to 0 (as in Excel), not an error token', async () => {
+    await sheet.enter(5, 8, '=I7+1');
+    await sheet.enter(6, 8, '=I6+1');
+    await sheet.expectValue(5, 8, 0);
+    await sheet.expectValue(6, 8, 0);
+    await sheet.enter(6, 8, '5');
+    await sheet.expectValue(5, 8, 6);
+  });
+
   test('S-FRM-14 an operator over ranges spills element-wise', async () => {
     for (const [i, v] of [1, 2, 3].entries()) {
       await sheet.enter(5 + i, 6, String(v));

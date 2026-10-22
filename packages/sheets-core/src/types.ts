@@ -342,6 +342,13 @@ export interface FormulaDependencies {
   ranges: RangeDependency[];
 }
 
+/**
+ * What a formula on a dependency cycle evaluates to: `'zero'` (Excel: 0, plus a
+ * 'circularReference' event), `'ref'` (#REF!) or `'error'` (the engine's
+ * diagnostic #CIRCULAR! token, which is never written to XLSX).
+ */
+export type CircularReferenceMode = 'zero' | 'ref' | 'error';
+
 export interface FormulaNode {
   cellKey: string;
   formula: string;
@@ -401,7 +408,8 @@ export type EventType =
   | 'sheetRename'
   | 'commentChange'
   | 'commentEvent'
-  | 'workbookChange';
+  | 'workbookChange'
+  | 'circularReference';
 
 export interface EventData {
   type: EventType;

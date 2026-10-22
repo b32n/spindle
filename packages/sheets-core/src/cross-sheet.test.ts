@@ -30,8 +30,8 @@ describe('cross-sheet dependency tracking', () => {
     const s2 = wb.addSheet('Sheet2');
     wb.setFormula(undefined, 0, 0, '=Sheet2!A1'); // Sheet1!A1 -> Sheet2!A1
     wb.setFormula(s2.id, 0, 0, '=Sheet1!A1'); // Sheet2!A1 -> Sheet1!A1 (cycle)
-    expect(wb.getCellValue(undefined, 0, 0)).toBe('#CIRCULAR!');
-    expect(wb.getCellValue(s2.id, 0, 0)).toBe('#CIRCULAR!');
+    expect(wb.getCellValue(undefined, 0, 0)).toBe(0); // Excel: a circular reference evaluates to 0
+    expect(wb.getCellValue(s2.id, 0, 0)).toBe(0);
   });
 
   it('recomputes to #REF! when a referenced sheet is deleted', () => {

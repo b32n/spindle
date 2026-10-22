@@ -117,6 +117,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FRM-10 | ISBLANK of an empty cell is TRUE | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-11 | SUMPRODUCT of an array expression multiplies element-wise | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-15 | a blocked spill (#SPILL!) fills in by itself once the blocker is cleared | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-16 | a circular reference evaluates to 0 (as in Excel), not an error token | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-14 | an operator over ranges spills element-wise | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-12 | unary minus binds tighter than ^ | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-13 | parentheses survive in the stored formula | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
@@ -391,7 +392,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 324
+- covered: 325
 - fixme + bug: 14
 - not covered: 8
 - n/a: 6

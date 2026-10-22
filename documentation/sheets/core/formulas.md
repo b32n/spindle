@@ -90,7 +90,7 @@ On a change, `collectDirty` walks the transitive dependents (plus every
 volatile cell) and records the dependency edges among them.
 `topologicalOrder` (Kahn's algorithm) then orders that set so each cell is
 recomputed **exactly once**, dependencies before dependents; any cell in, or
-downstream of, a cycle is reported as `#CIRCULAR!`.
+downstream of, a cycle: the cells on the cycle evaluate to `0`, as in Excel, and the workbook emits a `circularReference` event listing the cells on the cycle. `workbook.setCircularReferenceMode('ref')` makes them `#REF!` instead; `'error'` shows the diagnostic `#CIRCULAR!` token. `#CIRCULAR!` is never written to XLSX.
 
 ## Dynamic arrays (spill)
 
