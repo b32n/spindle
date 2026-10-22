@@ -70,7 +70,14 @@ test.describe('privacy: no third-party network with default settings', () => {
     ['P-NET-05', 'docs'],
     ['P-NET-06', 'slides'],
   ] as const) {
-    test(`${id} ${app}: fontSource local makes no external request at all`, async ({ page }) => {
+    test(`${id} ${app}: fontSource local makes no external request at all`, async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(
+        app === 'docs' && browserName === 'webkit',
+        'docs editor is not exercised on WebKit'
+      );
       const external = await trackExternalRequests(page);
       if (app === 'sheets') await new SheetsPage(page).goto('?fontSource=local');
       else if (app === 'docs') await new DocsPage(page).goto('?fontSource=local');
