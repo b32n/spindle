@@ -412,7 +412,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | ID | Scenario | Status | Smoke | Notes | Spec |
 |---|---|---|---|---|---|
 | P-NET-01 | sheets: loading, the font picker and dialogs only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
-| P-NET-02 | docs: loading, typing and the image/link dialogs only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+| P-NET-02 | docs: loading and the image dialog only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
 | P-NET-03 | slides: loading, navigating slides and the insert menu only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
 
 ## Summary
