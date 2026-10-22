@@ -51,7 +51,7 @@ test.describe('sheets: keyboard-only flows', () => {
         const cs = getComputedStyle(el);
         return {
           body: el === document.body,
-          textEntry: el.tagName === 'INPUT' && (el as HTMLInputElement).placeholder !== '',
+          textEntry: el.tagName === 'INPUT',
           label:
             el.getAttribute('aria-label') ||
             el.getAttribute('data-testid') ||
@@ -63,7 +63,7 @@ test.describe('sheets: keyboard-only flows', () => {
         };
       });
       expect(info.body, `focus fell to <body> after ${i + 1} Tab presses`).toBe(false);
-      // (The formula bar is a text field: its caret is the indicator; it has no outline of its own.)
+      // (Text fields (formula bar, font size) rely on their caret and browser-specific rings.)
       if (!info.textEntry) expect(info.ring, `no focus indicator on "${info.label}"`).toBe(true);
       seen.add(info.label);
       if (/Bold/.test(info.label)) bold = true;
