@@ -5,6 +5,14 @@ import type { CommentAuthor, SheetCommentEvent } from '@b32nio/spindle-sheets-co
 import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
+/** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
+const fontSource = (() => {
+  const v = new URLSearchParams(window.location.search).get('fontSource');
+  if (v === 'local') return { kind: 'local' } as const;
+  if (v?.startsWith('css:')) return { kind: 'css', url: v.slice(4) } as const;
+  return undefined;
+})();
+
 
 // Sample directory of users that can be @-mentioned in comments.
 const DEMO_USERS: CommentAuthor[] = [
@@ -202,7 +210,7 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas width={paneWidth} height={paneHeight} />
+            <WorkbookCanvas fontSource={fontSource} width={paneWidth} height={paneHeight} />
           </WorkbookProvider>
         </div>
       </div>
@@ -215,7 +223,7 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas width={paneWidth} height={paneHeight} />
+            <WorkbookCanvas fontSource={fontSource} width={paneWidth} height={paneHeight} />
           </WorkbookProvider>
         </div>
       </div>
@@ -304,7 +312,7 @@ function WsDemo({
           mentionableUsers={DEMO_USERS}
           onCommentEvent={logCommentEvent}
         >
-          <WorkbookCanvas width={width} height={height - 28} />
+          <WorkbookCanvas fontSource={fontSource} width={width} height={height - 28} />
         </WorkbookProvider>
       </div>
     </div>
@@ -398,7 +406,7 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas
+            <WorkbookCanvas fontSource={fontSource}
               width={dimensions.width}
               height={dimensions.height}
               readOnly={readOnly}

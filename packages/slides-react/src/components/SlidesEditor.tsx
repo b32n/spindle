@@ -2,8 +2,9 @@
 // interactive stage. Owns keyboard shortcuts (attached to a focused wrapper,
 // not window) and the right-click context menu.
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useDeck, useKeyboardShortcuts, useCommentsOpen, useFilmstripOpen } from '../hooks';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createFontLoader, type FontSource } from '@b32nio/spindle-shared/react';
+import { useDeck, useTheme, useKeyboardShortcuts, useCommentsOpen, useFilmstripOpen } from '../hooks';
 import { usePasteImport } from '../hooks/usePasteImport';
 import { useDeckContext } from '../context/DeckContext';
 import { Toolbar, type Zoom } from './Toolbar';
@@ -32,6 +33,17 @@ export interface SlidesEditorProps {
    * headerActions — app-specific toolbar buttons.
    */
   toolbarExtras?: React.ReactNode;
+  /**
+   * Where web fonts used by the deck theme are loaded from. Default: the
+   * Spindle font mirror (`https://fonts.b32n.io/css2`), falling back to system
+   * fonts if unreachable. `{ kind: 'local' }` makes no font requests.
+   */
+  fontSource?: FontSource;
+}
+
+/** First family of a CSS font stack, unquoted ("Inter, Arial" -> "Inter"). */
+function firstFamily(stack: string): string {
+  return stack.split(',')[0].trim().replace(/^["']|["']$/g, '');
 }
 
 const MOBILE_MAX_W = 640;
@@ -47,8 +59,13 @@ function ensureDrawerStyles(): void {
   document.head.appendChild(el);
 }
 
-export function SlidesEditor({ style, readOnly = false, headerActions, toolbarExtras }: SlidesEditorProps): React.ReactElement {
+export function SlidesEditor({ style, readOnly = false, headerActions, toolbarExtras, fontSource }: SlidesEditorProps): React.ReactElement {
   const deck = useDeck();
+  const theme = useTheme();
+  const loadFonts = useMemo(() => createFontLoader(fontSource), [fontSource]);
+  useEffect(() => {
+    loadFonts([firstFamily(theme.fonts.major), firstFamily(theme.fonts.minor)]);
+  }, [loadFonts, theme.fonts.major, theme.fonts.minor]);
   const [zoom, setZoom] = useState<Zoom>('fit');
   const [menu, setMenu] = useState<
     | { x: number; y: number; kind: 'element' }

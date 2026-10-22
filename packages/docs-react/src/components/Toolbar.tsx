@@ -11,7 +11,7 @@ import {
 import type { HeadingLevel } from '@b32nio/spindle-docs-core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { CellSelection } from '../core';
-import { ResponsiveToolbar, useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
+import { ResponsiveToolbar, useToolbarMenu, MenuRow, createFontLoader, type FontSource } from '@b32nio/spindle-shared/react';
 import { LinkDialog } from './LinkDialog';
 import { ImageDialog } from './ImageDialog';
 import { TableSizePicker } from './TableSizePicker';
@@ -264,6 +264,8 @@ const injectStyles = () => {
 // ============================================================================
 
 export interface ToolbarProps {
+  /** Where the font menu's web fonts load from (default: the Spindle font mirror; `{ kind: 'local' }` = none). */
+  fontSource?: FontSource;
   /** Opens a local .docx file. Providing this shows the Open button. */
   onOpenFile?: (file: File) => void;
   /** Downloads the document in the chosen format. Providing this shows the Download control. */
@@ -468,6 +470,7 @@ const OpenFileButton = memo(function OpenFileButton({ onClick }: { onClick: () =
  * Document editor toolbar - Modern floating design
  */
 export const Toolbar = memo(function Toolbar({ 
+  fontSource,
   onOpenFile,
   onDownload,
   downloadFormats = DOCS_EXPORT_FORMATS,
@@ -570,6 +573,8 @@ export const Toolbar = memo(function Toolbar({
     'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins',
   ];
   
+  useEffect(() => { createFontLoader(fontSource)(fonts); }, [fontSource]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
   const zoomLevels = [50, 75, 90, 100, 125, 150, 200];
   

@@ -22,8 +22,8 @@ async function openFormatCells(page: Page, sheet: SheetsPage, row: number, col: 
 test.describe('sheets: Format Cells dialog, colours, borders, font', () => {
   let sheet: SheetsPage;
   test.beforeEach(async ({ page }) => {
-    // The font picker loads Google Fonts on demand; keep the suite offline-safe.
-    await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+    // The font picker loads web fonts on demand; keep the suite offline-safe.
+    await page.route(/fonts\.b32n\.io/, (r) => r.abort());
     sheet = new SheetsPage(page);
     await sheet.goto();
   });

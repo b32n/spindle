@@ -25,6 +25,14 @@ Documents and spreadsheets sync live between users via Yjs CRDTs.
 
 ---
 
+## 🔤 Fonts and privacy
+
+No third-party font requests by default; choose where web fonts load from, or none at all.
+
+- **[Fonts Guide](fonts.md)** — the `fontSource` option (`local`, `css`, custom loader), the default mirror, and self-hosting
+
+---
+
 ## 💬 Comments
 
 Comment threads on spreadsheet cells and document text — replies, resolve, and @-mentions.

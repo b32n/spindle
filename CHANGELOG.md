@@ -6,6 +6,16 @@ follows [Semantic Versioning](https://semver.org/) (pre-1.0: minor versions may
 contain breaking changes). All `@b32nio/spindle-*` packages are versioned in
 lockstep.
 
+## [Unreleased]
+
+### Changed
+
+- **Privacy: `fontSource` option on the sheets, docs and slides editors.** The hard-coded Google Fonts
+  loader in the sheets toolbar is gone. Web fonts now come from the Spindle font mirror
+  (`https://fonts.b32n.io/css2`) by default and fall back to system fonts if it is unreachable.
+  `fontSource={{ kind: 'local' }}` makes zero font requests; `{ kind: 'css', url }` and
+  `{ kind: 'custom', load }` let hosts bring their own source. See `documentation/fonts.md`.
+
 ## [0.4.0] - 2026-10-20
 
 ### Added

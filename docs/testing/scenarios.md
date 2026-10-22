@@ -95,6 +95,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FIO-11 | CSV -> XLSX: values, text with newlines/unicode and numbers survive | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-12 | semicolon- and tab-delimited CSV are not split (no delimiter detection) | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-13 | opening a 10,000-row CSV stays within budget and the grid stays usable | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FNT-02 | default: the font picker asks the Spindle mirror, never Google | covered |  |  | `e2e/sheets/fonts.spec.ts` |
+| S-FNT-03 | fontSource {kind:'local'}: the picker works and makes zero font requests | covered |  |  | `e2e/sheets/fonts.spec.ts` |
+| S-FNT-04 | fontSource {kind:'css', url}: fonts load from the host's own endpoint | covered |  |  | `e2e/sheets/fonts.spec.ts` |
+| S-FNT-05 | unreachable font host: the picker still works and failed stylesheets are dropped | covered |  |  | `e2e/sheets/fonts.spec.ts` |
 | S-FMT-01 | Bold button and Ctrl/Cmd+B toggle bold | covered | yes |  | `e2e/sheets/formatting.spec.ts` |
 | S-FMT-02 | Italic via button and shortcut | covered |  |  | `e2e/sheets/formatting.spec.ts` |
 | S-FMT-03 | Underline via button and shortcut | covered |  |  | `e2e/sheets/formatting.spec.ts` |
@@ -247,6 +251,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-FIO-04 | a document built in the editor downloads and re-opens identically | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/76): LibreOffice writes a page break as a trailing <w:br w:type="page"/> run inside the preceding paragraph (here the one holding the image). The importer only maps a break to a page-break block when the paragraph is otherwise empty, so the break is silently dropped. | `e2e/docs/file-io.spec.ts` |
 | D-FIO-06 | a page break inserted in the editor exports as w:br and re-opens as a page break | covered |  |  | `e2e/docs/file-io.spec.ts` |
+| D-FNT-01 | default: web fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/docs/fonts.spec.ts` |
+| D-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/docs/fonts.spec.ts` |
+| D-FNT-03 | fontSource {kind:'css', url}: fonts load from the host's own endpoint | covered |  |  | `e2e/docs/fonts.spec.ts` |
+| D-FNT-04 | unreachable font host: the editor still loads and types | covered |  |  | `e2e/docs/fonts.spec.ts` |
 | D-IMG-03 | after a failed preview the Insert button is disabled, so no broken image enters the document | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
@@ -307,6 +315,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-GRP-01 | group and ungroup with Ctrl/Cmd+G | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-ORD-01 | bring to front / send to back change z-order | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-TAB-01 | Tab cycles element selection | covered |  |  | `e2e/slides/editing.spec.ts` |
+| L-FNT-01 | default: theme fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/slides/fonts.spec.ts` |
+| L-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/slides/fonts.spec.ts` |
+| L-FNT-03 | fontSource {kind:'css', url}: fonts load from the host's own endpoint | covered |  |  | `e2e/slides/fonts.spec.ts` |
+| L-FNT-04 | unreachable font host: the deck still renders | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | SL-IMG-06 | a 4000x3000 image is inserted scaled to fit the slide and keeps its aspect ratio | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-07 | cancelling the file chooser inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
@@ -392,7 +404,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 325
+- covered: 337
 - fixme + bug: 14
 - not covered: 8
 - n/a: 6
