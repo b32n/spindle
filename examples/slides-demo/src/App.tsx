@@ -6,6 +6,24 @@ import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32ni
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import { buildSampleDeck } from './sampleDeck';
 /** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
+/** e2e hooks: `?resolveImage=1` (fetch the typed URL), `?uploadImage=1` (pretend upload), `?maxImageBytes=N`. */
+const imageProps = (() => {
+  const q = new URLSearchParams(window.location.search);
+  return {
+    resolveImage: q.get('resolveImage')
+      ? async (url: string) => {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.blob();
+        }
+      : undefined,
+    uploadImage: q.get('uploadImage')
+      ? async (file: File) => `${window.location.origin}/uploaded/${encodeURIComponent(file.name)}`
+      : undefined,
+    maxImageBytes: q.get('maxImageBytes') ? Number(q.get('maxImageBytes')) : undefined,
+  };
+})();
+
 const fontSource = (() => {
   const v = new URLSearchParams(window.location.search).get('fontSource');
   if (v === 'local') return { kind: 'local' } as const;
@@ -94,7 +112,7 @@ function CollabDemo() {
           <div style={{ padding: '4px 12px', background: i === 0 ? '#ff6b6b' : '#4ecdc4', color: '#fff', fontWeight: 500 }}>{DEMO_USERS[i].name}</div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <DeckProvider deck={deck} currentUser={DEMO_USERS[i]} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-              <SlidesEditor fontSource={fontSource} />
+              <SlidesEditor fontSource={fontSource} {...imageProps} />
             </DeckProvider>
           </div>
         </div>
@@ -134,7 +152,7 @@ function WsDemo({ config }: { config: WsConfig }) {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <DeckProvider deck={deck} currentUser={{ id: config.identity.userId, name: config.identity.displayName }} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-          <SlidesEditor fontSource={fontSource} />
+          <SlidesEditor fontSource={fontSource} {...imageProps} />
         </DeckProvider>
       </div>
     </div>
@@ -164,7 +182,7 @@ export default function App() {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <DeckProvider deck={singleDeck} currentUser={DEMO_USERS[0]} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-          <SlidesEditor fontSource={fontSource} readOnly={readOnly} />
+          <SlidesEditor fontSource={fontSource} {...imageProps} readOnly={readOnly} />
         </DeckProvider>
       </div>
     </div>

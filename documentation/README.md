@@ -33,6 +33,14 @@ No third-party font requests by default; choose where web fonts load from, or no
 
 ---
 
+## 🖼️ Images and privacy
+
+No image URL is fetched by the library; hosts opt in with `resolveImage` / `uploadImage`.
+
+- **[Images Guide](images.md)** — `resolveImage`, `uploadImage`, `maxImageBytes`
+
+---
+
 ## 💬 Comments
 
 Comment threads on spreadsheet cells and document text — replies, resolve, and @-mentions.

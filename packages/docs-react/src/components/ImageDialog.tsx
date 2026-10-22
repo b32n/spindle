@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { docsSchema, createCommands } from '@b32nio/spindle-docs-core';
+import { useImageHooks, readImageFile, storeImageFile, resolveImageUrl, ImageError } from '@b32nio/spindle-shared/react';
 
 interface ImageDialogProps {
   /** ProseMirror editor view */
@@ -10,94 +11,6 @@ interface ImageDialogProps {
   isOpen: boolean;
   /** Callback when dialog is closed */
   onClose: () => void;
-}
-
-/**
- * Convert an image URL to base64 data URI
- */
-async function urlToBase64(url: string): Promise<string> {
-  // If already a data URI, return as-is
-  if (url.startsWith('data:')) {
-    return url;
-  }
-  
-  try {
-    // Fetch the image
-    const response = await fetch(url, { mode: 'cors' });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status}`);
-    }
-    
-    const blob = await response.blob();
-    
-    // Convert to base64
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('Failed to convert to base64'));
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    // If CORS fails, try with a proxy approach using canvas
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
-          return;
-        }
-        
-        ctx.drawImage(img, 0, 0);
-        
-        try {
-          const dataUrl = canvas.toDataURL('image/png');
-          resolve(dataUrl);
-        } catch {
-          // Canvas tainted - can't convert due to CORS
-          // Fall back to original URL
-          resolve(url);
-        }
-      };
-      
-      img.onerror = () => {
-        // Fall back to original URL if we can't load it
-        resolve(url);
-      };
-      
-      img.src = url;
-    });
-  }
-}
-
-/**
- * Convert a File to base64 data URI
- */
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Failed to convert file to base64'));
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
 
 /**
@@ -118,6 +31,11 @@ export const ImageDialog = memo(function ImageDialog({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
   const [activeTab, setActiveTab] = useState<'upload' | 'url'>('upload');
+  const hooks = useImageHooks();
+  // Set while a local file is staged (its data URL is in `url`); uploaded via the host on Insert.
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  // The data URL `resolveImage` produced for the typed URL.
+  const [resolved, setResolved] = useState<string | null>(null);
   
   const urlInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -138,6 +56,8 @@ export const ImageDialog = memo(function ImageDialog({
       setIsDragOver(false);
       setIsConverting(false);
       setActiveTab('upload');
+      setPendingFile(null);
+      setResolved(null);
     }
   }, [isOpen]);
   
@@ -171,37 +91,26 @@ export const ImageDialog = memo(function ImageDialog({
   
   // Handle file selection (from input or drop)
   const handleFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
-      return;
-    }
-    
-    // Check file size (limit to 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Image file is too large (max 10MB)');
-      return;
-    }
-    
     setError('');
     setPreviewLoading(true);
-    
     try {
-      const base64 = await fileToBase64(file);
-      setPreview(base64);
-      setUrl(base64);
+      const dataUrl = await readImageFile(hooks, file);
+      setPreview(dataUrl);
+      setUrl(dataUrl);
+      setPendingFile(file);
       setPreviewLoading(false);
-      
+
       // Use filename as alt text if empty
       if (!alt) {
         const name = file.name.replace(/\.[^/.]+$/, '');
         setAlt(name);
       }
     } catch (err) {
-      setError('Failed to read image file');
+      setError(err instanceof ImageError ? err.message : 'Failed to read image file');
       setPreviewLoading(false);
     }
-  }, [alt]);
-  
+  }, [alt, hooks]);
+
   // Handle file input change
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -234,38 +143,37 @@ export const ImageDialog = memo(function ImageDialog({
     }
   }, [handleFile]);
   
-  // Validate and preview URL
-  const validateAndPreview = useCallback((urlString: string) => {
+  // Fetch the typed URL through the host's resolveImage hook and preview the result.
+  const validateAndPreview = useCallback(async (urlString: string): Promise<string | null> => {
     if (!urlString.trim()) {
       setError('');
       setPreview(null);
-      return false;
+      setResolved(null);
+      return null;
     }
-    
-    // Basic URL validation
+
     let normalizedUrl = urlString.trim();
     if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://') && !normalizedUrl.startsWith('data:')) {
       normalizedUrl = 'https://' + normalizedUrl;
     }
-    
-    // Try to load the image for preview
+
     setPreviewLoading(true);
-    const img = new Image();
-    img.onload = () => {
-      setPreview(normalizedUrl);
-      setPreviewLoading(false);
+    try {
+      const dataUrl = await resolveImageUrl(hooks, normalizedUrl);
+      setPreview(dataUrl);
+      setResolved(dataUrl);
       setError('');
-    };
-    img.onerror = () => {
+      return dataUrl;
+    } catch (err) {
       setPreview(null);
+      setResolved(null);
+      setError(err instanceof ImageError ? err.message : 'Could not load image. Please check the URL.');
+      return null;
+    } finally {
       setPreviewLoading(false);
-      setError('Could not load image. Please check the URL.');
-    };
-    img.src = normalizedUrl;
-    
-    return true;
-  }, []);
-  
+    }
+  }, [hooks]);
+
   // Handle URL blur - trigger preview
   const handleUrlBlur = useCallback(() => {
     if (url.trim() && !url.startsWith('data:')) {
@@ -287,23 +195,22 @@ export const ImageDialog = memo(function ImageDialog({
     setIsConverting(true);
     
     try {
-      // Normalize URL
-      let normalizedUrl = url.trim();
-      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://') && !normalizedUrl.startsWith('data:')) {
-        normalizedUrl = 'https://' + normalizedUrl;
+      let src: string;
+      if (activeTab === 'url') {
+        const dataUrl = resolved ?? (await validateAndPreview(url));
+        if (!dataUrl) return; // validateAndPreview already showed the error
+        src = dataUrl;
+      } else if (pendingFile) {
+        src = await storeImageFile(hooks, pendingFile, url);
+      } else {
+        src = url.trim();
       }
-      
-      // Convert to base64 if not already
-      let base64Url = normalizedUrl;
-      if (!normalizedUrl.startsWith('data:')) {
-        base64Url = await urlToBase64(normalizedUrl);
-      }
-      
+
       const { state, dispatch } = editorView;
       
       // Build image attributes
       const attrs: { src: string; alt?: string; width?: number; height?: number } = {
-        src: base64Url,
+        src,
       };
       
       if (alt.trim()) {
@@ -326,11 +233,11 @@ export const ImageDialog = memo(function ImageDialog({
       editorView.focus();
       onClose();
     } catch (err) {
-      setError('Failed to process image');
+      setError(err instanceof ImageError ? err.message : 'Failed to process image');
     } finally {
       setIsConverting(false);
     }
-  }, [editorView, url, alt, width, height, commands, onClose]);
+  }, [editorView, url, alt, width, height, commands, onClose, activeTab, resolved, pendingFile, hooks, validateAndPreview]);
   
   if (!isOpen) return null;
   
@@ -383,7 +290,7 @@ export const ImageDialog = memo(function ImageDialog({
           >
             Upload
           </button>
-          <button
+          {hooks.resolveImage && <button
             type="button"
             style={tabStyle(activeTab === 'url')}
             onClick={() => {
@@ -392,7 +299,7 @@ export const ImageDialog = memo(function ImageDialog({
             }}
           >
             By URL
-          </button>
+          </button>}
         </div>
         
         <form onSubmit={handleSubmit} style={{ padding: '20px 24px 24px' }}>
@@ -463,8 +370,13 @@ export const ImageDialog = memo(function ImageDialog({
                       or click to browse
                     </p>
                     <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#9aa0a6' }}>
-                      PNG, JPG, GIF, WebP up to 10MB
+                      PNG, JPG, GIF, WebP up to {Math.round((hooks.maxImageBytes ?? 10 * 1024 * 1024) / (1024 * 1024))}MB
                     </p>
+                    {!hooks.resolveImage && (
+                      <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#9aa0a6' }}>
+                        Images from a web address are turned off. Upload a file or paste one instead.
+                      </p>
+                    )}
                   </>
                 )}
               </div>
@@ -504,6 +416,7 @@ export const ImageDialog = memo(function ImageDialog({
                   onChange={(e) => {
                     setUrl(e.target.value);
                     setPreview(null);
+                    setResolved(null);
                   }}
                   onBlur={handleUrlBlur}
                   placeholder="https://example.com/image.png"
