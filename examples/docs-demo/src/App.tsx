@@ -11,6 +11,22 @@ import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32ni
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
 /** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
+/** e2e hook: `?importConfirmation=never|host-yes|host-no` (default: the built-in dialog). */
+const importConfirmation = (() => {
+  const v = new URLSearchParams(window.location.search).get('importConfirmation');
+  if (v === 'never') return 'never' as const;
+  if (v === 'host-yes' || v === 'host-no') {
+    return (report: { items: unknown[] }) => {
+      (window as unknown as { __hostConfirmCalls?: number[] }).__hostConfirmCalls = [
+        ...((window as unknown as { __hostConfirmCalls?: number[] }).__hostConfirmCalls ?? []),
+        report.items.length,
+      ];
+      return v === 'host-yes';
+    };
+  }
+  return undefined;
+})();
+
 const fontSource = (() => {
   const v = new URLSearchParams(window.location.search).get('fontSource');
   if (v === 'local') return { kind: 'local' } as const;
@@ -473,7 +489,7 @@ function CollabDemo({
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor fontSource={fontSource} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
+            <DocumentEditor fontSource={fontSource} importConfirmation={importConfirmation} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
           </DocumentProvider>
         </div>
       </div>
@@ -488,7 +504,7 @@ function CollabDemo({
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor fontSource={fontSource} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
+            <DocumentEditor fontSource={fontSource} importConfirmation={importConfirmation} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
           </DocumentProvider>
         </div>
       </div>
@@ -580,7 +596,7 @@ function WsDemo({
           mentionableUsers={DEMO_USERS}
           onCommentEvent={logCommentEvent}
         >
-          <DocumentEditor fontSource={fontSource} width={width} height={height - 28} showToolbar={true} showRuler={true} />
+          <DocumentEditor fontSource={fontSource} importConfirmation={importConfirmation} width={width} height={height - 28} showToolbar={true} showRuler={true} />
         </DocumentProvider>
       </div>
     </div>
@@ -718,7 +734,7 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor fontSource={fontSource}
+            <DocumentEditor fontSource={fontSource} importConfirmation={importConfirmation}
               width={dimensions.width}
               height={dimensions.height}
               showToolbar={true}
