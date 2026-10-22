@@ -112,14 +112,17 @@ jobs:
           name: blob-report-visual
           path: blob-report
           retention-days: 7
-      # On a mismatch (or a missing baseline) this holds the *-actual.png / *-diff.png files:
-      # copy the *-actual.png over e2e/visual/__screenshots__/<name>.png to accept a change.
+      # A mismatch leaves *-actual.png / *-diff.png under e2e/.results; a missing baseline is written
+      # straight to e2e/visual/__screenshots__. Either way, copy the new PNG over
+      # e2e/visual/__screenshots__/<name>.png to accept it (see docs/testing).
       - name: Upload actual/diff images and traces (failures)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: visual-failure-artifacts
-          path: e2e/.results
+          path: |
+            e2e/.results
+            e2e/visual/__screenshots__
           retention-days: 7
           if-no-files-found: ignore
 

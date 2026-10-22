@@ -117,7 +117,7 @@ differ in anti-aliasing and the emoji font). To add or update one:
 
 1. Push the change; the `Visual (chromium)` job fails and uploads `visual-failure-artifacts`.
 2. `gh run download <run-id> -n visual-failure-artifacts -D /tmp/visual-artifacts` and copy each
-   `*-actual.png` over `e2e/visual/__screenshots__/<name>.png` (strip `-actual`).
+   `*-actual.png` (under `e2e/.results`, for a changed shot) over `e2e/visual/__screenshots__/<name>.png`; a brand new shot arrives already named correctly in `e2e/visual/__screenshots__`.
 3. Review the images, commit, push; the job is green. `npm run test:visual` runs it locally (expect diffs there).
 
 ## Keyboard-only flows
