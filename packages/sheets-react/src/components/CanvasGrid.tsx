@@ -1035,6 +1035,14 @@ export const CanvasGrid = memo(function CanvasGrid({
         } else {
           workbook.setCellValue(undefined, targetRow, targetCol, cell.value ?? null);
         }
+        // Carry the source cell's formatting (style + number format) along with its content.
+        if (cell.styleId || cell.formatId) {
+          workbook.setCell(undefined, targetRow, targetCol, {
+            ...sheet.getCell(targetRow, targetCol),
+            styleId: cell.styleId,
+            formatId: cell.formatId,
+          });
+        }
       });
     });
     onContentChange?.();
