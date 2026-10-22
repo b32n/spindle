@@ -77,6 +77,7 @@ export class WorkbookImpl implements Workbook {
   private maxHistorySize = 50; // Limit history size to prevent memory issues
   private isUndoing = false; // Flag to prevent recording history during undo/redo
   private isRedoing = false;
+  private historyCoalescing = false; // true until the microtask after the last recorded snapshot
   private isBatching = false; // Flag to track if we're in a batch operation
   // Set by attachCollab; consulted in places that need to know whether the
   // workbook is currently sourcing state from a Y.Doc.
@@ -282,7 +283,7 @@ export class WorkbookImpl implements Workbook {
       const currentCell = this.getCell(sheetId, row, col);
       const currentValue = currentCell?.value;
       if (currentValue !== value) {
-        this.recordHistory();
+        this.pushHistory(true);
       }
     }
     
@@ -320,6 +321,17 @@ export class WorkbookImpl implements Workbook {
     return this.getSpillIndex(sheetId).spilledValueAt(row, col);
   }
 
+  /** The bottom-right cell reached by any spill on a sheet, or undefined when nothing spills. */
+  getSpillExtent(sheetId: string | undefined): { row: number; col: number } | undefined {
+    let extent: { row: number; col: number } | undefined;
+    for (const r of this.getSpillIndex(sheetId).regions()) {
+      const row = r.anchorRow + r.rows - 1;
+      const col = r.anchorCol + r.cols - 1;
+      extent = { row: Math.max(extent?.row ?? 0, row), col: Math.max(extent?.col ?? 0, col) };
+    }
+    return extent;
+  }
+
   /** Whether a cell is filled by a spill it does not itself anchor (read-only). */
   isSpilledCell(sheetId: string | undefined, row: number, col: number): boolean {
     return this.getSpillIndex(sheetId).isCovered(row, col);
@@ -340,7 +352,7 @@ export class WorkbookImpl implements Workbook {
       const currentCell = this.getCell(sheetId, row, col);
       const currentFormula = currentCell?.formula;
       if (currentFormula !== formula) {
-        this.recordHistory();
+        this.pushHistory(true);
       }
     }
     
@@ -1113,6 +1125,15 @@ export class WorkbookImpl implements Workbook {
    * Record current state for undo
    */
   recordHistory(): void {
+    this.pushHistory(false);
+  }
+
+  /**
+   * `coalesce` marks a plain cell edit (setCellValue/setFormula): a run of those
+   * in one synchronous task shares the snapshot taken before the first. Any
+   * other operation (merge, sort, structure…) always gets its own snapshot.
+   */
+  private pushHistory(coalesce: boolean): void {
     if (this.isUndoing || this.isRedoing) {
       return; // Don't record history during undo/redo operations
     }
@@ -1120,6 +1141,21 @@ export class WorkbookImpl implements Workbook {
     // mutations through Y operations — those broadcast naturally. Skip the
     // snapshot stack entirely so it doesn't double-undo or diverge.
     if (this.collabHandle) return;
+
+    // Coalesce a run of edits made in one synchronous task (an unbatched loop
+    // of setCellValue/setFormula, a paste, a fill) into a single undo step.
+    // The snapshot taken by the first edit already holds the state before the
+    // whole run; re-snapshotting per edit made such loops quadratic.
+    if (coalesce && this.historyCoalescing) {
+      this.redoStack = [];
+      return;
+    }
+    this.historyCoalescing = coalesce;
+    if (coalesce) {
+      queueMicrotask(() => {
+        this.historyCoalescing = false;
+      });
+    }
 
     const snapshot = this.createSnapshot();
     this.undoStack.push(snapshot);
@@ -1148,6 +1184,7 @@ export class WorkbookImpl implements Workbook {
       return false;
     }
 
+    this.historyCoalescing = false; // the next edit after an undo starts a new step
     // Save current state to redo stack
     const currentSnapshot = this.createSnapshot();
     this.redoStack.push(currentSnapshot);
@@ -1176,6 +1213,7 @@ export class WorkbookImpl implements Workbook {
       return false;
     }
 
+    this.historyCoalescing = false;
     // Save current state to undo stack
     const currentSnapshot = this.createSnapshot();
     this.undoStack.push(currentSnapshot);

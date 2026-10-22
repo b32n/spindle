@@ -150,6 +150,19 @@ describe('importFromXlsx on a file without worksheets', () => {
 });
 
 describe('exportToXlsx -> importFromXlsx round-trips', () => {
+  it('exports the active sheet as the one the file opens on', async () => {
+    const wb = freshWorkbook();
+    const second = wb.addSheet('Second');
+    wb.addSheet('Third');
+    wb.setActiveSheet(second.id);
+
+    const wb2 = new WorkbookImpl('wb2', 'WB2');
+    await importFromXlsx(await exportToXlsx(wb), wb2);
+    expect(wb2.getSheet().name).toBe('Second');
+    const out = await readBack(wb);
+    expect(out.views[0].activeTab).toBe(1);
+  });
+
   it('round-trips plain values, formulas, and every sheet', async () => {
     const wb = freshWorkbook();
     wb.setCellValue(undefined, 0, 0, 'hello');

@@ -11,6 +11,7 @@ import {
   InputRule,
 } from 'prosemirror-inputrules';
 import { Plugin, PluginKey, type Command } from 'prosemirror-state';
+import { goToNextCell } from './commands';
 import type { Schema } from 'prosemirror-model';
 import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
 
@@ -101,20 +102,20 @@ export function buildKeymap(schema: Schema): Plugin {
 
   // Text formatting
   if (schema.marks.bold) {
-    keys['Mod-b'] = toggleMark(schema.marks.bold);
-    keys['Mod-B'] = toggleMark(schema.marks.bold);
+    keys['Mod-b'] = toggleMark(schema.marks.bold, null, { removeWhenPresent: false });
+    keys['Mod-B'] = toggleMark(schema.marks.bold, null, { removeWhenPresent: false });
   }
   if (schema.marks.italic) {
-    keys['Mod-i'] = toggleMark(schema.marks.italic);
-    keys['Mod-I'] = toggleMark(schema.marks.italic);
+    keys['Mod-i'] = toggleMark(schema.marks.italic, null, { removeWhenPresent: false });
+    keys['Mod-I'] = toggleMark(schema.marks.italic, null, { removeWhenPresent: false });
   }
   if (schema.marks.underline) {
-    keys['Mod-u'] = toggleMark(schema.marks.underline);
-    keys['Mod-U'] = toggleMark(schema.marks.underline);
+    keys['Mod-u'] = toggleMark(schema.marks.underline, null, { removeWhenPresent: false });
+    keys['Mod-U'] = toggleMark(schema.marks.underline, null, { removeWhenPresent: false });
   }
   if (schema.marks.strikethrough) {
-    keys['Mod-Shift-s'] = toggleMark(schema.marks.strikethrough);
-    keys['Mod-Shift-S'] = toggleMark(schema.marks.strikethrough);
+    keys['Mod-Shift-s'] = toggleMark(schema.marks.strikethrough, null, { removeWhenPresent: false });
+    keys['Mod-Shift-S'] = toggleMark(schema.marks.strikethrough, null, { removeWhenPresent: false });
   }
   
   // Link shortcut - Mod-K
@@ -143,6 +144,13 @@ export function buildKeymap(schema: Schema): Plugin {
     keys['Enter'] = splitListItem(schema.nodes.list_item);
     keys['Tab'] = sinkListItem(schema.nodes.list_item);
     keys['Shift-Tab'] = liftListItem(schema.nodes.list_item);
+  }
+
+  // Tab moves between table cells (Tab in the last cell adds a row). Inside a
+  // list item the list commands above win.
+  if (schema.nodes.table) {
+    keys['Tab'] = keys['Tab'] ? chainCommands(keys['Tab'], goToNextCell(1)) : goToNextCell(1);
+    keys['Shift-Tab'] = keys['Shift-Tab'] ? chainCommands(keys['Shift-Tab'], goToNextCell(-1)) : goToNextCell(-1);
   }
 
   // Structure commands

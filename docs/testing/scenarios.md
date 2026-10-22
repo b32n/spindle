@@ -21,7 +21,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CLP-08 | pasting plain tab-separated text from the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-09 | copy writes TSV to the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-10 | context menu copy and paste | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
-| S-CLP-11 | paste preserves cell formatting | fixme + bug |  | internal paste only carries values/formulas, not cell styles. https://github.com/b32n/spindle/issues/69 | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-11 | paste preserves cell formatting | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-12 | paste carries number formats and colours, and the paste is one undo step | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-COL-01 | an edit made by one client appears in the other | covered | yes |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-02 | concurrent edits to different cells converge | covered |  |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-03 | concurrent edits to the same cell converge on one value | covered |  |  | `e2e/sheets/collab.spec.ts` |
@@ -69,6 +70,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-SEL-16 | mouse drag selects a block; shift-click extends | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-EDT-08 | typing into the formula bar edits the active cell | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-01 | undo and redo via shortcuts and toolbar | covered | yes |  | `e2e/sheets/editing.spec.ts` |
+| S-UND-07 | a host loop of 5,000 unbatched edits stays fast and is one undo step | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-02 | undo reverts formatting | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-UND-03 | undo reverts a clear | covered |  |  | `e2e/sheets/editing.spec.ts` |
 | S-ERR-01 | a truncated .xlsx is rejected with an alert and the workbook is untouched | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
@@ -91,7 +93,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FIO-08 | CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells | covered | yes |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-09 | unicode CSV (accents, CJK, emoji, RTL, CRLF) round-trips byte for byte | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-10 | XLSX -> CSV exports only the active sheet, with raw (unformatted) numbers | covered |  |  | `e2e/sheets/file-io.spec.ts` |
-| S-FIO-14 | XLSX -> CSV exports computed values for formula cells | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/77): CSV export writes the formula text, guarded with a leading apostrophe (`'=B2*C2`), for formula cells instead of their computed values (25), so the CSV is not usable elsewhere. | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-14 | XLSX -> CSV exports computed values for formula cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-15 | XLSX export opens on the sheet that was active when downloading | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-11 | CSV -> XLSX: values, text with newlines/unicode and numbers survive | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-12 | semicolon- and tab-delimited CSV are not split (no delimiter detection) | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-13 | opening a 10,000-row CSV stays within budget and the grid stays usable | covered |  |  | `e2e/sheets/file-io.spec.ts` |
@@ -131,6 +134,9 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-RSZ-01 | dragging a column header border resizes the column | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-02 | dragging a row header border resizes the row | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-03 | resize is undoable | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FIO-16 | opening a workbook with unsupported features reports what was not imported | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-17 | opening a plain workbook and a comma CSV reports no loss | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-18 | a semicolon-delimited CSV is flagged (it imports into one column) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
 | S-KBD-01 | navigate, enter data and a formula, format by shortcut and undo without the mouse | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-02 | Tab reaches the toolbar, the formula bar and the grid, each with a visible focus indicator | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-03 | the Insert link dialog opens from a focused button, fills and submits with keys, and Escape cancels | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
@@ -172,7 +178,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CTX-03 | header context menu keeps selection and hides a column | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-CTX-04 | context menu Delete clears the selected cells | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-TAB-01 | add a sheet tab and switch between tabs | covered |  |  | `e2e/sheets/structure.spec.ts` |
-| S-GAP-01 | Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images) | not covered | | Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read. | |
+| S-GAP-01 | Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images) | not covered | | Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), and OOXML features the importer does not read. | |
 | S-GAP-02 | Ctrl/Cmd-click multi-range selection | n/a | | The grid supports a single selection range only. | |
 | S-GAP-03 | HTML clipboard paste | n/a | | Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path. | |
 | S-GAP-04 | Touch gestures beyond tap / double-tap (pinch zoom, long-press menu, touch drag-select) | not covered | | Tap and double-tap are covered (M-SHEETS-*). | |
@@ -210,7 +216,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-SEL-02 | double-click selects a word; typing replaces it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-SEL-03 | Shift+Arrow extends the selection | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-01 | Bold / Italic / Underline / Strike via shortcuts | covered |  |  | `e2e/docs/editing.spec.ts` |
-| D-FMT-10 | Ctrl+I on a partly-italic selection italicises all of it | fixme + bug |  | toggling a mark on a partly-marked selection removes it; Word / Google Docs add it to the whole selection. https://github.com/b32n/spindle/issues/71 | `e2e/docs/editing.spec.ts` |
+| D-FMT-12 | Ctrl+I on a partly-italic selection italicises all of it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-02 | toolbar Bold toggles on and off | covered | yes |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-03 | toolbar Italic, Underline, Strikethrough | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-04 | heading styles from the Paragraph menu | covered |  |  | `e2e/docs/editing.spec.ts` |
@@ -226,7 +232,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-INS-03 | insert an image from a URL | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-04 | insert a table from the size picker | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-05 | double-clicking a table cell lets you type into it | covered |  |  | `e2e/docs/features.spec.ts` |
-| D-INS-06 | Tab moves to the next table cell | fixme + bug |  | there is no Tab key binding for table cells, so Tab does not move to the next cell (Word / Google Docs behaviour); it leaves the caret in place. https://github.com/b32n/spindle/issues/70 | `e2e/docs/features.spec.ts` |
+| D-INS-06 | Tab moves to the next table cell | covered |  |  | `e2e/docs/features.spec.ts` |
+| D-INS-07 | Shift+Tab moves back a cell and Tab in the last cell adds a row | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-01 | the demo paginates into several pages with page-number footers | covered | yes |  | `e2e/docs/features.spec.ts` |
 | D-PAG-02 | explicit page break starts a new page and footers update | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-03 | typing enough paragraphs flows onto a new page | covered |  |  | `e2e/docs/features.spec.ts` |
@@ -259,6 +266,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-FIO-07 | opening a document with tracked changes and footnotes reports what was not imported | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-FIO-08 | opening a plain exported-style document reports no loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-KBD-01 | Tab reaches the toolbar and then the editor; the focused control has a visible indicator | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-02 | write text, a bullet list and a link using only the keyboard | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-03 | a heading style can be applied from the keyboard | fixme + bug |  | no keyboard-only way to give a paragraph a heading style: the Paragraph dropdown items are plain divs outside the tab order, Escape does not close it, and there is no shortcut; markdown input rules ("# ") are implemented in docs-core but not installed by the editor. https://github.com/b32n/spindle/issues/91 | `e2e/docs/keyboard.spec.ts` |
@@ -404,7 +413,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 337
-- fixme + bug: 14
+- covered: 350
+- fixme + bug: 10
 - not covered: 8
 - n/a: 6

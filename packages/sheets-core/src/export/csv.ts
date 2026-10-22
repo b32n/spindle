@@ -1,4 +1,4 @@
-import { exportCsv, importCsv, type CsvCellValue } from '@b32nio/spindle-shared/export/csv';
+import { exportCsv, importCsv, detectCsvLoss, type CsvCellValue, type ImportLossReport } from '@b32nio/spindle-shared/export/csv';
 import type { Sheet } from '../types';
 import type { WorkbookImpl } from '../workbook';
 
@@ -12,14 +12,21 @@ export function exportToCSV(workbook: WorkbookImpl, sheetId?: string): string {
     maxRow = Math.max(maxRow, row);
     maxCol = Math.max(maxCol, col);
   }
+  const spill = workbook.getSpillExtent(sheetId);
+  if (spill) {
+    maxRow = Math.max(maxRow, spill.row);
+    maxCol = Math.max(maxCol, spill.col);
+  }
 
   const rows: CsvCellValue[][] = [];
   for (let row = 0; row <= maxRow; row++) {
     const csvRow: CsvCellValue[] = [];
     for (let col = 0; col <= maxCol; col++) {
       const cell = sheet.getCell(row, col);
-      if (cell?.formula) {
-        csvRow.push(cell.formula);
+      if (cell?.formula || workbook.isSpilledCell(sheetId, row, col)) {
+        // Like Excel/Sheets/LibreOffice: a formula cell is saved as its computed value.
+        const v = workbook.getCellCalculatedValue(sheetId, row, col);
+        csvRow.push(typeof v === 'number' || typeof v === 'boolean' ? v : v != null ? String(v) : null);
       } else if (typeof cell?.value === 'number' || typeof cell?.value === 'boolean') {
         csvRow.push(cell.value);
       } else if (cell?.value != null) {
@@ -32,6 +39,11 @@ export function exportToCSV(workbook: WorkbookImpl, sheetId?: string): string {
   }
 
   return exportCsv({ rows });
+}
+
+/** What importing this CSV text would not bring across (currently: delimiters other than comma). */
+export function inspectCsv(csv: string): ImportLossReport {
+  return detectCsvLoss(csv);
 }
 
 export function importFromCSV(csv: string, sheet: Sheet): void {

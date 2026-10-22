@@ -61,3 +61,26 @@ describe('CSV export → import round-trips', () => {
     expect(wb2.getCellValue(undefined, 1, 0)).toBe('plain');
   });
 });
+
+describe('CSV export of formulas (#77)', () => {
+  it('writes computed values, not formula text', () => {
+    const { wb } = freshSheet();
+    wb.setCellValue(undefined, 0, 0, 10);
+    wb.setCellValue(undefined, 0, 1, 2.5);
+    wb.setFormula(undefined, 0, 2, '=A1*B1');
+    wb.setFormula(undefined, 0, 3, '=A1&"x"');
+    wb.setFormula(undefined, 0, 4, '=A1>5');
+    wb.setFormula(undefined, 0, 5, '=1/0');
+    expect(exportToCSV(wb).trim()).toBe('10,2.5,25,10x,true,#DIV/0!');
+  });
+
+  it('includes spilled cells and round-trips as numbers', () => {
+    const { wb } = freshSheet();
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    const csv = exportToCSV(wb);
+    expect(csv.trim().split(/\r?\n/)).toEqual(['1', '2', '3']);
+    const { wb: wb2, sheet } = freshSheet();
+    importFromCSV(csv, sheet);
+    expect(wb2.getCellValue(undefined, 2, 0)).toBe(3);
+  });
+});
