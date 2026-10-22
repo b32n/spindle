@@ -10,6 +10,13 @@ import type {
 export async function exportXlsx(input: SpreadsheetExportInput): Promise<Uint8Array> {
   const workbook = new ExcelJS.Workbook();
   input.sheets.forEach((sheet) => writeSheet(workbook.addWorksheet(sheet.name), sheet));
+
+  // The sheet that was active in the editor is the one Excel opens on.
+  const last = input.sheets.length - 1;
+  const active = Math.min(Math.max(input.activeSheetIndex ?? 0, 0), Math.max(last, 0));
+  if (last >= 0) {
+    workbook.views = [{ x: 0, y: 0, width: 28800, height: 17000, firstSheet: 0, activeTab: active, visibility: 'visible' }];
+  }
   const buffer = await workbook.xlsx.writeBuffer();
   return new Uint8Array(buffer);
 }

@@ -51,6 +51,11 @@ export class SpillIndex {
     return region;
   }
 
+  /** Every registered region. */
+  regions(): IterableIterator<SpillRegion> {
+    return this.byAnchor.values();
+  }
+
   /** The region anchored at this cell, if any. */
   regionAt(anchorRow: number, anchorCol: number): SpillRegion | undefined {
     return this.byAnchor.get(posKey(anchorRow, anchorCol));
