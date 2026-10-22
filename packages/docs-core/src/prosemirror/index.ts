@@ -33,6 +33,7 @@ export {
   insertLink,
   removeLink,
   insertTable,
+  goToNextCell,
   type DocsCommands,
 } from './commands';
 
