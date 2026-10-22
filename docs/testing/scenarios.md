@@ -123,6 +123,12 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-RSZ-01 | dragging a column header border resizes the column | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-02 | dragging a row header border resizes the row | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-03 | resize is undoable | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-KBD-01 | navigate, enter data and a formula, format by shortcut and undo without the mouse | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
+| S-KBD-02 | Tab reaches the toolbar, the formula bar and the grid, each with a visible focus indicator | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
+| S-KBD-03 | the Insert link dialog opens from a focused button, fills and submits with keys, and Escape cancels | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
+| S-KBD-04 | focus can leave the grid with the keyboard | fixme + bug |  | Tab moves the selection and the grid never lets go of focus (keyboard trap). https://github.com/b32n/spindle/issues/86 | `e2e/sheets/keyboard.spec.ts` |
+| S-KBD-05 | Format Cells is reachable from the keyboard via the context menu | fixme + bug |  | the context menu items are not focusable and Format Cells does not take focus. https://github.com/b32n/spindle/issues/87 | `e2e/sheets/keyboard.spec.ts` |
+| S-KBD-06 | focus is not lost after closing a dialog | fixme + bug |  | closing a dialog leaves focus on <body>. https://github.com/b32n/spindle/issues/88 | `e2e/sheets/keyboard.spec.ts` |
 | S-BIG-01 | a 10,000-row CSV opens, scrolls to the bottom and an edit near the end reflects within budget | covered |  |  | `e2e/sheets/large-data.spec.ts` |
 | S-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/sheets/resilience.spec.ts` |
 | S-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/sheets/resilience.spec.ts` |
@@ -241,6 +247,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-KBD-01 | Tab reaches the toolbar and then the editor; the focused control has a visible indicator | covered |  |  | `e2e/docs/keyboard.spec.ts` |
+| D-KBD-02 | write text, a bullet list and a link using only the keyboard | covered |  |  | `e2e/docs/keyboard.spec.ts` |
+| D-KBD-03 | a heading style can be applied from the keyboard | fixme + bug |  | no keyboard-only way to give a paragraph a heading style: the Paragraph dropdown items are plain divs outside the tab order, Escape does not close it, and there is no shortcut; markdown input rules ("# ") are implemented in docs-core but not installed by the editor. https://github.com/b32n/spindle/issues/91 | `e2e/docs/keyboard.spec.ts` |
+| D-KBD-04 | Escape closes the link dialog and keeps the typed text | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-BIG-01 | a ~55-page .docx opens, paginates and typing at the end appears within budget | covered |  |  | `e2e/docs/large-data.spec.ts` |
 | D-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/docs/resilience.spec.ts` |
@@ -298,6 +308,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-09 | a corrupt "image" (random bytes named .png) inserts nothing and raises no error | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-10 | a non-image file chosen anyway (bypassing accept) inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-KBD-01 | add a slide, navigate the filmstrip, present and exit using only keys | covered |  |  | `e2e/slides/keyboard.spec.ts` |
+| SL-KBD-02 | select and nudge an element, then delete it, with the keyboard | covered |  |  | `e2e/slides/keyboard.spec.ts` |
+| SL-KBD-03 | Tab reaches the toolbar buttons | fixme + bug |  | the editor root swallows Tab to cycle the slide's elements, so the toolbar can never be reached with Tab/Shift+Tab (a keyboard trap). https://github.com/b32n/spindle/issues/89 | `e2e/slides/keyboard.spec.ts` |
+| SL-KBD-04 | focus returns to the editor after leaving present mode | fixme + bug |  | leaving present mode drops focus to <body>, so the next keystroke goes nowhere. https://github.com/b32n/spindle/issues/90 | `e2e/slides/keyboard.spec.ts` |
 | SL-BIG-01 | a slide with 100 elements renders, selects, drags, multi-moves and deletes within budget | covered |  |  | `e2e/slides/large-data.spec.ts` |
 | SL-PRS-01 | Present opens full-screen present mode on the active slide | covered | yes |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-02 | arrow keys, space, PageDown/Up, Home and End navigate | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
@@ -374,7 +388,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 310
-- fixme + bug: 11
+- covered: 318
+- fixme + bug: 17
 - not covered: 8
 - n/a: 6
