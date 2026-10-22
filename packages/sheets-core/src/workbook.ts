@@ -1,6 +1,6 @@
 // Workbook model
 
-import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, SortOrder, CellFormat, CellStyle, EventType, EventHandler } from './types';
+import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, SortOrder, RangeDependency, CellFormat, CellStyle, EventType, EventHandler } from './types';
 import { SheetImpl } from './sheet';
 import { EventEmitter } from './event-emitter';
 import { FormulaGraphImpl } from './formula-graph';
@@ -810,8 +810,27 @@ export class WorkbookImpl implements Workbook {
     }
   }
 
+  /** The footprint of an array result at (row, col), minus the anchor, as ≤2 stable-key rectangles. */
+  private spillFootprintRects(
+    sheetId: string | undefined,
+    row: number,
+    col: number,
+    rows: number,
+    cols: number
+  ): RangeDependency[] {
+    const rect = (r0: number, c0: number, r1: number, c1: number): RangeDependency => ({
+      startKey: this.graphKey(sheetId, r0, c0),
+      endKey: this.graphKey(sheetId, r1, c1),
+    });
+    const rects: RangeDependency[] = [];
+    if (cols > 1) rects.push(rect(row, col + 1, row, col + cols - 1)); // rest of the anchor's row
+    if (rows > 1) rects.push(rect(row + 1, col, row + rows - 1, col + cols - 1)); // the rows below
+    return rects;
+  }
+
   /** Release any spill region anchored at a cell (it no longer returns an array). */
   private releaseSpill(sheetId: string | undefined, row: number, col: number): void {
+    this.formulaGraph.setSpillFootprint(this.graphKey(sheetId, row, col), []);
     const previous = this.getSpillIndex(sheetId).unregister(row, col);
     if (previous) this.pushSpillSeeds(sheetId, previous);
   }
@@ -853,6 +872,7 @@ export class WorkbookImpl implements Workbook {
 
     const previous = spill.unregister(row, col);
     if (previous) this.pushSpillSeeds(sheetId, previous);
+    this.formulaGraph.setSpillFootprint(cellKey, []);
 
     // A 1x1 array is just a scalar.
     if (rows <= 1 && cols <= 1) {
@@ -876,6 +896,9 @@ export class WorkbookImpl implements Workbook {
         const target = this.getCell(sheetId, tr, tc);
         const occupied = !!(target && (target.value != null || target.formula || target.formulaAst));
         if (occupied || spill.isCovered(tr, tc)) {
+          // Re-evaluate when anything in the would-be footprint changes, so the
+          // spill appears once the blocker is cleared.
+          this.formulaGraph.setSpillFootprint(cellKey, this.spillFootprintRects(sheetId, row, col, rows, cols));
           return this.storeFormulaResult(sheetId, row, col, cellKey, '#SPILL!', refreshedFormula);
         }
       }

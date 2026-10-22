@@ -93,6 +93,19 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(10, 0, 2);
   });
 
+  test('S-FRM-15 a blocked spill (#SPILL!) fills in by itself once the blocker is cleared', async ({
+    page,
+  }) => {
+    await sheet.enter(6, 10, 'blocker');
+    await sheet.enter(5, 10, '=SEQUENCE(3)');
+    await sheet.expectValue(5, 10, '#SPILL!');
+    await sheet.select(6, 10);
+    await page.keyboard.press('Delete');
+    await sheet.expectValue(5, 10, 1);
+    await sheet.expectValue(6, 10, 2);
+    await sheet.expectValue(7, 10, 3);
+  });
+
   test('S-FRM-14 an operator over ranges spills element-wise', async () => {
     for (const [i, v] of [1, 2, 3].entries()) {
       await sheet.enter(5 + i, 6, String(v));

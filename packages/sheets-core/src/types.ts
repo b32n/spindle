@@ -350,6 +350,8 @@ export interface FormulaNode {
   cachedValue?: CellValue;
   isDirty: boolean;
   volatile?: boolean; // recomputed on every recalc pass (RAND, NOW, OFFSET, …)
+  /** Cells a blocked (#SPILL!) array formula would fill: re-evaluate it when any of them changes. */
+  spillRects?: RangeDependency[];
 }
 
 /**
@@ -370,6 +372,8 @@ export interface FormulaGraph {
   ): void;
   removeFormula(cellKey: string): void;
   markClean(cellKey: string, value: CellValue): void;
+  /** Make a formula depend on the cells its array result would spill into (empty list clears it). */
+  setSpillFootprint(cellKey: string, rects: RangeDependency[]): void;
   /** Invalidate every formula's cached value (used before a full re-evaluation). */
   markAllDirty(): void;
   /**

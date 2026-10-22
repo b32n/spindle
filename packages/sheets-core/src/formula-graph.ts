@@ -80,6 +80,14 @@ export class FormulaGraphImpl implements FormulaGraph {
     }
   }
 
+  setSpillFootprint(cellKey: string, rects: RangeDependency[]): void {
+    const node = this.nodes.get(cellKey);
+    if (!node) return;
+    node.spillRects = rects.length > 0 ? rects.slice() : undefined;
+    if (rects.length > 0 || node.rangeRects.length > 0) this.rangeFormulas.add(cellKey);
+    else this.rangeFormulas.delete(cellKey);
+  }
+
   markClean(cellKey: string, value: CellValue): void {
     const node = this.nodes.get(cellKey);
     if (node) {
@@ -131,7 +139,8 @@ export class FormulaGraphImpl implements FormulaGraph {
           if (result.has(formulaKey)) continue;
           const node = this.nodes.get(formulaKey);
           if (!node) continue;
-          for (const rect of node.rangeRects) {
+          const rects = node.spillRects ? [...node.rangeRects, ...node.spillRects] : node.rangeRects;
+          for (const rect of rects) {
             if (this.rectContains(rect, idx, resolveCell)) {
               result.add(formulaKey);
               break;
