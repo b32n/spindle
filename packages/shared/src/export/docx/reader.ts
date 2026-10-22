@@ -412,6 +412,44 @@ function hasPageBreakRun(pNode: XmlNode): boolean {
   });
 }
 
+/**
+ * Where a page-break run sits relative to the paragraph's other content:
+ * 'before' (nothing but empty runs precede it), 'after' otherwise, or null when
+ * the paragraph has no page-break run. LibreOffice stores the break after the
+ * content it follows (`<w:r><w:br w:type="page"/></w:r>` at the end of the
+ * previous paragraph); Word's "page break before" style puts it first.
+ */
+function pageBreakPlacement(pNode: XmlNode): 'before' | 'after' | null {
+  let sawContent = false;
+  for (const child of childrenOf(pNode)) {
+    const tag = tagOf(child);
+    if (tag === 'w:r') {
+      const runKids = childrenOf(child);
+      const br = find(runKids, 'w:br');
+      if (br && attrsOf(br)['@_w:type'] === 'page') return sawContent ? 'after' : 'before';
+      if (runKids.some((k) => ['w:t', 'w:drawing', 'w:pict', 'w:tab'].includes(tagOf(k) ?? ''))) sawContent = true;
+    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:sdt' || tag === 'w:smartTag') {
+      sawContent = true;
+    }
+  }
+  return null;
+}
+
+/** parseParagraph plus the page break it may carry alongside its content. */
+function parseParagraphBlocks(
+  pNode: XmlNode,
+  styleNames: Map<string, string>,
+  numbering: NumberingInfo,
+  ctx: PartContext,
+  warnings: string[]
+): DocBlock[] {
+  const block = parseParagraph(pNode, styleNames, numbering, ctx, warnings);
+  if (block.type === 'pageBreak') return [block];
+  const placement = pageBreakPlacement(pNode);
+  if (!placement) return [block];
+  return placement === 'before' ? [{ type: 'pageBreak' }, block] : [block, { type: 'pageBreak' }];
+}
+
 function hasBottomBorder(pPrKids: XmlNode[]): boolean {
   const pBdr = find(pPrKids, 'w:pBdr');
   return !!pBdr && !!find(childrenOf(pBdr), 'w:bottom');
@@ -668,11 +706,11 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
         // OOXML the paragraph is the section's last and keeps its content
         // (Word and docx >= 9.12 emit it this way; older docx used an empty
         // carrier paragraph).
-        currentBlocks.push(parseParagraph(node, styleNames, numbering, ctx, warnings));
+        currentBlocks.push(...parseParagraphBlocks(node, styleNames, numbering, ctx, warnings));
         await flushSection(inlineSectPr);
         continue;
       }
-      currentBlocks.push(parseParagraph(node, styleNames, numbering, ctx, warnings));
+      currentBlocks.push(...parseParagraphBlocks(node, styleNames, numbering, ctx, warnings));
     } else if (tag === 'w:tbl') {
       currentBlocks.push(parseTable(node, ctx, warnings));
     } else if (tag === 'w:sectPr') {
