@@ -83,3 +83,54 @@ describe('conformance: blank cells (B1 is empty unless set)', () => {
     expect(w.getCellValue(undefined, 0, 0)).toBe(true);
   });
 });
+
+describe('conformance: operator precedence and unary signs', () => {
+  run([
+    ['=-2^2', {}, 4],
+    ['=2^-2', {}, 0.25],
+    ['=-2^-2', {}, 0.25],
+    ['=-A1^2', { A1: 3 }, 9],
+    ['=-(2)^2', {}, 4],
+    ['=-(1+1)^2', {}, 4],
+    ['=--2', {}, 2],
+    ['=+2^2', {}, 4],
+    ['=-2+3', {}, 1],
+    ['=-2*3', {}, -6],
+    ['=-6/2', {}, -3],
+    ['=2*-3', {}, -6],
+    ['=3-2-1', {}, 0],
+    ['=2^3^2', {}, 64], // Excel is left-associative: (2^3)^2
+    ['=2+3*4', {}, 14],
+    ['=(2+3)*4', {}, 20],
+    ['=1+2&3', {}, '33'],
+    ['=-2^2+1', {}, 5],
+    ['=1-2^2', {}, -3],
+    ['=-1E-2*100', {}, -1],
+    ['=1=1+0', {}, true],
+  ]);
+
+  it('keeps the formula text when re-rendered', () => {
+    const w = new WorkbookImpl('wb', 'WB');
+    w.setFormula(undefined, 0, 0, '=-2^2');
+    expect(w.getCell(undefined, 0, 0)?.formula).toBe('=-2^2');
+    w.setFormula(undefined, 0, 2, '=-A5^2');
+    expect(w.getCell(undefined, 0, 2)?.formula).toBe('=-A5^2');
+  });
+
+  it.each([
+    '=(1+2)*3', '=2*(3+4)', '=-(1+2)', '=A5-(B5-C5)', '=A5-B5-C5', '=A5/(B5*C5)', '=2^(3^2)', '=(2^3)^2',
+    '=-(2^2)', '=(A5+B5)&"x"', '=(1+2)=3', '=1+(2=3)', '=2--2', '=2*-3', '=-A5*B5', '=(-A5)^2',
+  ])('%s survives a render/re-parse round trip with the same value', (formula) => {
+    const w = new WorkbookImpl('wb', 'WB');
+    w.setCellValue(undefined, 4, 0, 3);
+    w.setCellValue(undefined, 4, 1, 4);
+    w.setCellValue(undefined, 4, 2, 5);
+    w.setFormula(undefined, 0, 0, formula);
+    const first = w.getCellValue(undefined, 0, 0);
+    const text = w.getCell(undefined, 0, 0)!.formula!;
+    w.setFormula(undefined, 1, 0, text);
+    expect(w.getCellValue(undefined, 1, 0)).toEqual(first);
+    // and the rendered text is stable (idempotent)
+    expect(w.getCell(undefined, 1, 0)!.formula).toBe(text);
+  });
+});

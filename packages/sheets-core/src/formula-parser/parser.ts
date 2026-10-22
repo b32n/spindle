@@ -352,13 +352,19 @@ export class FormulaParser {
               (op === '=' && (prevChar === '<' || prevChar === '>')) ||
               (op === '>' && prevChar === '<');
 
+            // A leading sign is a unary minus/plus: in Excel it binds tighter
+            // than ^ (=-2^2 is 4), so it must split last. Give it the highest
+            // precedence; it still parses via the empty-left path (0 - x).
+            const isLeadingSign = (op === '-' || op === '+') && prevNonSpace === '';
+            const effPrec = isLeadingSign ? 5 : prec;
+
             if (
               !isPartOfNumber &&
               !isUnarySign &&
               !isTwoCharOp &&
-              (prec < lowestPrec || (prec === lowestPrec && i > (lowestPrecOp?.index ?? -1)))
+              (effPrec < lowestPrec || (effPrec === lowestPrec && i > (lowestPrecOp?.index ?? -1)))
             ) {
-              lowestPrec = prec;
+              lowestPrec = effPrec;
               lowestPrecOp = { operator: op, index: i };
             }
           }

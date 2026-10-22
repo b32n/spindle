@@ -116,7 +116,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FRM-09 | array formulas spill into neighbouring cells | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-10 | ISBLANK of an empty cell is TRUE | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-11 | SUMPRODUCT of an array expression multiplies element-wise | fixme + bug |  | array expressions inside SUMPRODUCT give #VALUE!. https://github.com/b32n/spindle/issues/67 | `e2e/sheets/formulas-and-fill.spec.ts` |
-| S-FRM-12 | unary minus binds tighter than ^ | fixme + bug |  | =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68 | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-12 | unary minus binds tighter than ^ | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-13 | parentheses survive in the stored formula | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-01 | dragging the fill handle copies a value down | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-02 | fill extends a numeric series | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-03 | fill rebases formulas | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
@@ -388,7 +389,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 319
-- fixme + bug: 16
+- covered: 321
+- fixme + bug: 15
 - not covered: 8
 - n/a: 6

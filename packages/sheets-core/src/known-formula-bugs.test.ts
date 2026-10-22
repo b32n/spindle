@@ -23,8 +23,8 @@ describe('known formula bugs (expected failures)', () => {
     expect(w.getCellValue(undefined, 0, 3)).toBe(32); // 1*4 + 2*5 + 3*6
   });
 
-  // https://ISSUE_POW
-  test.failing('=-2^2 is 4 (unary minus binds tighter than ^, as in Excel)', () => {
+  // Fixed: https://github.com/b32n/spindle/issues/68
+  it('=-2^2 is 4 (unary minus binds tighter than ^, as in Excel)', () => {
     const w = new WorkbookImpl('wb', 'WB');
     w.setFormula(undefined, 0, 0, '=-2^2');
     expect(w.getCellValue(undefined, 0, 0)).toBe(4);

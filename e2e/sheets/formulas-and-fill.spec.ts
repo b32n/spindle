@@ -92,10 +92,22 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(9, 0, 32);
   });
 
-  // Bug: =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68
-  test.fixme('S-FRM-12 unary minus binds tighter than ^', async () => {
+  // https://github.com/b32n/spindle/issues/68
+  test('S-FRM-12 unary minus binds tighter than ^', async () => {
     await sheet.enter(5, 0, '=-2^2');
     await sheet.expectValue(5, 0, 4);
+    await expect.poll(() => sheet.cellFormula(5, 0)).toBe('=-2^2');
+  });
+
+  // The stored formula text is re-rendered from the parsed formula; it must keep the parentheses
+  // (it is what XLSX export and a reload re-parse).
+  test('S-FRM-13 parentheses survive in the stored formula', async () => {
+    await sheet.enter(5, 0, '=(1+2)*3');
+    await sheet.expectValue(5, 0, 9);
+    await expect.poll(() => sheet.cellFormula(5, 0)).toBe('=(1+2)*3');
+    await sheet.enter(6, 0, '=-(1+2)');
+    await sheet.expectValue(6, 0, -3);
+    await expect.poll(() => sheet.cellFormula(6, 0)).toBe('=-(1+2)');
   });
 
   test('S-FIL-01 dragging the fill handle copies a value down', async ({ page }) => {
