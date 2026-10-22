@@ -212,7 +212,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-SEL-02 | double-click selects a word; typing replaces it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-SEL-03 | Shift+Arrow extends the selection | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-01 | Bold / Italic / Underline / Strike via shortcuts | covered |  |  | `e2e/docs/editing.spec.ts` |
-| D-FMT-10 | Ctrl+I on a partly-italic selection italicises all of it | fixme + bug |  | toggling a mark on a partly-marked selection removes it; Word / Google Docs add it to the whole selection. https://github.com/b32n/spindle/issues/71 | `e2e/docs/editing.spec.ts` |
+| D-FMT-12 | Ctrl+I on a partly-italic selection italicises all of it | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-02 | toolbar Bold toggles on and off | covered | yes |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-03 | toolbar Italic, Underline, Strikethrough | covered |  |  | `e2e/docs/editing.spec.ts` |
 | D-FMT-04 | heading styles from the Paragraph menu | covered |  |  | `e2e/docs/editing.spec.ts` |
@@ -228,7 +228,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-INS-03 | insert an image from a URL | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-04 | insert a table from the size picker | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-INS-05 | double-clicking a table cell lets you type into it | covered |  |  | `e2e/docs/features.spec.ts` |
-| D-INS-06 | Tab moves to the next table cell | fixme + bug |  | there is no Tab key binding for table cells, so Tab does not move to the next cell (Word / Google Docs behaviour); it leaves the caret in place. https://github.com/b32n/spindle/issues/70 | `e2e/docs/features.spec.ts` |
+| D-INS-06 | Tab moves to the next table cell | covered |  |  | `e2e/docs/features.spec.ts` |
+| D-INS-07 | Shift+Tab moves back a cell and Tab in the last cell adds a row | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-01 | the demo paginates into several pages with page-number footers | covered | yes |  | `e2e/docs/features.spec.ts` |
 | D-PAG-02 | explicit page break starts a new page and footers update | covered |  |  | `e2e/docs/features.spec.ts` |
 | D-PAG-03 | typing enough paragraphs flows onto a new page | covered |  |  | `e2e/docs/features.spec.ts` |
@@ -251,7 +252,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-FIO-02 | DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer | covered | yes |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-03 | text typed after opening is part of the downloaded .docx | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-04 | a document built in the editor downloads and re-opens identically | covered |  |  | `e2e/docs/file-io.spec.ts` |
-| D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/76): LibreOffice writes a page break as a trailing <w:br w:type="page"/> run inside the preceding paragraph (here the one holding the image). The importer only maps a break to a page-break block when the paragraph is otherwise empty, so the break is silently dropped. | `e2e/docs/file-io.spec.ts` |
+| D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-06 | a page break inserted in the editor exports as w:br and re-opens as a page break | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FNT-01 | default: web fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/docs/fonts.spec.ts` |
 | D-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/docs/fonts.spec.ts` |
@@ -424,7 +425,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 351
-- fixme + bug: 15
+- covered: 355
+- fixme + bug: 12
 - not covered: 8
 - n/a: 6
