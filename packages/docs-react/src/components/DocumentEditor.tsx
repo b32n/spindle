@@ -24,7 +24,7 @@ import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
 import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
-import { downloadFile } from '@b32nio/spindle-shared/react';
+import { downloadFile, type FontSource } from '@b32nio/spindle-shared/react';
 import {
   DOCS_EXPORT_FORMATS,
   exportDocumentFile,
@@ -54,6 +54,12 @@ interface DocumentEditorProps {
   onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
   /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
   onFileError?: (error: Error, action: 'open' | 'download') => void;
+  /**
+   * Where web fonts offered by the font menu are loaded from. Default: the
+   * Spindle font mirror (`https://fonts.b32n.io/css2`), falling back to system
+   * fonts if unreachable. `{ kind: 'local' }` makes no font requests.
+   */
+  fontSource?: FontSource;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -91,6 +97,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   fileName,
   onFileOpened,
   onFileError,
+  fontSource,
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -420,6 +427,7 @@ export const DocumentEditor = memo(function DocumentEditor({
           background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
         }}>
           <Toolbar
+            fontSource={fontSource}
             onPageSetup={() => setShowPageSetup(true)}
             editorView={editorView}
             activeMarks={activeMarks}

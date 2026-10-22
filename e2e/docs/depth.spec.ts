@@ -6,7 +6,7 @@ test.describe('docs: table menu, links, page setup, text styles', () => {
   let doc: DocsPage;
   test.beforeEach(async ({ page }) => {
     // The font list may reference web fonts; keep the suite offline-safe.
-    await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+    await page.route(/fonts\.b32n\.io/, (r) => r.abort());
     doc = new DocsPage(page);
     await doc.goto();
   });

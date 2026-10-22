@@ -5,6 +5,14 @@ import type { SlidesCommentEvent } from '@b32nio/spindle-slides-core';
 import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import { buildSampleDeck } from './sampleDeck';
+/** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
+const fontSource = (() => {
+  const v = new URLSearchParams(window.location.search).get('fontSource');
+  if (v === 'local') return { kind: 'local' } as const;
+  if (v?.startsWith('css:')) return { kind: 'css', url: v.slice(4) } as const;
+  return undefined;
+})();
+
 
 const DEMO_USERS = [
   { id: 'alice', name: 'Alice' },
@@ -86,7 +94,7 @@ function CollabDemo() {
           <div style={{ padding: '4px 12px', background: i === 0 ? '#ff6b6b' : '#4ecdc4', color: '#fff', fontWeight: 500 }}>{DEMO_USERS[i].name}</div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <DeckProvider deck={deck} currentUser={DEMO_USERS[i]} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-              <SlidesEditor />
+              <SlidesEditor fontSource={fontSource} />
             </DeckProvider>
           </div>
         </div>
@@ -126,7 +134,7 @@ function WsDemo({ config }: { config: WsConfig }) {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <DeckProvider deck={deck} currentUser={{ id: config.identity.userId, name: config.identity.displayName }} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-          <SlidesEditor />
+          <SlidesEditor fontSource={fontSource} />
         </DeckProvider>
       </div>
     </div>
@@ -156,7 +164,7 @@ export default function App() {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <DeckProvider deck={singleDeck} currentUser={DEMO_USERS[0]} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-          <SlidesEditor readOnly={readOnly} />
+          <SlidesEditor fontSource={fontSource} readOnly={readOnly} />
         </DeckProvider>
       </div>
     </div>
