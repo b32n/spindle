@@ -21,7 +21,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CLP-08 | pasting plain tab-separated text from the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-09 | copy writes TSV to the system clipboard | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-CLP-10 | context menu copy and paste | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
-| S-CLP-11 | paste preserves cell formatting | fixme + bug |  | internal paste only carries values/formulas, not cell styles. https://github.com/b32n/spindle/issues/69 | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-11 | paste preserves cell formatting | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
+| S-CLP-12 | paste carries number formats and colours, and the paste is one undo step | covered |  |  | `e2e/sheets/clipboard.spec.ts` |
 | S-COL-01 | an edit made by one client appears in the other | covered | yes |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-02 | concurrent edits to different cells converge | covered |  |  | `e2e/sheets/collab.spec.ts` |
 | S-COL-03 | concurrent edits to the same cell converge on one value | covered |  |  | `e2e/sheets/collab.spec.ts` |
@@ -91,7 +92,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FIO-08 | CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells | covered | yes |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-09 | unicode CSV (accents, CJK, emoji, RTL, CRLF) round-trips byte for byte | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-10 | XLSX -> CSV exports only the active sheet, with raw (unformatted) numbers | covered |  |  | `e2e/sheets/file-io.spec.ts` |
-| S-FIO-14 | XLSX -> CSV exports computed values for formula cells | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/77): CSV export writes the formula text, guarded with a leading apostrophe (`'=B2*C2`), for formula cells instead of their computed values (25), so the CSV is not usable elsewhere. | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-14 | XLSX -> CSV exports computed values for formula cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-15 | XLSX export opens on the sheet that was active when downloading | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-11 | CSV -> XLSX: values, text with newlines/unicode and numbers survive | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-12 | semicolon- and tab-delimited CSV are not split (no delimiter detection) | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-13 | opening a 10,000-row CSV stays within budget and the grid stays usable | covered |  |  | `e2e/sheets/file-io.spec.ts` |
@@ -168,7 +170,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-CTX-03 | header context menu keeps selection and hides a column | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-CTX-04 | context menu Delete clears the selected cells | covered |  |  | `e2e/sheets/structure.spec.ts` |
 | S-TAB-01 | add a sheet tab and switch between tabs | covered |  |  | `e2e/sheets/structure.spec.ts` |
-| S-GAP-01 | Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images) | not covered | | Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), CSV export of computed values (S-FIO-14 fixme), and OOXML features the importer does not read. | |
+| S-GAP-01 | Import / export (CSV, XLSX) UI: delimiter detection, formatted-value CSV export, XLSX features beyond the fixtures (data validation, conditional formats, charts, images) | not covered | | Open / Download are covered (S-FIO-*, S-ERR-*). Not covered: semicolon/tab delimiter detection (unsupported, S-FIO-12 pins current behaviour), and OOXML features the importer does not read. | |
 | S-GAP-02 | Ctrl/Cmd-click multi-range selection | n/a | | The grid supports a single selection range only. | |
 | S-GAP-03 | HTML clipboard paste | n/a | | Sheets reads/writes plain text (TSV) only; there is no HTML clipboard path. | |
 | S-GAP-04 | Touch gestures beyond tap / double-tap (pinch zoom, long-press menu, touch drag-select) | not covered | | Tap and double-tap are covered (M-SHEETS-*). | |
@@ -401,7 +403,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 332
-- fixme + bug: 16
+- covered: 336
+- fixme + bug: 14
 - not covered: 8
 - n/a: 6
