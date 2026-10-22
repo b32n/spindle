@@ -256,7 +256,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-FIO-02 | DOCX -> DOCX: the downloaded file has the same structure, marks, list levels, table, link, image and header/footer | covered | yes |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-03 | text typed after opening is part of the downloaded .docx | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-04 | a document built in the editor downloads and re-opens identically | covered |  |  | `e2e/docs/file-io.spec.ts` |
-| D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | fixme + bug |  | Bug (https://github.com/b32n/spindle/issues/76): LibreOffice writes a page break as a trailing <w:br w:type="page"/> run inside the preceding paragraph (here the one holding the image). The importer only maps a break to a page-break block when the paragraph is otherwise empty, so the break is silently dropped. | `e2e/docs/file-io.spec.ts` |
+| D-FIO-05 | a page break stored in a content paragraph (LibreOffice style) is imported | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FIO-06 | a page break inserted in the editor exports as w:br and re-opens as a page break | covered |  |  | `e2e/docs/file-io.spec.ts` |
 | D-FNT-01 | default: web fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/docs/fonts.spec.ts` |
 | D-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/docs/fonts.spec.ts` |
@@ -413,7 +413,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 350
-- fixme + bug: 10
+- covered: 351
+- fixme + bug: 9
 - not covered: 8
 - n/a: 6

@@ -185,10 +185,9 @@ test.describe('docs: file open / download round-trips', () => {
     await expect(doc.editor).toHaveText('Hello from the editor');
   });
 
-  // Bug (https://github.com/b32n/spindle/issues/76): LibreOffice writes a page break as a trailing <w:br w:type="page"/> run inside the preceding
-  // paragraph (here the one holding the image). The importer only maps a break to a page-break block
-  // when the paragraph is otherwise empty, so the break is silently dropped.
-  test.fixme('D-FIO-05 a page break stored in a content paragraph (LibreOffice style) is imported', async ({
+  // https://github.com/b32n/spindle/issues/76: LibreOffice writes a page break as a trailing <w:br w:type="page"/> run
+  // inside the preceding paragraph (here the one holding the image).
+  test('D-FIO-05 a page break stored in a content paragraph (LibreOffice style) is imported', async ({
     page,
   }) => {
     await openViaChooser(page, OPEN, fixture('rich-document.docx'));
