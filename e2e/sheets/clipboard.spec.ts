@@ -110,14 +110,46 @@ test.describe('sheets: clipboard', () => {
     await sheet.expectValue(7, 0, 'Gadget');
   });
 
-  // Bug: internal paste only carries values/formulas, not cell styles.
   // https://github.com/b32n/spindle/issues/69
-  test.fixme('S-CLP-11 paste preserves cell formatting', async ({ page }) => {
+  test('S-CLP-11 paste preserves cell formatting', async ({ page }) => {
     await sheet.select(1, 0);
     await page.keyboard.press(`${MOD}+b`);
     await page.keyboard.press(`${MOD}+c`);
     await sheet.select(6, 0);
     await page.keyboard.press(`${MOD}+v`);
     await sheet.expectBold(6, 0);
+  });
+
+  test('S-CLP-12 paste carries number formats and colours, and the paste is one undo step', async ({
+    page,
+  }) => {
+    await sheet.enter(8, 0, '1234.5');
+    await sheet.select(8, 0);
+    await page.evaluate(() => {
+      const wb = (window as any).__spindle.workbook;
+      const sheet = wb.getSheet();
+      const cell = sheet.getCell(8, 0);
+      const styleId = wb
+        .getStylePool()
+        .getOrCreate({ fontColor: '#ff0000', backgroundColor: '#ffff00' });
+      const formatId = wb.getFormatPool().getOrCreate({ type: 'currency', decimals: 2 });
+      wb.setCell(undefined, 8, 0, { ...cell, styleId, formatId });
+    });
+    await page.keyboard.press(`${MOD}+c`);
+    await sheet.select(10, 1);
+    await page.keyboard.press(`${MOD}+v`);
+    await sheet.expectValue(10, 1, 1234.5);
+    const style = await sheet.cellStyle(10, 1);
+    expect(style.fontColor).toBe('#ff0000');
+    expect(style.backgroundColor).toBe('#ffff00');
+    expect(
+      await page.evaluate(() => {
+        const wb = (window as any).__spindle.workbook;
+        const id = wb.getCell(undefined, 10, 1)?.formatId;
+        return id ? wb.getFormatPool().get(id)?.type : null;
+      })
+    ).toBe('currency');
+    await page.keyboard.press(`${MOD}+z`);
+    await expect.poll(async () => (await sheet.cellStyle(10, 1)).fontColor ?? null).toBeNull();
   });
 });
