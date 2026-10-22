@@ -407,9 +407,17 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | V-SLIDES-01 | toolbar | covered |  |  | `e2e/visual/visual.spec.ts` |
 | V-SLIDES-02 | a slide with shapes | covered |  |  | `e2e/visual/visual.spec.ts` |
 
+## Privacy (no third-party network)
+
+| ID | Scenario | Status | Smoke | Notes | Spec |
+|---|---|---|---|---|---|
+| P-NET-01 | sheets: loading, the font picker and dialogs only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+| P-NET-02 | docs: loading, typing and the image/link dialogs only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+| P-NET-03 | slides: loading, navigating slides and the insert menu only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+
 ## Summary
 
-- covered: 340
+- covered: 343
 - fixme + bug: 16
 - not covered: 8
 - n/a: 6
