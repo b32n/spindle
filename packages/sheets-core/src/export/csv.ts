@@ -1,4 +1,4 @@
-import { exportCsv, importCsv, type CsvCellValue } from '@b32nio/spindle-shared/export/csv';
+import { exportCsv, importCsv, detectCsvLoss, type CsvCellValue, type ImportLossReport } from '@b32nio/spindle-shared/export/csv';
 import type { Sheet } from '../types';
 import type { WorkbookImpl } from '../workbook';
 
@@ -39,6 +39,11 @@ export function exportToCSV(workbook: WorkbookImpl, sheetId?: string): string {
   }
 
   return exportCsv({ rows });
+}
+
+/** What importing this CSV text would not bring across (currently: delimiters other than comma). */
+export function inspectCsv(csv: string): ImportLossReport {
+  return detectCsvLoss(csv);
 }
 
 export function importFromCSV(csv: string, sheet: Sheet): void {

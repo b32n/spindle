@@ -4,8 +4,11 @@ import {
   exportToXlsx,
   importFromCSV,
   importFromXlsx,
+  inspectCsv,
+  inspectXlsx,
 } from '@b32nio/spindle-sheets-core';
 import { fileExtension, sanitizeFileName, stripExtension } from '@b32nio/spindle-shared/react';
+import type { ImportLossReport } from '@b32nio/spindle-shared';
 
 /** Formats the toolbar's Download menu can produce. */
 export type SheetsExportFormat = 'xlsx' | 'csv';
@@ -32,6 +35,8 @@ export const SHEETS_IMPORT_ACCEPT = '.xlsx,.csv';
 
 export interface SheetsFileImportResult {
   warnings: string[];
+  /** What the file contained that could not be imported (empty `items` = nothing lost). */
+  loss: ImportLossReport;
 }
 
 export interface SheetsFileExport {
@@ -70,9 +75,23 @@ export async function importWorkbookFile(workbook: WorkbookImpl, file: File): Pr
     // "Open" semantics: build a fresh single-sheet workbook from the CSV and
     // swap it in, rather than merging into whatever was open before.
     const scratch = new WorkbookImpl(workbook.id, stripExtension(file.name) || workbook.name);
-    importFromCSV(await file.text(), scratch.getSheet());
+    const text = await file.text();
+    const loss = inspectCsv(text);
+    importFromCSV(text, scratch.getSheet());
     workbook.setData(scratch.getData());
-    return { warnings: [] };
+    return { warnings: [], loss };
   }
+  throw new Error(`Unsupported file type: ".${ext || '?'}". Open an .xlsx or .csv file.`);
+}
+
+/**
+ * Headless pre-check for "Open": what importing `file` would lose, without touching the
+ * workbook. Hosts that render their own confirmation call this, show `describeImportLoss(report)`
+ * when `hasImportLoss(report)`, and only then call `importWorkbookFile`.
+ */
+export async function inspectWorkbookFile(file: File): Promise<ImportLossReport> {
+  const ext = fileExtension(file.name);
+  if (ext === 'xlsx') return inspectXlsx(new Uint8Array(await file.arrayBuffer()));
+  if (ext === 'csv') return inspectCsv(await file.text());
   throw new Error(`Unsupported file type: ".${ext || '?'}". Open an .xlsx or .csv file.`);
 }
