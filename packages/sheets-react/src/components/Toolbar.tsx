@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect, useRef, useMemo } from 'react';
-import { ResponsiveToolbar, useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
+import { ResponsiveToolbar, useToolbarMenu, MenuRow, createFontLoader, type FontSource } from '@b32nio/spindle-shared/react';
 import { HyperlinkModal } from './HyperlinkModal';
 import type { FormatType } from '@b32nio/spindle-sheets-core';
 import {
@@ -411,33 +411,14 @@ const OpenFileButton = memo(function OpenFileButton({ onClick }: { onClick: () =
   );
 });
 
-// Load the given Google Fonts on demand (used by the font picker in both modes).
-function loadGoogleFonts(fonts: string[], loaded: React.MutableRefObject<Set<string>>) {
-  const toLoad = fonts.filter((f) => {
-    if (loaded.current.has(f)) return false;
-    if (document.querySelector(`link[data-fonts*="${f}"]`)) { loaded.current.add(f); return false; }
-    return true;
-  });
-  for (let i = 0; i < toLoad.length; i += 10) {
-    const batch = toLoad.slice(i, i + 10);
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${batch.map((f) => f.replace(/\s+/g, '+')).join('&family=')}:wght@400&display=swap`;
-    link.setAttribute('data-fonts', batch.join(','));
-    document.head.appendChild(link);
-    batch.forEach((f) => loaded.current.add(f));
-  }
-}
-
 // The searchable font list used inside the font picker (its own state, so it
 // works both in the inline dropdown and in the overflow modal).
-const FontPickerPanel = memo(function FontPickerPanel({ fonts, value, onPick }: {
-  fonts: string[]; value: string; onPick: (f: string) => void;
+const FontPickerPanel = memo(function FontPickerPanel({ fonts, value, onPick, loadFonts }: {
+  fonts: string[]; value: string; onPick: (f: string) => void; loadFonts: (families: string[]) => void;
 }) {
   const [query, setQuery] = useState('');
-  const loadedRef = useRef<Set<string>>(new Set());
   const filtered = useMemo(() => fonts.filter((f) => f.toLowerCase().includes(query.toLowerCase())), [fonts, query]);
-  useEffect(() => { loadGoogleFonts(filtered.slice(0, 50), loadedRef); }, [filtered]);
+  useEffect(() => { loadFonts(filtered.slice(0, 50)); }, [filtered, loadFonts]);
   return (
     <div>
       <div style={{ paddingBottom: 8, borderBottom: '1px solid rgba(0,0,0,0.06)', marginBottom: 6 }}>
@@ -454,13 +435,13 @@ const FontPickerPanel = memo(function FontPickerPanel({ fonts, value, onPick }: 
   );
 });
 
-const FontFamilyControl = memo(function FontFamilyControl({ value, fonts, onPick }: {
-  value: string; fonts: string[]; onPick?: (f: string) => void;
+const FontFamilyControl = memo(function FontFamilyControl({ value, fonts, onPick, loadFonts }: {
+  value: string; fonts: string[]; onPick?: (f: string) => void; loadFonts: (families: string[]) => void;
 }) {
   const menu = useToolbarMenu();
   const [open, setOpen] = useState(false);
   if (menu.inMenu) {
-    return <MenuRow icon={<Type size={17} />} label="Font" hint={value} onClick={() => menu.openModal('Font', <FontPickerPanel fonts={fonts} value={value} onPick={(f) => { onPick?.(f); menu.closeMenu(); }} />)} />;
+    return <MenuRow icon={<Type size={17} />} label="Font" hint={value} onClick={() => menu.openModal('Font', <FontPickerPanel loadFonts={loadFonts} fonts={fonts} value={value} onPick={(f) => { onPick?.(f); menu.closeMenu(); }} />)} />;
   }
   return (
     <div style={{ position: 'relative' }}>
@@ -470,7 +451,7 @@ const FontFamilyControl = memo(function FontFamilyControl({ value, fonts, onPick
       </button>
       {open && (
         <div style={{ ...styles.dropdown, padding: 8, minWidth: 240 }} onMouseLeave={() => setOpen(false)}>
-          <FontPickerPanel fonts={fonts} value={value} onPick={(f) => { onPick?.(f); setOpen(false); }} />
+          <FontPickerPanel loadFonts={loadFonts} fonts={fonts} value={value} onPick={(f) => { onPick?.(f); setOpen(false); }} />
         </div>
       )}
     </div>
@@ -583,6 +564,12 @@ const DropdownItem = memo(function DropdownItem({
 // ============================================================================
 
 export interface ToolbarProps {
+  /**
+   * Where the font picker loads web fonts from. Default: the Spindle font
+   * mirror (`https://fonts.b32n.io/css2`), falling back to system fonts if it
+   * is unreachable. `{ kind: 'local' }` makes no font requests at all.
+   */
+  fontSource?: FontSource;
   /** Opens a local file (.xlsx / .csv). Providing this shows the Open button. */
   onOpenFile?: (file: File) => void;
   /** Downloads the workbook in the chosen format. Providing this shows the Download menu. */
@@ -643,6 +630,7 @@ export interface ToolbarProps {
 }
 
 export const Toolbar = memo(function Toolbar({
+  fontSource,
   onOpenFile,
   onDownload,
   downloadFormats = SHEETS_EXPORT_FORMATS,
@@ -696,7 +684,9 @@ export const Toolbar = memo(function Toolbar({
     injectStyles();
   }, []);
 
-  // Comprehensive list of Google Fonts
+  const loadFonts = useMemo(() => createFontLoader(fontSource), [fontSource]);
+
+  // Font picker list; families that are not installed locally load from `fontSource`
   const googleFonts = [
     // Sans-serif fonts
     'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Source Sans Pro', 'Raleway', 'Poppins', 'Oswald', 'Ubuntu', 'Nunito',
@@ -852,7 +842,7 @@ export const Toolbar = memo(function Toolbar({
       <Divider />
 
       {/* Font Family */}
-      <FontFamilyControl value={currentFontFamily} fonts={googleFonts} onPick={onFontFamily} />
+      <FontFamilyControl value={currentFontFamily} fonts={googleFonts} onPick={onFontFamily} loadFonts={loadFonts} />
 
       {/* Font Size */}
       <FontSizeControl value={currentFontSize} sizes={commonFontSizes} onPick={onFontSize} />

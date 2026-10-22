@@ -7,6 +7,7 @@ import { FormulaSignatureHint } from './FormulaSignatureHint';
 import { useFormulaAssist } from '../hooks/useFormulaAssist';
 import { FormulaBar } from './FormulaBar';
 import { Toolbar } from './Toolbar';
+import type { FontSource } from '@b32nio/spindle-shared/react';
 import { SheetTabs } from './SheetTabs';
 import { CommentsPanel } from './CommentsPanel';
 import { ContextMenu } from './ContextMenu';
@@ -36,6 +37,12 @@ export interface WorkbookCanvasProps {
   /** Disables all editing: cell edits, paste/cut, formatting, structural changes, and comments. */
   readOnly?: boolean;
   /**
+   * Where the toolbar's font picker loads web fonts from. Default: the Spindle
+   * font mirror (`https://fonts.b32n.io/css2`), falling back to system fonts if
+   * unreachable. `{ kind: 'local' }` makes no font requests.
+   */
+  fontSource?: FontSource;
+  /**
    * Show Open (.xlsx / .csv, read from a local file input) and Download
    * (.xlsx / .csv) in the toolbar. Opening a file replaces the whole
    * workbook. Default: false. Never shown in read-only mode (the toolbar is
@@ -60,6 +67,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   rowHeight = 20,
   colWidth = 100,
   readOnly = false,
+  fontSource,
   fileActions = false,
   exportFormats,
   fileName,
@@ -991,6 +999,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     >
       {/* Toolbar — hidden entirely in read-only mode, since every action it exposes mutates the workbook */}
       {!readOnly && <Toolbar
+        fontSource={fontSource}
         onOpenFile={fileActions ? handleOpenFile : undefined}
         onDownload={fileActions ? handleDownload : undefined}
         downloadFormats={downloadFormats}

@@ -10,6 +10,14 @@ import {
 import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
+/** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
+const fontSource = (() => {
+  const v = new URLSearchParams(window.location.search).get('fontSource');
+  if (v === 'local') return { kind: 'local' } as const;
+  if (v?.startsWith('css:')) return { kind: 'css', url: v.slice(4) } as const;
+  return undefined;
+})();
+
 
 // Sample directory of users that can be @-mentioned in comments.
 const DEMO_USERS: CommentAuthor[] = [
@@ -463,7 +471,7 @@ function CollabDemo({
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
+            <DocumentEditor fontSource={fontSource} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
           </DocumentProvider>
         </div>
       </div>
@@ -478,7 +486,7 @@ function CollabDemo({
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
+            <DocumentEditor fontSource={fontSource} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
           </DocumentProvider>
         </div>
       </div>
@@ -570,7 +578,7 @@ function WsDemo({
           mentionableUsers={DEMO_USERS}
           onCommentEvent={logCommentEvent}
         >
-          <DocumentEditor width={width} height={height - 28} showToolbar={true} showRuler={true} />
+          <DocumentEditor fontSource={fontSource} width={width} height={height - 28} showToolbar={true} showRuler={true} />
         </DocumentProvider>
       </div>
     </div>
@@ -708,7 +716,7 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor
+            <DocumentEditor fontSource={fontSource}
               width={dimensions.width}
               height={dimensions.height}
               showToolbar={true}
