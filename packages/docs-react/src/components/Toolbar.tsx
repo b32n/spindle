@@ -1,3 +1,4 @@
+import { undoCommand as yUndoCommand, redoCommand as yRedoCommand, yUndoPluginKey } from 'y-prosemirror';
 import React, { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { TextSelection, type Command } from 'prosemirror-state';
@@ -540,7 +541,9 @@ export const Toolbar = memo(function Toolbar({
   
   const handleUndo = useCallback(() => {
     if (editorView) {
-      pmUndo(editorView.state, editorView.dispatch);
+      // In a collab session the Yjs undo manager owns history (local edits only).
+      if (yUndoPluginKey.getState(editorView.state)) yUndoCommand(editorView.state, editorView.dispatch);
+      else pmUndo(editorView.state, editorView.dispatch);
       editorView.focus();
     } else {
       undo();
@@ -549,7 +552,8 @@ export const Toolbar = memo(function Toolbar({
   
   const handleRedo = useCallback(() => {
     if (editorView) {
-      pmRedo(editorView.state, editorView.dispatch);
+      if (yUndoPluginKey.getState(editorView.state)) yRedoCommand(editorView.state, editorView.dispatch);
+      else pmRedo(editorView.state, editorView.dispatch);
       editorView.focus();
     } else {
       redo();

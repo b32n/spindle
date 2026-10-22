@@ -1,5 +1,6 @@
 import { keymap } from 'prosemirror-keymap';
 import { history, undo, redo } from 'prosemirror-history';
+import { undoCommand as yUndo, redoCommand as yRedo } from 'y-prosemirror';
 import { baseKeymap, toggleMark, chainCommands, exitCode, joinUp, joinDown, lift, selectParentNode } from 'prosemirror-commands';
 import { 
   inputRules, 
@@ -91,13 +92,16 @@ export function buildInputRules(schema: Schema): Plugin {
 /**
  * Build the keymap for the schema
  */
-export function buildKeymap(schema: Schema): Plugin {
+export function buildKeymap(schema: Schema, options: { collab?: boolean } = {}): Plugin {
   const keys: Record<string, Command> = {};
 
-  // Undo/Redo
-  keys['Mod-z'] = undo;
-  keys['Mod-y'] = redo;
-  keys['Mod-Shift-z'] = redo;
+  // Undo/Redo. While attached to a collaboration session the Yjs undo manager
+  // (yUndoPlugin) owns history, so Mod-z only reverts the local user's own edits.
+  const doUndo = options.collab ? (yUndo as Command) : undo;
+  const doRedo = options.collab ? (yRedo as Command) : redo;
+  keys['Mod-z'] = doUndo;
+  keys['Mod-y'] = doRedo;
+  keys['Mod-Shift-z'] = doRedo;
 
   // Text formatting
   if (schema.marks.bold) {
@@ -320,12 +324,13 @@ export function createActiveMarksPlugin(): Plugin {
 /**
  * Create all plugins for the editor
  */
-export function createPlugins(schema: Schema): Plugin[] {
+export function createPlugins(schema: Schema, options: { collab?: boolean } = {}): Plugin[] {
   return [
     buildInputRules(schema),
-    buildKeymap(schema),
+    buildKeymap(schema, options),
     keymap(baseKeymap),
-    history(),
+    // prosemirror-history would record remote Yjs changes as local steps; collab uses yUndoPlugin instead.
+    ...(options.collab ? [] : [history()]),
     createActiveMarksPlugin(),
   ];
 }

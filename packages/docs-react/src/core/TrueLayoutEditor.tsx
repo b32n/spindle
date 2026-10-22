@@ -27,7 +27,7 @@ import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
 import { docsSchema, createPlugins, blocksToPmDoc, proseMirrorToDocument, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
 import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
-import { ySyncPlugin, yCursorPlugin } from 'y-prosemirror';
+import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
 
 import { FlowBlock } from './flow-blocks';
@@ -358,13 +358,14 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       if (!collabHandle && !initialDocRef.current) return;
       editorInitializedRef.current = true;
 
-      const plugins = createPlugins(docsSchema);
+      const plugins = createPlugins(docsSchema, { collab: !!collabHandle });
       let state: EditorState;
       if (collabHandle) {
         ensureCollabCursorStyles();
         plugins.unshift(
           ySyncPlugin(collabHandle.xmlFragment),
           yCursorPlugin(collabHandle.awareness),
+          yUndoPlugin(), // undo/redo only the local user's edits
         );
         state = EditorState.create({ schema: docsSchema, plugins });
       } else {
