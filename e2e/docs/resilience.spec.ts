@@ -80,7 +80,10 @@ test.describe('docs: collaboration resilience', () => {
 
   test('D-RES-02 edits made while offline on both sides merge on reconnect, nothing is lost', async ({
     browser,
+    browserName,
   }, info) => {
+    // Eight sequential click+type steps across two pages; WebKit on CI needs more than the default 30s.
+    test.slow(browserName === 'webkit', 'many sequential docs edits are slow on WebKit');
     const proxy = new NetworkProxy();
     await proxy.start();
     const room = roomName('docs-res', info.testId);
