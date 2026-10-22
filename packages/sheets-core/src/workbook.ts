@@ -319,6 +319,17 @@ export class WorkbookImpl implements Workbook {
     return this.getSpillIndex(sheetId).spilledValueAt(row, col);
   }
 
+  /** The bottom-right cell reached by any spill on a sheet, or undefined when nothing spills. */
+  getSpillExtent(sheetId: string | undefined): { row: number; col: number } | undefined {
+    let extent: { row: number; col: number } | undefined;
+    for (const r of this.getSpillIndex(sheetId).regions()) {
+      const row = r.anchorRow + r.rows - 1;
+      const col = r.anchorCol + r.cols - 1;
+      extent = { row: Math.max(extent?.row ?? 0, row), col: Math.max(extent?.col ?? 0, col) };
+    }
+    return extent;
+  }
+
   /** Whether a cell is filled by a spill it does not itself anchor (read-only). */
   isSpilledCell(sheetId: string | undefined, row: number, col: number): boolean {
     return this.getSpillIndex(sheetId).isCovered(row, col);
