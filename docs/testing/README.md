@@ -45,6 +45,11 @@ npm run a11y:baseline                 # regenerate the axe baseline (deliberatel
 
 Servers are reused locally if already running (`npm run dev` in an example), and always started fresh in CI.
 
+WebKit cannot run on every dev machine (missing system libraries), so verify WebKit-specific changes in CI.
+Docs specs run on all three browsers. The one WebKit difference the helpers absorb: its DOM selection anchors on
+the block *element* (with a child offset) instead of a text node, so `DocsPage` measures the caret with a `Range`
+from the editor start rather than `anchorNode.textContent`.
+
 ### Debugging
 
 - **UI mode** (`npm run test:e2e:ui`): watch a test step by step, pick locators, re-run on save.
