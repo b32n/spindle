@@ -55,6 +55,7 @@ jobs:
         with:
           name: e2e-failure-artifacts-${{ matrix.shard }}
           path: e2e/.results
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: ignore
 
@@ -102,6 +103,7 @@ jobs:
           path: |
             e2e/.results
             e2e/visual/__screenshots__
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: ignore
 
@@ -168,6 +170,7 @@ jobs:
         with:
           name: preview-smoke-failure-artifacts
           path: e2e/.results
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: ignore
 
