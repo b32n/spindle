@@ -25,11 +25,12 @@ import { PageSetupModal } from './PageSetupModal';
 import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { ImportLossReport } from '@b32nio/spindle-shared';
-import { downloadFile, type FontSource } from '@b32nio/spindle-shared/react';
+import { downloadFile, useImportConfirm, type FontSource, type ImportConfirmation } from '@b32nio/spindle-shared/react';
 import {
   DOCS_EXPORT_FORMATS,
   exportDocumentFile,
   importDocumentFile,
+  inspectDocumentFile,
   type DocsExportFormat,
 } from '../file-io';
 
@@ -61,6 +62,13 @@ interface DocumentEditorProps {
    * fonts if unreachable. `{ kind: 'local' }` makes no font requests.
    */
   fontSource?: FontSource;
+  /**
+   * What Open does when the file contains things that cannot be imported (see `inspectDocumentFile`):
+   * `'dialog'` (default) asks "Import anyway / Cancel", `'never'` imports without asking, or pass
+   * `(report, file) => boolean | Promise<boolean>` to ask with your own UI. Nothing is asked for a
+   * file that loses nothing.
+   */
+  importConfirmation?: ImportConfirmation;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -99,6 +107,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   onFileOpened,
   onFileError,
   fontSource,
+  importConfirmation,
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -135,8 +144,12 @@ export const DocumentEditor = memo(function DocumentEditor({
     [exportFormats]
   );
 
+  const { confirm: confirmImport, dialog: importDialog } = useImportConfirm(importConfirmation);
+
   const handleOpenFile = useCallback(async (file: File) => {
     try {
+      // Ask before replacing the document if the file has things we can't import.
+      if (!(await confirmImport(file, await inspectDocumentFile(file)))) return;
       const { warnings, loss } = await importDocumentFile(docModel, file);
       setPendingComment(null);
       setActiveThreadId(null);
@@ -145,7 +158,7 @@ export const DocumentEditor = memo(function DocumentEditor({
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
-  }, [docModel, onFileOpened, onFileError]);
+  }, [docModel, onFileOpened, onFileError, confirmImport]);
 
   const handleDownload = useCallback(async (format: DocsExportFormat) => {
     try {
@@ -548,6 +561,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         onClose={() => setShowPageSetup(false)}
         onConfirm={handlePageSetupConfirm}
       />
+      {importDialog}
     </div>
   );
 });
