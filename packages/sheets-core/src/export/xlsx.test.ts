@@ -41,6 +41,24 @@ describe('exportToXlsx', () => {
     expect(cell.result).toBe(5);
   });
 
+  it('never writes #CIRCULAR! (a circular reference exports as its Excel value, 0)', async () => {
+    for (const mode of ['zero', 'error'] as const) {
+      const wb = freshWorkbook();
+      wb.setCircularReferenceMode(mode);
+      wb.setFormula(undefined, 0, 0, '=B1+1');
+      wb.setFormula(undefined, 0, 1, '=A1+1');
+      const bytes = await exportToXlsx(wb);
+      const out = new ExcelJS.Workbook();
+      // @ts-expect-error -- Buffer<ArrayBuffer> vs exceljs's plain Buffer type
+      await out.xlsx.load(Buffer.from(bytes));
+      const ws = out.worksheets[0];
+      for (const cell of [ws.getCell(1, 1), ws.getCell(1, 2)]) {
+        expect(JSON.stringify(cell.value)).not.toContain('CIRCULAR');
+        expect(cell.result).toBe(0);
+      }
+    }
+  });
+
   it('translates cell style to xlsx font/fill/alignment', async () => {
     const wb = freshWorkbook();
     wb.setCellValue(undefined, 0, 0, 'styled');

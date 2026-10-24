@@ -98,3 +98,69 @@ describe('spill — workbook integration', () => {
     expect(wb.getSpilledValue(undefined, 1, 0)).toBe(2);
   });
 });
+
+describe('#SPILL! recovery', () => {
+  const a1Spill = (wb: WorkbookImpl) => wb.getCellCalculatedValue(undefined, 0, 0);
+
+  it('spills by itself once the blocker is cleared (no re-entering the formula)', () => {
+    const wb = new WorkbookImpl('wb', 'Test');
+    wb.setCellValue(undefined, 1, 0, 'blocker');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    expect(a1Spill(wb)).toBe('#SPILL!');
+
+    wb.setCellValue(undefined, 1, 0, null);
+    expect(a1Spill(wb)).toBe(1);
+    expect(wb.getSpilledValue(undefined, 1, 0)).toBe(2);
+    expect(wb.getSpilledValue(undefined, 2, 0)).toBe(3);
+  });
+
+  it('recovers for a 2-D footprint when a blocker in the far corner is cleared', () => {
+    const wb = new WorkbookImpl('wb', 'Test');
+    wb.setCellValue(undefined, 2, 1, 'x');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3,2)');
+    expect(a1Spill(wb)).toBe('#SPILL!');
+    wb.setCellValue(undefined, 2, 1, null);
+    expect(a1Spill(wb)).toBe(1);
+    expect(wb.getSpilledValue(undefined, 2, 1)).toBe(6);
+  });
+
+  it('a dependent of the blocked anchor updates when it recovers', () => {
+    const wb = new WorkbookImpl('wb', 'Test');
+    wb.setCellValue(undefined, 1, 0, 'blocker');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    wb.setFormula(undefined, 0, 2, '=A1');
+    expect(wb.getCellCalculatedValue(undefined, 0, 2)).toBe('#SPILL!');
+    wb.setCellValue(undefined, 1, 0, null);
+    expect(wb.getCellCalculatedValue(undefined, 0, 2)).toBe(1);
+  });
+
+  it('stays #SPILL! while another cell still blocks, and recovers when the last is cleared', () => {
+    const wb = new WorkbookImpl('wb', 'Test');
+    wb.setCellValue(undefined, 1, 0, 'a');
+    wb.setCellValue(undefined, 2, 0, 'b');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    wb.setCellValue(undefined, 1, 0, null);
+    expect(a1Spill(wb)).toBe('#SPILL!');
+    wb.setCellValue(undefined, 2, 0, null);
+    expect(a1Spill(wb)).toBe(1);
+  });
+
+  it('recovers when the blocker is another spill that goes away', () => {
+    const wb = new WorkbookImpl('wb', 'Test');
+    wb.setFormula(undefined, 0, 1, '=SEQUENCE(1,3)'); // B1:D1
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(1,3)'); // A1:C1 collides with B1's spill
+    expect(a1Spill(wb)).toBe('#SPILL!');
+    wb.setCellValue(undefined, 0, 1, null);
+    expect(a1Spill(wb)).toBe(1);
+    expect(wb.getSpilledValue(undefined, 0, 2)).toBe(3);
+  });
+
+  it('recovers when the blocker is cleared by deleting its row', () => {
+    const wb = new WorkbookImpl('wb', 'Test');
+    wb.setCellValue(undefined, 1, 0, 'blocker');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    expect(a1Spill(wb)).toBe('#SPILL!');
+    wb.getSheet().deleteRows(1, 1);
+    expect(a1Spill(wb)).toBe(1);
+  });
+});

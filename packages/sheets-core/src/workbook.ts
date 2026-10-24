@@ -1,6 +1,6 @@
 // Workbook model
 
-import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, SortOrder, CellFormat, CellStyle, EventType, EventHandler } from './types';
+import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, SortOrder, RangeDependency, CircularReferenceMode, CellFormat, CellStyle, EventType, EventHandler } from './types';
 import { SheetImpl } from './sheet';
 import { EventEmitter } from './event-emitter';
 import { FormulaGraphImpl } from './formula-graph';
@@ -69,6 +69,8 @@ export class WorkbookImpl implements Workbook {
     ranges: [],
     activeCell: { row: 0, col: 0 },
   };
+  private circularReferenceMode: CircularReferenceMode = 'zero';
+  private circularSeen: string[] = []; // cells that hit a cycle while evaluating outside a graph pass
   private evaluatingCells: Set<string> = new Set(); // Track cells being evaluated to detect circular references
   private undoStack: WorkbookSnapshot[] = [];
   private redoStack: WorkbookSnapshot[] = [];
@@ -440,6 +442,7 @@ export class WorkbookImpl implements Workbook {
       // Check for circular reference BEFORE evaluating
       if (this.evaluatingCells.has(cellKey)) {
         // This cell is already being evaluated - circular reference!
+        this.circularSeen.push(cellKey);
         return '#CIRCULAR!';
       }
       
@@ -478,6 +481,7 @@ export class WorkbookImpl implements Workbook {
 
     // Check for circular reference BEFORE adding to evaluatingCells
     if (this.evaluatingCells.has(cellKey)) {
+      this.circularSeen.push(cellKey);
       const error = '#CIRCULAR!';
       this.formulaGraph.markClean(cellKey, error);
       this.setCell(sheetId, row, col, { value: error });
@@ -540,7 +544,9 @@ export class WorkbookImpl implements Workbook {
               return '#REF!';
             }
           }
-          return this.getCellCalculatedValue(targetSheetId, r, c);
+          // A blank cell is null (EMPTY), not 0: ISBLANK, &, ISNUMBER, comparisons
+          // and COUNT-style functions must tell it apart from a real 0 or "".
+          return this.getRangeCellValue(targetSheetId, r, c);
         },
         getRangeValues: (range: RangeReference, sId?: string, sheetName?: string) => {
           let targetSheetId = sId ?? sheetId;
@@ -569,7 +575,9 @@ export class WorkbookImpl implements Workbook {
         },
       };
 
-      const result = this.formulaParser.evaluate(numericAst, evaluationContext, row, col);
+      let result = this.formulaParser.evaluate(numericAst, evaluationContext, row, col);
+      // A formula that resolves to a blank cell shows 0, as in Excel (=B1 with B1 empty).
+      if (result === null || result === undefined) result = 0;
       this.evaluatingCells.delete(cellKey);
 
       // An array result spills into a block of cells.
@@ -671,7 +679,8 @@ export class WorkbookImpl implements Workbook {
    * (AVERAGE/COUNT/COUNTA/MIN/MEDIAN/COUNTBLANK/STDEV…) can distinguish an empty
    * cell from a real 0. Numeric coercion still treats null as 0 (toNum(null)===0),
    * so SUM and arithmetic are unaffected. Single-cell refs (=A1+B1) keep going
-   * through getCellValue, which still returns 0 for a blank operand.
+   * also read blank as null (EMPTY) via the evaluation context; only the public
+   * getCellCalculatedValue still reports 0 for a blank cell.
    */
   private getRangeCellValue(sheetId: string | undefined, row: number, col: number): unknown {
     const cell = this.getCell(sheetId, row, col);
@@ -692,7 +701,7 @@ export class WorkbookImpl implements Workbook {
    * footprint are fed back as seeds for another pass, so formulas that read a
    * spilled cell pick up the change. The loop runs to a fixed point.
    */
-  private recalculateDependents(cellKey: string, _sheetId: string | undefined): void {
+  private recalculateDependents(cellKey: string, _sheetId: string | undefined, extraSeeds: string[] = []): void {
     // Cell keys are globally unique, so dependents (and range corners) are
     // resolved against the whole workbook — a formula on another sheet that
     // references this cell is found and re-evaluated on its own sheet.
@@ -710,7 +719,8 @@ export class WorkbookImpl implements Workbook {
       return loc;
     };
 
-    let seeds = [cellKey, ...this.spillSeeds];
+    this.circularSeen = []; // cycles met so far are settled by this pass
+    let seeds = [cellKey, ...extraSeeds, ...this.spillSeeds];
     this.spillSeeds = [];
 
     for (let pass = 0; pass < 64 && seeds.length > 0; pass++) {
@@ -724,17 +734,70 @@ export class WorkbookImpl implements Workbook {
           this.evaluateFormula(loc.sheetId, loc.row, loc.col);
         }
       }
-      for (const key of cyclic) {
-        const loc = resolveCell(key);
-        if (!loc) continue;
-        this.formulaGraph.markClean(key, '#CIRCULAR!' as CellValue);
-        this.setCell(loc.sheetId, loc.row, loc.col, { value: '#CIRCULAR!' as CellValue });
-      }
+      if (cyclic.length > 0) this.resolveCycles(cyclic, edges, resolveCell);
 
       // Spill footprints touched this pass become the seeds for the next.
       seeds = this.spillSeeds;
       this.spillSeeds = [];
     }
+  }
+
+  /**
+   * Settle formulas that sit on (or downstream of) a dependency cycle. Cells on
+   * the cycle take the configured circular-reference value (0 like Excel, or
+   * #REF!); in those modes cells merely downstream of it are computed normally
+   * from that value. A 'circularReference' event reports the cells on the cycle.
+   */
+  private resolveCycles(
+    cyclic: string[],
+    edges: Map<string, Set<string>>,
+    resolveCell: (key: string) => { sheetId: string; row: number; col: number } | undefined
+  ): void {
+    const legacy = this.circularReferenceMode === 'error';
+    const members = legacy ? new Set(cyclic) : this.formulaGraph.cycleMembers(cyclic, edges);
+    const value = this.circularValue();
+    const reported: Array<{ sheetId: string; row: number; col: number }> = [];
+    for (const key of members) {
+      const loc = resolveCell(key);
+      if (!loc) continue;
+      this.formulaGraph.markClean(key, value);
+      this.setCell(loc.sheetId, loc.row, loc.col, { value });
+      reported.push(loc);
+    }
+    if (!legacy) {
+      const downstream = new Set(cyclic.filter((k) => !members.has(k)));
+      if (downstream.size > 0) {
+        const { ordered } = this.formulaGraph.topologicalOrder(downstream, edges);
+        for (const key of ordered) {
+          const loc = resolveCell(key);
+          if (loc) this.evaluateFormula(loc.sheetId, loc.row, loc.col);
+        }
+      }
+    }
+    if (reported.length > 0) this.events.emit('circularReference', { cells: reported });
+  }
+
+  /** What a cell on a dependency cycle evaluates to. */
+  private circularValue(): CellValue {
+    switch (this.circularReferenceMode) {
+      case 'ref':
+        return '#REF!' as CellValue;
+      case 'error':
+        return '#CIRCULAR!' as CellValue;
+      default:
+        return 0;
+    }
+  }
+
+  /** How circular references evaluate: 0 (Excel, default), `#REF!`, or the diagnostic `#CIRCULAR!` token. */
+  getCircularReferenceMode(): CircularReferenceMode {
+    return this.circularReferenceMode;
+  }
+
+  setCircularReferenceMode(mode: CircularReferenceMode): void {
+    if (mode === this.circularReferenceMode) return;
+    this.circularReferenceMode = mode;
+    this.recalculateAllFormulas();
   }
 
   /**
@@ -769,10 +832,18 @@ export class WorkbookImpl implements Workbook {
     // dependency it forward-references (in arbitrary sheet.entries() order) would
     // read the pre-change cached value (e.g. a stale number instead of #REF!).
     this.formulaGraph.markAllDirty();
+    this.circularSeen = [];
     for (const [sheetId, sheet] of this.sheets.entries()) {
       for (const [row, col, cell] of sheet.entries()) {
         if (cell.formula) this.evaluateFormula(sheetId, row, col);
       }
+    }
+    // A cycle met while evaluating in sheet order is only a marker: settle it
+    // through the dependency graph, which knows which cells are on the cycle.
+    if (this.circularSeen.length > 0) {
+      const seen = [...new Set(this.circularSeen)];
+      this.circularSeen = [];
+      this.recalculateDependents(seen[0], undefined, seen.slice(1));
     }
   }
 
@@ -817,8 +888,27 @@ export class WorkbookImpl implements Workbook {
     }
   }
 
+  /** The footprint of an array result at (row, col), minus the anchor, as ≤2 stable-key rectangles. */
+  private spillFootprintRects(
+    sheetId: string | undefined,
+    row: number,
+    col: number,
+    rows: number,
+    cols: number
+  ): RangeDependency[] {
+    const rect = (r0: number, c0: number, r1: number, c1: number): RangeDependency => ({
+      startKey: this.graphKey(sheetId, r0, c0),
+      endKey: this.graphKey(sheetId, r1, c1),
+    });
+    const rects: RangeDependency[] = [];
+    if (cols > 1) rects.push(rect(row, col + 1, row, col + cols - 1)); // rest of the anchor's row
+    if (rows > 1) rects.push(rect(row + 1, col, row + rows - 1, col + cols - 1)); // the rows below
+    return rects;
+  }
+
   /** Release any spill region anchored at a cell (it no longer returns an array). */
   private releaseSpill(sheetId: string | undefined, row: number, col: number): void {
+    this.formulaGraph.setSpillFootprint(this.graphKey(sheetId, row, col), []);
     const previous = this.getSpillIndex(sheetId).unregister(row, col);
     if (previous) this.pushSpillSeeds(sheetId, previous);
   }
@@ -860,6 +950,7 @@ export class WorkbookImpl implements Workbook {
 
     const previous = spill.unregister(row, col);
     if (previous) this.pushSpillSeeds(sheetId, previous);
+    this.formulaGraph.setSpillFootprint(cellKey, []);
 
     // A 1x1 array is just a scalar.
     if (rows <= 1 && cols <= 1) {
@@ -883,6 +974,9 @@ export class WorkbookImpl implements Workbook {
         const target = this.getCell(sheetId, tr, tc);
         const occupied = !!(target && (target.value != null || target.formula || target.formulaAst));
         if (occupied || spill.isCovered(tr, tc)) {
+          // Re-evaluate when anything in the would-be footprint changes, so the
+          // spill appears once the blocker is cleared.
+          this.formulaGraph.setSpillFootprint(cellKey, this.spillFootprintRects(sheetId, row, col, rows, cols));
           return this.storeFormulaResult(sheetId, row, col, cellKey, '#SPILL!', refreshedFormula);
         }
       }

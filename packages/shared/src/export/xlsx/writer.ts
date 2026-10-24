@@ -50,7 +50,12 @@ function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): void
   });
 }
 
+/** Engine-internal marker for a circular reference; not a value Excel knows, so it is never written. */
+const INTERNAL_CIRCULAR = '#CIRCULAR!';
+
 function writeCell(excelCell: ExcelJS.Cell, cell: SpreadsheetCell): void {
+  // Excel evaluates a circular reference to 0.
+  if (cell.value === INTERNAL_CIRCULAR) cell = { ...cell, value: 0 };
   if (cell.formula) {
     // exceljs caches a formula's last-known result alongside its expression;
     // `undefined` result is fine (recalculated on open) but we have it, so

@@ -69,9 +69,9 @@ describe('ROWS/COLUMNS do not falsely self-reference', () => {
     expect(w.getCellValue(undefined, 0, 2)).toBe(5);
   });
 
-  it('a genuine value self-reference (=SUM inside its own range) is still #CIRCULAR!', () => {
+  it('a genuine value self-reference (=SUM inside its own range) is still circular (0, as in Excel)', () => {
     const w = new WorkbookImpl('wb', 'WB');
     w.setFormula(undefined, 2, 0, '=SUM(A1:A5)'); // A3 inside A1:A5, reads values
-    expect(w.getCellValue(undefined, 2, 0)).toBe('#CIRCULAR!');
+    expect(w.getCellValue(undefined, 2, 0)).toBe(0);
   });
 });
