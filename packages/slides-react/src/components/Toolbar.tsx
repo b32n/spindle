@@ -13,7 +13,7 @@ import {
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, Play, MessageSquare,
 } from 'lucide-react';
 import type { NewElementSpec, AlignMode } from '@b32nio/spindle-slides-core';
-import { ResponsiveToolbar } from '@b32nio/spindle-shared/react';
+import { ResponsiveToolbar, useImageHooks, readImageFile, storeImageFile, resolveImageUrl } from '@b32nio/spindle-shared/react';
 import { useDeck, useSelection, useEditingId, useFilmstripOpen, useCommentsOpen } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { DeckControls } from './DeckControls';
@@ -44,6 +44,7 @@ export interface ToolbarProps {
 
 export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }: ToolbarProps): React.ReactElement {
   const deck = useDeck();
+  const imageHooks = useImageHooks();
   const selection = useSelection();
   const { tableSel, ui } = useDeckContext();
   const cellSel = useSyncExternalStore(tableSel.subscribe, tableSel.getState);
@@ -79,7 +80,9 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
     deck.setSelection({ slideId, elementIds: [el.id] });
   };
 
-  const insertImage = (src: string) => {
+  // `measureSrc` is the local data URL used to size the image; `src` is what the element stores
+  // (the same data URL, or the URL returned by the host's uploadImage).
+  const insertImage = (measureSrc: string, src: string = measureSrc) => {
     const img = new Image();
     img.onload = () => {
       const maxW = w * 0.6;
@@ -89,21 +92,29 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
         { w: img.naturalWidth * scale, h: img.naturalHeight * scale }
       );
     };
-    img.src = src;
+    img.src = measureSrc;
   };
 
-  const onImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => insertImage(reader.result as string);
-    reader.readAsDataURL(file);
     e.target.value = '';
+    if (!file) return;
+    try {
+      const dataUrl = await readImageFile(imageHooks, file);
+      insertImage(dataUrl, await storeImageFile(imageHooks, file, dataUrl));
+    } catch (err) {
+      imageHooks.onImageError?.(err as Error);
+    }
   };
 
-  const onImageUrl = () => {
+  const onImageUrl = async () => {
     const url = window.prompt('Image URL', '');
-    if (url && url.trim()) insertImage(url.trim());
+    if (!url || !url.trim()) return;
+    try {
+      insertImage(await resolveImageUrl(imageHooks, url.trim()));
+    } catch (err) {
+      imageHooks.onImageError?.(err as Error);
+    }
   };
 
   const align = (mode: AlignMode) => {
@@ -141,9 +152,9 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
           <IconButton title="Image (upload)" onClick={() => fileRef.current?.click()}>
             <ImageIcon size={16} />
           </IconButton>
-          <IconButton title="Image from URL" onClick={onImageUrl}>
+          {imageHooks.resolveImage && <IconButton title="Image from URL" onClick={onImageUrl}>
             <Link2 size={16} />
-          </IconButton>
+          </IconButton>}
           <IconButton title="Table (3×3)" onClick={() => insert({ type: 'table', rows: 3, cols: 3 } as NewElementSpec, { w: 720, h: 300 })}>
             <Table size={16} />
           </IconButton>

@@ -64,3 +64,22 @@ describe('font source', () => {
     expect(() => async(['Lato'])).not.toThrow();
   });
 });
+
+describe('font loading does not hold up page load', () => {
+  it('waits for window load while the document is still loading', () => {
+    const { doc, links } = fakeDoc();
+    (doc as { readyState?: string }).readyState = 'interactive';
+    const listeners: Array<() => void> = [];
+    (globalThis as unknown as { window: unknown }).window = {
+      addEventListener: (_: string, fn: () => void) => listeners.push(fn),
+    };
+    try {
+      createFontLoader({ kind: 'css', url: 'https://x.test/css2' }, doc)(['Roboto']);
+      expect(links).toHaveLength(0);
+      listeners.forEach((fn) => fn());
+      expect(links).toHaveLength(1);
+    } finally {
+      delete (globalThis as unknown as { window?: unknown }).window;
+    }
+  });
+});
