@@ -5,9 +5,16 @@ import type { Page } from '@playwright/test';
 const FONT_DIR = path.join(__dirname, '..', 'fixtures', 'fonts');
 const b64 = (f: string) => readFileSync(path.join(FONT_DIR, f)).toString('base64');
 
+// Unique name that no system font can share; the stylesheet forces the DOM onto it.
+const UNIQUE_FAMILY = 'SpindleVisualSans';
+
+// Canvas paths (sheets/slides) take their font stack from the app theme, which cannot be overridden
+// from CSS, so the demo family names stay registered too. fontsReady() asserts that every one of
+// them (unique name included) is actually loaded from the embedded data.
 // Every family the demos (and the sample content) ask for resolves to the same committed Liberation
 // Sans subset, so text metrics do not depend on which fonts the machine has installed.
 const FAMILIES = [
+  UNIQUE_FAMILY,
   'Inter',
   'Segoe UI',
   'Roboto',
@@ -35,6 +42,7 @@ export async function prepareVisual(page: Page): Promise<void> {
     const install = () => {
       const style = document.createElement('style');
       style.textContent =
+        `*,*::before,*::after{font-family:'SpindleVisualSans',sans-serif!important}` +
         `*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;scroll-behavior:auto!important}.selection-caret,.remote-cursor,.remote-cursor-label{visibility:hidden!important}` +
         faces
           .map(
@@ -49,21 +57,31 @@ export async function prepareVisual(page: Page): Promise<void> {
   }, faces);
 }
 
-/** Wait until the embedded fonts are decoded and then let layout/canvas repaint with them. */
+/**
+ * Wait until the embedded fonts are decoded, then fail clearly unless every embedded face (the
+ * unique family and the demo-name aliases) reports `loaded` in `document.fonts`.
+ */
 export async function fontsReady(page: Page): Promise<void> {
-  await page.evaluate(async () => {
-    await Promise.all(
-      [
-        '400 14px Inter',
-        '700 14px Inter',
-        '400 14px "Segoe UI"',
-        '700 14px "Segoe UI"',
-        '400 14px Arial',
-        '700 14px Arial',
-      ].map((f) => document.fonts.load(f))
-    );
-    await document.fonts.ready;
-  });
+  const missing = await page.evaluate(
+    async ({ families }) => {
+      await Promise.all(
+        families.flatMap((f) =>
+          [`400 14px "${f}"`, `700 14px "${f}"`].map((d) => document.fonts.load(d))
+        )
+      );
+      await document.fonts.ready;
+      const loaded = new Set<string>();
+      document.fonts.forEach((face) => {
+        if (face.status === 'loaded')
+          loaded.add(`${face.family.replace(/["']/g, '')}/${face.weight}`);
+      });
+      return families
+        .flatMap((f) => ['400', '700'].map((w) => `${f}/${w}`))
+        .filter((k) => !loaded.has(k));
+    },
+    { families: FAMILIES }
+  );
+  if (missing.length) throw new Error(`Embedded visual fonts did not load: ${missing.join(', ')}`);
 }
 
 /**

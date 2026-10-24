@@ -13,6 +13,10 @@ jobs:
   e2e:
     name: E2E (shard ${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -34,21 +38,6 @@ jobs:
       # The demos alias the packages' src/, but build keeps parity with ci.yml
       # and guards against build-only breakage reaching the demos.
       - run: npm run build
-      - name: Get Playwright version
-        id: pw
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
-      - name: Install browsers (with system deps)
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium firefox webkit
-      - name: Install system deps only (browsers cached)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium firefox webkit
       # retries=2, failOnFlakyTests and the blob reporter are enabled by CI=true in
       # playwright.config.ts: a test that only passes on a retry fails its shard.
       - name: Run Playwright (shard ${{ matrix.shard }}/4)
@@ -66,14 +55,20 @@ jobs:
         with:
           name: e2e-failure-artifacts-${{ matrix.shard }}
           path: e2e/.results
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: ignore
 
   # Visual regression: toHaveScreenshot on Chromium only (e2e/visual). The baselines in
-  # e2e/visual/__screenshots__ are made by this very job on this image; see docs/testing to update them.
+  # e2e/visual/__screenshots__ are made by this very job, inside the pinned Playwright container
+  # (mcr.microsoft.com/playwright:v1.64.1-noble); see docs/testing to update them.
   visual:
     name: Visual (chromium)
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -86,21 +81,6 @@ jobs:
         run: |
           ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
           npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
-      - name: Get Playwright version
-        id: pw
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
-      - name: Install Chromium (with system deps)
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-      - name: Install system deps only (browser cached)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
       - name: Run the visual project
         run: npx playwright test --project=visual
         env:
@@ -123,6 +103,7 @@ jobs:
           path: |
             e2e/.results
             e2e/visual/__screenshots__
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: ignore
 
@@ -162,6 +143,10 @@ jobs:
   preview-smoke:
     name: Production build smoke (@smoke, chromium)
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -175,21 +160,6 @@ jobs:
           ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
           npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
       - run: npm run build:demos
-      - name: Get Playwright version
-        id: pw
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
-      - name: Install Chromium (with system deps)
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-      - name: Install system deps only (browser cached)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
       - name: Run @smoke against the production builds
         run: npx playwright test --grep @smoke --project=chromium
         env:
@@ -200,6 +170,7 @@ jobs:
         with:
           name: preview-smoke-failure-artifacts
           path: e2e/.results
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: ignore
 
