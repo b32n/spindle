@@ -329,6 +329,8 @@ export const DocumentEditor = memo(function DocumentEditor({
   useEffect(() => {
     if (readOnly) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      // While attached, the editor's Yjs undo manager handles Mod-z/y (local edits only).
+      if (docModel.getCollabHandle()) return;
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
         if (e.shiftKey) {
