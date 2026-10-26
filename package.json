@@ -1,6 +1,6 @@
 {
   "name": "spindle",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A forever-free, open-source library that delivers the full editing experience you'd expect from commercial suites like Google Workspace or Microsoft Office, but built for developers who value performance, flexibility, and complete control over their tools.",
   "license": "MIT",
   "keywords": [
@@ -28,7 +28,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @b32nio/spindle-shared && npm run build -w @b32nio/spindle-docs-core -w @b32nio/spindle-sheets-core -w @b32nio/spindle-slides-core -w @b32nio/spindle-transport-websocket && npm run build -w @b32nio/spindle-docs-react -w @b32nio/spindle-sheets-react -w @b32nio/spindle-slides-react",
+    "build": "npm run build -w @b32nio/spindle-shared && npm run build -w @b32nio/spindle-io && npm run build -w @b32nio/spindle-docs-core -w @b32nio/spindle-sheets-core -w @b32nio/spindle-slides-core -w @b32nio/spindle-transport-websocket && npm run build -w @b32nio/spindle-docs-react -w @b32nio/spindle-sheets-react -w @b32nio/spindle-slides-react",
     "dev": "npm run dev --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint --ext .ts,.tsx packages",

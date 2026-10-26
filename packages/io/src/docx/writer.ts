@@ -33,7 +33,7 @@ import type {
   DocTableRow,
   DocumentExportInput,
   DocumentExportResult,
-} from './types';
+} from '@b32nio/spindle-shared/export/docx';
 
 // docx's own unit conventions: twips (1/1440in) for most measurements, but
 // half-points for font size — both derived from our px-at-96dpi convention.

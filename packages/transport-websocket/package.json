@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-transport-websocket",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "WebSocket-backed CollabProvider for Spindle collaboration",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@b32nio/spindle-shared": "^0.4.0"
+    "@b32nio/spindle-shared": "^0.4.1"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.0",

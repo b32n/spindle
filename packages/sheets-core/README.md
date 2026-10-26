@@ -39,7 +39,8 @@ const { warnings } = await importFromXlsx(bytes, workbook);
 XLSX carries values, formulas, styles, number formats, merges, column widths,
 row heights, hidden rows/columns, freeze panes and hyperlinks; charts, conditional formatting
 and data validation are not carried over. The format-level readers/writers
-live in `@b32nio/spindle-shared/export/{csv,xlsx}`. Everything runs locally.
+live in `@b32nio/spindle-shared/export/csv` and `@b32nio/spindle-io/xlsx` (a dependency of this package, loaded on first
+Open/Download). Everything runs locally.
 
 ## Performance
 

@@ -21,7 +21,7 @@ Verified absent in code.
       `exportToDocx`, plus a Download button in the toolbar.)
 - [ ] **Import — HTML / Markdown** — none. (DOCX import shipped in 0.4.0:
       `importFromDocx`, plus an Open button in the toolbar.)
-- [ ] **DOCX fidelity gaps** — `data:` URI images only (remote images are
+- [ ] **DOCX fidelity gaps** (work lands in `@b32nio/spindle-io`) — `data:` URI images only (remote images are
       skipped with a warning on export), floating/anchored images are skipped
       on import, and unsupported field codes keep no value.
 - [ ] **Find & replace** — none.

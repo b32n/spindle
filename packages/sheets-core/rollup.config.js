@@ -31,6 +31,7 @@ const external = [
   '@b32nio/spindle-shared',
   '@b32nio/spindle-shared/export/csv',
   '@b32nio/spindle-shared/export/xlsx',
+  '@b32nio/spindle-io/xlsx',
   'yjs',
   'y-protocols',
   'y-protocols/awareness',
@@ -44,7 +45,7 @@ export default defineConfig([
   {
     input: 'src/index.ts',
     output: [
-      { file: 'dist/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/index.esm.js', format: 'esm', sourcemap: true },
     ],
     external,
@@ -53,7 +54,7 @@ export default defineConfig([
   {
     input: 'src/collab/index.ts',
     output: [
-      { file: 'dist/collab/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/collab/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/collab/index.esm.js', format: 'esm', sourcemap: true },
     ],
     external,

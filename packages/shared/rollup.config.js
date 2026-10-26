@@ -6,10 +6,9 @@ import { defineConfig } from 'rollup';
 //   ./react      → React UI helpers (ResponsiveToolbar). React stays external, and
 //                  the subpath keeps React out of the pure `.` entry so non-React
 //                  consumers (the *-core packages) never pull it in.
-//   ./export/csv   → CSV/xlsx/docx read/write helpers. Each export format gets
-//   ./export/xlsx    its own subpath (same reasoning as ./react) so a
-//   ./export/docx    consumer that only needs CSV never bundles xlsx/docx/
-//                     pptx/pdf machinery, and vice versa.
+//   ./export/csv   → CSV read/write (no dependencies).
+//   ./export/xlsx  → types + deprecated async shims that lazy-load the optional
+//   ./export/docx    @b32nio/spindle-io peer, where the implementations moved.
 
 const tsMain = typescript({
   tsconfig: './tsconfig.json',
@@ -51,7 +50,7 @@ export default defineConfig([
   {
     input: 'src/index.ts',
     output: [
-      { file: 'dist/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/index.esm.js', format: 'esm', sourcemap: true },
     ],
     external: [],
@@ -60,7 +59,7 @@ export default defineConfig([
   {
     input: 'src/react/index.ts',
     output: [
-      { file: 'dist/react/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/react/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/react/index.esm.js', format: 'esm', sourcemap: true },
     ],
     // Externalize every bare import (react / react-dom); bundle only our source.
@@ -70,7 +69,7 @@ export default defineConfig([
   {
     input: 'src/export/csv/index.ts',
     output: [
-      { file: 'dist/export/csv/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/export/csv/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/export/csv/index.esm.js', format: 'esm', sourcemap: true },
     ],
     external: [],
@@ -79,19 +78,19 @@ export default defineConfig([
   {
     input: 'src/export/xlsx/index.ts',
     output: [
-      { file: 'dist/export/xlsx/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/export/xlsx/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/export/xlsx/index.esm.js', format: 'esm', sourcemap: true },
     ],
-    external: ['exceljs'],
+    external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx'],
     plugins: [tsExportXlsx],
   },
   {
     input: 'src/export/docx/index.ts',
     output: [
-      { file: 'dist/export/docx/index.js', format: 'cjs', sourcemap: true },
+      { file: 'dist/export/docx/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/export/docx/index.esm.js', format: 'esm', sourcemap: true },
     ],
-    external: ['docx', 'jszip', 'fast-xml-parser'],
+    external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx'],
     plugins: [tsExportDocx],
   },
 ]);

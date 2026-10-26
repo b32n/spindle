@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { exportXlsx } from './writer';
-import type { SpreadsheetExportInput } from './types';
+import type { SpreadsheetExportInput } from '@b32nio/spindle-shared/export/xlsx';
 
 async function readBack(input: SpreadsheetExportInput): Promise<ExcelJS.Workbook> {
   const bytes = await exportXlsx(input);
