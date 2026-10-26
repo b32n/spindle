@@ -24,6 +24,7 @@ import {
   Image, Palette, ChevronDown, Upload
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
+import { useImageHooks, readImageFile, resolveImageUrl, ImageError } from '@b32nio/spindle-shared/react';
 
 // ============================================================================
 // Types
@@ -408,25 +409,8 @@ interface HFImageDialogProps {
   onInsert: (src: string, width: number, height: number) => void;
 }
 
-/**
- * Convert a File to base64 data URI
- */
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Failed to convert file to base64'));
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 const HFImageDialog = memo(function HFImageDialog({ isOpen, onClose, onInsert }: HFImageDialogProps) {
+  const hooks = useImageHooks();
   const [preview, setPreview] = useState<string | null>(null);
   const [width, setWidth] = useState(32);
   const [height, setHeight] = useState(32);
@@ -462,21 +446,13 @@ const HFImageDialog = memo(function HFImageDialog({ isOpen, onClose, onInsert }:
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
   
-  // Handle file
+  // Handle file (headers/footers are small, so they keep a lower cap than the body)
   const handleFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image file is too large (max 5MB for headers/footers)');
-      return;
-    }
     setError('');
     try {
-      const base64 = await fileToBase64(file);
+      const base64 = await readImageFile({ ...hooks, maxImageBytes: Math.min(hooks.maxImageBytes ?? Infinity, 5 * 1024 * 1024) }, file);
       setPreview(base64);
-      
+
       // Get image dimensions
       const img = new window.Image();
       img.onload = () => {
@@ -486,10 +462,10 @@ const HFImageDialog = memo(function HFImageDialog({ isOpen, onClose, onInsert }:
         setHeight(Math.round(img.height * scale));
       };
       img.src = base64;
-    } catch {
-      setError('Failed to read image file');
+    } catch (err) {
+      setError(err instanceof ImageError ? err.message : 'Failed to read image file');
     }
-  }, []);
+  }, [hooks]);
   
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -498,25 +474,28 @@ const HFImageDialog = memo(function HFImageDialog({ isOpen, onClose, onInsert }:
     if (file) handleFile(file);
   }, [handleFile]);
   
-  const handleUrlSubmit = useCallback(() => {
+  const handleUrlSubmit = useCallback(async () => {
     if (!url.trim()) return;
     let normalizedUrl = url.trim();
     if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://') && !normalizedUrl.startsWith('data:')) {
       normalizedUrl = 'https://' + normalizedUrl;
     }
-    setPreview(normalizedUrl);
-    // Try to load to get dimensions
-    const img = new window.Image();
-    img.onload = () => {
-      const scale = Math.min(1, 32 / img.height);
-      setWidth(Math.round(img.width * scale));
-      setHeight(Math.round(img.height * scale));
-    };
-    img.onerror = () => {
-      setError('Could not load image from URL');
-    };
-    img.src = normalizedUrl;
-  }, [url]);
+    try {
+      const dataUrl = await resolveImageUrl(hooks, normalizedUrl);
+      setError('');
+      setPreview(dataUrl);
+      // Load the local copy to get dimensions
+      const img = new window.Image();
+      img.onload = () => {
+        const scale = Math.min(1, 32 / img.height);
+        setWidth(Math.round(img.width * scale));
+        setHeight(Math.round(img.height * scale));
+      };
+      img.src = dataUrl;
+    } catch (err) {
+      setError(err instanceof ImageError ? err.message : 'Could not load image from URL');
+    }
+  }, [url, hooks]);
   
   const handleInsert = useCallback(() => {
     if (preview) {
@@ -571,7 +550,7 @@ const HFImageDialog = memo(function HFImageDialog({ isOpen, onClose, onInsert }:
           >
             Upload
           </button>
-          <button
+          {hooks.resolveImage && <button
             type="button"
             onClick={() => setActiveTab('url')}
             style={{
@@ -586,7 +565,7 @@ const HFImageDialog = memo(function HFImageDialog({ isOpen, onClose, onInsert }:
             }}
           >
             By URL
-          </button>
+          </button>}
         </div>
         
         <div style={{ padding: '16px 20px 20px' }}>

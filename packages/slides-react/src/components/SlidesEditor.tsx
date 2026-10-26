@@ -3,7 +3,7 @@
 // not window) and the right-click context menu.
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createFontLoader, type FontSource } from '@b32nio/spindle-shared/react';
+import { createFontLoader, ImageHooksContext, type FontSource, type ImageHooks } from '@b32nio/spindle-shared/react';
 import { useDeck, useTheme, useKeyboardShortcuts, useCommentsOpen, useFilmstripOpen } from '../hooks';
 import { usePasteImport } from '../hooks/usePasteImport';
 import { useDeckContext } from '../context/DeckContext';
@@ -39,6 +39,18 @@ export interface SlidesEditorProps {
    * fonts if unreachable. `{ kind: 'local' }` makes no font requests.
    */
   fontSource?: FontSource;
+  /**
+   * Fetches an image for "image from URL" (return a Blob or a `data:image/…` URL).
+   * Without it the editor never fetches image URLs: the URL buttons are hidden
+   * and only local files can be inserted.
+   */
+  resolveImage?: ImageHooks['resolveImage'];
+  /** Stores a local image file and returns the URL to put in the deck (default: embed as a data URL). */
+  uploadImage?: ImageHooks['uploadImage'];
+  /** Largest accepted image in bytes (default 10 MB). */
+  maxImageBytes?: number;
+  /** Called when inserting an image fails (wrong type, too large, hook rejected). */
+  onImageError?: (error: Error) => void;
 }
 
 /** First family of a CSS font stack, unquoted ("Inter, Arial" -> "Inter"). */
@@ -59,9 +71,13 @@ function ensureDrawerStyles(): void {
   document.head.appendChild(el);
 }
 
-export function SlidesEditor({ style, readOnly = false, headerActions, toolbarExtras, fontSource }: SlidesEditorProps): React.ReactElement {
+export function SlidesEditor({ style, readOnly = false, headerActions, toolbarExtras, fontSource, resolveImage, uploadImage, maxImageBytes, onImageError }: SlidesEditorProps): React.ReactElement {
   const deck = useDeck();
   const theme = useTheme();
+  const imageHooks = useMemo<ImageHooks>(
+    () => ({ resolveImage, uploadImage, maxImageBytes, onImageError }),
+    [resolveImage, uploadImage, maxImageBytes, onImageError]
+  );
   const loadFonts = useMemo(() => createFontLoader(fontSource), [fontSource]);
   useEffect(() => {
     loadFonts([firstFamily(theme.fonts.major), firstFamily(theme.fonts.minor)]);
@@ -123,6 +139,7 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
   }, [ui]);
 
   return (
+    <ImageHooksContext.Provider value={imageHooks}>
     <div
       ref={rootRef}
       tabIndex={readOnly ? undefined : 0}
@@ -221,5 +238,6 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
       {menu?.kind === 'tableCell' && <TableCellMenu tableId={menu.tableId} row={menu.row} col={menu.col} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
       {presenting && <PresentMode onExit={() => setPresenting(false)} />}
     </div>
+    </ImageHooksContext.Provider>
   );
 }

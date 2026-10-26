@@ -72,7 +72,10 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
     await expect.poll(async () => (await s.els()).some((e) => e.type === 'table')).toBe(true);
   });
 
+  // "Image from URL" only exists when the host supplies resolveImage (the demo does with ?resolveImage=1).
   test('SL-INS-06 Image from URL prompts for a URL and inserts an image', async ({ page }) => {
+    await s.goto('?resolveImage=1');
+    await s.gotoSlide(2);
     const before = await ids();
     page.once('dialog', (d) => d.accept(PNG));
     await s.toolbar('Image from URL').click();
@@ -92,6 +95,8 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
   });
 
   test('SL-INS-08 cancelling the image URL prompt inserts nothing', async ({ page }) => {
+    await s.goto('?resolveImage=1');
+    await s.gotoSlide(2);
     const before = await ids();
     page.once('dialog', (d) => d.dismiss());
     await s.toolbar('Image from URL').click();

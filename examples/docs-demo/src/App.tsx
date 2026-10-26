@@ -11,6 +11,24 @@ import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32ni
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
 /** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
+/** e2e hooks: `?resolveImage=1` (fetch the typed URL), `?uploadImage=1` (pretend upload), `?maxImageBytes=N`. */
+const imageProps = (() => {
+  const q = new URLSearchParams(window.location.search);
+  return {
+    resolveImage: q.get('resolveImage')
+      ? async (url: string) => {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.blob();
+        }
+      : undefined,
+    uploadImage: q.get('uploadImage')
+      ? async (file: File) => `${window.location.origin}/uploaded/${encodeURIComponent(file.name)}`
+      : undefined,
+    maxImageBytes: q.get('maxImageBytes') ? Number(q.get('maxImageBytes')) : undefined,
+  };
+})();
+
 const fontSource = (() => {
   const v = new URLSearchParams(window.location.search).get('fontSource');
   if (v === 'local') return { kind: 'local' } as const;
@@ -473,7 +491,7 @@ function CollabDemo({
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor fontSource={fontSource} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
+            <DocumentEditor fontSource={fontSource} {...imageProps} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
           </DocumentProvider>
         </div>
       </div>
@@ -488,7 +506,7 @@ function CollabDemo({
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor fontSource={fontSource} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
+            <DocumentEditor fontSource={fontSource} {...imageProps} width={paneWidth} height={paneHeight} showToolbar={true} showRuler={false} />
           </DocumentProvider>
         </div>
       </div>
@@ -580,7 +598,7 @@ function WsDemo({
           mentionableUsers={DEMO_USERS}
           onCommentEvent={logCommentEvent}
         >
-          <DocumentEditor fontSource={fontSource} width={width} height={height - 28} showToolbar={true} showRuler={true} />
+          <DocumentEditor fontSource={fontSource} {...imageProps} width={width} height={height - 28} showToolbar={true} showRuler={true} />
         </DocumentProvider>
       </div>
     </div>
@@ -718,7 +736,7 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <DocumentEditor fontSource={fontSource}
+            <DocumentEditor fontSource={fontSource} {...imageProps}
               width={dimensions.width}
               height={dimensions.height}
               showToolbar={true}
