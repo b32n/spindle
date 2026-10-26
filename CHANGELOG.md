@@ -15,6 +15,8 @@ lockstep.
   `inspectWorkbookFile` / `inspectDocumentFile` (react packages) and `inspectXlsx` / `inspectCsv` / `inspectDocx` (core) check a file
   without importing it; `importWorkbookFile` / `importDocumentFile` / `importFromXlsx` / `importFromDocx` now also return `loss`, and
   `onFileOpened` receives it. See `documentation/import-loss.md`.
+- **Import confirmation.** Opening a file that would lose something now shows an *Import anyway / Cancel* dialog
+  (`ImportConfirmDialog`) in the sheets and docs editors; `importConfirmation` selects `'dialog'` (default), `'never'` or a host callback.
 
 ### Changed
 
