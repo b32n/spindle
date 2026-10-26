@@ -303,6 +303,9 @@ export function toMatrix(v: unknown): unknown[][] {
 
 /** Three-way comparison: numeric when both sides are numbers, else lexical. */
 export function compareValues(a: unknown, b: unknown): number {
+  // An empty cell takes the zero-value of the other operand (blank = 0, "" or FALSE).
+  if (a == null) a = typeof b === 'number' ? 0 : typeof b === 'boolean' ? false : '';
+  if (b == null) b = typeof a === 'number' ? 0 : typeof a === 'boolean' ? false : '';
   if (typeof a === 'number' && typeof b === 'number') {
     return a < b ? -1 : a > b ? 1 : 0;
   }
