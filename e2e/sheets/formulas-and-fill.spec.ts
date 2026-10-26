@@ -75,28 +75,73 @@ test.describe('sheets: formulas, autofill, resize', () => {
     await sheet.expectValue(7, 5, 3);
   });
 
-  // Bug: ISBLANK of a reference to an empty cell returns FALSE.
-  // https://github.com/b32n/spindle/issues/66 (unit: known-formula-bugs.test.ts)
-  test.fixme('S-FRM-10 ISBLANK of an empty cell is TRUE', async () => {
+  // https://github.com/b32n/spindle/issues/66 (unit: formula-conformance.test.ts)
+  test('S-FRM-10 ISBLANK of an empty cell is TRUE', async () => {
     await sheet.enter(5, 0, '=ISBLANK(F9)');
     await sheet.expectValue(5, 0, true);
   });
 
-  // Bug: array expressions inside SUMPRODUCT give #VALUE!.
   // https://github.com/b32n/spindle/issues/67
-  test.fixme('S-FRM-11 SUMPRODUCT of an array expression multiplies element-wise', async () => {
+  test('S-FRM-11 SUMPRODUCT of an array expression multiplies element-wise', async () => {
     for (const [i, v] of [1, 2, 3].entries()) {
       await sheet.enter(5 + i, 6, String(v));
       await sheet.enter(5 + i, 7, String(v + 3));
     }
     await sheet.enter(9, 0, '=SUMPRODUCT(G6:G8*H6:H8)');
     await sheet.expectValue(9, 0, 32);
+    await sheet.enter(10, 0, '=SUMPRODUCT((G6:G8>1)*1)');
+    await sheet.expectValue(10, 0, 2);
   });
 
-  // Bug: =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68
-  test.fixme('S-FRM-12 unary minus binds tighter than ^', async () => {
+  test('S-FRM-15 a blocked spill (#SPILL!) fills in by itself once the blocker is cleared', async ({
+    page,
+  }) => {
+    await sheet.enter(6, 10, 'blocker');
+    await sheet.enter(5, 10, '=SEQUENCE(3)');
+    await sheet.expectValue(5, 10, '#SPILL!');
+    await sheet.select(6, 10);
+    await page.keyboard.press('Delete');
+    await sheet.expectValue(5, 10, 1);
+    await sheet.expectValue(6, 10, 2);
+    await sheet.expectValue(7, 10, 3);
+  });
+
+  test('S-FRM-16 a circular reference evaluates to 0 (as in Excel), not an error token', async () => {
+    await sheet.enter(5, 8, '=I7+1');
+    await sheet.enter(6, 8, '=I6+1');
+    await sheet.expectValue(5, 8, 0);
+    await sheet.expectValue(6, 8, 0);
+    await sheet.enter(6, 8, '5');
+    await sheet.expectValue(5, 8, 6);
+  });
+
+  test('S-FRM-14 an operator over ranges spills element-wise', async () => {
+    for (const [i, v] of [1, 2, 3].entries()) {
+      await sheet.enter(5 + i, 6, String(v));
+      await sheet.enter(5 + i, 7, String(v + 3));
+    }
+    await sheet.enter(12, 0, '=G6:G8*H6:H8');
+    await sheet.expectValue(12, 0, 4);
+    await sheet.expectValue(13, 0, 10);
+    await sheet.expectValue(14, 0, 18);
+  });
+
+  // https://github.com/b32n/spindle/issues/68
+  test('S-FRM-12 unary minus binds tighter than ^', async () => {
     await sheet.enter(5, 0, '=-2^2');
     await sheet.expectValue(5, 0, 4);
+    await expect.poll(() => sheet.cellFormula(5, 0)).toBe('=-2^2');
+  });
+
+  // The stored formula text is re-rendered from the parsed formula; it must keep the parentheses
+  // (it is what XLSX export and a reload re-parse).
+  test('S-FRM-13 parentheses survive in the stored formula', async () => {
+    await sheet.enter(5, 0, '=(1+2)*3');
+    await sheet.expectValue(5, 0, 9);
+    await expect.poll(() => sheet.cellFormula(5, 0)).toBe('=(1+2)*3');
+    await sheet.enter(6, 0, '=-(1+2)');
+    await sheet.expectValue(6, 0, -3);
+    await expect.poll(() => sheet.cellFormula(6, 0)).toBe('=-(1+2)');
   });
 
   test('S-FIL-01 dragging the fill handle copies a value down', async ({ page }) => {

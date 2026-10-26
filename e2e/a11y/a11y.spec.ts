@@ -113,7 +113,7 @@ test.describe('a11y (axe)', () => {
 
   test('AX-DOCS-03 Insert image dialog', async ({ page }) => {
     const doc = new DocsPage(page);
-    await doc.goto();
+    await doc.goto('?resolveImage=1'); // with the By-URL tab (the fuller dialog)
     await doc.toolbar('Insert image').click();
     await expect(page.getByRole('button', { name: 'By URL' })).toBeVisible();
     await check(page, 'docs/insert-image-dialog');

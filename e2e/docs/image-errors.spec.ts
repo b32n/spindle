@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import JSZip from 'jszip';
+import { readFileSync } from 'node:fs';
 import { DocsPage, DOCS_URL } from '../support/docs';
 import { captureDownload, collectAlerts, collectPageErrors, fixture } from '../support/file-io';
 
@@ -18,8 +19,9 @@ test.describe('docs: image insertion failures', () => {
       route.fulfill({ status: 404, contentType: 'text/plain', body: 'not found' })
     );
     await page.route('**/unreachable/**', (route) => route.abort('connectionrefused'));
+    await page.route(/fonts\.b32n\.io/, (r) => r.abort());
     doc = new DocsPage(page);
-    await doc.goto();
+    await doc.goto('?resolveImage=1'); // the demo's resolveImage hook fetches the typed URL
     await doc.clearAndFocus();
     await doc.typeText('Keep me');
   });
@@ -99,5 +101,73 @@ test.describe('docs: image insertion failures', () => {
     expect(media).toHaveLength(1);
     const embedded = await zip.file(media[0])!.async('nodebuffer');
     expect(embedded.equals((await import('node:fs')).readFileSync(fixture('logo.png')))).toBe(true);
+  });
+
+  test('D-IMG-07 a good URL is fetched by the host hook and inserted as a data URL', async ({
+    page,
+  }) => {
+    const png = readFileSync(fixture('logo.png'));
+    await page.route('**/good/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'image/png', body: png })
+    );
+    const input = await openUrlTab(page);
+    await input.fill(`${DOCS_URL}/good/logo.png`);
+    await input.blur();
+    await expect(page.getByRole('img', { name: 'Preview' })).toBeVisible();
+    await page.getByRole('button', { name: 'Insert', exact: true }).click();
+    await expect(doc.editor.locator('img')).toHaveCount(1);
+    await expect(doc.editor.locator('img')).toHaveAttribute('src', /^data:image\/png;base64,/);
+  });
+});
+
+test.describe('docs: image hooks (no URL fetching by default)', () => {
+  // The default font mirror is not part of what is under test; fail it fast instead of waiting on DNS.
+  test.beforeEach(async ({ page }) => {
+    await page.route(/fonts\.b32n\.io/, (r) => r.abort());
+  });
+
+  test('D-IMG-08 without resolveImage there is no By-URL tab and no image request is made', async ({
+    page,
+  }) => {
+    const requested: string[] = [];
+    page.on('request', (r) => {
+      if (!r.url().startsWith(DOCS_URL) && !r.url().startsWith('https://fonts.b32n.io/'))
+        requested.push(r.url()); // anything leaving the demo origin (except the font mirror)
+    });
+    const doc = new DocsPage(page);
+    await doc.goto();
+    await doc.toolbar('Insert image').click();
+    await expect(page.getByRole('button', { name: 'Upload' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'By URL' })).toHaveCount(0);
+    await expect(page.getByText('Images from a web address are turned off')).toBeVisible();
+    expect(requested).toEqual([]);
+  });
+
+  test('D-IMG-09 uploadImage: the file is handed to the host and the returned URL is what the document stores', async ({
+    page,
+  }) => {
+    const png = readFileSync(fixture('logo.png'));
+    await page.route('**/uploaded/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'image/png', body: png })
+    );
+    const doc = new DocsPage(page);
+    await doc.goto('?uploadImage=1');
+    await doc.toolbar('Insert image').click();
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles(fixture('logo.png'));
+    await page.getByRole('button', { name: 'Insert', exact: true }).click();
+    await expect(doc.editor.locator('img')).toHaveAttribute('src', `${DOCS_URL}/uploaded/logo.png`);
+  });
+
+  test('D-IMG-10 maxImageBytes lowers the accepted size', async ({ page }) => {
+    const doc = new DocsPage(page);
+    await doc.goto('?maxImageBytes=1024');
+    await doc.toolbar('Insert image').click();
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles({
+      name: 'big.png',
+      mimeType: 'image/png',
+      buffer: Buffer.alloc(2048),
+    });
+    await expect(page.getByText('Image file is too large (max 1KB)')).toBeVisible();
+    await expect(doc.editor.locator('img')).toHaveCount(0);
   });
 });

@@ -47,6 +47,7 @@ export function fontStylesheetUrl(baseUrl: string, families: string[]): string |
 
 /** Minimal slice of `Document` the loader needs (lets tests run without a DOM). */
 export interface FontLoaderDocument {
+  readyState?: string;
   head: { appendChild(node: unknown): unknown };
   createElement(tag: 'link'): {
     rel: string; href: string; onerror: (() => void) | null;
@@ -76,16 +77,26 @@ export function createFontLoader(
       return;
     }
     if (!doc) return;
-    for (let i = 0; i < fresh.length; i += 10) {
-      const batch = fresh.slice(i, i + 10);
-      const href = fontStylesheetUrl(source.url, batch);
-      if (!href) return;
-      const link = doc.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = href;
-      link.setAttribute('data-spindle-fonts', batch.join(','));
-      link.onerror = () => link.remove();
-      doc.head.appendChild(link);
+    const append = () => {
+      for (let i = 0; i < fresh.length; i += 10) {
+        const batch = fresh.slice(i, i + 10);
+        const href = fontStylesheetUrl(source.url, batch);
+        if (!href) return;
+        const link = doc.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.setAttribute('data-spindle-fonts', batch.join(','));
+        link.onerror = () => link.remove();
+        doc.head.appendChild(link);
+      }
+    };
+    // A stylesheet added while the page is still loading would hold up the window
+    // `load` event (and an unreachable font host could stall it); fonts are
+    // progressive, so start fetching them once the page has finished loading.
+    if (doc.readyState === 'loading' || doc.readyState === 'interactive') {
+      window.addEventListener('load', append, { once: true });
+    } else {
+      append();
     }
   };
 }
