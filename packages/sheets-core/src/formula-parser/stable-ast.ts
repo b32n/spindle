@@ -248,13 +248,42 @@ function renderNode(
         .map((a) => renderNode(a, resolver, currentSheet))
         .join(',')})`;
     case 'operator': {
-      const l = node.left ? renderNode(node.left, resolver, currentSheet) : '';
-      const r = node.right ? renderNode(node.right, resolver, currentSheet) : '';
-      return `${l}${node.operator ?? ''}${r}`;
+      const op = node.operator ?? '';
+      const render = (n: StableFormulaNode) => renderNode(n, resolver, currentSheet);
+      // A leading sign is stored as `"" op x`; it binds tighter than any binary
+      // operator, so a binary operand needs its parentheses back.
+      if ((op === '-' || op === '+') && isEmptyLiteral(node.left) && node.right) {
+        const r = render(node.right);
+        return `${op}${node.right.type === 'operator' && !isUnarySign(node.right) ? `(${r})` : r}`;
+      }
+      const prec = OPERATOR_PRECEDENCE[op] ?? 0;
+      const l = node.left ? render(node.left) : '';
+      const r = node.right ? render(node.right) : '';
+      // Parentheses are not kept in the AST; restore the ones precedence needs.
+      // All binary operators are left-associative, so an equal-precedence right
+      // operand (a-(b-c)) needs them too.
+      const wrapLeft = node.left?.type === 'operator' && !isUnarySign(node.left) && (OPERATOR_PRECEDENCE[node.left.operator ?? ''] ?? 0) < prec;
+      const wrapRight = node.right?.type === 'operator' && !isUnarySign(node.right) && (OPERATOR_PRECEDENCE[node.right.operator ?? ''] ?? 0) <= prec;
+      return `${wrapLeft ? `(${l})` : l}${op}${wrapRight ? `(${r})` : r}`;
     }
     default:
       return '';
   }
+}
+
+// Same order as the parser: comparison < & < +,- < *,/ < ^.
+const OPERATOR_PRECEDENCE: Record<string, number> = {
+  '=': 0, '<>': 0, '<': 0, '>': 0, '<=': 0, '>=': 0,
+  '&': 1, '+': 2, '-': 2, '*': 3, '/': 3, '^': 4,
+};
+
+function isEmptyLiteral(node: StableFormulaNode | undefined): boolean {
+  return !!node && node.type === 'string' && node.value === '';
+}
+
+/** `"" - x` / `"" + x`: the parser's form of a unary sign. */
+function isUnarySign(node: StableFormulaNode): boolean {
+  return node.type === 'operator' && (node.operator === '-' || node.operator === '+') && isEmptyLiteral(node.left);
 }
 
 function renderRef(

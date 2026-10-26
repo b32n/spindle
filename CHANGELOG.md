@@ -20,6 +20,10 @@ lockstep.
 
 ### Changed
 
+- **Privacy: image hooks on the docs and slides editors.** The editors no longer fetch typed image URLs themselves.
+  `resolveImage(url) => Promise<Blob | dataURL>` enables insert-by-URL (otherwise the By-URL UI is hidden and only
+  local files can be inserted); `uploadImage(file) => Promise<url>` stores local files with the host;
+  `maxImageBytes` bounds embedded images. See `documentation/images.md`.
 - **Privacy: `fontSource` option on the sheets, docs and slides editors.** The hard-coded Google Fonts
   loader in the sheets toolbar is gone. Web fonts now come from the Spindle font mirror
   (`https://fonts.b32n.io/css2`) by default and fall back to system fonts if it is unreachable.

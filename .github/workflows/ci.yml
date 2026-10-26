@@ -36,6 +36,8 @@ jobs:
       - run: npm run type-check
       - run: npm test
       - run: npm run lint
+      # Library source must not fetch anything or hard-code third-party hosts (docs/testing: privacy).
+      - run: npm run check:network
 
   website:
     name: Website (type-check · build)

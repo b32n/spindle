@@ -121,9 +121,13 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FRM-07 | clicking a cell while typing a formula inserts its reference | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-08 | formula autocomplete suggests functions | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FRM-09 | array formulas spill into neighbouring cells | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
-| S-FRM-10 | ISBLANK of an empty cell is TRUE | fixme + bug |  | ISBLANK of a reference to an empty cell returns FALSE. https://github.com/b32n/spindle/issues/66 (unit: known-formula-bugs.test.ts) | `e2e/sheets/formulas-and-fill.spec.ts` |
-| S-FRM-11 | SUMPRODUCT of an array expression multiplies element-wise | fixme + bug |  | array expressions inside SUMPRODUCT give #VALUE!. https://github.com/b32n/spindle/issues/67 | `e2e/sheets/formulas-and-fill.spec.ts` |
-| S-FRM-12 | unary minus binds tighter than ^ | fixme + bug |  | =-2^2 gives -4; Excel gives 4. https://github.com/b32n/spindle/issues/68 | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-10 | ISBLANK of an empty cell is TRUE | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-11 | SUMPRODUCT of an array expression multiplies element-wise | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-15 | a blocked spill (#SPILL!) fills in by itself once the blocker is cleared | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-16 | a circular reference evaluates to 0 (as in Excel), not an error token | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-14 | an operator over ranges spills element-wise | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-12 | unary minus binds tighter than ^ | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
+| S-FRM-13 | parentheses survive in the stored formula | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-01 | dragging the fill handle copies a value down | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-02 | fill extends a numeric series | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-FIL-03 | fill rebases formulas | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
@@ -266,6 +270,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-07 | a good URL is fetched by the host hook and inserted as a data URL | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-08 | without resolveImage there is no By-URL tab and no image request is made | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-09 | uploadImage: the file is handed to the host and the returned URL is what the document stores | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-10 | maxImageBytes lowers the accepted size | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-FIO-07 | a document with tracked changes and footnotes asks first, listing what would be lost | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-FIO-08 | Cancel keeps the open document; Import anyway replaces it and reports the loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-FIO-09 | a document that loses nothing opens without a dialog | covered |  |  | `e2e/docs/import-loss.spec.ts` |
@@ -279,7 +287,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-03 | clients survive a relay restart and keep syncing with each other | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-04 | three clients editing at once converge | covered |  |  | `e2e/docs/resilience.spec.ts` |
-| D-RES-05 | undo under collaboration reverts only your own typing (B5) | fixme + bug |  | B5 - undo is not scoped to the local user under collaboration, the PM history stack is used under Yjs and own edits cannot be undone after a remote edit (https://github.com/b32n/spindle/issues/80). | `e2e/docs/resilience.spec.ts` |
+| D-RES-05 | undo under collaboration reverts only your own typing (B5) | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-RES-07 | redo and the toolbar Undo/Redo buttons are also scoped to your own edits | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-GAP-01 | DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes | not covered | | Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet. | |
 | D-GAP-02 | Triple-click paragraph selection and mouse drag selection | not covered | | Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02). | |
@@ -335,6 +344,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-09 | a corrupt "image" (random bytes named .png) inserts nothing and raises no error | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-10 | a non-image file chosen anyway (bypassing accept) inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-11 | without resolveImage there is no "Image from URL" button and no image request is made | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-12 | resolveImage: the URL is fetched by the host hook and stored as a data URL | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-13 | uploadImage: the element stores the URL the host returned | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-14 | maxImageBytes refuses a larger file | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-KBD-01 | add a slide, navigate the filmstrip, present and exit using only keys | covered |  |  | `e2e/slides/keyboard.spec.ts` |
 | SL-KBD-02 | select and nudge an element, then delete it, with the keyboard | covered |  |  | `e2e/slides/keyboard.spec.ts` |
 | SL-KBD-03 | Tab reaches the toolbar buttons | fixme + bug |  | the editor root swallows Tab to cycle the slide's elements, so the toolbar can never be reached with Tab/Shift+Tab (a keyboard trap). https://github.com/b32n/spindle/issues/89 | `e2e/slides/keyboard.spec.ts` |
@@ -413,9 +426,17 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | V-SLIDES-01 | toolbar | covered |  |  | `e2e/visual/visual.spec.ts` |
 | V-SLIDES-02 | a slide with shapes | covered |  |  | `e2e/visual/visual.spec.ts` |
 
+## Privacy (no third-party network)
+
+| ID | Scenario | Status | Smoke | Notes | Spec |
+|---|---|---|---|---|---|
+| P-NET-01 | sheets: loading, the font picker and dialogs only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+| P-NET-02 | docs: loading and the image dialog only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+| P-NET-03 | slides: loading, navigating slides and the insert menu only ever reach the default font mirror | covered |  |  | `e2e/privacy/no-third-party.spec.ts` |
+
 ## Summary
 
-- covered: 350
-- fixme + bug: 12
+- covered: 370
+- fixme + bug: 8
 - not covered: 8
 - n/a: 6

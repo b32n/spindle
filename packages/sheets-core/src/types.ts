@@ -342,6 +342,13 @@ export interface FormulaDependencies {
   ranges: RangeDependency[];
 }
 
+/**
+ * What a formula on a dependency cycle evaluates to: `'zero'` (Excel: 0, plus a
+ * 'circularReference' event), `'ref'` (#REF!) or `'error'` (the engine's
+ * diagnostic #CIRCULAR! token, which is never written to XLSX).
+ */
+export type CircularReferenceMode = 'zero' | 'ref' | 'error';
+
 export interface FormulaNode {
   cellKey: string;
   formula: string;
@@ -350,6 +357,8 @@ export interface FormulaNode {
   cachedValue?: CellValue;
   isDirty: boolean;
   volatile?: boolean; // recomputed on every recalc pass (RAND, NOW, OFFSET, …)
+  /** Cells a blocked (#SPILL!) array formula would fill: re-evaluate it when any of them changes. */
+  spillRects?: RangeDependency[];
 }
 
 /**
@@ -370,6 +379,8 @@ export interface FormulaGraph {
   ): void;
   removeFormula(cellKey: string): void;
   markClean(cellKey: string, value: CellValue): void;
+  /** Make a formula depend on the cells its array result would spill into (empty list clears it). */
+  setSpillFootprint(cellKey: string, rects: RangeDependency[]): void;
   /** Invalidate every formula's cached value (used before a full re-evaluation). */
   markAllDirty(): void;
   /**
@@ -397,7 +408,8 @@ export type EventType =
   | 'sheetRename'
   | 'commentChange'
   | 'commentEvent'
-  | 'workbookChange';
+  | 'workbookChange'
+  | 'circularReference';
 
 export interface EventData {
   type: EventType;

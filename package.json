@@ -32,6 +32,7 @@
     "dev": "npm run dev --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint --ext .ts,.tsx packages",
+    "check:network": "node scripts/check-no-network.mjs && node scripts/check-no-network.mjs --self-test",
     "type-check": "npm run type-check --workspaces",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
     "install:all": "npm install && npm install --workspaces",

@@ -194,8 +194,8 @@ test.describe('docs: collaboration resilience', () => {
     for (const p of [a, b, c]) await p.context.close();
   });
 
-  // Bug: B5 - undo is not scoped to the local user under collaboration, the PM history stack is used under Yjs and own edits cannot be undone after a remote edit (https://github.com/b32n/spindle/issues/80).
-  test.fixme('D-RES-05 undo under collaboration reverts only your own typing (B5)', async ({
+  // https://github.com/b32n/spindle/issues/80: undo is scoped to the local user (yUndoPlugin while attached).
+  test('D-RES-05 undo under collaboration reverts only your own typing (B5)', async ({
     browser,
   }, info) => {
     const room = roomName('docs-res', info.testId);
@@ -213,6 +213,34 @@ test.describe('docs: collaboration resilience', () => {
     await a.page.keyboard.press(`${MOD}+z`);
     for (const p of [a, b]) {
       await expect.poll(() => block(p, 'Welcome to Spindle Docs')).toBe('Welcome to Spindle Docs');
+      expect(await block(p, 'Features')).toBe('Features bob');
+    }
+    await a.context.close();
+    await b.context.close();
+  });
+
+  test('D-RES-07 redo and the toolbar Undo/Redo buttons are also scoped to your own edits', async ({
+    browser,
+  }, info) => {
+    const room = roomName('docs-res', info.testId);
+    const a = await peer(browser, WS, room, 'Alice');
+    await waitForRoomSeed(room);
+    const b = await peer(browser, WS, room, 'Bob');
+    await typeAtEnd(a, 'Welcome to Spindle Docs', ' alice');
+    await typeAtEnd(b, 'Features', ' bob');
+    await expect.poll(() => block(a, 'Features')).toBe('Features bob');
+    await expect
+      .poll(() => block(b, 'Welcome to Spindle Docs'))
+      .toBe('Welcome to Spindle Docs alice');
+
+    await a.doc.clickLine('Welcome to Spindle Docs');
+    await a.doc.toolbar('Undo').click();
+    await expect.poll(() => block(b, 'Welcome to Spindle Docs')).toBe('Welcome to Spindle Docs');
+    await a.doc.toolbar('Redo').click();
+    for (const p of [a, b]) {
+      await expect
+        .poll(() => block(p, 'Welcome to Spindle Docs'))
+        .toBe('Welcome to Spindle Docs alice');
       expect(await block(p, 'Features')).toBe('Features bob');
     }
     await a.context.close();

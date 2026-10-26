@@ -57,6 +57,7 @@ describe('spill overlay is rebuilt on structural edits (no ghosts / spurious #SP
 describe('#CIRCULAR! is a recognized error value', () => {
   it('propagates through aggregations and is caught by ISERROR/IFERROR', () => {
     const wb = new WorkbookImpl('wb', 'WB');
+    wb.setCircularReferenceMode('error'); // the diagnostic token (default mode evaluates a cycle to 0)
     wb.setFormula(undefined, 0, 0, '=A1'); // A1 self-reference → #CIRCULAR!
     expect(wb.getCellValue(undefined, 0, 0)).toBe('#CIRCULAR!');
     wb.setCellValue(undefined, 1, 0, 5); // A2

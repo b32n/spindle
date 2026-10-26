@@ -8,3 +8,8 @@ export { DEFAULT_FONT_SOURCE, DEFAULT_FONT_SOURCE_URL, createFontLoader, fontSty
 export type { FontSource, FontLoaderDocument } from './fonts';
 export { ImportConfirmDialog, useImportConfirm } from './import-confirm';
 export type { ImportConfirmDialogProps, ImportConfirmation } from './import-confirm';
+export {
+  DEFAULT_MAX_IMAGE_BYTES, ImageHooksContext, useImageHooks, ImageError,
+  blobToDataUrl, readImageFile, storeImageFile, resolveImageUrl,
+} from './images';
+export type { ImageHooks } from './images';

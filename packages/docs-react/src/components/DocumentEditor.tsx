@@ -25,7 +25,7 @@ import { PageSetupModal } from './PageSetupModal';
 import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { ImportLossReport } from '@b32nio/spindle-shared';
-import { downloadFile, useImportConfirm, type FontSource, type ImportConfirmation } from '@b32nio/spindle-shared/react';
+import { downloadFile, useImportConfirm, ImageHooksContext, type FontSource, type ImageHooks, type ImportConfirmation } from '@b32nio/spindle-shared/react';
 import {
   DOCS_EXPORT_FORMATS,
   exportDocumentFile,
@@ -69,6 +69,16 @@ interface DocumentEditorProps {
    * file that loses nothing.
    */
   importConfirmation?: ImportConfirmation;
+  /**
+   * Fetches an image for "insert by URL" (return a Blob or a `data:image/…` URL).
+   * Without it the editor never fetches image URLs: the By-URL tab is hidden
+   * and only local files can be inserted.
+   */
+  resolveImage?: ImageHooks['resolveImage'];
+  /** Stores a local image file and returns the URL to put in the document (default: embed as a data URL). */
+  uploadImage?: ImageHooks['uploadImage'];
+  /** Largest accepted image in bytes (default 10 MB). */
+  maxImageBytes?: number;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -108,6 +118,9 @@ export const DocumentEditor = memo(function DocumentEditor({
   onFileError,
   fontSource,
   importConfirmation,
+  resolveImage,
+  uploadImage,
+  maxImageBytes,
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -342,6 +355,8 @@ export const DocumentEditor = memo(function DocumentEditor({
   useEffect(() => {
     if (readOnly) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      // While attached, the editor's Yjs undo manager handles Mod-z/y (local edits only).
+      if (docModel.getCollabHandle()) return;
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
         if (e.shiftKey) {
@@ -416,7 +431,13 @@ export const DocumentEditor = memo(function DocumentEditor({
     return () => ro.disconnect();
   }, [pageWidthPx, setZoom]);
 
+  const imageHooks = useMemo<ImageHooks>(
+    () => ({ resolveImage, uploadImage, maxImageBytes }),
+    [resolveImage, uploadImage, maxImageBytes]
+  );
+
   return (
+    <ImageHooksContext.Provider value={imageHooks}>
     <div
       ref={containerRef}
       className="document-editor"
@@ -563,5 +584,6 @@ export const DocumentEditor = memo(function DocumentEditor({
       />
       {importDialog}
     </div>
+    </ImageHooksContext.Provider>
   );
 });
