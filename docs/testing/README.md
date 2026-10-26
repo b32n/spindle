@@ -181,3 +181,13 @@ The check name only appears in the search box after the workflow has run once on
   `tsc --noEmit` and `jest --findRelatedTests`; Prettier + e2e type-check for staged `e2e/` files.
 - **pre-push**: nothing by default. `SPINDLE_PREPUSH_E2E=1 git push` runs the `@smoke` E2E subset first.
 - Bypass once with `git commit --no-verify` (CI still runs everything).
+
+## Privacy guard (no third-party network)
+
+Spindle must not talk to a third party on its own. Two checks enforce it:
+
+- `npm run check:network` (CI "Packages" job, also runnable locally): scans `packages/*/src` (non-test files) for
+  `fetch`/`XMLHttpRequest`/`sendBeacon`/`EventSource`/`new WebSocket` and hard-coded `http(s)://` hosts that are not on the
+  allow-list in `scripts/check-no-network.mjs`. A documented, opt-in exception carries a `// network-allow: <reason>` comment.
+- `e2e/privacy/no-third-party.spec.ts` (P-NET-*): loads each demo with default settings, exercises fonts and insert dialogs, and fails on any
+  request that leaves localhost except the default font mirror (`fonts.b32n.io`); with `fontSource: local` any external request fails.
