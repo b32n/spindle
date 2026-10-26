@@ -28,8 +28,8 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4, 5, 6]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -45,14 +45,14 @@ jobs:
           PW_VISUAL: '1'
       - name: Upload blob report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blob-report-${{ matrix.shard }}
           path: blob-report
           retention-days: 7
       - name: Upload traces, screenshots and videos (failures)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nightly-failure-artifacts-${{ matrix.shard }}
           path: e2e/.results
@@ -65,13 +65,13 @@ jobs:
     needs: e2e
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: all-blob-reports
           pattern: blob-report-*
@@ -82,7 +82,7 @@ jobs:
           node scripts/testing/flaky-summary.mjs report.json
       - run: npx playwright merge-reports --reporter=html ./all-blob-reports
         if: ${{ always() }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: playwright-html-report
