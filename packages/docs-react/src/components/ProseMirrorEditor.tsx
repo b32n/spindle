@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { ySyncPlugin, yCursorPlugin } from 'y-prosemirror';
+import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from '../core/collab-cursor-styles';
 import {
   docsSchema,
@@ -200,13 +200,14 @@ export const ProseMirrorEditor = forwardRef<ProseMirrorEditorRef, ProseMirrorEdi
       //   - Collab: ySyncPlugin owns the doc; it's seeded from the Y.XmlFragment
       //     on the handle. initialContent is ignored — the Y.Doc is the truth.
       //   - Local: build a PM doc from initialContent (or an empty paragraph).
-      const plugins = createPlugins(docsSchema);
+      const plugins = createPlugins(docsSchema, { collab: !!collabHandle });
       let stateConfig: Parameters<typeof EditorState.create>[0];
       if (collabHandle) {
         ensureCollabCursorStyles();
         plugins.unshift(
           ySyncPlugin(collabHandle.xmlFragment),
           yCursorPlugin(collabHandle.awareness),
+          yUndoPlugin(), // undo/redo only the local user's edits
         );
         stateConfig = { schema: docsSchema, plugins };
       } else {
