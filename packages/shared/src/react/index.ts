@@ -6,3 +6,8 @@ export type { ToolbarMenuApi } from './toolbar-menu';
 export { downloadFile, fileExtension, stripExtension, sanitizeFileName } from './download';
 export { DEFAULT_FONT_SOURCE, DEFAULT_FONT_SOURCE_URL, createFontLoader, fontStylesheetUrl, isSystemFont } from './fonts';
 export type { FontSource, FontLoaderDocument } from './fonts';
+export {
+  DEFAULT_MAX_IMAGE_BYTES, ImageHooksContext, useImageHooks, ImageError,
+  blobToDataUrl, readImageFile, storeImageFile, resolveImageUrl,
+} from './images';
+export type { ImageHooks } from './images';

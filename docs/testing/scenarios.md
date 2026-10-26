@@ -262,6 +262,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-04 | uploading a non-image file in the dialog shows "Please select an image file" | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-05 | uploading an image over 10 MB is refused ("too large") | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-06 | uploading a valid PNG inserts it and the DOCX download embeds the same bytes | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-07 | a good URL is fetched by the host hook and inserted as a data URL | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-08 | without resolveImage there is no By-URL tab and no image request is made | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-09 | uploadImage: the file is handed to the host and the returned URL is what the document stores | covered |  |  | `e2e/docs/image-errors.spec.ts` |
+| D-IMG-10 | maxImageBytes lowers the accepted size | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-FIO-07 | opening a document with tracked changes and footnotes reports what was not imported | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-FIO-08 | opening a plain exported-style document reports no loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-KBD-01 | Tab reaches the toolbar and then the editor; the focused control has a visible indicator | covered |  |  | `e2e/docs/keyboard.spec.ts` |
@@ -329,6 +333,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-09 | a corrupt "image" (random bytes named .png) inserts nothing and raises no error | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-10 | a non-image file chosen anyway (bypassing accept) inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-11 | without resolveImage there is no "Image from URL" button and no image request is made | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-12 | resolveImage: the URL is fetched by the host hook and stored as a data URL | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-13 | uploadImage: the element stores the URL the host returned | covered |  |  | `e2e/slides/image-upload.spec.ts` |
+| SL-IMG-14 | maxImageBytes refuses a larger file | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-KBD-01 | add a slide, navigate the filmstrip, present and exit using only keys | covered |  |  | `e2e/slides/keyboard.spec.ts` |
 | SL-KBD-02 | select and nudge an element, then delete it, with the keyboard | covered |  |  | `e2e/slides/keyboard.spec.ts` |
 | SL-KBD-03 | Tab reaches the toolbar buttons | fixme + bug |  | the editor root swallows Tab to cycle the slide's elements, so the toolbar can never be reached with Tab/Shift+Tab (a keyboard trap). https://github.com/b32n/spindle/issues/89 | `e2e/slides/keyboard.spec.ts` |
@@ -409,7 +417,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 344
+- covered: 352
 - fixme + bug: 12
 - not covered: 8
 - n/a: 6

@@ -6,6 +6,7 @@
 import React, { useRef } from 'react';
 import { ImageUp, Link2, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 import type { ImageElement } from '@b32nio/spindle-slides-core';
+import { useImageHooks, readImageFile, storeImageFile, resolveImageUrl } from '@b32nio/spindle-shared/react';
 import { useDeck, useSelection, useElement } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
 
@@ -27,33 +28,44 @@ function loadImage(src: string): Promise<{ naturalW: number; naturalH: number }>
 
 export function ImageFormatBar(): React.ReactElement | null {
   const deck = useDeck();
+  const imageHooks = useImageHooks();
   const selection = useSelection();
   const fileRef = useRef<HTMLInputElement>(null);
   const id = selection.elementIds.length === 1 ? selection.elementIds[0] : null;
   const el = useElement(id ?? '') as ImageElement | undefined;
   if (!id || !el || el.type !== 'image') return null;
 
-  const replace = async (src: string) => {
+  // `measureSrc` is the local data URL used to read the size; `src` is what is stored
+  // (the same data URL, or the URL returned by the host's uploadImage).
+  const replace = async (measureSrc: string, src: string = measureSrc) => {
     try {
-      const { naturalW, naturalH } = await loadImage(src);
+      const { naturalW, naturalH } = await loadImage(measureSrc);
       deck.updateElement(id, { src, naturalW, naturalH });
     } catch {
       /* couldn't load — leave the current image untouched */
     }
   };
 
-  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => replace(reader.result as string);
-    reader.readAsDataURL(file);
     e.target.value = '';
+    if (!file) return;
+    try {
+      const dataUrl = await readImageFile(imageHooks, file);
+      await replace(dataUrl, await storeImageFile(imageHooks, file, dataUrl));
+    } catch (err) {
+      imageHooks.onImageError?.(err as Error);
+    }
   };
 
-  const replaceByUrl = () => {
+  const replaceByUrl = async () => {
     const url = window.prompt('Image URL', el.src.startsWith('data:') ? '' : el.src);
-    if (url && url.trim()) replace(url.trim());
+    if (!url || !url.trim()) return;
+    try {
+      await replace(await resolveImageUrl(imageHooks, url.trim()));
+    } catch (err) {
+      imageHooks.onImageError?.(err as Error);
+    }
   };
 
   return (
@@ -62,9 +74,9 @@ export function ImageFormatBar(): React.ReactElement | null {
       <ToolbarButton title="Replace image (upload)" onClick={() => fileRef.current?.click()}>
         <ImageUp size={15} />
       </ToolbarButton>
-      <ToolbarButton title="Replace with image URL" onClick={replaceByUrl}>
+      {imageHooks.resolveImage && <ToolbarButton title="Replace with image URL" onClick={replaceByUrl}>
         <Link2 size={15} />
-      </ToolbarButton>
+      </ToolbarButton>}
       <select
         title="Image fit"
         value={el.fit ?? 'fill'}
