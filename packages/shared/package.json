@@ -84,7 +84,7 @@
     "@types/react-dom": "^19.3.0",
     "jest": "^29.7.0",
     "react": "^19.3.1",
-    "rollup": "^4.64.8",
+    "rollup": "^4.65.0",
     "ts-jest": "^29.4.15",
     "typescript": "^5.2.0"
   },
