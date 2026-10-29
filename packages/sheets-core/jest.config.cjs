@@ -24,6 +24,7 @@ module.exports = {
           paths: {
             '@b32nio/spindle-shared/export/csv': ['../shared/src/export/csv/index.ts'],
             '@b32nio/spindle-shared/export/xlsx': ['../shared/src/export/xlsx/index.ts'],
+            '@b32nio/spindle-io/xlsx': ['../io/src/xlsx/index.ts'],
           },
         },
       },

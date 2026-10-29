@@ -1,0 +1,73 @@
+{
+  "name": "@b32nio/spindle-io",
+  "version": "0.4.1",
+  "description": "Optional XLSX and DOCX import/export for Spindle (exceljs, docx, jszip, fast-xml-parser)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/b32n/spindle.git",
+    "directory": "packages/io"
+  },
+  "bugs": {
+    "url": "https://github.com/b32n/spindle/issues"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./xlsx": {
+      "import": "./dist/xlsx/index.esm.js",
+      "require": "./dist/xlsx/index.js",
+      "types": "./dist/xlsx/index.d.ts"
+    },
+    "./docx": {
+      "import": "./dist/docx/index.esm.js",
+      "require": "./dist/docx/index.js",
+      "types": "./dist/docx/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "type-check": "tsc --noEmit",
+    "test": "jest --passWithNoTests",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo .rollup.cache"
+  },
+  "keywords": [
+    "xlsx",
+    "docx",
+    "import",
+    "export",
+    "office"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@b32nio/spindle-shared": "^0.4.1",
+    "docx": "^9.14.0",
+    "exceljs": "^4.4.0",
+    "fast-xml-parser": "^5.11.2",
+    "jszip": "^3.10.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "rollup": "^4.64.8",
+    "ts-jest": "^29.4.15",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

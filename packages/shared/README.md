@@ -12,12 +12,14 @@ cores and their React layers.
 - **`@b32nio/spindle-shared/react`**: shared React UI — notably
   `ResponsiveToolbar` (overflow/menu toolbar used by all three editors)
 
-- **`@b32nio/spindle-shared/export/csv`**, **`/export/xlsx`**, **`/export/docx`**:
-  format-level readers/writers (`exportCsv`/`importCsv`, `exportXlsx`/`importXlsx`,
-  `exportDocx`/`importDocx`) independent of any editor model. The editor cores
-  adapt their models onto these; use them directly for headless conversion.
-  `xlsx` and `docx` pull in `exceljs` / `docx` + `jszip` + `fast-xml-parser`, so
-  import them only where needed.
+- **`@b32nio/spindle-shared/export/csv`**: CSV reader/writer (`exportCsv`/`importCsv`,
+  `detectCsvLoss`), dependency-free.
+- **`@b32nio/spindle-shared/export/xlsx`**, **`/export/docx`**: the format types and
+  import-loss helpers, plus **deprecated** async shims (`exportXlsx`/`importXlsx`,
+  `exportDocx`/`importDocx`, `detect*Loss`) that load `@b32nio/spindle-io` on first
+  call. The implementations (and `exceljs` / `docx` / `jszip` / `fast-xml-parser`) moved
+  to [`@b32nio/spindle-io`](../io/README.md); install it and import from
+  `@b32nio/spindle-io/xlsx` / `/docx` instead. It is an optional peer dependency here.
 
 ## Usage
 

@@ -1,6 +1,6 @@
 import { exportXlsx } from './writer';
 import { importXlsx } from './reader';
-import type { SpreadsheetExportInput } from './types';
+import type { SpreadsheetExportInput } from '@b32nio/spindle-shared/export/xlsx';
 
 async function roundTrip(input: SpreadsheetExportInput) {
   const bytes = await exportXlsx(input);

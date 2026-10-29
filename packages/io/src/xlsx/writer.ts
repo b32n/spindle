@@ -5,7 +5,7 @@ import type {
   SpreadsheetCellStyle,
   SpreadsheetExportInput,
   SpreadsheetSheet,
-} from './types';
+} from '@b32nio/spindle-shared/export/xlsx';
 
 export async function exportXlsx(input: SpreadsheetExportInput): Promise<Uint8Array> {
   const workbook = new ExcelJS.Workbook();

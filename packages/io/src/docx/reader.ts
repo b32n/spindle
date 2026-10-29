@@ -10,7 +10,7 @@ import type {
   DocSection,
   DocTableRow,
   DocumentImportResult,
-} from './types';
+} from '@b32nio/spindle-shared/export/docx';
 
 // ---------------------------------------------------------------------------
 // XML tree utilities. Parsed with preserveOrder: true — required because a

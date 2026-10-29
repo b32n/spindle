@@ -45,6 +45,7 @@ const SURFACES = [
 
 const PACKAGES = [
   ['spindle-shared', 'Framework-agnostic utilities: events, collaboration primitives'],
+  ['spindle-io', 'XLSX and DOCX import/export · optional heavy dependencies'],
   ['spindle-sheets-core', 'Spreadsheet engine · sparse store · formulas · zero React'],
   ['spindle-sheets-react', 'React canvas grid, formula bar, toolbar & dialogs'],
   ['spindle-docs-core', 'Document engine · True Layout · zero React'],

@@ -16,6 +16,10 @@ module.exports = {
           declaration: false,
           noUnusedLocals: false,
           noUnusedParameters: false,
+          // Type-check the optional spindle-io peer against the local stubs (as tsconfig.json does).
+          paths: {
+            '@b32nio/spindle-io/*': ['./src/export/io-stubs/*'],
+          },
         },
       },
     ],

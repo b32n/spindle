@@ -8,6 +8,28 @@ lockstep.
 
 ## [Unreleased]
 
+### Added
+
+- **`@b32nio/spindle-io`: new optional package for XLSX and DOCX import/export.** The readers/writers
+  (`exportXlsx`/`importXlsx`/`detectXlsxLoss`, `exportDocx`/`importDocx`/`detectDocxLoss`) and their
+  dependencies (`exceljs`, `docx`, `jszip`, `fast-xml-parser`) moved out of `@b32nio/spindle-shared`, so
+  Phase 1 fidelity work grows there instead of in shared's always-on path. Subpaths `@b32nio/spindle-io/xlsx`
+  and `/docx` load one format only; the root re-exports both plus the CSV helpers. See `packages/io/README.md`.
+
+### Changed
+
+- `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
+  lazily on first XLSX/DOCX open or save (public APIs unchanged).
+- `@b32nio/spindle-shared` no longer depends on `exceljs`, `docx`, `jszip` or `fast-xml-parser`.
+- All packages bumped to 0.4.1 (lockstep; 0.4.1 is the first release containing `@b32nio/spindle-io`).
+
+### Deprecated
+
+- `@b32nio/spindle-shared/export/xlsx` and `/export/docx` functions: they keep working as async shims that
+  load `@b32nio/spindle-io` on demand (now an optional peer dependency, so install it if you use them).
+  Import from `@b32nio/spindle-io/xlsx` / `/docx` instead. Types and import-loss helpers stay in shared;
+  `@b32nio/spindle-shared/export/csv` is unchanged.
+
 ## [0.4.0] - 2026-10-26
 
 ### Added

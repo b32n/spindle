@@ -7,7 +7,7 @@ import type {
   SpreadsheetImportResult,
   SpreadsheetMergedRange,
   SpreadsheetSheet,
-} from './types';
+} from '@b32nio/spindle-shared/export/xlsx';
 
 export async function importXlsx(bytes: Uint8Array): Promise<SpreadsheetImportResult> {
   const workbook = new ExcelJS.Workbook();

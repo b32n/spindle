@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '../loss';
+import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
 
 const MAX_WHERE = 5;
 

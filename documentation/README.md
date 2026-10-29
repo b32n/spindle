@@ -13,6 +13,7 @@ Spindle is a suite of high-performance productivity components for React, provid
 | `@b32nio/spindle-slides-core` | Framework-agnostic presentation engine |
 | `@b32nio/spindle-slides-react` | React slides editor with DOM rendering |
 | `@b32nio/spindle-shared` | Shared utilities, types, and React UI |
+| `@b32nio/spindle-io` | XLSX and DOCX import/export (exceljs, docx, jszip, fast-xml-parser) |
 | `@b32nio/spindle-transport-websocket` | WebSocket `CollabProvider` for real-time collaboration |
 
 ---
