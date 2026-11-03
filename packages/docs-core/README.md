@@ -74,7 +74,7 @@ const { warnings: importWarnings } = await importFromDocx(bytes, doc);
 
 `warnings` lists anything that could not be carried over (for example images
 that are not `data:` URIs on export, or floating images on import). The
-format-level reader/writer live in `@b32nio/spindle-shared/export/docx`
+format-level reader/writer live in `@b32nio/spindle-io/docx` (a dependency of this package, loaded on first Open/Download)
 (`exportDocx` / `importDocx`) and are independent of the document model.
 Everything runs locally; there are no network calls.
 

@@ -1,4 +1,8 @@
-import { exportXlsx, importXlsx, detectXlsxLoss, type ImportLossReport } from '@b32nio/spindle-shared/export/xlsx';
+import type { ImportLossReport } from '@b32nio/spindle-shared/export/xlsx';
+
+// The XLSX reader/writer lives in the separate @b32nio/spindle-io package; load it on first use so
+// hosts that never open or save the format don't pay for its dependencies.
+const loadIo = () => import('@b32nio/spindle-io/xlsx');
 import type {
   SpreadsheetBorder,
   SpreadsheetCell,
@@ -18,6 +22,7 @@ export async function exportToXlsx(workbook: WorkbookImpl): Promise<Uint8Array> 
   const sheetIds = Array.from(workbook.sheets.keys());
   const sheets = sheetIds.map((id) => toSpreadsheetSheet(workbook, workbook.sheets.get(id)!));
   const activeSheetIndex = sheetIds.indexOf(workbook.activeSheetId);
+  const { exportXlsx } = await loadIo();
   return exportXlsx({ sheets, activeSheetIndex: activeSheetIndex >= 0 ? activeSheetIndex : undefined });
 }
 
@@ -154,6 +159,7 @@ export async function importFromXlsx(
   bytes: Uint8Array,
   workbook: WorkbookImpl
 ): Promise<{ warnings: string[]; loss: ImportLossReport }> {
+  const { detectXlsxLoss, importXlsx } = await loadIo();
   const loss = await detectXlsxLoss(bytes);
   const result = await importXlsx(bytes);
   // setData() replaces the whole workbook; a file with no worksheets (e.g. a zip that isn't
@@ -172,7 +178,7 @@ export async function importFromXlsx(
  * charts, comments…). Read-only: nothing is imported or modified.
  */
 export function inspectXlsx(bytes: Uint8Array): Promise<ImportLossReport> {
-  return detectXlsxLoss(bytes);
+  return loadIo().then((io) => io.detectXlsxLoss(bytes));
 }
 
 function toWorkbookData(

@@ -20,6 +20,7 @@ module.exports = {
           // "exports" maps (see sheets-core/jest.config.cjs for the same fix).
           paths: {
             '@b32nio/spindle-shared/export/docx': ['../shared/src/export/docx/index.ts'],
+            '@b32nio/spindle-io/docx': ['../io/src/docx/index.ts'],
           },
         },
       },

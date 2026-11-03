@@ -1,4 +1,8 @@
-import { exportDocx, importDocx, detectDocxLoss, type ImportLossReport } from '@b32nio/spindle-shared/export/docx';
+import type { ImportLossReport } from '@b32nio/spindle-shared/export/docx';
+
+// The DOCX reader/writer lives in the separate @b32nio/spindle-io package; load it on first use so
+// hosts that never open or save the format don't pay for its dependencies.
+const loadIo = () => import('@b32nio/spindle-io/docx');
 import type {
   DocBlock,
   DocHeaderFooter,
@@ -31,6 +35,7 @@ import { generateBlockId, generateCellId, generateRowId } from '../blocks/utils'
 
 export async function exportToDocx(document: DocumentImpl): Promise<{ bytes: Uint8Array; warnings: string[] }> {
   const data = document.getData();
+  const { exportDocx } = await loadIo();
   return exportDocx(toDocumentExportInput(data));
 }
 
@@ -288,6 +293,7 @@ export async function importFromDocx(
   bytes: Uint8Array,
   document: DocumentImpl
 ): Promise<{ warnings: string[]; loss: ImportLossReport }> {
+  const { detectDocxLoss, importDocx } = await loadIo();
   const loss = await detectDocxLoss(bytes);
   const result = await importDocx(bytes);
   // A zip that isn't a .docx imports as "no sections" plus a warning; applying that would wipe
@@ -305,7 +311,7 @@ export async function importFromDocx(
  * floating images…). Read-only: nothing is imported or modified.
  */
 export function inspectDocx(bytes: Uint8Array): Promise<ImportLossReport> {
-  return detectDocxLoss(bytes);
+  return loadIo().then((io) => io.detectDocxLoss(bytes));
 }
 
 function toDocumentData(result: DocumentImportResult, document: DocumentImpl): DocumentData {

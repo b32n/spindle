@@ -13,6 +13,7 @@
   "dependencies": {
     "@b32nio/spindle-docs-core": "file:../packages/docs-core",
     "@b32nio/spindle-docs-react": "file:../packages/docs-react",
+    "@b32nio/spindle-io": "file:../packages/io",
     "@b32nio/spindle-shared": "file:../packages/shared",
     "@b32nio/spindle-sheets-core": "file:../packages/sheets-core",
     "@b32nio/spindle-sheets-react": "file:../packages/sheets-react",

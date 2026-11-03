@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '../loss';
+import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
 
 /**
  * Scan a .docx for content the importer does not bring across. Cheap (zip +

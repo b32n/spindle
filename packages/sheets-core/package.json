@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-sheets-core",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Core spreadsheet engine for Spindle Sheets",
   "repository": {
     "type": "git",
@@ -47,7 +47,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@b32nio/spindle-shared": "^0.4.0",
+    "@b32nio/spindle-io": "^0.4.1",
+    "@b32nio/spindle-shared": "^0.4.1",
     "lib0": "^0.2.119",
     "y-indexeddb": "^9.0.12",
     "y-protocols": "^1.0.7",
