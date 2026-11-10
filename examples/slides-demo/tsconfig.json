@@ -15,7 +15,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
       "@b32nio/spindle-slides-core": ["../../packages/slides-core/src"],
       "@b32nio/spindle-slides-react": ["../../packages/slides-react/src"]
