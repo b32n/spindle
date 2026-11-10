@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-slides-core",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Core presentation editor engine for Spindle Slides",
   "repository": {
     "type": "git",
@@ -47,7 +47,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@b32nio/spindle-shared": "^0.4.0",
+    "@b32nio/spindle-shared": "^0.4.1",
     "lib0": "^0.2.119",
     "prosemirror-model": "^1.19.0",
     "y-indexeddb": "^9.0.12",
@@ -59,7 +59,7 @@
     "@rollup/plugin-typescript": "^11.1.0",
     "@types/jest": "^29.5.0",
     "jest": "^29.7.0",
-    "rollup": "^4.64.8",
+    "rollup": "^4.65.0",
     "ts-jest": "^29.4.15",
     "typescript": "^5.2.0"
   },

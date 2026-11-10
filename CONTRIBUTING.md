@@ -11,6 +11,7 @@ Spindle is an npm-workspaces monorepo:
 ```
 packages/
   spindle-shared               Framework-agnostic utilities & collaboration primitives
+  spindle-io                   XLSX / DOCX readers & writers (exceljs, docx, jszip, fast-xml-parser)
   spindle-sheets-core          Spreadsheet engine (sparse store, formulas) — zero React
   spindle-sheets-react         React canvas grid, formula bar, toolbar & dialogs
   spindle-docs-core            Document engine (True Layout) — zero React

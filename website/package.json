@@ -13,23 +13,24 @@
   "dependencies": {
     "@b32nio/spindle-docs-core": "file:../packages/docs-core",
     "@b32nio/spindle-docs-react": "file:../packages/docs-react",
+    "@b32nio/spindle-io": "file:../packages/io",
     "@b32nio/spindle-shared": "file:../packages/shared",
     "@b32nio/spindle-sheets-core": "file:../packages/sheets-core",
     "@b32nio/spindle-sheets-react": "file:../packages/sheets-react",
     "@b32nio/spindle-slides-core": "file:../packages/slides-core",
     "@b32nio/spindle-slides-react": "file:../packages/slides-react",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
-    "marked": "^12.0.2",
-    "mermaid": "^12.2.0",
+    "marked": "^18.1.3",
+    "mermaid": "^12.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^6.30.4"
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
+    "@vitejs/plugin-react": "^6.2.1",
     "typescript": "^5.5.4",
-    "vite": "^8.3.4"
+    "vite": "^8.3.6"
   }
 }

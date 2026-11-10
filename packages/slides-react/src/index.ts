@@ -82,3 +82,7 @@ export { ElementView } from './components/elements/ElementView';
 export { StaticRichText } from './components/elements/StaticRichText';
 export { shapeGeom } from './components/elements/shapes';
 export type { ShapeGeom } from './components/elements/shapes';
+
+// Shared import-confirmation dialog (slides has no importer yet; hosts that import decks can reuse it).
+export { ImportConfirmDialog } from '@b32nio/spindle-shared/react';
+export type { ImportConfirmDialogProps } from '@b32nio/spindle-shared/react';

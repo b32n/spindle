@@ -10,25 +10,27 @@ lockstep.
 
 ### Added
 
-- **Import loss report.** `ImportLossReport` (in `@b32nio/spindle-shared`) lists what an .xlsx / .docx / .csv import cannot
-  preserve (conditional formats, validation, named ranges, charts, comments, tracked changes, footnotes, floating images…).
-  `inspectWorkbookFile` / `inspectDocumentFile` (react packages) and `inspectXlsx` / `inspectCsv` / `inspectDocx` (core) check a file
-  without importing it; `importWorkbookFile` / `importDocumentFile` / `importFromXlsx` / `importFromDocx` now also return `loss`, and
-  `onFileOpened` receives it. See `documentation/import-loss.md`.
+- **`@b32nio/spindle-io`: new optional package for XLSX and DOCX import/export.** The readers/writers
+  (`exportXlsx`/`importXlsx`/`detectXlsxLoss`, `exportDocx`/`importDocx`/`detectDocxLoss`) and their
+  dependencies (`exceljs`, `docx`, `jszip`, `fast-xml-parser`) moved out of `@b32nio/spindle-shared`, so
+  Phase 1 fidelity work grows there instead of in shared's always-on path. Subpaths `@b32nio/spindle-io/xlsx`
+  and `/docx` load one format only; the root re-exports both plus the CSV helpers. See `packages/io/README.md`.
 
 ### Changed
 
-- **Privacy: image hooks on the docs and slides editors.** The editors no longer fetch typed image URLs themselves.
-  `resolveImage(url) => Promise<Blob | dataURL>` enables insert-by-URL (otherwise the By-URL UI is hidden and only
-  local files can be inserted); `uploadImage(file) => Promise<url>` stores local files with the host;
-  `maxImageBytes` bounds embedded images. See `documentation/images.md`.
-- **Privacy: `fontSource` option on the sheets, docs and slides editors.** The hard-coded Google Fonts
-  loader in the sheets toolbar is gone. Web fonts now come from the Spindle font mirror
-  (`https://fonts.b32n.io/css2`) by default and fall back to system fonts if it is unreachable.
-  `fontSource={{ kind: 'local' }}` makes zero font requests; `{ kind: 'css', url }` and
-  `{ kind: 'custom', load }` let hosts bring their own source. See `documentation/fonts.md`.
+- `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
+  lazily on first XLSX/DOCX open or save (public APIs unchanged).
+- `@b32nio/spindle-shared` no longer depends on `exceljs`, `docx`, `jszip` or `fast-xml-parser`.
+- All packages bumped to 0.4.1 (lockstep; 0.4.1 is the first release containing `@b32nio/spindle-io`).
 
-## [0.4.0] - 2026-10-20
+### Deprecated
+
+- `@b32nio/spindle-shared/export/xlsx` and `/export/docx` functions: they keep working as async shims that
+  load `@b32nio/spindle-io` on demand (now an optional peer dependency, so install it if you use them).
+  Import from `@b32nio/spindle-io/xlsx` / `/docx` instead. Types and import-loss helpers stay in shared;
+  `@b32nio/spindle-shared/export/csv` is unchanged.
+
+## [0.4.0] - 2026-10-26
 
 ### Added
 
@@ -54,6 +56,13 @@ lockstep.
   - The sheets and docs demos in `examples/` enable the new buttons.
 - Dependabot configuration (weekly, grouped updates) for npm and GitHub Actions.
 - `.nvmrc` (Node 22).
+- **Import loss report.** `ImportLossReport` (in `@b32nio/spindle-shared`) lists what an .xlsx / .docx / .csv import cannot
+  preserve (conditional formats, validation, named ranges, charts, comments, tracked changes, footnotes, floating images…).
+  `inspectWorkbookFile` / `inspectDocumentFile` (react packages) and `inspectXlsx` / `inspectCsv` / `inspectDocx` (core) check a file
+  without importing it; `importWorkbookFile` / `importDocumentFile` / `importFromXlsx` / `importFromDocx` now also return `loss`, and
+  `onFileOpened` receives it. See `documentation/import-loss.md`.
+- **Import confirmation.** Opening a file that would lose something now shows an *Import anyway / Cancel* dialog
+  (`ImportConfirmDialog`) in the sheets and docs editors; `importConfirmation` selects `'dialog'` (default), `'never'` or a host callback.
 
 ### Changed
 
@@ -61,6 +70,15 @@ lockstep.
   Node 20 reached end of life. CI runs the package job on Node 22 and 24; the
   website, deploy and publish jobs run on Node 22.
 - Internal dependency ranges bumped to `^0.4.0`.
+- **Privacy: image hooks on the docs and slides editors.** The editors no longer fetch typed image URLs themselves.
+  `resolveImage(url) => Promise<Blob | dataURL>` enables insert-by-URL (otherwise the By-URL UI is hidden and only
+  local files can be inserted); `uploadImage(file) => Promise<url>` stores local files with the host;
+  `maxImageBytes` bounds embedded images. See `documentation/images.md`.
+- **Privacy: `fontSource` option on the sheets, docs and slides editors.** The hard-coded Google Fonts
+  loader in the sheets toolbar is gone. Web fonts now come from the Spindle font mirror
+  (`https://fonts.b32n.io/css2`) by default and fall back to system fonts if it is unreachable.
+  `fontSource={{ kind: 'local' }}` makes zero font requests; `{ kind: 'css', url }` and
+  `{ kind: 'custom', load }` let hosts bring their own source. See `documentation/fonts.md`.
 
 ### Security
 
@@ -132,7 +150,8 @@ lockstep.
 - Initial release: docs, sheets and slides editors (React layers over
   framework-free cores) with Yjs-based real-time collaboration primitives.
 
-[0.4.0]: https://github.com/b32n/spindle/compare/v0.3.0...v0.4.0
+[Unreleased]: https://github.com/b32n/spindle/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/b32n/spindle/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/b32n/spindle/commit/d04923d
 [0.3.0]: https://github.com/b32n/spindle/releases/tag/v0.3.0
 [0.2.0]: https://github.com/b32n/spindle/commits/cfaefac

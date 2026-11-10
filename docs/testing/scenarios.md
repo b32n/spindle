@@ -134,9 +134,13 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-RSZ-01 | dragging a column header border resizes the column | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-02 | dragging a row header border resizes the row | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
 | S-RSZ-03 | resize is undoable | covered |  |  | `e2e/sheets/formulas-and-fill.spec.ts` |
-| S-FIO-16 | opening a workbook with unsupported features reports what was not imported | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
-| S-FIO-17 | opening a plain workbook and a comma CSV reports no loss | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
-| S-FIO-18 | a semicolon-delimited CSV is flagged (it imports into one column) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-16 | a file with unsupported features asks first, listing what would be lost | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-17 | Cancel (and Escape) keep the open workbook untouched | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-18 | "Import anyway" imports the file and reports the same loss to the host | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-19 | a file that loses nothing opens without a dialog | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-20 | a semicolon-delimited CSV asks first (it would import into one column) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-21 | importConfirmation 'never' imports without asking | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-22 | a host callback decides instead of the dialog (headless API) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
 | S-KBD-01 | navigate, enter data and a formula, format by shortcut and undo without the mouse | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-02 | Tab reaches the toolbar, the formula bar and the grid, each with a visible focus indicator | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-03 | the Insert link dialog opens from a focused button, fills and submits with keys, and Escape cancels | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
@@ -270,8 +274,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-IMG-08 | without resolveImage there is no By-URL tab and no image request is made | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-09 | uploadImage: the file is handed to the host and the returned URL is what the document stores | covered |  |  | `e2e/docs/image-errors.spec.ts` |
 | D-IMG-10 | maxImageBytes lowers the accepted size | covered |  |  | `e2e/docs/image-errors.spec.ts` |
-| D-FIO-07 | opening a document with tracked changes and footnotes reports what was not imported | covered |  |  | `e2e/docs/import-loss.spec.ts` |
-| D-FIO-08 | opening a plain exported-style document reports no loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-FIO-07 | a document with tracked changes and footnotes asks first, listing what would be lost | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-FIO-08 | Cancel keeps the open document; Import anyway replaces it and reports the loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-FIO-09 | a document that loses nothing opens without a dialog | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-FIO-10 | Escape cancels, and a host callback can decide instead of the dialog | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-KBD-01 | Tab reaches the toolbar and then the editor; the focused control has a visible indicator | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-02 | write text, a bullet list and a link using only the keyboard | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-03 | a heading style can be applied from the keyboard | fixme + bug |  | no keyboard-only way to give a paragraph a heading style: the Paragraph dropdown items are plain divs outside the tab order, Escape does not close it, and there is no shortcut; markdown input rules ("# ") are implemented in docs-core but not installed by the editor. https://github.com/b32n/spindle/issues/91 | `e2e/docs/keyboard.spec.ts` |
@@ -430,7 +436,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 364
+- covered: 370
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

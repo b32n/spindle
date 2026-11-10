@@ -1,6 +1,6 @@
 {
   "name": "@b32nio/spindle-sheets-react",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "React components for Spindle Sheets",
   "repository": {
     "type": "git",
@@ -47,9 +47,9 @@
     "react-dom": ">=18.0.0"
   },
   "dependencies": {
-    "@b32nio/spindle-sheets-core": "^0.4.0",
-    "@b32nio/spindle-shared": "^0.4.0",
-    "lucide-react": "^0.563.0"
+    "@b32nio/spindle-sheets-core": "^0.4.1",
+    "@b32nio/spindle-shared": "^0.4.1",
+    "lucide-react": "^1.66.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.0",
@@ -59,7 +59,7 @@
     "jest": "^29.7.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "rollup": "^4.64.8",
+    "rollup": "^4.65.0",
     "ts-jest": "^29.4.15",
     "typescript": "^5.2.0"
   },

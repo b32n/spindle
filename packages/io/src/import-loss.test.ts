@@ -5,11 +5,11 @@ import { exportXlsx } from './xlsx/writer';
 import { exportDocx } from './docx/writer';
 import { detectXlsxLoss } from './xlsx/loss';
 import { detectDocxLoss } from './docx/loss';
-import { detectCsvLoss } from './csv/loss';
-import { describeImportLoss, hasImportLoss } from './loss';
-import type { DocSection } from './docx/types';
+import { detectCsvLoss } from '@b32nio/spindle-shared/export/csv';
+import { describeImportLoss, hasImportLoss } from '@b32nio/spindle-shared';
+import type { DocSection } from '@b32nio/spindle-shared/export/docx';
 
-const fixture = (name: string) => new Uint8Array(readFileSync(path.resolve(__dirname, '../../../../e2e/fixtures', name)));
+const fixture = (name: string) => new Uint8Array(readFileSync(path.resolve(__dirname, '../../../e2e/fixtures', name)));
 
 async function plainXlsx(): Promise<Uint8Array> {
   return exportXlsx({

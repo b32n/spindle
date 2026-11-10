@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import { exportDocx } from './writer';
-import type { DocSection, DocumentExportInput } from './types';
+import type { DocSection, DocumentExportInput } from '@b32nio/spindle-shared/export/docx';
 
 const BASE_SECTION: Omit<DocSection, 'blocks'> = {
   pageWidthPx: 816,

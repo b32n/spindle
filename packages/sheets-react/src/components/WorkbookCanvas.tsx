@@ -7,7 +7,7 @@ import { FormulaSignatureHint } from './FormulaSignatureHint';
 import { useFormulaAssist } from '../hooks/useFormulaAssist';
 import { FormulaBar } from './FormulaBar';
 import { Toolbar } from './Toolbar';
-import type { FontSource } from '@b32nio/spindle-shared/react';
+import { useImportConfirm, type FontSource, type ImportConfirmation } from '@b32nio/spindle-shared/react';
 import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { SheetTabs } from './SheetTabs';
 import { CommentsPanel } from './CommentsPanel';
@@ -25,6 +25,7 @@ import {
   SHEETS_EXPORT_FORMATS,
   exportWorkbookFile,
   importWorkbookFile,
+  inspectWorkbookFile,
   type SheetsExportFormat,
 } from '../file-io';
 
@@ -43,6 +44,13 @@ export interface WorkbookCanvasProps {
    * unreachable. `{ kind: 'local' }` makes no font requests.
    */
   fontSource?: FontSource;
+  /**
+   * What Open does when the file contains things that cannot be imported (see `inspectWorkbookFile`):
+   * `'dialog'` (default) asks "Import anyway / Cancel", `'never'` imports without asking, or pass
+   * `(report, file) => boolean | Promise<boolean>` to ask with your own UI. Nothing is asked for a
+   * file that loses nothing.
+   */
+  importConfirmation?: ImportConfirmation;
   /**
    * Show Open (.xlsx / .csv, read from a local file input) and Download
    * (.xlsx / .csv) in the toolbar. Opening a file replaces the whole
@@ -69,6 +77,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   colWidth = 100,
   readOnly = false,
   fontSource,
+  importConfirmation,
   fileActions = false,
   exportFormats,
   fileName,
@@ -504,8 +513,12 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     [exportFormats]
   );
 
+  const { confirm: confirmImport, dialog: importDialog } = useImportConfirm(importConfirmation);
+
   const handleOpenFile = useCallback(async (file: File) => {
     try {
+      // Ask before replacing the workbook if the file has things we can't import.
+      if (!(await confirmImport(file, await inspectWorkbookFile(file)))) return;
       const { warnings, loss } = await importWorkbookFile(workbook, file);
       // setData swapped every sheet; drop any state pointing into the old one.
       setActiveCell(null);
@@ -515,7 +528,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
-  }, [workbook, onFileOpened, onFileError]);
+  }, [workbook, onFileOpened, onFileError, confirmImport]);
 
   const handleDownload = useCallback(async (format: SheetsExportFormat) => {
     try {
@@ -1703,6 +1716,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
           onClose={handleCloseFindReplace}
         />
       )}
+      {importDialog}
     </div>
   );
 });

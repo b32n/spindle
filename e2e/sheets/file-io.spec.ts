@@ -43,8 +43,12 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(alerts, 'unexpected alert dialogs').toEqual([]);
   });
 
+  // These fixtures contain things the importer drops (rich text in cells; non-comma delimiters),
+  // so Open asks for confirmation first — see import-loss.spec.ts for the dialog itself.
+  const LOSSY_FIXTURES = new Set(['styled-multisheet.xlsx', 'semicolon.csv', 'tabs.tsv.csv']);
   async function openFixture(page: Page, name: string) {
     await openViaChooser(page, OPEN, fixture(name));
+    if (LOSSY_FIXTURES.has(name)) await page.getByRole('button', { name: 'Import anyway' }).click();
   }
 
   test('S-FIO-01 opening a LibreOffice .xlsx shows sheets, values, formulas, formats, merges and styles', async ({

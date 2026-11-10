@@ -372,7 +372,7 @@ export function getScrollForRegion(
 ## Import / Export Functionality
 
 All formats are read and written locally (no network). The format-level
-parsers/writers live in `@b32nio/spindle-shared/export/{csv,xlsx}` and know
+parsers/writers live in `@b32nio/spindle-shared/export/csv` (CSV) and `@b32nio/spindle-io/xlsx` (XLSX) and know
 nothing about the workbook; `sheets-core` adapts the workbook model onto them.
 
 ### CSV
