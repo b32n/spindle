@@ -114,7 +114,7 @@ Text is made deterministic by embedding a Liberation Sans subset under every fon
 
 **Baselines come from the pinned Playwright container job, not locally** (`e2e/visual/__screenshots__`; local machines
 differ in anti-aliasing and the emoji font). `e2e.yml` runs every Playwright job in
-`mcr.microsoft.com/playwright:v1.64.1-noble` (keep the tag equal to `@playwright/test`; this also avoids the slow
+`mcr.microsoft.com/playwright:v1.65.0-noble` (keep the tag equal to `@playwright/test`; this also avoids the slow
 `playwright install-deps` apt step), so runner-image updates cannot shift fonts. The embedded test font is registered as
 `SpindleVisualSans` (forced onto the DOM) plus aliases for canvas text, and `fontsReady` fails if any face is not loaded.
 To add or update a baseline:
