@@ -49,7 +49,7 @@
   "dependencies": {
     "@b32nio/spindle-io": "^0.4.1",
     "@b32nio/spindle-shared": "^0.4.1",
-    "lib0": "^0.2.119",
+    "lib0": "^0.2.120",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
     "prosemirror-inputrules": "^1.2.0",
