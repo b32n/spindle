@@ -3,7 +3,7 @@
 // a mini inline-SVG using the same geometry as the canvas; selecting one
 // inserts it centred on the active slide.
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Shapes as ShapesIcon, ChevronDown } from 'lucide-react';
 import type { ShapePreset, NewElementSpec } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
@@ -37,7 +37,8 @@ export function ShapePicker(): React.ReactElement {
   const deck = useDeck();
   const menu = useToolbarMenu();
   const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLButtonElement>(null);
+  // Callback ref into state: the Popover needs the anchor element at render time.
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { w, h } = deck.getSlideSize();
 
   const insert = (preset: ShapePreset) => {
@@ -83,12 +84,12 @@ export function ShapePicker(): React.ReactElement {
 
   return (
     <>
-      <button ref={anchorRef} title="Shapes" style={btn} onClick={() => setOpen((o) => !o)}>
+      <button ref={setAnchorEl} title="Shapes" style={btn} onClick={() => setOpen((o) => !o)}>
         <ShapesIcon size={16} />
         <ChevronDown size={12} />
       </button>
       {open && (
-        <Popover anchor={anchorRef.current} onClose={() => setOpen(false)}>
+        <Popover anchor={anchorEl} onClose={() => setOpen(false)}>
           {grid(32, insert)}
         </Popover>
       )}

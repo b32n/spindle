@@ -34,8 +34,11 @@ export function TableResizeOverlay({ scale }: { scale: number }): React.ReactEle
   const box = { x: live?.x ?? t.x, y: live?.y ?? t.y, w: live?.w ?? t.w, h: live?.h ?? t.h };
 
   const grip = 8 / scale;
-  let ax = 0;
-  const colBounds = t.colFractions.slice(0, -1).map((f, i) => ((ax += f), { i, x: ax * box.w }));
+  const colBounds: Array<{ i: number; x: number }> = [];
+  for (let i = 0, ax = 0; i < t.colFractions.length - 1; i++) {
+    ax += t.colFractions[i];
+    colBounds.push({ i, x: ax * box.w });
+  }
   // Row boundaries at the measured row bottoms (rows-1 internal boundaries);
   // grip i sizes the row above it. Fall back to even rows before measurement.
   const measured = tableMetrics.get(t.id);

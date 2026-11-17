@@ -16,9 +16,12 @@ export function Popover({
 }): React.ReactElement | null {
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
+  // Reading the anchor's rect is a layout measurement; it must land before paint
+  // (no flash at 0,0), so the sync setState is intentional. Runs only on anchor change.
   useLayoutEffect(() => {
     if (!anchor) return;
     const r = anchor.getBoundingClientRect();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPos({ left: r.left, top: r.bottom + 4 });
   }, [anchor]);
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { analyzeFormula, searchFunctions, getFunctionDoc } from '@b32nio/spindle-sheets-core';
 import type { FunctionDoc } from '@b32nio/spindle-sheets-core';
@@ -60,8 +60,17 @@ export function useFormulaAssist(options: UseFormulaAssistOptions): FormulaAssis
   }, [context]);
 
   // Typing clears a previous Escape-dismiss; a new suggestion list resets the cursor.
-  useEffect(() => setDismissed(false), [value]);
-  useEffect(() => setHighlightedIndex(0), [suggestions]);
+  // Adjusted during render (not in an effect) so no stale frame is committed.
+  const [prevValue, setPrevValue] = useState(value);
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDismissed(false);
+  }
+  const [prevSuggestions, setPrevSuggestions] = useState(suggestions);
+  if (prevSuggestions !== suggestions) {
+    setPrevSuggestions(suggestions);
+    setHighlightedIndex(0);
+  }
 
   let mode: FormulaAssistMode = 'hidden';
   if (enabled && !dismissed) {

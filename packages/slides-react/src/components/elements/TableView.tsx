@@ -35,17 +35,19 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
   // render drives this — thumbnails would measure a scaled/clipped box.
   const tableRef = useRef<HTMLTableElement>(null);
   const syncRef = useRef<() => void>(() => {});
-  syncRef.current = () => {
-    const node = tableRef.current;
-    if (!interactive || !node) return;
-    const rect = node.getBoundingClientRect();
-    const rows = node.tBodies[0] ? Array.from(node.tBodies[0].rows) : [];
-    const tops = rect.height > 0 ? rows.map((tr) => (tr.getBoundingClientRect().top - rect.top) / rect.height) : [];
-    tops.push(1);
-    tableMetrics.set(el.id, tops);
-    // Don't fight a live gesture (resize/move owns the frame until it commits).
-    if (!transient.get().liveFrames?.has(el.id)) deck.syncElementHeight(el.id, node.offsetHeight);
-  };
+  useLayoutEffect(() => {
+    syncRef.current = () => {
+      const node = tableRef.current;
+      if (!interactive || !node) return;
+      const rect = node.getBoundingClientRect();
+      const rows = node.tBodies[0] ? Array.from(node.tBodies[0].rows) : [];
+      const tops = rect.height > 0 ? rows.map((tr) => (tr.getBoundingClientRect().top - rect.top) / rect.height) : [];
+      tops.push(1);
+      tableMetrics.set(el.id, tops);
+      // Don't fight a live gesture (resize/move owns the frame until it commits).
+      if (!transient.get().liveFrames?.has(el.id)) deck.syncElementHeight(el.id, node.offsetHeight);
+    };
+  });
   // Re-measure on content reflow (ResizeObserver) and after every render — the
   // latter re-syncs the height when the frame itself changed (e.g. a resize).
   useEffect(() => {

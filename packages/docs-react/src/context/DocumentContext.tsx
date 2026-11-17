@@ -54,7 +54,9 @@ export function DocumentProvider({
   // Forward semantic comment events to the host. A ref keeps the listener
   // stable even if the app passes an inline onCommentEvent callback.
   const onCommentEventRef = useRef(onCommentEvent);
-  onCommentEventRef.current = onCommentEvent;
+  useEffect(() => {
+    onCommentEventRef.current = onCommentEvent;
+  });
   useEffect(() => {
     return document.on('commentEvent', (data) => {
       onCommentEventRef.current?.(data.payload as DocsCommentEvent);

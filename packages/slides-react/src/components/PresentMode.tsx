@@ -53,7 +53,9 @@ export function PresentMode({ onExit }: { onExit: () => void }): React.ReactElem
   // Count via a ref so the keydown listener (subscribed once) always reads a
   // fresh value without re-subscribing on every navigation.
   const lenRef = useRef(slideIds.length);
-  lenRef.current = slideIds.length;
+  useEffect(() => {
+    lenRef.current = slideIds.length;
+  }, [slideIds.length]);
   // Navigation/fade state (the slide we're heading toward + whether the commit
   // timer is armed). Advanced synchronously by go() via the pure scheduler so a
   // rapid or held key computes off the latest destination rather than the
@@ -100,7 +102,9 @@ export function PresentMode({ onExit }: { onExit: () => void }): React.ReactElem
   // Browsers that reserve Esc for leaving fullscreen (Firefox) never deliver the
   // keydown, so also end the presentation when fullscreen is left from outside.
   const onExitRef = useRef(onExit);
-  onExitRef.current = onExit;
+  useEffect(() => {
+    onExitRef.current = onExit;
+  }, [onExit]);
   useEffect(() => {
     const el = containerRef.current;
     // Any fullscreenchange that leaves `el` out of fullscreen means the user left fullscreen
@@ -176,14 +180,18 @@ export function PresentMode({ onExit }: { onExit: () => void }): React.ReactElem
   // Re-clamp if the deck shrinks below the current index (e.g. a collaborator
   // deletes slides while presenting) — otherwise slideIds[index] is undefined
   // and the stage renders a blank slide until the next navigation.
+  // The state is adjusted during render (no cascading effect render); the
+  // navigation ref can only be touched in an effect.
+  const clampedIndex = slideIds.length - 1;
+  if (slideIds.length > 0 && index > clampedIndex) {
+    setFading(false);
+    setIndex(clampedIndex);
+  }
   useEffect(() => {
-    if (slideIds.length > 0 && index > slideIds.length - 1) {
-      const clamped = slideIds.length - 1;
-      navRef.current = { pending: clamped, timerArmed: false };
-      setFading(false);
-      setIndex(clamped);
+    if (slideIds.length > 0 && navRef.current.pending > slideIds.length - 1) {
+      navRef.current = { pending: slideIds.length - 1, timerArmed: false };
     }
-  }, [index, slideIds.length]);
+  }, [slideIds.length]);
 
   // Keep the engine's active slide in sync so the filmstrip reflects the jump.
   useEffect(() => {

@@ -12,13 +12,13 @@ export default tseslint.config(
       js.configs.recommended,
       ...tseslint.configs.recommended,
       react.configs.flat.recommended,
+      reactHooks.configs.flat.recommended,
     ],
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    plugins: { 'react-hooks': reactHooks },
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -28,9 +28,6 @@ export default tseslint.config(
       ],
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
-      // Explicit v4-equivalent set; the plugin's recommended preset adds compiler rules (see B5).
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
     },
     settings: { react: { version: 'detect' } },
   },

@@ -11,7 +11,7 @@
 // dead. The surface measures its own rows, so controls that render nothing
 // (an inactive contextual format bar) collapse away and reappear live.
 
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { ToolbarMenuContext, type ToolbarMenuApi } from './toolbar-menu';
 
@@ -32,6 +32,13 @@ export interface ResponsiveToolbarProps {
 const MIN_ROW_W = 18;
 const MOBILE_MAX_W = 640;
 const Z = 2147483000; // above any editor overlay
+
+function subscribeMobile(onChange: () => void): () => void {
+  if (typeof window === 'undefined' || !window.matchMedia) return () => {};
+  const mq = window.matchMedia(`(max-width: ${MOBILE_MAX_W}px)`);
+  mq.addEventListener('change', onChange);
+  return () => mq.removeEventListener('change', onChange);
+}
 
 function isMobileNow(): boolean {
   return typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia(`(max-width: ${MOBILE_MAX_W}px)`).matches;
@@ -96,16 +103,14 @@ export function ResponsiveToolbar({
   const widths = useRef<number[]>([]);
   const moreW = useRef(40);
   const rowRefs = useRef<Record<number, HTMLElement | null>>({});
-  const rowW = useRef<Record<number, number>>({});
+  const [rowW, setRowW] = useState<Record<number, number>>({});
 
-  const initMobile = isMobileNow();
-  const [isMobile, setIsMobile] = useState(initMobile);
-  const [visible, setVisible] = useState(initMobile ? 0 : n);
+  const isMobile = useSyncExternalStore(subscribeMobile, isMobileNow, () => false);
+  const [visible, setVisible] = useState(() => (isMobileNow() ? 0 : n));
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
   const [modal, setModal] = useState<{ title: string; content: React.ReactNode } | null>(null);
   const [modalClosing, setModalClosing] = useState(false);
-  const [, bump] = useState(0);
 
   // Fade the modal out, then unmount it (keeps the surface open).
   const dismissModal = useCallback(() => {
@@ -121,15 +126,6 @@ export function ResponsiveToolbar({
   };
 
   useEffect(ensureStyles, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia(`(max-width: ${MOBILE_MAX_W}px)`);
-    const on = () => setIsMobile(mq.matches);
-    on();
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
 
   // Desktop: measure inline items and compute how many fit. Mobile: everything
   // lives in the sheet, so nothing stays inline.
@@ -160,6 +156,10 @@ export function ResponsiveToolbar({
     setVisible((prev) => (prev === count ? prev : count));
   }, [n, gap, isMobile]);
 
+  // Layout measurement has to land before paint (otherwise items flash/overflow),
+  // so the resulting setState must be synchronous here; it is guarded by the
+  // equality check in `measure`, so it cannot loop.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useLayoutEffect(() => { measure(); });
 
   useEffect(() => {
@@ -178,6 +178,7 @@ export function ResponsiveToolbar({
   // dividers collapse — and reappear when they become active.
   useLayoutEffect(() => {
     if (!open) return;
+    const next = { ...rowW };
     let changed = false;
     for (let i = firstOverflow; i < n; i++) {
       const el = rowRefs.current[i];
@@ -185,9 +186,11 @@ export function ResponsiveToolbar({
       // Measure the natural content, not the (possibly flex-grown) wrapper: an
       // empty control has no child, a divider has one thin child.
       const w = el.childElementCount === 0 ? 0 : (el.firstElementChild as HTMLElement).offsetWidth;
-      if (rowW.current[i] !== w) { rowW.current[i] = w; changed = true; }
+      if (next[i] !== w) { next[i] = w; changed = true; }
     }
-    if (changed) bump((x) => x + 1);
+    // Synchronous so hidden rows never paint; the `changed` guard stops the loop.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (changed) setRowW(next);
     // Runs every render so live content changes (a format bar becoming active
     // while the surface is open) re-measure; the `changed` guard stops the loop.
      
@@ -230,7 +233,7 @@ export function ResponsiveToolbar({
   const rows: React.ReactNode[] = [];
   for (let i = firstOverflow; i < n; i++) {
     const item = items[i];
-    const w = rowW.current[i];
+    const w = rowW[i];
     const hidden = w !== undefined && w < MIN_ROW_W; // empty control or divider
     const label = getLabel(item);
     // Only a labelled single-action control is clickable as a whole row (tap the
