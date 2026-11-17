@@ -190,7 +190,7 @@ export function ResponsiveToolbar({
     if (changed) bump((x) => x + 1);
     // Runs every render so live content changes (a format bar becoming active
     // while the surface is open) re-measure; the `changed` guard stops the loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   });
 
   // Anchor the desktop dropdown to the "⋯" (follows scroll/resize).

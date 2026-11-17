@@ -31,7 +31,7 @@
     "build": "npm run build -w @b32nio/spindle-shared && npm run build -w @b32nio/spindle-io && npm run build -w @b32nio/spindle-docs-core -w @b32nio/spindle-sheets-core -w @b32nio/spindle-slides-core -w @b32nio/spindle-transport-websocket && npm run build -w @b32nio/spindle-docs-react -w @b32nio/spindle-sheets-react -w @b32nio/spindle-slides-react",
     "dev": "npm run dev --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "lint": "eslint --ext .ts,.tsx packages",
+    "lint": "eslint packages",
     "check:network": "node scripts/check-no-network.mjs && node scripts/check-no-network.mjs --self-test",
     "type-check": "npm run type-check --workspaces",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
@@ -51,14 +51,13 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@babel/core": "^7.29.7",
+    "@eslint/js": "^9.0.0",
     "@playwright/test": "^1.64.1",
     "@types/ws": "^8.18.2",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^6.3.0",
-    "eslint": "^8.50.0",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "exceljs": "^4.4.0",
     "jszip": "^3.10.2",
@@ -68,13 +67,11 @@
     "tslib": "^2.9.1",
     "tsx": "^4.23.15",
     "typescript": "^5.2.0",
+    "typescript-eslint": "^8.0.0",
     "vite": "^8.3.8",
     "ws": "^8.23.0"
   },
   "overrides": {
-    "@typescript-eslint/typescript-estree": {
-      "minimatch": "^9.0.7"
-    },
     "uuid": "^11.1.1"
   },
   "engines": {

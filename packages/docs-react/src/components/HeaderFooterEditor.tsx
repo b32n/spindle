@@ -1065,7 +1065,7 @@ export const HeaderFooterEditor = memo(function HeaderFooterEditor({
       view.destroy();
       editorViewRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [isEditing, content, pageIndex, scale]);
   
   // Handle escape key

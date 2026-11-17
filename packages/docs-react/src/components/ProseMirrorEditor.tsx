@@ -125,7 +125,7 @@ const proseMirrorStyles = `
  * ActiveMarks extends ActiveState from docs-core
  * Includes both mark-level and block-level state
  */
-export interface ActiveMarks extends ActiveState {}
+export type ActiveMarks = ActiveState;
 
 export interface ProseMirrorEditorProps {
   initialContent?: unknown;
@@ -235,7 +235,7 @@ export const ProseMirrorEditor = forwardRef<ProseMirrorEditorRef, ProseMirrorEdi
         state,
         editable: () => editable,
         dispatchTransaction(transaction: Transaction) {
-          // eslint-disable-next-line @typescript-eslint/no-this-alias
+           
           const v = view ?? (this as unknown as EditorView);
           const newState = v.state.apply(transaction);
           v.updateState(newState);
