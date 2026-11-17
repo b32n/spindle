@@ -208,7 +208,7 @@ export class WebSocketProvider implements CollabProvider {
       try {
         h(status);
       } catch (err) {
-        // eslint-disable-next-line no-console
+         
         console.error('[WebSocketProvider] status handler threw:', err);
       }
     }
@@ -316,7 +316,7 @@ export class WebSocketProvider implements CollabProvider {
           h(payload);
         } catch (err) {
           // Don't let a single handler error tear down the whole dispatch.
-          // eslint-disable-next-line no-console
+           
           console.error('[WebSocketProvider] handler threw:', err);
         }
       }

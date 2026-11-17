@@ -386,7 +386,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         state,
         editable: () => editable,
         dispatchTransaction(transaction: Transaction) {
-          // eslint-disable-next-line @typescript-eslint/no-this-alias
+           
           const v = (view ?? (this as unknown as EditorView));
           const newState = v.state.apply(transaction);
           v.updateState(newState);
@@ -631,7 +631,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         imageInteractionRef.current?.destroy();
         imageInteractionRef.current = null;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }, [editorView]);
     
     // Scroll state detection - pause mouse processing during scroll
@@ -819,7 +819,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         }
       },
       getScrollContainer: () => viewportRef.current,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     }), [editorView, layout]);
     
     // Calculate total height
