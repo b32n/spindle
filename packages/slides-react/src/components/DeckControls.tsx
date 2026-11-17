@@ -3,7 +3,7 @@
 // Popovers; inside the ResponsiveToolbar overflow surface (useToolbarMenu) it
 // switches to menu rows that open a modal for their options.
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Plus, Palette, ChevronDown, SquareDashed } from 'lucide-react';
 import { BUILTIN_THEMES, getBuiltinTheme } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
@@ -27,8 +27,9 @@ export function DeckControls(): React.ReactElement {
   const slide = useSlide(activeSlideId);
   const menu = useToolbarMenu();
   const [open, setOpen] = useState<null | 'layout' | 'theme'>(null);
-  const layoutRef = useRef<HTMLButtonElement>(null);
-  const themeRef = useRef<HTMLButtonElement>(null);
+  // Callback refs into state: the Popover needs the anchor element at render time.
+  const [layoutEl, setLayoutEl] = useState<HTMLButtonElement | null>(null);
+  const [themeEl, setThemeEl] = useState<HTMLButtonElement | null>(null);
 
   const layouts = deck.getLayouts();
   const slideSize = deck.getSlideSize();
@@ -94,21 +95,21 @@ export function DeckControls(): React.ReactElement {
   // ── Inline mode: dropdown buttons with portal Popovers. ──
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <button ref={layoutRef} style={btn} title="New slide" onClick={() => setOpen(open === 'layout' ? null : 'layout')}>
+      <button ref={setLayoutEl} style={btn} title="New slide" onClick={() => setOpen(open === 'layout' ? null : 'layout')}>
         <Plus size={15} /> Slide <ChevronDown size={13} />
       </button>
       {open === 'layout' && (
-        <Popover anchor={layoutRef.current} onClose={() => setOpen(null)}>
+        <Popover anchor={layoutEl} onClose={() => setOpen(null)}>
           <div style={{ fontSize: 11, color: '#8a93a2', padding: '2px 6px 8px' }}>Add slide with layout</div>
           <div style={{ width: 300 }}>{layoutGrid((id) => { addSlide(id); setOpen(null); })}</div>
         </Popover>
       )}
 
-      <button ref={themeRef} style={btn} title="Theme" onClick={() => setOpen(open === 'theme' ? null : 'theme')}>
+      <button ref={setThemeEl} style={btn} title="Theme" onClick={() => setOpen(open === 'theme' ? null : 'theme')}>
         <Palette size={15} /> {theme.name} <ChevronDown size={13} />
       </button>
       {open === 'theme' && (
-        <Popover anchor={themeRef.current} onClose={() => setOpen(null)}>
+        <Popover anchor={themeEl} onClose={() => setOpen(null)}>
           <div style={{ minWidth: 200 }}>{themeList((name) => { deck.setTheme(getBuiltinTheme(name)); setOpen(null); })}</div>
         </Popover>
       )}

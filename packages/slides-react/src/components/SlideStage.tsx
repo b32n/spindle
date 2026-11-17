@@ -58,7 +58,9 @@ export function SlideStage({ zoom, interactive = false, onZoomChange }: SlideSta
   // Keep the live scale in a ref so the (non-passive) wheel listener doesn't
   // need re-subscribing on every zoom change.
   const scaleRef = useRef(scale);
-  scaleRef.current = scale;
+  useLayoutEffect(() => {
+    scaleRef.current = scale;
+  }, [scale]);
   // Where to re-anchor the view after a wheel zoom re-renders (cursor stable).
   const anchor = useRef<{ fx: number; fy: number; cx: number; cy: number } | null>(null);
 

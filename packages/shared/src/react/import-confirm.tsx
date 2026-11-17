@@ -89,7 +89,9 @@ export function useImportConfirm(mode: ImportConfirmation = 'dialog'): {
 } {
   const [pending, setPending] = useState<{ file: File; report: ImportLossReport; resolve: (ok: boolean) => void } | null>(null);
   const pendingRef = useRef(pending);
-  pendingRef.current = pending;
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
 
   // A dialog still open when the editor unmounts must not leave its Open promise hanging.
   useEffect(() => () => pendingRef.current?.resolve(false), []);

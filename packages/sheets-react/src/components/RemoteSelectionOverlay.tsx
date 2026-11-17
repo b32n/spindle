@@ -59,10 +59,7 @@ export function RemoteSelectionOverlay({
   useEffect(() => {
     const handle = workbook.getCollabHandle();
     awarenessRef.current = handle?.awareness ?? null;
-    if (!handle) {
-      setPeers([]);
-      return;
-    }
+    if (!handle) return;
     const refresh = (): void => {
       const localId = handle.ydoc.clientID;
       const out: RemotePeer[] = [];
@@ -79,6 +76,8 @@ export function RemoteSelectionOverlay({
     refresh();
     return () => {
       handle.awareness.off('change', refresh);
+      // Drop peers from the previous workbook/handle (cleanup, not a render-time reset).
+      setPeers([]);
     };
   }, [workbook]);
 
