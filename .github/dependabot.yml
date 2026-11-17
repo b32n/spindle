@@ -8,6 +8,13 @@ updates:
       day: monday
     open-pull-requests-limit: 5
     labels: [dependencies]
+    # Playwright is pinned: we use @playwright/test 1.64.1, and CI runs the Docker image
+    # mcr.microsoft.com/playwright:v1.64.1-noble (see .github/workflows/e2e.yml).
+    # Do not bump until microsoft/playwright#43994 (Firefox filechooser regression in 1.65) is fixed.
+    ignore:
+      - dependency-name: '@playwright/test'
+      - dependency-name: playwright
+      - dependency-name: playwright-core
     groups:
       prosemirror:
         patterns: ['prosemirror-*']
@@ -32,6 +39,12 @@ updates:
       day: monday
     open-pull-requests-limit: 3
     labels: [dependencies]
+    # Pinned with the root: @playwright/test 1.64.1 / mcr.microsoft.com/playwright:v1.64.1-noble
+    # until microsoft/playwright#43994 (Firefox filechooser regression in 1.65) is fixed.
+    ignore:
+      - dependency-name: '@playwright/test'
+      - dependency-name: playwright
+      - dependency-name: playwright-core
     groups:
       website-minor-patch:
         update-types: [minor, patch]
@@ -42,6 +55,12 @@ updates:
     schedule: { interval: weekly, day: monday }
     open-pull-requests-limit: 2
     labels: [dependencies]
+    # Pinned with the root: @playwright/test 1.64.1 / mcr.microsoft.com/playwright:v1.64.1-noble
+    # until microsoft/playwright#43994 (Firefox filechooser regression in 1.65) is fixed.
+    ignore:
+      - dependency-name: '@playwright/test'
+      - dependency-name: playwright
+      - dependency-name: playwright-core
     groups:
       docs-demo-minor-patch:
         update-types: [minor, patch]
@@ -50,6 +69,12 @@ updates:
     schedule: { interval: weekly, day: monday }
     open-pull-requests-limit: 2
     labels: [dependencies]
+    # Pinned with the root: @playwright/test 1.64.1 / mcr.microsoft.com/playwright:v1.64.1-noble
+    # until microsoft/playwright#43994 (Firefox filechooser regression in 1.65) is fixed.
+    ignore:
+      - dependency-name: '@playwright/test'
+      - dependency-name: playwright
+      - dependency-name: playwright-core
     groups:
       sheets-demo-minor-patch:
         update-types: [minor, patch]
@@ -58,6 +83,12 @@ updates:
     schedule: { interval: weekly, day: monday }
     open-pull-requests-limit: 2
     labels: [dependencies]
+    # Pinned with the root: @playwright/test 1.64.1 / mcr.microsoft.com/playwright:v1.64.1-noble
+    # until microsoft/playwright#43994 (Firefox filechooser regression in 1.65) is fixed.
+    ignore:
+      - dependency-name: '@playwright/test'
+      - dependency-name: playwright
+      - dependency-name: playwright-core
     groups:
       slides-demo-minor-patch:
         update-types: [minor, patch]
@@ -66,6 +97,12 @@ updates:
     schedule: { interval: weekly, day: monday }
     open-pull-requests-limit: 2
     labels: [dependencies]
+    # Pinned with the root: @playwright/test 1.64.1 / mcr.microsoft.com/playwright:v1.64.1-noble
+    # until microsoft/playwright#43994 (Firefox filechooser regression in 1.65) is fixed.
+    ignore:
+      - dependency-name: '@playwright/test'
+      - dependency-name: playwright
+      - dependency-name: playwright-core
     groups:
       collab-server-minor-patch:
         update-types: [minor, patch]
