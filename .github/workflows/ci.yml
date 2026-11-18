@@ -34,8 +34,19 @@ jobs:
       - run: npm run build
       - run: npm run type-check
       - run: npm test
-      # DOCX fidelity corpus against the built packages (goldens in fixtures/docx/goldens).
-      - run: npm run docs:docx-fidelity
+      # DOCX fidelity corpus against the built packages (goldens in fixtures/docx/goldens). Fails on
+      # snapshot drift; also writes a per-file loss / round-trip summary to the job summary and a
+      # JSON report for the artifact below.
+      - name: DOCX fidelity corpus
+        run: npm run docs:docx-fidelity -- --report md --report-out "$GITHUB_STEP_SUMMARY" --report json --report-out docx-fidelity-report.json
+      - name: Upload DOCX fidelity report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: docx-fidelity-report-node${{ matrix.node }}
+          path: docx-fidelity-report.json
+          if-no-files-found: ignore
+          retention-days: 14
       - run: npm run lint
       # Library source must not fetch anything or hard-code third-party hosts (docs/testing: privacy).
       - run: npm run check:network

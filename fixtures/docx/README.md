@@ -35,6 +35,38 @@ npm test -w @b32nio/spindle-docs-core -- fidelity   # the same checks as Jest te
 
 `DOCX_FIDELITY_UPDATE=1 npm test -w @b32nio/spindle-docs-core -- fidelity` also rewrites goldens.
 
+## The CI report
+
+The packages job runs the CLI with `--report`, which turns the run into something a reviewer can read
+without opening the goldens:
+
+```bash
+npm run docs:docx-fidelity -- --report md                         # print the markdown report
+npm run docs:docx-fidelity -- --report md --report-out out.md     # append it to a file
+npm run docs:docx-fidelity -- --report md --report-out "$GITHUB_STEP_SUMMARY" --report json --report-out docx-fidelity-report.json
+```
+
+In CI the markdown goes to the **job summary** (Actions run page, "Packages" job, one per Node version)
+and the JSON is uploaded as the `docx-fidelity-report-node<version>` artifact (14 days). The report
+lists, in this order:
+
+1. The verdict (all snapshots match, or which ones differ and how to update them) and one line of totals.
+2. A per-file table: import ok/error, warning count, loss occurrences and types, round-trip result
+   (clean, number of differences, or the failing stage), and whether the `model`, `loss` and
+   `roundtrip` snapshots matched.
+3. Loss totals by loss id across the corpus.
+4. Collapsible details per file (files with drift or problems first, and open): import error, warnings,
+   the itemised loss table, and the round-trip summary (differences by kind, block and character counts
+   before and after, the most frequent differing fields and the first differences).
+
+The summary stays under GitHub's 1 MiB limit by dropping per-file details (never the overview) and says
+which files were omitted; the JSON artifact always has everything. A loss or a round-trip difference is
+**not** a failure: only snapshot drift, a missing/orphaned golden, a false manifest claim or an
+`expectImportError` that disagrees with reality fails the job.
+
+The report code is format-neutral (`scripts/docx-fidelity/report.ts`: `FidelityReport`, `formatMarkdown`,
+`formatJson`). The XLSX and PPTX corpora can map their own harness results onto `FidelityReport` and reuse it.
+
 When an importer change shrinks a loss or alters the model, the goldens will fail. Re-run with
 `docs:docx-fidelity:update`, read the diff, and commit the new goldens in the same PR as the importer
 change. An improvement should be visible in review as a smaller loss snapshot.

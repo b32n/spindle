@@ -14,3 +14,6 @@ e2e/.report/
 blob-report/
 playwright-report/
 test-results/
+
+# DOCX fidelity report (written by CI / --report json)
+docx-fidelity-report.json
