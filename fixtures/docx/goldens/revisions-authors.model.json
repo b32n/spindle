@@ -1,0 +1,476 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Revision review: quarterly harbour report",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Four reviewers marked up this draft; tracked changes and comments are preserved.",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "1. Insertions and deletions",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Total tonnage handled in ",
+                "type": "text"
+              },
+              {
+                "text": " rose ",
+                "type": "text"
+              },
+              {
+                "text": "by roughly ",
+                "type": "text"
+              },
+              {
+                "text": " percent, ",
+                "type": "text"
+              },
+              {
+                "text": "while passenger traffic was flat.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Wind, salt and patience shaped the town more than any decree ever did. ",
+                "type": "text"
+              },
+              {
+                "text": "Nobody remembered who had painted the clock face blue, but everybody agreed it suited the square.",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "2. Moved text",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Before the move: ",
+                "type": "text"
+              },
+              {
+                "text": " (that sentence used to be here).",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The orchard on the northern slope produced more pears than the town could eat or trade. ",
+                "type": "text"
+              },
+              {
+                "text": " It now lives in this paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": " ",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Second move target: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "3. Formatting changes",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Run formatting: ",
+                "type": "text"
+              },
+              {
+                "bold": true,
+                "text": "now bold",
+                "type": "text"
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "color": "#c00000",
+                "italic": true,
+                "text": "now italic and red",
+                "type": "text"
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "fontSize": 14,
+                "text": "larger",
+                "type": "text"
+              },
+              {
+                "text": " and plain again.",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "This paragraph was centred by Alice (paragraph property change).",
+                "type": "text"
+              }
+            ],
+            "id": "block-15",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Promoted from body text to a heading by Chidi",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "4. Lists and tables",
+                "type": "text"
+              }
+            ],
+            "id": "block-17",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [],
+            "id": "block-18",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Inspect the sea wall",
+                "type": "text"
+              }
+            ],
+            "id": "block-19",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [],
+            "id": "block-20",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Publish the report",
+                "type": "text"
+              }
+            ],
+            "id": "block-21",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "id": "block-22",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Berth",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Vessels",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Fee",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-3"
+                  }
+                ],
+                "id": "row-1"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "North",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-4"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-5"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "40",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-6"
+                  }
+                ],
+                "id": "row-2"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [],
+                    "id": "cell-7"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-8"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-9"
+                  }
+                ],
+                "id": "row-3"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [],
+                    "id": "cell-10"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-11"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-12"
+                  }
+                ],
+                "id": "row-4"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "South",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-13"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-14"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "45",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-15"
+                  }
+                ],
+                "id": "row-5"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-23",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "5. Mixed revisions in one paragraph",
+                "type": "text"
+              }
+            ],
+            "id": "block-24",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Final paragraph: ",
+                "type": "text"
+              },
+              {
+                "text": "zeta.",
+                "type": "text"
+              }
+            ],
+            "id": "block-25",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A closing paragraph without markup, so the document ends cleanly. Letters addressed to the old mill were still delivered, although the mill had burned down years ago. A single bell, rung at noon, was enough to pause the market for exactly one breath.",
+                "type": "text"
+              }
+            ],
+            "id": "block-26",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Revision review"
+  },
+  "importError": null,
+  "warnings": []
+}

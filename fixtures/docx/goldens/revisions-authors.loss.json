@@ -1,0 +1,23 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 6,
+      "effect": "not imported",
+      "id": "docx.comments",
+      "label": "comment(s)"
+    },
+    {
+      "count": 13,
+      "effect": "applied (the deleted text is gone)",
+      "id": "docx.trackedDeletions",
+      "label": "tracked deletion(s)"
+    },
+    {
+      "count": 15,
+      "effect": "their text is not imported",
+      "id": "docx.trackedInsertions",
+      "label": "tracked insertion(s)"
+    }
+  ]
+}

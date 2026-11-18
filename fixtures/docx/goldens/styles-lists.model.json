@@ -1,0 +1,870 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "firstLineIndent": 28.8
+      }
+    },
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Harbour Records Handbook",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A compact reference that exercises styles, heading levels and several kinds of list.",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "1. Style inheritance",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Each lantern on the quay was numbered, oiled and logged by the keeper before dusk. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Plain callout: derived from Body Text with an indent and italic blue text.",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Warning callout: derived from the callout; bold and red.",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Large warning: three levels of basedOn, centred and larger.",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A sentence mixing ",
+                "type": "text"
+              },
+              {
+                "text": "accent words",
+                "type": "text"
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "text": "loud accents",
+                "type": "text"
+              },
+              {
+                "text": ", and ",
+                "type": "text"
+              },
+              {
+                "text": "inline code()",
+                "type": "text"
+              },
+              {
+                "text": ". Direct formatting follows: ",
+                "type": "text"
+              },
+              {
+                "bold": true,
+                "italic": true,
+                "text": "bold italic underline",
+                "type": "text",
+                "underline": true
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "strikethrough": true,
+                "text": "struck through",
+                "type": "text"
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "superscript": true,
+                "text": "2",
+                "type": "text"
+              },
+              {
+                "text": " and ",
+                "type": "text"
+              },
+              {
+                "subscript": true,
+                "text": "2",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Nobody remembered who had painted the clock face blue, but everybody agreed it suited the square. Letters addressed to the old mill were still delivered, although the mill had burned down years ago.",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Hanging-indent reference entries (first-line indent via a custom style):",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "[1] Rain arrived in short, orderly bursts, as if it had been scheduled by the same committee. Letters addressed to the old mill were still delivered, although the mill had burned down years ago.",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "[2] In the margin of the survey, someone had sketched a heron standing on one leg. Bread was baked in three sizes: small for travellers, medium for families, large for feast days.",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "[3] Letters addressed to the old mill were still delivered, although the mill had burned down years ago. The bridge keeper kept a tally of crossings using a string of coloured beads.",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "2. Headings at every level",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "2.1 Second level",
+                "type": "text"
+              }
+            ],
+            "id": "block-15",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "A careful reader will notice that the second ledger disagrees with the first by seven coins. Rain arrived in short, orderly bursts, as if it had been scheduled by the same committee.",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "2.1.1 Third level",
+                "type": "text"
+              }
+            ],
+            "id": "block-17",
+            "level": 3,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Wind, salt and patience shaped the town more than any decree ever did. In the margin of the survey, someone had sketched a heron standing on one leg.",
+                "type": "text"
+              }
+            ],
+            "id": "block-18",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "2.1.1.1 Fourth level",
+                "type": "text"
+              }
+            ],
+            "id": "block-19",
+            "level": 4,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Measurements were taken twice, once at dawn and once after the fishing boats returned.",
+                "type": "text"
+              }
+            ],
+            "id": "block-20",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "2.2 Another second level",
+                "type": "text"
+              }
+            ],
+            "id": "block-21",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Fifth level and sixth level follow",
+                "type": "text"
+              }
+            ],
+            "id": "block-22",
+            "level": 5,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Sixth level",
+                "type": "text"
+              }
+            ],
+            "id": "block-23",
+            "level": 6,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "3. Lists",
+                "type": "text"
+              }
+            ],
+            "id": "block-24",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Bulleted list (built-in List Bullet styles, two nesting levels):",
+                "type": "text"
+              }
+            ],
+            "id": "block-25",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Lanterns",
+                "type": "text"
+              }
+            ],
+            "id": "block-26",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Oil lamps",
+                "type": "text"
+              }
+            ],
+            "id": "block-27",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Candles",
+                "type": "text"
+              }
+            ],
+            "id": "block-28",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Mirrors",
+                "type": "text"
+              }
+            ],
+            "id": "block-29",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Ropes",
+                "type": "text"
+              }
+            ],
+            "id": "block-30",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Simple numbered list (List Number):",
+                "type": "text"
+              }
+            ],
+            "id": "block-31",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Open the ledger.",
+                "type": "text"
+              }
+            ],
+            "id": "block-32",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Record the tide.",
+                "type": "text"
+              }
+            ],
+            "id": "block-33",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Sign the entry.",
+                "type": "text"
+              }
+            ],
+            "id": "block-34",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Multilevel outline list (1. / 1.1 / 1.1.1 / (a)):",
+                "type": "text"
+              }
+            ],
+            "id": "block-35",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inspection",
+                "type": "text"
+              }
+            ],
+            "id": "block-36",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Hull",
+                "type": "text"
+              }
+            ],
+            "id": "block-37",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Planking",
+                "type": "text"
+              }
+            ],
+            "id": "block-38",
+            "level": 2,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Fastenings",
+                "type": "text"
+              }
+            ],
+            "id": "block-39",
+            "level": 3,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Keel",
+                "type": "text"
+              }
+            ],
+            "id": "block-40",
+            "level": 2,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Rigging",
+                "type": "text"
+              }
+            ],
+            "id": "block-41",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Repair",
+                "type": "text"
+              }
+            ],
+            "id": "block-42",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Order parts",
+                "type": "text"
+              }
+            ],
+            "id": "block-43",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Schedule yard",
+                "type": "text"
+              }
+            ],
+            "id": "block-44",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Sign-off",
+                "type": "text"
+              }
+            ],
+            "id": "block-45",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "A new list that restarts at 1 (separate w:num with startOverride):",
+                "type": "text"
+              }
+            ],
+            "id": "block-46",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "First again",
+                "type": "text"
+              }
+            ],
+            "id": "block-47",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Second again",
+                "type": "text"
+              }
+            ],
+            "id": "block-48",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Third again",
+                "type": "text"
+              }
+            ],
+            "id": "block-49",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "A list that starts at 5:",
+                "type": "text"
+              }
+            ],
+            "id": "block-50",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Fifth item",
+                "type": "text"
+              }
+            ],
+            "id": "block-51",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Sixth item",
+                "type": "text"
+              }
+            ],
+            "id": "block-52",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Letter / roman list:",
+                "type": "text"
+              }
+            ],
+            "id": "block-53",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Materials",
+                "type": "text"
+              }
+            ],
+            "id": "block-54",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Timber",
+                "type": "text"
+              }
+            ],
+            "id": "block-55",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Iron",
+                "type": "text"
+              }
+            ],
+            "id": "block-56",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Nails",
+                "type": "text"
+              }
+            ],
+            "id": "block-57",
+            "level": 2,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Labour",
+                "type": "text"
+              }
+            ],
+            "id": "block-58",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Carpenters",
+                "type": "text"
+              }
+            ],
+            "id": "block-59",
+            "level": 1,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "4. Paragraph formatting",
+                "type": "text"
+              }
+            ],
+            "id": "block-60",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "alignment": "left",
+            "content": [
+              {
+                "text": "This paragraph is left-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
+                "type": "text"
+              }
+            ],
+            "id": "block-61",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "This paragraph is centre-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
+                "type": "text"
+              }
+            ],
+            "id": "block-62",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "right",
+            "content": [
+              {
+                "text": "This paragraph is right-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
+                "type": "text"
+              }
+            ],
+            "id": "block-63",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "justify",
+            "content": [
+              {
+                "text": "This paragraph is justified-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
+                "type": "text"
+              }
+            ],
+            "id": "block-64",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Double-spaced with space before and after. In the margin of the survey, someone had sketched a heron standing on one leg. Maps of the estuary changed so often that the cartographer stopped signing them.",
+                "type": "text"
+              }
+            ],
+            "id": "block-65",
+            "spaceAfter": 24,
+            "spaceBefore": 16,
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Left indent 0.75in and first-line indent 0.3in. Bread was baked in three sizes: small for travellers, medium for families, large for feast days. The apprentice learned that a good index is simply a promise kept in alphabetical order.",
+                "type": "text"
+              }
+            ],
+            "id": "block-66",
+            "indent": 72,
+            "styleId": "paragraph-style-1",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-67",
+            "type": "page-break"
+          },
+          {
+            "content": [
+              {
+                "text": "5. After a page break",
+                "type": "text"
+              }
+            ],
+            "id": "block-68",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The bridge keeper kept a tally of crossings using a string of coloured beads. Winter inventories listed rope, tar, lamp glass, and a surprising quantity of buttons. Wind, salt and patience shaped the town more than any decree ever did.",
+                "type": "text"
+              }
+            ],
+            "id": "block-69",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A horizontal-rule-like paragraph border follows.",
+                "type": "text"
+              }
+            ],
+            "id": "block-70",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-71",
+            "type": "horizontal-rule"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 120,
+            "right": 120,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Styles and lists"
+  },
+  "importError": null,
+  "warnings": []
+}

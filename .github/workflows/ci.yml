@@ -34,6 +34,8 @@ jobs:
       - run: npm run build
       - run: npm run type-check
       - run: npm test
+      # DOCX fidelity corpus against the built packages (goldens in fixtures/docx/goldens).
+      - run: npm run docs:docx-fidelity
       - run: npm run lint
       # Library source must not fetch anything or hard-code third-party hosts (docs/testing: privacy).
       - run: npm run check:network
