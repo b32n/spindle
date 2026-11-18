@@ -66,14 +66,14 @@ describe('probes', () => {
   });
 
   it('counts hyperlinks, headings and lists', () => {
-    const p = body('<w:hyperlink w:anchor="x"/><w:pStyle w:val="Heading1"/><w:pStyle w:val="heading 2"/><w:numPr><w:ilvl w:val="2"/></w:numPr>', {
+    const p = body('<w:hyperlink w:anchor="x"/><w:pStyle w:val="Heading1"/><w:pStyle w:val="heading 2"/><w:numPr><w:ilvl w:val="2"/><w:numId w:val="3"/></w:numPr><w:numPr><w:numId w:val="4"/></w:numPr>', {
       'word/_rels/document.xml.rels': '<Relationships><Relationship Id="r" Type="http://x/hyperlink" Target="https://example.com" TargetMode="External"/></Relationships>',
-      'word/numbering.xml': '<w:numbering><w:startOverride w:val="1"/></w:numbering>',
+      'word/numbering.xml': '<w:numbering><w:num w:numId="3"><w:abstractNumId w:val="0"/><w:lvlOverride w:ilvl="0"><w:startOverride w:val="1"/></w:lvlOverride></w:num><w:num w:numId="4"><w:abstractNumId w:val="0"/></w:num></w:numbering>',
     });
     expect(count('hyperlinks.external', p)).toBe(1);
     expect(count('hyperlinks.internal', p)).toBe(1);
     expect(count('headings', p)).toBe(2);
-    expect(count('lists.numbered', p)).toBe(1);
+    expect(count('lists.numbered', p)).toBe(2);
     expect(count('lists.multilevel', p)).toBe(1);
     expect(count('lists.restart', p)).toBe(1);
   });
@@ -122,20 +122,21 @@ describe('probes', () => {
   it('counts package-level features', () => {
     const p = parts(
       {
-        'word/document.xml': '<w:document/>',
+        'word/document.xml': '<w:document><w:rFonts w:asciiTheme="minorHAnsi"/></w:document>',
         'word/theme/theme1.xml': '<a:theme/>',
         'word/styles.xml': '<w:styles><w:rFonts w:asciiTheme="minorHAnsi"/></w:styles>',
         'word/header1.xml': '<w:hdr><w:t>Mark</w:t><v:shape id="PowerPlusWaterMarkObject1"/></w:hdr>',
       },
       ['word/fonts/font1.odttf', 'word/charts/chart1.xml', 'customXml/item1.xml', 'word/diagrams/data1.xml', 'word/diagrams/drawing1.xml']
     );
-    for (const id of ['fonts.embedded', 'themes', 'charts', 'customXml', 'smartart', 'watermark', 'content.headersOnly']) expect([id, count(id, p) > 0]).toEqual([id, true]);
+    for (const id of ['fonts.embedded', 'themes', 'charts', 'customXml', 'smartart', 'watermark', 'headers.content']) expect([id, count(id, p) > 0]).toEqual([id, true]);
     expect(count('smartart', parts({}, ['word/diagrams/data1.xml']))).toBe(0);
     expect(count('themes', parts({ 'word/styles.xml': '<w:styles w:asciiTheme="x"/>' }))).toBe(0);
+    expect(count('themes', parts({ 'word/document.xml': '<w:document><w:color w:themeColor="accent1"/></w:document>' }, ['word/theme/theme1.xml']))).toBe(1);
   });
 
   it('counts text features', () => {
-    const p = body('<w:bidi/><w:t>漢字 😀 → </w:t><w:sym w:font="Symbol" w:char="F0B7"/><w:tab w:val="right" w:leader="dot"/>', {
+    const p = body('<w:bidi/><w:t>漢字 😀 → </w:t><w:sym w:font="Symbol" w:char="F0B7"/><w:tab w:val="right" w:leader="dot"/><w:ptab w:leader="dot"/>', {
       'word/settings.xml': '<w:settings><w:autoHyphenation/></w:settings>',
     });
     for (const id of ['i18n.rtl', 'i18n.cjk', 'text.emoji', 'text.symbols', 'typography.hyphenation', 'typography.tabLeaders']) expect([id, count(id, p) > 0]).toEqual([id, true]);
@@ -185,13 +186,19 @@ describe('coverage matrix', () => {
     { id: 'a', constructs: ['headings', 'sdt'] },
   ];
 
-  it('marks claimed constructs per fixture', () => {
-    const lines = buildMatrix(fixtures).split('\n');
-    expect(lines[0]).toBe('| Construct | `b` | `a` |');
-    expect(lines[1]).toBe('|---|:-:|:-:|');
+  it('lists the files and marks claimed constructs per fixture', () => {
+    const md = buildMatrix([
+      { id: 'b', constructs: ['sdt'], title: 'B title', source: { tool: 'tool B' } },
+      { id: 'a', constructs: ['headings', 'sdt'] },
+    ]);
+    const lines = md.split('\n');
+    expect(lines.slice(0, 4)).toEqual(['| # | Fixture | Title | Produced by |', '|--:|---|---|---|', '| 1 | `b` | B title | tool B |', '| 2 | `a` |  |  |']);
+    const header = lines.indexOf('| Construct | 1 | 2 |');
+    expect(header).toBeGreaterThan(0);
+    expect(lines[header + 1]).toBe('|---|:-:|:-:|');
     expect(lines.find((l) => l.includes('(`sdt`)'))).toMatch(/\| yes \| yes \|$/);
     expect(lines.find((l) => l.includes('(`headings`)'))).toMatch(/\|\s{2}\| yes \|$/);
-    expect(lines).toHaveLength(2 + CONSTRUCTS.length);
+    expect(lines).toHaveLength(header + 2 + CONSTRUCTS.length);
   });
 
   it('lists constructs nobody claims', () => {

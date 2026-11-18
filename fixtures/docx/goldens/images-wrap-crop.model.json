@@ -1,0 +1,286 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Images",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline, floating, wrapped and cropped pictures",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Images",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline images of different sizes: ",
+                "type": "text"
+              },
+              {
+                "alt": "blue rectangle",
+                "height": 60,
+                "src": "data:image/png;sha256=a2e36272782c2651;chars=228",
+                "type": "image",
+                "width": 96
+              },
+              {
+                "text": " ",
+                "type": "text"
+              },
+              {
+                "alt": "blue circle",
+                "height": 72,
+                "src": "data:image/png;sha256=d5a2866a677b81e2;chars=352",
+                "type": "image",
+                "width": 72
+              },
+              {
+                "text": " ",
+                "type": "text"
+              },
+              {
+                "alt": "diagonal band",
+                "height": 48,
+                "src": "data:image/png;sha256=a45109f60bfe29b9;chars=392",
+                "type": "image",
+                "width": 120
+              },
+              {
+                "text": " in running text.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "alt": "checkerboard, block-level inline image",
+            "height": 150,
+            "id": "block-5",
+            "src": "data:image/png;sha256=012db674810a3177;chars=836",
+            "type": "image",
+            "width": 240
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Figure ",
+                "type": "text"
+              },
+              {
+                "text": ": a centred inline image with a caption.",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The tide almanac measured three disputed boundary stones as the tide turned. Local fishing crews catalogued the dredging contract with unusual care. A visiting engineer rebuilt the fog-signal schedule while the market was closed. Local fishing crews rebuilt the old customs register after several rounds of discussion. The quay-side bakery recorded the fog-signal schedule after several rounds of discussion. The regional council reorganised the fog-signal schedule while the market was closed. Several market traders reorganised the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the eastern jetty during the long spring inspection.",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Our records office compared last season's tonnage figures and filed the result in triplicate. A junior surveyor relocated the eastern jetty and filed the result in triplicate. The tide almanac reviewed the lamp oil inventory during the long spring inspection. The winter inspection team recorded every outstanding repair order according to the standing orders. A junior surveyor inspected the old customs register according to the standing orders. A junior surveyor rebuilt the lamp oil inventory after several rounds of discussion. Local fishing crews documented a ledger of unpaid berth fees according to the standing orders. Every lighthouse keeper rebuilt a ledger of unpaid berth fees according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Every lighthouse keeper postponed the dredging contract according to the standing orders. The bridge authority catalogued the lamp oil inventory during the long spring inspection. Our records office measured a ledger of unpaid berth fees without waiting for approval. An experienced pilot audited the ferry timetable after several rounds of discussion. Our records office audited the dredging contract in time for the autumn meeting. Every lighthouse keeper compared a ledger of unpaid berth fees in time for the autumn meeting. Our records office measured the eastern jetty without waiting for approval.",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The harbour committee audited two dozen mooring rings before the first frost. A junior surveyor relocated a bundle of weathered charts as the tide turned. The northern ferry service audited the eastern jetty before the first frost. A junior surveyor documented the fog-signal schedule according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Text over an image placed behind the text. The regional council reorganised the ferry timetable to the satisfaction of nobody in particular. The bridge authority catalogued the old customs register before the first frost. Every lighthouse keeper documented the winter storage sheds with unusual care.",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Cropped images (a:srcRect) inside a table, next to an uncropped original:",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-13",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (0, 0, 0, 0)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (25000, 0, 0, 0)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-2"
+                  },
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (0, 30000, 30000, 0)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-3"
+                  },
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (10000, 10000, 40000, 40000)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-4"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Image-only paragraph followed by alt-text-less image: ",
+                "type": "text"
+              },
+              {
+                "alt": "circle image",
+                "height": 40,
+                "src": "data:image/png;sha256=3baa01fdd12a85aa;chars=228",
+                "type": "image",
+                "width": 40
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Images"
+  },
+  "importError": null,
+  "warnings": [
+    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported."
+  ]
+}

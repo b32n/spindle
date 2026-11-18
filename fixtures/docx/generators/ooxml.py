@@ -176,7 +176,7 @@ def tc(content, w=None, span=None, vmerge=None, shade=None, borders="", valign=N
     pr += extra
     if not content.startswith("<w:p") and not content.startswith("<w:tbl"):
         content = p(content)
-    if "<w:p>" not in content.split("</w:tc>")[-1] and not content.rstrip().endswith("</w:p>"):
+    if not content.rstrip().endswith("</w:p>"):
         content += p("")  # a cell must end with a paragraph
     return f"<w:tc><w:tcPr>{pr}</w:tcPr>{content}</w:tc>"
 
@@ -192,12 +192,14 @@ def tr(cells, header=False, cant_split=False, height=None):
     return f'<w:tr>{"<w:trPr>" + pr + "</w:trPr>" if pr else ""}{"".join(cells)}</w:tr>'
 
 
-def tbl(rows, grid, style="TableGrid", layout="fixed", borders="", width=None, look="04A0", extra=""):
+def tbl(rows, grid, style="TableGrid", layout="fixed", borders="", width=None, look="04A0", jc=None, cellmar="", extra=""):
     tw = width or sum(grid)
     tblw = '<w:tblW w:w="0" w:type="auto"/>' if layout == "autofit" else f'<w:tblW w:w="{tw}" w:type="dxa"/>'
     lay = '<w:tblLayout w:type="fixed"/>' if layout == "fixed" else ""
     bd = f"<w:tblBorders>{borders}</w:tblBorders>" if borders else ""
-    pr = f'<w:tblPr><w:tblStyle w:val="{style}"/>{tblw}{bd}{lay}<w:tblLook w:val="{look}"/>{extra}</w:tblPr>'
+    j = f'<w:jc w:val="{jc}"/>' if jc else ""
+    cm = f"<w:tblCellMar>{cellmar}</w:tblCellMar>" if cellmar else ""
+    pr = f'<w:tblPr><w:tblStyle w:val="{style}"/>{tblw}{j}{bd}{lay}{cm}<w:tblLook w:val="{look}"/>{extra}</w:tblPr>'
     g = "".join(f'<w:gridCol w:w="{c}"/>' for c in grid)
     return f"<w:tbl>{pr}<w:tblGrid>{g}</w:tblGrid>{''.join(rows)}</w:tbl>"
 
@@ -207,7 +209,8 @@ def border(side, val="single", sz=4, color="auto", space=0):
 
 
 # -------------------------------------------------------------- section props
-def sect(w=12240, h=15840, orient="portrait", margins=(1440, 1440, 1440, 1440), cols=None, refs="", extra="", kind=None):
+def sect(w=12240, h=15840, orient="portrait", margins=(1440, 1440, 1440, 1440), cols=None, refs="", extra="", kind=None,
+         pgnum=None, titlepg=False, borders="", lnnum=""):
     t, rgt, b, lft = margins
     o = ' w:orient="landscape"' if orient == "landscape" else ""
     sz = f'<w:pgSz w:w="{w}" w:h="{h}"{o}/>'
@@ -217,7 +220,13 @@ def sect(w=12240, h=15840, orient="portrait", margins=(1440, 1440, 1440, 1440), 
         n, space, sep = cols
         c = f'<w:cols w:num="{n}" w:space="{space}"{" w:sep=\"1\"" if sep else ""}/>'
     ty = f'<w:type w:val="{kind}"/>' if kind else ""
-    return f"<w:sectPr>{refs}{ty}{sz}{mar}{c}{extra}</w:sectPr>"
+    pn = ""
+    if pgnum:
+        fmt, start = pgnum
+        pn = "<w:pgNumType" + (f' w:fmt="{fmt}"' if fmt else "") + (f' w:start="{start}"' if start is not None else "") + "/>"
+    bd = f"<w:pgBorders>{borders}</w:pgBorders>" if borders else ""
+    tp = "<w:titlePg/>" if titlepg else ""
+    return f"<w:sectPr>{refs}{ty}{sz}{mar}{bd}{lnnum}{pn}{c}{tp}{extra}</w:sectPr>"
 
 
 def landscape_sect(**kw):
@@ -419,12 +428,12 @@ def numbering_xml(extra=""):
     return f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering {NS_DECL}>{absn}{nums}{extra}</w:numbering>'
 
 
-def settings_xml(extra="", footnote_pr=True):
+def settings_xml(extra="", footnote_pr=True, mid=""):
     fn = ""
     if footnote_pr:
         fn = '<w:footnotePr><w:footnote w:id="-1"/><w:footnote w:id="0"/></w:footnotePr><w:endnotePr><w:endnote w:id="-1"/><w:endnote w:id="0"/></w:endnotePr>'
     return (f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings {NS_DECL}>{extra}'
-            f'<w:defaultTabStop w:val="720"/><w:characterSpacingControl w:val="doNotCompress"/>{fn}'
+            f'<w:defaultTabStop w:val="720"/>{mid}<w:characterSpacingControl w:val="doNotCompress"/>{fn}'
             f'<w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>')
 
 

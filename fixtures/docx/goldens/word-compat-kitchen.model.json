@@ -1,0 +1,3275 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Contents",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Operations",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Vessel traffic",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Cargo",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Finance",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Outlook",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Executive summary",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "A junior surveyor catalogued three disputed boundary stones after several rounds of discussion. The harbour committee compared the sluice gate mechanism with unusual care. The grain exchange approved last season's tonnage figures according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Operations",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The regional council recorded the eastern jetty in time for the autumn meeting. Local fishing crews rebuilt the winter storage sheds and filed the result in triplicate. A visiting engineer compared an index of local pilots in time for the autumn meeting.",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Vessel traffic",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "An experienced pilot compared the dredging contract while the market was closed. The harbour committee compared last season's tonnage figures during the long spring inspection. The tide almanac repainted the dredging contract and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Cargo",
+                "type": "text"
+              }
+            ],
+            "id": "block-15",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Several market traders catalogued two dozen mooring rings in the presence of two witnesses. The bridge authority rebuilt three disputed boundary stones as the tide turned. Our records office inspected a draft of the annual report before the first frost.",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Finance",
+                "type": "text"
+              }
+            ],
+            "id": "block-17",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "A careful archivist measured a bundle of weathered charts according to the standing orders. A junior surveyor compared the ferry timetable before the first frost. The northern ferry service catalogued two dozen mooring rings using only the instruments on hand.",
+                "type": "text"
+              }
+            ],
+            "id": "block-18",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Outlook",
+                "type": "text"
+              }
+            ],
+            "id": "block-19",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The bridge authority reorganised the lamp oil inventory before the first frost. The bridge authority rebuilt two dozen mooring rings without waiting for approval. Every lighthouse keeper postponed every outstanding repair order to the satisfaction of nobody in particular.",
+                "type": "text"
+              }
+            ],
+            "id": "block-20",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Fields and cross-references",
+                "type": "text"
+              }
+            ],
+            "id": "block-21",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The key figure of this report is 42 vessels per day.",
+                "type": "text"
+              }
+            ],
+            "id": "block-22",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "As stated on page ",
+                "type": "text"
+              },
+              {
+                "text": ": ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-23",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Figure ",
+                "type": "text"
+              },
+              {
+                "text": " shows the quay; Figure ",
+                "type": "text"
+              },
+              {
+                "text": " shows the lighthouse; Table ",
+                "type": "text"
+              },
+              {
+                "text": " lists berths.",
+                "type": "text"
+              }
+            ],
+            "id": "block-24",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Generated on ",
+                "type": "text"
+              },
+              {
+                "text": " at ",
+                "type": "text"
+              },
+              {
+                "text": " by ",
+                "type": "text"
+              },
+              {
+                "text": " for ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-25",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Page ",
+                "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
+              },
+              {
+                "text": " of ",
+                "type": "text"
+              },
+              {
+                "fieldType": "totalPages",
+                "type": "dynamicField"
+              },
+              {
+                "text": " (section pages: ",
+                "type": "text"
+              },
+              {
+                "text": "; words: ",
+                "type": "text"
+              },
+              {
+                "text": ").",
+                "type": "text"
+              }
+            ],
+            "id": "block-26",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Current chapter: ",
+                "type": "text"
+              },
+              {
+                "text": ". Conditional: ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-27",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "External field link: ",
+                "type": "text"
+              },
+              {
+                "text": " and run link: ",
+                "type": "text"
+              },
+              {
+                "href": "https://example.org/tides",
+                "text": "example.org/tides",
+                "type": "link"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-28",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Internal links: ",
+                "type": "text"
+              },
+              {
+                "text": "jump to the key figure",
+                "type": "text"
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "text": "jump to Findings",
+                "type": "text"
+              },
+              {
+                "text": "; a mail link: ",
+                "type": "text"
+              },
+              {
+                "href": "mailto:records@example.com",
+                "text": "records@example.com",
+                "type": "link"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-29",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": " (unresolved mail-merge field) and a ",
+                "type": "text"
+              }
+            ],
+            "id": "block-30",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Simple field: ",
+                "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
+              },
+              {
+                "text": " and a nested field: ",
+                "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
+              },
+              {
+                "text": "single page",
+                "type": "text"
+              }
+            ],
+            "id": "block-31",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Executive summary",
+                "type": "text"
+              }
+            ],
+            "id": "block-32",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The regional council approved the eastern jetty to the satisfaction of nobody in particular. The tide almanac approved a bundle of weathered charts with unusual care. The northern ferry service inspected the sluice gate mechanism and filed the result in triplicate. The tide almanac documented the old customs register in the presence of two witnesses. The grain exchange negotiated the dredging contract in the presence of two witnesses.",
+                "type": "text"
+              }
+            ],
+            "id": "block-33",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Spelling errors are marked by ",
+                "type": "text"
+              },
+              {
+                "text": "teh",
+                "type": "text"
+              },
+              {
+                "text": " editor, ",
+                "type": "text"
+              },
+              {
+                "text": "page-break markers are cached, ",
+                "type": "text"
+              },
+              {
+                "text": " is a smart-tagged place, ",
+                "type": "text"
+              },
+              {
+                "text": "noProof text.",
+                "type": "text"
+              }
+            ],
+            "id": "block-34",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Throughput rose across all four quarters.",
+                "type": "text"
+              },
+              {
+                "text": " ",
+                "type": "text"
+              },
+              {
+                "href": "https://example.com/report",
+                "text": "Full dataset",
+                "type": "link"
+              }
+            ],
+            "id": "block-35",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Operations",
+                "type": "text"
+              }
+            ],
+            "id": "block-36",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Vessel traffic",
+                "type": "text"
+              }
+            ],
+            "id": "block-37",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline images of different sizes: ",
+                "type": "text"
+              },
+              {
+                "alt": "blue rectangle",
+                "height": 60,
+                "src": "data:image/png;sha256=a2e36272782c2651;chars=228",
+                "type": "image",
+                "width": 96
+              },
+              {
+                "text": " ",
+                "type": "text"
+              },
+              {
+                "alt": "blue circle",
+                "height": 72,
+                "src": "data:image/png;sha256=d5a2866a677b81e2;chars=352",
+                "type": "image",
+                "width": 72
+              },
+              {
+                "text": " ",
+                "type": "text"
+              },
+              {
+                "alt": "diagonal band",
+                "height": 48,
+                "src": "data:image/png;sha256=a45109f60bfe29b9;chars=392",
+                "type": "image",
+                "width": 120
+              },
+              {
+                "text": " in running text.",
+                "type": "text"
+              }
+            ],
+            "id": "block-38",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "alt": "checkerboard, block-level inline image",
+            "height": 150,
+            "id": "block-39",
+            "src": "data:image/png;sha256=012db674810a3177;chars=836",
+            "type": "image",
+            "width": 240
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Figure ",
+                "type": "text"
+              },
+              {
+                "text": ": a centred inline image with a caption.",
+                "type": "text"
+              }
+            ],
+            "id": "block-40",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The tide almanac measured three disputed boundary stones as the tide turned. Local fishing crews catalogued the dredging contract with unusual care. A visiting engineer rebuilt the fog-signal schedule while the market was closed. Local fishing crews rebuilt the old customs register after several rounds of discussion. The quay-side bakery recorded the fog-signal schedule after several rounds of discussion. The regional council reorganised the fog-signal schedule while the market was closed. Several market traders reorganised the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the eastern jetty during the long spring inspection.",
+                "type": "text"
+              }
+            ],
+            "id": "block-41",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Our records office compared last season's tonnage figures and filed the result in triplicate. A junior surveyor relocated the eastern jetty and filed the result in triplicate. The tide almanac reviewed the lamp oil inventory during the long spring inspection. The winter inspection team recorded every outstanding repair order according to the standing orders. A junior surveyor inspected the old customs register according to the standing orders. A junior surveyor rebuilt the lamp oil inventory after several rounds of discussion. Local fishing crews documented a ledger of unpaid berth fees according to the standing orders. Every lighthouse keeper rebuilt a ledger of unpaid berth fees according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-42",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Every lighthouse keeper postponed the dredging contract according to the standing orders. The bridge authority catalogued the lamp oil inventory during the long spring inspection. Our records office measured a ledger of unpaid berth fees without waiting for approval. An experienced pilot audited the ferry timetable after several rounds of discussion. Our records office audited the dredging contract in time for the autumn meeting. Every lighthouse keeper compared a ledger of unpaid berth fees in time for the autumn meeting. Our records office measured the eastern jetty without waiting for approval.",
+                "type": "text"
+              }
+            ],
+            "id": "block-43",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The harbour committee audited two dozen mooring rings before the first frost. A junior surveyor relocated a bundle of weathered charts as the tide turned. The northern ferry service audited the eastern jetty before the first frost. A junior surveyor documented the fog-signal schedule according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-44",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Text over an image placed behind the text. The regional council reorganised the ferry timetable to the satisfaction of nobody in particular. The bridge authority catalogued the old customs register before the first frost. Every lighthouse keeper documented the winter storage sheds with unusual care.",
+                "type": "text"
+              }
+            ],
+            "id": "block-45",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Cropped images (a:srcRect) inside a table, next to an uncropped original:",
+                "type": "text"
+              }
+            ],
+            "id": "block-46",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-47",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (0, 0, 0, 0)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (25000, 0, 0, 0)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-2"
+                  },
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (0, 30000, 30000, 0)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-3"
+                  },
+                  {
+                    "content": [
+                      {
+                        "alt": "crop (10000, 10000, 40000, 40000)",
+                        "height": 160,
+                        "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                        "type": "image",
+                        "width": 160
+                      }
+                    ],
+                    "id": "cell-4"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Image-only paragraph followed by alt-text-less image: ",
+                "type": "text"
+              },
+              {
+                "alt": "circle image",
+                "height": 40,
+                "src": "data:image/png;sha256=3baa01fdd12a85aa;chars=228",
+                "type": "image",
+                "width": 40
+              }
+            ],
+            "id": "block-48",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Cargo",
+                "type": "text"
+              }
+            ],
+            "id": "block-49",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "alignment": "center",
+            "content": [],
+            "id": "block-50",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Chart 1: Vessels per month.",
+                "type": "text"
+              }
+            ],
+            "id": "block-51",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [],
+            "id": "block-52",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Chart 2: Tonnage trend.",
+                "type": "text"
+              }
+            ],
+            "id": "block-53",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [],
+            "id": "block-54",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Chart 3: Cargo share.",
+                "type": "text"
+              }
+            ],
+            "id": "block-55",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Embedded worksheet object (OLE package with a preview image): ",
+                "type": "text"
+              }
+            ],
+            "id": "block-56",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Finance",
+                "type": "text"
+              }
+            ],
+            "id": "block-57",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Nested tables (outer, inner, innermost):",
+                "type": "text"
+              }
+            ],
+            "id": "block-58",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-59",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Outer 1",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-5"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Outer 2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-6"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Outer 3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-7"
+                  }
+                ],
+                "id": "row-2"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "a",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-8"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Contains a nested table:",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-9"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "c",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-10"
+                  }
+                ],
+                "id": "row-3"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "d",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-11"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "e",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-12"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "f",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-13"
+                  }
+                ],
+                "id": "row-4"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-60",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Merged cells (horizontal and vertical, with a repeating three-row header):",
+                "type": "text"
+              }
+            ],
+            "id": "block-61",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-62",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "colspan": 5,
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Quarter schedule",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-14"
+                  }
+                ],
+                "id": "row-5"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Berth",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-15",
+                    "rowspan": 2
+                  },
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "Week 1-2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-16"
+                  },
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "Week 3-4",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-17"
+                  }
+                ],
+                "id": "row-6"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "In",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-18"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Out",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-19"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "In",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-20"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Out",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-21"
+                  }
+                ],
+                "id": "row-7"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "North",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-22",
+                    "rowspan": 2
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-23"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "9",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-24"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "14",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-25"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "11",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-26"
+                  }
+                ],
+                "id": "row-8"
+              },
+              {
+                "cells": [
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "note",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-27"
+                  },
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "n/a",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-28"
+                  }
+                ],
+                "id": "row-9"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "East",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-29",
+                    "rowspan": 2
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "7",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-30",
+                    "rowspan": 2
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-31"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "8",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-32"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-33"
+                  }
+                ],
+                "id": "row-10"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "4",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-34"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "5",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-35"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "6",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-36"
+                  }
+                ],
+                "id": "row-11"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Total",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-37"
+                  },
+                  {
+                    "colspan": 4,
+                    "content": [
+                      {
+                        "text": "all berths combined",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-38"
+                  }
+                ],
+                "id": "row-12"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-63",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Borders and shading:",
+                "type": "text"
+              }
+            ],
+            "id": "block-64",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-65",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Style",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-39"
+                  },
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Fill",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-40"
+                  },
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Notes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-41"
+                  }
+                ],
+                "id": "row-13"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Double / dashed / thick / dotted",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-42"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Solid green",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-43"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Light blue",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-44"
+                  }
+                ],
+                "id": "row-14"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "No borders",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-45"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Grey",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-46"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bottom aligned",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-47"
+                  }
+                ],
+                "id": "row-15"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-66",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A banded table style with a repeating header row across pages:",
+                "type": "text"
+              }
+            ],
+            "id": "block-67",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-68",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Date",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-48"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Vessel",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-49"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Cargo",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-50"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Tonnes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-51"
+                  }
+                ],
+                "id": "row-16"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-01",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-52"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 1",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-53"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-54"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "120",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-55"
+                  }
+                ],
+                "id": "row-17"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-02",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-56"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-57"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-58"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "157",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-59"
+                  }
+                ],
+                "id": "row-18"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-03",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-60"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-61"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-62"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "194",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-63"
+                  }
+                ],
+                "id": "row-19"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-04",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-64"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 4",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-65"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-66"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "231",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-67"
+                  }
+                ],
+                "id": "row-20"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-05",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-68"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 5",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-69"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-70"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "268",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-71"
+                  }
+                ],
+                "id": "row-21"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-06",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-72"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 6",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-73"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-74"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "305",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-75"
+                  }
+                ],
+                "id": "row-22"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-07",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-76"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 7",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-77"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-78"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "342",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-79"
+                  }
+                ],
+                "id": "row-23"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-08",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-80"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 8",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-81"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-82"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "379",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-83"
+                  }
+                ],
+                "id": "row-24"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-09",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-84"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 9",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-85"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-86"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "416",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-87"
+                  }
+                ],
+                "id": "row-25"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-10",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-88"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 10",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-89"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-90"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "453",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-91"
+                  }
+                ],
+                "id": "row-26"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-11",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-92"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 11",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-93"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-94"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "490",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-95"
+                  }
+                ],
+                "id": "row-27"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-96"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-97"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-98"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "527",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-99"
+                  }
+                ],
+                "id": "row-28"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-13",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-100"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 13",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-101"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-102"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "564",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-103"
+                  }
+                ],
+                "id": "row-29"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-14",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-104"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 14",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-105"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-106"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "601",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-107"
+                  }
+                ],
+                "id": "row-30"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-15",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-108"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 15",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-109"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-110"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "638",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-111"
+                  }
+                ],
+                "id": "row-31"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-16",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-112"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 16",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-113"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-114"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "675",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-115"
+                  }
+                ],
+                "id": "row-32"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-17",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-116"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 17",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-117"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-118"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "712",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-119"
+                  }
+                ],
+                "id": "row-33"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-18",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-120"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 18",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-121"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-122"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "749",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-123"
+                  }
+                ],
+                "id": "row-34"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-19",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-124"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 19",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-125"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-126"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "786",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-127"
+                  }
+                ],
+                "id": "row-35"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-20",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-128"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 20",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-129"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-130"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "823",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-131"
+                  }
+                ],
+                "id": "row-36"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-21",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-132"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 21",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-133"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-134"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "860",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-135"
+                  }
+                ],
+                "id": "row-37"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-22",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-136"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 22",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-137"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-138"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "897",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-139"
+                  }
+                ],
+                "id": "row-38"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-23",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-140"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 23",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-141"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-142"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "934",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-143"
+                  }
+                ],
+                "id": "row-39"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-24",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-144"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 24",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-145"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-146"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "971",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-147"
+                  }
+                ],
+                "id": "row-40"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-25",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-148"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 25",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-149"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-150"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "1008",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-151"
+                  }
+                ],
+                "id": "row-41"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-26",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-152"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 26",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-153"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-154"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "145",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-155"
+                  }
+                ],
+                "id": "row-42"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-27",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-156"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 27",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-157"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-158"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "182",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-159"
+                  }
+                ],
+                "id": "row-43"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-28",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-160"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 28",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-161"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-162"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "219",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-163"
+                  }
+                ],
+                "id": "row-44"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-01",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-164"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 29",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-165"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-166"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "256",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-167"
+                  }
+                ],
+                "id": "row-45"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-02",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-168"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 30",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-169"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-170"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "293",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-171"
+                  }
+                ],
+                "id": "row-46"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-03",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-172"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 31",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-173"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-174"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "330",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-175"
+                  }
+                ],
+                "id": "row-47"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-04",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-176"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 32",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-177"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-178"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "367",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-179"
+                  }
+                ],
+                "id": "row-48"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-05",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-180"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 33",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-181"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-182"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "404",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-183"
+                  }
+                ],
+                "id": "row-49"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-06",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-184"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 34",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-185"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-186"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "441",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-187"
+                  }
+                ],
+                "id": "row-50"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-69",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Autofit, percentage widths, cell margins and rotated text:",
+                "type": "text"
+              }
+            ],
+            "id": "block-70",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-71",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "autofit col 1",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-188"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "autofit column two is wider",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-189"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "c3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-190"
+                  }
+                ],
+                "id": "row-51"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "x",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-191"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "y",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-192"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "z",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-193"
+                  }
+                ],
+                "id": "row-52"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-72",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-73",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "30%",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-194"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "70% (percentage widths, autofit)",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-195"
+                  }
+                ],
+                "id": "row-53"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-74",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-75",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Rotated",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-196"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "The harbour committee repainted the winter storage sheds according to the standing orders.",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-197"
+                  }
+                ],
+                "id": "row-54"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-76",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Outlook",
+                "type": "text"
+              }
+            ],
+            "id": "block-77",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The regional council mapped an index of local pilots before the first frost. Local fishing crews compared three disputed boundary stones according to the standing orders. A careful archivist repainted two dozen mooring rings after several rounds of discussion. Every lighthouse keeper reorganised the sluice gate mechanism according to the standing orders. The winter inspection team repainted three disputed boundary stones to the satisfaction of nobody in particular.",
+                "type": "text"
+              }
+            ],
+            "id": "block-78",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A paragraph that wraps around an anchored shape containing text. ",
+                "type": "text"
+              },
+              {
+                "text": "Our records office compared an index of local pilots before the first frost. A visiting engineer relocated a draft of the annual report during the long spring inspection. Every lighthouse keeper mapped a ledger of unpaid berth fees without waiting for approval. The tide almanac compared the dredging contract as the tide turned. A careful archivist documented every outstanding repair order during the long spring inspection. The regional council negotiated last season's tonnage figures after several rounds of discussion.",
+                "type": "text"
+              }
+            ],
+            "id": "block-79",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline shapes: ",
+                "type": "text"
+              },
+              {
+                "text": "  ",
+                "type": "text"
+              },
+              {
+                "text": "  ",
+                "type": "text"
+              },
+              {
+                "text": "  ",
+                "type": "text"
+              },
+              {
+                "text": "  ",
+                "type": "text"
+              },
+              {
+                "text": "  ",
+                "type": "text"
+              }
+            ],
+            "id": "block-80",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A shape group with two children containing text: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-81",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A legacy VML text box (Word 2003 style) that contains a table: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-82",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A SmartArt diagram (basic block list) with its cached fallback drawing:",
+                "type": "text"
+              }
+            ],
+            "id": "block-83",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-84",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline controls: name ",
+                "type": "text"
+              },
+              {
+                "text": ", berth ",
+                "type": "text"
+              },
+              {
+                "text": ", vessel ",
+                "type": "text"
+              },
+              {
+                "text": ", arrival ",
+                "type": "text"
+              },
+              {
+                "text": ", inspected ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-85",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-86",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-87",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Quantity",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-198"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-199"
+                  }
+                ],
+                "id": "row-55"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Data-bound control: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-88",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Legacy (Word 97) form fields:",
+                "type": "text"
+              }
+            ],
+            "id": "block-89",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Captain: ",
+                "type": "text"
+              },
+              {
+                "text": "   Cleared: ",
+                "type": "text"
+              },
+              {
+                "text": "   Flag colour: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-90",
+            "type": "paragraph"
+          }
+        ],
+        "footer": {
+          "blocks": [
+            {
+              "alignment": "center",
+              "content": [
+                {
+                  "text": "Quarterly Report — page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "header": {
+          "blocks": [
+            {
+              "content": [
+                {
+                  "text": "Marguerite Harbour Authority",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Quarterly harbour operations report"
+  },
+  "importError": null,
+  "warnings": [
+    "Unsupported field code \"PAGEREF _Toc9000 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9001 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9002 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9003 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9004 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9005 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF keyfigure \\h\" — its cached value was dropped.",
+    "Unsupported field code \"REF keyfigure \\h\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Table \\* ARABIC\" — its cached value was dropped.",
+    "Unsupported field code \"DATE \\@ \"yyyy-MM-dd\"\" — its cached value was dropped.",
+    "Unsupported field code \"TIME \\@ \"HH:mm\"\" — its cached value was dropped.",
+    "Unsupported field code \"AUTHOR\" — its cached value was dropped.",
+    "Unsupported field code \"TITLE\" — its cached value was dropped.",
+    "Unsupported field code \"SECTIONPAGES\" — its cached value was dropped.",
+    "Unsupported field code \"NUMWORDS\" — its cached value was dropped.",
+    "Unsupported field code \"STYLEREF \"Heading 1\"\" — its cached value was dropped.",
+    "Unsupported field code \"IF 1 = 1 \"yes\" \"no\"\" — its cached value was dropped.",
+    "Unsupported field code \"HYPERLINK \"https://example.com/harbour\"\" — its cached value was dropped.",
+    "Unsupported field code \"MERGEFIELD Recipient \\* MERGEFORMAT\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "Unsupported field code \"FORMTEXT\" — its cached value was dropped.",
+    "Unsupported field code \"FORMCHECKBOX\" — its cached value was dropped.",
+    "Unsupported field code \"FORMDROPDOWN\" — its cached value was dropped.",
+    "Unsupported field code \"STYLEREF \"Heading 1\"\" — its cached value was dropped."
+  ]
+}

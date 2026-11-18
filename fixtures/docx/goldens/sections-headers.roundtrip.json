@@ -1,0 +1,46 @@
+{
+  "diff": {
+    "added": 0,
+    "after": {
+      "blocks": {
+        "heading": 3,
+        "paragraph": 33
+      },
+      "sections": 4,
+      "textChars": 10859
+    },
+    "before": {
+      "blocks": {
+        "heading": 3,
+        "paragraph": 33
+      },
+      "sections": 4,
+      "textChars": 10859
+    },
+    "byField": {
+      "changed sections[].pageConfig.size.h": 1,
+      "changed sections[].pageConfig.size.w": 1
+    },
+    "changed": 2,
+    "entries": [
+      {
+        "after": "816",
+        "before": "1056",
+        "kind": "changed",
+        "path": "sections[1].pageConfig.size.h"
+      },
+      {
+        "after": "1056",
+        "before": "816",
+        "kind": "changed",
+        "path": "sections[1].pageConfig.size.w"
+      }
+    ],
+    "removed": 0,
+    "total": 2,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

@@ -1,0 +1,36 @@
+{
+  "diff": {
+    "added": 0,
+    "after": {
+      "blocks": {
+        "heading": 85,
+        "image": 12,
+        "list-item": 120,
+        "paragraph": 574,
+        "table": 12
+      },
+      "sections": 15,
+      "textChars": 229400
+    },
+    "before": {
+      "blocks": {
+        "heading": 85,
+        "image": 12,
+        "list-item": 120,
+        "paragraph": 574,
+        "table": 12
+      },
+      "sections": 15,
+      "textChars": 229400
+    },
+    "byField": {},
+    "changed": 0,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

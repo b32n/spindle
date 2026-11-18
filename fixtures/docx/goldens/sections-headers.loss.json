@@ -1,0 +1,11 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "laid out as a single column",
+      "id": "docx.columns",
+      "label": "multi-column section(s)"
+    }
+  ]
+}

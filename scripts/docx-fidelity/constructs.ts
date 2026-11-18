@@ -50,6 +50,13 @@ export function isWellFormed(xml: string): boolean {
 }
 
 const lists = (p: DocxParts) => part(p, 'word/numbering.xml');
+/** Paragraphs that use a list instance (w:num) carrying a startOverride, i.e. a restarted or re-numbered list. */
+function restartedListParagraphs(p: DocxParts): number {
+  const restarted = new Set(
+    [...lists(p).matchAll(/<w:num\b[^>]*\bw:numId="(\d+)"[^>]*>((?:(?!<\/w:num>)[\s\S])*)<\/w:num>/g)].filter((m) => /<w:startOverride\b/.test(m[2])).map((m) => m[1])
+  );
+  return [...doc(p).matchAll(/<w:numId w:val="(\d+)"/g)].filter((m) => restarted.has(m[1])).length;
+}
 const instr = (p: DocxParts, re: RegExp) =>
   n(
     [...doc(p).matchAll(/<w:instrText[^>]*>([^<]*)<\/w:instrText>/g)].map((m) => m[1]).join('\n') +
@@ -80,7 +87,7 @@ export const CONSTRUCTS: Construct[] = [
   { id: 'headings', label: 'Headings', count: (p) => n(doc(p), /<w:pStyle w:val="(?:Heading|heading)\s?[1-9]"/g) },
   { id: 'lists.numbered', label: 'Numbered / bulleted lists', count: (p) => n(doc(p), /<w:numPr>/g) },
   { id: 'lists.multilevel', label: 'Multilevel lists', count: (p) => n(doc(p), /<w:ilvl w:val="[1-8]"/g) },
-  { id: 'lists.restart', label: 'List restarts / start overrides', count: (p) => n(lists(p), /<w:startOverride\b/g) },
+  { id: 'lists.restart', label: 'List restarts / start overrides (used by a paragraph)', count: (p) => restartedListParagraphs(p) },
   { id: 'styles.inheritance', label: 'Style inheritance (basedOn)', count: (p) => n(part(p, 'word/styles.xml'), /<w:basedOn\b/g) },
   { id: 'styles.linked', label: 'Linked paragraph/character styles', count: (p) => n(part(p, 'word/styles.xml'), /<w:link\b/g) },
   { id: 'tables.nested', label: 'Nested tables', count: (p) => n(doc(p), /<w:tc>(?:(?!<\/w:tc>)[\s\S])*?<w:tbl>/g) },
@@ -107,13 +114,13 @@ export const CONSTRUCTS: Construct[] = [
   { id: 'sdt', label: 'Content controls (SDT)', count: (p) => n(doc(p), /<w:sdt\b/g) },
   { id: 'forms.legacy', label: 'Legacy form fields', count: (p) => n(doc(p), /<w:ffData\b/g) },
   { id: 'fonts.embedded', label: 'Embedded fonts', count: (p) => p.names.filter((x) => /^word\/fonts\//.test(x)).length },
-  { id: 'themes', label: 'Theme colours / fonts', count: (p) => (p.names.some((x) => /^word\/theme\/theme\d+\.xml$/.test(x)) ? n(doc(p), /w:themeColor=|w:asciiTheme=/g) + n(part(p, 'word/styles.xml'), /w:asciiTheme=|w:themeColor=/g) : 0) },
+  { id: 'themes', label: 'Theme colours / fonts used in content', count: (p) => (p.names.some((x) => /^word\/theme\/theme\d+\.xml$/.test(x)) ? all(p, /w:themeColor=|w:themeFill=|w:asciiTheme=/g, /^word\/(?:document|header\d*|footer\d*)\.xml$/) : 0) },
   { id: 'i18n.rtl', label: 'Right-to-left / bidi text', count: (p) => n(doc(p), /<w:bidi\b|<w:rtl\b/g) },
   { id: 'i18n.cjk', label: 'CJK text', count: (p) => n(doc(p), /[぀-ヿ㐀-鿿가-힯]/g) },
   { id: 'text.symbols', label: 'Symbols', count: (p) => n(doc(p), /<w:sym\b|[←-⏿☀-➿]/g) },
   { id: 'text.emoji', label: 'Emoji', count: (p) => n(doc(p), /[\u{1F300}-\u{1FAFF}]/gu) },
   { id: 'typography.hyphenation', label: 'Hyphenation', count: (p) => n(part(p, 'word/settings.xml'), /<w:autoHyphenation\b/g) + n(doc(p), /<w:noHyphen\b|<w:suppressAutoHyphens\b/g) },
-  { id: 'typography.tabLeaders', label: 'Tabs with leaders', count: (p) => n(Object.values(p.xml).join('\n'), /<w:tab\b[^>]*w:leader="(?:dot|hyphen|underscore|heavy|middleDot)"/g) },
+  { id: 'typography.tabLeaders', label: 'Tabs with leaders', count: (p) => all(p, /<w:(?:tab|ptab)\b[^>]*w:leader="(?:dot|hyphen|underscore|heavy|middleDot)"/g, /^word\/(?:document|header\d*|footer\d*)\.xml$/) },
   { id: 'typography.dropCap', label: 'Drop caps', count: (p) => n(doc(p), /<w:framePr\b[^>]*w:dropCap=/g) },
   { id: 'watermark', label: 'Watermarks', count: (p) => all(p, /PowerPlusWaterMarkObject/g, headersFooters) },
   { id: 'charts', label: 'Charts', count: (p) => p.names.filter((x) => /^word\/charts\/chart\d*\.xml$/.test(x)).length },
@@ -121,7 +128,7 @@ export const CONSTRUCTS: Construct[] = [
   { id: 'text.hidden', label: 'Hidden (vanish) text', count: (p) => n(doc(p), /<w:vanish\b/g) },
   { id: 'customXml', label: 'Custom XML parts', count: (p) => p.names.filter((x) => /^customXml\/item\d+\.xml$/.test(x)).length },
   { id: 'doc.long', label: 'Long document (15,000+ words)', count: (p) => { const words = n(doc(p).replace(/<[^>]+>/g, ' '), /\S+/g); return words >= 15000 ? words : 0; } },
-  { id: 'content.headersOnly', label: 'Content in headers/footers', count: (p) => all(p, /<w:t[ >]/g, headersFooters) },
+  { id: 'headers.content', label: 'Content in headers/footers', count: (p) => all(p, /<w:t[ >]/g, headersFooters) },
   {
     id: 'edge.brokenRels',
     label: 'Relationship targets that do not exist',

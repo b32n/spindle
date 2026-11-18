@@ -1,0 +1,322 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "   ",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Hidden text follows: ",
+                "type": "text"
+              },
+              {
+                "text": "this sentence is hidden (w:vanish)",
+                "type": "text"
+              },
+              {
+                "text": " and this one is visible again.",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Special characters: ",
+                "type": "text"
+              },
+              {
+                "text": " non-breaking hyphen, ",
+                "type": "text"
+              },
+              {
+                "text": "position tab, ",
+                "type": "text"
+              },
+              {
+                "text": "line break with clear, ",
+                "type": "text"
+              },
+              {
+                "text": "NBSP here, zero-width​space, tab",
+                "type": "text"
+              },
+              {
+                "text": "end.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A 1,200-character unbroken token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Permission range (editable region)",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Field in a hyperlink in a tracked insertion: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Anchored text box: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Alternate content requiring an unknown namespace: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-11",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "colspan": 5,
+                    "content": [
+                      {
+                        "text": "span 5 of 3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  }
+                ],
+                "id": "row-1"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "orphan vMerge continue",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-3"
+                  }
+                ],
+                "id": "row-2"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [],
+                    "id": "cell-4"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-5"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-6"
+                  }
+                ],
+                "id": "row-3"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "id": "block-12",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "table with an empty grid",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-7"
+                  }
+                ],
+                "id": "row-4"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A paragraph with an extremely long run of mixed scripts: ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              },
+              {
+                "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          }
+        ],
+        "footer": {
+          "blocks": [
+            {
+              "content": [],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "header": {
+          "blocks": [
+            {
+              "content": [
+                {
+                  "text": "Content in the header: ",
+                  "type": "text"
+                },
+                {
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Odd but valid"
+  },
+  "importError": null,
+  "warnings": [
+    "A floating (anchored) image was skipped — only inline images are supported.",
+    "Unsupported field code \"TITLE\" — its cached value was dropped."
+  ]
+}

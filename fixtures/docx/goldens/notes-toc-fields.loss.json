@@ -1,0 +1,23 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 6,
+      "effect": "not imported",
+      "id": "docx.endnotes",
+      "label": "endnote(s)"
+    },
+    {
+      "count": 25,
+      "effect": "their displayed value is dropped",
+      "id": "docx.fields",
+      "label": "field(s) (table of contents, cross-references, dates…)"
+    },
+    {
+      "count": 10,
+      "effect": "not imported",
+      "id": "docx.footnotes",
+      "label": "footnote(s)"
+    }
+  ]
+}

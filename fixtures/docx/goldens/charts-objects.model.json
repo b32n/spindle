@@ -1,0 +1,151 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Charts and embedded objects",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Three charts with embedded workbooks and an OLE worksheet object",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Charts and embedded objects",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "alignment": "center",
+            "content": [],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Chart 1: Vessels per month.",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Chart 2: Tonnage trend.",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "center",
+            "content": [
+              {
+                "text": "Chart 3: Cargo share.",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Embedded worksheet object (OLE package with a preview image): ",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The quay-side bakery rebuilt a bundle of weathered charts as the tide turned. The tide almanac relocated the lamp oil inventory while the market was closed. A visiting engineer relocated an index of local pilots without waiting for approval. The quay-side bakery reviewed every outstanding repair order and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Charts and objects"
+  },
+  "importError": null,
+  "warnings": [
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped."
+  ]
+}
