@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "revisions-authors",
+      "filename": "revisions-authors.docx",
+      "title": "Revision review: quarterly harbour report",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "revisions.insertions",
+        "revisions.deletions",
+        "revisions.moves",
+        "revisions.formatting",
+        "revisions.multiAuthor",
+        "comments",
+        "comments.threaded",
+        "lists.numbered",
+        "tables.headerRow",
+        "headings",
+        "styles.inheritance",
+        "styles.linked"
+      ],
+      "notes": "Four reviewers (Alice Archer, Bram Keller, Chidi Okafor, Dana Whitfield): inserted/deleted runs, inserted and deleted paragraph marks, two tracked moves, run and paragraph formatting changes, tracked table rows and cells, a tracked list item, and five comments in three threads (root + replies via commentsExtended, one resolved). Word-compatible markup, but not produced by Word.",
+      "generator": "generators/build_revisions.py"
+    },
+    {
+      "id": "styles-lists",
+      "filename": "styles-lists.docx",
+      "title": "Styles and lists",
+      "source": {
+        "tool": "programmatic: python-docx 1.2.0 + lxml (python-docx default template), post-processed for numbering",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT); package skeleton from python-docx's default template (MIT)",
+      "constructs": [
+        "headings",
+        "styles.inheritance",
+        "styles.linked",
+        "lists.numbered",
+        "lists.multilevel",
+        "lists.restart"
+      ],
+      "notes": "Three-level paragraph style chain (Body Text > Callout > Callout Warning > Callout Warning Large), character style chain, headings 1-6, bullets, List Number, a multilevel outline list, a restarted list, a list starting at 5, letter/roman lists, alignment and spacing variants, hanging indents, a page break and a paragraph border.",
+      "generator": "generators/build_styles_lists.py"
+    }
+  ]
+}

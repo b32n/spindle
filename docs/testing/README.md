@@ -25,6 +25,22 @@ npm test               # all workspaces
 npm test -w @b32nio/spindle-sheets-core -- formula   # one package, name filter
 ```
 
+## DOCX fidelity corpus
+
+`fixtures/docx/` holds a corpus of authored `.docx` files and golden snapshots of what the importer
+does with them (imported model, loss report, import -> export -> import diff), losses included.
+It is a unit-level measurement, not a browser test: Jest runs it as part of `npm test`
+(`packages/docs-core/src/fidelity/`), and CI also runs the CLI against the built packages.
+
+```bash
+npm run docs:docx-fidelity          # compare with the goldens (needs `npm run build`)
+npm run docs:docx-fidelity:update   # deliberately regenerate goldens, then review `git diff`
+```
+
+CI fails only when a snapshot *changes* unexpectedly, never because a loss exists, so an importer
+improvement lands as a reviewed golden update. See [`fixtures/docx/README.md`](../../fixtures/docx/README.md)
+for how to add a fixture and the coverage matrix.
+
 ## Running E2E tests
 
 Playwright starts the demo apps itself (`playwright.config.ts` → `webServer`):
