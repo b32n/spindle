@@ -1,0 +1,23 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 3,
+      "effect": "not imported",
+      "id": "docx.charts",
+      "label": "chart(s)/diagram(s)"
+    },
+    {
+      "count": 1,
+      "effect": "not imported (only inline images are)",
+      "id": "docx.floatingImages",
+      "label": "floating image(s)"
+    },
+    {
+      "count": 5,
+      "effect": "their text is not imported",
+      "id": "docx.textBoxes",
+      "label": "text box(es)/shape(s)"
+    }
+  ]
+}

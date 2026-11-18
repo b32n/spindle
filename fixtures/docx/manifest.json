@@ -2,6 +2,391 @@
   "version": 1,
   "fixtures": [
     {
+      "id": "charts-objects",
+      "filename": "charts-objects.docx",
+      "title": "Charts and embedded objects",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "charts",
+        "objects.embedded",
+        "headings"
+      ],
+      "notes": "A clustered column chart, a line chart and a pie chart (DrawingML chart parts with caches and an embedded .xlsx workbook each) and an embedded OLE-package worksheet object with a preview image.",
+      "generator": "generators/features3.py"
+    },
+    {
+      "id": "content-controls-forms",
+      "filename": "content-controls-forms.docx",
+      "title": "Content controls and forms",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "sdt",
+        "forms.legacy",
+        "customXml",
+        "images.inline",
+        "lists.numbered",
+        "tables.shading",
+        "headings"
+      ],
+      "notes": "Content controls: rich text (with a placeholder and with content), plain text, drop-down, combo box, date, checkbox, picture, repeating section, a row inside a control, a data-bound control with its custom XML part, a cover-page docPartObj and five nested levels; plus legacy FORMTEXT / FORMCHECKBOX / FORMDROPDOWN fields.",
+      "generator": "generators/features2.py"
+    },
+    {
+      "id": "edge-malformed",
+      "filename": "edge-malformed.docx",
+      "title": "Malformed package",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.brokenRels",
+        "edge.invalidXml",
+        "edge.missingOptionalParts",
+        "notes.footnotes",
+        "hyperlinks.external",
+        "images.inline",
+        "lists.numbered"
+      ],
+      "notes": "A valid main document inside a damaged package: styles, settings, numbering, font table and theme parts removed; truncated comments.xml, tag-soup footnotes.xml, binary commentsExtended.xml; dangling hyperlink, image and header/footer relationships, a duplicate relationship id, a content-type override for a missing part, stray binary parts, unknown style and numbering ids, a table row wider than its grid. LibreOffice cannot open this file either.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-no-body",
+      "filename": "edge-no-body.docx",
+      "title": "Package without a main document",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.brokenRels",
+        "edge.missingOptionalParts"
+      ],
+      "notes": "A package whose officeDocument relationship points at a word/document.xml that is not there. importFromDocx throws; the golden records the error.",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
+    },
+    {
+      "id": "edge-odd-valid",
+      "filename": "edge-odd-valid.docx",
+      "title": "Odd but valid",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "revisions.insertions",
+        "revisions.deletions",
+        "fields.page",
+        "hyperlinks.external",
+        "tables.mergeH",
+        "tables.mergeV",
+        "tables.autofit",
+        "images.wrapped",
+        "shapes",
+        "textboxes",
+        "sdt",
+        "text.hidden",
+        "customXml",
+        "headers.content",
+        "i18n.cjk"
+      ],
+      "notes": "Valid but unusual markup: hidden (vanish) text, position tabs and no-break hyphens, a 1,200-character token, permission ranges, custom XML / bdo / dir wrappers, a field inside a hyperlink inside a tracked insertion, ten nested content controls around a table with nested controls, a revision inside a table inside a text box, unknown mc:AlternateContent and an ignorable namespace, over-wide gridSpan, an orphan vMerge, zero-width columns, an empty tblGrid, an altChunk, content-bearing headers and footers with tables, and an unreferenced custom XML datastore.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "equations-omml",
+      "filename": "equations-omml.docx",
+      "title": "Equations",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "equations",
+        "headings"
+      ],
+      "notes": "Office Math: quadratic formula (fraction and radical), improper integral and summation (n-ary), a 3x3 matrix, a limit with function names, a cases-style equation array, accents, inline equations in running text and an equation in a table cell. LibreOffice without its Math component does not render them, so the OOXML was checked structurally.",
+      "generator": "generators/features2.py"
+    },
+    {
+      "id": "fonts-themes",
+      "filename": "fonts-themes.docx",
+      "title": "Embedded font and custom theme",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT). Embedded font: Liberation Sans Regular, SIL Open Font License 1.1 (Debian fonts-liberation 1:2.1.5-3, /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf; licence text in /usr/share/doc/fonts-liberation/copyright). The font is embedded unmodified (obfuscated as Word does).",
+      "constructs": [
+        "fonts.embedded",
+        "themes",
+        "tables.shading",
+        "headings"
+      ],
+      "notes": "Liberation Sans Regular embedded as an obfuscated .odttf (embedTrueTypeFonts, saveSubsetFonts, fontKey), and a custom theme (Harbour Palette, major font Liberation Serif, minor Liberation Sans) referenced through themeColor / themeShade / themeTint / themeFill and asciiTheme.",
+      "generator": "generators/build_corpus.py"
+    },
+    {
+      "id": "i18n-bidi-cjk",
+      "filename": "i18n-bidi-cjk.docx",
+      "title": "Languages and symbols",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "i18n.rtl",
+        "i18n.cjk",
+        "text.symbols",
+        "text.emoji",
+        "lists.numbered",
+        "headings"
+      ],
+      "notes": "Arabic and Hebrew right-to-left paragraphs, bidi and rtl runs, mixed-direction paragraphs, a right-to-left table and list, Chinese/Japanese/Korean text with East Asian fonts, ruby, combined digits, vertical text direction, Unicode and Wingdings/Symbol symbols, emoji (ZWJ sequences, skin tones, flags, keycaps) and combining marks. Sentences were written for this fixture.",
+      "generator": "generators/features3.py"
+    },
+    {
+      "id": "images-wrap-crop",
+      "filename": "images-wrap-crop.docx",
+      "title": "Images",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "images.inline",
+        "images.floating",
+        "images.wrapped",
+        "images.cropped",
+        "fields.seq",
+        "headings"
+      ],
+      "notes": "Inline images in running text, centred with a SEQ caption, anchored images with square/tight/top-and-bottom wrapping on either side, an anchored image behind text, and cropped images (a:srcRect) in a table next to the uncropped original. All pictures are tiny original geometric PNGs generated by the script.",
+      "generator": "generators/features2.py"
+    },
+    {
+      "id": "kitchen-sink",
+      "filename": "kitchen-sink.docx",
+      "title": "Kitchen sink",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "revisions.insertions",
+        "revisions.deletions",
+        "revisions.moves",
+        "revisions.formatting",
+        "revisions.multiAuthor",
+        "comments",
+        "comments.threaded",
+        "notes.footnotes",
+        "notes.endnotes",
+        "fields.toc",
+        "fields.page",
+        "fields.pageref",
+        "fields.ref",
+        "fields.seq",
+        "fields.date",
+        "fields.other",
+        "fields.bookmarks",
+        "hyperlinks.external",
+        "hyperlinks.internal",
+        "headings",
+        "lists.numbered",
+        "lists.multilevel",
+        "lists.restart",
+        "styles.inheritance",
+        "styles.linked",
+        "tables.nested",
+        "tables.mergeH",
+        "tables.mergeV",
+        "tables.borders",
+        "tables.shading",
+        "tables.headerRow",
+        "tables.autofit",
+        "sections.landscape",
+        "sections.portrait",
+        "sections.columns",
+        "sections.firstPage",
+        "sections.oddEven",
+        "sections.pageNumberRestart",
+        "images.inline",
+        "images.floating",
+        "images.wrapped",
+        "images.cropped",
+        "shapes",
+        "textboxes",
+        "smartart",
+        "equations",
+        "sdt",
+        "forms.legacy",
+        "i18n.rtl",
+        "i18n.cjk",
+        "text.symbols",
+        "text.emoji",
+        "typography.hyphenation",
+        "typography.tabLeaders",
+        "typography.dropCap",
+        "charts",
+        "objects.embedded",
+        "customXml",
+        "headers.content"
+      ],
+      "notes": "Every programmatic feature block stacked in one 18-page document across four sections (portrait / landscape two-column / portrait three-column / A4), plus nested combinations: a field inside a tracked insertion, a tracked hyperlink, a comment thread spanning a bookmark and a footnote reference, a table with tracked rows, moves and a footnote, a deleted footnote reference and tracked list items.",
+      "generator": "generators/build_corpus.py"
+    },
+    {
+      "id": "libreoffice-complex",
+      "filename": "libreoffice-complex.docx",
+      "title": "Harbour works programme (LibreOffice)",
+      "source": {
+        "tool": "LibreOffice 25.2.3.2 520(Build:2), headless re-save (soffice --convert-to docx:\"MS Word 2007 XML\") of a programmatically generated DOCX",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "notes.footnotes",
+        "notes.endnotes",
+        "fields.toc",
+        "fields.page",
+        "fields.pageref",
+        "fields.ref",
+        "fields.seq",
+        "fields.date",
+        "fields.bookmarks",
+        "hyperlinks.external",
+        "hyperlinks.internal",
+        "headings",
+        "lists.numbered",
+        "lists.multilevel",
+        "styles.inheritance",
+        "styles.linked",
+        "tables.nested",
+        "tables.mergeH",
+        "tables.mergeV",
+        "tables.borders",
+        "tables.shading",
+        "tables.headerRow",
+        "sections.landscape",
+        "sections.portrait",
+        "sections.columns",
+        "sections.firstPage",
+        "sections.pageNumberRestart",
+        "images.inline",
+        "images.floating",
+        "images.wrapped",
+        "images.cropped",
+        "sdt",
+        "headers.content"
+      ],
+      "notes": "Dense styles, lists, nested/merged/bordered tables, inline and floating cropped images, a TOC, footnotes and endnotes, four sections with first-page headers, landscape and columns, re-serialised by LibreOffice (its own styles, numbering, header/footer parts and drawing markup).",
+      "generator": "generators/build_libreoffice.py"
+    },
+    {
+      "id": "libreoffice-review",
+      "filename": "libreoffice-review.docx",
+      "title": "Review of the harbour bye-laws (LibreOffice)",
+      "source": {
+        "tool": "LibreOffice 25.2.3.2 520(Build:2), headless re-save (soffice --convert-to docx:\"MS Word 2007 XML\") of a programmatically generated DOCX",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "revisions.insertions",
+        "revisions.deletions",
+        "revisions.multiAuthor",
+        "comments",
+        "comments.threaded",
+        "headings",
+        "lists.numbered",
+        "tables.shading",
+        "tables.headerRow"
+      ],
+      "notes": "Tracked insertions and deletions by four authors (including in a table cell and list items, with a deleted paragraph) and a three-message comment thread, as written by LibreOffice's record-changes export (it does not emit moves or run-formatting changes).",
+      "generator": "generators/build_libreoffice.py"
+    },
+    {
+      "id": "long-document",
+      "filename": "long-document.docx",
+      "title": "The Marguerite Harbour Handbook (long)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "doc.long",
+        "fields.toc",
+        "fields.pageref",
+        "fields.ref",
+        "fields.seq",
+        "fields.page",
+        "fields.bookmarks",
+        "hyperlinks.internal",
+        "hyperlinks.external",
+        "headings",
+        "lists.numbered",
+        "lists.multilevel",
+        "lists.restart",
+        "tables.headerRow",
+        "tables.shading",
+        "images.inline",
+        "notes.footnotes",
+        "sections.columns",
+        "sections.pageNumberRestart",
+        "headers.content"
+      ],
+      "notes": "Twelve chapters of dense generated prose (about 30,000 words, around 90 pages when rendered): title page, a TOC with 84 entries, a section per chapter with STYLEREF headers and PAGE/NUMPAGES footers, bulleted and numbered lists with per-chapter restarts, 12 banded tables with repeating headers, figures with SEQ captions, 72 footnotes, quotes and code blocks, and a two-column glossary appendix. Prose comes from a deterministic sentence generator (original text).",
+      "generator": "generators/build_corpus.py"
+    },
+    {
+      "id": "notes-toc-fields",
+      "filename": "notes-toc-fields.docx",
+      "title": "Fields, notes and navigation",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "notes.footnotes",
+        "notes.endnotes",
+        "fields.toc",
+        "fields.page",
+        "fields.pageref",
+        "fields.ref",
+        "fields.seq",
+        "fields.date",
+        "fields.other",
+        "fields.bookmarks",
+        "hyperlinks.external",
+        "hyperlinks.internal",
+        "headings",
+        "styles.inheritance",
+        "styles.linked"
+      ],
+      "notes": "A TOC field with cached hyperlinked entries and PAGEREF per entry, bookmarks, PAGE/NUMPAGES/SECTIONPAGES/NUMWORDS/REF/PAGEREF/SEQ/DATE/TIME/AUTHOR/TITLE/STYLEREF/IF/MERGEFIELD/HYPERLINK fields (complex, simple and nested), internal and external (example.com / example.org / mailto) links, 15 footnotes including multi-paragraph, formatted and in-table notes, and 10 endnotes.",
+      "generator": "generators/build_corpus.py"
+    },
+    {
       "id": "revisions-authors",
       "filename": "revisions-authors.docx",
       "title": "Revision review: quarterly harbour report",
@@ -28,6 +413,49 @@
       "generator": "generators/build_revisions.py"
     },
     {
+      "id": "sections-headers",
+      "filename": "sections-headers.docx",
+      "title": "Sections and headers",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "sections.portrait",
+        "sections.landscape",
+        "sections.columns",
+        "sections.firstPage",
+        "sections.oddEven",
+        "sections.pageNumberRestart",
+        "fields.page",
+        "headers.content",
+        "headings"
+      ],
+      "notes": "Four sections: portrait with different first-page and odd/even headers and footers (evenAndOddHeaders), landscape in two columns with a separator and lower-roman numbering restarting at i, portrait in three columns restarting at 10, and a closing A4 section; column breaks; PAGE and NUMPAGES fields in headers/footers.",
+      "generator": "generators/features.py"
+    },
+    {
+      "id": "shapes-textboxes-smartart",
+      "filename": "shapes-textboxes-smartart.docx",
+      "title": "Shapes, text boxes, SmartArt",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "shapes",
+        "textboxes",
+        "smartart",
+        "images.wrapped",
+        "lists.numbered",
+        "headings"
+      ],
+      "notes": "A DrawingML rounded rectangle with a text box (inside mc:AlternateContent with a VML fallback), inline ellipse/arrow/triangle/star/line shapes, a shape group with two text children, a legacy VML text box containing a table, and a SmartArt basic block list with its data/layout/style/colors parts and the cached dsp fallback drawing.",
+      "generator": "generators/features2.py"
+    },
+    {
       "id": "styles-lists",
       "filename": "styles-lists.docx",
       "title": "Styles and lists",
@@ -46,6 +474,97 @@
       ],
       "notes": "Three-level paragraph style chain (Body Text > Callout > Callout Warning > Callout Warning Large), character style chain, headings 1-6, bullets, List Number, a multilevel outline list, a restarted list, a list starting at 5, letter/roman lists, alignment and spacing variants, hanging indents, a page break and a paragraph border.",
       "generator": "generators/build_styles_lists.py"
+    },
+    {
+      "id": "tables-advanced",
+      "filename": "tables-advanced.docx",
+      "title": "Advanced tables",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "tables.nested",
+        "tables.mergeH",
+        "tables.mergeV",
+        "tables.borders",
+        "tables.shading",
+        "tables.headerRow",
+        "tables.autofit",
+        "headings"
+      ],
+      "notes": "Three-level nested tables; a quarter schedule with horizontal and vertical merges and a three-row repeating header; per-cell double/dashed/thick/dotted borders and shading; a banded table style with a 35-row table that repeats its header across pages; autofit, percentage-width, centred, cell-margin and rotated-text tables.",
+      "generator": "generators/features.py"
+    },
+    {
+      "id": "typography-extras",
+      "filename": "typography-extras.docx",
+      "title": "Typography extras",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "typography.hyphenation",
+        "typography.tabLeaders",
+        "typography.dropCap",
+        "watermark",
+        "fields.page",
+        "headers.content",
+        "headings"
+      ],
+      "notes": "Automatic hyphenation settings with soft and non-breaking hyphens and a paragraph that opts out, dot/hyphen/underscore/middle-dot/heavy tab leaders and decimal/centre/right tabs, framed drop caps (drop and margin), character effects, paragraph borders, a VML WordArt 'DRAFT' watermark in the header, page borders and line numbering.",
+      "generator": "generators/features3.py"
+    },
+    {
+      "id": "word-compat-kitchen",
+      "filename": "word-compat-kitchen.docx",
+      "title": "Quarterly harbour operations report (Word-compatible, programmatic)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "comments",
+        "comments.threaded",
+        "notes.footnotes",
+        "fields.toc",
+        "fields.page",
+        "fields.pageref",
+        "fields.ref",
+        "fields.seq",
+        "fields.date",
+        "fields.other",
+        "fields.bookmarks",
+        "hyperlinks.external",
+        "hyperlinks.internal",
+        "headings",
+        "tables.nested",
+        "tables.mergeH",
+        "tables.mergeV",
+        "tables.borders",
+        "tables.shading",
+        "tables.headerRow",
+        "tables.autofit",
+        "images.inline",
+        "images.floating",
+        "images.wrapped",
+        "images.cropped",
+        "shapes",
+        "textboxes",
+        "smartart",
+        "sdt",
+        "forms.legacy",
+        "charts",
+        "objects.embedded",
+        "customXml",
+        "headers.content"
+      ],
+      "notes": "A business-report layout with the markup noise Word writes (rsids, w14:paraId, proofErr, smartTag, lastRenderedPageBreak, _GoBack bookmark, compat/clrSchemeMapping settings), a cover-page content control, TOC, comments with a reply, tables, pictures, shapes, a SmartArt, a chart, an embedded object and form controls. Word-compatible markup written by our generator; it was not produced by Word.",
+      "generator": "generators/build_corpus.py"
     }
   ]
 }

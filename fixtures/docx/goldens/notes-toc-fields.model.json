@@ -1,0 +1,713 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Fields, notes and navigation",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "TOC, PAGE / PAGEREF / REF / SEQ / DATE, bookmarks, hyperlinks, footnotes and endnotes",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Contents",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Scope of the survey",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Method",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Findings",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Tonnage",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Seasonal variation",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Recommendations",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Overview",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "A junior surveyor catalogued three disputed boundary stones after several rounds of discussion. The harbour committee compared the sluice gate mechanism with unusual care. The grain exchange approved last season's tonnage figures according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Scope of the survey",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The regional council recorded the eastern jetty in time for the autumn meeting. Local fishing crews rebuilt the winter storage sheds and filed the result in triplicate. A visiting engineer compared an index of local pilots in time for the autumn meeting.",
+                "type": "text"
+              }
+            ],
+            "id": "block-15",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Method",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "An experienced pilot compared the dredging contract while the market was closed. The harbour committee compared last season's tonnage figures during the long spring inspection. The tide almanac repainted the dredging contract and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-17",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Findings",
+                "type": "text"
+              }
+            ],
+            "id": "block-18",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Several market traders catalogued two dozen mooring rings in the presence of two witnesses. The bridge authority rebuilt three disputed boundary stones as the tide turned. Our records office inspected a draft of the annual report before the first frost.",
+                "type": "text"
+              }
+            ],
+            "id": "block-19",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Tonnage",
+                "type": "text"
+              }
+            ],
+            "id": "block-20",
+            "level": 2,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "A careful archivist measured a bundle of weathered charts according to the standing orders. A junior surveyor compared the ferry timetable before the first frost. The northern ferry service catalogued two dozen mooring rings using only the instruments on hand.",
+                "type": "text"
+              }
+            ],
+            "id": "block-21",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Seasonal variation",
+                "type": "text"
+              }
+            ],
+            "id": "block-22",
+            "level": 3,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The bridge authority reorganised the lamp oil inventory before the first frost. The bridge authority rebuilt two dozen mooring rings without waiting for approval. Every lighthouse keeper postponed every outstanding repair order to the satisfaction of nobody in particular.",
+                "type": "text"
+              }
+            ],
+            "id": "block-23",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Recommendations",
+                "type": "text"
+              }
+            ],
+            "id": "block-24",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The grain exchange postponed the eastern jetty to the satisfaction of nobody in particular. A junior surveyor compared the dredging contract during the long spring inspection. A junior surveyor rebuilt the ferry timetable without waiting for approval.",
+                "type": "text"
+              }
+            ],
+            "id": "block-25",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Fields and cross-references",
+                "type": "text"
+              }
+            ],
+            "id": "block-26",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The key figure of this report is 42 vessels per day.",
+                "type": "text"
+              }
+            ],
+            "id": "block-27",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "As stated on page ",
+                "type": "text"
+              },
+              {
+                "text": ": ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-28",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Figure ",
+                "type": "text"
+              },
+              {
+                "text": " shows the quay; Figure ",
+                "type": "text"
+              },
+              {
+                "text": " shows the lighthouse; Table ",
+                "type": "text"
+              },
+              {
+                "text": " lists berths.",
+                "type": "text"
+              }
+            ],
+            "id": "block-29",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Generated on ",
+                "type": "text"
+              },
+              {
+                "text": " at ",
+                "type": "text"
+              },
+              {
+                "text": " by ",
+                "type": "text"
+              },
+              {
+                "text": " for ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-30",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Page ",
+                "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
+              },
+              {
+                "text": " of ",
+                "type": "text"
+              },
+              {
+                "fieldType": "totalPages",
+                "type": "dynamicField"
+              },
+              {
+                "text": " (section pages: ",
+                "type": "text"
+              },
+              {
+                "text": "; words: ",
+                "type": "text"
+              },
+              {
+                "text": ").",
+                "type": "text"
+              }
+            ],
+            "id": "block-31",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Current chapter: ",
+                "type": "text"
+              },
+              {
+                "text": ". Conditional: ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-32",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "External field link: ",
+                "type": "text"
+              },
+              {
+                "text": " and run link: ",
+                "type": "text"
+              },
+              {
+                "href": "https://example.org/tides",
+                "text": "example.org/tides",
+                "type": "link"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-33",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Internal links: ",
+                "type": "text"
+              },
+              {
+                "text": "jump to the key figure",
+                "type": "text"
+              },
+              {
+                "text": ", ",
+                "type": "text"
+              },
+              {
+                "text": "jump to Findings",
+                "type": "text"
+              },
+              {
+                "text": "; a mail link: ",
+                "type": "text"
+              },
+              {
+                "href": "mailto:records@example.com",
+                "text": "records@example.com",
+                "type": "link"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-34",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": " (unresolved mail-merge field) and a ",
+                "type": "text"
+              }
+            ],
+            "id": "block-35",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Simple field: ",
+                "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
+              },
+              {
+                "text": " and a nested field: ",
+                "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
+              },
+              {
+                "text": "single page",
+                "type": "text"
+              }
+            ],
+            "id": "block-36",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Footnotes and endnotes",
+                "type": "text"
+              }
+            ],
+            "id": "block-37",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Harbour tonnage rose again last year.",
+                "type": "text"
+              },
+              {
+                "text": " A second claim needs support too.",
+                "type": "text"
+              },
+              {
+                "text": " The third claim is contested",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-38",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Rich footnote here.",
+                "type": "text"
+              },
+              {
+                "text": " And an endnote right after it.",
+                "type": "text"
+              }
+            ],
+            "id": "block-39",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-40",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Cell with note",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Plain cell",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-41",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The grain exchange repainted the sluice gate mechanism in time for the autumn meeting. An experienced pilot mapped a draft of the annual report without waiting for approval. ",
+                "type": "text"
+              },
+              {
+                "text": " Closing words of paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-42",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A visiting engineer rebuilt every outstanding repair order while the market was closed. A visiting engineer approved an index of local pilots according to the standing orders. ",
+                "type": "text"
+              },
+              {
+                "text": " Closing words of paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-43",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Our records office relocated the fog-signal schedule without waiting for approval. An experienced pilot mapped a ledger of unpaid berth fees as the tide turned. ",
+                "type": "text"
+              },
+              {
+                "text": " Closing words of paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-44",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The northern ferry service inspected a ledger of unpaid berth fees as the tide turned. The grain exchange approved the fog-signal schedule after several rounds of discussion. ",
+                "type": "text"
+              },
+              {
+                "text": " Closing words of paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-45",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A junior surveyor rebuilt the winter storage sheds in the presence of two witnesses. The regional council mapped every outstanding repair order without waiting for approval. ",
+                "type": "text"
+              },
+              {
+                "text": " Closing words of paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-46",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The harbour committee documented the sluice gate mechanism according to the standing orders. The grain exchange approved the sluice gate mechanism to the satisfaction of nobody in particular. ",
+                "type": "text"
+              },
+              {
+                "text": " Closing words of paragraph.",
+                "type": "text"
+              }
+            ],
+            "id": "block-47",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Fields and notes"
+  },
+  "importError": null,
+  "warnings": [
+    "Unsupported field code \"PAGEREF _Toc9000 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9001 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9002 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9003 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9004 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9005 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF _Toc9006 \\h\" — its cached value was dropped.",
+    "Unsupported field code \"PAGEREF keyfigure \\h\" — its cached value was dropped.",
+    "Unsupported field code \"REF keyfigure \\h\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "Unsupported field code \"SEQ Table \\* ARABIC\" — its cached value was dropped.",
+    "Unsupported field code \"DATE \\@ \"yyyy-MM-dd\"\" — its cached value was dropped.",
+    "Unsupported field code \"TIME \\@ \"HH:mm\"\" — its cached value was dropped.",
+    "Unsupported field code \"AUTHOR\" — its cached value was dropped.",
+    "Unsupported field code \"TITLE\" — its cached value was dropped.",
+    "Unsupported field code \"SECTIONPAGES\" — its cached value was dropped.",
+    "Unsupported field code \"NUMWORDS\" — its cached value was dropped.",
+    "Unsupported field code \"STYLEREF \"Heading 1\"\" — its cached value was dropped.",
+    "Unsupported field code \"IF 1 = 1 \"yes\" \"no\"\" — its cached value was dropped.",
+    "Unsupported field code \"HYPERLINK \"https://example.com/harbour\"\" — its cached value was dropped.",
+    "Unsupported field code \"MERGEFIELD Recipient \\* MERGEFORMAT\" — its cached value was dropped."
+  ]
+}

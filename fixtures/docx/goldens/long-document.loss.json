@@ -1,0 +1,23 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "laid out as a single column",
+      "id": "docx.columns",
+      "label": "multi-column section(s)"
+    },
+    {
+      "count": 109,
+      "effect": "their displayed value is dropped",
+      "id": "docx.fields",
+      "label": "field(s) (table of contents, cross-references, dates…)"
+    },
+    {
+      "count": 72,
+      "effect": "not imported",
+      "id": "docx.footnotes",
+      "label": "footnote(s)"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 3,
+      "effect": "not imported",
+      "id": "docx.charts",
+      "label": "chart(s)/diagram(s)"
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.embeddedObjects",
+      "label": "embedded object(s)"
+    }
+  ]
+}

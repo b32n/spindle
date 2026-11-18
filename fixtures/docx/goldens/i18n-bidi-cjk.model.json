@@ -1,0 +1,451 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Languages and symbols",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Arabic, Hebrew, Chinese, Japanese, Korean, symbols and emoji",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Right-to-left, CJK, symbols and emoji",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Arabic (right-to-left paragraphs, bidi + rtl runs):",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "left",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "left",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "يقيس الميناء حركة السفن كل صباح ويسجل النتائج في دفتر خاص.",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "left",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "تُنشر جداول المد والجزر عند البوابة الشمالية.",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Hebrew:",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "left",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "שלום עולם, זהו מסמך בדיקה לכתיבה מימין לשמאל.",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "alignment": "left",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Mixed direction in one paragraph (English inside Arabic, numbers and punctuation):",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "ميناء ",
+                "type": "text"
+              },
+              {
+                "text": "Marguerite Harbour",
+                "type": "text"
+              },
+              {
+                "text": " استقبل ",
+                "type": "text"
+              },
+              {
+                "text": "42",
+                "type": "text"
+              },
+              {
+                "text": " سفينة في 2026/01/15.",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "English sentence with an embedded Hebrew word ",
+                "type": "text"
+              },
+              {
+                "text": "שלום",
+                "type": "text"
+              },
+              {
+                "text": " and an Arabic word ",
+                "type": "text"
+              },
+              {
+                "text": "مرحبا",
+                "type": "text"
+              },
+              {
+                "text": ", then more English.",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Arabic-Indic digits: ١٢٣٤٥٦٧٨٩٠ and Hebrew with niqqud: שָׁלוֹם",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-15",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Right-to-left table cell",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Chinese, Japanese and Korean with East Asian fonts:",
+                "type": "text"
+              }
+            ],
+            "id": "block-17",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "这是一个用于测试中文排版的示例段落，包含标点符号、数字 2026 和英文单词 Spindle。",
+                "type": "text"
+              }
+            ],
+            "id": "block-18",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "港口委员会每月召开一次会议，审议潮汐表和船舶进出记录。",
+                "type": "text"
+              }
+            ],
+            "id": "block-19",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "これは日本語の組版を確認するためのサンプル文章です。ひらがな、カタカナ、漢字が混在しています。",
+                "type": "text"
+              }
+            ],
+            "id": "block-20",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "港湾委員会は毎月会議を開き、潮汐表を確認します。",
+                "type": "text"
+              }
+            ],
+            "id": "block-21",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "이것은 한국어 조판을 확인하기 위한 예시 문장입니다.",
+                "type": "text"
+              }
+            ],
+            "id": "block-22",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "항만 위원회는 매달 모여 조석표를 검토합니다.",
+                "type": "text"
+              }
+            ],
+            "id": "block-23",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "12",
+                "type": "text"
+              },
+              {
+                "text": "  (combined digits), ruby: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-24",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-25",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "縦書きのテキスト",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-3"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Vertical (tbRl) text direction in the neighbouring cell.",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-4"
+                  }
+                ],
+                "id": "row-2"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Symbols: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-26",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "DejaVu Sans",
+                "text": "Unicode symbols: © ® ™ € £ ¥ § ¶ † ‡ • … ← → ↔ ⇒ ∀ ∃ ∑ ∏ ∞ ≈ ≠ ≤ ≥ ± × ÷ √ ∫ ♠ ♣ ♥ ♦ ☀ ☂ ☎ ✓ ✔ ✘ ★",
+                "type": "text"
+              }
+            ],
+            "id": "block-27",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Word symbol runs: ",
+                "type": "text"
+              },
+              {
+                "text": " bullet, ",
+                "type": "text"
+              },
+              {
+                "text": " tick, ",
+                "type": "text"
+              },
+              {
+                "text": " smiley.",
+                "type": "text"
+              }
+            ],
+            "id": "block-28",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Emoji: 😀 🚀 🌍 ⚓ 🐟 🌊 ❤️ 👍🏽 👩‍💻 🏳️‍🌈 🇳🇴 1️⃣ — including ZWJ sequences, skin tones, flags and keycaps.",
+                "type": "text"
+              }
+            ],
+            "id": "block-29",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Combining marks and ligature candidates: é (e + acute), ñ, ﬁ ﬂ, Å (angstrom U+212B), ǆ, and a surrogate-pair math letter 𝒜𝔹ℂ𝟘.",
+                "type": "text"
+              }
+            ],
+            "id": "block-30",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Languages and symbols"
+  },
+  "importError": null,
+  "warnings": []
+}

@@ -1,0 +1,224 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Malformed package",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Everything in this file is plausible except the package plumbing: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A link that works: ",
+                "type": "text"
+              },
+              {
+                "href": "https://example.org/works",
+                "text": "works",
+                "type": "link"
+              },
+              {
+                "text": ", and one whose relationship id does not exist: ",
+                "type": "text"
+              },
+              {
+                "text": "dangling hyperlink",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Image whose media part is missing: ",
+                "type": "text"
+              },
+              {
+                "text": " and an image with an unknown relationship id: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A style that does not exist.",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A list item pointing at a numbering definition that does not exist.",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "level": 0,
+            "listType": "numbered",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "A footnote whose part is corrupt.",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A comment on this phrase.",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A table with a row that has more cells than the grid:",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-10",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "a",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "b",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "c-extra",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-3"
+                  }
+                ],
+                "id": "row-1"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "d",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-4"
+                  }
+                ],
+                "id": "row-2"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "A header reference to a part that is not in the package follows in the section properties.",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Malformed package"
+  },
+  "importError": null,
+  "warnings": [
+    "Hyperlink relationship \"rId999\" could not be resolved.",
+    "An embedded image could not be resolved and was skipped.",
+    "An embedded image could not be resolved and was skipped."
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 6,
+      "effect": "not imported",
+      "id": "docx.charts",
+      "label": "chart(s)/diagram(s)"
+    },
+    {
+      "count": 2,
+      "effect": "laid out as a single column",
+      "id": "docx.columns",
+      "label": "multi-column section(s)"
+    },
+    {
+      "count": 2,
+      "effect": "not imported",
+      "id": "docx.comments",
+      "label": "comment(s)"
+    },
+    {
+      "count": 21,
+      "effect": "their content is not imported",
+      "id": "docx.contentControls",
+      "label": "content control(s)"
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.embeddedObjects",
+      "label": "embedded object(s)"
+    },
+    {
+      "count": 6,
+      "effect": "not imported",
+      "id": "docx.endnotes",
+      "label": "endnote(s)"
+    },
+    {
+      "count": 10,
+      "effect": "not imported",
+      "id": "docx.equations",
+      "label": "equation(s)"
+    },
+    {
+      "count": 34,
+      "effect": "their displayed value is dropped",
+      "id": "docx.fields",
+      "label": "field(s) (table of contents, cross-references, dates…)"
+    },
+    {
+      "count": 6,
+      "effect": "not imported (only inline images are)",
+      "id": "docx.floatingImages",
+      "label": "floating image(s)"
+    },
+    {
+      "count": 12,
+      "effect": "not imported",
+      "id": "docx.footnotes",
+      "label": "footnote(s)"
+    },
+    {
+      "count": 5,
+      "effect": "their text is not imported",
+      "id": "docx.textBoxes",
+      "label": "text box(es)/shape(s)"
+    },
+    {
+      "count": 2,
+      "effect": "applied (the deleted text is gone)",
+      "id": "docx.trackedDeletions",
+      "label": "tracked deletion(s)"
+    },
+    {
+      "count": 7,
+      "effect": "their text is not imported",
+      "id": "docx.trackedInsertions",
+      "label": "tracked insertion(s)"
+    }
+  ]
+}

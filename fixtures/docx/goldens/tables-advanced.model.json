@@ -1,0 +1,2220 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Advanced tables",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Nested, merged, bordered, shaded, banded and autofit tables",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Tables",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Nested tables (outer, inner, innermost):",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-5",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Outer 1",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Outer 2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Outer 3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-3"
+                  }
+                ],
+                "id": "row-1"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "a",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-4"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Contains a nested table:",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-5"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "c",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-6"
+                  }
+                ],
+                "id": "row-2"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "d",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-7"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "e",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-8"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "f",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-9"
+                  }
+                ],
+                "id": "row-3"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Merged cells (horizontal and vertical, with a repeating three-row header):",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-8",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "colspan": 5,
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Quarter schedule",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-10"
+                  }
+                ],
+                "id": "row-4"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Berth",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-11",
+                    "rowspan": 2
+                  },
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "Week 1-2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-12"
+                  },
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "Week 3-4",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-13"
+                  }
+                ],
+                "id": "row-5"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "In",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-14"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Out",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-15"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "In",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-16"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Out",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-17"
+                  }
+                ],
+                "id": "row-6"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "North",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-18",
+                    "rowspan": 2
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-19"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "9",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-20"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "14",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-21"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "11",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-22"
+                  }
+                ],
+                "id": "row-7"
+              },
+              {
+                "cells": [
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "note",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-23"
+                  },
+                  {
+                    "colspan": 2,
+                    "content": [
+                      {
+                        "text": "n/a",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-24"
+                  }
+                ],
+                "id": "row-8"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "East",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-25",
+                    "rowspan": 2
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "7",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-26",
+                    "rowspan": 2
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-27"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "8",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-28"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-29"
+                  }
+                ],
+                "id": "row-9"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "4",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-30"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "5",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-31"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "6",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-32"
+                  }
+                ],
+                "id": "row-10"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Total",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-33"
+                  },
+                  {
+                    "colspan": 4,
+                    "content": [
+                      {
+                        "text": "all berths combined",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-34"
+                  }
+                ],
+                "id": "row-11"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Borders and shading:",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-11",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Style",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-35"
+                  },
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Fill",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-36"
+                  },
+                  {
+                    "content": [
+                      {
+                        "bold": true,
+                        "text": "Notes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-37"
+                  }
+                ],
+                "id": "row-12"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Double / dashed / thick / dotted",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-38"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Solid green",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-39"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Light blue",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-40"
+                  }
+                ],
+                "id": "row-13"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "No borders",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-41"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Grey",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-42"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bottom aligned",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-43"
+                  }
+                ],
+                "id": "row-14"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A banded table style with a repeating header row across pages:",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-14",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Date",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-44"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Vessel",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-45"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Cargo",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-46"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Tonnes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-47"
+                  }
+                ],
+                "id": "row-15"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-01",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-48"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 1",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-49"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-50"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "120",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-51"
+                  }
+                ],
+                "id": "row-16"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-02",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-52"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 2",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-53"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-54"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "157",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-55"
+                  }
+                ],
+                "id": "row-17"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-03",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-56"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-57"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-58"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "194",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-59"
+                  }
+                ],
+                "id": "row-18"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-04",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-60"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 4",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-61"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-62"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "231",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-63"
+                  }
+                ],
+                "id": "row-19"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-05",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-64"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 5",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-65"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-66"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "268",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-67"
+                  }
+                ],
+                "id": "row-20"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-06",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-68"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 6",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-69"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-70"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "305",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-71"
+                  }
+                ],
+                "id": "row-21"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-07",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-72"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 7",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-73"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-74"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "342",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-75"
+                  }
+                ],
+                "id": "row-22"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-08",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-76"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 8",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-77"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-78"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "379",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-79"
+                  }
+                ],
+                "id": "row-23"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-09",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-80"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 9",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-81"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-82"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "416",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-83"
+                  }
+                ],
+                "id": "row-24"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-10",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-84"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 10",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-85"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-86"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "453",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-87"
+                  }
+                ],
+                "id": "row-25"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-11",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-88"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 11",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-89"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-90"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "490",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-91"
+                  }
+                ],
+                "id": "row-26"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-92"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 12",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-93"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-94"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "527",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-95"
+                  }
+                ],
+                "id": "row-27"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-13",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-96"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 13",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-97"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-98"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "564",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-99"
+                  }
+                ],
+                "id": "row-28"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-14",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-100"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 14",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-101"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-102"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "601",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-103"
+                  }
+                ],
+                "id": "row-29"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-15",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-104"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 15",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-105"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-106"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "638",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-107"
+                  }
+                ],
+                "id": "row-30"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-16",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-108"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 16",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-109"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-110"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "675",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-111"
+                  }
+                ],
+                "id": "row-31"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-17",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-112"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 17",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-113"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-114"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "712",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-115"
+                  }
+                ],
+                "id": "row-32"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-18",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-116"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 18",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-117"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-118"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "749",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-119"
+                  }
+                ],
+                "id": "row-33"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-19",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-120"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 19",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-121"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-122"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "786",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-123"
+                  }
+                ],
+                "id": "row-34"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-20",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-124"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 20",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-125"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-126"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "823",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-127"
+                  }
+                ],
+                "id": "row-35"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-21",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-128"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 21",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-129"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-130"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "860",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-131"
+                  }
+                ],
+                "id": "row-36"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-22",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-132"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 22",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-133"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-134"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "897",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-135"
+                  }
+                ],
+                "id": "row-37"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-23",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-136"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 23",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-137"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-138"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "934",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-139"
+                  }
+                ],
+                "id": "row-38"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-24",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-140"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 24",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-141"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-142"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "971",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-143"
+                  }
+                ],
+                "id": "row-39"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-25",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-144"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 25",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-145"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-146"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "1008",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-147"
+                  }
+                ],
+                "id": "row-40"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-26",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-148"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 26",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-149"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-150"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "145",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-151"
+                  }
+                ],
+                "id": "row-41"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-27",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-152"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 27",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-153"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-154"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "182",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-155"
+                  }
+                ],
+                "id": "row-42"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-28",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-156"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 28",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-157"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-158"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "219",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-159"
+                  }
+                ],
+                "id": "row-43"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-01",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-160"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Bright Venture 29",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-161"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "salt",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-162"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "256",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-163"
+                  }
+                ],
+                "id": "row-44"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-02",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-164"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Lantern Moth 30",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-165"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "timber",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-166"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "293",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-167"
+                  }
+                ],
+                "id": "row-45"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-03",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-168"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Marguerite 31",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-169"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "grain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-170"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "330",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-171"
+                  }
+                ],
+                "id": "row-46"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-04",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-172"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Thornback 32",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-173"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "ballast stone",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-174"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "367",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-175"
+                  }
+                ],
+                "id": "row-47"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-05",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-176"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Ostrich Bay 33",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-177"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "fish",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-178"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "404",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-179"
+                  }
+                ],
+                "id": "row-48"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "2026-02-06",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-180"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Calloway 34",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-181"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "coal",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-182"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "441",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-183"
+                  }
+                ],
+                "id": "row-49"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-15",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Autofit, percentage widths, cell margins and rotated text:",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-17",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "autofit col 1",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-184"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "autofit column two is wider",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-185"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "c3",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-186"
+                  }
+                ],
+                "id": "row-50"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "x",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-187"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "y",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-188"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "z",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-189"
+                  }
+                ],
+                "id": "row-51"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-18",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-19",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "30%",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-190"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "70% (percentage widths, autofit)",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-191"
+                  }
+                ],
+                "id": "row-52"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-20",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-21",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Rotated",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-192"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "The harbour committee repainted the winter storage sheds according to the standing orders.",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-193"
+                  }
+                ],
+                "id": "row-53"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [],
+            "id": "block-22",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Advanced tables"
+  },
+  "importError": null,
+  "warnings": []
+}

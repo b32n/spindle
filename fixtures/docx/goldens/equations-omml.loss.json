@@ -1,0 +1,11 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 10,
+      "effect": "not imported",
+      "id": "docx.equations",
+      "label": "equation(s)"
+    }
+  ]
+}

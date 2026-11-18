@@ -1,0 +1,177 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Content controls and forms",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Structured document tags and legacy form fields",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Content controls and form fields",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline controls: name ",
+                "type": "text"
+              },
+              {
+                "text": ", berth ",
+                "type": "text"
+              },
+              {
+                "text": ", vessel ",
+                "type": "text"
+              },
+              {
+                "text": ", arrival ",
+                "type": "text"
+              },
+              {
+                "text": ", inspected ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-6",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Quantity",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-2"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Data-bound control: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Legacy (Word 97) form fields:",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Captain: ",
+                "type": "text"
+              },
+              {
+                "text": "   Cleared: ",
+                "type": "text"
+              },
+              {
+                "text": "   Flag colour: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Content controls and forms"
+  },
+  "importError": null,
+  "warnings": [
+    "Unsupported field code \"FORMTEXT\" — its cached value was dropped.",
+    "Unsupported field code \"FORMCHECKBOX\" — its cached value was dropped.",
+    "Unsupported field code \"FORMDROPDOWN\" — its cached value was dropped."
+  ]
+}

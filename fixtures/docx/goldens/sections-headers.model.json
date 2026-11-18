@@ -1,0 +1,637 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "bold": true,
+                "fontSize": 20,
+                "text": "Sections and headers",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Section 1 is portrait with a different first page and different odd/even headers.",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The northern ferry service negotiated a draft of the annual report before the first frost. The northern ferry service repainted the dredging contract using only the instruments on hand. The winter inspection team negotiated the sluice gate mechanism without waiting for approval. The grain exchange relocated the lamp oil inventory with unusual care. Every lighthouse keeper reorganised last season's tonnage figures in time for the autumn meeting. The bridge authority catalogued last season's tonnage figures and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A junior surveyor reviewed the old customs register to the satisfaction of nobody in particular. The winter inspection team recorded the eastern jetty after several rounds of discussion. A careful archivist catalogued two dozen mooring rings in the presence of two witnesses. A careful archivist approved a ledger of unpaid berth fees to the satisfaction of nobody in particular. A visiting engineer recorded the fog-signal schedule in the presence of two witnesses. The winter inspection team audited an index of local pilots during the long spring inspection.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The harbour committee approved a bundle of weathered charts after several rounds of discussion. Our records office repainted the lamp oil inventory and filed the result in triplicate. The bridge authority mapped every outstanding repair order as the tide turned. Several market traders reorganised last season's tonnage figures with unusual care. A careful archivist negotiated the old customs register with unusual care. Several market traders negotiated the dredging contract as the tide turned.",
+                "type": "text"
+              }
+            ],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "An experienced pilot catalogued a ledger of unpaid berth fees during the long spring inspection. Several market traders recorded a bundle of weathered charts to the satisfaction of nobody in particular. Local fishing crews rebuilt a bundle of weathered charts according to the standing orders. The regional council inspected an index of local pilots to the satisfaction of nobody in particular. The quay-side bakery relocated the dredging contract according to the standing orders. An experienced pilot audited a draft of the annual report in the presence of two witnesses.",
+                "type": "text"
+              }
+            ],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The quay-side bakery recorded an index of local pilots with unusual care. Our records office repainted the old customs register according to the standing orders. The grain exchange recorded the fog-signal schedule in time for the autumn meeting. Every lighthouse keeper catalogued the winter storage sheds in the presence of two witnesses. A junior surveyor postponed last season's tonnage figures in time for the autumn meeting. The regional council negotiated two dozen mooring rings without waiting for approval.",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The winter inspection team compared a draft of the annual report in time for the autumn meeting. Several market traders recorded a draft of the annual report with unusual care. A visiting engineer measured the lamp oil inventory and filed the result in triplicate. The tide almanac postponed the dredging contract as the tide turned. The tide almanac compared the fog-signal schedule in the presence of two witnesses. A junior surveyor measured every outstanding repair order using only the instruments on hand.",
+                "type": "text"
+              }
+            ],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The bridge authority catalogued every outstanding repair order as the tide turned. Our records office repainted an index of local pilots and filed the result in triplicate. The tide almanac relocated last season's tonnage figures after several rounds of discussion. Local fishing crews rebuilt the sluice gate mechanism in the presence of two witnesses. Local fishing crews reviewed the old customs register as the tide turned. Every lighthouse keeper inspected a bundle of weathered charts with unusual care.",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-10",
+            "type": "paragraph"
+          }
+        ],
+        "footer": {
+          "blocks": [
+            {
+              "alignment": "center",
+              "content": [
+                {
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "header": {
+          "blocks": [
+            {
+              "content": [
+                {
+                  "text": "Default header",
+                  "type": "text"
+                },
+                {
+                  "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      },
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Landscape in two columns",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "The northern ferry service negotiated two dozen mooring rings after several rounds of discussion. Local fishing crews inspected the old customs register as the tide turned. Local fishing crews reorganised two dozen mooring rings with unusual care. The harbour committee inspected every outstanding repair order before the first frost. Several market traders audited the eastern jetty and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Every lighthouse keeper reviewed the ferry timetable in time for the autumn meeting. The harbour committee measured a draft of the annual report before the first frost. The grain exchange inspected every outstanding repair order as the tide turned. The northern ferry service catalogued the ferry timetable according to the standing orders. The regional council catalogued three disputed boundary stones after several rounds of discussion.",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The harbour committee approved three disputed boundary stones while the market was closed. Local fishing crews inspected an index of local pilots in time for the autumn meeting. A visiting engineer negotiated a bundle of weathered charts to the satisfaction of nobody in particular. A visiting engineer mapped the fog-signal schedule before the first frost. The northern ferry service approved every outstanding repair order according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The regional council negotiated the eastern jetty without waiting for approval. A junior surveyor measured a ledger of unpaid berth fees according to the standing orders. The tide almanac postponed the fog-signal schedule and filed the result in triplicate. The bridge authority reviewed three disputed boundary stones using only the instruments on hand. The grain exchange rebuilt a draft of the annual report during the long spring inspection.",
+                "type": "text"
+              }
+            ],
+            "id": "block-15",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The quay-side bakery recorded the dredging contract as the tide turned. The bridge authority inspected the fog-signal schedule with unusual care. Our records office mapped the lamp oil inventory before the first frost. The winter inspection team measured the lamp oil inventory without waiting for approval. A careful archivist reorganised the eastern jetty and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The winter inspection team compared two dozen mooring rings and filed the result in triplicate. A junior surveyor measured every outstanding repair order and filed the result in triplicate. The northern ferry service reviewed last season's tonnage figures while the market was closed. An experienced pilot audited last season's tonnage figures using only the instruments on hand. An experienced pilot measured three disputed boundary stones while the market was closed.",
+                "type": "text"
+              }
+            ],
+            "id": "block-17",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A careful archivist catalogued the ferry timetable using only the instruments on hand. The bridge authority inspected the sluice gate mechanism during the long spring inspection. Every lighthouse keeper recorded the eastern jetty using only the instruments on hand. A junior surveyor documented the eastern jetty without waiting for approval. Every lighthouse keeper negotiated every outstanding repair order according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-18",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Local fishing crews measured the lamp oil inventory in the presence of two witnesses. A junior surveyor measured the winter storage sheds according to the standing orders. A junior surveyor measured the winter storage sheds during the long spring inspection. Our records office compared an index of local pilots with unusual care. A visiting engineer relocated a draft of the annual report during the long spring inspection.",
+                "type": "text"
+              }
+            ],
+            "id": "block-19",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Column break follows.",
+                "type": "text"
+              },
+              {
+                "text": "This text starts the second column.",
+                "type": "text"
+              }
+            ],
+            "id": "block-20",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-21",
+            "type": "paragraph"
+          }
+        ],
+        "footer": {
+          "blocks": [
+            {
+              "alignment": "center",
+              "content": [
+                {
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "header": {
+          "blocks": [
+            {
+              "content": [
+                {
+                  "text": "Landscape section header",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "id": "section-2",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "landscape",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      },
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Portrait in three columns",
+                "type": "text"
+              }
+            ],
+            "id": "block-22",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Our records office inspected every outstanding repair order while the market was closed. The quay-side bakery inspected a bundle of weathered charts before the first frost. The tide almanac approved every outstanding repair order according to the standing orders.",
+                "type": "text"
+              }
+            ],
+            "id": "block-23",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Every lighthouse keeper reviewed the fog-signal schedule without waiting for approval. The tide almanac measured the old customs register in time for the autumn meeting. Our records office compared the ferry timetable in time for the autumn meeting.",
+                "type": "text"
+              }
+            ],
+            "id": "block-24",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A junior surveyor approved a ledger of unpaid berth fees using only the instruments on hand. The quay-side bakery inspected a draft of the annual report according to the standing orders. The northern ferry service reorganised the fog-signal schedule and filed the result in triplicate.",
+                "type": "text"
+              }
+            ],
+            "id": "block-25",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The regional council negotiated an index of local pilots in the presence of two witnesses. The tide almanac measured an index of local pilots as the tide turned. Every lighthouse keeper inspected the lamp oil inventory after several rounds of discussion.",
+                "type": "text"
+              }
+            ],
+            "id": "block-26",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "An experienced pilot recorded the sluice gate mechanism during the long spring inspection. An experienced pilot inspected a ledger of unpaid berth fees after several rounds of discussion. A junior surveyor negotiated a ledger of unpaid berth fees using only the instruments on hand.",
+                "type": "text"
+              }
+            ],
+            "id": "block-27",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Several market traders approved every outstanding repair order with unusual care. A visiting engineer measured the fog-signal schedule without waiting for approval. The harbour committee postponed the eastern jetty during the long spring inspection.",
+                "type": "text"
+              }
+            ],
+            "id": "block-28",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A careful archivist catalogued the fog-signal schedule in time for the autumn meeting. An experienced pilot inspected every outstanding repair order according to the standing orders. The regional council mapped the winter storage sheds without waiting for approval.",
+                "type": "text"
+              }
+            ],
+            "id": "block-29",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The bridge authority measured last season's tonnage figures while the market was closed. A visiting engineer audited the sluice gate mechanism while the market was closed. An experienced pilot reviewed the dredging contract in the presence of two witnesses.",
+                "type": "text"
+              }
+            ],
+            "id": "block-30",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The grain exchange compared the winter storage sheds without waiting for approval. An experienced pilot negotiated the winter storage sheds in the presence of two witnesses. The quay-side bakery recorded the sluice gate mechanism with unusual care.",
+                "type": "text"
+              }
+            ],
+            "id": "block-31",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-32",
+            "type": "paragraph"
+          }
+        ],
+        "footer": {
+          "blocks": [
+            {
+              "alignment": "center",
+              "content": [
+                {
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "header": {
+          "blocks": [
+            {
+              "content": [
+                {
+                  "text": "Default header",
+                  "type": "text"
+                },
+                {
+                  "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "id": "section-3",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      },
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Closing section (A4, single column)",
+                "type": "text"
+              }
+            ],
+            "id": "block-33",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Our records office inspected the ferry timetable to the satisfaction of nobody in particular. A junior surveyor negotiated a ledger of unpaid berth fees in the presence of two witnesses. Every lighthouse keeper audited the ferry timetable and filed the result in triplicate. The northern ferry service approved a ledger of unpaid berth fees in time for the autumn meeting.",
+                "type": "text"
+              }
+            ],
+            "id": "block-34",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "The northern ferry service reviewed the lamp oil inventory after several rounds of discussion. A careful archivist audited the fog-signal schedule during the long spring inspection. A junior surveyor relocated the fog-signal schedule after several rounds of discussion. The tide almanac reorganised last season's tonnage figures as the tide turned.",
+                "type": "text"
+              }
+            ],
+            "id": "block-35",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "A junior surveyor documented the eastern jetty during the long spring inspection. Every lighthouse keeper negotiated every outstanding repair order as the tide turned. The harbour committee approved three disputed boundary stones while the market was closed. Local fishing crews inspected an index of local pilots in time for the autumn meeting.",
+                "type": "text"
+              }
+            ],
+            "id": "block-36",
+            "type": "paragraph"
+          }
+        ],
+        "footer": {
+          "blocks": [
+            {
+              "alignment": "center",
+              "content": [
+                {
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "header": {
+          "blocks": [
+            {
+              "content": [
+                {
+                  "text": "Default header",
+                  "type": "text"
+                },
+                {
+                  "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ]
+        },
+        "id": "section-4",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1123,
+            "w": 794
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Sections and headers"
+  },
+  "importError": null,
+  "warnings": []
+}

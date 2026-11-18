@@ -1,0 +1,173 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "text": "Equations",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Office Math (OMML): fractions, radicals, integrals, sums, matrices and systems",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Equations (OMML)",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "level": 1,
+            "type": "heading"
+          },
+          {
+            "content": [
+              {
+                "text": "Display equations follow: the quadratic formula, a definite integral, a summation, a matrix product, a limit and a system of equations.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-5",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline math: the area of a circle is ",
+                "type": "text"
+              },
+              {
+                "text": ", and the golden ratio is ",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Equation inside a table cell and a text box is also common:",
+                "type": "text"
+              }
+            ],
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-14",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "a/b + c/d",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "Equations"
+  },
+  "importError": null,
+  "warnings": []
+}

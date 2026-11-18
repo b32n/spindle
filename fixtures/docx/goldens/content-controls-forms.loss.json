@@ -1,0 +1,17 @@
+{
+  "format": "docx",
+  "items": [
+    {
+      "count": 21,
+      "effect": "their content is not imported",
+      "id": "docx.contentControls",
+      "label": "content control(s)"
+    },
+    {
+      "count": 3,
+      "effect": "their displayed value is dropped",
+      "id": "docx.fields",
+      "label": "field(s) (table of contents, cross-references, dates…)"
+    }
+  ]
+}
