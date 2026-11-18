@@ -38,7 +38,10 @@ npm run docs:docx-fidelity:update   # deliberately regenerate goldens, then revi
 ```
 
 CI fails only when a snapshot *changes* unexpectedly, never because a loss exists, so an importer
-improvement lands as a reviewed golden update. See [`fixtures/docx/README.md`](../../fixtures/docx/README.md)
+improvement lands as a reviewed golden update. The packages job also writes a readable per-file report
+(import errors and warnings, itemised losses, snapshot status, round-trip differences) to the job
+summary and uploads it as the `docx-fidelity-report-node<version>` artifact; locally,
+`npm run docs:docx-fidelity -- --report md` prints the same thing. See [`fixtures/docx/README.md`](../../fixtures/docx/README.md)
 for how to add a fixture and the coverage matrix.
 
 ## Running E2E tests

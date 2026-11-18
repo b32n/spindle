@@ -5,14 +5,19 @@
  *   npm run docs:docx-fidelity:update          rewrite the snapshots (and the README coverage matrix)
  *   npm run docs:docx-fidelity -- --only id    run a subset
  *   npm run docs:docx-fidelity -- --matrix     verify claims and print the coverage matrix
+ *   npm run docs:docx-fidelity -- --report md  also print a markdown report (--report json for JSON);
+ *       add --report-out <file> to append it to a file (CI passes "$GITHUB_STEP_SUMMARY"); repeatable
  *
  * Runs against the built @b32nio/spindle-docs-core (run `npm run build` first).
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { appendFileSync, writeFileSync } from 'node:fs';
+import { parseArgs } from './args';
 import { loadManifest } from './manifest';
 import { describeOutcome, runHarness } from './harness';
-import { MATRIX_END, MATRIX_START, buildMatrix, injectMatrix, uncoveredConstructs, verifyClaims } from './matrix';
+import { MATRIX_START, buildMatrix, injectMatrix, uncoveredConstructs, verifyClaims } from './matrix';
+import { formatJson, formatMarkdown, toFidelityReport } from './report';
 import { SNAPSHOT_KINDS, type EditorApi } from './types';
 
 const repoRoot = path.resolve(__dirname, '..', '..');
@@ -26,17 +31,6 @@ async function loadApi(): Promise<EditorApi> {
     exportToDocx: (document) => core.exportToDocx(document as InstanceType<typeof core.DocumentImpl>),
     inspectDocx: (bytes) => core.inspectDocx(bytes),
   };
-}
-
-function parseArgs(argv: string[]) {
-  const args = { update: false, matrix: false, only: [] as string[] };
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--update') args.update = true;
-    else if (argv[i] === '--matrix') args.matrix = true;
-    else if (argv[i] === '--only') args.only.push(...(argv[++i] ?? '').split(',').filter(Boolean));
-    else throw new Error(`unknown argument: ${argv[i]}`);
-  }
-  return args;
 }
 
 async function main(): Promise<number> {
@@ -65,6 +59,13 @@ async function main(): Promise<number> {
     for (const line of describeOutcome(o)) console.log(`       ${line}`);
   }
   for (const f of report.orphanGoldens) console.log(`FAIL orphan golden without a manifest entry: ${f}`);
+
+  for (const r of args.reports) {
+    const text = r.format === 'md' ? formatMarkdown(toFidelityReport('DOCX', report)) : formatJson(toFidelityReport('DOCX', report));
+    if (!r.out) console.log('\n' + text);
+    else if (r.format === 'md') appendFileSync(r.out, text + '\n'); // $GITHUB_STEP_SUMMARY is append-only
+    else writeFileSync(r.out, text);
+  }
 
   if (args.update) {
     const current = readFileSync(readme, 'utf8');
