@@ -592,3 +592,24 @@ describe('comments through the editor API', () => {
     expect(comments).toMatch(/<w:comment w:id="\d+" w:author="Cy">/);
   });
 });
+
+describe('list item paragraph formatting', () => {
+  it('writes and re-imports the spacing and indent of a list item, so a styled list survives a round trip', async () => {
+    const source = docWith({
+      paragraphStylePool: { ps1: { spaceAfter: 16, leftIndent: 48 } },
+      sections: [
+        {
+          id: 'sec1',
+          pageConfig: PAGE_CONFIG,
+          blocks: [{ id: 'b1', type: 'list-item', listType: 'bullet', level: 0, content: [{ type: 'text', text: 'item' }], styleId: 'ps1' }],
+        },
+      ],
+    });
+    const target = docWith({});
+    await importFromDocx((await exportToDocx(source)).bytes, target);
+    const data = target.getData();
+    const item = data.sections[0].blocks[0];
+    expect(item.type).toBe('list-item');
+    expect(item.type === 'list-item' && item.styleId && data.paragraphStylePool[item.styleId]).toEqual({ spaceAfter: 16, leftIndent: 48 });
+  });
+});

@@ -5,7 +5,6 @@ import type {
   DocHeaderFooterParagraph,
   DocInline,
   DocParagraphStyle,
-  DocRunBase,
   DocSection,
   DocTableRow,
   DocumentImportResult,
@@ -13,6 +12,7 @@ import type {
 
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { drawingKind, type DrawingKind } from './drawing-kind';
+import { parsePPr, StyleSheet } from './styles';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
 /** Depth-first concatenation of every #text leaf under a node (a run's <w:t>, a field's cached-result text, ...). */
@@ -49,6 +49,7 @@ function parseRels(xml: string | undefined): Map<string, string> {
 interface PartContext {
   rels: Map<string, string>;
   media: Map<string, string>;
+  styles: StyleSheet;
   /** Comment ranges open at the current position of the body walk (absent for headers/footers). */
   comments?: CommentTracker;
 }
@@ -69,31 +70,6 @@ async function buildMediaMap(zip: JSZip, rels: Map<string, string>): Promise<Map
   }
   return media;
 }
-
-// ---------------------------------------------------------------------------
-// Styles (word/styles.xml): styleId -> style name. Real files (Word, Google
-// Docs, LibreOffice) don't reliably use "Heading1" as the styleId itself —
-// the human-readable name ("Heading 1") is the only convention that's
-// actually universal, so heading detection goes through this map rather
-// than assuming a styleId spelling.
-// ---------------------------------------------------------------------------
-
-function parseStyleNames(xml: string | undefined): Map<string, string> {
-  const names = new Map<string, string>();
-  if (!xml) return names;
-  const root = parseXml(xml);
-  const stylesEl = find(root, 'w:styles');
-  if (!stylesEl) return names;
-  for (const style of findAll(childrenOf(stylesEl), 'w:style')) {
-    const id = attrsOf(style)['@_w:styleId'];
-    const nameEl = find(childrenOf(style), 'w:name');
-    const name = nameEl ? attrsOf(nameEl)['@_w:val'] : undefined;
-    if (id && name) names.set(id, name);
-  }
-  return names;
-}
-
-const HEADING_STYLE_NAME = /^Heading\s*(\d)$/i;
 
 // ---------------------------------------------------------------------------
 // Numbering (word/numbering.xml): numId -> abstractNumId -> (per level) format.
@@ -144,53 +120,6 @@ function listTypeFor(numbering: NumberingInfo, numId: string, ilvl: number): 'bu
 // ---------------------------------------------------------------------------
 // Runs and inline content
 // ---------------------------------------------------------------------------
-
-const HIGHLIGHT_TO_HEX: Record<string, string> = {
-  black: '#000000', blue: '#0000ff', cyan: '#00ffff', darkBlue: '#00008b', darkCyan: '#008b8b',
-  darkGray: '#a9a9a9', darkGreen: '#006400', darkMagenta: '#8b008b', darkRed: '#8b0000',
-  darkYellow: '#808000', green: '#00ff00', lightGray: '#d3d3d3', magenta: '#ff00ff',
-  red: '#ff0000', white: '#ffffff', yellow: '#ffff00',
-};
-
-function runProps(rPrNode: XmlNode | undefined): DocRunBase {
-  if (!rPrNode) return {};
-  const props = childrenOf(rPrNode);
-  const bold = !!find(props, 'w:b') && attrsOf(find(props, 'w:b')!)['@_w:val'] !== 'false';
-  const italic = !!find(props, 'w:i') && attrsOf(find(props, 'w:i')!)['@_w:val'] !== 'false';
-  const strike = !!find(props, 'w:strike') && attrsOf(find(props, 'w:strike')!)['@_w:val'] !== 'false';
-  const uEl = find(props, 'w:u');
-  const underline = !!uEl && attrsOf(uEl)['@_w:val'] !== 'none';
-  const smallCaps = !!find(props, 'w:smallCaps');
-  const vertAlignEl = find(props, 'w:vertAlign');
-  const vertAlign = vertAlignEl ? attrsOf(vertAlignEl)['@_w:val'] : undefined;
-  const colorEl = find(props, 'w:color');
-  const colorVal = colorEl ? attrsOf(colorEl)['@_w:val'] : undefined;
-  const color = colorVal && colorVal !== 'auto' ? `#${colorVal.toLowerCase()}` : undefined;
-  const szEl = find(props, 'w:sz');
-  const fontSize = szEl ? Number(attrsOf(szEl)['@_w:val']) / 2 : undefined;
-  const fontsEl = find(props, 'w:rFonts');
-  const fontFamily = fontsEl ? attrsOf(fontsEl)['@_w:ascii'] : undefined;
-  const shdEl = find(props, 'w:shd');
-  const fill = shdEl ? attrsOf(shdEl)['@_w:fill'] : undefined;
-  const highlightEl = find(props, 'w:highlight');
-  const highlightVal = highlightEl ? attrsOf(highlightEl)['@_w:val'] : undefined;
-  const backgroundColor =
-    fill && fill !== 'auto' && fill !== 'none' ? `#${fill.toLowerCase()}` : highlightVal ? HIGHLIGHT_TO_HEX[highlightVal] : undefined;
-
-  return {
-    ...(bold && { bold: true }),
-    ...(italic && { italic: true }),
-    ...(strike && { strikethrough: true }),
-    ...(underline && { underline: true }),
-    ...(smallCaps && { smallCaps: true }),
-    ...(vertAlign === 'superscript' && { superscript: true }),
-    ...(vertAlign === 'subscript' && { subscript: true }),
-    ...(color && { color }),
-    ...(fontSize && { fontSize }),
-    ...(fontFamily && { fontFamily }),
-    ...(backgroundColor && { backgroundColor }),
-  };
-}
 
 const NON_BREAKING_HYPHEN = '\u2011';
 const SOFT_HYPHEN = '\u00ad';
@@ -243,13 +172,13 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
  */
 function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
   const out: DocInline[] = [];
+  const pStyleId = paragraphStyleId(pNode);
   ctx.comments?.paragraphStart();
   let pendingField = ''; // accumulated instrText while inside a begin/.../end sequence
   let inField = false;
 
   const consumeRun = (runNode: XmlNode, target: string | undefined) => {
-    const rPr = find(childrenOf(runNode), 'w:rPr');
-    const props = runProps(rPr);
+    const props = ctx.styles.run(find(childrenOf(runNode), 'w:rPr'), pStyleId);
     let text = '';
     const flush = () => {
       if (!text) return;
@@ -401,33 +330,11 @@ function resolveHyperlinkTarget(hyperlinkNode: XmlNode, rels: Map<string, string
 // Paragraphs (-> paragraph / heading / listItem blocks)
 // ---------------------------------------------------------------------------
 
-const ALIGN_MAP: Record<string, DocParagraphStyle['alignment']> = {
-  left: 'left', start: 'left', center: 'center', right: 'right', end: 'right', both: 'justify',
-};
-
-function paragraphStyle(pPr: XmlNode | undefined): DocParagraphStyle {
-  if (!pPr) return {};
-  const kids = childrenOf(pPr);
-  const jcEl = find(kids, 'w:jc');
-  const alignment = jcEl ? ALIGN_MAP[attrsOf(jcEl)['@_w:val']] : undefined;
-  const spacingEl = find(kids, 'w:spacing');
-  const spacingAttrs = spacingEl ? attrsOf(spacingEl) : {};
-  const spaceBeforePt = spacingAttrs['@_w:before'] ? Number(spacingAttrs['@_w:before']) / 20 : undefined;
-  const spaceAfterPt = spacingAttrs['@_w:after'] ? Number(spacingAttrs['@_w:after']) / 20 : undefined;
-  const indentEl = find(kids, 'w:ind');
-  const indentAttrs = indentEl ? attrsOf(indentEl) : {};
-  const leftTwips = indentAttrs['@_w:left'] ?? indentAttrs['@_w:start'];
-  const leftIndentPt = leftTwips ? Number(leftTwips) / 20 : undefined;
-  const firstLineTwips = indentAttrs['@_w:firstLine'];
-  const firstLineIndentPt = firstLineTwips ? Number(firstLineTwips) / 20 : undefined;
-
-  return {
-    ...(alignment && { alignment }),
-    ...(spaceBeforePt != null && { spaceBeforePt }),
-    ...(spaceAfterPt != null && { spaceAfterPt }),
-    ...(leftIndentPt != null && { leftIndentPt }),
-    ...(firstLineIndentPt != null && { firstLineIndentPt }),
-  };
+/** The id of a paragraph's own style (`w:pStyle`), if it names one. */
+function paragraphStyleId(pNode: XmlNode): string | undefined {
+  const pPr = find(childrenOf(pNode), 'w:pPr');
+  const el = pPr ? find(childrenOf(pPr), 'w:pStyle') : undefined;
+  return el ? attrsOf(el)['@_w:val'] : undefined;
 }
 
 function hasPageBreakRun(pNode: XmlNode): boolean {
@@ -464,12 +371,11 @@ function pageBreakPlacement(pNode: XmlNode): 'before' | 'after' | null {
 /** parseParagraph plus the page break it may carry alongside its content. */
 function parseParagraphBlocks(
   pNode: XmlNode,
-  styleNames: Map<string, string>,
   numbering: NumberingInfo,
   ctx: PartContext,
   warnings: string[]
 ): DocBlock[] {
-  const block = parseParagraph(pNode, styleNames, numbering, ctx, warnings);
+  const block = parseParagraph(pNode, numbering, ctx, warnings);
   if (block.type === 'pageBreak') return [block];
   const placement = pageBreakPlacement(pNode);
   if (!placement) return [block];
@@ -483,7 +389,6 @@ function hasBottomBorder(pPrKids: XmlNode[]): boolean {
 
 function parseParagraph(
   pNode: XmlNode,
-  styleNames: Map<string, string>,
   numbering: NumberingInfo,
   ctx: PartContext,
   warnings: string[]
@@ -492,7 +397,16 @@ function parseParagraph(
   const pPr = find(kids, 'w:pPr');
   const pPrKids = pPr ? childrenOf(pPr) : [];
   const content = paragraphInlineContent(pNode, ctx, warnings);
-  const style = paragraphStyle(pPr);
+  // Effective formatting: docDefaults, then the paragraph's style chain, then its own properties.
+  const direct = parsePPr(pPr);
+  const effective = ctx.styles.paragraph(paragraphStyleId(pNode), direct);
+  const style: DocParagraphStyle = {
+    ...(effective.alignment && { alignment: effective.alignment }),
+    ...(effective.spaceBeforePt != null && { spaceBeforePt: effective.spaceBeforePt }),
+    ...(effective.spaceAfterPt != null && { spaceAfterPt: effective.spaceAfterPt }),
+    ...(effective.leftIndentPt != null && { leftIndentPt: effective.leftIndentPt }),
+    ...(effective.firstLineIndentPt != null && { firstLineIndentPt: effective.firstLineIndentPt }),
+  };
 
   // An otherwise-empty paragraph carrying only a page-break run or a
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
@@ -519,25 +433,19 @@ function parseParagraph(
     };
   }
 
-  const numPr = find(pPrKids, 'w:numPr');
-  if (numPr) {
-    const numPrKids = childrenOf(numPr);
-    const ilvlEl = find(numPrKids, 'w:ilvl');
-    const numIdEl = find(numPrKids, 'w:numId');
-    const level = ilvlEl ? Number(attrsOf(ilvlEl)['@_w:val']) : 0;
-    const numId = numIdEl ? attrsOf(numIdEl)['@_w:val'] : undefined;
-    const listType = numId ? listTypeFor(numbering, numId, level) : 'bullet';
-    return { type: 'listItem', listType, level, content, ...style };
-  }
-
-  const pStyleEl = find(pPrKids, 'w:pStyle');
-  const styleId = pStyleEl ? attrsOf(pStyleEl)['@_w:val'] : undefined;
-  const styleName = styleId ? styleNames.get(styleId) : undefined;
-  const headingMatch = styleName?.match(HEADING_STYLE_NAME);
-  if (headingMatch) {
-    const level = Math.min(6, Math.max(1, Number(headingMatch[1]))) as 1 | 2 | 3 | 4 | 5 | 6;
-    return { type: 'heading', level, content, ...style };
-  }
+  // A list item is a paragraph numbered directly, or through its style. A heading that is numbered through its
+  // style (numbered headings) stays a heading.
+  const level = effective.ilvl ?? 0;
+  const listItem = (numId: string | undefined): DocBlock => ({
+    type: 'listItem',
+    listType: numId ? listTypeFor(numbering, numId, level) : 'bullet',
+    level,
+    content,
+    ...style,
+  });
+  if (find(pPrKids, 'w:numPr') && direct.numId !== '0') return listItem(direct.numId);
+  if (effective.headingLevel) return { type: 'heading', level: effective.headingLevel as 1 | 2 | 3 | 4 | 5 | 6, content, ...style };
+  if (effective.numId && effective.numId !== '0') return listItem(effective.numId);
 
   return { type: 'paragraph', content, ...style };
 }
@@ -676,8 +584,7 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
   if (rootEl) {
     for (const p of findAll(flattenBlocks(childrenOf(rootEl)), 'w:p')) {
       const pPr = find(childrenOf(p), 'w:pPr');
-      const jcEl = pPr ? find(childrenOf(pPr), 'w:jc') : undefined;
-      const alignment = jcEl ? ALIGN_MAP[attrsOf(jcEl)['@_w:val']] : undefined;
+      const alignment = ctx.styles.paragraph(paragraphStyleId(p), parsePPr(pPr)).alignment;
       const content = paragraphInlineContent(p, ctx, warnings);
       paragraphs.push({ content, ...(alignment && alignment !== 'justify' ? { alignment } : {}) });
     }
@@ -716,8 +623,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const media = await buildMediaMap(zip, rels);
   const parsedComments = parseComments({ comments: commentsXml, extended: commentsExtendedXml, people: peopleXml }, warnings);
   const comments = createCommentTracker(parsedComments, documentXml);
-  const ctx: PartContext = { rels, media, comments };
-  const styleNames = parseStyleNames(stylesXml);
+  const styles = new StyleSheet(stylesXml);
+  const ctx: PartContext = { rels, media, styles, comments };
   const numbering = parseNumbering(numberingXml);
 
   const root = parseXml(documentXml);
@@ -730,8 +637,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
 
   const flushSection = async (sectPrNode: XmlNode) => {
     const parsed = parseSectPr(sectPrNode);
-    const header = parsed.headerRId ? await loadHeaderFooter(zip, rels, parsed.headerRId, warnings) : undefined;
-    const footer = parsed.footerRId ? await loadHeaderFooter(zip, rels, parsed.footerRId, warnings) : undefined;
+    const header = parsed.headerRId ? await loadHeaderFooter(zip, rels, parsed.headerRId, styles, warnings) : undefined;
+    const footer = parsed.footerRId ? await loadHeaderFooter(zip, rels, parsed.footerRId, styles, warnings) : undefined;
     sections.push({
       pageWidthPx: parsed.pageWidthPx,
       pageHeightPx: parsed.pageHeightPx,
@@ -757,11 +664,11 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
         // OOXML the paragraph is the section's last and keeps its content
         // (Word and docx >= 9.12 emit it this way; older docx used an empty
         // carrier paragraph).
-        currentBlocks.push(...parseParagraphBlocks(node, styleNames, numbering, ctx, warnings));
+        currentBlocks.push(...parseParagraphBlocks(node, numbering, ctx, warnings));
         await flushSection(inlineSectPr);
         continue;
       }
-      currentBlocks.push(...parseParagraphBlocks(node, styleNames, numbering, ctx, warnings));
+      currentBlocks.push(...parseParagraphBlocks(node, numbering, ctx, warnings));
     } else if (tag === 'w:tbl') {
       currentBlocks.push(parseTable(node, ctx, warnings));
     } else if (tag === 'w:sectPr') {
@@ -799,6 +706,7 @@ async function loadHeaderFooter(
   zip: JSZip,
   rels: Map<string, string>,
   rId: string,
+  styles: StyleSheet,
   warnings: string[]
 ): Promise<DocHeaderFooter | undefined> {
   const target = rels.get(rId);
@@ -811,7 +719,7 @@ async function loadHeaderFooter(
   const partRelsXml = await readZipText(zip, `word/_rels/${target}.rels`);
   const partRels = parseRels(partRelsXml);
   const partMedia = await buildMediaMap(zip, partRels);
-  return parseHeaderFooter(partXml, { rels: partRels, media: partMedia }, warnings);
+  return parseHeaderFooter(partXml, { rels: partRels, media: partMedia, styles }, warnings);
 }
 
 function parseTitle(coreXml: string): string {

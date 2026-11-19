@@ -47,7 +47,7 @@
     },
     {
       "count": 67,
-      "effect": "the style's formatting is not applied and its name is not kept",
+      "effect": "the style's formatting is applied to the text, but the style name is not kept",
       "id": "docx.namedStyles",
       "label": "use(s) of a named paragraph/character style",
       "where": [

@@ -142,7 +142,7 @@ function extraSections(root: XmlNode[]): Item[] {
   );
 }
 
-/** Uses of a named paragraph/character style other than headings: no formatting is applied and the name is not kept. */
+/** Uses of a named paragraph/character style other than headings: the formatting is applied to the text, the name is not kept. */
 function namedStyles(root: XmlNode[], names: Map<string, string>): Item[] {
   const used = new Map<string, number>();
   let total = 0;
@@ -156,7 +156,7 @@ function namedStyles(root: XmlNode[], names: Map<string, string>): Item[] {
     total++;
     bump(used, name);
   });
-  return item('docx.namedStyles', 'use(s) of a named paragraph/character style', total, 'the style\'s formatting is not applied and its name is not kept', used);
+  return item('docx.namedStyles', 'use(s) of a named paragraph/character style', total, 'the style\'s formatting is applied to the text, but the style name is not kept', used);
 }
 
 const cellHasContent = (p: XmlNode) => {

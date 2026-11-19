@@ -15,44 +15,61 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Images",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Inline, floating, wrapped and cropped pictures",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Images",
                 "type": "text"
               }
             ],
             "id": "block-3",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline images of different sizes: ",
                 "type": "text"
               },
@@ -64,6 +81,7 @@
                 "width": 96
               },
               {
+                "fontSize": 11,
                 "text": " ",
                 "type": "text"
               },
@@ -75,6 +93,7 @@
                 "width": 72
               },
               {
+                "fontSize": 11,
                 "text": " ",
                 "type": "text"
               },
@@ -86,11 +105,13 @@
                 "width": 120
               },
               {
+                "fontSize": 11,
                 "text": " in running text.",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -106,75 +127,100 @@
             "alignment": "center",
             "content": [
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": "Figure ",
                 "type": "text"
               },
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": ": a centred inline image with a caption.",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The tide almanac measured three disputed boundary stones as the tide turned. Local fishing crews catalogued the dredging contract with unusual care. A visiting engineer rebuilt the fog-signal schedule while the market was closed. Local fishing crews rebuilt the old customs register after several rounds of discussion. The quay-side bakery recorded the fog-signal schedule after several rounds of discussion. The regional council reorganised the fog-signal schedule while the market was closed. Several market traders reorganised the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the eastern jetty during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Our records office compared last season's tonnage figures and filed the result in triplicate. A junior surveyor relocated the eastern jetty and filed the result in triplicate. The tide almanac reviewed the lamp oil inventory during the long spring inspection. The winter inspection team recorded every outstanding repair order according to the standing orders. A junior surveyor inspected the old customs register according to the standing orders. A junior surveyor rebuilt the lamp oil inventory after several rounds of discussion. Local fishing crews documented a ledger of unpaid berth fees according to the standing orders. Every lighthouse keeper rebuilt a ledger of unpaid berth fees according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-8",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Every lighthouse keeper postponed the dredging contract according to the standing orders. The bridge authority catalogued the lamp oil inventory during the long spring inspection. Our records office measured a ledger of unpaid berth fees without waiting for approval. An experienced pilot audited the ferry timetable after several rounds of discussion. Our records office audited the dredging contract in time for the autumn meeting. Every lighthouse keeper compared a ledger of unpaid berth fees in time for the autumn meeting. Our records office measured the eastern jetty without waiting for approval.",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The harbour committee audited two dozen mooring rings before the first frost. A junior surveyor relocated a bundle of weathered charts as the tide turned. The northern ferry service audited the eastern jetty before the first frost. A junior surveyor documented the fog-signal schedule according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-10",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Text over an image placed behind the text. The regional council reorganised the ferry timetable to the satisfaction of nobody in particular. The bridge authority catalogued the old customs register before the first frost. Every lighthouse keeper documented the winter storage sheds with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-11",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Cropped images (a:srcRect) inside a table, next to an uncropped original:",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -237,8 +283,10 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Image-only paragraph followed by alt-text-less image: ",
                 "type": "text"
               },
@@ -251,6 +299,7 @@
               }
             ],
             "id": "block-14",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],

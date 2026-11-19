@@ -15,18 +15,29 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      },
+      "paragraph-style-2": {
+        "leftIndent": 48,
+        "spaceAfter": 10.666666666666666
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Kitchen sink",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -39,534 +50,726 @@
               }
             ],
             "id": "block-2",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Section 1 is portrait with a different first page and different odd/even headers.",
                 "type": "text"
               }
             ],
             "id": "block-3",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The northern ferry service negotiated a draft of the annual report before the first frost. The northern ferry service repainted the dredging contract using only the instruments on hand. The winter inspection team negotiated the sluice gate mechanism without waiting for approval. The grain exchange relocated the lamp oil inventory with unusual care. Every lighthouse keeper reorganised last season's tonnage figures in time for the autumn meeting. The bridge authority catalogued last season's tonnage figures and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A junior surveyor reviewed the old customs register to the satisfaction of nobody in particular. The winter inspection team recorded the eastern jetty after several rounds of discussion. A careful archivist catalogued two dozen mooring rings in the presence of two witnesses. A careful archivist approved a ledger of unpaid berth fees to the satisfaction of nobody in particular. A visiting engineer recorded the fog-signal schedule in the presence of two witnesses. The winter inspection team audited an index of local pilots during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-5",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The harbour committee approved a bundle of weathered charts after several rounds of discussion. Our records office repainted the lamp oil inventory and filed the result in triplicate. The bridge authority mapped every outstanding repair order as the tide turned. Several market traders reorganised last season's tonnage figures with unusual care. A careful archivist negotiated the old customs register with unusual care. Several market traders negotiated the dredging contract as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "An experienced pilot catalogued a ledger of unpaid berth fees during the long spring inspection. Several market traders recorded a bundle of weathered charts to the satisfaction of nobody in particular. Local fishing crews rebuilt a bundle of weathered charts according to the standing orders. The regional council inspected an index of local pilots to the satisfaction of nobody in particular. The quay-side bakery relocated the dredging contract according to the standing orders. An experienced pilot audited a draft of the annual report in the presence of two witnesses.",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The quay-side bakery recorded an index of local pilots with unusual care. Our records office repainted the old customs register according to the standing orders. The grain exchange recorded the fog-signal schedule in time for the autumn meeting. Every lighthouse keeper catalogued the winter storage sheds in the presence of two witnesses. A junior surveyor postponed last season's tonnage figures in time for the autumn meeting. The regional council negotiated two dozen mooring rings without waiting for approval.",
                 "type": "text"
               }
             ],
             "id": "block-8",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The winter inspection team compared a draft of the annual report in time for the autumn meeting. Several market traders recorded a draft of the annual report with unusual care. A visiting engineer measured the lamp oil inventory and filed the result in triplicate. The tide almanac postponed the dredging contract as the tide turned. The tide almanac compared the fog-signal schedule in the presence of two witnesses. A junior surveyor measured every outstanding repair order using only the instruments on hand.",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The bridge authority catalogued every outstanding repair order as the tide turned. Our records office repainted an index of local pilots and filed the result in triplicate. The tide almanac relocated last season's tonnage figures after several rounds of discussion. Local fishing crews rebuilt the sluice gate mechanism in the presence of two witnesses. Local fishing crews reviewed the old customs register as the tide turned. Every lighthouse keeper inspected a bundle of weathered charts with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-10",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Contents",
                 "type": "text"
               }
             ],
             "id": "block-11",
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-12",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Lists and styles",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-13",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Review",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-14",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Tables",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-15",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Media",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-16",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Equations",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-17",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Controls",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-18",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Languages",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-19",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Typography",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-20",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "Charts",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               }
             ],
             "id": "block-21",
+            "indent": 0,
+            "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-22",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Navigation",
                 "type": "text"
               }
             ],
             "id": "block-23",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A junior surveyor catalogued three disputed boundary stones after several rounds of discussion. The harbour committee compared the sluice gate mechanism with unusual care. The grain exchange approved last season's tonnage figures according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-24",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Lists and styles",
                 "type": "text"
               }
             ],
             "id": "block-25",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The regional council recorded the eastern jetty in time for the autumn meeting. Local fishing crews rebuilt the winter storage sheds and filed the result in triplicate. A visiting engineer compared an index of local pilots in time for the autumn meeting.",
                 "type": "text"
               }
             ],
             "id": "block-26",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Review",
                 "type": "text"
               }
             ],
             "id": "block-27",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "An experienced pilot compared the dredging contract while the market was closed. The harbour committee compared last season's tonnage figures during the long spring inspection. The tide almanac repainted the dredging contract and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-28",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Tables",
                 "type": "text"
               }
             ],
             "id": "block-29",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Several market traders catalogued two dozen mooring rings in the presence of two witnesses. The bridge authority rebuilt three disputed boundary stones as the tide turned. Our records office inspected a draft of the annual report before the first frost.",
                 "type": "text"
               }
             ],
             "id": "block-30",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Media",
                 "type": "text"
               }
             ],
             "id": "block-31",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A careful archivist measured a bundle of weathered charts according to the standing orders. A junior surveyor compared the ferry timetable before the first frost. The northern ferry service catalogued two dozen mooring rings using only the instruments on hand.",
                 "type": "text"
               }
             ],
             "id": "block-32",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Equations",
                 "type": "text"
               }
             ],
             "id": "block-33",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The bridge authority reorganised the lamp oil inventory before the first frost. The bridge authority rebuilt two dozen mooring rings without waiting for approval. Every lighthouse keeper postponed every outstanding repair order to the satisfaction of nobody in particular.",
                 "type": "text"
               }
             ],
             "id": "block-34",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Controls",
                 "type": "text"
               }
             ],
             "id": "block-35",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The grain exchange postponed the eastern jetty to the satisfaction of nobody in particular. A junior surveyor compared the dredging contract during the long spring inspection. A junior surveyor rebuilt the ferry timetable without waiting for approval.",
                 "type": "text"
               }
             ],
             "id": "block-36",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Languages",
                 "type": "text"
               }
             ],
             "id": "block-37",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A visiting engineer audited the dredging contract after several rounds of discussion. A careful archivist rebuilt the eastern jetty using only the instruments on hand. The harbour committee reviewed the fog-signal schedule in the presence of two witnesses.",
                 "type": "text"
               }
             ],
             "id": "block-38",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Typography",
                 "type": "text"
               }
             ],
             "id": "block-39",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Our records office reorganised the old customs register in time for the autumn meeting. Every lighthouse keeper compared the lamp oil inventory after several rounds of discussion. The regional council recorded the lamp oil inventory with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-40",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Charts",
                 "type": "text"
               }
             ],
             "id": "block-41",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The northern ferry service mapped a bundle of weathered charts while the market was closed. A careful archivist rebuilt a bundle of weathered charts without waiting for approval. An experienced pilot audited a ledger of unpaid berth fees according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-42",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Fields and cross-references",
                 "type": "text"
               }
             ],
             "id": "block-43",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The key figure of this report is 42 vessels per day.",
                 "type": "text"
               }
             ],
             "id": "block-44",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "As stated on page ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ": ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-45",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": "Figure ",
                 "type": "text"
               },
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": " shows the quay; Figure ",
                 "type": "text"
               },
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": " shows the lighthouse; Table ",
                 "type": "text"
               },
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": " lists berths.",
                 "type": "text"
               }
             ],
             "id": "block-46",
+            "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Generated on ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " at ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " by ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " for ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-47",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Page ",
                 "type": "text"
               },
@@ -575,6 +778,7 @@
                 "type": "dynamicField"
               },
               {
+                "fontSize": 11,
                 "text": " of ",
                 "type": "text"
               },
@@ -583,110 +787,143 @@
                 "type": "dynamicField"
               },
               {
+                "fontSize": 11,
                 "text": " (section pages: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "; words: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ").",
                 "type": "text"
               }
             ],
             "id": "block-48",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Current chapter: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ". Conditional: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-49",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "External field link: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " and run link: ",
                 "type": "text"
               },
               {
                 "href": "https://example.org/tides",
+                "styleId": "text-style-1",
                 "text": "example.org/tides",
                 "type": "link"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-50",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Internal links: ",
                 "type": "text"
               },
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "jump to the key figure",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
+                "color": "#0563c1",
+                "fontSize": 11,
                 "text": "jump to Findings",
-                "type": "text"
+                "type": "text",
+                "underline": true
               },
               {
+                "fontSize": 11,
                 "text": "; a mail link: ",
                 "type": "text"
               },
               {
                 "href": "mailto:records@example.com",
+                "styleId": "text-style-1",
                 "text": "records@example.com",
                 "type": "link"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-51",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": " (unresolved mail-merge field) and a ",
                 "type": "text"
               }
             ],
             "id": "block-52",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Simple field: ",
                 "type": "text"
               },
@@ -695,6 +932,7 @@
                 "type": "dynamicField"
               },
               {
+                "fontSize": 11,
                 "text": " and a nested field: ",
                 "type": "text"
               },
@@ -703,58 +941,74 @@
                 "type": "dynamicField"
               },
               {
+                "fontSize": 11,
                 "text": "single page",
                 "type": "text"
               }
             ],
             "id": "block-53",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Footnotes and endnotes",
                 "type": "text"
               }
             ],
             "id": "block-54",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Harbour tonnage rose again last year.",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " A second claim needs support too.",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " The third claim is contested",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-55",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Rich footnote here.",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " And an endnote right after it.",
                 "type": "text"
               }
             ],
             "id": "block-56",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -765,6 +1019,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Cell with note",
                         "type": "text"
                       }
@@ -774,6 +1029,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Plain cell",
                         "type": "text"
                       }
@@ -789,95 +1045,121 @@
           {
             "content": [],
             "id": "block-58",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The grain exchange repainted the sluice gate mechanism in time for the autumn meeting. An experienced pilot mapped a draft of the annual report without waiting for approval. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
               }
             ],
             "id": "block-59",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A visiting engineer rebuilt every outstanding repair order while the market was closed. A visiting engineer approved an index of local pilots according to the standing orders. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
               }
             ],
             "id": "block-60",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Our records office relocated the fog-signal schedule without waiting for approval. An experienced pilot mapped a ledger of unpaid berth fees as the tide turned. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
               }
             ],
             "id": "block-61",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The northern ferry service inspected a ledger of unpaid berth fees as the tide turned. The grain exchange approved the fog-signal schedule after several rounds of discussion. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
               }
             ],
             "id": "block-62",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A junior surveyor rebuilt the winter storage sheds in the presence of two witnesses. The regional council mapped every outstanding repair order without waiting for approval. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
               }
             ],
             "id": "block-63",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The harbour committee documented the sluice gate mechanism according to the standing orders. The grain exchange approved the sluice gate mechanism to the satisfaction of nobody in particular. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
               }
             ],
             "id": "block-64",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-65",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           }
         ],
@@ -887,6 +1169,7 @@
               "alignment": "center",
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
                 },
@@ -895,6 +1178,7 @@
                   "type": "dynamicField"
                 },
                 {
+                  "fontSize": 11,
                   "text": " of ",
                   "type": "text"
                 },
@@ -912,18 +1196,22 @@
             {
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Default header",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "Harbour Report",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
@@ -956,108 +1244,141 @@
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Landscape in two columns",
                 "type": "text"
               }
             ],
             "id": "block-66",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The northern ferry service negotiated two dozen mooring rings after several rounds of discussion. Local fishing crews inspected the old customs register as the tide turned. Local fishing crews reorganised two dozen mooring rings with unusual care. The harbour committee inspected every outstanding repair order before the first frost. Several market traders audited the eastern jetty and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-67",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Every lighthouse keeper reviewed the ferry timetable in time for the autumn meeting. The harbour committee measured a draft of the annual report before the first frost. The grain exchange inspected every outstanding repair order as the tide turned. The northern ferry service catalogued the ferry timetable according to the standing orders. The regional council catalogued three disputed boundary stones after several rounds of discussion.",
                 "type": "text"
               }
             ],
             "id": "block-68",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The harbour committee approved three disputed boundary stones while the market was closed. Local fishing crews inspected an index of local pilots in time for the autumn meeting. A visiting engineer negotiated a bundle of weathered charts to the satisfaction of nobody in particular. A visiting engineer mapped the fog-signal schedule before the first frost. The northern ferry service approved every outstanding repair order according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-69",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The regional council negotiated the eastern jetty without waiting for approval. A junior surveyor measured a ledger of unpaid berth fees according to the standing orders. The tide almanac postponed the fog-signal schedule and filed the result in triplicate. The bridge authority reviewed three disputed boundary stones using only the instruments on hand. The grain exchange rebuilt a draft of the annual report during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-70",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The quay-side bakery recorded the dredging contract as the tide turned. The bridge authority inspected the fog-signal schedule with unusual care. Our records office mapped the lamp oil inventory before the first frost. The winter inspection team measured the lamp oil inventory without waiting for approval. A careful archivist reorganised the eastern jetty and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-71",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The winter inspection team compared two dozen mooring rings and filed the result in triplicate. A junior surveyor measured every outstanding repair order and filed the result in triplicate. The northern ferry service reviewed last season's tonnage figures while the market was closed. An experienced pilot audited last season's tonnage figures using only the instruments on hand. An experienced pilot measured three disputed boundary stones while the market was closed.",
                 "type": "text"
               }
             ],
             "id": "block-72",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A careful archivist catalogued the ferry timetable using only the instruments on hand. The bridge authority inspected the sluice gate mechanism during the long spring inspection. Every lighthouse keeper recorded the eastern jetty using only the instruments on hand. A junior surveyor documented the eastern jetty without waiting for approval. Every lighthouse keeper negotiated every outstanding repair order according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-73",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Local fishing crews measured the lamp oil inventory in the presence of two witnesses. A junior surveyor measured the winter storage sheds according to the standing orders. A junior surveyor measured the winter storage sheds during the long spring inspection. Our records office compared an index of local pilots with unusual care. A visiting engineer relocated a draft of the annual report during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-74",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Lists and styles",
                 "type": "text"
               }
             ],
             "id": "block-75",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Survey",
                 "type": "text"
               }
@@ -1065,11 +1386,13 @@
             "id": "block-76",
             "level": 0,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "North quay",
                 "type": "text"
               }
@@ -1077,11 +1400,13 @@
             "id": "block-77",
             "level": 1,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Bollards",
                 "type": "text"
               }
@@ -1089,11 +1414,13 @@
             "id": "block-78",
             "level": 2,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "East quay",
                 "type": "text"
               }
@@ -1101,11 +1428,13 @@
             "id": "block-79",
             "level": 1,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Review",
                 "type": "text"
               }
@@ -1113,11 +1442,13 @@
             "id": "block-80",
             "level": 0,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Draft",
                 "type": "text"
               }
@@ -1125,11 +1456,13 @@
             "id": "block-81",
             "level": 1,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Final",
                 "type": "text"
               }
@@ -1137,11 +1470,13 @@
             "id": "block-82",
             "level": 1,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "First",
                 "type": "text"
               }
@@ -1149,11 +1484,13 @@
             "id": "block-83",
             "level": 0,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Second",
                 "type": "text"
               }
@@ -1161,79 +1498,109 @@
             "id": "block-84",
             "level": 0,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
+            "alignment": "center",
             "content": [
               {
+                "color": "#404040",
+                "fontSize": 11,
+                "italic": true,
                 "text": "Quoted: An experienced pilot compared the fog-signal schedule before the first frost. The grain exchange documented last season's tonnage figures during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-85",
+            "indent": 48,
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "center",
             "content": [
               {
+                "bold": true,
+                "color": "#4472c4",
+                "fontSize": 11,
+                "italic": true,
                 "text": "Several market traders catalogued a ledger of unpaid berth fees to the satisfaction of nobody in particular. The regional council postponed three disputed boundary stones as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-86",
+            "indent": 48,
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "left",
             "content": [
               {
+                "fontFamily": "DejaVu Sans Mono",
+                "fontSize": 9,
                 "text": "def tide(h):\n    return h % 12",
                 "type": "text"
               }
             ],
             "id": "block-87",
+            "spaceAfter": 0,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Combined constructs",
                 "type": "text"
               }
             ],
             "id": "block-88",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A tracked-in date field: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ". A tracked link: ",
                 "type": "text"
               },
               {
                 "href": "https://example.com/tracked",
+                "styleId": "text-style-1",
                 "text": "tracked hyperlink text",
                 "type": "link"
               },
               {
+                "fontSize": 11,
                 "text": ". A comment over a bookmark: ",
                 "type": "text"
               },
               {
                 "commentThreadId": "thread-1",
+                "fontSize": 11,
                 "text": "bookmarked and commented",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-89",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -1245,6 +1612,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Header A",
                         "type": "text"
                       }
@@ -1255,6 +1623,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Header B",
                         "type": "text"
                       }
@@ -1265,6 +1634,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Header C",
                         "type": "text"
                       }
@@ -1283,6 +1653,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "inserted in cell",
                         "type": "text"
                       }
@@ -1292,6 +1663,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "note",
                         "type": "text"
                       }
@@ -1306,6 +1678,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "tracked row, cell 1",
                         "type": "text"
                       }
@@ -1319,10 +1692,12 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "tracked row, cell 3",
                         "type": "text"
                       },
                       {
+                        "fontSize": 11,
                         "text": " ",
                         "type": "text"
                       }
@@ -1338,11 +1713,13 @@
           {
             "content": [],
             "id": "block-91",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "List item with a deleted footnote reference",
                 "type": "text"
               }
@@ -1350,11 +1727,13 @@
             "id": "block-92",
             "level": 0,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "A tracked list item at level 2",
                 "type": "text"
               }
@@ -1362,44 +1741,55 @@
             "id": "block-93",
             "level": 1,
             "listType": "numbered",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A formatting change inside a heading-like paragraph: ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontSize": 11,
                 "text": "now bold",
                 "type": "text"
               }
             ],
             "id": "block-94",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Column break follows.",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\n",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "This text starts the second column.",
                 "type": "text"
               }
             ],
             "id": "block-95",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-96",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           }
         ],
@@ -1409,6 +1799,7 @@
               "alignment": "center",
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
                 },
@@ -1417,6 +1808,7 @@
                   "type": "dynamicField"
                 },
                 {
+                  "fontSize": 11,
                   "text": " of ",
                   "type": "text"
                 },
@@ -1434,14 +1826,17 @@
             {
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Landscape section header",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
@@ -1474,123 +1869,161 @@
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Portrait in three columns",
                 "type": "text"
               }
             ],
             "id": "block-97",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Our records office inspected every outstanding repair order while the market was closed. The quay-side bakery inspected a bundle of weathered charts before the first frost. The tide almanac approved every outstanding repair order according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-98",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Every lighthouse keeper reviewed the fog-signal schedule without waiting for approval. The tide almanac measured the old customs register in time for the autumn meeting. Our records office compared the ferry timetable in time for the autumn meeting.",
                 "type": "text"
               }
             ],
             "id": "block-99",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A junior surveyor approved a ledger of unpaid berth fees using only the instruments on hand. The quay-side bakery inspected a draft of the annual report according to the standing orders. The northern ferry service reorganised the fog-signal schedule and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-100",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The regional council negotiated an index of local pilots in the presence of two witnesses. The tide almanac measured an index of local pilots as the tide turned. Every lighthouse keeper inspected the lamp oil inventory after several rounds of discussion.",
                 "type": "text"
               }
             ],
             "id": "block-101",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "An experienced pilot recorded the sluice gate mechanism during the long spring inspection. An experienced pilot inspected a ledger of unpaid berth fees after several rounds of discussion. A junior surveyor negotiated a ledger of unpaid berth fees using only the instruments on hand.",
                 "type": "text"
               }
             ],
             "id": "block-102",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Several market traders approved every outstanding repair order with unusual care. A visiting engineer measured the fog-signal schedule without waiting for approval. The harbour committee postponed the eastern jetty during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-103",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A careful archivist catalogued the fog-signal schedule in time for the autumn meeting. An experienced pilot inspected every outstanding repair order according to the standing orders. The regional council mapped the winter storage sheds without waiting for approval.",
                 "type": "text"
               }
             ],
             "id": "block-104",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The bridge authority measured last season's tonnage figures while the market was closed. A visiting engineer audited the sluice gate mechanism while the market was closed. An experienced pilot reviewed the dredging contract in the presence of two witnesses.",
                 "type": "text"
               }
             ],
             "id": "block-105",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The grain exchange compared the winter storage sheds without waiting for approval. An experienced pilot negotiated the winter storage sheds in the presence of two witnesses. The quay-side bakery recorded the sluice gate mechanism with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-106",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Tables",
                 "type": "text"
               }
             ],
             "id": "block-107",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Nested tables (outer, inner, innermost):",
                 "type": "text"
               }
             ],
             "id": "block-108",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -1601,6 +2034,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Outer 1",
                         "type": "text"
                       }
@@ -1610,6 +2044,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Outer 2",
                         "type": "text"
                       }
@@ -1619,6 +2054,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Outer 3",
                         "type": "text"
                       }
@@ -1633,6 +2069,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "a",
                         "type": "text"
                       }
@@ -1642,6 +2079,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Contains a nested table:",
                         "type": "text"
                       }
@@ -1651,6 +2089,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "c",
                         "type": "text"
                       }
@@ -1665,6 +2104,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "d",
                         "type": "text"
                       }
@@ -1674,6 +2114,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "e",
                         "type": "text"
                       }
@@ -1683,6 +2124,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "f",
                         "type": "text"
                       }
@@ -1698,16 +2140,20 @@
           {
             "content": [],
             "id": "block-110",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Merged cells (horizontal and vertical, with a repeating three-row header):",
                 "type": "text"
               }
             ],
             "id": "block-111",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -1720,6 +2166,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Quarter schedule",
                         "type": "text"
                       }
@@ -1734,6 +2181,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Berth",
                         "type": "text"
                       }
@@ -1745,6 +2193,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Week 1-2",
                         "type": "text"
                       }
@@ -1755,6 +2204,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Week 3-4",
                         "type": "text"
                       }
@@ -1769,6 +2219,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "In",
                         "type": "text"
                       }
@@ -1778,6 +2229,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Out",
                         "type": "text"
                       }
@@ -1787,6 +2239,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "In",
                         "type": "text"
                       }
@@ -1796,6 +2249,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Out",
                         "type": "text"
                       }
@@ -1810,6 +2264,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "North",
                         "type": "text"
                       }
@@ -1820,6 +2275,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "12",
                         "type": "text"
                       }
@@ -1829,6 +2285,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "9",
                         "type": "text"
                       }
@@ -1838,6 +2295,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "14",
                         "type": "text"
                       }
@@ -1847,6 +2305,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "11",
                         "type": "text"
                       }
@@ -1862,6 +2321,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "note",
                         "type": "text"
                       }
@@ -1872,6 +2332,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "n/a",
                         "type": "text"
                       }
@@ -1886,6 +2347,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "East",
                         "type": "text"
                       }
@@ -1896,6 +2358,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "7",
                         "type": "text"
                       }
@@ -1906,6 +2369,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "3",
                         "type": "text"
                       }
@@ -1915,6 +2379,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "8",
                         "type": "text"
                       }
@@ -1924,6 +2389,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2",
                         "type": "text"
                       }
@@ -1938,6 +2404,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "4",
                         "type": "text"
                       }
@@ -1947,6 +2414,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "5",
                         "type": "text"
                       }
@@ -1956,6 +2424,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "6",
                         "type": "text"
                       }
@@ -1971,6 +2440,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Total",
                         "type": "text"
                       }
@@ -1981,6 +2451,7 @@
                     "colspan": 4,
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "all berths combined",
                         "type": "text"
                       }
@@ -1996,16 +2467,20 @@
           {
             "content": [],
             "id": "block-113",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Borders and shading:",
                 "type": "text"
               }
             ],
             "id": "block-114",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -2017,6 +2492,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Style",
                         "type": "text"
                       }
@@ -2027,6 +2503,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Fill",
                         "type": "text"
                       }
@@ -2037,6 +2514,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontSize": 11,
                         "text": "Notes",
                         "type": "text"
                       }
@@ -2051,6 +2529,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Double / dashed / thick / dotted",
                         "type": "text"
                       }
@@ -2060,6 +2539,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Solid green",
                         "type": "text"
                       }
@@ -2069,6 +2549,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Light blue",
                         "type": "text"
                       }
@@ -2083,6 +2564,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "No borders",
                         "type": "text"
                       }
@@ -2092,6 +2574,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Grey",
                         "type": "text"
                       }
@@ -2101,6 +2584,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Bottom aligned",
                         "type": "text"
                       }
@@ -2116,16 +2600,20 @@
           {
             "content": [],
             "id": "block-116",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A banded table style with a repeating header row across pages:",
                 "type": "text"
               }
             ],
             "id": "block-117",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -2136,6 +2624,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Date",
                         "type": "text"
                       }
@@ -2145,6 +2634,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Vessel",
                         "type": "text"
                       }
@@ -2154,6 +2644,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Cargo",
                         "type": "text"
                       }
@@ -2163,6 +2654,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Tonnes",
                         "type": "text"
                       }
@@ -2177,6 +2669,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-01",
                         "type": "text"
                       }
@@ -2186,6 +2679,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Marguerite 1",
                         "type": "text"
                       }
@@ -2195,6 +2689,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "grain",
                         "type": "text"
                       }
@@ -2204,6 +2699,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "120",
                         "type": "text"
                       }
@@ -2218,6 +2714,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-02",
                         "type": "text"
                       }
@@ -2227,6 +2724,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Thornback 2",
                         "type": "text"
                       }
@@ -2236,6 +2734,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
                       }
@@ -2245,6 +2744,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "157",
                         "type": "text"
                       }
@@ -2259,6 +2759,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-03",
                         "type": "text"
                       }
@@ -2268,6 +2769,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Ostrich Bay 3",
                         "type": "text"
                       }
@@ -2277,6 +2779,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "fish",
                         "type": "text"
                       }
@@ -2286,6 +2789,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "194",
                         "type": "text"
                       }
@@ -2300,6 +2804,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-04",
                         "type": "text"
                       }
@@ -2309,6 +2814,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Calloway 4",
                         "type": "text"
                       }
@@ -2318,6 +2824,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "coal",
                         "type": "text"
                       }
@@ -2327,6 +2834,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "231",
                         "type": "text"
                       }
@@ -2341,6 +2849,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-05",
                         "type": "text"
                       }
@@ -2350,6 +2859,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Bright Venture 5",
                         "type": "text"
                       }
@@ -2359,6 +2869,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "salt",
                         "type": "text"
                       }
@@ -2368,6 +2879,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "268",
                         "type": "text"
                       }
@@ -2382,6 +2894,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-06",
                         "type": "text"
                       }
@@ -2391,6 +2904,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Lantern Moth 6",
                         "type": "text"
                       }
@@ -2400,6 +2914,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "timber",
                         "type": "text"
                       }
@@ -2409,6 +2924,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "305",
                         "type": "text"
                       }
@@ -2423,6 +2939,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-07",
                         "type": "text"
                       }
@@ -2432,6 +2949,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Marguerite 7",
                         "type": "text"
                       }
@@ -2441,6 +2959,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "grain",
                         "type": "text"
                       }
@@ -2450,6 +2969,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "342",
                         "type": "text"
                       }
@@ -2464,6 +2984,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-08",
                         "type": "text"
                       }
@@ -2473,6 +2994,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Thornback 8",
                         "type": "text"
                       }
@@ -2482,6 +3004,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
                       }
@@ -2491,6 +3014,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "379",
                         "type": "text"
                       }
@@ -2505,6 +3029,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-09",
                         "type": "text"
                       }
@@ -2514,6 +3039,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Ostrich Bay 9",
                         "type": "text"
                       }
@@ -2523,6 +3049,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "fish",
                         "type": "text"
                       }
@@ -2532,6 +3059,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "416",
                         "type": "text"
                       }
@@ -2546,6 +3074,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-10",
                         "type": "text"
                       }
@@ -2555,6 +3084,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Calloway 10",
                         "type": "text"
                       }
@@ -2564,6 +3094,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "coal",
                         "type": "text"
                       }
@@ -2573,6 +3104,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "453",
                         "type": "text"
                       }
@@ -2587,6 +3119,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-11",
                         "type": "text"
                       }
@@ -2596,6 +3129,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Bright Venture 11",
                         "type": "text"
                       }
@@ -2605,6 +3139,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "salt",
                         "type": "text"
                       }
@@ -2614,6 +3149,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "490",
                         "type": "text"
                       }
@@ -2628,6 +3164,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-12",
                         "type": "text"
                       }
@@ -2637,6 +3174,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Lantern Moth 12",
                         "type": "text"
                       }
@@ -2646,6 +3184,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "timber",
                         "type": "text"
                       }
@@ -2655,6 +3194,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "527",
                         "type": "text"
                       }
@@ -2669,6 +3209,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-13",
                         "type": "text"
                       }
@@ -2678,6 +3219,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Marguerite 13",
                         "type": "text"
                       }
@@ -2687,6 +3229,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "grain",
                         "type": "text"
                       }
@@ -2696,6 +3239,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "564",
                         "type": "text"
                       }
@@ -2710,6 +3254,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-14",
                         "type": "text"
                       }
@@ -2719,6 +3264,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Thornback 14",
                         "type": "text"
                       }
@@ -2728,6 +3274,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
                       }
@@ -2737,6 +3284,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "601",
                         "type": "text"
                       }
@@ -2751,6 +3299,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-15",
                         "type": "text"
                       }
@@ -2760,6 +3309,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Ostrich Bay 15",
                         "type": "text"
                       }
@@ -2769,6 +3319,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "fish",
                         "type": "text"
                       }
@@ -2778,6 +3329,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "638",
                         "type": "text"
                       }
@@ -2792,6 +3344,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-16",
                         "type": "text"
                       }
@@ -2801,6 +3354,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Calloway 16",
                         "type": "text"
                       }
@@ -2810,6 +3364,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "coal",
                         "type": "text"
                       }
@@ -2819,6 +3374,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "675",
                         "type": "text"
                       }
@@ -2833,6 +3389,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-17",
                         "type": "text"
                       }
@@ -2842,6 +3399,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Bright Venture 17",
                         "type": "text"
                       }
@@ -2851,6 +3409,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "salt",
                         "type": "text"
                       }
@@ -2860,6 +3419,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "712",
                         "type": "text"
                       }
@@ -2874,6 +3434,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-18",
                         "type": "text"
                       }
@@ -2883,6 +3444,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Lantern Moth 18",
                         "type": "text"
                       }
@@ -2892,6 +3454,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "timber",
                         "type": "text"
                       }
@@ -2901,6 +3464,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "749",
                         "type": "text"
                       }
@@ -2915,6 +3479,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-19",
                         "type": "text"
                       }
@@ -2924,6 +3489,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Marguerite 19",
                         "type": "text"
                       }
@@ -2933,6 +3499,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "grain",
                         "type": "text"
                       }
@@ -2942,6 +3509,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "786",
                         "type": "text"
                       }
@@ -2956,6 +3524,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-20",
                         "type": "text"
                       }
@@ -2965,6 +3534,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Thornback 20",
                         "type": "text"
                       }
@@ -2974,6 +3544,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
                       }
@@ -2983,6 +3554,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "823",
                         "type": "text"
                       }
@@ -2997,6 +3569,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-21",
                         "type": "text"
                       }
@@ -3006,6 +3579,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Ostrich Bay 21",
                         "type": "text"
                       }
@@ -3015,6 +3589,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "fish",
                         "type": "text"
                       }
@@ -3024,6 +3599,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "860",
                         "type": "text"
                       }
@@ -3038,6 +3614,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-22",
                         "type": "text"
                       }
@@ -3047,6 +3624,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Calloway 22",
                         "type": "text"
                       }
@@ -3056,6 +3634,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "coal",
                         "type": "text"
                       }
@@ -3065,6 +3644,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "897",
                         "type": "text"
                       }
@@ -3079,6 +3659,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-23",
                         "type": "text"
                       }
@@ -3088,6 +3669,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Bright Venture 23",
                         "type": "text"
                       }
@@ -3097,6 +3679,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "salt",
                         "type": "text"
                       }
@@ -3106,6 +3689,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "934",
                         "type": "text"
                       }
@@ -3120,6 +3704,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-24",
                         "type": "text"
                       }
@@ -3129,6 +3714,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Lantern Moth 24",
                         "type": "text"
                       }
@@ -3138,6 +3724,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "timber",
                         "type": "text"
                       }
@@ -3147,6 +3734,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "971",
                         "type": "text"
                       }
@@ -3161,6 +3749,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-25",
                         "type": "text"
                       }
@@ -3170,6 +3759,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Marguerite 25",
                         "type": "text"
                       }
@@ -3179,6 +3769,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "grain",
                         "type": "text"
                       }
@@ -3188,6 +3779,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "1008",
                         "type": "text"
                       }
@@ -3202,6 +3794,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-26",
                         "type": "text"
                       }
@@ -3211,6 +3804,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Thornback 26",
                         "type": "text"
                       }
@@ -3220,6 +3814,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
                       }
@@ -3229,6 +3824,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "145",
                         "type": "text"
                       }
@@ -3243,6 +3839,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-27",
                         "type": "text"
                       }
@@ -3252,6 +3849,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Ostrich Bay 27",
                         "type": "text"
                       }
@@ -3261,6 +3859,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "fish",
                         "type": "text"
                       }
@@ -3270,6 +3869,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "182",
                         "type": "text"
                       }
@@ -3284,6 +3884,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-28",
                         "type": "text"
                       }
@@ -3293,6 +3894,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Calloway 28",
                         "type": "text"
                       }
@@ -3302,6 +3904,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "coal",
                         "type": "text"
                       }
@@ -3311,6 +3914,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "219",
                         "type": "text"
                       }
@@ -3325,6 +3929,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-01",
                         "type": "text"
                       }
@@ -3334,6 +3939,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Bright Venture 29",
                         "type": "text"
                       }
@@ -3343,6 +3949,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "salt",
                         "type": "text"
                       }
@@ -3352,6 +3959,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "256",
                         "type": "text"
                       }
@@ -3366,6 +3974,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-02",
                         "type": "text"
                       }
@@ -3375,6 +3984,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Lantern Moth 30",
                         "type": "text"
                       }
@@ -3384,6 +3994,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "timber",
                         "type": "text"
                       }
@@ -3393,6 +4004,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "293",
                         "type": "text"
                       }
@@ -3407,6 +4019,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-03",
                         "type": "text"
                       }
@@ -3416,6 +4029,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Marguerite 31",
                         "type": "text"
                       }
@@ -3425,6 +4039,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "grain",
                         "type": "text"
                       }
@@ -3434,6 +4049,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "330",
                         "type": "text"
                       }
@@ -3448,6 +4064,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-04",
                         "type": "text"
                       }
@@ -3457,6 +4074,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Thornback 32",
                         "type": "text"
                       }
@@ -3466,6 +4084,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
                       }
@@ -3475,6 +4094,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "367",
                         "type": "text"
                       }
@@ -3489,6 +4109,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-05",
                         "type": "text"
                       }
@@ -3498,6 +4119,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Ostrich Bay 33",
                         "type": "text"
                       }
@@ -3507,6 +4129,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "fish",
                         "type": "text"
                       }
@@ -3516,6 +4139,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "404",
                         "type": "text"
                       }
@@ -3530,6 +4154,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "2026-02-06",
                         "type": "text"
                       }
@@ -3539,6 +4164,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Calloway 34",
                         "type": "text"
                       }
@@ -3548,6 +4174,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "coal",
                         "type": "text"
                       }
@@ -3557,6 +4184,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "441",
                         "type": "text"
                       }
@@ -3572,16 +4200,20 @@
           {
             "content": [],
             "id": "block-119",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Autofit, percentage widths, cell margins and rotated text:",
                 "type": "text"
               }
             ],
             "id": "block-120",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -3592,6 +4224,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "autofit col 1",
                         "type": "text"
                       }
@@ -3601,6 +4234,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "autofit column two is wider",
                         "type": "text"
                       }
@@ -3610,6 +4244,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "c3",
                         "type": "text"
                       }
@@ -3624,6 +4259,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "x",
                         "type": "text"
                       }
@@ -3633,6 +4269,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "y",
                         "type": "text"
                       }
@@ -3642,6 +4279,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "z",
                         "type": "text"
                       }
@@ -3657,6 +4295,7 @@
           {
             "content": [],
             "id": "block-122",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -3667,6 +4306,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "30%",
                         "type": "text"
                       }
@@ -3676,6 +4316,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "70% (percentage widths, autofit)",
                         "type": "text"
                       }
@@ -3691,6 +4332,7 @@
           {
             "content": [],
             "id": "block-124",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -3701,6 +4343,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Rotated",
                         "type": "text"
                       }
@@ -3710,6 +4353,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "The harbour committee repainted the winter storage sheds according to the standing orders.",
                         "type": "text"
                       }
@@ -3725,22 +4369,29 @@
           {
             "content": [],
             "id": "block-126",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Images",
                 "type": "text"
               }
             ],
             "id": "block-127",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline images of different sizes: ",
                 "type": "text"
               },
@@ -3752,6 +4403,7 @@
                 "width": 96
               },
               {
+                "fontSize": 11,
                 "text": " ",
                 "type": "text"
               },
@@ -3763,6 +4415,7 @@
                 "width": 72
               },
               {
+                "fontSize": 11,
                 "text": " ",
                 "type": "text"
               },
@@ -3774,11 +4427,13 @@
                 "width": 120
               },
               {
+                "fontSize": 11,
                 "text": " in running text.",
                 "type": "text"
               }
             ],
             "id": "block-128",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -3794,75 +4449,100 @@
             "alignment": "center",
             "content": [
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": "Figure ",
                 "type": "text"
               },
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": ": a centred inline image with a caption.",
                 "type": "text"
               }
             ],
             "id": "block-130",
+            "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The tide almanac measured three disputed boundary stones as the tide turned. Local fishing crews catalogued the dredging contract with unusual care. A visiting engineer rebuilt the fog-signal schedule while the market was closed. Local fishing crews rebuilt the old customs register after several rounds of discussion. The quay-side bakery recorded the fog-signal schedule after several rounds of discussion. The regional council reorganised the fog-signal schedule while the market was closed. Several market traders reorganised the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the eastern jetty during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-131",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Our records office compared last season's tonnage figures and filed the result in triplicate. A junior surveyor relocated the eastern jetty and filed the result in triplicate. The tide almanac reviewed the lamp oil inventory during the long spring inspection. The winter inspection team recorded every outstanding repair order according to the standing orders. A junior surveyor inspected the old customs register according to the standing orders. A junior surveyor rebuilt the lamp oil inventory after several rounds of discussion. Local fishing crews documented a ledger of unpaid berth fees according to the standing orders. Every lighthouse keeper rebuilt a ledger of unpaid berth fees according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-132",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Every lighthouse keeper postponed the dredging contract according to the standing orders. The bridge authority catalogued the lamp oil inventory during the long spring inspection. Our records office measured a ledger of unpaid berth fees without waiting for approval. An experienced pilot audited the ferry timetable after several rounds of discussion. Our records office audited the dredging contract in time for the autumn meeting. Every lighthouse keeper compared a ledger of unpaid berth fees in time for the autumn meeting. Our records office measured the eastern jetty without waiting for approval.",
                 "type": "text"
               }
             ],
             "id": "block-133",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The harbour committee audited two dozen mooring rings before the first frost. A junior surveyor relocated a bundle of weathered charts as the tide turned. The northern ferry service audited the eastern jetty before the first frost. A junior surveyor documented the fog-signal schedule according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-134",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Text over an image placed behind the text. The regional council reorganised the ferry timetable to the satisfaction of nobody in particular. The bridge authority catalogued the old customs register before the first frost. Every lighthouse keeper documented the winter storage sheds with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-135",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Cropped images (a:srcRect) inside a table, next to an uncropped original:",
                 "type": "text"
               }
             ],
             "id": "block-136",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -3925,8 +4605,10 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Image-only paragraph followed by alt-text-less image: ",
                 "type": "text"
               },
@@ -3939,11 +4621,13 @@
               }
             ],
             "id": "block-138",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-139",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           }
         ],
@@ -3953,6 +4637,7 @@
               "alignment": "center",
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
                 },
@@ -3961,6 +4646,7 @@
                   "type": "dynamicField"
                 },
                 {
+                  "fontSize": 11,
                   "text": " of ",
                   "type": "text"
                 },
@@ -3978,18 +4664,22 @@
             {
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Default header",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "Harbour Report",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
@@ -4022,216 +4712,277 @@
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Closing section (A4, single column)",
                 "type": "text"
               }
             ],
             "id": "block-140",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Our records office inspected the ferry timetable to the satisfaction of nobody in particular. A junior surveyor negotiated a ledger of unpaid berth fees in the presence of two witnesses. Every lighthouse keeper audited the ferry timetable and filed the result in triplicate. The northern ferry service approved a ledger of unpaid berth fees in time for the autumn meeting.",
                 "type": "text"
               }
             ],
             "id": "block-141",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The northern ferry service reviewed the lamp oil inventory after several rounds of discussion. A careful archivist audited the fog-signal schedule during the long spring inspection. A junior surveyor relocated the fog-signal schedule after several rounds of discussion. The tide almanac reorganised last season's tonnage figures as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-142",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A junior surveyor documented the eastern jetty during the long spring inspection. Every lighthouse keeper negotiated every outstanding repair order as the tide turned. The harbour committee approved three disputed boundary stones while the market was closed. Local fishing crews inspected an index of local pilots in time for the autumn meeting.",
                 "type": "text"
               }
             ],
             "id": "block-143",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Shapes, text boxes and SmartArt",
                 "type": "text"
               }
             ],
             "id": "block-144",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A paragraph that wraps around an anchored shape containing text. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Our records office compared an index of local pilots before the first frost. A visiting engineer relocated a draft of the annual report during the long spring inspection. Every lighthouse keeper mapped a ledger of unpaid berth fees without waiting for approval. The tide almanac compared the dredging contract as the tide turned. A careful archivist documented every outstanding repair order during the long spring inspection. The regional council negotiated last season's tonnage figures after several rounds of discussion.",
                 "type": "text"
               }
             ],
             "id": "block-145",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline shapes: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               }
             ],
             "id": "block-146",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A shape group with two children containing text: ",
                 "type": "text"
               }
             ],
             "id": "block-147",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A legacy VML text box (Word 2003 style) that contains a table: ",
                 "type": "text"
               }
             ],
             "id": "block-148",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A SmartArt diagram (basic block list) with its cached fallback drawing:",
                 "type": "text"
               }
             ],
             "id": "block-149",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-150",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Equations (OMML)",
                 "type": "text"
               }
             ],
             "id": "block-151",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Display equations follow: the quadratic formula, a definite integral, a summation, a matrix product, a limit and a system of equations.",
                 "type": "text"
               }
             ],
             "id": "block-152",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-153",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-154",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-155",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-156",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-157",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-158",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-159",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline math: the area of a circle is ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", and the golden ratio is ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-160",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Equation inside a table cell and a text box is also common:",
                 "type": "text"
               }
             ],
             "id": "block-161",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -4246,6 +4997,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "a/b + c/d",
                         "type": "text"
                       }
@@ -4261,112 +5013,142 @@
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Content controls and form fields",
                 "type": "text"
               }
             ],
             "id": "block-163",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "color": "#808080",
+                "fontSize": 11,
                 "text": "Click here to enter a summary.",
                 "type": "text"
               }
             ],
             "id": "block-164",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Rich text control with ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontSize": 11,
                 "text": "bold",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " and ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "italic": true,
                 "text": "italic",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " runs.",
                 "type": "text"
               }
             ],
             "id": "block-165",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "And a second paragraph inside the same control.",
                 "type": "text"
               }
             ],
             "id": "block-166",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline controls: name ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Ada Marlowe",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", berth ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "East",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", vessel ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Thornback",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", arrival ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "2 March 2026",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", inspected ",
                 "type": "text"
               },
               {
                 "fontFamily": "DejaVu Sans",
+                "fontSize": 11,
                 "text": "☒",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-167",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -4380,10 +5162,12 @@
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line item 1: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "rope, 40 m",
                 "type": "text"
               }
@@ -4391,15 +5175,18 @@
             "id": "block-169",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line item 2: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "lamp glass, 6 pieces",
                 "type": "text"
               }
@@ -4407,15 +5194,18 @@
             "id": "block-170",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line item 3: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "tar, 2 barrels",
                 "type": "text"
               }
@@ -4423,6 +5213,7 @@
             "id": "block-171",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
@@ -4433,6 +5224,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Quantity",
                         "type": "text"
                       }
@@ -4442,6 +5234,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "12",
                         "type": "text"
                       }
@@ -4456,6 +5249,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Row inside a content control",
                         "type": "text"
                       }
@@ -4465,6 +5259,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "yes",
                         "type": "text"
                       }
@@ -4478,17 +5273,21 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Data-bound control: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Bound title",
                 "type": "text"
               }
             ],
             "id": "block-173",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -4501,75 +5300,98 @@
               }
             ],
             "id": "block-174",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Wrapped in a docPartObj content control.",
                 "type": "text"
               }
             ],
             "id": "block-175",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Innermost paragraph, 5 controls deep.",
                 "type": "text"
               }
             ],
             "id": "block-176",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Legacy (Word 97) form fields:",
                 "type": "text"
               }
             ],
             "id": "block-177",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Captain: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "   Cleared: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "   Flag colour: ",
                 "type": "text"
               }
             ],
             "id": "block-178",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Right-to-left, CJK, symbols and emoji",
                 "type": "text"
               }
             ],
             "id": "block-179",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Arabic (right-to-left paragraphs, bidi + rtl runs):",
                 "type": "text"
               }
             ],
             "id": "block-180",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -4577,11 +5399,13 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
                 "type": "text"
               }
             ],
             "id": "block-181",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -4589,11 +5413,13 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "يقيس الميناء حركة السفن كل صباح ويسجل النتائج في دفتر خاص.",
                 "type": "text"
               }
             ],
             "id": "block-182",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -4601,21 +5427,26 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "تُنشر جداول المد والجزر عند البوابة الشمالية.",
                 "type": "text"
               }
             ],
             "id": "block-183",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Hebrew:",
                 "type": "text"
               }
             ],
             "id": "block-184",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -4623,11 +5454,13 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "שלום עולם, זהו מסמך בדיקה לכתיבה מימין לשמאל.",
                 "type": "text"
               }
             ],
             "id": "block-185",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -4635,83 +5468,103 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
                 "type": "text"
               }
             ],
             "id": "block-186",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Mixed direction in one paragraph (English inside Arabic, numbers and punctuation):",
                 "type": "text"
               }
             ],
             "id": "block-187",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "ميناء ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Marguerite Harbour",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " استقبل ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "42",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " سفينة في 2026/01/15.",
                 "type": "text"
               }
             ],
             "id": "block-188",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "English sentence with an embedded Hebrew word ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "שלום",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " and an Arabic word ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "مرحبا",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", then more English.",
                 "type": "text"
               }
             ],
             "id": "block-189",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Arabic-Indic digits: ١٢٣٤٥٦٧٨٩٠ and Hebrew with niqqud: שָׁלוֹם",
                 "type": "text"
               }
             ],
             "id": "block-190",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -4722,6 +5575,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
                         "type": "text"
                       }
@@ -4731,6 +5585,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Right-to-left table cell",
                         "type": "text"
                       }
@@ -4746,6 +5601,7 @@
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
                 "type": "text"
               }
@@ -4753,100 +5609,127 @@
             "id": "block-192",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Chinese, Japanese and Korean with East Asian fonts:",
                 "type": "text"
               }
             ],
             "id": "block-193",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "这是一个用于测试中文排版的示例段落，包含标点符号、数字 2026 和英文单词 Spindle。",
                 "type": "text"
               }
             ],
             "id": "block-194",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "港口委员会每月召开一次会议，审议潮汐表和船舶进出记录。",
                 "type": "text"
               }
             ],
             "id": "block-195",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "これは日本語の組版を確認するためのサンプル文章です。ひらがな、カタカナ、漢字が混在しています。",
                 "type": "text"
               }
             ],
             "id": "block-196",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "港湾委員会は毎月会議を開き、潮汐表を確認します。",
                 "type": "text"
               }
             ],
             "id": "block-197",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "이것은 한국어 조판을 확인하기 위한 예시 문장입니다.",
                 "type": "text"
               }
             ],
             "id": "block-198",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "항만 위원회는 매달 모여 조석표를 검토합니다.",
                 "type": "text"
               }
             ],
             "id": "block-199",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "12",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  (combined digits), ruby: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "漢字",
                 "type": "text"
               }
             ],
             "id": "block-200",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -4857,6 +5740,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "縦書きのテキスト",
                         "type": "text"
                       }
@@ -4866,6 +5750,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Vertical (tbRl) text direction in the neighbouring cell.",
                         "type": "text"
                       }
@@ -4879,294 +5764,368 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Symbols: ",
                 "type": "text"
               }
             ],
             "id": "block-202",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "DejaVu Sans",
+                "fontSize": 11,
                 "text": "Unicode symbols: © ® ™ € £ ¥ § ¶ † ‡ • … ← → ↔ ⇒ ∀ ∃ ∑ ∏ ∞ ≈ ≠ ≤ ≥ ± × ÷ √ ∫ ♠ ♣ ♥ ♦ ☀ ☂ ☎ ✓ ✔ ✘ ★",
                 "type": "text"
               }
             ],
             "id": "block-203",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Word symbol runs: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " bullet, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " tick, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " smiley.",
                 "type": "text"
               }
             ],
             "id": "block-204",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Emoji: 😀 🚀 🌍 ⚓ 🐟 🌊 ❤️ 👍🏽 👩‍💻 🏳️‍🌈 🇳🇴 1️⃣ — including ZWJ sequences, skin tones, flags and keycaps.",
                 "type": "text"
               }
             ],
             "id": "block-205",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Combining marks and ligature candidates: é (e + acute), ñ, ﬁ ﬂ, Å (angstrom U+212B), ǆ, and a surrogate-pair math letter 𝒜𝔹ℂ𝟘.",
                 "type": "text"
               }
             ],
             "id": "block-206",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Typography extras",
                 "type": "text"
               }
             ],
             "id": "block-207",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
             "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Automatic hyphenation is enabled for this document, so long justified lines break inside words. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "A visiting engineer repainted an index of local pilots while the market was closed. Our records office postponed three disputed boundary stones with unusual care. A visiting engineer reorganised a ledger of unpaid berth fees with unusual care. Local fishing crews mapped a bundle of weathered charts as the tide turned. The tide almanac relocated the sluice gate mechanism with unusual care. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Pneumonoultramicroscopicsilicovolcanoconiosis and incomprehensibilities are long words. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Soft hyphens: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Anti",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "dis",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "establishment",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "arianism. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Non-breaking hyphen: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "‑",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-208",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "This paragraph opts out of hyphenation. The tide almanac rebuilt a draft of the annual report without waiting for approval. The quay-side bakery documented the ferry timetable and filed the result in triplicate. The tide almanac repainted the eastern jetty as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-209",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Tab stops with leaders:",
                 "type": "text"
               }
             ],
             "id": "block-210",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Preface",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "iii",
                 "type": "text"
               }
             ],
             "id": "block-211",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Chapter one",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "1",
                 "type": "text"
               }
             ],
             "id": "block-212",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Chapter two",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "17",
                 "type": "text"
               }
             ],
             "id": "block-213",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Appendix",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "203",
                 "type": "text"
               }
             ],
             "id": "block-214",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Index",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "240",
                 "type": "text"
               }
             ],
             "id": "block-215",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Item",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "12.50",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "1,204.75",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "end",
                 "type": "text"
               }
             ],
             "id": "block-216",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Drop caps (framed first letter, three lines):",
                 "type": "text"
               }
             ],
             "id": "block-217",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -5184,13 +6143,16 @@
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "he lighthouse had stood on the point for two hundred years, and every keeper had added a line to the logbook. The northern ferry service documented the old customs register using only the instruments on hand. The tide almanac postponed two dozen mooring rings to the satisfaction of nobody in particular. Our records office negotiated the winter storage sheds to the satisfaction of nobody in particular. The quay-side bakery measured the lamp oil inventory after several rounds of discussion.",
                 "type": "text"
               }
             ],
             "id": "block-219",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -5208,159 +6170,203 @@
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "hen the committee last met, the margin drop cap hung outside the text block. Every lighthouse keeper inspected the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the dredging contract as the tide turned. The northern ferry service catalogued the dredging contract and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-221",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Character effects: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "smallCaps": true,
                 "text": "small caps ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "ALL CAPS ",
                 "type": "text"
               },
               {
                 "backgroundColor": "#ffff00",
+                "fontSize": 11,
                 "text": "highlighted ",
                 "type": "text"
               },
               {
                 "color": "#c00000",
+                "fontSize": 11,
                 "text": "coloured ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "expanded spacing ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "condensed ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "raised ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "embossed ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "shadow-outline ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "wavy underline",
                 "type": "text",
                 "underline": true
               }
             ],
             "id": "block-222",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Paragraph borders, shading and keep-with-next. The harbour committee reviewed a ledger of unpaid berth fees according to the standing orders. The tide almanac postponed the eastern jetty with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-223",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line numbering and page borders apply to this whole section.",
                 "type": "text"
               }
             ],
             "id": "block-224",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Charts and embedded objects",
                 "type": "text"
               }
             ],
             "id": "block-225",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
             "alignment": "center",
             "content": [],
             "id": "block-226",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": "Chart 1: Vessels per month.",
                 "type": "text"
               }
             ],
             "id": "block-227",
+            "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [],
             "id": "block-228",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": "Chart 2: Tonnage trend.",
                 "type": "text"
               }
             ],
             "id": "block-229",
+            "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [],
             "id": "block-230",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [
               {
+                "color": "#44546a",
+                "fontSize": 9,
+                "italic": true,
                 "text": "Chart 3: Cargo share.",
                 "type": "text"
               }
             ],
             "id": "block-231",
+            "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Embedded worksheet object (OLE package with a preview image): ",
                 "type": "text"
               }
             ],
             "id": "block-232",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],
@@ -5370,6 +6376,7 @@
               "alignment": "center",
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
                 },
@@ -5378,6 +6385,7 @@
                   "type": "dynamicField"
                 },
                 {
+                  "fontSize": 11,
                   "text": " of ",
                   "type": "text"
                 },
@@ -5395,18 +6403,22 @@
             {
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Default header",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "Harbour Report",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
@@ -5435,7 +6447,13 @@
         }
       }
     ],
-    "textStylePool": {},
+    "textStylePool": {
+      "text-style-1": {
+        "color": "#0563c1",
+        "fontSize": 11,
+        "underline": true
+      }
+    },
     "threads": [
       {
         "anchor": {
