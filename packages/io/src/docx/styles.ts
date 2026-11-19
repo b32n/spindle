@@ -1,4 +1,4 @@
-import type { DocParagraphStyle, DocRunBase } from '@b32nio/spindle-shared/export/docx';
+import type { DocNamedStyle, DocParagraphStyle, DocRunBase } from '@b32nio/spindle-shared/export/docx';
 
 import { preferRecorded, themeColor, themeFont, themeScriptFont, type Theme } from './theme';
 import { attrsOf, childrenOf, find, findAll, parseXml, type XmlNode } from './xml-tree';
@@ -192,6 +192,36 @@ export function parsePPr(pPr: XmlNode | undefined): ParagraphPartial {
   return out;
 }
 
+const LINE_KEYWORDS: Array<[number, 'single' | 'onePointFive' | 'double']> = [
+  [1, 'single'],
+  [1.5, 'onePointFive'],
+  [2, 'double'],
+];
+
+/** The paragraph properties the interchange format carries, from a paragraph's effective formatting. */
+export function toDocParagraphStyle(effective: ParagraphPartial): DocParagraphStyle {
+  const style: DocParagraphStyle = {
+    ...(effective.alignment && { alignment: effective.alignment }),
+    ...(effective.spaceBeforePt != null && { spaceBeforePt: effective.spaceBeforePt }),
+    ...(effective.spaceAfterPt != null && { spaceAfterPt: effective.spaceAfterPt }),
+    ...(effective.leftIndentPt != null && { leftIndentPt: effective.leftIndentPt }),
+    ...(effective.rightIndentPt != null && { rightIndentPt: effective.rightIndentPt }),
+    ...(effective.firstLineIndentPt != null && { firstLineIndentPt: effective.firstLineIndentPt }),
+    ...(effective.keepNext && { keepWithNext: true }),
+    ...(effective.keepLines && { keepTogether: true }),
+    ...(effective.pageBreakBefore && { pageBreakBefore: true }),
+  };
+  const spacing = effective.lineSpacing;
+  if (spacing?.rule === 'auto') {
+    const keyword = LINE_KEYWORDS.find(([factor]) => Math.abs(factor - spacing.value) < 0.001);
+    if (keyword) style.lineSpacing = keyword[1];
+    else style.lineSpacingCustom = { rule: 'multiple', value: Math.round(spacing.value * 1000) / 1000 };
+  } else if (spacing) {
+    style.lineSpacingCustom = { rule: spacing.rule === 'exact' ? 'exactly' : 'atLeast', value: spacing.value };
+  }
+  return style;
+}
+
 /** Later layers win key by key. */
 function overlay<T extends object>(base: T, top: T): T {
   const out = { ...base };
@@ -204,6 +234,7 @@ interface StyleDef {
   type: string;
   name: string;
   basedOn?: string;
+  next?: string;
   link?: string;
   isDefault: boolean;
   run: RunPartial;
@@ -255,6 +286,7 @@ export class StyleSheet {
         type: a['@_w:type'] ?? 'paragraph',
         name: attr('w:name') ?? '',
         basedOn: attr('w:basedOn'),
+        next: attr('w:next'),
         link: attr('w:link'),
         isDefault: a['@_w:default'] === '1' || a['@_w:default'] === 'true',
         run: parseRPr(find(sk, 'w:rPr'), theme),
@@ -268,6 +300,48 @@ export class StyleSheet {
   /** styleId -> style name (what the importer has always exposed for heading detection). */
   name(styleId: string): string | undefined {
     return this.styles.get(styleId)?.name || undefined;
+  }
+
+  /** The id of a paragraph style to keep on a paragraph: one the file defines, other than the default (an unstyled paragraph is in it anyway). */
+  namedParagraphStyle(styleId: string | undefined): string | undefined {
+    const def = styleId ? this.styles.get(styleId) : undefined;
+    return def && def.type === 'paragraph' && !def.isDefault ? def.id : undefined;
+  }
+
+  /** The id of a character style to keep on a run: one the file defines, other than the default (`DefaultParagraphFont`). */
+  namedCharacterStyle(styleId: string | undefined): string | undefined {
+    const def = styleId ? this.styles.get(styleId) : undefined;
+    return def && def.type === 'character' && !def.isDefault ? def.id : undefined;
+  }
+
+  /**
+   * The definitions of the given styles and of every style they are based on, linked to or followed by
+   * (paragraph, character and, when reached that way, table styles), with each style's own properties.
+   */
+  definitions(used: Iterable<string>): Record<string, DocNamedStyle> {
+    const out: Record<string, DocNamedStyle> = {};
+    const queue = [...used];
+    for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
+      const def = this.styles.get(id);
+      if (!def || Object.prototype.hasOwnProperty.call(out, id)) continue;
+      if (def.type !== 'paragraph' && def.type !== 'character' && def.type !== 'table') continue;
+      const text = toStyleText(def.run);
+      const paragraph = def.type === 'paragraph' ? toDocParagraphStyle(def.para) : {};
+      const outline = def.para.outlineLvl;
+      out[id] = {
+        name: def.name || id,
+        kind: def.type,
+        ...(def.basedOn && { basedOn: def.basedOn }),
+        ...(def.next && { next: def.next }),
+        ...(def.link && { link: def.link }),
+        ...(def.isDefault && { isDefault: true }),
+        ...(outline !== undefined && outline >= 0 && outline <= 9 && { outlineLevel: outline <= 8 ? outline + 1 : 0 }),
+        ...(Object.keys(text).length > 0 && { text }),
+        ...(Object.keys(paragraph).length > 0 && { paragraph }),
+      };
+      for (const related of [def.basedOn, def.next, def.link]) if (related) queue.push(related);
+    }
+    return out;
   }
 
   /** The style and its ancestors, root first; stops at a missing base or a loop. */
@@ -353,6 +427,15 @@ export class StyleSheet {
     }
     return toRunBase(merged);
   }
+}
+
+/** A style's own run properties: unlike an effective run, an explicit "off" is kept (it overrides the style it is based on). */
+function toStyleText(p: RunPartial): DocRunBase {
+  const out = toRunBase(p);
+  for (const [partial, key] of [['bold', 'bold'], ['italic', 'italic'], ['strike', 'strikethrough'], ['smallCaps', 'smallCaps'], ['allCaps', 'allCaps'], ['hidden', 'hidden'], ['underline', 'underline']] as const) {
+    if (p[partial] === false) out[key] = false;
+  }
+  return out;
 }
 
 function toRunBase(p: RunPartial): DocRunBase {

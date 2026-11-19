@@ -15,6 +15,228 @@
         "w": 816
       }
     },
+    "namedStyles": {
+      "BodyText": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "BodyTextChar",
+        "name": "Body Text",
+        "paragraph": {
+          "alignment": "justify",
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.15
+          },
+          "spaceAfter": 8
+        }
+      },
+      "BodyTextChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "BodyText",
+        "name": "Body Text Char"
+      },
+      "Caption": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "caption",
+        "next": "Normal",
+        "paragraph": {
+          "lineSpacing": {
+            "type": "single"
+          },
+          "spaceAfter": 13.333333333333334
+        },
+        "text": {
+          "color": "#44546a",
+          "fontSize": 9,
+          "italic": true
+        }
+      },
+      "CodeBlock": {
+        "basedOn": "BodyText",
+        "kind": "paragraph",
+        "link": "CodeBlockChar",
+        "name": "Code Block",
+        "paragraph": {
+          "alignment": "left",
+          "lineSpacing": {
+            "type": "single"
+          },
+          "spaceAfter": 0
+        },
+        "text": {
+          "fontFamily": "DejaVu Sans Mono",
+          "fontSize": 9
+        }
+      },
+      "CodeBlockChar": {
+        "basedOn": "BodyTextChar",
+        "kind": "character",
+        "link": "CodeBlock",
+        "name": "Code Block Char",
+        "text": {
+          "fontFamily": "DejaVu Sans Mono",
+          "fontSize": 9
+        }
+      },
+      "DefaultParagraphFont": {
+        "isDefault": true,
+        "kind": "character",
+        "name": "Default Paragraph Font"
+      },
+      "Heading1": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading1Char",
+        "name": "heading 1",
+        "next": "BodyText",
+        "outlineLevel": 1,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 5.333333333333333,
+          "spaceBefore": 16
+        },
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 16
+        }
+      },
+      "Heading1Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading1",
+        "name": "Heading 1 Char",
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 16
+        }
+      },
+      "Heading2": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading2Char",
+        "name": "heading 2",
+        "next": "BodyText",
+        "outlineLevel": 2,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 5.333333333333333,
+          "spaceBefore": 10.666666666666666
+        },
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 13
+        }
+      },
+      "Heading2Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading2",
+        "name": "Heading 2 Char",
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 13
+        }
+      },
+      "Hyperlink": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "name": "Hyperlink",
+        "text": {
+          "color": "#0563c1",
+          "underline": true
+        }
+      },
+      "Normal": {
+        "isDefault": true,
+        "kind": "paragraph",
+        "name": "Normal",
+        "paragraph": {
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.079
+          },
+          "spaceAfter": 10.666666666666666
+        }
+      },
+      "Quote": {
+        "basedOn": "BodyText",
+        "kind": "paragraph",
+        "name": "Quote",
+        "next": "BodyText",
+        "paragraph": {
+          "alignment": "center",
+          "leftIndent": 48,
+          "rightIndent": 48
+        },
+        "text": {
+          "color": "#404040",
+          "italic": true
+        }
+      },
+      "Subtitle": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Subtitle",
+        "next": "BodyText",
+        "text": {
+          "color": "#595959",
+          "fontSize": 14,
+          "italic": true
+        }
+      },
+      "TOC1": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "toc 1",
+        "next": "Normal",
+        "paragraph": {
+          "leftIndent": 0,
+          "spaceAfter": 6.666666666666667
+        }
+      },
+      "TOC2": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "toc 2",
+        "next": "Normal",
+        "paragraph": {
+          "leftIndent": 14.666666666666666,
+          "spaceAfter": 6.666666666666667
+        }
+      },
+      "TOCHeading": {
+        "basedOn": "Heading1",
+        "kind": "paragraph",
+        "name": "TOC Heading",
+        "next": "Normal",
+        "outlineLevel": 0
+      },
+      "Title": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Title",
+        "next": "Subtitle",
+        "paragraph": {
+          "spaceAfter": 8
+        },
+        "text": {
+          "fontFamily": "Liberation Serif",
+          "fontSize": 28
+        }
+      }
+    },
     "paragraphStylePool": {},
     "sections": [
       {
@@ -34,6 +256,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Title",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -53,6 +276,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Subtitle",
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -71,6 +295,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -120,6 +345,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOCHeading",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "paragraph"
@@ -132,6 +358,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -141,6 +368,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "1.1 Background",
                 "type": "text",
                 "underline": true
@@ -158,6 +386,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -167,6 +396,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "1.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -184,6 +414,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -193,6 +424,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "1.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -210,6 +442,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -219,6 +452,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "1.4 Records",
                 "type": "text",
                 "underline": true
@@ -236,6 +470,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -245,6 +480,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "1.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -262,6 +498,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -271,6 +508,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "1.6 Review",
                 "type": "text",
                 "underline": true
@@ -288,6 +526,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -297,6 +536,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 2: Berth Allocation",
                 "type": "text",
                 "underline": true
@@ -314,6 +554,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -323,6 +564,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "2.1 Background",
                 "type": "text",
                 "underline": true
@@ -340,6 +582,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -349,6 +592,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "2.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -366,6 +610,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -375,6 +620,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "2.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -392,6 +638,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -401,6 +648,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "2.4 Records",
                 "type": "text",
                 "underline": true
@@ -418,6 +666,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -427,6 +676,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "2.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -444,6 +694,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -453,6 +704,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "2.6 Review",
                 "type": "text",
                 "underline": true
@@ -470,6 +722,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -479,6 +732,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 3: Cargo Handling",
                 "type": "text",
                 "underline": true
@@ -496,6 +750,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -505,6 +760,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "3.1 Background",
                 "type": "text",
                 "underline": true
@@ -522,6 +778,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -531,6 +788,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "3.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -548,6 +806,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -557,6 +816,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "3.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -574,6 +834,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -583,6 +844,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "3.4 Records",
                 "type": "text",
                 "underline": true
@@ -600,6 +862,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -609,6 +872,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "3.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -626,6 +890,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -635,6 +900,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "3.6 Review",
                 "type": "text",
                 "underline": true
@@ -652,6 +918,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -661,6 +928,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 4: Pilotage",
                 "type": "text",
                 "underline": true
@@ -678,6 +946,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -687,6 +956,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "4.1 Background",
                 "type": "text",
                 "underline": true
@@ -704,6 +974,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -713,6 +984,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "4.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -730,6 +1002,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -739,6 +1012,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "4.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -756,6 +1030,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -765,6 +1040,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "4.4 Records",
                 "type": "text",
                 "underline": true
@@ -782,6 +1058,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -791,6 +1068,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "4.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -808,6 +1086,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -817,6 +1096,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "4.6 Review",
                 "type": "text",
                 "underline": true
@@ -834,6 +1114,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -843,6 +1124,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 5: Lighthouse Operations",
                 "type": "text",
                 "underline": true
@@ -860,6 +1142,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -869,6 +1152,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "5.1 Background",
                 "type": "text",
                 "underline": true
@@ -886,6 +1170,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -895,6 +1180,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "5.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -912,6 +1198,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -921,6 +1208,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "5.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -938,6 +1226,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -947,6 +1236,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "5.4 Records",
                 "type": "text",
                 "underline": true
@@ -964,6 +1254,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -973,6 +1264,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "5.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -990,6 +1282,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -999,6 +1292,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "5.6 Review",
                 "type": "text",
                 "underline": true
@@ -1016,6 +1310,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1025,6 +1320,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 6: Dredging",
                 "type": "text",
                 "underline": true
@@ -1042,6 +1338,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1051,6 +1348,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "6.1 Background",
                 "type": "text",
                 "underline": true
@@ -1068,6 +1366,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1077,6 +1376,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "6.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -1094,6 +1394,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1103,6 +1404,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "6.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -1120,6 +1422,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1129,6 +1432,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "6.4 Records",
                 "type": "text",
                 "underline": true
@@ -1146,6 +1450,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1155,6 +1460,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "6.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -1172,6 +1478,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1181,6 +1488,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "6.6 Review",
                 "type": "text",
                 "underline": true
@@ -1198,6 +1506,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1207,6 +1516,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 7: Customs and Records",
                 "type": "text",
                 "underline": true
@@ -1224,6 +1534,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1233,6 +1544,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "7.1 Background",
                 "type": "text",
                 "underline": true
@@ -1250,6 +1562,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1259,6 +1572,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "7.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -1276,6 +1590,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1285,6 +1600,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "7.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -1302,6 +1618,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1311,6 +1628,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "7.4 Records",
                 "type": "text",
                 "underline": true
@@ -1328,6 +1646,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1337,6 +1656,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "7.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -1354,6 +1674,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1363,6 +1684,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "7.6 Review",
                 "type": "text",
                 "underline": true
@@ -1380,6 +1702,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1389,6 +1712,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 8: Winter Procedures",
                 "type": "text",
                 "underline": true
@@ -1406,6 +1730,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1415,6 +1740,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "8.1 Background",
                 "type": "text",
                 "underline": true
@@ -1432,6 +1758,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1441,6 +1768,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "8.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -1458,6 +1786,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1467,6 +1796,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "8.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -1484,6 +1814,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1493,6 +1824,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "8.4 Records",
                 "type": "text",
                 "underline": true
@@ -1510,6 +1842,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1519,6 +1852,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "8.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -1536,6 +1870,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1545,6 +1880,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "8.6 Review",
                 "type": "text",
                 "underline": true
@@ -1562,6 +1898,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1571,6 +1908,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 9: Fishing Fleet",
                 "type": "text",
                 "underline": true
@@ -1588,6 +1926,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1597,6 +1936,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "9.1 Background",
                 "type": "text",
                 "underline": true
@@ -1614,6 +1954,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1623,6 +1964,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "9.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -1640,6 +1982,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1649,6 +1992,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "9.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -1666,6 +2010,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1675,6 +2020,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "9.4 Records",
                 "type": "text",
                 "underline": true
@@ -1692,6 +2038,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1701,6 +2048,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "9.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -1718,6 +2066,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1727,6 +2076,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "9.6 Review",
                 "type": "text",
                 "underline": true
@@ -1744,6 +2094,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1753,6 +2104,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 10: Ferry Services",
                 "type": "text",
                 "underline": true
@@ -1770,6 +2122,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1779,6 +2132,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "10.1 Background",
                 "type": "text",
                 "underline": true
@@ -1796,6 +2150,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1805,6 +2160,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "10.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -1822,6 +2178,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1831,6 +2188,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "10.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -1848,6 +2206,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1857,6 +2216,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "10.4 Records",
                 "type": "text",
                 "underline": true
@@ -1874,6 +2234,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1883,6 +2244,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "10.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -1900,6 +2262,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1909,6 +2272,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "10.6 Review",
                 "type": "text",
                 "underline": true
@@ -1926,6 +2290,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1935,6 +2300,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 11: Finance",
                 "type": "text",
                 "underline": true
@@ -1952,6 +2318,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1961,6 +2328,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "11.1 Background",
                 "type": "text",
                 "underline": true
@@ -1978,6 +2346,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -1987,6 +2356,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "11.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -2004,6 +2374,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2013,6 +2384,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "11.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -2030,6 +2402,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2039,6 +2412,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "11.4 Records",
                 "type": "text",
                 "underline": true
@@ -2056,6 +2430,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2065,6 +2440,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "11.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -2082,6 +2458,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2091,6 +2468,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "11.6 Review",
                 "type": "text",
                 "underline": true
@@ -2108,6 +2486,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2117,6 +2496,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "Chapter 12: Safety and Emergency",
                 "type": "text",
                 "underline": true
@@ -2134,6 +2514,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC1",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2143,6 +2524,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "12.1 Background",
                 "type": "text",
                 "underline": true
@@ -2160,6 +2542,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2169,6 +2552,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "12.2 Current practice",
                 "type": "text",
                 "underline": true
@@ -2186,6 +2570,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2195,6 +2580,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "12.3 Responsibilities",
                 "type": "text",
                 "underline": true
@@ -2212,6 +2598,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2221,6 +2608,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "12.4 Records",
                 "type": "text",
                 "underline": true
@@ -2238,6 +2626,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2247,6 +2636,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "12.5 Exceptions",
                 "type": "text",
                 "underline": true
@@ -2264,6 +2654,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2273,6 +2664,7 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "namedStyleId": "Hyperlink",
                 "text": "12.6 Review",
                 "type": "text",
                 "underline": true
@@ -2290,6 +2682,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "TOC2",
             "spaceAfter": 6.666666666666667,
             "type": "paragraph"
           },
@@ -2414,6 +2807,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -2433,6 +2827,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2455,6 +2850,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -2474,6 +2870,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2492,6 +2889,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2534,6 +2932,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2552,6 +2951,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2570,6 +2970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2592,6 +2993,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -2611,6 +3013,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2629,6 +3032,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2647,6 +3051,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2665,6 +3070,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2683,6 +3089,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2905,6 +3312,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -2924,6 +3332,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2942,6 +3351,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2960,6 +3370,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2978,6 +3389,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -2996,6 +3408,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3022,6 +3435,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -3456,6 +3870,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -3475,6 +3890,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3493,6 +3909,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3511,6 +3928,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3529,6 +3947,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3547,6 +3966,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3583,6 +4003,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -3605,6 +4026,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -3624,6 +4046,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3642,6 +4065,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3660,6 +4084,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3678,6 +4103,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3696,6 +4122,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3717,6 +4144,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -3735,6 +4163,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -3757,6 +4186,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -3776,6 +4206,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3794,6 +4225,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3812,6 +4244,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3830,6 +4263,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3848,6 +4282,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -3972,6 +4407,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -3991,6 +4427,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4013,6 +4450,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -4032,6 +4470,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4050,6 +4489,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4092,6 +4532,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4110,6 +4551,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4128,6 +4570,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4150,6 +4593,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -4169,6 +4613,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4187,6 +4632,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4205,6 +4651,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4223,6 +4670,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4241,6 +4689,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4463,6 +4912,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -4482,6 +4932,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4500,6 +4951,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4518,6 +4970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4536,6 +4989,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4554,6 +5008,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -4580,6 +5035,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -5014,6 +5470,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -5033,6 +5490,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5051,6 +5509,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5069,6 +5528,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5087,6 +5547,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5105,6 +5566,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5141,6 +5603,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -5163,6 +5626,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -5182,6 +5646,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5200,6 +5665,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5218,6 +5684,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5236,6 +5703,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5254,6 +5722,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5275,6 +5744,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -5293,6 +5763,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -5315,6 +5786,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -5334,6 +5806,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5352,6 +5825,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5370,6 +5844,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5388,6 +5863,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5406,6 +5882,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5530,6 +6007,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -5549,6 +6027,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5571,6 +6050,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -5590,6 +6070,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5608,6 +6089,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5650,6 +6132,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5668,6 +6151,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5686,6 +6170,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5708,6 +6193,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -5727,6 +6213,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5745,6 +6232,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5763,6 +6251,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5781,6 +6270,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -5799,6 +6289,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6021,6 +6512,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -6040,6 +6532,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6058,6 +6551,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6076,6 +6570,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6094,6 +6589,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6112,6 +6608,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6138,6 +6635,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -6572,6 +7070,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -6591,6 +7090,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6609,6 +7109,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6627,6 +7128,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6645,6 +7147,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6663,6 +7166,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6699,6 +7203,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -6721,6 +7226,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -6740,6 +7246,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6758,6 +7265,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6776,6 +7284,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6794,6 +7303,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6812,6 +7322,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6833,6 +7344,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -6851,6 +7363,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -6873,6 +7386,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -6892,6 +7406,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6910,6 +7425,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6928,6 +7444,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6946,6 +7463,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -6964,6 +7482,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7088,6 +7607,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -7107,6 +7627,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7129,6 +7650,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -7148,6 +7670,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7166,6 +7689,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7208,6 +7732,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7226,6 +7751,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7244,6 +7770,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7266,6 +7793,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -7285,6 +7813,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7303,6 +7832,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7321,6 +7851,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7339,6 +7870,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7357,6 +7889,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7579,6 +8112,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -7598,6 +8132,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7616,6 +8151,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7634,6 +8170,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7652,6 +8189,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7670,6 +8208,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -7696,6 +8235,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -8130,6 +8670,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -8149,6 +8690,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8167,6 +8709,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8185,6 +8728,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8203,6 +8747,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8221,6 +8766,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8257,6 +8803,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -8279,6 +8826,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -8298,6 +8846,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8316,6 +8865,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8334,6 +8884,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8352,6 +8903,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8370,6 +8922,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8391,6 +8944,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -8409,6 +8963,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -8431,6 +8986,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -8450,6 +9006,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8468,6 +9025,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8486,6 +9044,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8504,6 +9063,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8522,6 +9082,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8646,6 +9207,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -8665,6 +9227,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8687,6 +9250,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -8706,6 +9270,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8724,6 +9289,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8766,6 +9332,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8784,6 +9351,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8802,6 +9370,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8824,6 +9393,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -8843,6 +9413,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8861,6 +9432,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8879,6 +9451,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8897,6 +9470,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -8915,6 +9489,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9137,6 +9712,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -9156,6 +9732,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9174,6 +9751,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9192,6 +9770,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9210,6 +9789,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9228,6 +9808,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9254,6 +9835,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -9688,6 +10270,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -9707,6 +10290,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9725,6 +10309,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9743,6 +10328,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9761,6 +10347,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9779,6 +10366,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9815,6 +10403,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -9837,6 +10426,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -9856,6 +10446,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9874,6 +10465,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9892,6 +10484,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9910,6 +10503,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9928,6 +10522,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -9949,6 +10544,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -9967,6 +10563,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -9989,6 +10586,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -10008,6 +10606,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10026,6 +10625,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10044,6 +10644,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10062,6 +10663,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10080,6 +10682,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10204,6 +10807,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -10223,6 +10827,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10245,6 +10850,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -10264,6 +10870,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10282,6 +10889,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10324,6 +10932,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10342,6 +10951,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10360,6 +10970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10382,6 +10993,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -10401,6 +11013,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10419,6 +11032,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10437,6 +11051,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10455,6 +11070,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10473,6 +11089,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10695,6 +11312,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -10714,6 +11332,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10732,6 +11351,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10750,6 +11370,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10768,6 +11389,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10786,6 +11408,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -10812,6 +11435,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -11246,6 +11870,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -11265,6 +11890,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11283,6 +11909,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11301,6 +11928,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11319,6 +11947,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11337,6 +11966,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11373,6 +12003,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -11395,6 +12026,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -11414,6 +12046,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11432,6 +12065,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11450,6 +12084,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11468,6 +12103,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11486,6 +12122,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11507,6 +12144,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -11525,6 +12163,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -11547,6 +12186,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -11566,6 +12206,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11584,6 +12225,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11602,6 +12244,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11620,6 +12263,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11638,6 +12282,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11762,6 +12407,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -11781,6 +12427,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11803,6 +12450,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -11822,6 +12470,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11840,6 +12489,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11882,6 +12532,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11900,6 +12551,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11918,6 +12570,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11940,6 +12593,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -11959,6 +12613,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11977,6 +12632,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -11995,6 +12651,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12013,6 +12670,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12031,6 +12689,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12253,6 +12912,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -12272,6 +12932,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12290,6 +12951,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12308,6 +12970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12326,6 +12989,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12344,6 +13008,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12370,6 +13035,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -12804,6 +13470,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -12823,6 +13490,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12841,6 +13509,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12859,6 +13528,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12877,6 +13547,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12895,6 +13566,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12931,6 +13603,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -12953,6 +13626,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -12972,6 +13646,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -12990,6 +13665,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13008,6 +13684,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13026,6 +13703,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13044,6 +13722,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13065,6 +13744,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -13083,6 +13763,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -13105,6 +13786,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -13124,6 +13806,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13142,6 +13825,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13160,6 +13844,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13178,6 +13863,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13196,6 +13882,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13320,6 +14007,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -13339,6 +14027,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13361,6 +14050,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -13380,6 +14070,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13398,6 +14089,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13440,6 +14132,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13458,6 +14151,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13476,6 +14170,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13498,6 +14193,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -13517,6 +14213,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13535,6 +14232,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13553,6 +14251,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13571,6 +14270,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13589,6 +14289,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13811,6 +14512,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -13830,6 +14532,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13848,6 +14551,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13866,6 +14570,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13884,6 +14589,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13902,6 +14608,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -13928,6 +14635,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -14362,6 +15070,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -14381,6 +15090,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14399,6 +15109,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14417,6 +15128,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14435,6 +15147,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14453,6 +15166,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14489,6 +15203,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -14511,6 +15226,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -14530,6 +15246,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14548,6 +15265,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14566,6 +15284,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14584,6 +15303,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14602,6 +15322,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14623,6 +15344,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -14641,6 +15363,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -14663,6 +15386,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -14682,6 +15406,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14700,6 +15425,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14718,6 +15444,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14736,6 +15463,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14754,6 +15482,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14878,6 +15607,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -14897,6 +15627,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14919,6 +15650,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -14938,6 +15670,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14956,6 +15689,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -14998,6 +15732,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15016,6 +15751,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15034,6 +15770,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15056,6 +15793,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -15075,6 +15813,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15093,6 +15832,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15111,6 +15851,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15129,6 +15870,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15147,6 +15889,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15369,6 +16112,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -15388,6 +16132,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15406,6 +16151,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15424,6 +16170,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15442,6 +16189,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15460,6 +16208,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15486,6 +16235,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -15920,6 +16670,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -15939,6 +16690,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15957,6 +16709,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15975,6 +16728,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -15993,6 +16747,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16011,6 +16766,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16047,6 +16803,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -16069,6 +16826,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -16088,6 +16846,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16106,6 +16865,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16124,6 +16884,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16142,6 +16903,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16160,6 +16922,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16181,6 +16944,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -16199,6 +16963,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -16221,6 +16986,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -16240,6 +17006,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16258,6 +17025,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16276,6 +17044,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16294,6 +17063,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16312,6 +17082,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16436,6 +17207,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -16455,6 +17227,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16477,6 +17250,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -16496,6 +17270,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16514,6 +17289,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16556,6 +17332,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16574,6 +17351,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16592,6 +17370,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16614,6 +17393,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -16633,6 +17413,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16651,6 +17432,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16669,6 +17451,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16687,6 +17470,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16705,6 +17489,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16927,6 +17712,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -16946,6 +17732,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16964,6 +17751,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -16982,6 +17770,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17000,6 +17789,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17018,6 +17808,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17044,6 +17835,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -17478,6 +18270,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -17497,6 +18290,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17515,6 +18309,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17533,6 +18328,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17551,6 +18347,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17569,6 +18366,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17605,6 +18403,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -17627,6 +18426,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -17646,6 +18446,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17664,6 +18465,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17682,6 +18484,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17700,6 +18503,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17718,6 +18522,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17739,6 +18544,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -17757,6 +18563,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -17779,6 +18586,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -17798,6 +18606,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17816,6 +18625,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17834,6 +18644,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17852,6 +18663,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17870,6 +18682,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -17994,6 +18807,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -18013,6 +18827,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18035,6 +18850,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -18054,6 +18870,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18072,6 +18889,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18114,6 +18932,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18132,6 +18951,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18150,6 +18970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18172,6 +18993,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -18191,6 +19013,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18209,6 +19032,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18227,6 +19051,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18245,6 +19070,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18263,6 +19089,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18485,6 +19312,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -18504,6 +19332,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18522,6 +19351,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18540,6 +19370,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18558,6 +19389,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18576,6 +19408,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -18602,6 +19435,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -19036,6 +19870,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -19055,6 +19890,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19073,6 +19909,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19091,6 +19928,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19109,6 +19947,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19127,6 +19966,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19163,6 +20003,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -19185,6 +20026,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -19204,6 +20046,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19222,6 +20065,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19240,6 +20084,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19258,6 +20103,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19276,6 +20122,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19297,6 +20144,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -19315,6 +20163,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -19337,6 +20186,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -19356,6 +20206,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19374,6 +20225,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19392,6 +20244,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19410,6 +20263,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19428,6 +20282,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19552,6 +20407,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -19571,6 +20427,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19593,6 +20450,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -19612,6 +20470,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19630,6 +20489,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19672,6 +20532,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19690,6 +20551,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19708,6 +20570,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19730,6 +20593,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -19749,6 +20613,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19767,6 +20632,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19785,6 +20651,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19803,6 +20670,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -19821,6 +20689,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20043,6 +20912,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -20062,6 +20932,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20080,6 +20951,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20098,6 +20970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20116,6 +20989,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20134,6 +21008,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20160,6 +21035,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -20594,6 +21470,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -20613,6 +21490,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20631,6 +21509,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20649,6 +21528,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20667,6 +21547,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20685,6 +21566,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20721,6 +21603,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Caption",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -20743,6 +21626,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -20762,6 +21646,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20780,6 +21665,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20798,6 +21684,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20816,6 +21703,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20834,6 +21722,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20855,6 +21744,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Quote",
             "rightIndent": 48,
             "spaceAfter": 8,
             "type": "paragraph"
@@ -20873,6 +21763,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "CodeBlock",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -20895,6 +21786,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -20914,6 +21806,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20932,6 +21825,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20950,6 +21844,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20968,6 +21863,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -20986,6 +21882,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21110,6 +22007,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -21136,6 +22034,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21161,6 +22060,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21186,6 +22086,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21211,6 +22112,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21236,6 +22138,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21261,6 +22164,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21286,6 +22190,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21311,6 +22216,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21336,6 +22242,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21361,6 +22268,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21386,6 +22294,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21411,6 +22320,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21436,6 +22346,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21461,6 +22372,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21486,6 +22398,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21511,6 +22424,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21536,6 +22450,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21561,6 +22476,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21586,6 +22502,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21611,6 +22528,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21636,6 +22554,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21661,6 +22580,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21686,6 +22606,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21711,6 +22632,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21736,6 +22658,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21761,6 +22684,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21786,6 +22710,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21811,6 +22736,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21836,6 +22762,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21861,6 +22788,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21886,6 +22814,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21911,6 +22840,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21936,6 +22866,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21961,6 +22892,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -21986,6 +22918,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -22011,6 +22944,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -22036,6 +22970,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -22061,6 +22996,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -22086,6 +23022,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -22111,6 +23048,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           }

@@ -33,6 +33,7 @@ import type {
   DocHeaderFooter,
   DocHeaderFooterParagraph,
   DocInline,
+  DocNamedStyle,
   DocParagraphStyle,
   DocRunBase,
   DocSection,
@@ -41,6 +42,7 @@ import type {
   DocumentExportResult,
 } from '@b32nio/spindle-shared/export/docx';
 
+import { addNamedStyles, usableNamedStyles } from './styles-writer';
 import { addCommentParts, buildCommentParts, planComments, type CommentPlan, type CommentPlanThread } from './comments-writer';
 
 // docx's own unit conventions: twips (1/1440in) for most measurements, but
@@ -137,8 +139,16 @@ class DocxBuilder {
   private numberedRun = { reference: NUMBERED_REFERENCE, instance: 0 };
   private numberedInstances = 0;
 
-  constructor(private readonly comments: CommentPlan) {
+  constructor(
+    private readonly comments: CommentPlan,
+    private readonly namedStyles: Record<string, DocNamedStyle> = {}
+  ) {
     this.pendingOrphans = comments.orphans;
+  }
+
+  /** A named style of the given kind that the document defines (a reference to a removed or foreign style is dropped). */
+  private namedStyle(id: string | undefined, kind: DocNamedStyle['kind']): string | undefined {
+    return id && Object.prototype.hasOwnProperty.call(this.namedStyles, id) && this.namedStyles[id].kind === kind ? id : undefined;
   }
 
   /** `anchorComments: false` for header/footer content, which has no comment anchors. */
@@ -216,8 +226,10 @@ class DocxBuilder {
   }
 
   private runOptions(base: DocRunBase, extra: Partial<IRunOptions>): IRunOptions {
+    const style = this.namedStyle(base.namedStyleId, 'character');
     return {
       ...extra,
+      ...(style && { style }),
       ...(base.bold != null && { bold: base.bold }),
       ...(base.italic != null && { italics: base.italic }),
       ...(base.underline && { underline: { type: UnderlineType.SINGLE } }),
@@ -263,8 +275,10 @@ class DocxBuilder {
           : { line: ptToTwips(custom.value), lineRule: custom.rule === 'exactly' ? LineRuleType.EXACT : LineRuleType.AT_LEAST }
         : { line: style.lineSpacing ? LINE_SPACING_MAP[style.lineSpacing] : undefined };
     const firstLine = style.firstLineIndentPt;
+    const namedStyle = this.namedStyle(style.namedStyleId, 'paragraph');
     return new Paragraph({
       children,
+      ...(namedStyle && { style: namedStyle }),
       alignment: style.alignment ? ALIGNMENT_MAP[style.alignment] : undefined,
       spacing: {
         before: style.spaceBeforePt != null ? ptToTwips(style.spaceBeforePt) : undefined,
@@ -303,7 +317,12 @@ class DocxBuilder {
       case 'paragraph':
         return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)));
       case 'heading':
-        return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)), { heading: HEADING_MAP[block.level] });
+        // A heading in a named style of the document is written in that style (which carries the outline level).
+        return this.buildParagraph(
+          block,
+          this.withOrphans(this.buildRuns(block.content)),
+          this.namedStyle(block.namedStyleId, 'paragraph') ? {} : { heading: HEADING_MAP[block.level] }
+        );
       case 'listItem':
         return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)), {
           numbering: this.listNumbering(block),
@@ -421,7 +440,8 @@ function truncate(s: string, max = 60): string {
 
 export async function exportDocx(input: DocumentExportInput): Promise<DocumentExportResult> {
   const comments = planComments(input.comments, input.sections);
-  const builder = new DocxBuilder(comments);
+  const namedStyles = usableNamedStyles(input.namedStyles);
+  const builder = new DocxBuilder(comments, namedStyles);
   const doc = new Document({
     title: input.title,
     numbering: numberingConfig(numberedStarts(input.sections)),
@@ -430,7 +450,8 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   // toArrayBuffer, not toBuffer: JSZip's "nodebuffer" output does not exist in browsers,
   // so toBuffer made every in-browser DOCX download fail.
   const buffer = await Packer.toArrayBuffer(doc);
-  let bytes = new Uint8Array(buffer);
+  let bytes: Uint8Array = new Uint8Array(buffer);
+  bytes = await addNamedStyles(bytes, namedStyles);
   if (comments.threads.size > 0) {
     const unplaced = builder.unplaced();
     const lost = unplaced.reduce((n, t) => n + t.ids.length, 0);

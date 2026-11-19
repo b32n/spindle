@@ -14,7 +14,7 @@ snapshots under [`goldens/`](./goldens):
 | Snapshot | Contents |
 |---|---|
 | `<id>.model.json` | The imported docs-core model (generated ids normalized to `block-1`, `row-1`, `cell-1`, ... and style-pool keys to `text-style-N` / `paragraph-style-N`; image data URLs replaced by a digest), the import warnings, and `importError` when `importFromDocx` throws. |
-| `<id>.loss.json` | The import-loss report (`inspectDocx(bytes, { detail: 'full' })`): what the importer does not bring across, by loss id and count, including the formatting/structure ids (named styles, table formatting, tabs and breaks, sections, bookmarks…) and a per-kind `where` breakdown for fields. The default `detail: 'summary'` report, which drives the import-confirmation dialog, is narrower. |
+| `<id>.loss.json` | The import-loss report (`inspectDocx(bytes, { detail: 'full' })`): what the importer does not bring across, by loss id and count, including the formatting/structure ids (table formatting, tabs and breaks, sections, bookmarks…) and a per-kind `where` breakdown for fields. The default `detail: 'summary'` report, which drives the import-confirmation dialog, is narrower. |
 | `<id>.roundtrip.json` | Import -> `exportToDocx` -> import again, then a structured diff of the two normalized models: totals, per-field counts, block/text counts before and after, and the first differences. |
 
 Round-trip diffs and losses are **expected** to be non-empty today. CI fails only when a snapshot

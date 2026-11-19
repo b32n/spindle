@@ -91,6 +91,17 @@ describe('proseMirrorToFlowBlocks: DOCX paragraph and run properties', () => {
     ]);
   });
 
+  it('ignores the named style mark and attr (the formatting is already on the run and block)', () => {
+    const doc = j([
+      { type: 'paragraph', attrs: { namedStyleId: 'Callout' }, content: [text('a', [{ type: 'namedStyle', attrs: { id: 'AccentWord' } }, { type: 'bold' }])] },
+    ]);
+    const para = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
+    const run = para.runs[0] as TextRun;
+    expect(run.text).toBe('a');
+    expect(run.bold).toBe(true);
+    expect(JSON.stringify(para)).not.toContain('AccentWord');
+  });
+
   it('numbers an ordered list from its start attribute', () => {
     const item = (s: string) => ({ type: 'list_item', attrs: { level: 0 }, content: [{ type: 'paragraph', content: [text(s)] }] });
     const doc = j([{ type: 'ordered_list', attrs: { start: 7 }, content: [item('a'), item('b')] }, { type: 'ordered_list', content: [item('c')] }]);

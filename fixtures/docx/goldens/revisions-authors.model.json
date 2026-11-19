@@ -15,6 +15,133 @@
         "w": 816
       }
     },
+    "namedStyles": {
+      "BodyText": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "BodyTextChar",
+        "name": "Body Text",
+        "paragraph": {
+          "alignment": "justify",
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.15
+          },
+          "spaceAfter": 8
+        }
+      },
+      "BodyTextChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "BodyText",
+        "name": "Body Text Char"
+      },
+      "DefaultParagraphFont": {
+        "isDefault": true,
+        "kind": "character",
+        "name": "Default Paragraph Font"
+      },
+      "Heading1": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading1Char",
+        "name": "heading 1",
+        "next": "BodyText",
+        "outlineLevel": 1,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 5.333333333333333,
+          "spaceBefore": 16
+        },
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 16
+        }
+      },
+      "Heading1Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading1",
+        "name": "Heading 1 Char",
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 16
+        }
+      },
+      "Heading2": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading2Char",
+        "name": "heading 2",
+        "next": "BodyText",
+        "outlineLevel": 2,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 5.333333333333333,
+          "spaceBefore": 10.666666666666666
+        },
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 13
+        }
+      },
+      "Heading2Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading2",
+        "name": "Heading 2 Char",
+        "text": {
+          "bold": true,
+          "color": "#2f5496",
+          "fontFamily": "Liberation Serif",
+          "fontSize": 13
+        }
+      },
+      "Normal": {
+        "isDefault": true,
+        "kind": "paragraph",
+        "name": "Normal",
+        "paragraph": {
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.079
+          },
+          "spaceAfter": 10.666666666666666
+        }
+      },
+      "Subtitle": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Subtitle",
+        "next": "BodyText",
+        "text": {
+          "color": "#595959",
+          "fontSize": 14,
+          "italic": true
+        }
+      },
+      "Title": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Title",
+        "next": "Subtitle",
+        "paragraph": {
+          "spaceAfter": 8
+        },
+        "text": {
+          "fontFamily": "Liberation Serif",
+          "fontSize": 28
+        }
+      }
+    },
     "paragraphStylePool": {},
     "sections": [
       {
@@ -33,6 +160,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Title",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -52,6 +180,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Subtitle",
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -74,6 +203,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -137,6 +267,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -168,6 +299,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -186,6 +318,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -197,6 +330,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -219,6 +353,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -244,6 +379,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -268,6 +404,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -286,6 +423,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -304,6 +442,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -326,6 +465,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -385,6 +525,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -403,6 +544,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -425,6 +567,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -448,6 +591,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -709,6 +853,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -731,6 +876,7 @@
               "type": "multiple",
               "value": 1.079
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "heading"
@@ -775,6 +921,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -793,6 +940,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           }

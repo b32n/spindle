@@ -13,7 +13,7 @@ import type {
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './numbering';
-import { parsePPr, StyleSheet, type ParagraphPartial } from './styles';
+import { parsePPr, StyleSheet, toDocParagraphStyle } from './styles';
 import { parseTheme } from './theme';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
@@ -136,7 +136,12 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   let inField = false;
 
   const consumeRun = (runNode: XmlNode, target: string | undefined) => {
-    const props = ctx.styles.run(find(childrenOf(runNode), 'w:rPr'), pStyleId);
+    const rPr = find(childrenOf(runNode), 'w:rPr');
+    const rStyleEl = rPr ? find(childrenOf(rPr), 'w:rStyle') : undefined;
+    // `Hyperlink` on a link is Word's implicit link style, which the writer applies to every link again.
+    const characterStyle = ctx.styles.namedCharacterStyle(rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined);
+    const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
+    const props = { ...ctx.styles.run(rPr, pStyleId), ...(namedStyleId && { namedStyleId }) };
     let text = '';
     const flush = () => {
       if (!text) return;
@@ -353,36 +358,6 @@ function settleListStarts(blocks: DocBlock[]): DocBlock[] {
   return blocks;
 }
 
-const LINE_KEYWORDS: Array<[number, 'single' | 'onePointFive' | 'double']> = [
-  [1, 'single'],
-  [1.5, 'onePointFive'],
-  [2, 'double'],
-];
-
-/** The paragraph properties the interchange format carries, from a paragraph's effective formatting. */
-function toDocParagraphStyle(effective: ParagraphPartial): DocParagraphStyle {
-  const style: DocParagraphStyle = {
-    ...(effective.alignment && { alignment: effective.alignment }),
-    ...(effective.spaceBeforePt != null && { spaceBeforePt: effective.spaceBeforePt }),
-    ...(effective.spaceAfterPt != null && { spaceAfterPt: effective.spaceAfterPt }),
-    ...(effective.leftIndentPt != null && { leftIndentPt: effective.leftIndentPt }),
-    ...(effective.rightIndentPt != null && { rightIndentPt: effective.rightIndentPt }),
-    ...(effective.firstLineIndentPt != null && { firstLineIndentPt: effective.firstLineIndentPt }),
-    ...(effective.keepNext && { keepWithNext: true }),
-    ...(effective.keepLines && { keepTogether: true }),
-    ...(effective.pageBreakBefore && { pageBreakBefore: true }),
-  };
-  const spacing = effective.lineSpacing;
-  if (spacing?.rule === 'auto') {
-    const keyword = LINE_KEYWORDS.find(([factor]) => Math.abs(factor - spacing.value) < 0.001);
-    if (keyword) style.lineSpacing = keyword[1];
-    else style.lineSpacingCustom = { rule: 'multiple', value: Math.round(spacing.value * 1000) / 1000 };
-  } else if (spacing) {
-    style.lineSpacingCustom = { rule: spacing.rule === 'exact' ? 'exactly' : 'atLeast', value: spacing.value };
-  }
-  return style;
-}
-
 /** parseParagraph plus the page break it may carry alongside its content. */
 function parseParagraphBlocks(
   pNode: XmlNode,
@@ -415,7 +390,8 @@ function parseParagraph(
   // Effective formatting: docDefaults, then the paragraph's style chain, then its own properties.
   const direct = parsePPr(pPr);
   const effective = ctx.styles.paragraph(paragraphStyleId(pNode), direct);
-  const style = toDocParagraphStyle(effective);
+  const namedStyleId = ctx.styles.namedParagraphStyle(paragraphStyleId(pNode));
+  const style: DocParagraphStyle = { ...toDocParagraphStyle(effective), ...(namedStyleId && { namedStyleId }) };
 
   // An otherwise-empty paragraph carrying only a page-break run or a
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
@@ -449,7 +425,9 @@ function parseParagraph(
     const listType = numId ? listTypeFor(numbering, numId, level) : 'bullet';
     // The number the item shows; importDocx keeps it as `start` only where a list begins or restarts.
     const shown = numId && listType === 'numbered' ? ctx.lists?.next(numId, level) : undefined;
-    return { type: 'listItem', listType, level, content, ...(shown !== undefined && { start: shown }), ...style };
+    // `ListParagraph` is Word's implicit list style, which the writer applies to every list item again.
+    const { namedStyleId: listStyle, ...rest } = style;
+    return { type: 'listItem', listType, level, content, ...(shown !== undefined && { start: shown }), ...rest, ...(listStyle && listStyle !== 'ListParagraph' && { namedStyleId: listStyle }) };
   };
   if (find(pPrKids, 'w:numPr') && direct.numId !== '0') return listItem(direct.numId);
   if (effective.headingLevel) return { type: 'heading', level: effective.headingLevel as 1 | 2 | 3 | 4 | 5 | 6, content, ...style };
@@ -708,7 +686,37 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const title = coreXml ? parseTitle(coreXml) : '';
 
   const threads = comments.threads();
-  return { title, sections, warnings, ...(threads.length > 0 && { comments: threads }) };
+  const namedStyles = styles.definitions(usedStyleIds(sections));
+  return {
+    title,
+    sections,
+    warnings,
+    ...(threads.length > 0 && { comments: threads }),
+    ...(Object.keys(namedStyles).length > 0 && { namedStyles }),
+  };
+}
+
+/** Every named style id the imported blocks and runs refer to. */
+function usedStyleIds(sections: DocSection[]): Set<string> {
+  const used = new Set<string>();
+  const inlines = (content: DocInline[]) => {
+    for (const inline of content) if ((inline.type === 'text' || inline.type === 'link') && inline.namedStyleId) used.add(inline.namedStyleId);
+  };
+  const hf = (part: DocHeaderFooter | undefined) => {
+    for (const p of [...(part?.paragraphs ?? []), ...(part?.firstPageParagraphs ?? [])]) inlines(p.content);
+  };
+  for (const section of sections) {
+    for (const block of section.blocks) {
+      if (block.type === 'table') for (const row of block.rows) for (const cell of row.cells) inlines(cell.content);
+      else if ('content' in block) {
+        inlines(block.content);
+        if ('namedStyleId' in block && block.namedStyleId) used.add(block.namedStyleId);
+      }
+    }
+    hf(section.header);
+    hf(section.footer);
+  }
+  return used;
 }
 
 async function loadHeaderFooter(

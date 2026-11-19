@@ -20,17 +20,6 @@
       "label": "section(s) with line numbering"
     },
     {
-      "count": 17,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "Body Text ×15",
-        "Subtitle ×1",
-        "Title ×1"
-      ]
-    },
-    {
       "count": 1,
       "effect": "not imported",
       "id": "docx.pageBorders",

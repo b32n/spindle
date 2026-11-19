@@ -20,17 +20,6 @@
       ]
     },
     {
-      "count": 30,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "Body Text ×28",
-        "Subtitle ×1",
-        "Title ×1"
-      ]
-    },
-    {
       "count": 3,
       "effect": "not imported",
       "id": "docx.sectionProperties",

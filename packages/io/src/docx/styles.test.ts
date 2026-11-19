@@ -27,6 +27,7 @@ const runProps = async (body: string, styles?: string) => {
   const props: Record<string, unknown> = { ...runsOf(await firstBlock(body, styles))[0] };
   delete props.type;
   delete props.text;
+  delete props.namedStyleId; // asserted separately (named styles are kept, see "named styles" below)
   return props;
 };
 

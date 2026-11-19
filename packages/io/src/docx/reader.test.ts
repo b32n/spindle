@@ -102,7 +102,7 @@ describe('importDocx', () => {
       { color: '#1f4d78' },
     ];
     expect(result.sections[0].blocks).toEqual(
-      [1, 2, 3, 4, 5, 6].map((level) => ({ type: 'heading', level, content: [{ type: 'text', text: `H${level}`, ...resolved[level - 1] }] }))
+      [1, 2, 3, 4, 5, 6].map((level) => ({ type: 'heading', level, namedStyleId: `Heading${level}`, content: [{ type: 'text', text: `H${level}`, ...resolved[level - 1] }] }))
     );
   });
 

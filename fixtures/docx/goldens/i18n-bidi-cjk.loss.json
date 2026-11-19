@@ -2,17 +2,6 @@
   "format": "docx",
   "items": [
     {
-      "count": 19,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "Body Text ×17",
-        "Subtitle ×1",
-        "Title ×1"
-      ]
-    },
-    {
       "count": 23,
       "effect": "the direction is not kept",
       "id": "docx.rtl",

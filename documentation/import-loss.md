@@ -32,7 +32,7 @@ model is built) and never throws on a malformed file; the import itself reports 
 
 `inspectDocx(bytes)` / `detectDocxLoss(bytes)` return the table above (the report the confirmation dialog uses). Pass `{ detail: 'full' }` for the
 complete measurement, which adds ids for things the importer flattens or ignores rather than drops: `docx.sections` (sections after the first are kept
-but not shown or edited), `docx.namedStyles` (the style's formatting is applied to the text; the name is not kept), `docx.tableFormatting`, `docx.tableStructure`, `docx.listFormatting` (other number formats), `docx.bookmarks` (bookmarks and internal links), `docx.headerFooterVariants` (first-page
+but not shown or edited), `docx.tableFormatting`, `docx.tableStructure`, `docx.listFormatting` (other number formats), `docx.bookmarks` (bookmarks and internal links), `docx.headerFooterVariants` (first-page
 and even/odd headers) and `docx.sectionProperties` (page-number restarts and formats, vertical alignment), and a `where` breakdown by field kind on
 `docx.fields`. The full report also lists a long tail: `docx.trackedMoves`, `docx.formattingRevisions` (`rPrChange`, `pPrChange`, `tblPrChange`,
 `sectPrChange`), `docx.dropCaps`, `docx.watermarks`, `docx.pageBorders`, `docx.lineNumbers`, `docx.hyphenation`, `docx.tabStops` (custom stops and
@@ -41,6 +41,8 @@ which `docx.fields` also counts). In both modes `docx.charts` counts chart and S
 `docx.floatingImages` counts anchored pictures only; anchored shapes and text boxes are not floating images. Tabs, line breaks, soft and non-breaking hyphens, and the text inside smart tags, custom XML, content controls, tracked insertions and ruby base text are imported, so they are no longer reported as lost. The DOCX fidelity harness (`fixtures/docx/`) records the full report.
 
 Paragraph and run properties the importer keeps (line spacing, left/right/first-line/hanging indents, keep-with-next, keep-lines-together, page-break-before, all caps, hidden text, East Asian and complex-script fonts, list start numbers and restarts) are not reported as lost. The editor does not lay out keep-with-next, keep-lines-together, page-break-before or at-least/exact line heights yet, and shows hidden text dimmed instead of removing it; all of them are kept in the document and written back on export.
+
+Named styles are kept: the names, ids and own properties of the paragraph and character styles the document uses (with the styles they are based on, linked to or followed by) are stored in `DocumentData.namedStyles`, blocks and runs keep a `namedStyleId`, and the export writes them back into `styles.xml` with `pStyle`/`rStyle` references, so `docx.namedStyles` is no longer reported. The editor does not show a style gallery yet; the formatting of a styled paragraph or run is also applied directly to it, as before. Table styles and the style definitions of styles nothing uses are not kept (table formatting is `docx.tableFormatting`).
 
 Comments are imported (threads, replies, resolved state and anchors), so `docx.comments` is reported only when the comments part itself is damaged and its comments cannot be read.
 

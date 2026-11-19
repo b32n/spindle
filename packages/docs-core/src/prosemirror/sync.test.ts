@@ -184,3 +184,41 @@ describe('collab round-trip preserves DOCX paragraph formatting and run flags', 
     });
   });
 });
+
+describe('collab round-trip preserves named style references', () => {
+  const text = (t: string, extra: object = {}) => ({ type: 'text' as const, text: t, ...extra });
+
+  it('keeps namedStyleId on paragraphs, headings and list items', () => {
+    const out = roundTrip([
+      { id: 'p', type: 'paragraph', content: [text('p')], namedStyleId: 'Callout' },
+      { id: 'h', type: 'heading', level: 2, content: [text('h')], namedStyleId: 'Heading2' },
+      { id: 'l', type: 'list-item', listType: 'numbered', level: 0, content: [text('l')], namedStyleId: 'ListParagraph' },
+    ]);
+    expect(out[0]).toMatchObject({ type: 'paragraph', namedStyleId: 'Callout' });
+    expect(out[1]).toMatchObject({ type: 'heading', namedStyleId: 'Heading2' });
+    expect(out[2]).toMatchObject({ type: 'list-item', namedStyleId: 'ListParagraph' });
+  });
+
+  it('keeps namedStyleId on text runs and links next to their formatting, and leaves unstyled runs unstyled', () => {
+    const out = roundTrip([
+      {
+        id: 'p',
+        type: 'paragraph',
+        content: [
+          text('plain '),
+          text('accent', { namedStyleId: 'AccentWord', bold: true }),
+          { type: 'link' as const, text: 'site', href: 'https://example.com/', namedStyleId: 'Hyperlink', underline: true },
+        ],
+      },
+    ]);
+    const content = (out[0] as { content: object[] }).content;
+    expect(content[0]).not.toHaveProperty('namedStyleId');
+    expect(content[1]).toMatchObject({ text: 'accent', namedStyleId: 'AccentWord' });
+    expect(content[2]).toMatchObject({ type: 'link', href: 'https://example.com/', namedStyleId: 'Hyperlink' });
+  });
+
+  it('does not invent a namedStyleId', () => {
+    const out = roundTrip([{ id: 'p', type: 'paragraph', content: [text('p')] }]);
+    expect(out[0]).not.toHaveProperty('namedStyleId');
+  });
+});

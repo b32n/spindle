@@ -78,6 +78,22 @@ lockstep.
   keep-lines, page-break-before and `atLeast`/`exactly` line heights are stored and exported but not laid out yet, and hidden
   text is shown dimmed rather than removed (the caret and selection mapping needs every character painted).
 
+- **DOCX named styles are kept and exported.** Import keeps the ids, names, `basedOn`/`next`/`link`, default flag,
+  outline level and own run/paragraph properties of the paragraph and character styles a document uses (and the styles
+  they refer to) in the additive `DocumentImportResult.namedStyles` (`DocNamedStyle`), and tags blocks and runs with
+  the additive `namedStyleId` (`DocParagraphStyle`, `DocRunBase`). `exportDocx` accepts
+  `DocumentExportInput.namedStyles` and writes the styles into `styles.xml` (a built-in style of the same id, such as
+  `Heading1` or `Hyperlink`, is replaced by the document's definition) with `pStyle`/`rStyle` references, so Word shows
+  "Callout", "Accent Word" and the like in its style list. A reference to a style the document no longer defines is
+  left out of the file. Word's implicit `ListParagraph` on list items and `Hyperlink` on links are not kept as named
+  styles (the writer applies them again).
+- **Editor: named styles in the document model.** Additive `DocumentData.namedStyles` (`NamedStyle`),
+  `DocumentImpl.getNamedStyles()` / `setNamedStyles()`, `namedStyleId` on `ParagraphFormat` (paragraph, heading and
+  list-item blocks), `TextRun` and `InlineLink` (distinct from the existing style-pool `styleId`). In ProseMirror the
+  paragraph and heading nodes gain a `namedStyleId` attr and there is a new `namedStyle` mark, and in the Yjs
+  document a new `namedStyles` map, so styles and references sync in collaboration (a late joiner receives the room's
+  styles; no migration is needed). There is no style gallery or style editing UI yet.
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
@@ -94,6 +110,7 @@ lockstep.
 
 ### Fixed
 
+- **DOCX loss report: `docx.namedStyles` is gone** (the style names are now imported and exported).
 - **A paragraph's `indent` is a level of 24 px, not pixels.** The DOCX importer stored pixels in `indent` (the editor's
   indent command stores levels), so an imported indent of 48 px was laid out as 48 levels. The importer now sets
   `leftIndent` (pixels), and the exporter writes `leftIndent` plus 24 px per `indent` level.
