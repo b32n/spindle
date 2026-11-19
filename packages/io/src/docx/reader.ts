@@ -13,6 +13,7 @@ import type {
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { parsePPr, StyleSheet } from './styles';
+import { parseTheme } from './theme';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
 /** Depth-first concatenation of every #text leaf under a node (a run's <w:t>, a field's cached-result text, ...). */
@@ -623,7 +624,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const media = await buildMediaMap(zip, rels);
   const parsedComments = parseComments({ comments: commentsXml, extended: commentsExtendedXml, people: peopleXml }, warnings);
   const comments = createCommentTracker(parsedComments, documentXml);
-  const styles = new StyleSheet(stylesXml);
+  const themeXml = await readZipText(zip, 'word/theme/theme1.xml');
+  const styles = new StyleSheet(stylesXml, parseTheme(themeXml));
   const ctx: PartContext = { rels, media, styles, comments };
   const numbering = parseNumbering(numberingXml);
 

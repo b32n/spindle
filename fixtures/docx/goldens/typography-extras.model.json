@@ -27,6 +27,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Typography extras",
                 "type": "text"
@@ -40,6 +41,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Hyphenation, tab leaders, drop caps, a watermark, line numbers and page borders",
@@ -55,6 +57,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Typography extras",
                 "type": "text"
@@ -69,71 +72,85 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Automatic hyphenation is enabled for this document, so long justified lines break inside words. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A visiting engineer repainted an index of local pilots while the market was closed. Our records office postponed three disputed boundary stones with unusual care. A visiting engineer reorganised a ledger of unpaid berth fees with unusual care. Local fishing crews mapped a bundle of weathered charts as the tide turned. The tide almanac relocated the sluice gate mechanism with unusual care. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Pneumonoultramicroscopicsilicovolcanoconiosis and incomprehensibilities are long words. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Soft hyphens: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Anti",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "dis",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "establishment",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "arianism. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Non-breaking hyphen: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "‑",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -147,6 +164,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "This paragraph opts out of hyphenation. The tide almanac rebuilt a draft of the annual report without waiting for approval. The quay-side bakery documented the ferry timetable and filed the result in triplicate. The tide almanac repainted the eastern jetty as the tide turned.",
                 "type": "text"
@@ -160,6 +178,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Tab stops with leaders:",
                 "type": "text"
@@ -172,16 +191,19 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Preface",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "iii",
                 "type": "text"
@@ -194,16 +216,19 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Chapter one",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "1",
                 "type": "text"
@@ -216,16 +241,19 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Chapter two",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "17",
                 "type": "text"
@@ -238,16 +266,19 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Appendix",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "203",
                 "type": "text"
@@ -260,16 +291,19 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Index",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "240",
                 "type": "text"
@@ -282,36 +316,43 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Item",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "12.50",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "1,204.75",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "end",
                 "type": "text"
@@ -325,6 +366,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Drop caps (framed first letter, three lines):",
                 "type": "text"
@@ -339,6 +381,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 85,
                 "text": "T",
                 "type": "text"
@@ -352,6 +395,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "he lighthouse had stood on the point for two hundred years, and every keeper had added a line to the logbook. The northern ferry service documented the old customs register using only the instruments on hand. The tide almanac postponed two dozen mooring rings to the satisfaction of nobody in particular. Our records office negotiated the winter storage sheds to the satisfaction of nobody in particular. The quay-side bakery measured the lamp oil inventory after several rounds of discussion.",
                 "type": "text"
@@ -366,6 +410,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 85,
                 "text": "W",
                 "type": "text"
@@ -379,6 +424,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "hen the committee last met, the margin drop cap hung outside the text block. Every lighthouse keeper inspected the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the dredging contract as the tide turned. The northern ferry service catalogued the dredging contract and filed the result in triplicate.",
                 "type": "text"
@@ -392,59 +438,70 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Character effects: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "smallCaps": true,
                 "text": "small caps ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "ALL CAPS ",
                 "type": "text"
               },
               {
                 "backgroundColor": "#ffff00",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "highlighted ",
                 "type": "text"
               },
               {
                 "color": "#c00000",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "coloured ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "expanded spacing ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "condensed ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "raised ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "embossed ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "shadow-outline ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "wavy underline",
                 "type": "text",
@@ -459,6 +516,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Paragraph borders, shading and keep-with-next. The harbour committee reviewed a ledger of unpaid berth fees according to the standing orders. The tide almanac postponed the eastern jetty with unusual care.",
                 "type": "text"
@@ -472,6 +530,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Line numbering and page borders apply to this whole section.",
                 "type": "text"
@@ -485,6 +544,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The quay-side bakery compared the old customs register to the satisfaction of nobody in particular. An experienced pilot relocated every outstanding repair order before the first frost. Every lighthouse keeper reorganised last season's tonnage figures while the market was closed. The grain exchange compared the eastern jetty in time for the autumn meeting. The grain exchange documented last season's tonnage figures without waiting for approval. The regional council compared an index of local pilots during the long spring inspection.",
                 "type": "text"
@@ -498,6 +558,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The winter inspection team postponed a bundle of weathered charts after several rounds of discussion. A visiting engineer catalogued the sluice gate mechanism in time for the autumn meeting. A junior surveyor repainted the eastern jetty using only the instruments on hand. A careful archivist repainted an index of local pilots after several rounds of discussion. The winter inspection team rebuilt the fog-signal schedule before the first frost. A junior surveyor rebuilt the dredging contract using only the instruments on hand.",
                 "type": "text"
@@ -511,6 +572,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The bridge authority measured a ledger of unpaid berth fees during the long spring inspection. An experienced pilot relocated the winter storage sheds according to the standing orders. The harbour committee negotiated the winter storage sheds during the long spring inspection. The quay-side bakery negotiated the winter storage sheds according to the standing orders. An experienced pilot reorganised the old customs register using only the instruments on hand. Every lighthouse keeper approved a draft of the annual report before the first frost.",
                 "type": "text"
@@ -524,6 +586,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Local fishing crews reorganised an index of local pilots with unusual care. A visiting engineer catalogued last season's tonnage figures with unusual care. The regional council catalogued a draft of the annual report in the presence of two witnesses. The regional council catalogued a draft of the annual report in the presence of two witnesses. Every lighthouse keeper recorded the dredging contract during the long spring inspection. Our records office mapped two dozen mooring rings in time for the autumn meeting.",
                 "type": "text"
@@ -537,6 +600,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A visiting engineer postponed a draft of the annual report without waiting for approval. The regional council relocated three disputed boundary stones before the first frost. The regional council postponed the sluice gate mechanism after several rounds of discussion. Every lighthouse keeper mapped the sluice gate mechanism according to the standing orders. A visiting engineer negotiated last season's tonnage figures without waiting for approval. The tide almanac approved every outstanding repair order according to the standing orders.",
                 "type": "text"
@@ -550,6 +614,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The tide almanac audited every outstanding repair order as the tide turned. The grain exchange catalogued the ferry timetable without waiting for approval. An experienced pilot rebuilt the old customs register as the tide turned. The tide almanac reviewed the old customs register and filed the result in triplicate. The bridge authority relocated the fog-signal schedule with unusual care. A visiting engineer mapped the ferry timetable with unusual care.",
                 "type": "text"
@@ -566,6 +631,7 @@
               "alignment": "center",
               "content": [
                 {
+                  "fontFamily": "Liberation Sans",
                   "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
@@ -584,6 +650,7 @@
             {
               "content": [
                 {
+                  "fontFamily": "Liberation Sans",
                   "fontSize": 11,
                   "text": "Harbour records — confidential draft",
                   "type": "text"

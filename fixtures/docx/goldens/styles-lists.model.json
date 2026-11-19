@@ -38,6 +38,7 @@
             "content": [
               {
                 "color": "#17365d",
+                "fontFamily": "Calibri",
                 "fontSize": 26,
                 "text": "Harbour Records Handbook",
                 "type": "text"
@@ -51,6 +52,7 @@
             "content": [
               {
                 "color": "#4f81bd",
+                "fontFamily": "Calibri",
                 "fontSize": 12,
                 "italic": true,
                 "text": "A compact reference that exercises styles, heading levels and several kinds of list.",
@@ -66,6 +68,7 @@
               {
                 "bold": true,
                 "color": "#365f91",
+                "fontFamily": "Calibri",
                 "fontSize": 14,
                 "text": "1. Style inheritance",
                 "type": "text"
@@ -79,6 +82,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Each lantern on the quay was numbered, oiled and logged by the keeper before dusk. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
                 "type": "text"
@@ -92,6 +96,7 @@
             "content": [
               {
                 "color": "#1f4e79",
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "italic": true,
                 "text": "Plain callout: derived from Body Text with an indent and italic blue text.",
@@ -108,6 +113,7 @@
               {
                 "bold": true,
                 "color": "#c0392b",
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "italic": true,
                 "text": "Warning callout: derived from the callout; bold and red.",
@@ -125,6 +131,7 @@
               {
                 "bold": true,
                 "color": "#c0392b",
+                "fontFamily": "Cambria",
                 "fontSize": 15,
                 "italic": true,
                 "text": "Large warning: three levels of basedOn, centred and larger.",
@@ -139,18 +146,21 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "A sentence mixing ",
                 "type": "text"
               },
               {
                 "color": "#2e75b6",
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "smallCaps": true,
                 "text": "accent words",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": ", ",
                 "type": "text"
@@ -158,12 +168,14 @@
               {
                 "bold": true,
                 "color": "#2e75b6",
+                "fontFamily": "Cambria",
                 "fontSize": 13,
                 "smallCaps": true,
                 "text": "loud accents",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": ", and ",
                 "type": "text"
@@ -175,12 +187,14 @@
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": ". Direct formatting follows: ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "italic": true,
                 "text": "bold italic underline",
@@ -188,39 +202,46 @@
                 "underline": true
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "strikethrough": true,
                 "text": "struck through",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "superscript": true,
                 "text": "2",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": " and ",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "subscript": true,
                 "text": "2",
                 "type": "text"
               },
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -235,6 +256,7 @@
               {
                 "bold": true,
                 "color": "#4f81bd",
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "italic": true,
                 "text": "Nobody remembered who had painted the clock face blue, but everybody agreed it suited the square. Letters addressed to the old mill were still delivered, although the mill had burned down years ago.",
@@ -250,6 +272,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Hanging-indent reference entries (first-line indent via a custom style):",
                 "type": "text"
@@ -262,6 +285,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "[1] Rain arrived in short, orderly bursts, as if it had been scheduled by the same committee. Letters addressed to the old mill were still delivered, although the mill had burned down years ago.",
                 "type": "text"
@@ -275,6 +299,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "[2] In the margin of the survey, someone had sketched a heron standing on one leg. Bread was baked in three sizes: small for travellers, medium for families, large for feast days.",
                 "type": "text"
@@ -288,6 +313,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "[3] Letters addressed to the old mill were still delivered, although the mill had burned down years ago. The bridge keeper kept a tally of crossings using a string of coloured beads.",
                 "type": "text"
@@ -303,6 +329,7 @@
               {
                 "bold": true,
                 "color": "#365f91",
+                "fontFamily": "Calibri",
                 "fontSize": 14,
                 "text": "2. Headings at every level",
                 "type": "text"
@@ -318,6 +345,7 @@
               {
                 "bold": true,
                 "color": "#4f81bd",
+                "fontFamily": "Calibri",
                 "fontSize": 13,
                 "text": "2.1 Second level",
                 "type": "text"
@@ -331,6 +359,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "A careful reader will notice that the second ledger disagrees with the first by seven coins. Rain arrived in short, orderly bursts, as if it had been scheduled by the same committee.",
                 "type": "text"
@@ -345,6 +374,7 @@
               {
                 "bold": true,
                 "color": "#4f81bd",
+                "fontFamily": "Calibri",
                 "fontSize": 11,
                 "text": "2.1.1 Third level",
                 "type": "text"
@@ -358,6 +388,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Wind, salt and patience shaped the town more than any decree ever did. In the margin of the survey, someone had sketched a heron standing on one leg.",
                 "type": "text"
@@ -372,6 +403,7 @@
               {
                 "bold": true,
                 "color": "#4f81bd",
+                "fontFamily": "Calibri",
                 "fontSize": 11,
                 "italic": true,
                 "text": "2.1.1.1 Fourth level",
@@ -386,6 +418,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Measurements were taken twice, once at dawn and once after the fishing boats returned.",
                 "type": "text"
@@ -400,6 +433,7 @@
               {
                 "bold": true,
                 "color": "#4f81bd",
+                "fontFamily": "Calibri",
                 "fontSize": 13,
                 "text": "2.2 Another second level",
                 "type": "text"
@@ -414,6 +448,7 @@
             "content": [
               {
                 "color": "#243f60",
+                "fontFamily": "Calibri",
                 "fontSize": 11,
                 "text": "Fifth level and sixth level follow",
                 "type": "text"
@@ -428,6 +463,7 @@
             "content": [
               {
                 "color": "#243f60",
+                "fontFamily": "Calibri",
                 "fontSize": 11,
                 "italic": true,
                 "text": "Sixth level",
@@ -444,6 +480,7 @@
               {
                 "bold": true,
                 "color": "#365f91",
+                "fontFamily": "Calibri",
                 "fontSize": 14,
                 "text": "3. Lists",
                 "type": "text"
@@ -457,6 +494,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Bulleted list (built-in List Bullet styles, two nesting levels):",
                 "type": "text"
@@ -469,6 +507,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Lanterns",
                 "type": "text"
@@ -483,6 +522,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Oil lamps",
                 "type": "text"
@@ -497,6 +537,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Candles",
                 "type": "text"
@@ -511,6 +552,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Mirrors",
                 "type": "text"
@@ -525,6 +567,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Ropes",
                 "type": "text"
@@ -539,6 +582,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Simple numbered list (List Number):",
                 "type": "text"
@@ -551,6 +595,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Open the ledger.",
                 "type": "text"
@@ -565,6 +610,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Record the tide.",
                 "type": "text"
@@ -579,6 +625,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Sign the entry.",
                 "type": "text"
@@ -593,6 +640,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Multilevel outline list (1. / 1.1 / 1.1.1 / (a)):",
                 "type": "text"
@@ -605,6 +653,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Inspection",
                 "type": "text"
@@ -619,6 +668,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Hull",
                 "type": "text"
@@ -633,6 +683,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Planking",
                 "type": "text"
@@ -647,6 +698,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Fastenings",
                 "type": "text"
@@ -661,6 +713,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Keel",
                 "type": "text"
@@ -675,6 +728,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Rigging",
                 "type": "text"
@@ -689,6 +743,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Repair",
                 "type": "text"
@@ -703,6 +758,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Order parts",
                 "type": "text"
@@ -717,6 +773,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Schedule yard",
                 "type": "text"
@@ -731,6 +788,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Sign-off",
                 "type": "text"
@@ -745,6 +803,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "A new list that restarts at 1 (separate w:num with startOverride):",
                 "type": "text"
@@ -757,6 +816,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "First again",
                 "type": "text"
@@ -771,6 +831,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Second again",
                 "type": "text"
@@ -785,6 +846,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Third again",
                 "type": "text"
@@ -799,6 +861,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "A list that starts at 5:",
                 "type": "text"
@@ -811,6 +874,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Fifth item",
                 "type": "text"
@@ -825,6 +889,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Sixth item",
                 "type": "text"
@@ -839,6 +904,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Letter / roman list:",
                 "type": "text"
@@ -851,6 +917,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Materials",
                 "type": "text"
@@ -865,6 +932,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Timber",
                 "type": "text"
@@ -879,6 +947,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Iron",
                 "type": "text"
@@ -893,6 +962,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Nails",
                 "type": "text"
@@ -907,6 +977,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Labour",
                 "type": "text"
@@ -921,6 +992,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Carpenters",
                 "type": "text"
@@ -937,6 +1009,7 @@
               {
                 "bold": true,
                 "color": "#365f91",
+                "fontFamily": "Calibri",
                 "fontSize": 14,
                 "text": "4. Paragraph formatting",
                 "type": "text"
@@ -951,6 +1024,7 @@
             "alignment": "left",
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "This paragraph is left-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
                 "type": "text"
@@ -964,6 +1038,7 @@
             "alignment": "center",
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "This paragraph is centre-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
                 "type": "text"
@@ -977,6 +1052,7 @@
             "alignment": "right",
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "This paragraph is right-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
                 "type": "text"
@@ -990,6 +1066,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "This paragraph is justified-aligned. The orchard on the northern slope produced more pears than the town could eat or trade. The bridge keeper kept a tally of crossings using a string of coloured beads.",
                 "type": "text"
@@ -1002,6 +1079,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Double-spaced with space before and after. In the margin of the survey, someone had sketched a heron standing on one leg. Maps of the estuary changed so often that the cartographer stopped signing them.",
                 "type": "text"
@@ -1015,6 +1093,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "Left indent 0.75in and first-line indent 0.3in. Bread was baked in three sizes: small for travellers, medium for families, large for feast days. The apprentice learned that a good index is simply a promise kept in alphabetical order.",
                 "type": "text"
@@ -1035,6 +1114,7 @@
               {
                 "bold": true,
                 "color": "#365f91",
+                "fontFamily": "Calibri",
                 "fontSize": 14,
                 "text": "5. After a page break",
                 "type": "text"
@@ -1048,6 +1128,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "The bridge keeper kept a tally of crossings using a string of coloured beads. Winter inventories listed rope, tar, lamp glass, and a surprising quantity of buttons. Wind, salt and patience shaped the town more than any decree ever did.",
                 "type": "text"
@@ -1060,6 +1141,7 @@
           {
             "content": [
               {
+                "fontFamily": "Cambria",
                 "fontSize": 11,
                 "text": "A horizontal-rule-like paragraph border follows.",
                 "type": "text"

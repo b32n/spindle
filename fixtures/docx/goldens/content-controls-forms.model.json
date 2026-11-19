@@ -31,6 +31,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Content controls and forms",
                 "type": "text"
@@ -44,6 +45,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Structured document tags and legacy form fields",
@@ -59,6 +61,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Content controls and form fields",
                 "type": "text"
@@ -74,6 +77,7 @@
             "content": [
               {
                 "color": "#808080",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Click here to enter a summary.",
                 "type": "text"
@@ -87,28 +91,33 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Rich text control with ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "bold",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " and ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "italic": true,
                 "text": "italic",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " runs.",
                 "type": "text"
@@ -122,6 +131,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "And a second paragraph inside the same control.",
                 "type": "text"
@@ -135,46 +145,55 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Inline controls: name ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Ada Marlowe",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", berth ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "East",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", vessel ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Thornback",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", arrival ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "2 March 2026",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", inspected ",
                 "type": "text"
@@ -186,6 +205,7 @@
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -206,11 +226,13 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Line item 1: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "rope, 40 m",
                 "type": "text"
@@ -225,11 +247,13 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Line item 2: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "lamp glass, 6 pieces",
                 "type": "text"
@@ -244,11 +268,13 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Line item 3: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "tar, 2 barrels",
                 "type": "text"
@@ -268,6 +294,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Quantity",
                         "type": "text"
@@ -278,6 +305,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "12",
                         "type": "text"
@@ -293,6 +321,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Row inside a content control",
                         "type": "text"
@@ -303,6 +332,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "yes",
                         "type": "text"
@@ -320,11 +350,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Data-bound control: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Bound title",
                 "type": "text"
@@ -338,6 +370,7 @@
             "content": [
               {
                 "bold": true,
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Cover page building block",
                 "type": "text"
@@ -351,6 +384,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Wrapped in a docPartObj content control.",
@@ -365,6 +399,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Innermost paragraph, 5 controls deep.",
                 "type": "text"
@@ -378,6 +413,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Legacy (Word 97) form fields:",
                 "type": "text"
@@ -391,16 +427,19 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Captain: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "   Cleared: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "   Flag colour: ",
                 "type": "text"

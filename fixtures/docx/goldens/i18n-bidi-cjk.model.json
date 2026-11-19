@@ -31,6 +31,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Languages and symbols",
                 "type": "text"
@@ -44,6 +45,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Arabic, Hebrew, Chinese, Japanese, Korean, symbols and emoji",
@@ -59,6 +61,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Right-to-left, CJK, symbols and emoji",
                 "type": "text"
@@ -73,6 +76,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Arabic (right-to-left paragraphs, bidi + rtl runs):",
                 "type": "text"
@@ -128,6 +132,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Hebrew:",
                 "type": "text"
@@ -169,6 +174,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Mixed direction in one paragraph (English inside Arabic, numbers and punctuation):",
                 "type": "text"
@@ -181,26 +187,31 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "ميناء ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Marguerite Harbour",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " استقبل ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "42",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " سفينة في 2026/01/15.",
                 "type": "text"
@@ -214,26 +225,31 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "English sentence with an embedded Hebrew word ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "שלום",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " and an Arabic word ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "مرحبا",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", then more English.",
                 "type": "text"
@@ -246,6 +262,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Arabic-Indic digits: ١٢٣٤٥٦٧٨٩٠ and Hebrew with niqqud: שָׁלוֹם",
                 "type": "text"
@@ -263,6 +280,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
                         "type": "text"
@@ -273,6 +291,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Right-to-left table cell",
                         "type": "text"
@@ -289,6 +308,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
                 "type": "text"
@@ -304,6 +324,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Chinese, Japanese and Korean with East Asian fonts:",
                 "type": "text"
@@ -401,16 +422,19 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "12",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "  (combined digits), ruby: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "漢字",
                 "type": "text"
@@ -428,6 +452,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "縦書きのテキスト",
                         "type": "text"
@@ -438,6 +463,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Vertical (tbRl) text direction in the neighbouring cell.",
                         "type": "text"
@@ -455,6 +481,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Symbols: ",
                 "type": "text"
@@ -482,21 +509,25 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Word symbol runs: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " bullet, ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " tick, ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " smiley.",
                 "type": "text"
@@ -510,6 +541,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Emoji: 😀 🚀 🌍 ⚓ 🐟 🌊 ❤️ 👍🏽 👩‍💻 🏳️‍🌈 🇳🇴 1️⃣ — including ZWJ sequences, skin tones, flags and keycaps.",
                 "type": "text"
@@ -523,6 +555,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Combining marks and ligature candidates: é (e + acute), ñ, ﬁ ﬂ, Å (angstrom U+212B), ǆ, and a surrogate-pair math letter 𝒜𝔹ℂ𝟘.",
                 "type": "text"

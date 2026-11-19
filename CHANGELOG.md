@@ -52,7 +52,12 @@ lockstep.
   so runs and paragraphs gain formatting they previously lost (paragraph spacing from the defaults, heading sizes and
   colours, link colour and underline, callout styles). A heading is recognised by its `Heading N` name, else by an
   outline level in its style chain (level 10 means body text), else through a `Heading N` ancestor; a heading numbered
-  through its style stays a heading. Theme fonts and colours are resolved in a follow-up.
+  through its style stays a heading.
+- **DOCX theme fonts and colours are resolved.** `importDocx` reads `word/theme/theme1.xml` (major/minor Latin fonts and
+  the colour scheme) and resolves `asciiTheme` fonts, `themeColor` text colours and `themeFill` shading with their
+  `themeTint`/`themeShade` modifiers, in `docDefaults`, styles and direct formatting. A theme reference takes precedence
+  over the literal value next to it; the literal is kept when there is no theme or the slot is missing, and when Word's
+  recorded colour is within a few steps of the computed tint/shade it is used as the exact value.
 
 ### Changed
 
