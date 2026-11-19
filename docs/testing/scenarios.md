@@ -208,6 +208,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-COL-05b | a late joiner never ends up with duplicated seed content | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-06 | list and structural edits propagate | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-07 | two-pane in-process demo mounts two editors | covered |  |  | `e2e/docs/collab.spec.ts` |
+| D-CMT-03 | a .docx with comment threads shows them anchored in the text and listed in the sidebar | covered | yes |  | `e2e/docs/comments-import.spec.ts` |
 | D-TBL-01 | table context menu inserts rows and columns where asked and deletes them | covered |  |  | `e2e/docs/depth.spec.ts` |
 | D-LNK-01 | an existing link can be edited (Update) and removed | covered |  |  | `e2e/docs/depth.spec.ts` |
 | D-PGS-03 | page size A4 changes the page dimensions | covered |  |  | `e2e/docs/depth.spec.ts` |
@@ -436,7 +437,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 370
+- covered: 371
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

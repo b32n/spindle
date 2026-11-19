@@ -27,7 +27,7 @@ model is built) and never throws on a malformed file; the import itself reports 
 | Format | Reported |
 |---|---|
 | XLSX | conditional formatting, data validation, filters, protected sheets / workbook protection, grouped rows/columns, sparklines, hidden sheets (become visible), named ranges, charts, images, comments/notes, tables, pivot tables, macros, external links, slicers, rich text inside cells |
-| DOCX | tracked insertions (text kept as if accepted, author/date lost) and deletions (applied), content controls (text kept, control lost), footnotes, endnotes, comments, floating images, text boxes/shapes, equations, embedded objects, charts/diagrams, multi-column sections, fields other than PAGE/NUMPAGES |
+| DOCX | tracked insertions (text kept as if accepted, author/date lost) and deletions (applied), content controls (text kept, control lost), footnotes, endnotes, floating images, text boxes/shapes, equations, embedded objects, charts/diagrams, multi-column sections, fields other than PAGE/NUMPAGES |
 | CSV | semicolon- or tab-separated files (they import into one column) |
 
 `inspectDocx(bytes)` / `detectDocxLoss(bytes)` return the table above (the report the confirmation dialog uses). Pass `{ detail: 'full' }` for the
@@ -40,6 +40,8 @@ and even/odd headers) and `docx.sectionProperties` (page-number restarts and for
 leaders), `docx.rtl`, `docx.ruby` (base text kept, reading marks lost), `docx.embeddedFonts`, `docx.altChunk` and `docx.legacyForms` (`FORMTEXT`/`FORMCHECKBOX`/`FORMDROPDOWN`,
 which `docx.fields` also counts). In both modes `docx.charts` counts chart and SmartArt objects referenced from the body (not the XML parts behind them) and
 `docx.floatingImages` counts anchored pictures only; anchored shapes and text boxes are not floating images. Tabs, line breaks, soft and non-breaking hyphens, and the text inside smart tags, custom XML, content controls, tracked insertions and ruby base text are imported, so they are no longer reported as lost. The DOCX fidelity harness (`fixtures/docx/`) records the full report.
+
+Comments are imported (threads, replies, resolved state and anchors), so `docx.comments` is reported only when the comments part itself is damaged and its comments cannot be read.
 
 Parse-time problems found while importing (an unresolvable image, an unsupported field…) still arrive as `warnings`.
 

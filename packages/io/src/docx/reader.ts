@@ -11,6 +11,7 @@ import type {
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
 
+import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
@@ -48,6 +49,8 @@ function parseRels(xml: string | undefined): Map<string, string> {
 interface PartContext {
   rels: Map<string, string>;
   media: Map<string, string>;
+  /** Comment ranges open at the current position of the body walk (absent for headers/footers). */
+  comments?: CommentTracker;
 }
 
 const MEDIA_EXT_TO_MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp' };
@@ -240,6 +243,7 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
  */
 function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
   const out: DocInline[] = [];
+  ctx.comments?.paragraphStart();
   let pendingField = ''; // accumulated instrText while inside a begin/.../end sequence
   let inField = false;
 
@@ -249,8 +253,10 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     let text = '';
     const flush = () => {
       if (!text) return;
-      if (target) out.push({ type: 'link', text, href: target, ...props });
-      else out.push({ type: 'text', text, ...props });
+      const commentThreadId = ctx.comments?.anchorText(text);
+      const runProps = commentThreadId ? { ...props, commentThreadId } : props;
+      if (target) out.push({ type: 'link', text, href: target, ...runProps });
+      else out.push({ type: 'text', text, ...runProps });
       text = '';
     };
     for (const piece of childrenOf(runNode)) {
@@ -305,6 +311,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       const tag = tagOf(child);
       if (tag === 'w:fldSimple') out.push(...fieldRunFor(attrsOf(child)['@_w:instr'] ?? '', warnings));
       else if (tag === 'w:r') consumeRun(child, target);
+      else ctx.comments?.mark(child);
     }
   };
 
@@ -315,6 +322,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       consumeRuns(childrenOf(child), target);
     } else if (tag === 'w:r' || tag === 'w:fldSimple') {
       consumeRuns([child], undefined);
+    } else {
+      ctx.comments?.mark(child);
     }
     // Bookmarks, proofErr, and other structural markers carry no content — skipped.
   }
@@ -538,18 +547,25 @@ function parseParagraph(
 // ---------------------------------------------------------------------------
 
 function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): DocBlock {
-  const rowsXml = findAll(flattenBlocks(childrenOf(tblNode)), 'w:tr');
   const rows: DocTableRow[] = [];
   // Column index -> the DocTableCell object currently accumulating a
   // vertical merge, so a later row's continuation cell can bump its rowspan
   // instead of emitting a new cell.
   const openVMerge = new Map<number, { cell: DocTableRow['cells'][number] }>();
 
-  for (const trNode of rowsXml) {
-    const cellsXml = findAll(flattenBlocks(childrenOf(trNode)), 'w:tc');
+  for (const trChild of flattenBlocks(childrenOf(tblNode))) {
+    if (tagOf(trChild) !== 'w:tr') {
+      ctx.comments?.mark(trChild);
+      continue;
+    }
+    const trNode = trChild;
     const rowCells: DocTableRow['cells'] = [];
     let col = 0;
-    for (const tcNode of cellsXml) {
+    for (const tcNode of flattenBlocks(childrenOf(trNode))) {
+      if (tagOf(tcNode) !== 'w:tc') {
+        ctx.comments?.mark(tcNode);
+        continue;
+      }
       const tcKids = childrenOf(tcNode);
       const tcPr = find(tcKids, 'w:tcPr');
       const tcPrKids = tcPr ? childrenOf(tcPr) : [];
@@ -562,6 +578,7 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
         const open = openVMerge.get(col);
         if (open) open.cell.rowspan = (open.cell.rowspan ?? 1) + 1;
         col += colspan ?? 1;
+        ctx.comments?.mark(tcNode);
         continue; // this cell contributes no content of its own
       }
 
@@ -580,11 +597,17 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
 
 /** A table cell's content is one or more paragraphs; flatten to the first non-empty paragraph's inline content (our own writer only ever emits one). */
 function collectCellContent(tcNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
-  for (const p of findAll(flattenBlocks(childrenOf(tcNode)), 'w:p')) {
-    const content = paragraphInlineContent(p, ctx, warnings);
-    if (content.length > 0) return content;
+  let result: DocInline[] | undefined;
+  for (const child of flattenBlocks(childrenOf(tcNode))) {
+    if (!result && tagOf(child) === 'w:p') {
+      const content = paragraphInlineContent(child, ctx, warnings);
+      if (content.length > 0) result = content;
+    } else {
+      // Content that is not imported can still open or close a comment range.
+      ctx.comments?.mark(child);
+    }
   }
-  return [];
+  return result ?? [];
 }
 
 // ---------------------------------------------------------------------------
@@ -675,11 +698,14 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const warnings: string[] = [];
   const zip = await JSZip.loadAsync(bytes);
 
-  const [documentXml, docRelsXml, stylesXml, numberingXml] = await Promise.all([
+  const [documentXml, docRelsXml, stylesXml, numberingXml, commentsXml, commentsExtendedXml, peopleXml] = await Promise.all([
     readZipText(zip, 'word/document.xml'),
     readZipText(zip, 'word/_rels/document.xml.rels'),
     readZipText(zip, 'word/styles.xml'),
     readZipText(zip, 'word/numbering.xml'),
+    readZipText(zip, 'word/comments.xml'),
+    readZipText(zip, 'word/commentsExtended.xml'),
+    readZipText(zip, 'word/people.xml'),
   ]);
 
   if (!documentXml) {
@@ -688,7 +714,9 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
 
   const rels = parseRels(docRelsXml);
   const media = await buildMediaMap(zip, rels);
-  const ctx: PartContext = { rels, media };
+  const parsedComments = parseComments({ comments: commentsXml, extended: commentsExtendedXml, people: peopleXml }, warnings);
+  const comments = createCommentTracker(parsedComments, documentXml);
+  const ctx: PartContext = { rels, media, comments };
   const styleNames = parseStyleNames(stylesXml);
   const numbering = parseNumbering(numberingXml);
 
@@ -739,6 +767,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
     } else if (tag === 'w:sectPr') {
       // The trailing sectPr for the document's last section.
       await flushSection(node);
+    } else {
+      ctx.comments?.mark(node);
     }
     // Bookmarks and other body-level markers carry no block content — skipped.
   }
@@ -761,7 +791,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const coreXml = await readZipText(zip, 'docProps/core.xml');
   const title = coreXml ? parseTitle(coreXml) : '';
 
-  return { title, sections, warnings };
+  const threads = comments.threads();
+  return { title, sections, warnings, ...(threads.length > 0 && { comments: threads }) };
 }
 
 async function loadHeaderFooter(

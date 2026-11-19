@@ -568,6 +568,7 @@
           {
             "content": [
               {
+                "commentThreadId": "thread-1",
                 "text": "Throughput rose across all four quarters.",
                 "type": "text"
               },
@@ -3483,7 +3484,34 @@
       }
     ],
     "textStylePool": {},
-    "threads": [],
+    "threads": [
+      {
+        "anchor": {
+          "quote": "Throughput rose across all four quarters."
+        },
+        "comments": [
+          {
+            "authorId": "Bram Keller",
+            "authorInitials": "BK",
+            "authorName": "Bram Keller",
+            "body": "Please add the Q3 comparison here.",
+            "createdAt": "2026-01-12T14:00:00Z",
+            "id": "comment-1"
+          },
+          {
+            "authorId": "Alice Archer",
+            "authorInitials": "AA",
+            "authorName": "Alice Archer",
+            "body": "Added in the table below.",
+            "createdAt": "2026-01-13T14:00:00Z",
+            "id": "comment-2"
+          }
+        ],
+        "createdAt": "2026-01-12T14:00:00Z",
+        "id": "thread-1",
+        "status": "open"
+      }
+    ],
     "title": "Quarterly harbour operations report"
   },
   "importError": null,

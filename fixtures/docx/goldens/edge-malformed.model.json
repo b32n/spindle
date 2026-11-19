@@ -217,6 +217,7 @@
   },
   "importError": null,
   "warnings": [
+    "The comments part could not be read, so its comments were not imported.",
     "Hyperlink relationship \"rId999\" could not be resolved.",
     "An embedded image could not be resolved and was skipped.",
     "An embedded image could not be resolved and was skipped."

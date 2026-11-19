@@ -61,6 +61,7 @@
                 "type": "text"
               },
               {
+                "commentThreadId": "thread-1",
                 "text": " hours",
                 "type": "text"
               },
@@ -83,6 +84,7 @@
           {
             "content": [
               {
+                "commentThreadId": "thread-2",
                 "text": "Fees are set annually",
                 "type": "text"
               },
@@ -323,7 +325,60 @@
       }
     ],
     "textStylePool": {},
-    "threads": [],
+    "threads": [
+      {
+        "anchor": {
+          "quote": " hours"
+        },
+        "comments": [
+          {
+            "authorId": "Alice Archer",
+            "authorInitials": "AA",
+            "authorName": "Alice Archer",
+            "body": "Is 48 hours long enough for visiting vessels?",
+            "createdAt": "2026-01-08T14:00:00Z",
+            "id": "comment-1"
+          },
+          {
+            "authorId": "Bram Keller",
+            "authorInitials": "BK",
+            "authorName": "Bram Keller",
+            "body": "Council guidance says 72 hours.",
+            "createdAt": "2026-01-09T14:00:00Z",
+            "id": "comment-2"
+          },
+          {
+            "authorId": "Chidi Okafor",
+            "authorInitials": "CO",
+            "authorName": "Chidi Okafor",
+            "body": "Agreed, changing it.",
+            "createdAt": "2026-01-10T14:00:00Z",
+            "id": "comment-3"
+          }
+        ],
+        "createdAt": "2026-01-08T14:00:00Z",
+        "id": "thread-1",
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "quote": "Fees are set annually"
+        },
+        "comments": [
+          {
+            "authorId": "Dana Whitfield",
+            "authorInitials": "DW",
+            "authorName": "Dana Whitfield",
+            "body": "Cite the 2019 statute here.",
+            "createdAt": "2026-01-11T14:00:00Z",
+            "id": "comment-4"
+          }
+        ],
+        "createdAt": "2026-01-11T14:00:00Z",
+        "id": "thread-2",
+        "status": "open"
+      }
+    ],
     "title": "Review of the harbour bye-laws"
   },
   "importError": null,

@@ -6,6 +6,8 @@ export type {
   DocRunBase,
   DocTextRun,
   DocLinkRun,
+  DocComment,
+  DocCommentThread,
   DocImageRun,
   DocPageNumberRun,
   DocTotalPagesRun,

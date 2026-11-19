@@ -156,8 +156,9 @@ describe('detectDocxLoss', () => {
       'docx.columns': 1,
       'docx.fields': 1, // TOC only; PAGE is supported
       'docx.footnotes': 1, // the separator is not a footnote
-      'docx.comments': 2,
     });
+    // Comments are imported (with replies and anchors), so a readable comments part is no loss.
+    expect(by['docx.comments']).toBeUndefined();
   });
 
   it('keeps the confirmation-level report of the LibreOffice rich-document fixture empty', async () => {

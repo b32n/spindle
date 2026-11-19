@@ -15,6 +15,8 @@ export interface Comment {
    * correctly when the author is offline or unknown to the current peer.
    */
   authorName: string;
+  /** Author's initials when the source records them (DOCX comments do). */
+  authorInitials?: string;
   body: string;
   /** ISO-8601 timestamp. */
   createdAt: string;

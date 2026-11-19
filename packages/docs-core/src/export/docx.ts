@@ -5,6 +5,7 @@ import type { ImportLossReport } from '@b32nio/spindle-shared/export/docx';
 const loadIo = () => import('@b32nio/spindle-io/docx');
 import type {
   DocBlock,
+  DocCommentThread,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
   DocInline,
@@ -28,6 +29,7 @@ import type {
   TextRun,
   TextStyle,
 } from '../types';
+import type { DocsCommentThread } from '../comments';
 import type { DocumentImpl } from '../document';
 import { createSection } from '../document';
 import { TextStylePoolImpl, ParagraphStylePoolImpl } from '../style-pool';
@@ -328,6 +330,28 @@ function toDocumentData(result: DocumentImportResult, document: DocumentImpl): D
     paragraphStylePool: paragraphStylePool.toData(),
     createdAt: existing.createdAt,
     updatedAt: new Date().toISOString(),
+    ...(result.comments && result.comments.length > 0 && { threads: result.comments.map(toThreadFromDocx) }),
+  };
+}
+
+/** A comment with no recorded date still needs a timestamp (the model requires one); the epoch marks it unknown. */
+const UNKNOWN_COMMENT_DATE = new Date(0).toISOString();
+
+function toThreadFromDocx(thread: DocCommentThread): DocsCommentThread {
+  const createdAt = thread.comments[0]?.date ?? UNKNOWN_COMMENT_DATE;
+  return {
+    id: thread.id,
+    anchor: { quote: thread.quote },
+    status: thread.resolved ? 'resolved' : 'open',
+    createdAt,
+    comments: thread.comments.map((c) => ({
+      id: `docx-comment-${c.id}`,
+      authorId: c.authorId ?? c.author,
+      authorName: c.author,
+      ...(c.initials && { authorInitials: c.initials }),
+      body: c.text,
+      createdAt: c.date ?? UNKNOWN_COMMENT_DATE,
+    })),
   };
 }
 
@@ -504,7 +528,7 @@ function toInlineContentFromDocx(content: DocInline[], textStylePool: TextStyleP
 function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): InlineContent | null {
   switch (item.type) {
     case 'text':
-      return { type: 'text', text: item.text, ...toTextStyle(item) };
+      return { type: 'text', text: item.text, ...toTextStyle(item), ...(item.commentThreadId && { commentThreadId: item.commentThreadId }) };
     case 'link':
       // InlineLink carries no inline style fields of its own — only a
       // styleId reference — so any run formatting on the link has to go
@@ -514,6 +538,7 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
         text: item.text,
         href: item.href,
         styleId: hasAnyRunStyle(item) ? textStylePool.getOrCreate(toTextStyle(item)) : undefined,
+        ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
       };
     case 'image':
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };

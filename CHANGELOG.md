@@ -26,6 +26,16 @@ lockstep.
   The default report (`detail: 'summary'`), and so the import-confirmation dialog, is unchanged apart from the
   count fixes below. The new detectors parse the XML instead of matching text.
 
+- **DOCX comments are imported.** `importDocx` reads `word/comments.xml`, `commentsExtended.xml` (replies and the
+  resolved state) and `people.xml` (author ids), anchors each thread to its commented text across runs, links,
+  paragraphs and table cells, and returns the threads in the additive `DocumentImportResult.comments`
+  (`DocCommentThread`, `DocComment` in `@b32nio/spindle-shared/export/docx`); the anchored runs carry the additive
+  `commentThreadId` on `DocRunBase`. `importFromDocx` fills the document's comment store, so threads appear in the
+  existing comments sidebar with author, initials (additive `Comment.authorInitials`), date, replies and resolved
+  state. Overlapping comments are tagged with the innermost thread (all threads keep their anchor quote), a comment
+  with no surviving anchor stays as a thread without one, and damaged comment parts import what they hold plus a
+  warning. Comments are not written back by `exportDocx` yet.
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
@@ -42,6 +52,8 @@ lockstep.
 
 ### Fixed
 
+- **DOCX loss report: `docx.comments` is reported only for comments that could not be read** (a damaged comments
+  part), since readable comments are now imported.
 - **DOCX import no longer drops text.** Tabs (`w:tab`, `w:ptab`) are imported as `\t`, line breaks (`w:br`
   other than page breaks, `w:cr`) as `\n`, soft and non-breaking hyphens as U+00AD and U+2011, and the text inside
   `w:smartTag`, `w:customXml`, content controls (`w:sdt`: inline, block, in table rows, cells and cell content, and

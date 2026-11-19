@@ -1224,6 +1224,7 @@
                 "type": "text"
               },
               {
+                "commentThreadId": "thread-1",
                 "text": "bookmarked and commented",
                 "type": "text"
               },
@@ -5435,7 +5436,34 @@
       }
     ],
     "textStylePool": {},
-    "threads": [],
+    "threads": [
+      {
+        "anchor": {
+          "quote": "bookmarked and commented"
+        },
+        "comments": [
+          {
+            "authorId": "Alice Archer",
+            "authorInitials": "AA",
+            "authorName": "Alice Archer",
+            "body": "Which table does this footnote belong to?",
+            "createdAt": "2026-01-08T14:00:00Z",
+            "id": "comment-1"
+          },
+          {
+            "authorId": "Bram Keller",
+            "authorInitials": "BK",
+            "authorName": "Bram Keller",
+            "body": "The berth table; I moved it.",
+            "createdAt": "2026-01-09T14:00:00Z",
+            "id": "comment-2"
+          }
+        ],
+        "createdAt": "2026-01-08T14:00:00Z",
+        "id": "thread-1",
+        "status": "open"
+      }
+    ],
     "title": "Kitchen sink"
   },
   "importError": null,

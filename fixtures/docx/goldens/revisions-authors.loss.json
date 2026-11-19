@@ -2,12 +2,6 @@
   "format": "docx",
   "items": [
     {
-      "count": 6,
-      "effect": "not imported",
-      "id": "docx.comments",
-      "label": "comment(s)"
-    },
-    {
       "count": 5,
       "effect": "the change history is dropped; the current formatting is imported",
       "id": "docx.formattingRevisions",
