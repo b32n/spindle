@@ -308,10 +308,11 @@ export async function importFromDocx(
 
 /**
  * What importing this .docx would not bring across (tracked changes, footnotes, content controls,
- * floating images…). Read-only: nothing is imported or modified.
+ * floating images…). Read-only: nothing is imported or modified. `detail: 'full'` also lists formatting and
+ * structure that is flattened or ignored (named styles, table formatting, tabs and breaks, sections…).
  */
-export function inspectDocx(bytes: Uint8Array): Promise<ImportLossReport> {
-  return loadIo().then((io) => io.detectDocxLoss(bytes));
+export function inspectDocx(bytes: Uint8Array, options?: { detail?: 'summary' | 'full' }): Promise<ImportLossReport> {
+  return loadIo().then((io) => io.detectDocxLoss(bytes, options));
 }
 
 function toDocumentData(result: DocumentImportResult, document: DocumentImpl): DocumentData {

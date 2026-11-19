@@ -1,4 +1,45 @@
 {
   "format": "docx",
-  "items": []
+  "items": [
+    {
+      "count": 8,
+      "effect": "imported as plain bullet or decimal-numbered items; the number format and start value are not kept",
+      "id": "docx.listFormatting",
+      "label": "list item(s) with another number format or a custom start",
+      "where": [
+        "lowerRoman ×3",
+        "custom start ×2",
+        "upperLetter ×2",
+        "lowerLetter ×1"
+      ]
+    },
+    {
+      "count": 34,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×14",
+        "List Bullet ×3",
+        "List Number ×3",
+        "Reference Item ×3",
+        "List Bullet 2 ×2",
+        "Accent Loud ×1",
+        "Accent Word ×1",
+        "Callout ×1",
+        "Callout Warning ×1",
+        "Callout Warning Large ×1",
+        "other ×4"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
+      "id": "docx.paragraphFormatting",
+      "label": "paragraph/run formatting occurrence(s)",
+      "where": [
+        "line spacing ×1"
+      ]
+    }
+  ]
 }

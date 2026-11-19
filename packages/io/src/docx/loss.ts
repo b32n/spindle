@@ -1,12 +1,23 @@
 import JSZip from 'jszip';
+import { scanDocx } from './loss-scan';
 import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
+
+export interface DetectDocxLossOptions {
+  /**
+   * `'summary'` (default) is what the import-confirmation dialog shows: content the importer drops outright
+   * (tracked changes, notes, comments, floating images, fields…). `'full'` also reports formatting and
+   * structure the importer flattens or ignores (named styles, table formatting, tabs and breaks, sections,
+   * bookmarks, …) and breaks fields down by kind; the DOCX fidelity harness uses it.
+   */
+  detail?: 'summary' | 'full';
+}
 
 /**
  * Scan a .docx for content the importer does not bring across. Cheap (zip +
  * pattern counts); never throws on a malformed file — an unreadable zip yields
  * an empty report and the import itself reports the error.
  */
-export async function detectDocxLoss(bytes: Uint8Array): Promise<ImportLossReport> {
+export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossOptions = {}): Promise<ImportLossReport> {
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(bytes);
@@ -41,11 +52,18 @@ export async function detectDocxLoss(bytes: Uint8Array): Promise<ImportLossRepor
   const columns = [...doc.matchAll(/<w:cols\b[^>]*\bw:num="(\d+)"/g)].filter((m) => Number(m[1]) > 1).length;
   add('docx.columns', 'multi-column section(s)', columns, 'laid out as a single column');
 
-  // Fields other than PAGE / NUMPAGES lose their cached result (TOC, REF, DATE, MERGEFIELD…).
-  const instr = [...doc.matchAll(/<w:instrText[^>]*>([^<]*)<\/w:instrText>/g)].map((m) => m[1].trim().toUpperCase());
-  const simple = [...doc.matchAll(/<w:fldSimple\b[^>]*\bw:instr="([^"]*)"/g)].map((m) => m[1].trim().toUpperCase());
-  const unsupported = [...instr, ...simple].filter((f) => f && !(f.startsWith('PAGE') && !f.startsWith('PAGEREF')) && !f.startsWith('NUMPAGES'));
-  add('docx.fields', 'field(s) (table of contents, cross-references, dates…)', unsupported.length, 'their displayed value is dropped');
+  // Constructs that need element context (styles, tables, sections, fields…) are counted on the parsed XML.
+  items.push(
+    ...scanDocx(
+      {
+        document: doc,
+        styles: await text('word/styles.xml'),
+        numbering: await text('word/numbering.xml'),
+        settings: await text('word/settings.xml'),
+      },
+      options.detail === 'full'
+    )
+  );
 
   return createLossReport('docx', items);
 }

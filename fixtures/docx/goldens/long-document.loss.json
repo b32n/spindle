@@ -2,6 +2,16 @@
   "format": "docx",
   "items": [
     {
+      "count": 168,
+      "effect": "bookmarks are dropped and internal links become plain text",
+      "id": "docx.bookmarks",
+      "label": "bookmark(s) and internal link(s)",
+      "where": [
+        "bookmarks ×84",
+        "internal links ×84"
+      ]
+    },
+    {
       "count": 1,
       "effect": "laid out as a single column",
       "id": "docx.columns",
@@ -11,13 +21,74 @@
       "count": 109,
       "effect": "their displayed value is dropped",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, cross-references, dates…)"
+      "label": "field(s) (table of contents, cross-references, dates…)",
+      "where": [
+        "PAGEREF ×84",
+        "REF ×12",
+        "SEQ ×12",
+        "TOC ×1"
+      ]
     },
     {
       "count": 72,
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
+    },
+    {
+      "count": 716,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×413",
+        "Hyperlink ×96",
+        "footnote reference ×72",
+        "toc 2 ×72",
+        "caption ×24",
+        "Code Block ×12",
+        "Quote ×12",
+        "toc 1 ×12",
+        "Subtitle ×1",
+        "Title ×1",
+        "other ×1"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "not imported",
+      "id": "docx.sectionProperties",
+      "label": "section(s) with page-number format/restart or vertical alignment",
+      "where": [
+        "page numbering ×2"
+      ]
+    },
+    {
+      "count": 14,
+      "effect": "kept in the document and exported, but the editor shows and edits only the first section",
+      "id": "docx.sections",
+      "label": "extra section(s)"
+    },
+    {
+      "count": 12,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "repeating header rows ×12",
+        "shading ×12",
+        "table style ×12",
+        "widths ×12"
+      ]
+    },
+    {
+      "count": 84,
+      "effect": "dropped from the text",
+      "id": "docx.tabsAndBreaks",
+      "label": "tab(s) and line break(s)",
+      "where": [
+        "tab ×84"
+      ]
     }
   ]
 }

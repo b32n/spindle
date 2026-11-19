@@ -30,6 +30,14 @@ model is built) and never throws on a malformed file; the import itself reports 
 | DOCX | tracked insertions (text dropped) and deletions (applied), content controls, footnotes, endnotes, comments, floating images, text boxes/shapes, equations, embedded objects, charts/diagrams, multi-column sections, fields other than PAGE/NUMPAGES |
 | CSV | semicolon- or tab-separated files (they import into one column) |
 
+`inspectDocx(bytes)` / `detectDocxLoss(bytes)` return the table above (the report the confirmation dialog uses). Pass `{ detail: 'full' }` for the
+complete measurement, which adds ids for things the importer flattens or ignores rather than drops: `docx.sections` (sections after the first are kept
+but not shown or edited), `docx.namedStyles`, `docx.tableFormatting`, `docx.tableStructure`, `docx.paragraphFormatting` (line spacing, right/hanging
+indents, keep-with-next/lines, page-break-before, hidden text), `docx.listFormatting` (other number formats, custom starts), `docx.tabsAndBreaks`
+(tabs, line breaks and hyphen characters dropped from text), `docx.bookmarks` (bookmarks and internal links), `docx.headerFooterVariants` (first-page
+and even/odd headers) and `docx.sectionProperties` (page-number restarts and formats, vertical alignment), and a `where` breakdown by field kind on
+`docx.fields`. The DOCX fidelity harness (`fixtures/docx/`) records the full report.
+
 Parse-time problems found while importing (an unresolvable image, an unsupported field…) still arrive as `warnings`.
 
 ## Confirmation dialog

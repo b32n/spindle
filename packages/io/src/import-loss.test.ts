@@ -160,6 +160,12 @@ describe('detectDocxLoss', () => {
     });
   });
 
+  it('keeps the confirmation-level report of the LibreOffice rich-document fixture empty', async () => {
+    expect((await detectDocxLoss(fixture('rich-document.docx'))).items).toEqual([]);
+    const full = await detectDocxLoss(fixture('rich-document.docx'), { detail: 'full' });
+    expect(full.items.length).toBeGreaterThan(0);
+  });
+
   it('flags the LibreOffice rich-document fixture without crashing', async () => {
     const report = await detectDocxLoss(fixture('rich-document.docx'));
     for (const item of report.items) expect(item.id).toMatch(/^docx\./);

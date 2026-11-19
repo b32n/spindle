@@ -29,7 +29,7 @@ async function loadApi(): Promise<EditorApi> {
     createDocument: () => new core.DocumentImpl('fixture', 'Untitled'),
     importFromDocx: (bytes, document) => core.importFromDocx(bytes, document as InstanceType<typeof core.DocumentImpl>),
     exportToDocx: (document) => core.exportToDocx(document as InstanceType<typeof core.DocumentImpl>),
-    inspectDocx: (bytes) => core.inspectDocx(bytes),
+    inspectDocx: (bytes) => core.inspectDocx(bytes, { detail: 'full' }),
   };
 }
 

@@ -23,7 +23,9 @@ Verified absent in code.
       `importFromDocx`, plus an Open button in the toolbar.)
 - [ ] **DOCX fidelity gaps** (work lands in `@b32nio/spindle-io`) — `data:` URI images only (remote images are
       skipped with a warning on export), floating/anchored images are skipped
-      on import, and unsupported field codes keep no value.
+      on import, and unsupported field codes keep no value. `inspectDocx(bytes, { detail: 'full' })` and the
+      fixture goldens in `fixtures/docx/` list what else is flattened or ignored (named styles, table
+      formatting, tabs and breaks, sections, bookmarks…).
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Multi-section documents in the UI** — the model supports `sections[]`

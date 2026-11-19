@@ -2,6 +2,16 @@
   "format": "docx",
   "items": [
     {
+      "count": 25,
+      "effect": "bookmarks are dropped and internal links become plain text",
+      "id": "docx.bookmarks",
+      "label": "bookmark(s) and internal link(s)",
+      "where": [
+        "bookmarks ×13",
+        "internal links ×12"
+      ]
+    },
+    {
       "count": 6,
       "effect": "not imported",
       "id": "docx.charts",
@@ -44,10 +54,29 @@
       "label": "equation(s)"
     },
     {
-      "count": 34,
+      "count": 33,
       "effect": "their displayed value is dropped",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, cross-references, dates…)"
+      "label": "field(s) (table of contents, cross-references, dates…)",
+      "where": [
+        "PAGEREF ×11",
+        "SEQ ×5",
+        "DATE ×2",
+        "IF ×2",
+        "AUTHOR ×1",
+        "FORMCHECKBOX ×1",
+        "FORMDROPDOWN ×1",
+        "FORMTEXT ×1",
+        "HYPERLINK ×1",
+        "MERGEFIELD ×1",
+        "NUMWORDS ×1",
+        "REF ×1",
+        "SECTIONPAGES ×1",
+        "STYLEREF ×1",
+        "TIME ×1",
+        "TITLE ×1",
+        "TOC ×1"
+      ]
     },
     {
       "count": 6,
@@ -60,6 +89,98 @@
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
+    },
+    {
+      "count": 4,
+      "effect": "only the first header/footer reference of each section is used, as its default header/footer",
+      "id": "docx.headerFooterVariants",
+      "label": "section(s) with first-page or even/odd headers and footers",
+      "where": [
+        "even/odd headers setting ×4",
+        "even-page reference ×2",
+        "first-page header/footer (titlePg) ×1",
+        "first-page reference ×1"
+      ]
+    },
+    {
+      "count": 182,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×113",
+        "Hyperlink ×20",
+        "footnote reference ×13",
+        "toc 1 ×10",
+        "caption ×9",
+        "endnote reference ×6",
+        "Title ×3",
+        "annotation reference ×2",
+        "Subtitle ×2",
+        "Code Block ×1",
+        "other ×3"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
+      "id": "docx.paragraphFormatting",
+      "label": "paragraph/run formatting occurrence(s)",
+      "where": [
+        "keep with next/lines ×2",
+        "line spacing ×2"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "not imported",
+      "id": "docx.sectionProperties",
+      "label": "section(s) with page-number format/restart or vertical alignment",
+      "where": [
+        "page numbering ×3"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "kept in the document and exported, but the editor shows and edits only the first section",
+      "id": "docx.sections",
+      "label": "extra section(s)"
+    },
+    {
+      "count": 17,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "table style ×17",
+        "widths ×16",
+        "shading ×5",
+        "repeating header rows ×4",
+        "borders ×1",
+        "vertical alignment ×1"
+      ]
+    },
+    {
+      "count": 6,
+      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
+      "id": "docx.tableStructure",
+      "label": "nested table(s) / multi-paragraph cell(s)",
+      "where": [
+        "multi-paragraph cells ×4",
+        "nested tables ×2"
+      ]
+    },
+    {
+      "count": 23,
+      "effect": "dropped from the text",
+      "id": "docx.tabsAndBreaks",
+      "label": "tab(s) and line break(s)",
+      "where": [
+        "tab ×18",
+        "soft hyphen ×3",
+        "column break ×1",
+        "non-breaking hyphen ×1"
+      ]
     },
     {
       "count": 5,

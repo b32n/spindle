@@ -1,4 +1,39 @@
 {
   "format": "docx",
-  "items": []
+  "items": [
+    {
+      "count": 7,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×5",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 9,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "table style ×9",
+        "widths ×8",
+        "repeating header rows ×3",
+        "shading ×3",
+        "borders ×1",
+        "vertical alignment ×1"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
+      "id": "docx.tableStructure",
+      "label": "nested table(s) / multi-paragraph cell(s)",
+      "where": [
+        "nested tables ×2"
+      ]
+    }
+  ]
 }

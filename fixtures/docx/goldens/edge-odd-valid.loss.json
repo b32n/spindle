@@ -14,6 +14,46 @@
       "label": "floating image(s)"
     },
     {
+      "count": 15,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×10",
+        "Hyperlink ×5"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
+      "id": "docx.paragraphFormatting",
+      "label": "paragraph/run formatting occurrence(s)",
+      "where": [
+        "hidden text ×1"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "table style ×3",
+        "widths ×3"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "dropped from the text",
+      "id": "docx.tabsAndBreaks",
+      "label": "tab(s) and line break(s)",
+      "where": [
+        "tab ×2",
+        "line break ×1",
+        "non-breaking hyphen ×1"
+      ]
+    },
+    {
       "count": 1,
       "effect": "their text is not imported",
       "id": "docx.textBoxes",
