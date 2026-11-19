@@ -91,8 +91,18 @@ describe('importDocx', () => {
       content: [{ type: 'text', text: `H${level}` }],
     }));
     const result = await roundTrip(section(blocks));
+    // The `docx` library's built-in heading styles carry colour, size and italic, which the importer now
+    // resolves into the runs (see the style-resolution tests).
+    const resolved: object[] = [
+      { color: '#2e74b5', fontSize: 16 },
+      { color: '#2e74b5', fontSize: 13 },
+      { color: '#1f4d78', fontSize: 12 },
+      { italic: true, color: '#2e74b5' },
+      { color: '#2e74b5' },
+      { color: '#1f4d78' },
+    ];
     expect(result.sections[0].blocks).toEqual(
-      [1, 2, 3, 4, 5, 6].map((level) => ({ type: 'heading', level, content: [{ type: 'text', text: `H${level}` }] }))
+      [1, 2, 3, 4, 5, 6].map((level) => ({ type: 'heading', level, content: [{ type: 'text', text: `H${level}`, ...resolved[level - 1] }] }))
     );
   });
 
@@ -155,7 +165,8 @@ describe('importDocx', () => {
         type: 'paragraph',
         content: [
           { type: 'text', text: 'Before ' },
-          { type: 'link', text: 'Spindle', href: 'https://example.com' },
+          // The "Hyperlink" character style the writer applies (blue, underlined) is resolved into the run.
+          { type: 'link', text: 'Spindle', href: 'https://example.com', color: '#0563c1', underline: true },
         ],
       },
     ]);

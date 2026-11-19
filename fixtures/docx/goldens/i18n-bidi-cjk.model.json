@@ -15,49 +15,71 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      },
+      "paragraph-style-2": {
+        "leftIndent": 48,
+        "spaceAfter": 10.666666666666666
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Languages and symbols",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Arabic, Hebrew, Chinese, Japanese, Korean, symbols and emoji",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Right-to-left, CJK, symbols and emoji",
                 "type": "text"
               }
             ],
             "id": "block-3",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Arabic (right-to-left paragraphs, bidi + rtl runs):",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -65,11 +87,13 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
                 "type": "text"
               }
             ],
             "id": "block-5",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -77,11 +101,13 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "يقيس الميناء حركة السفن كل صباح ويسجل النتائج في دفتر خاص.",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -89,21 +115,26 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "تُنشر جداول المد والجزر عند البوابة الشمالية.",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Hebrew:",
                 "type": "text"
               }
             ],
             "id": "block-8",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -111,11 +142,13 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "שלום עולם, זהו מסמך בדיקה לכתיבה מימין לשמאל.",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -123,83 +156,103 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
                 "type": "text"
               }
             ],
             "id": "block-10",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Mixed direction in one paragraph (English inside Arabic, numbers and punctuation):",
                 "type": "text"
               }
             ],
             "id": "block-11",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "ميناء ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Marguerite Harbour",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " استقبل ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "42",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " سفينة في 2026/01/15.",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "English sentence with an embedded Hebrew word ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "שלום",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " and an Arabic word ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "مرحبا",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", then more English.",
                 "type": "text"
               }
             ],
             "id": "block-13",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Arabic-Indic digits: ١٢٣٤٥٦٧٨٩٠ and Hebrew with niqqud: שָׁלוֹם",
                 "type": "text"
               }
             ],
             "id": "block-14",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -210,6 +263,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "هذا مستند اختبار لدعم الكتابة من اليمين إلى اليسار.",
                         "type": "text"
                       }
@@ -219,6 +273,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Right-to-left table cell",
                         "type": "text"
                       }
@@ -234,6 +289,7 @@
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
                 "type": "text"
               }
@@ -241,100 +297,127 @@
             "id": "block-16",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Chinese, Japanese and Korean with East Asian fonts:",
                 "type": "text"
               }
             ],
             "id": "block-17",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "这是一个用于测试中文排版的示例段落，包含标点符号、数字 2026 和英文单词 Spindle。",
                 "type": "text"
               }
             ],
             "id": "block-18",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "港口委员会每月召开一次会议，审议潮汐表和船舶进出记录。",
                 "type": "text"
               }
             ],
             "id": "block-19",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "これは日本語の組版を確認するためのサンプル文章です。ひらがな、カタカナ、漢字が混在しています。",
                 "type": "text"
               }
             ],
             "id": "block-20",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "港湾委員会は毎月会議を開き、潮汐表を確認します。",
                 "type": "text"
               }
             ],
             "id": "block-21",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "이것은 한국어 조판을 확인하기 위한 예시 문장입니다.",
                 "type": "text"
               }
             ],
             "id": "block-22",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "항만 위원회는 매달 모여 조석표를 검토합니다.",
                 "type": "text"
               }
             ],
             "id": "block-23",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "12",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "  (combined digits), ruby: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "漢字",
                 "type": "text"
               }
             ],
             "id": "block-24",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -345,6 +428,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "縦書きのテキスト",
                         "type": "text"
                       }
@@ -354,6 +438,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Vertical (tbRl) text direction in the neighbouring cell.",
                         "type": "text"
                       }
@@ -367,66 +452,84 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Symbols: ",
                 "type": "text"
               }
             ],
             "id": "block-26",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "fontFamily": "DejaVu Sans",
+                "fontSize": 11,
                 "text": "Unicode symbols: © ® ™ € £ ¥ § ¶ † ‡ • … ← → ↔ ⇒ ∀ ∃ ∑ ∏ ∞ ≈ ≠ ≤ ≥ ± × ÷ √ ∫ ♠ ♣ ♥ ♦ ☀ ☂ ☎ ✓ ✔ ✘ ★",
                 "type": "text"
               }
             ],
             "id": "block-27",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Word symbol runs: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " bullet, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " tick, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " smiley.",
                 "type": "text"
               }
             ],
             "id": "block-28",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Emoji: 😀 🚀 🌍 ⚓ 🐟 🌊 ❤️ 👍🏽 👩‍💻 🏳️‍🌈 🇳🇴 1️⃣ — including ZWJ sequences, skin tones, flags and keycaps.",
                 "type": "text"
               }
             ],
             "id": "block-29",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Combining marks and ligature candidates: é (e + acute), ñ, ﬁ ﬂ, Å (angstrom U+212B), ǆ, and a surrogate-pair math letter 𝒜𝔹ℂ𝟘.",
                 "type": "text"
               }
             ],
             "id": "block-30",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],

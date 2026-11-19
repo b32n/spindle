@@ -15,142 +15,223 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "alignment": "left",
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      },
+      "paragraph-style-2": {
+        "alignment": "left",
+        "leftIndent": 48,
+        "spaceAfter": 10.666666666666666,
+        "spaceBefore": 0
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
+            "alignment": "left",
             "content": [
               {
+                "fontFamily": "Liberation Serif",
+                "fontSize": 28,
                 "text": "Review of the Harbour Bye-laws",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "left",
             "content": [
               {
+                "color": "#595959",
+                "fontFamily": "Liberation Sans",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Tracked changes and comments recorded for a LibreOffice round trip",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "left",
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
+                "fontSize": 16,
                 "text": "Mooring",
                 "type": "text"
               }
             ],
             "id": "block-3",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Visiting vessels may moor for up to ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "72",
                 "type": "text"
               },
               {
                 "commentThreadId": "thread-1",
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": " hours",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": " without a permit. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Permits are issued by the harbour office. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Every lighthouse keeper postponed the fog-signal schedule after several rounds of discussion. The harbour committee repainted a ledger of unpaid berth fees during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "commentThreadId": "thread-2",
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Fees are set annually",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": " by the harbour board",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": ". The harbour committee measured a ledger of unpaid berth fees during the long spring inspection. Local fishing crews recorded the fog-signal schedule as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-5",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [],
             "id": "block-6",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "This paragraph is new: night mooring requires a lit stern light.",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "left",
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
+                "fontSize": 16,
                 "text": "Fishing",
                 "type": "text"
               }
             ],
             "id": "block-8",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Registered vessels ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "and day-trip operators ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "may land catch at the east quay. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Auctions start at seven. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "The regional council reorganised an index of local pilots with unusual care. The harbour committee repainted every outstanding repair order after several rounds of discussion.",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
@@ -162,6 +243,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Vessel class",
                         "type": "text"
@@ -173,6 +255,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Fee",
                         "type": "text"
@@ -188,6 +271,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Small",
                         "type": "text"
@@ -198,6 +282,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "12",
                         "type": "text"
@@ -213,6 +298,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Medium",
                         "type": "text"
@@ -223,6 +309,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "25",
                         "type": "text"
@@ -237,23 +324,33 @@
             "type": "table"
           },
           {
+            "alignment": "left",
             "content": [],
             "id": "block-11",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "List of required documents:",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 8,
+            "spaceBefore": 0,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Registration certificate",
                 "type": "text"
               }
@@ -261,11 +358,14 @@
             "id": "block-13",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Insurance schedule",
                 "type": "text"
               }
@@ -273,6 +373,7 @@
             "id": "block-14",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
@@ -280,11 +381,14 @@
             "id": "block-15",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Crew list",
                 "type": "text"
               }
@@ -292,12 +396,15 @@
             "id": "block-16",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "The quay-side bakery mapped the sluice gate mechanism in time for the autumn meeting. Local fishing crews recorded the sluice gate mechanism in the presence of two witnesses. Local fishing crews reviewed the winter storage sheds using only the instruments on hand. The bridge authority catalogued the eastern jetty after several rounds of discussion.",
                 "type": "text"
               }

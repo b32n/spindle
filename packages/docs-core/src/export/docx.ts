@@ -122,6 +122,7 @@ function toBlock(
         listType: block.listType,
         level: block.level,
         content: toInlineContent(block.content, title, textStylePool),
+        ...resolveParagraphStyle(block, paragraphStylePool),
       };
     case 'table':
       return {

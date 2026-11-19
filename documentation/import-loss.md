@@ -32,7 +32,7 @@ model is built) and never throws on a malformed file; the import itself reports 
 
 `inspectDocx(bytes)` / `detectDocxLoss(bytes)` return the table above (the report the confirmation dialog uses). Pass `{ detail: 'full' }` for the
 complete measurement, which adds ids for things the importer flattens or ignores rather than drops: `docx.sections` (sections after the first are kept
-but not shown or edited), `docx.namedStyles`, `docx.tableFormatting`, `docx.tableStructure`, `docx.paragraphFormatting` (line spacing, right/hanging
+but not shown or edited), `docx.namedStyles` (the style's formatting is applied to the text; the name is not kept), `docx.tableFormatting`, `docx.tableStructure`, `docx.paragraphFormatting` (line spacing, right/hanging
 indents, keep-with-next/lines, page-break-before, hidden text), `docx.listFormatting` (other number formats, custom starts), `docx.bookmarks` (bookmarks and internal links), `docx.headerFooterVariants` (first-page
 and even/odd headers) and `docx.sectionProperties` (page-number restarts and formats, vertical alignment), and a `where` breakdown by field kind on
 `docx.fields`. The full report also lists a long tail: `docx.trackedMoves`, `docx.formattingRevisions` (`rPrChange`, `pPrChange`, `tblPrChange`,

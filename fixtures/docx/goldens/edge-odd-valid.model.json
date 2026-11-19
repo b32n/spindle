@@ -22,115 +22,147 @@
           {
             "content": [],
             "id": "block-1",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "   ",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Hidden text follows: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "this sentence is hidden (w:vanish)",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " and this one is visible again.",
                 "type": "text"
               }
             ],
             "id": "block-3",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Special characters: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "‑",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " non-breaking hyphen, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "position tab, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\n",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "line break with clear, ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "NBSP here, zero-width​space, tab",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "end.",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A 1,200-character unbroken token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                 "type": "text"
               }
             ],
             "id": "block-5",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Permission range (editable region)",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Text wrapped in a custom XML element, ",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Field in a hyperlink in a tracked insertion: ",
                 "type": "text"
               },
@@ -140,16 +172,19 @@
               }
             ],
             "id": "block-8",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Ten controls deep, wrapping a paragraph and a table:",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
@@ -164,6 +199,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "plain",
                         "type": "text"
                       }
@@ -177,23 +213,29 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Anchored text box: ",
                 "type": "text"
               }
             ],
             "id": "block-11",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Alternate content requiring an unknown namespace: ",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -205,6 +247,7 @@
                     "colspan": 5,
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "span 5 of 3",
                         "type": "text"
                       }
@@ -219,6 +262,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "orphan vMerge continue",
                         "type": "text"
                       }
@@ -260,6 +304,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "table with an empty grid",
                         "type": "text"
                       }
@@ -275,48 +320,60 @@
           {
             "content": [],
             "id": "block-15",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A paragraph with an extremely long run of mixed scripts: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Latin Ελληνικά Кириллица العربية 日本語 한국어 हिन्दी ไทย ",
                 "type": "text"
               }
             ],
             "id": "block-16",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],
@@ -333,14 +390,17 @@
             {
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Content in the header: ",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "\t",
                   "type": "text"
                 },
                 {
+                  "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
                 },

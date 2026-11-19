@@ -15,139 +15,184 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      },
+      "paragraph-style-2": {
+        "leftIndent": 48,
+        "spaceAfter": 10.666666666666666
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Content controls and forms",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Structured document tags and legacy form fields",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Content controls and form fields",
                 "type": "text"
               }
             ],
             "id": "block-3",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "color": "#808080",
+                "fontSize": 11,
                 "text": "Click here to enter a summary.",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Rich text control with ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontSize": 11,
                 "text": "bold",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " and ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "italic": true,
                 "text": "italic",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": " runs.",
                 "type": "text"
               }
             ],
             "id": "block-5",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "And a second paragraph inside the same control.",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline controls: name ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Ada Marlowe",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", berth ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "East",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", vessel ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Thornback",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", arrival ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "2 March 2026",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", inspected ",
                 "type": "text"
               },
               {
                 "fontFamily": "DejaVu Sans",
+                "fontSize": 11,
                 "text": "☒",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -161,10 +206,12 @@
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line item 1: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "rope, 40 m",
                 "type": "text"
               }
@@ -172,15 +219,18 @@
             "id": "block-9",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line item 2: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "lamp glass, 6 pieces",
                 "type": "text"
               }
@@ -188,15 +238,18 @@
             "id": "block-10",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line item 3: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "tar, 2 barrels",
                 "type": "text"
               }
@@ -204,6 +257,7 @@
             "id": "block-11",
             "level": 0,
             "listType": "bullet",
+            "styleId": "paragraph-style-2",
             "type": "list-item"
           },
           {
@@ -214,6 +268,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Quantity",
                         "type": "text"
                       }
@@ -223,6 +278,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "12",
                         "type": "text"
                       }
@@ -237,6 +293,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "Row inside a content control",
                         "type": "text"
                       }
@@ -246,6 +303,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "yes",
                         "type": "text"
                       }
@@ -259,17 +317,21 @@
             "type": "table"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Data-bound control: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Bound title",
                 "type": "text"
               }
             ],
             "id": "block-13",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -282,54 +344,70 @@
               }
             ],
             "id": "block-14",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Wrapped in a docPartObj content control.",
                 "type": "text"
               }
             ],
             "id": "block-15",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Innermost paragraph, 5 controls deep.",
                 "type": "text"
               }
             ],
             "id": "block-16",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Legacy (Word 97) form fields:",
                 "type": "text"
               }
             ],
             "id": "block-17",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Captain: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "   Cleared: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "   Flag colour: ",
                 "type": "text"
               }
             ],
             "id": "block-18",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],

@@ -15,202 +15,253 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Embedded font and custom theme",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Liberation Sans (SIL OFL 1.1) is embedded, obfuscated, in word/fonts; the theme overrides colours and fonts",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The body font below is Liberation Sans through the theme's minor font, and it is also embedded in this file so the document renders the same where the font is not installed.",
                 "type": "text"
               }
             ],
             "id": "block-3",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Explicit font names: ",
                 "type": "text"
               },
               {
                 "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "Liberation Sans (embedded)",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
                 "fontFamily": "Liberation Serif",
+                "fontSize": 11,
                 "text": "Liberation Serif (not embedded)",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
                 "fontFamily": "DejaVu Sans Mono",
+                "fontSize": 11,
                 "text": "DejaVu Sans Mono (not embedded)",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Theme colours and fonts",
                 "type": "text"
               }
             ],
             "id": "block-5",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
                 "bold": true,
                 "color": "#c0392b",
+                "fontSize": 11,
                 "text": "accent1 ",
                 "type": "text"
               },
               {
                 "color": "#c0392b",
+                "fontSize": 11,
                 "text": "accent1-shade ",
                 "type": "text"
               },
               {
                 "color": "#c0392b",
+                "fontSize": 11,
                 "text": "accent1-tint ",
                 "type": "text"
               },
               {
                 "bold": true,
                 "color": "#2980b9",
+                "fontSize": 11,
                 "text": "accent2 ",
                 "type": "text"
               },
               {
                 "color": "#2980b9",
+                "fontSize": 11,
                 "text": "accent2-shade ",
                 "type": "text"
               },
               {
                 "color": "#2980b9",
+                "fontSize": 11,
                 "text": "accent2-tint ",
                 "type": "text"
               },
               {
                 "bold": true,
                 "color": "#27ae60",
+                "fontSize": 11,
                 "text": "accent3 ",
                 "type": "text"
               },
               {
                 "color": "#27ae60",
+                "fontSize": 11,
                 "text": "accent3-shade ",
                 "type": "text"
               },
               {
                 "color": "#27ae60",
+                "fontSize": 11,
                 "text": "accent3-tint ",
                 "type": "text"
               },
               {
                 "bold": true,
                 "color": "#f39c12",
+                "fontSize": 11,
                 "text": "accent4 ",
                 "type": "text"
               },
               {
                 "color": "#f39c12",
+                "fontSize": 11,
                 "text": "accent4-shade ",
                 "type": "text"
               },
               {
                 "color": "#f39c12",
+                "fontSize": 11,
                 "text": "accent4-tint ",
                 "type": "text"
               },
               {
                 "bold": true,
                 "color": "#8e44ad",
+                "fontSize": 11,
                 "text": "accent5 ",
                 "type": "text"
               },
               {
                 "color": "#8e44ad",
+                "fontSize": 11,
                 "text": "accent5-shade ",
                 "type": "text"
               },
               {
                 "color": "#8e44ad",
+                "fontSize": 11,
                 "text": "accent5-tint ",
                 "type": "text"
               },
               {
                 "bold": true,
                 "color": "#16a085",
+                "fontSize": 11,
                 "text": "accent6 ",
                 "type": "text"
               },
               {
                 "color": "#16a085",
+                "fontSize": 11,
                 "text": "accent6-shade ",
                 "type": "text"
               },
               {
                 "color": "#16a085",
+                "fontSize": 11,
                 "text": "accent6-tint ",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Major theme font (headings). ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Minor theme font (body).",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -222,6 +273,7 @@
                     "content": [
                       {
                         "color": "#ffffff",
+                        "fontSize": 11,
                         "text": "accent1 fill",
                         "type": "text"
                       }
@@ -232,6 +284,7 @@
                     "content": [
                       {
                         "color": "#ffffff",
+                        "fontSize": 11,
                         "text": "accent2 fill",
                         "type": "text"
                       }
@@ -242,6 +295,7 @@
                     "content": [
                       {
                         "color": "#ffffff",
+                        "fontSize": 11,
                         "text": "accent5 fill",
                         "type": "text"
                       }
@@ -252,6 +306,7 @@
                     "content": [
                       {
                         "color": "#ffffff",
+                        "fontSize": 11,
                         "text": "accent6 fill",
                         "type": "text"
                       }
@@ -267,46 +322,59 @@
           {
             "content": [],
             "id": "block-9",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The quay-side bakery compared the ferry timetable in time for the autumn meeting. Every lighthouse keeper relocated the fog-signal schedule and filed the result in triplicate. The regional council documented the eastern jetty to the satisfaction of nobody in particular. The harbour committee postponed the fog-signal schedule to the satisfaction of nobody in particular. A junior surveyor reviewed the eastern jetty before the first frost.",
                 "type": "text"
               }
             ],
             "id": "block-10",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Several market traders catalogued three disputed boundary stones while the market was closed. The winter inspection team catalogued every outstanding repair order during the long spring inspection. An experienced pilot approved the winter storage sheds without waiting for approval. The northern ferry service rebuilt three disputed boundary stones in the presence of two witnesses. Our records office repainted three disputed boundary stones as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-11",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A careful archivist measured the eastern jetty without waiting for approval. The northern ferry service relocated the sluice gate mechanism as the tide turned. The quay-side bakery reorganised the dredging contract in the presence of two witnesses. A visiting engineer recorded a ledger of unpaid berth fees as the tide turned. Local fishing crews audited every outstanding repair order to the satisfaction of nobody in particular.",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Local fishing crews compared the dredging contract as the tide turned. The winter inspection team catalogued the winter storage sheds after several rounds of discussion. The quay-side bakery repainted the sluice gate mechanism with unusual care. The bridge authority audited last season's tonnage figures without waiting for approval. Several market traders catalogued a draft of the annual report without waiting for approval.",
                 "type": "text"
               }
             ],
             "id": "block-13",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],

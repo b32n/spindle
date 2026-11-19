@@ -43,6 +43,17 @@ lockstep.
   first body paragraph so it is not lost. Comment dates are written without fractional seconds; the placeholder date of
   an undated comment is omitted. LibreOffice reads the result (comments, replies, resolved state).
 
+- **DOCX styles are resolved into the formatting you see.** `importDocx` now reads `word/styles.xml` fully:
+  `docDefaults`, the default paragraph style, `basedOn` chains (loops and missing bases are survived), paragraph and
+  character styles (`pStyle`/`rStyle`, including the `Hyperlink` style on links), toggle properties (bold, italic,
+  small caps, strike: overridden inside one chain, XOR-ed between the paragraph and character style, set outright by
+  direct formatting), numbering carried by a paragraph style (`numId` 0 switches it off), and paragraph alignment,
+  spacing and indents through the chain. The effective values are written into the existing run and paragraph fields,
+  so runs and paragraphs gain formatting they previously lost (paragraph spacing from the defaults, heading sizes and
+  colours, link colour and underline, callout styles). A heading is recognised by its `Heading N` name, else by an
+  outline level in its style chain (level 10 means body text), else through a `Heading N` ancestor; a heading numbered
+  through its style stays a heading. Theme fonts and colours are resolved in a follow-up.
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
@@ -59,6 +70,10 @@ lockstep.
 
 ### Fixed
 
+- **DOCX export keeps list item spacing and indents** (they were written for paragraphs and headings only).
+- **DOCX import: a paragraph with `numId` 0 is not a list item** (it used to be treated as a numbered one).
+- **DOCX loss report: `docx.namedStyles` effect narrowed.** The style's formatting is now applied to the text; only the
+  style name is not kept.
 - **DOCX loss report: `docx.comments` is reported only for comments that could not be read** (a damaged comments
   part), since readable comments are now imported.
 - **DOCX import no longer drops text.** Tabs (`w:tab`, `w:ptab`) are imported as `\t`, line breaks (`w:br`

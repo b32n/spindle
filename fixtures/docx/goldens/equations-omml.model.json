@@ -15,112 +15,145 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Equations",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Office Math (OMML): fractions, radicals, integrals, sums, matrices and systems",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Equations (OMML)",
                 "type": "text"
               }
             ],
             "id": "block-3",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Display equations follow: the quadratic formula, a definite integral, a summation, a matrix product, a limit and a system of equations.",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-5",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-6",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-7",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-8",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-9",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-10",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [],
             "id": "block-11",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Inline math: the area of a circle is ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ", and the golden ratio is ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Equation inside a table cell and a text box is also common:",
                 "type": "text"
               }
             ],
             "id": "block-13",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -135,6 +168,7 @@
                   {
                     "content": [
                       {
+                        "fontSize": 11,
                         "text": "a/b + c/d",
                         "type": "text"
                       }

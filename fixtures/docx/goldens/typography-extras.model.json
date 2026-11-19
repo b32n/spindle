@@ -15,256 +15,323 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {},
+    "paragraphStylePool": {
+      "paragraph-style-1": {
+        "spaceAfter": 5.333333333333333,
+        "spaceBefore": 16
+      }
+    },
     "sections": [
       {
         "blocks": [
           {
             "content": [
               {
+                "fontSize": 28,
                 "text": "Typography extras",
                 "type": "text"
               }
             ],
             "id": "block-1",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "color": "#595959",
+                "fontSize": 14,
+                "italic": true,
                 "text": "Hyphenation, tab leaders, drop caps, a watermark, line numbers and page borders",
                 "type": "text"
               }
             ],
             "id": "block-2",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "bold": true,
+                "color": "#2f5496",
+                "fontSize": 16,
                 "text": "Typography extras",
                 "type": "text"
               }
             ],
             "id": "block-3",
             "level": 1,
+            "styleId": "paragraph-style-1",
             "type": "heading"
           },
           {
             "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Automatic hyphenation is enabled for this document, so long justified lines break inside words. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "A visiting engineer repainted an index of local pilots while the market was closed. Our records office postponed three disputed boundary stones with unusual care. A visiting engineer reorganised a ledger of unpaid berth fees with unusual care. Local fishing crews mapped a bundle of weathered charts as the tide turned. The tide almanac relocated the sluice gate mechanism with unusual care. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Pneumonoultramicroscopicsilicovolcanoconiosis and incomprehensibilities are long words. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Soft hyphens: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Anti",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "dis",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "establishment",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "­",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "arianism. ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "Non-breaking hyphen: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "‑",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": ".",
                 "type": "text"
               }
             ],
             "id": "block-4",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "This paragraph opts out of hyphenation. The tide almanac rebuilt a draft of the annual report without waiting for approval. The quay-side bakery documented the ferry timetable and filed the result in triplicate. The tide almanac repainted the eastern jetty as the tide turned.",
                 "type": "text"
               }
             ],
             "id": "block-5",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Tab stops with leaders:",
                 "type": "text"
               }
             ],
             "id": "block-6",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Preface",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "iii",
                 "type": "text"
               }
             ],
             "id": "block-7",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Chapter one",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "1",
                 "type": "text"
               }
             ],
             "id": "block-8",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Chapter two",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "17",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Appendix",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "203",
                 "type": "text"
               }
             ],
             "id": "block-10",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Index",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "240",
                 "type": "text"
               }
             ],
             "id": "block-11",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
             "content": [
               {
+                "fontSize": 11,
                 "text": "Item",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "12.50",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "1,204.75",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "\t",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "end",
                 "type": "text"
               }
             ],
             "id": "block-12",
+            "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Drop caps (framed first letter, three lines):",
                 "type": "text"
               }
             ],
             "id": "block-13",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -282,13 +349,16 @@
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "he lighthouse had stood on the point for two hundred years, and every keeper had added a line to the logbook. The northern ferry service documented the old customs register using only the instruments on hand. The tide almanac postponed two dozen mooring rings to the satisfaction of nobody in particular. Our records office negotiated the winter storage sheds to the satisfaction of nobody in particular. The quay-side bakery measured the lamp oil inventory after several rounds of discussion.",
                 "type": "text"
               }
             ],
             "id": "block-15",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
@@ -306,147 +376,187 @@
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "hen the committee last met, the margin drop cap hung outside the text block. Every lighthouse keeper inspected the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the dredging contract as the tide turned. The northern ferry service catalogued the dredging contract and filed the result in triplicate.",
                 "type": "text"
               }
             ],
             "id": "block-17",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Character effects: ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "smallCaps": true,
                 "text": "small caps ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "ALL CAPS ",
                 "type": "text"
               },
               {
                 "backgroundColor": "#ffff00",
+                "fontSize": 11,
                 "text": "highlighted ",
                 "type": "text"
               },
               {
                 "color": "#c00000",
+                "fontSize": 11,
                 "text": "coloured ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "expanded spacing ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "condensed ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "raised ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "embossed ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "shadow-outline ",
                 "type": "text"
               },
               {
+                "fontSize": 11,
                 "text": "wavy underline",
                 "type": "text",
                 "underline": true
               }
             ],
             "id": "block-18",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Paragraph borders, shading and keep-with-next. The harbour committee reviewed a ledger of unpaid berth fees according to the standing orders. The tide almanac postponed the eastern jetty with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-19",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Line numbering and page borders apply to this whole section.",
                 "type": "text"
               }
             ],
             "id": "block-20",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The quay-side bakery compared the old customs register to the satisfaction of nobody in particular. An experienced pilot relocated every outstanding repair order before the first frost. Every lighthouse keeper reorganised last season's tonnage figures while the market was closed. The grain exchange compared the eastern jetty in time for the autumn meeting. The grain exchange documented last season's tonnage figures without waiting for approval. The regional council compared an index of local pilots during the long spring inspection.",
                 "type": "text"
               }
             ],
             "id": "block-21",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The winter inspection team postponed a bundle of weathered charts after several rounds of discussion. A visiting engineer catalogued the sluice gate mechanism in time for the autumn meeting. A junior surveyor repainted the eastern jetty using only the instruments on hand. A careful archivist repainted an index of local pilots after several rounds of discussion. The winter inspection team rebuilt the fog-signal schedule before the first frost. A junior surveyor rebuilt the dredging contract using only the instruments on hand.",
                 "type": "text"
               }
             ],
             "id": "block-22",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The bridge authority measured a ledger of unpaid berth fees during the long spring inspection. An experienced pilot relocated the winter storage sheds according to the standing orders. The harbour committee negotiated the winter storage sheds during the long spring inspection. The quay-side bakery negotiated the winter storage sheds according to the standing orders. An experienced pilot reorganised the old customs register using only the instruments on hand. Every lighthouse keeper approved a draft of the annual report before the first frost.",
                 "type": "text"
               }
             ],
             "id": "block-23",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "Local fishing crews reorganised an index of local pilots with unusual care. A visiting engineer catalogued last season's tonnage figures with unusual care. The regional council catalogued a draft of the annual report in the presence of two witnesses. The regional council catalogued a draft of the annual report in the presence of two witnesses. Every lighthouse keeper recorded the dredging contract during the long spring inspection. Our records office mapped two dozen mooring rings in time for the autumn meeting.",
                 "type": "text"
               }
             ],
             "id": "block-24",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "A visiting engineer postponed a draft of the annual report without waiting for approval. The regional council relocated three disputed boundary stones before the first frost. The regional council postponed the sluice gate mechanism after several rounds of discussion. Every lighthouse keeper mapped the sluice gate mechanism according to the standing orders. A visiting engineer negotiated last season's tonnage figures without waiting for approval. The tide almanac approved every outstanding repair order according to the standing orders.",
                 "type": "text"
               }
             ],
             "id": "block-25",
+            "spaceAfter": 8,
             "type": "paragraph"
           },
           {
+            "alignment": "justify",
             "content": [
               {
+                "fontSize": 11,
                 "text": "The tide almanac audited every outstanding repair order as the tide turned. The grain exchange catalogued the ferry timetable without waiting for approval. An experienced pilot rebuilt the old customs register as the tide turned. The tide almanac reviewed the old customs register and filed the result in triplicate. The bridge authority relocated the fog-signal schedule with unusual care. A visiting engineer mapped the ferry timetable with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-26",
+            "spaceAfter": 8,
             "type": "paragraph"
           }
         ],
@@ -456,6 +566,7 @@
               "alignment": "center",
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Page ",
                   "type": "text"
                 },
@@ -473,6 +584,7 @@
             {
               "content": [
                 {
+                  "fontSize": 11,
                   "text": "Harbour records — confidential draft",
                   "type": "text"
                 }
