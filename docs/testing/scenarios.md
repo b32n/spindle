@@ -279,6 +279,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-FIO-08 | Cancel keeps the open document; Import anyway replaces it and reports the loss | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-FIO-09 | a document that loses nothing opens without a dialog | covered |  |  | `e2e/docs/import-loss.spec.ts` |
 | D-FIO-10 | Escape cancels, and a host callback can decide instead of the dialog | covered |  |  | `e2e/docs/import-loss.spec.ts` |
+| D-LNK-01 | clicking a table-of-contents entry scrolls to the bookmarked heading | covered |  |  | `e2e/docs/internal-links.spec.ts` |
 | D-KBD-01 | Tab reaches the toolbar and then the editor; the focused control has a visible indicator | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-02 | write text, a bullet list and a link using only the keyboard | covered |  |  | `e2e/docs/keyboard.spec.ts` |
 | D-KBD-03 | a heading style can be applied from the keyboard | fixme + bug |  | no keyboard-only way to give a paragraph a heading style: the Paragraph dropdown items are plain divs outside the tab order, Escape does not close it, and there is no shortcut; markdown input rules ("# ") are implemented in docs-core but not installed by the editor. https://github.com/b32n/spindle/issues/91 | `e2e/docs/keyboard.spec.ts` |
@@ -437,7 +438,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 371
+- covered: 372
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6
