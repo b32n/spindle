@@ -20,15 +20,6 @@
     },
     {
       "count": 1,
-      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
-      "id": "docx.paragraphFormatting",
-      "label": "paragraph/run formatting occurrence(s)",
-      "where": [
-        "line spacing ×1"
-      ]
-    },
-    {
-      "count": 1,
       "effect": "not imported",
       "id": "docx.sectionProperties",
       "label": "section(s) with page-number format/restart or vertical alignment",

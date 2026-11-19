@@ -82,6 +82,13 @@ export interface TextStyle {
   superscript?: boolean;
   subscript?: boolean;
   smallCaps?: boolean;
+  /** All capitals (DOCX `caps`). */
+  allCaps?: boolean;
+  /** Hidden text (DOCX `vanish`): kept and exported; the editor still shows it, dimmed. */
+  hidden?: boolean;
+  /** East Asian and complex-script fonts, when they differ from `fontFamily` (the Latin font). */
+  fontFamilyEastAsia?: string;
+  fontFamilyComplex?: string;
 }
 
 export const DEFAULT_TEXT_STYLE: TextStyle = {
@@ -149,6 +156,10 @@ export interface TextRun {
   color?: string;
   backgroundColor?: string;
   smallCaps?: boolean;
+  allCaps?: boolean;
+  hidden?: boolean;
+  fontFamilyEastAsia?: string;
+  fontFamilyComplex?: string;
   /** Thread ID when this run is covered by a comment. */
   commentThreadId?: string;
 }
@@ -186,32 +197,48 @@ export interface BaseBlock {
   type: BlockType;
 }
 
-export interface ParagraphBlock extends BaseBlock {
+/**
+ * Paragraph formatting carried on the block itself (not through the paragraph style pool), so it lives in the
+ * editor document and is shared in collaboration. Distances are pixels (96 dpi).
+ */
+export interface ParagraphFormat {
+  alignment?: TextAlignment;
+  lineSpacing?: LineSpacing;
+  spaceBefore?: number;
+  spaceAfter?: number;
+  /** Left indent in pixels. */
+  leftIndent?: number;
+  /** Right indent in pixels. */
+  rightIndent?: number;
+  /** First-line indent in pixels; negative for a hanging indent. */
+  firstLineIndent?: number;
+  keepWithNext?: boolean;
+  /** Keep the paragraph's lines on one page. */
+  keepTogether?: boolean;
+  pageBreakBefore?: boolean;
+}
+
+export interface ParagraphBlock extends BaseBlock, ParagraphFormat {
   type: 'paragraph';
   content: InlineContent[];
   styleId?: string; // Reference to paragraph style in pool
   // Inline paragraph styles (when not using styleId)
-  alignment?: TextAlignment;
+  /** Indent level set by the indent/outdent commands (24 px each), on top of `leftIndent`. */
   indent?: number;
-  lineSpacing?: LineSpacing;
-  spaceBefore?: number;
-  spaceAfter?: number;
 }
 
-export interface HeadingBlock extends BaseBlock {
+export interface HeadingBlock extends BaseBlock, ParagraphFormat {
   type: 'heading';
   level: HeadingLevel;
   content: InlineContent[];
   styleId?: string;
-  // Inline paragraph styles (when not using styleId)
-  alignment?: TextAlignment;
 }
 
-export interface ListItemBlock extends BaseBlock {
+export interface ListItemBlock extends BaseBlock, ParagraphFormat {
   type: 'list-item';
   listType: ListType;
   level: number; // Nesting level (0-based)
-  /** First number of a numbered list (set on the list's first item when not 1). */
+  /** First number of a numbered list (set on the list's first item when not 1; a `start` on a later item begins a new list). */
   start?: number;
   content: InlineContent[];
   styleId?: string;

@@ -15,19 +15,7 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {
-      "paragraph-style-1": {
-        "alignment": "left",
-        "spaceAfter": 5.333333333333333,
-        "spaceBefore": 16
-      },
-      "paragraph-style-2": {
-        "alignment": "left",
-        "leftIndent": 48,
-        "spaceAfter": 10.666666666666666,
-        "spaceBefore": 0
-      }
-    },
+    "paragraphStylePool": {},
     "sections": [
       {
         "blocks": [
@@ -42,6 +30,10 @@
               }
             ],
             "id": "block-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -59,6 +51,10 @@
               }
             ],
             "id": "block-2",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -76,8 +72,15 @@
               }
             ],
             "id": "block-3",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -122,6 +125,10 @@
               }
             ],
             "id": "block-4",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -150,6 +157,10 @@
               }
             ],
             "id": "block-5",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -158,6 +169,10 @@
             "alignment": "justify",
             "content": [],
             "id": "block-6",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -173,6 +188,10 @@
               }
             ],
             "id": "block-7",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -190,8 +209,15 @@
               }
             ],
             "id": "block-8",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -230,6 +256,10 @@
               }
             ],
             "id": "block-9",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -327,6 +357,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-11",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -342,11 +376,16 @@
               }
             ],
             "id": "block-12",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -356,12 +395,19 @@
               }
             ],
             "id": "block-13",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "bullet",
-            "styleId": "paragraph-style-2",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -371,20 +417,34 @@
               }
             ],
             "id": "block-14",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "bullet",
-            "styleId": "paragraph-style-2",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [],
             "id": "block-15",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "bullet",
-            "styleId": "paragraph-style-2",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -394,9 +454,15 @@
               }
             ],
             "id": "block-16",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "bullet",
-            "styleId": "paragraph-style-2",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
@@ -410,6 +476,10 @@
               }
             ],
             "id": "block-17",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"

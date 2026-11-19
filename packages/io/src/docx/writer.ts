@@ -11,6 +11,7 @@ import {
   HeadingLevel,
   ImageRun,
   LevelFormat,
+  LineRuleType,
   Packer,
   PageBreak,
   PageNumber,
@@ -66,7 +67,37 @@ const NUMBERING_LEVELS = 9; // Word's own max nesting depth
 const BULLET_REFERENCE = 'spindle-bullet-list';
 const NUMBERED_REFERENCE = 'spindle-numbered-list';
 
-function numberingConfig() {
+/** The numbering reference for a numbered list whose first number is `start` (1 uses the plain reference). */
+function numberedReference(start: number): string {
+  return start === 1 ? NUMBERED_REFERENCE : `${NUMBERED_REFERENCE}-from-${start}`;
+}
+
+/** Every first number a numbered list in the document starts at, other than 1. */
+function numberedStarts(sections: DocSection[]): number[] {
+  const starts = new Set<number>();
+  for (const section of sections) {
+    for (const block of section.blocks) {
+      if (block.type === 'listItem' && block.listType === 'numbered' && block.start !== undefined && block.start !== 1 && Number.isInteger(block.start) && block.start > 0) {
+        starts.add(block.start);
+      }
+    }
+  }
+  return [...starts];
+}
+
+function numberingConfig(starts: number[] = []) {
+  const numbered = (reference: string, start: number) => ({
+    reference,
+    levels: Array.from({ length: NUMBERING_LEVELS }, (_, level) => ({
+      level,
+      format: LevelFormat.DECIMAL,
+      text: `%${level + 1}.`,
+      alignment: AlignmentType.LEFT,
+      // Only the top level of a list carries the document's first number; nested levels start at 1.
+      start: level === 0 ? start : 1,
+      style: { paragraph: { indent: { left: ptToTwips(18 * (level + 1)), hanging: ptToTwips(18) } } },
+    })),
+  });
   return {
     config: [
       {
@@ -79,24 +110,32 @@ function numberingConfig() {
           style: { paragraph: { indent: { left: ptToTwips(18 * (level + 1)), hanging: ptToTwips(18) } } },
         })),
       },
-      {
-        reference: NUMBERED_REFERENCE,
-        levels: Array.from({ length: NUMBERING_LEVELS }, (_, level) => ({
-          level,
-          format: LevelFormat.DECIMAL,
-          text: `%${level + 1}.`,
-          alignment: AlignmentType.LEFT,
-          style: { paragraph: { indent: { left: ptToTwips(18 * (level + 1)), hanging: ptToTwips(18) } } },
-        })),
-      },
+      numbered(NUMBERED_REFERENCE, 1),
+      ...starts.map((start) => numbered(numberedReference(start), start)),
     ],
   };
+}
+
+/** A plain font name sets the Latin, East Asian and complex-script fonts alike; separate ones are written per script. */
+function fontOptions(base: DocRunBase): Partial<IRunOptions> {
+  const { fontFamily, fontFamilyEastAsia, fontFamilyComplex } = base;
+  if (fontFamilyEastAsia == null && fontFamilyComplex == null) return fontFamily != null ? { font: fontFamily } : {};
+  return {
+    font: {
+      ...(fontFamily != null && { ascii: fontFamily, hAnsi: fontFamily }),
+      ...((fontFamilyEastAsia ?? fontFamily) != null && { eastAsia: (fontFamilyEastAsia ?? fontFamily) as string }),
+      ...((fontFamilyComplex ?? fontFamily) != null && { cs: (fontFamilyComplex ?? fontFamily) as string }),
+    },
+  } as Partial<IRunOptions>;
 }
 
 class DocxBuilder {
   readonly warnings: string[] = [];
   /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
   private pendingOrphans: CommentPlanThread[];
+  private inNumberedRun = false;
+  private numberedRun = { reference: NUMBERED_REFERENCE, instance: 0 };
+  private numberedInstances = 0;
 
   constructor(private readonly comments: CommentPlan) {
     this.pendingOrphans = comments.orphans;
@@ -186,7 +225,9 @@ class DocxBuilder {
       ...(base.superscript && { superScript: true }),
       ...(base.subscript && { subScript: true }),
       ...(base.smallCaps != null && { smallCaps: base.smallCaps }),
-      ...(base.fontFamily != null && { font: base.fontFamily }),
+      ...(base.allCaps != null && { allCaps: base.allCaps }),
+      ...(base.hidden != null && { vanish: base.hidden }),
+      ...fontOptions(base),
       ...(base.fontSize != null && { size: Math.round(base.fontSize * PT_TO_HALF_POINTS) }),
       ...(base.color != null && { color: toDocxColor(base.color) }),
       ...(base.backgroundColor != null && {
@@ -214,23 +255,50 @@ class DocxBuilder {
   }
 
   buildParagraph(style: DocParagraphStyle, children: ParagraphChild[], extra: Record<string, unknown> = {}): Paragraph {
+    const custom = style.lineSpacingCustom;
+    const spacingLine =
+      custom != null
+        ? custom.rule === 'multiple'
+          ? { line: Math.round(custom.value * 240), lineRule: LineRuleType.AUTO }
+          : { line: ptToTwips(custom.value), lineRule: custom.rule === 'exactly' ? LineRuleType.EXACT : LineRuleType.AT_LEAST }
+        : { line: style.lineSpacing ? LINE_SPACING_MAP[style.lineSpacing] : undefined };
+    const firstLine = style.firstLineIndentPt;
     return new Paragraph({
       children,
       alignment: style.alignment ? ALIGNMENT_MAP[style.alignment] : undefined,
       spacing: {
         before: style.spaceBeforePt != null ? ptToTwips(style.spaceBeforePt) : undefined,
         after: style.spaceAfterPt != null ? ptToTwips(style.spaceAfterPt) : undefined,
-        line: style.lineSpacing ? LINE_SPACING_MAP[style.lineSpacing] : undefined,
+        ...spacingLine,
       },
       indent: {
         left: style.leftIndentPt != null ? ptToTwips(style.leftIndentPt) : undefined,
-        firstLine: style.firstLineIndentPt != null ? ptToTwips(style.firstLineIndentPt) : undefined,
+        right: style.rightIndentPt != null ? ptToTwips(style.rightIndentPt) : undefined,
+        // A negative first-line indent is a hanging indent.
+        firstLine: firstLine != null && firstLine >= 0 ? ptToTwips(firstLine) : undefined,
+        hanging: firstLine != null && firstLine < 0 ? ptToTwips(-firstLine) : undefined,
       },
+      ...(style.keepWithNext && { keepNext: true }),
+      ...(style.keepTogether && { keepLines: true }),
+      ...(style.pageBreakBefore && { pageBreakBefore: true }),
       ...extra,
     });
   }
 
+  /** The numbering of the current list run: a new run (instance) begins where the previous block is not a numbered item, or an item states its own first number. */
+  private listNumbering(block: Extract<DocBlock, { type: 'listItem' }>) {
+    const level = Math.min(block.level, NUMBERING_LEVELS - 1);
+    if (block.listType === 'bullet') return { reference: BULLET_REFERENCE, level };
+    if (!this.inNumberedRun || block.start !== undefined) {
+      const start = block.start !== undefined && Number.isInteger(block.start) && block.start > 0 ? block.start : 1;
+      this.numberedRun = { reference: numberedReference(start), instance: ++this.numberedInstances };
+    }
+    this.inNumberedRun = true;
+    return { ...this.numberedRun, level };
+  }
+
   buildBlock(block: DocBlock): Paragraph | Table {
+    if (!(block.type === 'listItem' && block.listType === 'numbered')) this.inNumberedRun = false;
     switch (block.type) {
       case 'paragraph':
         return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)));
@@ -238,10 +306,7 @@ class DocxBuilder {
         return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)), { heading: HEADING_MAP[block.level] });
       case 'listItem':
         return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)), {
-          numbering: {
-            reference: block.listType === 'bullet' ? BULLET_REFERENCE : NUMBERED_REFERENCE,
-            level: Math.min(block.level, NUMBERING_LEVELS - 1),
-          },
+          numbering: this.listNumbering(block),
         });
       case 'table':
         return this.buildTable(block.rows, block.colWidthsPx);
@@ -305,6 +370,7 @@ class DocxBuilder {
     const landscape = section.orientation === 'landscape';
     const width = pxToTwips(landscape ? section.pageHeightPx : section.pageWidthPx);
     const height = pxToTwips(landscape ? section.pageWidthPx : section.pageHeightPx);
+    this.inNumberedRun = false;
     const header = this.buildHeader(section.header);
     const footer = this.buildFooter(section.footer);
     return {
@@ -358,7 +424,7 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   const builder = new DocxBuilder(comments);
   const doc = new Document({
     title: input.title,
-    numbering: numberingConfig(),
+    numbering: numberingConfig(numberedStarts(input.sections)),
     sections: input.sections.map((s) => builder.buildSection(s)),
   });
   // toArrayBuffer, not toBuffer: JSZip's "nodebuffer" output does not exist in browsers,

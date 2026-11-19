@@ -24,6 +24,7 @@ import type {
   HeaderFooterParagraph,
   InlineContent,
   LineSpacing,
+  ParagraphFormat,
   ParagraphStyle,
   SectionData,
   TextRun,
@@ -32,7 +33,7 @@ import type {
 import type { DocsCommentThread } from '../comments';
 import type { DocumentImpl } from '../document';
 import { createSection } from '../document';
-import { TextStylePoolImpl, ParagraphStylePoolImpl } from '../style-pool';
+import { TextStylePoolImpl } from '../style-pool';
 import { generateBlockId, generateCellId, generateRowId } from '../blocks/utils';
 
 /** A comment with no recorded date still needs a timestamp (the model requires one); the epoch marks it unknown. */
@@ -121,6 +122,7 @@ function toBlock(
         type: 'listItem',
         listType: block.listType,
         level: block.level,
+        ...(block.start !== undefined && { start: block.start }),
         content: toInlineContent(block.content, title, textStylePool),
         ...resolveParagraphStyle(block, paragraphStylePool),
       };
@@ -150,39 +152,66 @@ function pxToPt(px: number): number {
   return px * 0.75;
 }
 
-const LINE_SPACING_MAP: Partial<Record<LineSpacing['type'], DocParagraphStyle['lineSpacing']>> = {
+const LINE_SPACING_KEYWORDS: Partial<Record<LineSpacing['type'], DocParagraphStyle['lineSpacing']>> = {
   single: 'single',
   onePointFive: 'onePointFive',
   double: 'double',
-  // atLeast/exactly/multiple carry a numeric value our generic type doesn't
-  // model — fall back to single rather than guess at a multiplier.
 };
 
-interface ParagraphLikeBlock {
+/** Model line spacing -> the interchange keyword, or a custom rule (atLeast/exactly heights go px -> pt). */
+function toDocLineSpacing(spacing: LineSpacing | undefined): Pick<DocParagraphStyle, 'lineSpacing' | 'lineSpacingCustom'> {
+  if (!spacing) return {};
+  const keyword = LINE_SPACING_KEYWORDS[spacing.type];
+  if (keyword) return { lineSpacing: keyword };
+  if (spacing.value == null) return { lineSpacing: 'single' };
+  if (spacing.type === 'multiple') return { lineSpacingCustom: { rule: 'multiple', value: spacing.value } };
+  return { lineSpacingCustom: { rule: spacing.type === 'exactly' ? 'exactly' : 'atLeast', value: pxToPt(spacing.value) } };
+}
+
+function fromDocLineSpacing(style: DocParagraphStyle): LineSpacing | undefined {
+  const custom = style.lineSpacingCustom;
+  if (custom) {
+    if (custom.rule === 'multiple') return { type: 'multiple', value: custom.value };
+    return { type: custom.rule, value: ptToPx(custom.value) };
+  }
+  return style.lineSpacing ? ({ type: style.lineSpacing } as LineSpacing) : undefined;
+}
+
+/** Pixels per indent level of the indent/outdent commands. */
+const INDENT_LEVEL_PX = 24;
+
+interface ParagraphLikeBlock extends ParagraphFormat {
   styleId?: string;
-  alignment?: ParagraphStyle['alignment'];
+  /** Indent level (24 px each), on top of `leftIndent`. */
   indent?: number;
-  lineSpacing?: LineSpacing;
-  spaceBefore?: number;
-  spaceAfter?: number;
 }
 
 /** Pool style as a base, with the block's own inline properties (when present) overriding it. */
 function resolveParagraphStyle(block: ParagraphLikeBlock, pool: Record<string, ParagraphStyle>): DocParagraphStyle {
   const base = block.styleId ? pool[block.styleId] : undefined;
   const alignment = block.alignment ?? base?.alignment;
-  const lineSpacingType = (block.lineSpacing ?? base?.lineSpacing)?.type;
   const spaceBefore = block.spaceBefore ?? base?.spaceBefore;
   const spaceAfter = block.spaceAfter ?? base?.spaceAfter;
-  const leftIndent = block.indent ?? base?.leftIndent;
+  const leftIndent = block.leftIndent ?? base?.leftIndent;
+  const rightIndent = block.rightIndent ?? base?.rightIndent;
+  const firstLineIndent = block.firstLineIndent ?? base?.firstLineIndent;
+  const indentPx = block.indent ? block.indent * INDENT_LEVEL_PX : 0;
+  const totalLeft = leftIndent != null || indentPx ? (leftIndent ?? 0) + indentPx : undefined;
+  const keepWithNext = block.keepWithNext ?? base?.keepWithNext;
+  const keepTogether = block.keepTogether ?? base?.keepTogether;
+  const pageBreakBefore = block.pageBreakBefore ?? base?.pageBreakBefore;
 
   return {
     alignment,
     spaceBeforePt: spaceBefore != null ? pxToPt(spaceBefore) : undefined,
     spaceAfterPt: spaceAfter != null ? pxToPt(spaceAfter) : undefined,
-    leftIndentPt: leftIndent != null ? pxToPt(leftIndent) : undefined,
-    firstLineIndentPt: base?.firstLineIndent != null ? pxToPt(base.firstLineIndent) : undefined,
-    lineSpacing: lineSpacingType ? (LINE_SPACING_MAP[lineSpacingType] ?? 'single') : undefined,
+    leftIndentPt: totalLeft != null ? pxToPt(totalLeft) : undefined,
+    rightIndentPt: rightIndent != null ? pxToPt(rightIndent) : undefined,
+    firstLineIndentPt: firstLineIndent != null ? pxToPt(firstLineIndent) : undefined,
+    ...toDocLineSpacing(block.lineSpacing ?? base?.lineSpacing),
+    ...(keepWithNext && { keepWithNext: true }),
+    ...(keepTogether && { keepTogether: true }),
+    ...(pageBreakBefore && { pageBreakBefore: true }),
   };
 }
 
@@ -214,19 +243,7 @@ function resolveTextStyle(item: TextRun, pool: Record<string, TextStyle>): DocRu
   if (item.styleId && pool[item.styleId]) {
     return toDocRunBase(pool[item.styleId]);
   }
-  return {
-    bold: item.bold,
-    italic: item.italic,
-    underline: item.underline,
-    strikethrough: item.strikethrough,
-    superscript: item.superscript,
-    subscript: item.subscript,
-    smallCaps: item.smallCaps,
-    fontFamily: item.fontFamily,
-    fontSize: item.fontSize,
-    color: item.color,
-    backgroundColor: item.backgroundColor,
-  };
+  return toDocRunBase(item);
 }
 
 function toDocRunBase(style: TextStyle): DocRunBase {
@@ -238,7 +255,11 @@ function toDocRunBase(style: TextStyle): DocRunBase {
     superscript: style.superscript,
     subscript: style.subscript,
     smallCaps: style.smallCaps,
+    allCaps: style.allCaps,
+    hidden: style.hidden,
     fontFamily: style.fontFamily,
+    fontFamilyEastAsia: style.fontFamilyEastAsia,
+    fontFamilyComplex: style.fontFamilyComplex,
     fontSize: style.fontSize,
     color: style.color,
     backgroundColor: style.backgroundColor,
@@ -342,14 +363,13 @@ export function inspectDocx(bytes: Uint8Array, options?: { detail?: 'summary' | 
 function toDocumentData(result: DocumentImportResult, document: DocumentImpl): DocumentData {
   const existing = document.getData();
   const textStylePool = new TextStylePoolImpl();
-  const paragraphStylePool = new ParagraphStylePoolImpl();
   return {
     id: existing.id,
     title: result.title || existing.title,
-    sections: result.sections.map((s) => toSectionData(s, textStylePool, paragraphStylePool)),
+    sections: result.sections.map((s) => toSectionData(s, textStylePool)),
     defaultPageConfig: existing.defaultPageConfig,
     textStylePool: textStylePool.toData(),
-    paragraphStylePool: paragraphStylePool.toData(),
+    paragraphStylePool: {},
     createdAt: existing.createdAt,
     updatedAt: new Date().toISOString(),
     ...(result.comments && result.comments.length > 0 && { threads: result.comments.map(toThreadFromDocx) }),
@@ -381,8 +401,7 @@ function ptToPx(pt: number): number {
 
 function toSectionData(
   section: DocSection,
-  textStylePool: TextStylePoolImpl,
-  paragraphStylePool: ParagraphStylePoolImpl
+  textStylePool: TextStylePoolImpl
 ): SectionData {
   // Inverse of toSection's own convention: PageConfig.size is always the
   // natural (portrait) size, with landscape swapping width/height back.
@@ -399,7 +418,7 @@ function toSectionData(
       },
       orientation: section.orientation,
     },
-    section.blocks.map((b) => toBlockFromDocx(b, textStylePool, paragraphStylePool))
+    section.blocks.map((b) => toBlockFromDocx(b, textStylePool))
   );
   return {
     ...built,
@@ -408,55 +427,31 @@ function toSectionData(
   };
 }
 
-function fullParagraphStyle(style: DocParagraphStyle): ParagraphStyle {
+/** The paragraph formatting of an imported block, as inline fields (pixels). */
+function toParagraphFormat(style: DocParagraphStyle): ParagraphFormat {
+  const lineSpacing = fromDocLineSpacing(style);
   return {
-    alignment: style.alignment,
-    lineSpacing: style.lineSpacing ? ({ type: style.lineSpacing } as LineSpacing) : undefined,
-    spaceBefore: style.spaceBeforePt != null ? ptToPx(style.spaceBeforePt) : undefined,
-    spaceAfter: style.spaceAfterPt != null ? ptToPx(style.spaceAfterPt) : undefined,
-    leftIndent: style.leftIndentPt != null ? ptToPx(style.leftIndentPt) : undefined,
-    firstLineIndent: style.firstLineIndentPt != null ? ptToPx(style.firstLineIndentPt) : undefined,
+    ...(style.alignment && { alignment: style.alignment }),
+    ...(lineSpacing && { lineSpacing }),
+    ...(style.spaceBeforePt != null && { spaceBefore: ptToPx(style.spaceBeforePt) }),
+    ...(style.spaceAfterPt != null && { spaceAfter: ptToPx(style.spaceAfterPt) }),
+    ...(style.leftIndentPt != null && { leftIndent: ptToPx(style.leftIndentPt) }),
+    ...(style.rightIndentPt != null && { rightIndent: ptToPx(style.rightIndentPt) }),
+    ...(style.firstLineIndentPt != null && { firstLineIndent: ptToPx(style.firstLineIndentPt) }),
+    ...(style.keepWithNext && { keepWithNext: true }),
+    ...(style.keepTogether && { keepTogether: true }),
+    ...(style.pageBreakBefore && { pageBreakBefore: true }),
   };
 }
 
-function hasAnyParagraphStyle(style: DocParagraphStyle): boolean {
-  return (
-    style.alignment != null ||
-    style.lineSpacing != null ||
-    style.spaceBeforePt != null ||
-    style.spaceAfterPt != null ||
-    style.leftIndentPt != null ||
-    style.firstLineIndentPt != null
-  );
-}
-
-/**
- * heading and list-item blocks have no inline slot for spacing/indent (only
- * `alignment`, and list-item not even that) — so any such style has to go
- * through the paragraph style pool.
- */
-function styleIdForFullStyle(style: DocParagraphStyle, pool: ParagraphStylePoolImpl): string | undefined {
-  return hasAnyParagraphStyle(style) ? pool.getOrCreate(fullParagraphStyle(style)) : undefined;
-}
-
-/** paragraph blocks support alignment/indent/lineSpacing/spaceBefore/spaceAfter inline — only firstLineIndent has no inline slot and needs the pool. */
-function styleIdForFirstLineIndent(style: DocParagraphStyle, pool: ParagraphStylePoolImpl): string | undefined {
-  return style.firstLineIndentPt != null ? pool.getOrCreate({ firstLineIndent: ptToPx(style.firstLineIndentPt) }) : undefined;
-}
-
-function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl, paragraphStylePool: ParagraphStylePoolImpl): Block {
+function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Block {
   switch (block.type) {
     case 'paragraph':
       return {
         id: generateBlockId(),
         type: 'paragraph',
         content: toInlineContentFromDocx(block.content, textStylePool),
-        styleId: styleIdForFirstLineIndent(block, paragraphStylePool),
-        alignment: block.alignment,
-        indent: block.leftIndentPt != null ? ptToPx(block.leftIndentPt) : undefined,
-        lineSpacing: block.lineSpacing ? ({ type: block.lineSpacing } as LineSpacing) : undefined,
-        spaceBefore: block.spaceBeforePt != null ? ptToPx(block.spaceBeforePt) : undefined,
-        spaceAfter: block.spaceAfterPt != null ? ptToPx(block.spaceAfterPt) : undefined,
+        ...toParagraphFormat(block),
       };
     case 'heading':
       return {
@@ -464,8 +459,7 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl, para
         type: 'heading',
         level: block.level,
         content: toInlineContentFromDocx(block.content, textStylePool),
-        styleId: styleIdForFullStyle(block, paragraphStylePool),
-        alignment: block.alignment,
+        ...toParagraphFormat(block),
       };
     case 'listItem':
       return {
@@ -473,8 +467,9 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl, para
         type: 'list-item',
         listType: block.listType,
         level: block.level,
+        ...(block.start !== undefined && { start: block.start }),
         content: toInlineContentFromDocx(block.content, textStylePool),
-        styleId: styleIdForFullStyle(block, paragraphStylePool),
+        ...toParagraphFormat(block),
       };
     case 'table':
       return {
@@ -517,7 +512,11 @@ function toTextStyle(base: DocRunBase): TextStyle {
     superscript: base.superscript,
     subscript: base.subscript,
     smallCaps: base.smallCaps,
+    allCaps: base.allCaps,
+    hidden: base.hidden,
     fontFamily: base.fontFamily,
+    fontFamilyEastAsia: base.fontFamilyEastAsia,
+    fontFamilyComplex: base.fontFamilyComplex,
     fontSize: base.fontSize,
     color: base.color,
     backgroundColor: base.backgroundColor,
@@ -533,7 +532,11 @@ function hasAnyRunStyle(base: DocRunBase): boolean {
     base.superscript != null ||
     base.subscript != null ||
     base.smallCaps != null ||
+    base.allCaps != null ||
+    base.hidden != null ||
     base.fontFamily != null ||
+    base.fontFamilyEastAsia != null ||
+    base.fontFamilyComplex != null ||
     base.fontSize != null ||
     base.color != null ||
     base.backgroundColor != null

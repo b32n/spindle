@@ -37,16 +37,6 @@
       "label": "section(s) with page borders"
     },
     {
-      "count": 4,
-      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
-      "id": "docx.paragraphFormatting",
-      "label": "paragraph/run formatting occurrence(s)",
-      "where": [
-        "keep with next/lines ×2",
-        "line spacing ×2"
-      ]
-    },
-    {
       "count": 9,
       "effect": "not imported (tabs use default stops)",
       "id": "docx.tabStops",

@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import { exportToDocx, importFromDocx, inspectDocx } from './docx';
 import { DocumentImpl } from '../document';
-import type { DocumentData } from '../types';
+import type { DocumentData, ParagraphBlock } from '../types';
 
 const PAGE_CONFIG = {
   size: { w: 816, h: 1056 },
@@ -593,23 +593,65 @@ describe('comments through the editor API', () => {
   });
 });
 
-describe('list item paragraph formatting', () => {
-  it('writes and re-imports the spacing and indent of a list item, so a styled list survives a round trip', async () => {
-    const source = docWith({
-      paragraphStylePool: { ps1: { spaceAfter: 16, leftIndent: 48 } },
-      sections: [
-        {
-          id: 'sec1',
-          pageConfig: PAGE_CONFIG,
-          blocks: [{ id: 'b1', type: 'list-item', listType: 'bullet', level: 0, content: [{ type: 'text', text: 'item' }], styleId: 'ps1' }],
-        },
-      ],
-    });
+describe('paragraph formatting through the editor API', () => {
+  const block = (extra: Partial<ParagraphBlock>): ParagraphBlock => ({ id: 'b1', type: 'paragraph', content: [{ type: 'text', text: 'x' }], ...extra });
+  const roundTrip = async (blocks: DocumentData['sections'][number]['blocks'], pool: DocumentData['paragraphStylePool'] = {}) => {
+    const source = docWith({ paragraphStylePool: pool, sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks }] });
     const target = docWith({});
     await importFromDocx((await exportToDocx(source)).bytes, target);
-    const data = target.getData();
-    const item = data.sections[0].blocks[0];
-    expect(item.type).toBe('list-item');
-    expect(item.type === 'list-item' && item.styleId && data.paragraphStylePool[item.styleId]).toEqual({ spaceAfter: 16, leftIndent: 48 });
+    return target.getData().sections[0].blocks;
+  };
+
+  it('keeps the spacing and indent of a list item through export and import (inline, not through the pool)', async () => {
+    const out = await roundTrip([
+      { id: 'b1', type: 'list-item', listType: 'bullet', level: 0, content: [{ type: 'text', text: 'item' }], spaceAfter: 16, leftIndent: 48 },
+    ]);
+    expect(out[0]).toMatchObject({ type: 'list-item', spaceAfter: 16, leftIndent: 48 });
+  });
+
+  it('round-trips line spacing, indents, hanging indent and pagination flags on paragraphs and headings', async () => {
+    const fmt = { lineSpacing: { type: 'multiple' as const, value: 1.15 }, rightIndent: 16, firstLineIndent: -24, leftIndent: 48, keepWithNext: true, keepTogether: true, pageBreakBefore: true, spaceAfter: 0 };
+    const out = await roundTrip([block(fmt), { id: 'b2', type: 'heading', level: 2, content: [{ type: 'text', text: 'h' }], ...fmt }]);
+    expect(out[0]).toMatchObject(fmt);
+    expect(out[1]).toMatchObject({ type: 'heading', ...fmt });
+  });
+
+  it('writes atLeast and exact line heights in points and reads them back in pixels', async () => {
+    const out = await roundTrip([
+      block({ lineSpacing: { type: 'atLeast', value: 20 } }),
+      block({ lineSpacing: { type: 'exactly', value: 24 } }),
+      block({ lineSpacing: { type: 'double' } }),
+      block({ lineSpacing: { type: 'multiple' } }), // no value: single
+    ]);
+    expect(out.map((b) => (b.type === 'paragraph' ? b.lineSpacing : undefined))).toEqual([
+      { type: 'atLeast', value: 20 },
+      { type: 'exactly', value: 24 },
+      { type: 'double' },
+      { type: 'single' },
+    ]);
+  });
+
+  it('treats the indent of a paragraph as levels of 24 px on top of its left indent, and takes the pool style as a base', async () => {
+    const source = docWith({
+      paragraphStylePool: { ps1: { leftIndent: 12, rightIndent: 6, keepWithNext: true, lineSpacing: { type: 'onePointFive' } } },
+      sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [block({ indent: 2, styleId: 'ps1' }), block({ indent: 1, leftIndent: 10 })] }],
+    });
+    const { documentXml } = await exportAndUnzip(source);
+    // (12 + 2 x 24) px = 45 pt = 900 twips, (10 + 24) px = 25.5 pt = 510 twips
+    expect(documentXml).toContain('w:left="900"');
+    expect(documentXml).toContain('w:right="90"');
+    expect(documentXml).toContain('<w:keepNext/>');
+    expect(documentXml).toContain('w:left="510"');
+  });
+
+  it('round-trips caps, hidden text, per-script fonts and numbered list starts', async () => {
+    const out = await roundTrip([
+      block({ content: [{ type: 'text', text: 'a', allCaps: true, hidden: true, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho' }] }),
+      { id: 'l1', type: 'list-item', listType: 'numbered', level: 0, start: 5, content: [{ type: 'text', text: 'five' }] },
+      { id: 'l2', type: 'list-item', listType: 'numbered', level: 0, content: [{ type: 'text', text: 'six' }] },
+      { id: 'l3', type: 'list-item', listType: 'numbered', level: 0, start: 1, content: [{ type: 'text', text: 'one again' }] },
+    ]);
+    expect(out[0].type === 'paragraph' && out[0].content[0]).toMatchObject({ allCaps: true, hidden: true, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho' });
+    expect(out.slice(1).map((b) => (b.type === 'list-item' ? b.start : 'x'))).toEqual([5, undefined, 1]);
   });
 });

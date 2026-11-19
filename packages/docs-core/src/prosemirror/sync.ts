@@ -9,6 +9,8 @@ import type {
   InlineLink,
   TextStyle,
   TextStylePool,
+  ParagraphFormat,
+  LineSpacing,
   ParagraphBlock,
   HeadingBlock,
   TableRow,
@@ -71,6 +73,42 @@ export function sectionToProseMirror(section: Section): PmNodeJSON {
   };
 }
 
+/** PM `lineSpacing` attr: 'single' (the default) or the LineSpacing object. */
+function lineSpacingAttr(spacing: LineSpacing | undefined): 'single' | LineSpacing {
+  return spacing && spacing.type !== 'single' ? { ...spacing } : 'single';
+}
+
+/** The indent and pagination attrs shared by paragraphs and headings (null when unset). */
+function formatAttrs(block: ParagraphFormat): Record<string, unknown> {
+  return {
+    leftIndent: block.leftIndent ?? null,
+    rightIndent: block.rightIndent ?? null,
+    firstLineIndent: block.firstLineIndent ?? null,
+    keepWithNext: block.keepWithNext || null,
+    keepTogether: block.keepTogether || null,
+    pageBreakBefore: block.pageBreakBefore || null,
+  };
+}
+
+/**
+ * Read paragraph formatting back from a PM node's attrs. A paragraph's attrs have defaults (spacing after 8,
+ * before 0) that mean "unset"; a heading's are null when unset, so an explicit 0 survives for both.
+ */
+function readFormat(attrs: Record<string, unknown>, defaults: { spaceBefore: number | null; spaceAfter: number | null }): ParagraphFormat {
+  const out: ParagraphFormat = {};
+  if (attrs.alignment && attrs.alignment !== 'left') out.alignment = attrs.alignment as ParagraphFormat['alignment'];
+  if (attrs.lineSpacing && typeof attrs.lineSpacing === 'object') out.lineSpacing = { ...(attrs.lineSpacing as LineSpacing) };
+  if (typeof attrs.spaceBefore === 'number' && attrs.spaceBefore !== defaults.spaceBefore) out.spaceBefore = attrs.spaceBefore;
+  if (typeof attrs.spaceAfter === 'number' && attrs.spaceAfter !== defaults.spaceAfter) out.spaceAfter = attrs.spaceAfter;
+  if (typeof attrs.leftIndent === 'number') out.leftIndent = attrs.leftIndent;
+  if (typeof attrs.rightIndent === 'number') out.rightIndent = attrs.rightIndent;
+  if (typeof attrs.firstLineIndent === 'number') out.firstLineIndent = attrs.firstLineIndent;
+  if (attrs.keepWithNext === true) out.keepWithNext = true;
+  if (attrs.keepTogether === true) out.keepTogether = true;
+  if (attrs.pageBreakBefore === true) out.pageBreakBefore = true;
+  return out;
+}
+
 /**
  * Convert a single block to ProseMirror node JSON
  */
@@ -82,9 +120,10 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
         attrs: {
           alignment: block.alignment || 'left',
           indent: block.indent || 0,
-          lineSpacing: 'single',
+          lineSpacing: lineSpacingAttr(block.lineSpacing),
           spaceBefore: block.spaceBefore || 0,
           spaceAfter: block.spaceAfter ?? 8,
+          ...formatAttrs(block),
         },
         content: inlineContentToPm(block.content, stylePool),
       };
@@ -92,9 +131,13 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
     case 'heading':
       return {
         type: 'heading',
-        attrs: { 
+        attrs: {
           level: block.level,
           alignment: block.alignment || 'left',
+          lineSpacing: lineSpacingAttr(block.lineSpacing),
+          spaceBefore: block.spaceBefore ?? null,
+          spaceAfter: block.spaceAfter ?? null,
+          ...formatAttrs(block),
         },
         content: inlineContentToPm(block.content, stylePool),
       };
@@ -110,6 +153,13 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
           attrs: { level: block.level ?? 0 }, // preserve nesting depth across the round-trip
           content: [{
             type: 'paragraph',
+            attrs: {
+              alignment: block.alignment || 'left',
+              lineSpacing: lineSpacingAttr(block.lineSpacing),
+              spaceBefore: block.spaceBefore || 0,
+              spaceAfter: block.spaceAfter ?? 8,
+              ...formatAttrs(block),
+            },
             content: inlineContentToPm(block.content, stylePool),
           }],
         }],
@@ -176,6 +226,8 @@ function styleToMarks(style: TextStyle): PmMarkJSON[] {
   if (style.superscript) marks.push({ type: 'superscript' });
   if (style.subscript) marks.push({ type: 'subscript' });
   if (style.smallCaps) marks.push({ type: 'smallCaps' });
+  if (style.allCaps) marks.push({ type: 'allCaps' });
+  if (style.hidden) marks.push({ type: 'hidden' });
   
   // Add textStyle mark if any text style attributes are set
   const textStyleAttrs: Record<string, unknown> = {};
@@ -183,6 +235,8 @@ function styleToMarks(style: TextStyle): PmMarkJSON[] {
   if (style.backgroundColor) textStyleAttrs.backgroundColor = style.backgroundColor;
   if (style.fontSize) textStyleAttrs.fontSize = style.fontSize;
   if (style.fontFamily) textStyleAttrs.fontFamily = style.fontFamily;
+  if (style.fontFamilyEastAsia) textStyleAttrs.fontFamilyEastAsia = style.fontFamilyEastAsia;
+  if (style.fontFamilyComplex) textStyleAttrs.fontFamilyComplex = style.fontFamilyComplex;
   
   if (Object.keys(textStyleAttrs).length > 0) {
     marks.push({ type: 'textStyle', attrs: textStyleAttrs });
@@ -191,20 +245,24 @@ function styleToMarks(style: TextStyle): PmMarkJSON[] {
   return marks;
 }
 
-/** The character-formatting fields of a link (same names as TextRun's). */
-function linkInlineStyle(link: InlineLink): TextStyle {
+/** The character-formatting fields of a text run or link (same names in TextRun, InlineLink and TextStyle). */
+function inlineStyleOf(item: TextStyle): TextStyle {
   const style: TextStyle = {};
-  if (link.bold) style.bold = true;
-  if (link.italic) style.italic = true;
-  if (link.underline) style.underline = true;
-  if (link.strikethrough) style.strikethrough = true;
-  if (link.superscript) style.superscript = true;
-  if (link.subscript) style.subscript = true;
-  if (link.smallCaps) style.smallCaps = true;
-  if (link.color) style.color = link.color;
-  if (link.backgroundColor) style.backgroundColor = link.backgroundColor;
-  if (link.fontSize) style.fontSize = link.fontSize;
-  if (link.fontFamily) style.fontFamily = link.fontFamily;
+  if (item.bold) style.bold = true;
+  if (item.italic) style.italic = true;
+  if (item.underline) style.underline = true;
+  if (item.strikethrough) style.strikethrough = true;
+  if (item.superscript) style.superscript = true;
+  if (item.subscript) style.subscript = true;
+  if (item.smallCaps) style.smallCaps = true;
+  if (item.allCaps) style.allCaps = true;
+  if (item.hidden) style.hidden = true;
+  if (item.color) style.color = item.color;
+  if (item.backgroundColor) style.backgroundColor = item.backgroundColor;
+  if (item.fontSize) style.fontSize = item.fontSize;
+  if (item.fontFamily) style.fontFamily = item.fontFamily;
+  if (item.fontFamilyEastAsia) style.fontFamilyEastAsia = item.fontFamilyEastAsia;
+  if (item.fontFamilyComplex) style.fontFamilyComplex = item.fontFamilyComplex;
   return style;
 }
 
@@ -245,19 +303,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
         }
       } else {
         // Use inline styles
-        const inlineStyle: TextStyle = {};
-        if (item.bold) inlineStyle.bold = true;
-        if (item.italic) inlineStyle.italic = true;
-        if (item.underline) inlineStyle.underline = true;
-        if (item.strikethrough) inlineStyle.strikethrough = true;
-        if (item.superscript) inlineStyle.superscript = true;
-        if (item.subscript) inlineStyle.subscript = true;
-        if (item.smallCaps) inlineStyle.smallCaps = true;
-        if (item.color) inlineStyle.color = item.color;
-        if (item.backgroundColor) inlineStyle.backgroundColor = item.backgroundColor;
-        if (item.fontSize) inlineStyle.fontSize = item.fontSize;
-        if (item.fontFamily) inlineStyle.fontFamily = item.fontFamily;
-        
+        const inlineStyle = inlineStyleOf(item);
         marks = styleToMarks(inlineStyle);
       }
 
@@ -274,7 +320,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       const marks: PmMarkJSON[] = [{ type: 'link', attrs: linkAttrs }];
       // Keep character formatting that was applied on top of the link.
       const poolStyle = item.styleId && stylePool ? stylePool.get(item.styleId) : undefined;
-      marks.push(...styleToMarks(poolStyle ?? linkInlineStyle(item)));
+      marks.push(...styleToMarks(poolStyle ?? inlineStyleOf(item)));
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
@@ -318,10 +364,12 @@ export function proseMirrorToDocument(
   const blocks: Block[] = [];
   let blockIndex = 0;
   
+  let previous: PmNode | undefined;
   pmDoc.forEach((node) => {
-    const convertedBlocks = pmNodeToBlocks(node, blockIndex, stylePool);
+    const convertedBlocks = pmNodeToBlocks(node, blockIndex, stylePool, previous?.type.name === 'ordered_list');
     blocks.push(...convertedBlocks);
     blockIndex += convertedBlocks.length;
+    previous = node;
   });
   
   // Ensure at least one paragraph
@@ -347,7 +395,7 @@ export function proseMirrorToDocument(
  * Convert ProseMirror node to our block model
  * Returns an array because some nodes (like lists) expand to multiple blocks
  */
-function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStylePool): Block[] {
+function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStylePool, followsNumberedList = false): Block[] {
   switch (node.type.name) {
     case 'paragraph': {
       const block: ParagraphBlock = {
@@ -356,18 +404,10 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
         content: pmContentToInline(node, stylePool),
       };
       // Extract paragraph attributes
-      if (node.attrs.alignment && node.attrs.alignment !== 'left') {
-        block.alignment = node.attrs.alignment;
-      }
       if (node.attrs.indent && node.attrs.indent !== 0) {
         block.indent = node.attrs.indent;
       }
-      if (node.attrs.spaceBefore && node.attrs.spaceBefore !== 0) {
-        block.spaceBefore = node.attrs.spaceBefore;
-      }
-      if (node.attrs.spaceAfter && node.attrs.spaceAfter !== 8) {
-        block.spaceAfter = node.attrs.spaceAfter;
-      }
+      Object.assign(block, readFormat(node.attrs, { spaceBefore: 0, spaceAfter: 8 }));
       return [block];
     }
       
@@ -378,10 +418,7 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
         level: node.attrs.level as 1 | 2 | 3 | 4 | 5 | 6,
         content: pmContentToInline(node, stylePool),
       };
-      // Extract heading alignment
-      if (node.attrs.alignment && node.attrs.alignment !== 'left') {
-        block.alignment = node.attrs.alignment;
-      }
+      Object.assign(block, readFormat(node.attrs, { spaceBefore: null, spaceAfter: null }));
       return [block];
     }
       
@@ -393,19 +430,26 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
       node.forEach((listItem, _, index) => {
         // Get the first paragraph content from the list item
         let content: InlineContent[] = [];
+        let format: ParagraphFormat = {};
         listItem.forEach((child) => {
           if (child.type.name === 'paragraph') {
             content = pmContentToInline(child, stylePool);
+            format = readFormat(child.attrs, { spaceBefore: 0, spaceAfter: 8 });
           }
         });
         
+        // A list's first number is kept when it is not 1, or when the list follows another numbered list
+        // (a restart, which would otherwise merge into the list before it).
         const start = node.attrs.start as number | undefined;
+        const first = index === 0 && listType === 'numbered';
+        const keepStart = first && start && (start !== 1 || followsNumberedList);
         blocks.push({
           id: `block_${startIndex + index}_${Date.now()}`,
           type: 'list-item',
           listType,
           level: (listItem.attrs.level as number) ?? 0,
-          ...(index === 0 && listType === 'numbered' && start && start !== 1 ? { start } : {}),
+          ...(keepStart ? { start } : {}),
+          ...format,
           content,
         });
       });
@@ -517,11 +561,21 @@ function extractStyleFromMarks(marks: readonly Mark[]): TextStyle | null {
         style.smallCaps = true;
         hasStyle = true;
         break;
+      case 'allCaps':
+        style.allCaps = true;
+        hasStyle = true;
+        break;
+      case 'hidden':
+        style.hidden = true;
+        hasStyle = true;
+        break;
       case 'textStyle':
         if (mark.attrs.color) { style.color = mark.attrs.color; hasStyle = true; }
         if (mark.attrs.backgroundColor) { style.backgroundColor = mark.attrs.backgroundColor; hasStyle = true; }
         if (mark.attrs.fontSize) { style.fontSize = mark.attrs.fontSize; hasStyle = true; }
         if (mark.attrs.fontFamily) { style.fontFamily = mark.attrs.fontFamily; hasStyle = true; }
+        if (mark.attrs.fontFamilyEastAsia) { style.fontFamilyEastAsia = mark.attrs.fontFamilyEastAsia; hasStyle = true; }
+        if (mark.attrs.fontFamilyComplex) { style.fontFamilyComplex = mark.attrs.fontFamilyComplex; hasStyle = true; }
         break;
     }
   }
@@ -657,7 +711,9 @@ export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNod
       // This is a list item that needs to be grouped
       const listType = node.listType === 'bullet' ? 'bullet_list' : 'ordered_list';
       
-      if (currentList && currentList.listType === node.listType) {
+      // An item that states its own first number begins a new list, even right after another list of the same kind.
+      const restarts = node.listType === 'numbered' && node.listStart !== undefined && !!currentList && currentList.items.length > 0;
+      if (currentList && currentList.listType === node.listType && !restarts) {
         // Add to existing list
         currentList.items.push(...(node.content ?? []));
       } else {

@@ -97,3 +97,90 @@ describe('collab round-trip preserves inline content', () => {
     expect(pm.firstChild!.firstChild!.marks.map((m) => m.type.name)).toEqual(['bold']);
   });
 });
+
+describe('collab round-trip preserves DOCX paragraph formatting and run flags', () => {
+  const text = (t: string, extra: object = {}) => ({ type: 'text' as const, text: t, ...extra });
+  const fmt = {
+    lineSpacing: { type: 'multiple' as const, value: 1.15 },
+    leftIndent: 36,
+    rightIndent: 12,
+    firstLineIndent: -18,
+    keepWithNext: true,
+    keepTogether: true,
+    pageBreakBefore: true,
+  };
+
+  it('keeps indents, line spacing, flags and an explicit zero spacing on paragraphs, headings and list items', () => {
+    const blocks: Block[] = [
+      { id: 'p', type: 'paragraph', content: [text('p')], spaceAfter: 0, spaceBefore: 6, ...fmt },
+      { id: 'h', type: 'heading', level: 2, content: [text('h')], spaceAfter: 0, spaceBefore: 12, ...fmt },
+      { id: 'l', type: 'list-item', listType: 'bullet', level: 0, content: [text('l')], spaceAfter: 0, ...fmt },
+    ];
+    const out = roundTrip(blocks);
+    expect(out[0]).toMatchObject({ type: 'paragraph', spaceAfter: 0, spaceBefore: 6, ...fmt });
+    expect(out[1]).toMatchObject({ type: 'heading', level: 2, spaceAfter: 0, spaceBefore: 12, ...fmt });
+    expect(out[2]).toMatchObject({ type: 'list-item', spaceAfter: 0, ...fmt });
+  });
+
+  it('leaves unset formatting unset (defaults are not written back as values)', () => {
+    const out = roundTrip([
+      { id: 'p', type: 'paragraph', content: [text('p')] },
+      { id: 'h', type: 'heading', level: 1, content: [text('h')] },
+    ]);
+    for (const b of out) {
+      expect(b).not.toHaveProperty('spaceAfter');
+      expect(b).not.toHaveProperty('spaceBefore');
+      expect(b).not.toHaveProperty('leftIndent');
+      expect(b).not.toHaveProperty('lineSpacing');
+      expect(b).not.toHaveProperty('keepWithNext');
+    }
+  });
+
+  it('does not store single spacing (it is the default)', () => {
+    const out = roundTrip([{ id: 'p', type: 'paragraph', content: [text('p')], lineSpacing: { type: 'single' } }]);
+    expect(out[0]).not.toHaveProperty('lineSpacing');
+  });
+
+  it('keeps all caps, hidden text and per-script fonts on text and on links', () => {
+    const out = roundTrip([
+      {
+        id: 'p',
+        type: 'paragraph',
+        content: [
+          text('a', { allCaps: true, hidden: true, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Arial' }),
+          { type: 'link', text: 'l', href: 'https://example.com/', allCaps: true, hidden: true },
+        ],
+      },
+    ]);
+    const content = (out[0] as { content: object[] }).content;
+    expect(content[0]).toMatchObject({ allCaps: true, hidden: true, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Arial' });
+    expect(content[1]).toMatchObject({ type: 'link', allCaps: true, hidden: true });
+  });
+
+  describe('numbered lists', () => {
+    const li = (id: string, start?: number): ListItemBlock => ({
+      id,
+      type: 'list-item',
+      listType: 'numbered',
+      level: 0,
+      content: [text(id)],
+      ...(start !== undefined && { start }),
+    });
+    const starts = (blocks: Block[]) => blocks.map((b) => (b.type === 'list-item' ? b.start : 'x'));
+
+    it('keeps a first number other than 1', () => {
+      expect(starts(roundTrip([li('a', 7), li('b')]))).toEqual([7, undefined]);
+    });
+
+    it('keeps a restart at 1 right after another numbered list as a separate list', () => {
+      const out = roundTrip([li('a'), li('b'), li('c', 1), li('d')]);
+      expect(starts(out)).toEqual([undefined, undefined, 1, undefined]);
+      expect(blocksToPmDoc([li('a'), li('b'), li('c', 1), li('d')]).childCount).toBe(2);
+    });
+
+    it('does not turn a start of 1 on the very first item, or a start on a bullet, into a restart', () => {
+      expect(starts(roundTrip([li('a', 1), li('b')]))).toEqual([undefined, undefined]);
+      expect(blocksToPmDoc([li('a', 1), li('b')]).childCount).toBe(1);
+    });
+  });
+});

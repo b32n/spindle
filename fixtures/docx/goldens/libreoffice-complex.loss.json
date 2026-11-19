@@ -100,16 +100,6 @@
       ]
     },
     {
-      "count": 2,
-      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
-      "id": "docx.paragraphFormatting",
-      "label": "paragraph/run formatting occurrence(s)",
-      "where": [
-        "line spacing ×1",
-        "right/hanging indent ×1"
-      ]
-    },
-    {
       "count": 4,
       "effect": "not imported",
       "id": "docx.sectionProperties",

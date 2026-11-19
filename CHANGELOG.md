@@ -59,6 +59,25 @@ lockstep.
   over the literal value next to it; the literal is kept when there is no theme or the slot is missing, and when Word's
   recorded colour is within a few steps of the computed tint/shade it is used as the exact value.
 
+- **DOCX paragraph, run and list properties.** Import and export now carry line spacing (single, 1.5, double,
+  any multiple, at least, exactly), left, right, first-line and hanging indents, keep-with-next, keep-lines-together
+  and page-break-before, all capitals (`w:caps`), hidden text (`w:vanish`), the high-ANSI font as a fallback for the
+  Latin font, and East Asian and complex-script fonts (kept only where they differ from the Latin font). Numbered lists
+  keep their first number, continue counting after an interruption and restart where Word restarts them (the
+  additive `listItem.start`); every separate numbered list in an exported file now restarts instead of carrying on
+  counting from the previous list. Interchange additions (all optional): `DocParagraphStyle.rightIndentPt`,
+  `lineSpacingCustom`, `keepWithNext`, `keepTogether`, `pageBreakBefore`, `DocRunBase.allCaps`, `hidden`,
+  `fontFamilyEastAsia`, `fontFamilyComplex`, `listItem.start`.
+- **Editor: paragraph formatting is part of the editor document.** `ParagraphBlock`, `HeadingBlock` and
+  `ListItemBlock` share the new `ParagraphFormat` fields (`lineSpacing`, `spaceBefore`, `spaceAfter`, `leftIndent`,
+  `rightIndent`, `firstLineIndent`, `keepWithNext`, `keepTogether`, `pageBreakBefore`), `TextStyle`/`TextRun` gain
+  `allCaps`, `hidden`, `fontFamilyEastAsia` and `fontFamilyComplex`. The ProseMirror schema carries them as optional
+  attrs on `paragraph` and `heading` and as new `allCaps` and `hidden` marks, so they survive editing and collaboration
+  (they are shared through the Yjs document like every other attr and mark). The layout honours left, right and
+  first-line indents, spacing, multiple line spacing, small caps, all caps and numbered-list start values; keep-with-next,
+  keep-lines, page-break-before and `atLeast`/`exactly` line heights are stored and exported but not laid out yet, and hidden
+  text is shown dimmed rather than removed (the caret and selection mapping needs every character painted).
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
@@ -75,6 +94,13 @@ lockstep.
 
 ### Fixed
 
+- **A paragraph's `indent` is a level of 24 px, not pixels.** The DOCX importer stored pixels in `indent` (the editor's
+  indent command stores levels), so an imported indent of 48 px was laid out as 48 levels. The importer now sets
+  `leftIndent` (pixels), and the exporter writes `leftIndent` plus 24 px per `indent` level.
+- **Spacing of 0 survives editing.** An explicit zero space before/after a paragraph was dropped when the editor wrote
+  its document back (and in collaboration), so it came back as the default.
+- **DOCX loss report: `docx.paragraphFormatting` is gone and `docx.listFormatting` reports number formats only** (line
+  spacing, indents, keep-with-next, page-break-before, hidden text, custom list starts and restarts are imported).
 - **DOCX export keeps list item spacing and indents** (they were written for paragraphs and headings only).
 - **DOCX import: a paragraph with `numId` 0 is not a list item** (it used to be treated as a numbered one).
 - **DOCX loss report: `docx.namedStyles` effect narrowed.** The style's formatting is now applied to the text; only the
