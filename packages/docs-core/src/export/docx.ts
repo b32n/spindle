@@ -289,6 +289,8 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
               ),
         ...(item.dirty && { dirty: true }),
       };
+    case 'bookmark':
+      return { type: 'bookmark', name: item.name };
   }
 }
 
@@ -669,6 +671,8 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
               ),
         ...(item.dirty && { dirty: true }),
       };
+    case 'bookmark':
+      return { type: 'bookmark', name: item.name };
   }
 }
 
@@ -711,8 +715,9 @@ function toHeaderFooterInlineFromDocx(item: DocInline): HeaderFooterInlineConten
       return { type: 'dynamicField', fieldType: 'pageNumber' };
     case 'totalPages':
       return { type: 'dynamicField', fieldType: 'totalPages' };
-    // Headers and footers have no generic field; the reader does not produce one there.
+    // Headers and footers have no generic field or bookmark.
     case 'field':
+    case 'bookmark':
       return null;
   }
 }

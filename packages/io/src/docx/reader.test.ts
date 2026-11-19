@@ -371,7 +371,7 @@ describe('importDocx', () => {
 
     it('keeps tabs and breaks inside a hyperlink run', async () => {
       const block = await firstText(para(`<w:hyperlink w:anchor="x">${r(`${t('a')}<w:tab/>${t('b')}`)}</w:hyperlink>`));
-      expect(block).toMatchObject({ content: [{ type: 'text', text: 'a\tb' }] });
+      expect(block).toMatchObject({ content: [{ type: 'link', href: '#x', text: 'a\tb' }] });
     });
 
     it('keeps tabs and breaks of a field result in the field, not in the text around it', async () => {

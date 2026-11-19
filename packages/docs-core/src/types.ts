@@ -202,7 +202,17 @@ export interface InlineField {
   dirty?: boolean;
 }
 
-export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField;
+/**
+ * A named position in the text (a Word bookmark): the target of internal links (an `InlineLink` whose `href` is
+ * `#name`). It takes no space but counts as one position in the editor. A bookmark that covers text is kept as a
+ * point at its start.
+ */
+export interface InlineBookmark {
+  type: 'bookmark';
+  name: string;
+}
+
+export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField | InlineBookmark;
 
 // ============================================================================
 // Block Types

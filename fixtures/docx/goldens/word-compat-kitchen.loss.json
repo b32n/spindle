@@ -2,16 +2,6 @@
   "format": "docx",
   "items": [
     {
-      "count": 16,
-      "effect": "bookmarks are dropped and internal links become plain text",
-      "id": "docx.bookmarks",
-      "label": "bookmark(s) and internal link(s)",
-      "where": [
-        "bookmarks ×8",
-        "internal links ×8"
-      ]
-    },
-    {
       "count": 4,
       "effect": "not imported",
       "id": "docx.charts",

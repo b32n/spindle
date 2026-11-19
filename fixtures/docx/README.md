@@ -71,6 +71,10 @@ Fields (`fields.*`) are imported as generic fields with their cached result, so 
 contents, indexes and legacy form fields under `docx.fields`; the `model.json` goldens show each field's instruction and
 result, and the remaining `Unsupported field code` warnings are fields in headers and footers.
 
+Bookmarks (`fields.bookmarks`) are imported as named positions and `w:hyperlink w:anchor` as `#name` links, so the loss goldens
+no longer report `docx.bookmarks`; the `model.json` goldens show `bookmark` items (one per bookmark in the source, `_GoBack`
+aside) and `href: "#name"` links, and a hyperlink wrapped around a `PAGEREF` field keeps only the field.
+
 When an importer change shrinks a loss or alters the model, the goldens will fail. Re-run with
 `docs:docx-fidelity:update`, read the diff, and commit the new goldens in the same PR as the importer
 change. An improvement should be visible in review as a smaller loss snapshot.

@@ -138,3 +138,33 @@ describe('field nodes', () => {
     expect(para.runs.map((r) => (r.kind === 'text' ? r.text : ''))).toEqual(['see ', 'Figure 1', '2b']);
   });
 });
+
+describe('bookmark nodes', () => {
+  const bookmarkSchema = new Schema({
+    nodes: {
+      doc: { content: 'block+' },
+      paragraph: { group: 'block', content: 'inline*', toDOM: () => ['p', 0] },
+      text: { group: 'inline' },
+      bookmark: { inline: true, group: 'inline', atom: true, attrs: { name: {} } },
+    },
+    marks: { link: { attrs: { href: {} }, toDOM: (m) => ['a', { href: m.attrs.href }, 0] } },
+  });
+
+  it('keeps a bookmark as one zero-width character, so layout offsets stay in step with positions', () => {
+    const doc = bookmarkSchema.nodeFromJSON({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'bookmark', attrs: { name: '_Toc1' } }, { type: 'text', text: 'Intro' }] }],
+    });
+    const para = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
+    expect(para.runs.map((r) => (r.kind === 'text' ? r.text : ''))).toEqual(['​', 'Intro']);
+  });
+
+  it('keeps an internal link href as written', () => {
+    const doc = bookmarkSchema.nodeFromJSON({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'go', marks: [{ type: 'link', attrs: { href: '#_Toc1' } }] }] }],
+    });
+    const para = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
+    expect(para.runs[0]).toMatchObject({ kind: 'link', href: '#_Toc1' });
+  });
+});

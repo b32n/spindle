@@ -1,5 +1,6 @@
 import {
   AlignmentType,
+  Bookmark,
   BuilderElement,
   CommentRangeEnd,
   CommentRangeStart,
@@ -10,6 +11,7 @@ import {
   Header,
   HeadingLevel,
   ImageRun,
+  InternalHyperlink,
   LevelFormat,
   LineRuleType,
   Packer,
@@ -208,7 +210,19 @@ class DocxBuilder {
     switch (inline.type) {
       case 'text':
         return this.textRuns(inline, inline.text);
+      case 'bookmark':
+        return inline.name ? [new Bookmark({ id: inline.name, children: [] })] : [];
       case 'link':
+        // `#name` points at a bookmark in this document.
+        if (inline.href.startsWith('#') && inline.href.length > 1) {
+          return [
+            new InternalHyperlink({
+              anchor: inline.href.slice(1),
+              // No Hyperlink character style: Word's own internal links (tables of contents) look like their text.
+              children: this.textRuns(inline, inline.text),
+            }),
+          ];
+        }
         return [
           new ExternalHyperlink({
             link: inline.href,

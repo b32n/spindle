@@ -73,6 +73,19 @@ describe('collab round-trip preserves inline content', () => {
     expect(out[0]).toMatchObject({ content: para.content });
   });
 
+  it('keeps bookmarks and internal links', () => {
+    const para: Block = {
+      id: 'p',
+      type: 'paragraph',
+      content: [
+        { type: 'bookmark', name: '_Toc1' },
+        { type: 'text', text: 'see ' },
+        { type: 'link', text: 'there', href: '#_Toc1' },
+      ],
+    };
+    expect(roundTrip([para])[0]).toMatchObject({ content: para.content });
+  });
+
   it('keeps generic fields with their instruction, cached result and dirty flag', () => {
     const para: Block = {
       id: 'p',
