@@ -5,6 +5,7 @@ import type { ImportLossReport } from '@b32nio/spindle-shared/export/docx';
 const loadIo = () => import('@b32nio/spindle-io/docx');
 import type {
   DocBlock,
+  DocColumns,
   DocCommentThread,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
@@ -31,6 +32,7 @@ import type {
   InlineImage,
   LineSpacing,
   NamedStyle,
+  PageColumns,
   ParagraphFormat,
   ParagraphStyle,
   SectionData,
@@ -160,6 +162,9 @@ function toSection(
     blocks: section.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)),
     header: section.header ? toHeaderFooter(section.header, title) : undefined,
     footer: section.footer ? toHeaderFooter(section.footer, title) : undefined,
+    ...(section.pageConfig.columns && { columns: toDocColumns(section.pageConfig.columns) }),
+    ...(section.pageNumbering && { pageNumbering: section.pageNumbering }),
+    ...(section.verticalAlign && { verticalAlign: section.verticalAlign }),
   };
 }
 
@@ -390,11 +395,31 @@ function toDynamicFieldRun(item: DynamicFieldRun, title: string): DocInline | nu
   }
 }
 
+function toDocColumns(columns: PageColumns): DocColumns {
+  return {
+    count: columns.count,
+    ...(columns.spacing !== undefined && { spacingPx: columns.spacing }),
+    ...(columns.separator && { separator: true }),
+    ...(columns.widths && { widthsPx: columns.widths }),
+  };
+}
+
+function fromDocColumns(columns: DocColumns): PageColumns {
+  return {
+    count: columns.count,
+    ...(columns.spacingPx !== undefined && { spacing: columns.spacingPx }),
+    ...(columns.separator && { separator: true }),
+    ...(columns.widthsPx && { widths: columns.widthsPx }),
+  };
+}
+
 function toHeaderFooter(hf: HeaderFooterContent, title: string): DocHeaderFooter {
   return {
     paragraphs: hf.blocks.map((p) => toHeaderFooterParagraph(p, title)),
     differentFirstPage: hf.differentFirstPage,
     firstPageParagraphs: hf.firstPageBlocks?.map((p) => toHeaderFooterParagraph(p, title)),
+    ...(hf.differentOddEven && { differentOddEven: true }),
+    ...(hf.evenPageBlocks && { evenPageParagraphs: hf.evenPageBlocks.map((p) => toHeaderFooterParagraph(p, title)) }),
   };
 }
 
@@ -539,6 +564,7 @@ function toSectionData(
         left: section.marginLeftPx,
       },
       orientation: section.orientation,
+      ...(section.columns && { columns: fromDocColumns(section.columns) }),
     },
     section.blocks.map((b) => toBlockFromDocx(b, textStylePool))
   );
@@ -546,6 +572,8 @@ function toSectionData(
     ...built,
     header: section.header ? toHeaderFooterContentFromDocx(section.header) : undefined,
     footer: section.footer ? toHeaderFooterContentFromDocx(section.footer) : undefined,
+    ...(section.pageNumbering && { pageNumbering: section.pageNumbering }),
+    ...(section.verticalAlign && { verticalAlign: section.verticalAlign }),
   };
 }
 
@@ -739,6 +767,8 @@ function toHeaderFooterContentFromDocx(hf: DocHeaderFooter): HeaderFooterContent
     blocks: hf.paragraphs.map(toHeaderFooterParagraphFromDocx),
     differentFirstPage: hf.differentFirstPage,
     firstPageBlocks: hf.firstPageParagraphs?.map(toHeaderFooterParagraphFromDocx),
+    ...(hf.differentOddEven && { differentOddEven: true }),
+    ...(hf.evenPageParagraphs && { evenPageBlocks: hf.evenPageParagraphs.map(toHeaderFooterParagraphFromDocx) }),
   };
 }
 

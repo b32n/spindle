@@ -10,7 +10,10 @@ import type {
   DocTextRun,
   DocBorders,
   DocCellTextDirection,
+  DocColumns,
+  DocPageNumbering,
   DocRunBase,
+  DocSectionVerticalAlign,
   DocTableRow,
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
@@ -849,6 +852,8 @@ function parseCellContent(
 // Section properties (page size/margins/orientation, header/footer refs)
 // ---------------------------------------------------------------------------
 
+type HeaderFooterVariant = 'default' | 'first' | 'even';
+
 interface ParsedSectPr {
   pageWidthPx: number;
   pageHeightPx: number;
@@ -857,8 +862,14 @@ interface ParsedSectPr {
   marginBottomPx: number;
   marginLeftPx: number;
   orientation: 'portrait' | 'landscape';
-  headerRId?: string;
-  footerRId?: string;
+  /** Relationship id of the header/footer of each variant (`w:type`; a reference with no type is the default one). */
+  headerRIds: Partial<Record<HeaderFooterVariant, string>>;
+  footerRIds: Partial<Record<HeaderFooterVariant, string>>;
+  /** The first page has its own header/footer (`w:titlePg`). */
+  titlePg: boolean;
+  columns?: DocColumns;
+  pageNumbering?: DocPageNumbering;
+  verticalAlign?: DocSectionVerticalAlign;
 }
 
 const TWIPS_TO_PX = 96 / 1440;
@@ -884,8 +895,22 @@ function parseSectPr(sectPrNode: XmlNode): ParsedSectPr {
   const bottom = Number(marAttrs['@_w:bottom'] ?? 1440);
   const left = Number(marAttrs['@_w:left'] ?? 1440);
 
-  const headerRef = find(kids, 'w:headerReference');
-  const footerRef = find(kids, 'w:footerReference');
+  const references = (tag: 'w:headerReference' | 'w:footerReference'): Partial<Record<HeaderFooterVariant, string>> => {
+    const out: Partial<Record<HeaderFooterVariant, string>> = {};
+    for (const el of kids.filter((k) => tagOf(k) === tag)) {
+      const type = attrsOf(el)['@_w:type'];
+      const variant: HeaderFooterVariant = type === 'first' || type === 'even' ? type : 'default';
+      const rId = attrsOf(el)['@_r:id'];
+      if (rId && !out[variant]) out[variant] = rId;
+    }
+    return out;
+  };
+
+  const titlePg = find(kids, 'w:titlePg');
+  const columns = parseColumns(find(kids, 'w:cols'));
+  const pageNumbering = parsePageNumbering(find(kids, 'w:pgNumType'));
+  const vAlign = find(kids, 'w:vAlign');
+  const vAlignVal = vAlign ? attrsOf(vAlign)['@_w:val'] : undefined;
 
   return {
     pageWidthPx: Math.round(widthTwips * TWIPS_TO_PX),
@@ -895,9 +920,47 @@ function parseSectPr(sectPrNode: XmlNode): ParsedSectPr {
     marginBottomPx: Math.round(bottom * TWIPS_TO_PX),
     marginLeftPx: Math.round(left * TWIPS_TO_PX),
     orientation,
-    headerRId: headerRef ? attrsOf(headerRef)['@_r:id'] : undefined,
-    footerRId: footerRef ? attrsOf(footerRef)['@_r:id'] : undefined,
+    headerRIds: references('w:headerReference'),
+    footerRIds: references('w:footerReference'),
+    titlePg: !!titlePg && isOnEl(titlePg),
+    ...(columns && { columns }),
+    ...(pageNumbering && { pageNumbering }),
+    ...(vAlignVal === 'center' || vAlignVal === 'bottom' || vAlignVal === 'both' ? { verticalAlign: vAlignVal } : {}),
   };
+}
+
+/** Text columns (`w:cols`); a single column is the default and is not kept. */
+function parseColumns(cols: XmlNode | undefined): DocColumns | undefined {
+  if (!cols) return undefined;
+  const attrs = attrsOf(cols);
+  const children = findAll(childrenOf(cols), 'w:col');
+  const num = Number(attrs['@_w:num']);
+  const count = Number.isInteger(num) && num > 0 ? num : Math.max(1, children.length);
+  if (count < 2) return undefined;
+  const space = Number(attrs['@_w:space']);
+  const equal = attrs['@_w:equalWidth'];
+  const widths = children.map((c) => Number(attrsOf(c)['@_w:w']));
+  const unequal = (equal === '0' || equal === 'false' || equal === 'off') && widths.length === count && widths.every((w) => Number.isFinite(w) && w > 0);
+  const sep = attrs['@_w:sep'];
+  return {
+    count,
+    ...(Number.isFinite(space) && space >= 0 && attrs['@_w:space'] !== undefined && { spacingPx: pxFromTwips(space) }),
+    ...((sep === '1' || sep === 'true' || sep === 'on') && { separator: true }),
+    ...(unequal && { widthsPx: widths.map(pxFromTwips) }),
+  };
+}
+
+/** Page numbering (`w:pgNumType`): the first page's number and the number format; chapter numbering is not kept. */
+function parsePageNumbering(el: XmlNode | undefined): DocPageNumbering | undefined {
+  if (!el) return undefined;
+  const attrs = attrsOf(el);
+  const start = Number(attrs['@_w:start']);
+  const fmt = attrs['@_w:fmt'];
+  const numbering: DocPageNumbering = {
+    ...(attrs['@_w:start'] !== undefined && Number.isInteger(start) && { start }),
+    ...(fmt && fmt !== 'decimal' && /^[A-Za-z0-9]{1,40}$/.test(fmt) && { format: fmt }),
+  };
+  return Object.keys(numbering).length > 0 ? numbering : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -939,7 +1002,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const warnings: string[] = [];
   const zip = await JSZip.loadAsync(bytes);
 
-  const [documentXml, docRelsXml, stylesXml, numberingXml, commentsXml, commentsExtendedXml, peopleXml] = await Promise.all([
+  const [documentXml, docRelsXml, stylesXml, numberingXml, commentsXml, commentsExtendedXml, peopleXml, settingsXml] = await Promise.all([
     readZipText(zip, 'word/document.xml'),
     readZipText(zip, 'word/_rels/document.xml.rels'),
     readZipText(zip, 'word/styles.xml'),
@@ -947,6 +1010,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
     readZipText(zip, 'word/comments.xml'),
     readZipText(zip, 'word/commentsExtended.xml'),
     readZipText(zip, 'word/people.xml'),
+    readZipText(zip, 'word/settings.xml'),
   ]);
 
   if (!documentXml) {
@@ -955,6 +1019,16 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
 
   const rels = parseRels(docRelsXml);
   const media = await buildMediaMap(zip, rels);
+  // `w:evenAndOddHeaders` makes the even pages of every section show their own header and footer.
+  const evenAndOddHeaders = (() => {
+    try {
+      const settings = settingsXml ? find(parseXml(settingsXml), 'w:settings') : undefined;
+      const el = settings ? find(childrenOf(settings), 'w:evenAndOddHeaders') : undefined;
+      return !!el && isOnEl(el);
+    } catch {
+      return false;
+    }
+  })();
   const parsedComments = parseComments({ comments: commentsXml, extended: commentsExtendedXml, people: peopleXml }, warnings);
   const comments = createCommentTracker(parsedComments, documentXml);
   const themeXml = await readZipText(zip, 'word/theme/theme1.xml');
@@ -973,8 +1047,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
 
   const flushSection = async (sectPrNode: XmlNode) => {
     const parsed = parseSectPr(sectPrNode);
-    const header = parsed.headerRId ? await loadHeaderFooter(zip, rels, parsed.headerRId, styles, warnings) : undefined;
-    const footer = parsed.footerRId ? await loadHeaderFooter(zip, rels, parsed.footerRId, styles, warnings) : undefined;
+    const header = await loadHeaderFooterVariants(zip, rels, parsed.headerRIds, parsed.titlePg, evenAndOddHeaders, styles, warnings);
+    const footer = await loadHeaderFooterVariants(zip, rels, parsed.footerRIds, parsed.titlePg, evenAndOddHeaders, styles, warnings);
     sections.push({
       pageWidthPx: parsed.pageWidthPx,
       pageHeightPx: parsed.pageHeightPx,
@@ -986,6 +1060,9 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       blocks: settleListStarts(currentBlocks),
       ...(header && { header }),
       ...(footer && { footer }),
+      ...(parsed.columns && { columns: parsed.columns }),
+      ...(parsed.pageNumbering && { pageNumbering: parsed.pageNumbering }),
+      ...(parsed.verticalAlign && { verticalAlign: parsed.verticalAlign }),
     });
     currentBlocks = [];
   };
@@ -1066,7 +1143,7 @@ function usedStyleIds(sections: DocSection[]): Set<string> {
     for (const inline of content) if ((inline.type === 'text' || inline.type === 'link') && inline.namedStyleId) used.add(inline.namedStyleId);
   };
   const hf = (part: DocHeaderFooter | undefined) => {
-    for (const p of [...(part?.paragraphs ?? []), ...(part?.firstPageParagraphs ?? [])]) inlines(p.content);
+    for (const p of [...(part?.paragraphs ?? []), ...(part?.firstPageParagraphs ?? []), ...(part?.evenPageParagraphs ?? [])]) inlines(p.content);
   };
   const visit = (block: DocBlock) => {
     if (block.type === 'table') {
@@ -1108,6 +1185,35 @@ async function loadHeaderFooter(
   const partRels = parseRels(partRelsXml);
   const partMedia = await buildMediaMap(zip, partRels);
   return parseHeaderFooter(partXml, { rels: partRels, media: partMedia, styles }, warnings);
+}
+
+/**
+ * The header or footer of a section with its first-page and even-page variants. `differentFirstPage` follows the
+ * section's `w:titlePg` and `differentOddEven` the document's `w:evenAndOddHeaders`; a variant that is switched on
+ * without a part of its own is blank (empty paragraphs), as in Word. A variant part present while its switch is off is
+ * kept (inert), so the file writes back as it was.
+ */
+async function loadHeaderFooterVariants(
+  zip: JSZip,
+  rels: Map<string, string>,
+  rIds: Partial<Record<HeaderFooterVariant, string>>,
+  titlePg: boolean,
+  evenAndOdd: boolean,
+  styles: StyleSheet,
+  warnings: string[]
+): Promise<DocHeaderFooter | undefined> {
+  const load = (variant: HeaderFooterVariant) => (rIds[variant] ? loadHeaderFooter(zip, rels, rIds[variant]!, styles, warnings) : Promise.resolve(undefined));
+  const base = await load('default');
+  const first = await load('first');
+  const even = await load('even');
+  if (!base && !first && !even) return undefined;
+  return {
+    paragraphs: base?.paragraphs ?? [],
+    ...(titlePg && { differentFirstPage: true }),
+    ...(first && { firstPageParagraphs: first.paragraphs }),
+    ...(evenAndOdd && { differentOddEven: true }),
+    ...(even && { evenPageParagraphs: even.paragraphs }),
+  };
 }
 
 function parseTitle(coreXml: string): string {

@@ -447,6 +447,36 @@ describe('importFromDocx', () => {
     expect(nested.rows[0].cells[0].content).toEqual([expect.objectContaining({ text: 'inner' })]);
   });
 
+  it('round-trips header and footer variants and the section properties through DOCX', async () => {
+    const hfp = (t: string) => ({ type: 'paragraph' as const, content: [{ type: 'text' as const, text: t }] });
+    const source = docWith({
+      sections: [
+        {
+          id: 'sec1',
+          pageConfig: { ...PAGE_CONFIG, columns: { count: 2, spacing: 24, separator: true } },
+          blocks: [{ id: 'b1', type: 'paragraph', content: [{ type: 'text', text: 'body' }] }],
+          header: { blocks: [hfp('odd')], differentFirstPage: true, firstPageBlocks: [hfp('first')], differentOddEven: true, evenPageBlocks: [hfp('even')] },
+          footer: { blocks: [hfp('foot')] },
+          pageNumbering: { start: 7, format: 'upperRoman' },
+          verticalAlign: 'center',
+        },
+      ],
+    });
+    const { result: exported } = await exportAndUnzip(source);
+    const target = docWith({});
+    await importFromDocx(exported.bytes, target);
+    const section = target.getData().sections[0];
+    const texts = (blocks: Array<{ content: Array<{ type: string }> }> | undefined) => blocks?.map((b) => b.content.map((c) => (c as { text?: string }).text).join(''));
+    expect(texts(section.header?.blocks)).toEqual(['odd']);
+    expect(texts(section.header?.firstPageBlocks)).toEqual(['first']);
+    expect(texts(section.header?.evenPageBlocks)).toEqual(['even']);
+    expect(section.header).toMatchObject({ differentFirstPage: true, differentOddEven: true });
+    expect(texts(section.footer?.firstPageBlocks)).toEqual(['foot']);
+    expect(section.pageConfig.columns).toEqual({ count: 2, spacing: 24, separator: true });
+    expect(section.pageNumbering).toEqual({ start: 7, format: 'upperRoman' });
+    expect(section.verticalAlign).toBe('center');
+  });
+
   it('round-trips a hyperlink via the text style pool when it carries formatting', async () => {
     const source = docWith({
       textStylePool: { style_1: { bold: true } },
