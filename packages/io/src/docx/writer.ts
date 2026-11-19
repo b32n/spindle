@@ -237,14 +237,17 @@ class DocxBuilder {
   }
 
   buildSection(section: DocSection) {
-    const width = pxToTwips(section.pageWidthPx);
-    const height = pxToTwips(section.pageHeightPx);
+    // `docx` swaps width/height itself when the orientation is landscape, so it
+    // is handed the portrait pair; the file then carries the on-page dimensions.
+    const landscape = section.orientation === 'landscape';
+    const width = pxToTwips(landscape ? section.pageHeightPx : section.pageWidthPx);
+    const height = pxToTwips(landscape ? section.pageWidthPx : section.pageHeightPx);
     const header = this.buildHeader(section.header);
     const footer = this.buildFooter(section.footer);
     return {
       properties: {
         page: {
-          size: { width, height, orientation: section.orientation === 'landscape' ? PageOrientation.LANDSCAPE : PageOrientation.PORTRAIT },
+          size: { width, height, orientation: landscape ? PageOrientation.LANDSCAPE : PageOrientation.PORTRAIT },
           margin: {
             top: pxToTwips(section.marginTopPx),
             right: pxToTwips(section.marginRightPx),

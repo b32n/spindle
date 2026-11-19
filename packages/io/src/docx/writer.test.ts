@@ -151,9 +151,53 @@ describe('exportDocx', () => {
   it('writes page size/margins/orientation for a section', async () => {
     const { documentXml } = await buildAndUnzip({
       title: 'T',
-      sections: [{ ...BASE_SECTION, orientation: 'landscape', blocks: [{ type: 'paragraph', content: [] }] }],
+      sections: [{ ...BASE_SECTION, pageWidthPx: 1056, pageHeightPx: 816, orientation: 'landscape', blocks: [{ type: 'paragraph', content: [] }] }],
     });
     expect(documentXml).toMatch(/<w:pgSz[^>]*w:orient="landscape"/);
+  });
+
+  describe('page size (pgSz)', () => {
+    async function pgSz(over: Partial<DocSection>) {
+      const { documentXml } = await buildAndUnzip({
+        title: 'T',
+        sections: [{ ...BASE_SECTION, ...over, blocks: [{ type: 'paragraph', content: [] }] }],
+      });
+      const tag = documentXml.match(/<w:pgSz[^>]*\/>/)![0];
+      const attr = (n: string) => tag.match(new RegExp(`w:${n}="([^"]*)"`))?.[1];
+      return { w: Number(attr('w')), h: Number(attr('h')), orient: attr('orient') };
+    }
+
+    it('writes portrait Letter as 12240 x 15840', async () => {
+      expect(await pgSz({})).toMatchObject({ w: 12240, h: 15840, orient: 'portrait' });
+    });
+
+    it('writes landscape Letter with the on-page size, width larger than height', async () => {
+      expect(await pgSz({ pageWidthPx: 1056, pageHeightPx: 816, orientation: 'landscape' })).toMatchObject({
+        w: 15840,
+        h: 12240,
+        orient: 'landscape',
+      });
+    });
+
+    it('writes landscape A4 as 16838 x 11906', async () => {
+      expect(await pgSz({ pageWidthPx: 1123, pageHeightPx: 794, orientation: 'landscape' })).toMatchObject({
+        w: 16845,
+        h: 11910,
+        orient: 'landscape',
+      });
+    });
+
+    it('writes a custom landscape size without swapping it twice', async () => {
+      expect(await pgSz({ pageWidthPx: 960, pageHeightPx: 480, orientation: 'landscape' })).toMatchObject({
+        w: 14400,
+        h: 7200,
+        orient: 'landscape',
+      });
+    });
+
+    it('writes a custom portrait size unchanged', async () => {
+      expect(await pgSz({ pageWidthPx: 480, pageHeightPx: 960 })).toMatchObject({ w: 7200, h: 14400, orient: 'portrait' });
+    });
   });
 
   it('writes header and footer content, including a page-number field', async () => {

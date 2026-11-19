@@ -592,9 +592,15 @@ function parseSectPr(sectPrNode: XmlNode): ParsedSectPr {
   const kids = childrenOf(sectPrNode);
   const pgSz = find(kids, 'w:pgSz');
   const pgSzAttrs = pgSz ? attrsOf(pgSz) : {};
-  const orientation: 'portrait' | 'landscape' = pgSzAttrs['@_w:orient'] === 'landscape' ? 'landscape' : 'portrait';
-  const widthTwips = Number(pgSzAttrs['@_w:w'] ?? 12240);
-  const heightTwips = Number(pgSzAttrs['@_w:h'] ?? 15840);
+  const rawWidthTwips = Number(pgSzAttrs['@_w:w'] ?? 12240);
+  const rawHeightTwips = Number(pgSzAttrs['@_w:h'] ?? 15840);
+  // Some producers write landscape pages with w < h (the natural size) and
+  // rely on w:orient; others omit w:orient and only swap w/h. Treat either
+  // signal as landscape and report the on-page size (width >= height).
+  const landscape = pgSzAttrs['@_w:orient'] === 'landscape' || rawWidthTwips > rawHeightTwips;
+  const orientation: 'portrait' | 'landscape' = landscape ? 'landscape' : 'portrait';
+  const widthTwips = landscape ? Math.max(rawWidthTwips, rawHeightTwips) : rawWidthTwips;
+  const heightTwips = landscape ? Math.min(rawWidthTwips, rawHeightTwips) : rawHeightTwips;
 
   const pgMar = find(kids, 'w:pgMar');
   const marAttrs = pgMar ? attrsOf(pgMar) : {};
