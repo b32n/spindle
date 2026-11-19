@@ -333,6 +333,10 @@ function extractRuns(node: PmNode): Run[] {
       // Body fields are resolved at paint time only in headers/footers; in the
       // body they render as a visible placeholder so they stay selectable.
       runs.push({ kind: 'text', text: `\u2039${String(child.attrs.fieldType)}\u203A` });
+    } else if (child.type.name === 'bookmark') {
+      // Zero width on the page, but one editor position: a zero-width space keeps the
+      // layout offsets and ProseMirror positions in step, and marks where to scroll to.
+      runs.push({ kind: 'text', text: '\u200B' });
     } else if (child.type.name === 'field') {
       // A field shows the result Word last computed; it is never recalculated here.
       runs.push({ kind: 'text', text: fieldResultText(child.attrs.result) });

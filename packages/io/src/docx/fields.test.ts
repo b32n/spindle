@@ -106,9 +106,9 @@ describe('fields', () => {
     expect(content).toEqual([{ type: 'link', text: 'example', href: 'https://example.com/a', bold: true }]);
   });
 
-  it('keeps a HYPERLINK field to an anchor only as a field', async () => {
+  it('turns a HYPERLINK field to an anchor only into an internal link', async () => {
     const content = await contentOf(para(complex(' HYPERLINK \\l "_Toc1" ', r(t('Intro')))));
-    expect(content).toMatchObject([{ type: 'field', kind: 'HYPERLINK', result: 'Intro' }]);
+    expect(content).toEqual([{ type: 'link', text: 'Intro', href: '#_Toc1' }]);
   });
 
   it('keeps the text of a table of contents as static paragraphs, and fields inside it', async () => {

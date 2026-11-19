@@ -140,15 +140,6 @@
           "fontSize": 13
         }
       },
-      "Hyperlink": {
-        "basedOn": "DefaultParagraphFont",
-        "kind": "character",
-        "name": "Hyperlink",
-        "text": {
-          "color": "#0563c1",
-          "underline": true
-        }
-      },
       "IndexLink": {
         "kind": "character",
         "name": "Index Link"
@@ -667,6 +658,10 @@
             "alignment": "left",
             "content": [
               {
+                "name": "_Toc9000",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -711,6 +706,10 @@
           {
             "alignment": "left",
             "content": [
+              {
+                "name": "_Toc9001",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -757,6 +756,10 @@
             "alignment": "left",
             "content": [
               {
+                "name": "_Toc9002",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -801,6 +804,10 @@
           {
             "alignment": "left",
             "content": [
+              {
+                "name": "_Toc9003",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -847,6 +854,10 @@
             "alignment": "left",
             "content": [
               {
+                "name": "_Toc9004",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -892,6 +903,10 @@
             "alignment": "left",
             "content": [
               {
+                "name": "_TocFields",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -916,6 +931,10 @@
           {
             "alignment": "justify",
             "content": [
+              {
+                "name": "keyfigure",
+                "type": "bookmark"
+              },
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
@@ -1367,13 +1386,10 @@
                 "type": "text"
               },
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#keyfigure",
+                "styleId": "text-style-1",
                 "text": "jump to the key figure",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1382,13 +1398,10 @@
                 "type": "text"
               },
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9003",
+                "styleId": "text-style-1",
                 "text": "jump to Findings",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
                 "fontFamily": "Liberation Sans",

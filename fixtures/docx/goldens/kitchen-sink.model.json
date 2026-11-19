@@ -117,15 +117,6 @@
           "fontSize": 16
         }
       },
-      "Hyperlink": {
-        "basedOn": "DefaultParagraphFont",
-        "kind": "character",
-        "name": "Hyperlink",
-        "text": {
-          "color": "#0563c1",
-          "underline": true
-        }
-      },
       "IntenseQuote": {
         "basedOn": "Quote",
         "kind": "paragraph",
@@ -428,7 +419,6 @@
                 "color": "#0563c1",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
-                "namedStyleId": "Hyperlink",
                 "text": "Navigation",
                 "type": "text",
                 "underline": true
@@ -459,19 +449,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9001",
+                "styleId": "text-style-1",
                 "text": "Lists and styles",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9001",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9001 \\h",
@@ -500,19 +487,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9002",
+                "styleId": "text-style-1",
                 "text": "Review",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9002",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9002 \\h",
@@ -541,19 +525,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9003",
+                "styleId": "text-style-1",
                 "text": "Tables",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9003",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9003 \\h",
@@ -582,19 +563,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9004",
+                "styleId": "text-style-1",
                 "text": "Media",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9004",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9004 \\h",
@@ -623,19 +601,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9005",
+                "styleId": "text-style-1",
                 "text": "Equations",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9005",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9005 \\h",
@@ -664,19 +639,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9006",
+                "styleId": "text-style-1",
                 "text": "Controls",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9006",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9006 \\h",
@@ -705,19 +677,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9007",
+                "styleId": "text-style-1",
                 "text": "Languages",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9007",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9007 \\h",
@@ -746,19 +715,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9008",
+                "styleId": "text-style-1",
                 "text": "Typography",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9008",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9008 \\h",
@@ -787,19 +753,16 @@
           {
             "content": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9009",
+                "styleId": "text-style-1",
                 "text": "Charts",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
+                "href": "#_Toc9009",
+                "styleId": "text-style-2",
                 "text": "\t",
-                "type": "text"
+                "type": "link"
               },
               {
                 "instruction": "PAGEREF _Toc9009 \\h",
@@ -837,6 +800,10 @@
           },
           {
             "content": [
+              {
+                "name": "_Toc9000",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -881,6 +848,10 @@
           {
             "content": [
               {
+                "name": "_Toc9001",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -923,6 +894,10 @@
           },
           {
             "content": [
+              {
+                "name": "_Toc9002",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -967,6 +942,10 @@
           {
             "content": [
               {
+                "name": "_Toc9003",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -1009,6 +988,10 @@
           },
           {
             "content": [
+              {
+                "name": "_Toc9004",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -1053,6 +1036,10 @@
           {
             "content": [
               {
+                "name": "_Toc9005",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -1095,6 +1082,10 @@
           },
           {
             "content": [
+              {
+                "name": "_Toc9006",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -1139,6 +1130,10 @@
           {
             "content": [
               {
+                "name": "_Toc9007",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -1181,6 +1176,10 @@
           },
           {
             "content": [
+              {
+                "name": "_Toc9008",
+                "type": "bookmark"
+              },
               {
                 "bold": true,
                 "color": "#2f5496",
@@ -1225,6 +1224,10 @@
           {
             "content": [
               {
+                "name": "_Toc9009",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -1268,6 +1271,10 @@
           {
             "content": [
               {
+                "name": "_TocFields",
+                "type": "bookmark"
+              },
+              {
                 "bold": true,
                 "color": "#2f5496",
                 "fontFamily": "Liberation Serif",
@@ -1292,6 +1299,10 @@
           {
             "alignment": "justify",
             "content": [
+              {
+                "name": "keyfigure",
+                "type": "bookmark"
+              },
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
@@ -1735,13 +1746,10 @@
                 "type": "text"
               },
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#keyfigure",
+                "styleId": "text-style-1",
                 "text": "jump to the key figure",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1750,13 +1758,10 @@
                 "type": "text"
               },
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "namedStyleId": "Hyperlink",
+                "href": "#_Toc9003",
+                "styleId": "text-style-1",
                 "text": "jump to Findings",
-                "type": "text",
-                "underline": true
+                "type": "link"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -2743,6 +2748,10 @@
                 "fontSize": 11,
                 "text": ". A comment over a bookmark: ",
                 "type": "text"
+              },
+              {
+                "name": "nestedbm",
+                "type": "bookmark"
               },
               {
                 "commentThreadId": "thread-1",
@@ -8694,6 +8703,10 @@
         "fontFamily": "Liberation Sans",
         "fontSize": 11,
         "underline": true
+      },
+      "text-style-2": {
+        "fontFamily": "Liberation Sans",
+        "fontSize": 11
       }
     },
     "threads": [

@@ -419,6 +419,27 @@ const nodes: Record<string, NodeSpec> = {
     },
   },
 
+  // A named position (Word bookmark), the target of internal links. Zero-width in the
+  // document flow; the editor sees it as one position.
+  bookmark: {
+    inline: true,
+    group: 'inline',
+    atom: true,
+    selectable: false,
+    attrs: { name: { default: '' } },
+    parseDOM: [
+      {
+        tag: 'span[data-bookmark]',
+        getAttrs(dom: HTMLElement) {
+          return { name: dom.getAttribute('data-bookmark') || '' };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      return ['span', { class: 'bookmark', 'data-bookmark': String(node.attrs.name) }];
+    },
+  },
+
   text: {
     group: 'inline',
   },

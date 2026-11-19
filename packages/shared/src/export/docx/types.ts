@@ -80,7 +80,16 @@ export interface DocFieldRun {
   dirty?: boolean;
 }
 
-export type DocInline = DocTextRun | DocLinkRun | DocImageRun | DocPageNumberRun | DocTotalPagesRun | DocFieldRun;
+/**
+ * A named position in the text (a Word bookmark), the target of internal links (`href: '#name'`) and of REF and
+ * PAGEREF fields. It takes no space. A bookmark that covers text is kept as a point at its start.
+ */
+export interface DocBookmarkRun {
+  type: 'bookmark';
+  name: string;
+}
+
+export type DocInline = DocTextRun | DocLinkRun | DocImageRun | DocPageNumberRun | DocTotalPagesRun | DocFieldRun | DocBookmarkRun;
 
 export interface DocParagraphStyle {
   alignment?: 'left' | 'center' | 'right' | 'justify';

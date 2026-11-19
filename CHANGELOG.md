@@ -94,6 +94,15 @@ lockstep.
   document a new `namedStyles` map, so styles and references sync in collaboration (a late joiner receives the room's
   styles; no migration is needed). There is no style gallery or style editing UI yet.
 
+- **DOCX bookmarks and internal links are imported and exported.** A `w:bookmarkStart` becomes the additive `DocBookmarkRun`
+  interchange member (`{ type: 'bookmark', name }`; `_Toc` and `_Ref` names kept, Word's `_GoBack` marker dropped), a
+  `w:hyperlink` with `w:anchor` becomes a link whose `href` is `#name` (`url#name` with a target too), and the export writes
+  `w:bookmarkStart`/`w:bookmarkEnd` and an internal hyperlink. A bookmark is kept as a point where it starts (its range is
+  not preserved). Clicking an internal link in the editor scrolls to its bookmark. `docx.bookmarks` is removed from the full
+  loss report.
+- **Editor: bookmark in the document model.** Additive `InlineBookmark` in `InlineContent` and a `bookmark` inline atom in the
+  ProseMirror schema (attr `name`) that syncs over Yjs. It takes no space on the page but counts as one position. Code that
+  switches exhaustively over `InlineContent` or `DocInline` needs a `bookmark` case.
 - **DOCX fields are kept with their cached result.** Import keeps every field other than `PAGE`/`NUMPAGES` (still page-number
   fields), `HYPERLINK`, tables of contents and legacy form fields as the additive `DocFieldRun` interchange member
   (`{ type: 'field', instruction, kind, result, dirty? }`): `REF`, `PAGEREF`, `SEQ`, `STYLEREF`, `DATE`, `TIME`, `TITLE`,

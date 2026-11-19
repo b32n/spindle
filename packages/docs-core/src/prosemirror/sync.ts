@@ -344,6 +344,10 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       };
     }
 
+    if (item.type === 'bookmark') {
+      return { type: 'bookmark', attrs: { name: item.name } };
+    }
+
     if (item.type === 'field') {
       return {
         type: 'field',
@@ -617,6 +621,11 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
         height: (child.attrs.height as number | null) ?? 100,
         ...(child.attrs.alt ? { alt: child.attrs.alt as string } : {}),
       });
+      return;
+    }
+
+    if (child.type.name === 'bookmark') {
+      content.push({ type: 'bookmark', name: child.attrs.name as string });
       return;
     }
 

@@ -216,21 +216,6 @@ function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
   );
 }
 
-function bookmarks(root: XmlNode[]): Item[] {
-  const kinds = new Map<string, number>();
-  let total = 0;
-  walk(root, (node, tag) => {
-    if (tag === 'w:bookmarkStart' && !(attr(node, 'w:name') ?? '').startsWith('_GoBack')) {
-      total++;
-      bump(kinds, 'bookmarks');
-    } else if (tag === 'w:hyperlink' && attr(node, 'w:anchor')) {
-      total++;
-      bump(kinds, 'internal links');
-    }
-  });
-  return item('docx.bookmarks', 'bookmark(s) and internal link(s)', total, 'bookmarks are dropped and internal links become plain text', kinds);
-}
-
 function sectionDetectors(root: XmlNode[], evenAndOdd: boolean): Item[] {
   const variantKinds = new Map<string, number>();
   const propKinds = new Map<string, number>();
@@ -508,7 +493,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     ...safe(() => extraSections(root)),
     ...safe(() => tableDetectors(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
-    ...safe(() => bookmarks(root)),
     ...safe(() => sectionDetectors(root, evenAndOdd)),
     ...safe(() => fields(root)),
     ...safe(() => trackedMoves(root)),
