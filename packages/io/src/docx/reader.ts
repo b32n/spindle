@@ -330,8 +330,43 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
 
 const EMU_TO_PX = 1 / 9525; // 914400 EMU/inch, 96px/inch
 
-/** An inline (non-floating) image drawing: <w:drawing><wp:inline>...<a:blip r:embed="..."/></wp:inline></w:drawing>. Floating (wp:anchor) images aren't positioned the same way our block model supports, so they're dropped with a warning. */
+type DrawingKind = 'picture' | 'chart' | 'diagram' | 'shape' | 'embeddedObject' | 'unknown';
+
+const DRAWING_KIND_WARNINGS: Record<Exclude<DrawingKind, 'picture'>, string> = {
+  chart: 'A chart was not imported — charts are not supported yet.',
+  diagram: 'A SmartArt diagram was not imported — diagrams are not supported yet.',
+  shape: 'A shape or text box was not imported — shapes and text boxes are not supported yet.',
+  embeddedObject: 'An embedded object preview was not imported — embedded objects are not supported yet.',
+  unknown: 'A drawing object of an unsupported kind was not imported.',
+};
+
+/** Classifies a <w:drawing> by its <a:graphicData uri="...">, which says what the drawing really is. A drawing with no graphicData that still carries a blip is treated as a picture. */
+function drawingKind(drawingNode: XmlNode): DrawingKind {
+  const graphicData = findDeep(drawingNode, 'a:graphicData');
+  const uri = (graphicData ? attrsOf(graphicData)['@_uri'] : undefined)?.toLowerCase() ?? '';
+  if (uri.endsWith('/drawingml/2006/picture')) return 'picture';
+  if (uri.includes('/chart')) return 'chart'; // .../drawingml/2006/chart, .../drawing/2014/chartex
+  if (uri.endsWith('/drawingml/2006/diagram')) return 'diagram';
+  if (uri.includes('wordprocessingshape') || uri.includes('wordprocessinggroup') || uri.includes('wordprocessingcanvas') || uri.endsWith('/drawingml/2006/lockedcanvas')) {
+    return 'shape';
+  }
+  if (/\/ole(\/|$)/.test(uri) || (graphicData && findDeep(graphicData, 'o:OLEObject'))) return 'embeddedObject';
+  if (!uri && findDeep(drawingNode, 'a:blip')) return 'picture';
+  return 'unknown';
+}
+
+/**
+ * A <w:drawing> run child. Only inline pictures (<wp:inline> + <a:blip r:embed>) become images. Anchored
+ * pictures aren't positioned the way our block model supports, so they're dropped with a warning; every
+ * other kind (chart, SmartArt, shape/text box, embedded-object preview) is reported as what it is rather
+ * than as a missing image. Linked pictures (<a:blip r:link>) point outside the package and are never fetched.
+ */
 function parseDrawing(drawingNode: XmlNode, media: Map<string, string>, warnings: string[]): DocInline | null {
+  const kind = drawingKind(drawingNode);
+  if (kind !== 'picture') {
+    warnings.push(DRAWING_KIND_WARNINGS[kind]);
+    return null;
+  }
   const inline = findDeep(drawingNode, 'wp:inline');
   if (!inline) {
     warnings.push('A floating (anchored) image was skipped — only inline images are supported.');
@@ -345,10 +380,15 @@ function parseDrawing(drawingNode: XmlNode, media: Map<string, string>, warnings
   const docPrAttrs = docPr ? attrsOf(docPr) : {};
   const alt = docPrAttrs['@_descr'] || docPrAttrs['@_name'] || undefined;
   const blip = findDeep(inline, 'a:blip');
-  const rId = blip ? attrsOf(blip)['@_r:embed'] : undefined;
-  const src = rId ? media.get(rId) : undefined;
+  const blipAttrs = blip ? attrsOf(blip) : {};
+  const embedId = blipAttrs['@_r:embed'];
+  const src = embedId ? media.get(embedId) : undefined;
   if (!src) {
-    warnings.push('An embedded image could not be resolved and was skipped.');
+    if (!embedId && blipAttrs['@_r:link']) {
+      warnings.push('A linked picture was skipped — images linked from outside the document are never fetched.');
+    } else {
+      warnings.push('An embedded image could not be resolved and was skipped.');
+    }
     return null;
   }
   return { type: 'image', src, width, height, ...(alt && { alt }) };

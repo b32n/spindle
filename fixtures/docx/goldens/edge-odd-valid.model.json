@@ -316,7 +316,7 @@
   },
   "importError": null,
   "warnings": [
-    "A floating (anchored) image was skipped — only inline images are supported.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
     "Unsupported field code \"TITLE\" — its cached value was dropped."
   ]
 }

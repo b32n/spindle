@@ -152,13 +152,13 @@
   },
   "importError": null,
   "warnings": [
-    "A floating (anchored) image was skipped — only inline images are supported.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped."
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A shape or text box was not imported — shapes and text boxes are not supported yet.",
+    "A SmartArt diagram was not imported — diagrams are not supported yet."
   ]
 }
