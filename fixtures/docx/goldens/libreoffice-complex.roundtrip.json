@@ -23,27 +23,11 @@
       "sections": 4,
       "textChars": 20846
     },
-    "byField": {
-      "changed sections[].pageConfig.size.h": 1,
-      "changed sections[].pageConfig.size.w": 1
-    },
-    "changed": 2,
-    "entries": [
-      {
-        "after": "816",
-        "before": "1056",
-        "kind": "changed",
-        "path": "sections[1].pageConfig.size.h"
-      },
-      {
-        "after": "1056",
-        "before": "816",
-        "kind": "changed",
-        "path": "sections[1].pageConfig.size.w"
-      }
-    ],
+    "byField": {},
+    "changed": 0,
+    "entries": [],
     "removed": 0,
-    "total": 2,
+    "total": 0,
     "truncated": false
   },
   "exportWarnings": [],

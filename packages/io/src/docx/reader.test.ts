@@ -301,12 +301,49 @@ describe('importDocx', () => {
     expect(s.marginRightPx).toBe(72);
   });
 
-  it('round-trips landscape orientation', async () => {
-    // The docx library normalizes page-size numbers for landscape internally,
-    // so this only asserts the orientation flag itself round-trips — matching
-    // the scope of the writer's own "landscape" test.
-    const result = await roundTrip(section([{ type: 'paragraph', content: [] }], { orientation: 'landscape' }));
+  it('round-trips landscape orientation and the on-page size', async () => {
+    const result = await roundTrip(
+      section([{ type: 'paragraph', content: [] }], { pageWidthPx: 1056, pageHeightPx: 816, orientation: 'landscape' })
+    );
     expect(result.sections[0].orientation).toBe('landscape');
+    expect(result.sections[0].pageWidthPx).toBe(1056);
+    expect(result.sections[0].pageHeightPx).toBe(816);
+  });
+
+  describe('page size from pgSz', () => {
+    async function importPgSz(attrs: string) {
+      const exported = await exportDocx(section([{ type: 'paragraph', content: [] }]));
+      const zip = await JSZip.loadAsync(exported.bytes);
+      let xml = await zip.file('word/document.xml')!.async('string');
+      xml = xml.replace(/<w:pgSz[^>]*\/>/, `<w:pgSz ${attrs}/>`);
+      zip.file('word/document.xml', xml);
+      return (await importDocx(await zip.generateAsync({ type: 'uint8array' }))).sections[0];
+    }
+
+    it('reads landscape written with w < h (natural size plus orient)', async () => {
+      const s = await importPgSz('w:w="12240" w:h="15840" w:orient="landscape"');
+      expect(s).toMatchObject({ orientation: 'landscape', pageWidthPx: 1056, pageHeightPx: 816 });
+    });
+
+    it('reads landscape written with w > h', async () => {
+      const s = await importPgSz('w:w="15840" w:h="12240" w:orient="landscape"');
+      expect(s).toMatchObject({ orientation: 'landscape', pageWidthPx: 1056, pageHeightPx: 816 });
+    });
+
+    it('treats w > h without an orient attribute as landscape', async () => {
+      const s = await importPgSz('w:w="15840" w:h="12240"');
+      expect(s).toMatchObject({ orientation: 'landscape', pageWidthPx: 1056, pageHeightPx: 816 });
+    });
+
+    it('reads portrait unchanged', async () => {
+      const s = await importPgSz('w:w="12240" w:h="15840" w:orient="portrait"');
+      expect(s).toMatchObject({ orientation: 'portrait', pageWidthPx: 816, pageHeightPx: 1056 });
+    });
+
+    it('keeps a custom landscape size', async () => {
+      const s = await importPgSz('w:w="7200" w:h="14400" w:orient="landscape"');
+      expect(s).toMatchObject({ orientation: 'landscape', pageWidthPx: 960, pageHeightPx: 480 });
+    });
   });
 
   it('round-trips multiple sections with independent orientation', async () => {
@@ -314,7 +351,7 @@ describe('importDocx', () => {
       title: 'T',
       sections: [
         { ...BASE_SECTION, blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'One' }] }] },
-        { ...BASE_SECTION, orientation: 'landscape', blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'Two' }] }] },
+        { ...BASE_SECTION, pageWidthPx: 1056, pageHeightPx: 816, orientation: 'landscape', blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'Two' }] }] },
       ],
     });
     const result = await importDocx(exported.bytes);

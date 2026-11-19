@@ -30,6 +30,14 @@ lockstep.
   Import from `@b32nio/spindle-io/xlsx` / `/docx` instead. Types and import-loss helpers stay in shared;
   `@b32nio/spindle-shared/export/csv` is unchanged.
 
+### Fixed
+
+- **DOCX: landscape sections no longer lose their orientation on a round trip.** `exportDocx` handed the `docx`
+  library an already-swapped page size and the library swapped it again, so a landscape section was written
+  as 8.5x11in with `w:orient="landscape"` and re-imported as portrait-shaped. The writer now emits the on-page
+  size (width larger than height for landscape), and the reader also accepts landscape written with
+  `w:w` < `w:h` or with `w:w` > `w:h` and no `w:orient`. `PageConfig.size` keeps its natural-size convention.
+
 ## [0.4.0] - 2026-10-26
 
 ### Added
