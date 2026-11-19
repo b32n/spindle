@@ -87,6 +87,7 @@ function formatAttrs(block: ParagraphFormat): Record<string, unknown> {
     keepWithNext: block.keepWithNext || null,
     keepTogether: block.keepTogether || null,
     pageBreakBefore: block.pageBreakBefore || null,
+    namedStyleId: block.namedStyleId ?? null,
   };
 }
 
@@ -106,6 +107,7 @@ function readFormat(attrs: Record<string, unknown>, defaults: { spaceBefore: num
   if (attrs.keepWithNext === true) out.keepWithNext = true;
   if (attrs.keepTogether === true) out.keepTogether = true;
   if (attrs.pageBreakBefore === true) out.pageBreakBefore = true;
+  if (typeof attrs.namedStyleId === 'string' && attrs.namedStyleId) out.namedStyleId = attrs.namedStyleId;
   return out;
 }
 
@@ -307,6 +309,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
         marks = styleToMarks(inlineStyle);
       }
 
+      if (item.namedStyleId) marks.push({ type: 'namedStyle', attrs: { id: item.namedStyleId } });
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
@@ -321,6 +324,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       // Keep character formatting that was applied on top of the link.
       const poolStyle = item.styleId && stylePool ? stylePool.get(item.styleId) : undefined;
       marks.push(...styleToMarks(poolStyle ?? inlineStyleOf(item)));
+      if (item.namedStyleId) marks.push({ type: 'namedStyle', attrs: { id: item.namedStyleId } });
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
@@ -651,6 +655,10 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
       item = { type: 'text', text } as TextRun;
     }
 
+    const namedStyleMark = child.marks.find((m) => m.type.name === 'namedStyle');
+    if (namedStyleMark && typeof namedStyleMark.attrs.id === 'string' && namedStyleMark.attrs.id) {
+      (item as TextRun | InlineLink).namedStyleId = namedStyleMark.attrs.id;
+    }
     if (commentThreadId) {
       (item as TextRun | InlineLink).commentThreadId = commentThreadId;
     }

@@ -15,6 +15,45 @@
         "w": 816
       }
     },
+    "namedStyles": {
+      "BodyText": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "BodyTextChar",
+        "name": "Body Text",
+        "paragraph": {
+          "alignment": "justify",
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.15
+          },
+          "spaceAfter": 8
+        }
+      },
+      "BodyTextChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "BodyText",
+        "name": "Body Text Char"
+      },
+      "DefaultParagraphFont": {
+        "isDefault": true,
+        "kind": "character",
+        "name": "Default Paragraph Font"
+      },
+      "Normal": {
+        "isDefault": true,
+        "kind": "paragraph",
+        "name": "Normal",
+        "paragraph": {
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.079
+          },
+          "spaceAfter": 10.666666666666666
+        }
+      }
+    },
     "paragraphStylePool": {},
     "sections": [
       {
@@ -44,6 +83,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -75,6 +115,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -147,6 +188,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -165,6 +207,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -183,6 +226,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -201,6 +245,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -223,6 +268,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -284,6 +330,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -302,6 +349,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -460,6 +508,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           }

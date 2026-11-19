@@ -46,25 +46,6 @@
       "label": "footnote(s)"
     },
     {
-      "count": 67,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "Body Text ×24",
-        "Hyperlink ×16",
-        "footnote reference ×10",
-        "endnote reference ×6",
-        "toc 1 ×3",
-        "toc 2 ×3",
-        "caption ×1",
-        "Subtitle ×1",
-        "Title ×1",
-        "toc 3 ×1",
-        "other ×1"
-      ]
-    },
-    {
       "count": 1,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",

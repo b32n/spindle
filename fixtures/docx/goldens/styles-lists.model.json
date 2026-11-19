@@ -15,6 +15,385 @@
         "w": 816
       }
     },
+    "namedStyles": {
+      "AccentLoud": {
+        "basedOn": "AccentWord",
+        "kind": "character",
+        "name": "Accent Loud",
+        "text": {
+          "bold": true,
+          "fontSize": 13
+        }
+      },
+      "AccentWord": {
+        "kind": "character",
+        "name": "Accent Word",
+        "text": {
+          "color": "#2e75b6",
+          "smallCaps": true
+        }
+      },
+      "BodyText": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "BodyTextChar",
+        "name": "Body Text",
+        "paragraph": {
+          "spaceAfter": 8
+        }
+      },
+      "BodyTextChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "BodyText",
+        "name": "Body Text Char"
+      },
+      "Callout": {
+        "basedOn": "BodyText",
+        "kind": "paragraph",
+        "name": "Callout",
+        "paragraph": {
+          "leftIndent": 48,
+          "spaceAfter": 13.333333333333334
+        },
+        "text": {
+          "color": "#1f4e79",
+          "italic": true
+        }
+      },
+      "CalloutWarning": {
+        "basedOn": "Callout",
+        "kind": "paragraph",
+        "name": "Callout Warning",
+        "text": {
+          "bold": true,
+          "color": "#c0392b"
+        }
+      },
+      "CalloutWarningLarge": {
+        "basedOn": "CalloutWarning",
+        "kind": "paragraph",
+        "name": "Callout Warning Large",
+        "paragraph": {
+          "alignment": "center"
+        },
+        "text": {
+          "fontSize": 15
+        }
+      },
+      "DefaultParagraphFont": {
+        "isDefault": true,
+        "kind": "character",
+        "name": "Default Paragraph Font"
+      },
+      "Heading1": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading1Char",
+        "name": "heading 1",
+        "next": "Normal",
+        "outlineLevel": 1,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 0,
+          "spaceBefore": 32
+        },
+        "text": {
+          "bold": true,
+          "color": "#365f91",
+          "fontFamily": "Calibri",
+          "fontSize": 14
+        }
+      },
+      "Heading1Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading1",
+        "name": "Heading 1 Char",
+        "text": {
+          "bold": true,
+          "color": "#365f91",
+          "fontFamily": "Calibri",
+          "fontSize": 14
+        }
+      },
+      "Heading2": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading2Char",
+        "name": "heading 2",
+        "next": "Normal",
+        "outlineLevel": 2,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 0,
+          "spaceBefore": 13.333333333333334
+        },
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "fontFamily": "Calibri",
+          "fontSize": 13
+        }
+      },
+      "Heading2Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading2",
+        "name": "Heading 2 Char",
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "fontFamily": "Calibri",
+          "fontSize": 13
+        }
+      },
+      "Heading3": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading3Char",
+        "name": "heading 3",
+        "next": "Normal",
+        "outlineLevel": 3,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 0,
+          "spaceBefore": 13.333333333333334
+        },
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "fontFamily": "Calibri"
+        }
+      },
+      "Heading3Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading3",
+        "name": "Heading 3 Char",
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "fontFamily": "Calibri"
+        }
+      },
+      "Heading4": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading4Char",
+        "name": "heading 4",
+        "next": "Normal",
+        "outlineLevel": 4,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 0,
+          "spaceBefore": 13.333333333333334
+        },
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "fontFamily": "Calibri",
+          "italic": true
+        }
+      },
+      "Heading4Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading4",
+        "name": "Heading 4 Char",
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "fontFamily": "Calibri",
+          "italic": true
+        }
+      },
+      "Heading5": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading5Char",
+        "name": "heading 5",
+        "next": "Normal",
+        "outlineLevel": 5,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 0,
+          "spaceBefore": 13.333333333333334
+        },
+        "text": {
+          "color": "#243f60",
+          "fontFamily": "Calibri"
+        }
+      },
+      "Heading5Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading5",
+        "name": "Heading 5 Char",
+        "text": {
+          "color": "#243f60",
+          "fontFamily": "Calibri"
+        }
+      },
+      "Heading6": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "Heading6Char",
+        "name": "heading 6",
+        "next": "Normal",
+        "outlineLevel": 6,
+        "paragraph": {
+          "keepTogether": true,
+          "keepWithNext": true,
+          "spaceAfter": 0,
+          "spaceBefore": 13.333333333333334
+        },
+        "text": {
+          "color": "#243f60",
+          "fontFamily": "Calibri",
+          "italic": true
+        }
+      },
+      "Heading6Char": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Heading6",
+        "name": "Heading 6 Char",
+        "text": {
+          "color": "#243f60",
+          "fontFamily": "Calibri",
+          "italic": true
+        }
+      },
+      "InlineCode": {
+        "kind": "character",
+        "name": "Inline Code",
+        "text": {
+          "fontFamily": "DejaVu Sans Mono",
+          "fontSize": 9.5
+        }
+      },
+      "IntenseQuote": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "IntenseQuoteChar",
+        "name": "Intense Quote",
+        "next": "Normal",
+        "paragraph": {
+          "leftIndent": 62.4,
+          "rightIndent": 62.4,
+          "spaceAfter": 18.666666666666668,
+          "spaceBefore": 13.333333333333334
+        },
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "italic": true
+        }
+      },
+      "IntenseQuoteChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "IntenseQuote",
+        "name": "Intense Quote Char",
+        "text": {
+          "bold": true,
+          "color": "#4f81bd",
+          "italic": true
+        }
+      },
+      "ListBullet": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "List Bullet"
+      },
+      "ListBullet2": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "List Bullet 2"
+      },
+      "ListNumber": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "List Number"
+      },
+      "Normal": {
+        "isDefault": true,
+        "kind": "paragraph",
+        "name": "Normal"
+      },
+      "ReferenceItem": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Reference Item",
+        "paragraph": {
+          "firstLineIndent": -38.4,
+          "leftIndent": 38.4,
+          "lineSpacing": {
+            "type": "onePointFive"
+          }
+        }
+      },
+      "Subtitle": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "SubtitleChar",
+        "name": "Subtitle",
+        "next": "Normal",
+        "text": {
+          "color": "#4f81bd",
+          "fontFamily": "Calibri",
+          "fontSize": 12,
+          "italic": true
+        }
+      },
+      "SubtitleChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Subtitle",
+        "name": "Subtitle Char",
+        "text": {
+          "color": "#4f81bd",
+          "fontFamily": "Calibri",
+          "fontSize": 12,
+          "italic": true
+        }
+      },
+      "Title": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "TitleChar",
+        "name": "Title",
+        "next": "Normal",
+        "paragraph": {
+          "lineSpacing": {
+            "type": "single"
+          },
+          "spaceAfter": 20
+        },
+        "text": {
+          "color": "#17365d",
+          "fontFamily": "Calibri",
+          "fontSize": 26
+        }
+      },
+      "TitleChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "Title",
+        "name": "Title Char",
+        "text": {
+          "color": "#17365d",
+          "fontFamily": "Calibri",
+          "fontSize": 26
+        }
+      }
+    },
     "paragraphStylePool": {},
     "sections": [
       {
@@ -33,6 +412,7 @@
             "lineSpacing": {
               "type": "single"
             },
+            "namedStyleId": "Title",
             "spaceAfter": 20,
             "type": "paragraph"
           },
@@ -52,6 +432,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Subtitle",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -74,6 +455,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 0,
             "spaceBefore": 32,
             "type": "heading"
@@ -92,6 +474,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -112,6 +495,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Callout",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -133,6 +517,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "CalloutWarning",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -155,6 +540,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "CalloutWarningLarge",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -170,6 +556,7 @@
                 "color": "#2e75b6",
                 "fontFamily": "Cambria",
                 "fontSize": 11,
+                "namedStyleId": "AccentWord",
                 "smallCaps": true,
                 "text": "accent words",
                 "type": "text"
@@ -185,6 +572,7 @@
                 "color": "#2e75b6",
                 "fontFamily": "Cambria",
                 "fontSize": 13,
+                "namedStyleId": "AccentLoud",
                 "smallCaps": true,
                 "text": "loud accents",
                 "type": "text"
@@ -198,6 +586,7 @@
               {
                 "fontFamily": "DejaVu Sans Mono",
                 "fontSize": 9.5,
+                "namedStyleId": "InlineCode",
                 "text": "inline code()",
                 "type": "text"
               },
@@ -267,6 +656,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -288,6 +678,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "IntenseQuote",
             "rightIndent": 62.4,
             "spaceAfter": 18.666666666666668,
             "spaceBefore": 13.333333333333334,
@@ -307,6 +698,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -325,6 +717,7 @@
             "lineSpacing": {
               "type": "onePointFive"
             },
+            "namedStyleId": "ReferenceItem",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -343,6 +736,7 @@
             "lineSpacing": {
               "type": "onePointFive"
             },
+            "namedStyleId": "ReferenceItem",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -361,6 +755,7 @@
             "lineSpacing": {
               "type": "onePointFive"
             },
+            "namedStyleId": "ReferenceItem",
             "spaceAfter": 13.333333333333334,
             "type": "paragraph"
           },
@@ -383,6 +778,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 0,
             "spaceBefore": 32,
             "type": "heading"
@@ -406,6 +802,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 0,
             "spaceBefore": 13.333333333333334,
             "type": "heading"
@@ -424,6 +821,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -446,6 +844,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading3",
             "spaceAfter": 0,
             "spaceBefore": 13.333333333333334,
             "type": "heading"
@@ -464,6 +863,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -487,6 +887,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading4",
             "spaceAfter": 0,
             "spaceBefore": 13.333333333333334,
             "type": "heading"
@@ -505,6 +906,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -527,6 +929,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading2",
             "spaceAfter": 0,
             "spaceBefore": 13.333333333333334,
             "type": "heading"
@@ -549,6 +952,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading5",
             "spaceAfter": 0,
             "spaceBefore": 13.333333333333334,
             "type": "heading"
@@ -572,6 +976,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading6",
             "spaceAfter": 0,
             "spaceBefore": 13.333333333333334,
             "type": "heading"
@@ -595,6 +1000,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 0,
             "spaceBefore": 32,
             "type": "heading"
@@ -613,6 +1019,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -632,6 +1039,7 @@
               "value": 1.15
             },
             "listType": "bullet",
+            "namedStyleId": "ListBullet",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -651,6 +1059,7 @@
               "value": 1.15
             },
             "listType": "bullet",
+            "namedStyleId": "ListBullet2",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -670,6 +1079,7 @@
               "value": 1.15
             },
             "listType": "bullet",
+            "namedStyleId": "ListBullet2",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -689,6 +1099,7 @@
               "value": 1.15
             },
             "listType": "bullet",
+            "namedStyleId": "ListBullet",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -708,6 +1119,7 @@
               "value": 1.15
             },
             "listType": "bullet",
+            "namedStyleId": "ListBullet",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -725,6 +1137,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -744,6 +1157,7 @@
               "value": 1.15
             },
             "listType": "numbered",
+            "namedStyleId": "ListNumber",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -763,6 +1177,7 @@
               "value": 1.15
             },
             "listType": "numbered",
+            "namedStyleId": "ListNumber",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -782,6 +1197,7 @@
               "value": 1.15
             },
             "listType": "numbered",
+            "namedStyleId": "ListNumber",
             "spaceAfter": 13.333333333333334,
             "type": "list-item"
           },
@@ -799,6 +1215,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -1006,6 +1423,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -1080,6 +1498,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -1136,6 +1555,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -1272,6 +1692,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 0,
             "spaceBefore": 32,
             "type": "heading"
@@ -1407,6 +1828,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "Heading1",
             "spaceAfter": 0,
             "spaceBefore": 32,
             "type": "heading"
@@ -1425,6 +1847,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -1442,6 +1865,7 @@
               "type": "multiple",
               "value": 1.15
             },
+            "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
           },

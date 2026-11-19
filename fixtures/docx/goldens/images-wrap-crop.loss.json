@@ -17,18 +17,6 @@
       "label": "floating image(s)"
     },
     {
-      "count": 15,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "Body Text ×8",
-        "caption ×5",
-        "Subtitle ×1",
-        "Title ×1"
-      ]
-    },
-    {
       "count": 1,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",

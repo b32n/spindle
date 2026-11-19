@@ -205,6 +205,8 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       pageBreakBefore: true,
     }),
     p([t('exact')], { lineSpacing: { type: 'exactly', value: 20 } }),
+    // A named paragraph style (DOCX pStyle).
+    p([t('callout')], { namedStyleId: 'Callout' }),
   ],
   heading: [
     { type: 'heading', attrs: { level: 3, alignment: 'right' }, content: [t('Title')] },
@@ -213,6 +215,7 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       attrs: { level: 1, lineSpacing: { type: 'atLeast', value: 24 }, spaceBefore: 16, spaceAfter: 0, leftIndent: 8, keepWithNext: true, pageBreakBefore: true },
       content: [t('Styled')],
     },
+    { type: 'heading', attrs: { level: 2, namedStyleId: 'Heading2' }, content: [t('Named')] },
   ],
   bullet_list: [{ type: 'bullet_list', content: [li(0, 'a'), li(2, 'b')] }],
   // A second numbered list right after the first restarts at 1 (it must not merge into the first).
@@ -229,7 +232,7 @@ const NODE_SAMPLES: Record<string, Json[]> = {
         {
           type: 'list_item',
           attrs: { level: 0 },
-          content: [p([t('indented')], { spaceAfter: 0, lineSpacing: { type: 'multiple', value: 1.5 }, leftIndent: 20, keepWithNext: true })],
+          content: [p([t('indented')], { spaceAfter: 0, lineSpacing: { type: 'multiple', value: 1.5 }, leftIndent: 20, keepWithNext: true, namedStyleId: 'ListParagraph' })],
         },
       ],
     },
@@ -301,6 +304,7 @@ const MARK_SAMPLES: Record<string, Json> = {
   link: { type: 'link', attrs: { href: 'https://example.com/a', title: null, target: '_blank' } },
   textStyle: { type: 'textStyle', attrs: { color: '#ff0000', backgroundColor: '#00ff00', fontSize: 18, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Arial' } },
   comment: { type: 'comment', attrs: { threadId: 'thread_1' } },
+  namedStyle: { type: 'namedStyle', attrs: { id: 'AccentWord' } },
 };
 
 const nodeNames = Object.keys(docsSchema.nodes);

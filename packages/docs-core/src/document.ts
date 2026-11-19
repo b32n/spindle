@@ -6,6 +6,7 @@ import type {
   Section,
   SectionData,
   Block,
+  NamedStyle,
   PageConfig,
   TextSelection,
   DocumentEventHandler,
@@ -17,7 +18,7 @@ import { DocumentHistory } from './history';
 import { TextStylePoolImpl, ParagraphStylePoolImpl } from './style-pool';
 import { createParagraphFromText } from './blocks/paragraph';
 import { attachCollabToYDoc } from './collab/binding';
-import { getYDocFields } from './collab/y-schema';
+import { getYDocFields, readNamedStyles } from './collab/y-schema';
 import { DocsCommentStore, type DocsCommentEvent, type DocsCommentThread } from './comments';
 
 function generateDocumentId(): string {
@@ -487,7 +488,31 @@ export class DocumentImpl {
       createdAt: this.document.createdAt,
       updatedAt: this.document.updatedAt,
       threads: this.commentStore.toJSON(),
+      ...(this.document.namedStyles && { namedStyles: this.document.namedStyles }),
     };
+  }
+
+  /** The document's named styles by style id (DOCX `w:style`), if any. */
+  getNamedStyles(): Record<string, NamedStyle> | undefined {
+    return this.document.namedStyles;
+  }
+
+  /**
+   * Replace the document's named styles. While collaboration is attached the change is written to the shared
+   * `namedStyles` map so peers see it. Blocks and runs that refer to a style that is no longer defined keep the
+   * reference; the DOCX export leaves such a reference out.
+   */
+  setNamedStyles(styles: Record<string, NamedStyle> | undefined): void {
+    this.document.namedStyles = styles && Object.keys(styles).length > 0 ? styles : undefined;
+    const handle = this.collabHandle;
+    if (handle) {
+      const map = getYDocFields(handle.ydoc).namedStyles;
+      handle.ydoc.transact(() => {
+        map.clear();
+        for (const [id, style] of Object.entries(this.document.namedStyles ?? {})) map.set(id, style);
+      });
+    }
+    this.emit('documentChange', { action: 'setNamedStyles' });
   }
 
   setData(data: DocumentData): void {
@@ -509,6 +534,7 @@ export class DocumentImpl {
       defaultPageConfig: data.defaultPageConfig,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      ...(data.namedStyles && Object.keys(data.namedStyles).length > 0 && { namedStyles: data.namedStyles }),
     };
 
     this.textStylePool.setFromData(data.textStylePool || {});
@@ -565,6 +591,9 @@ export class DocumentImpl {
     // live: on first attach the map was hydrated from getData(); on a late
     // join it already holds peers' threads — loadThreadsFromY covers both.
     this.loadThreadsFromY();
+    // Named styles: the Y map is hydrated from getData() on first attach and holds the room's styles on a late join.
+    const sharedStyles = readNamedStyles(getYDocFields(handle.ydoc).namedStyles);
+    if (sharedStyles) this.document.namedStyles = sharedStyles;
     const threadsY = getYDocFields(handle.ydoc).threads;
     this.threadsObserver = () => {
       if (!this.mirroringThreads) this.loadThreadsFromY();

@@ -19,6 +19,8 @@ const PARAGRAPH_FORMAT_ATTRS = {
   keepWithNext: { default: null },
   keepTogether: { default: null },
   pageBreakBefore: { default: null },
+  // Named paragraph style (DOCX `w:pStyle`), a key of the document's `namedStyles`.
+  namedStyleId: { default: null },
 };
 
 /** CSS for the indents of a paragraph/heading (sanitised: the attrs come from loaded or collaborative JSON). */
@@ -548,6 +550,23 @@ const marks: Record<string, MarkSpec> = {
     parseDOM: [{ tag: 'span[data-hidden-text]' }],
     toDOM(): DOMOutputSpec {
       return ['span', { 'data-hidden-text': 'true', style: 'opacity: 0.5' }, 0];
+    },
+  },
+
+  // Named character style (DOCX `w:rStyle`); `id` is a key of the document's `namedStyles`. The run's formatting
+  // marks hold the effective formatting; this mark keeps the style's name so it round-trips and shows in Word.
+  namedStyle: {
+    attrs: { id: {} },
+    parseDOM: [
+      {
+        tag: 'span[data-named-style]',
+        getAttrs(dom: HTMLElement) {
+          return { id: dom.getAttribute('data-named-style') };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      return ['span', { 'data-named-style': String(node.attrs.id) }, 0];
     },
   },
 

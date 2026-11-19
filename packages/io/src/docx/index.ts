@@ -8,6 +8,7 @@ export type {
   DocLinkRun,
   DocComment,
   DocCommentThread,
+  DocNamedStyle,
   DocImageRun,
   DocPageNumberRun,
   DocTotalPagesRun,

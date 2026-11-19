@@ -655,3 +655,62 @@ describe('paragraph formatting through the editor API', () => {
     expect(out.slice(1).map((b) => (b.type === 'list-item' ? b.start : 'x'))).toEqual([5, undefined, 1]);
   });
 });
+
+describe('named styles through DOCX', () => {
+  const styles = {
+    Callout: {
+      name: 'Callout',
+      kind: 'paragraph' as const,
+      basedOn: 'Normal',
+      next: 'Callout',
+      text: { bold: true, color: '#c00000', fontSize: 12 },
+      // px in the model: 48 px = 36 pt, hanging 24 px = 18 pt
+      paragraph: { leftIndent: 48, firstLineIndent: -24, spaceBefore: 8, keepWithNext: true, lineSpacing: { type: 'multiple' as const, value: 1.25 } },
+    },
+    AccentWord: { name: 'Accent Word', kind: 'character' as const, text: { smallCaps: true, underline: true } },
+  };
+  const blocks: ParagraphBlock[] = [
+    {
+      id: 'b1',
+      type: 'paragraph',
+      namedStyleId: 'Callout',
+      leftIndent: 48,
+      content: [{ type: 'text', text: 'plain ' }, { type: 'text', text: 'accent', namedStyleId: 'AccentWord', smallCaps: true, underline: true }],
+    },
+  ];
+
+  it('writes the styles and the references, and reads them back with the same ids, names and px values', async () => {
+    const doc = docWith({ namedStyles: styles, sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks }] });
+    const { result, zip, documentXml } = await exportAndUnzip(doc);
+    const stylesXml = await zip.file('word/styles.xml')!.async('string');
+    expect(stylesXml).toContain('w:styleId="Callout"');
+    expect(stylesXml).toContain('<w:name w:val="Accent Word"/>');
+    expect(stylesXml).toContain('<w:ind w:left="720" w:hanging="360"/>');
+    expect(documentXml).toContain('<w:pStyle w:val="Callout"/>');
+    expect(documentXml).toContain('<w:rStyle w:val="AccentWord"/>');
+
+    const target = new DocumentImpl('t', 'T');
+    await importFromDocx(result.bytes, target);
+    const data = target.getData();
+    expect(data.namedStyles?.Callout).toMatchObject({
+      name: 'Callout',
+      kind: 'paragraph',
+      basedOn: 'Normal',
+      text: { bold: true, color: '#c00000', fontSize: 12 },
+      paragraph: { leftIndent: 48, firstLineIndent: -24, spaceBefore: 8, keepWithNext: true, lineSpacing: { type: 'multiple', value: 1.25 } },
+    });
+    expect(data.namedStyles?.AccentWord).toMatchObject({ name: 'Accent Word', kind: 'character', text: { smallCaps: true, underline: true } });
+    const block = data.sections[0].blocks[0] as ParagraphBlock;
+    expect(block.namedStyleId).toBe('Callout');
+    expect(block.content[1]).toMatchObject({ text: 'accent', namedStyleId: 'AccentWord' });
+    expect(block.content[0]).not.toHaveProperty('namedStyleId');
+  });
+
+  it('a style removed from the document while still referenced is left out of the file', async () => {
+    const doc = docWith({ namedStyles: styles, sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks }] });
+    doc.setNamedStyles(undefined);
+    const { documentXml } = await exportAndUnzip(doc);
+    expect(documentXml).not.toContain('w:val="Callout"');
+    expect(documentXml).not.toContain('w:val="AccentWord"');
+  });
+});

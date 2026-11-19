@@ -74,25 +74,10 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.namedStyles', () => {
-    const parts = { 'word/styles.xml': styles(['Heading2', 'heading 2'], ['Callout', 'Callout'], ['ListParagraph', 'List Paragraph']) };
-    it('counts paragraph and character style uses with names in where, skipping headings, Normal and List Paragraph', async () => {
-      const bytes = await docx(
-        p('a', '<w:pStyle w:val="Callout"/>') +
-          p('b', '<w:pStyle w:val="Callout"/>') +
-          p('c', '<w:pStyle w:val="Heading2"/>') +
-          p('e', '<w:pStyle w:val="ListParagraph"/>') +
-          '<w:p><w:r><w:rPr><w:rStyle w:val="Emphasis2"/></w:rPr><w:t>d</w:t></w:r></w:p>',
-        parts
-      );
-      expect(await item(bytes, 'docx.namedStyles')).toMatchObject({ count: 3, where: ['Callout ×2', 'Emphasis2 ×1'] });
-    });
-    it('falls back to the id for a style missing from styles.xml', async () => {
-      const bytes = await docx(p('a', '<w:pStyle w:val="NoSuchStyle"/>'));
-      expect(await item(bytes, 'docx.namedStyles')).toMatchObject({ count: 1, where: ['NoSuchStyle ×1'] });
-    });
-    it('ignores a style recorded in a pPrChange', async () => {
-      const bytes = await docx(p('a', '<w:pPrChange w:id="1"><w:pPr><w:pStyle w:val="Callout"/></w:pPr></w:pPrChange>'), parts);
+  describe('named styles', () => {
+    it('are kept on import, so they are no longer reported as lost', async () => {
+      const parts = { 'word/styles.xml': styles(['Callout', 'Callout']) };
+      const bytes = await docx(p('a', '<w:pStyle w:val="Callout"/>') + '<w:p><w:r><w:rPr><w:rStyle w:val="Emphasis2"/></w:rPr><w:t>d</w:t></w:r></w:p>', parts);
       expect(await item(bytes, 'docx.namedStyles')).toBeUndefined();
     });
   });
@@ -293,7 +278,6 @@ describe('detectDocxLoss: XML-based detectors', () => {
       const full = await detectDocxLoss(bytes, { detail: 'full' });
       expect(full.items.map((i) => i.id).sort()).toEqual([
         'docx.fields',
-        'docx.namedStyles',
         'docx.sectionProperties',
       ]);
       expect(full.items.find((i) => i.id === 'docx.fields')?.where).toEqual(['DATE ×1']);

@@ -8,20 +8,6 @@
       "label": "footnote(s)"
     },
     {
-      "count": 13,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "BodyText ×7",
-        "Hyperlink ×2",
-        "CommentReference ×1",
-        "FootnoteReference ×1",
-        "NoSuchStyle ×1",
-        "Title ×1"
-      ]
-    },
-    {
       "count": 1,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",

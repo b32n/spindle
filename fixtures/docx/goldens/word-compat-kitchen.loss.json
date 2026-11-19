@@ -78,24 +78,6 @@
       ]
     },
     {
-      "count": 86,
-      "effect": "the style's formatting is applied to the text, but the style name is not kept",
-      "id": "docx.namedStyles",
-      "label": "use(s) of a named paragraph/character style",
-      "where": [
-        "Body Text ×47",
-        "Hyperlink ×16",
-        "caption ×9",
-        "toc 1 ×4",
-        "annotation reference ×2",
-        "Subtitle ×2",
-        "Title ×2",
-        "toc 2 ×2",
-        "footnote reference ×1",
-        "TOC Heading ×1"
-      ]
-    },
-    {
       "count": 12,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",

@@ -162,6 +162,8 @@ export interface TextRun {
   fontFamilyComplex?: string;
   /** Thread ID when this run is covered by a comment. */
   commentThreadId?: string;
+  /** Named character style of the run (a key of `DocumentData.namedStyles`); distinct from the pool `styleId`. */
+  namedStyleId?: string;
 }
 
 export interface InlineImage {
@@ -180,6 +182,8 @@ export interface InlineLink extends TextStyle {
   styleId?: string;
   /** Thread ID when this link is covered by a comment. */
   commentThreadId?: string;
+  /** Named character style of the run (a key of `DocumentData.namedStyles`). */
+  namedStyleId?: string;
 }
 
 export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun;
@@ -216,6 +220,8 @@ export interface ParagraphFormat {
   /** Keep the paragraph's lines on one page. */
   keepTogether?: boolean;
   pageBreakBefore?: boolean;
+  /** Named paragraph style of the block (a key of `DocumentData.namedStyles`); distinct from the pool `styleId`. */
+  namedStyleId?: string;
 }
 
 export interface ParagraphBlock extends BaseBlock, ParagraphFormat {
@@ -383,6 +389,7 @@ export interface Document {
   defaultPageConfig: PageConfig;
   createdAt?: string;
   updatedAt?: string;
+  namedStyles?: Record<string, NamedStyle>;
 }
 
 // ============================================================================
@@ -461,6 +468,26 @@ export interface DocumentSnapshot {
 // Serialization
 // ============================================================================
 
+/**
+ * A named style of the document (DOCX `w:style`): a name and the style's own properties. Blocks and runs refer to
+ * it by `namedStyleId`. Their own fields hold the effective formatting, so a style's properties are what is written
+ * to `styles.xml` (the editor has no style gallery yet).
+ */
+export interface NamedStyle {
+  /** Display name ("Callout"). */
+  name: string;
+  kind: 'paragraph' | 'character' | 'table';
+  basedOn?: string;
+  next?: string;
+  link?: string;
+  /** The default style of its kind. */
+  isDefault?: boolean;
+  /** Outline level 1 to 9 the style gives its paragraphs; 0 is body text (cancels an inherited level). */
+  outlineLevel?: number;
+  text?: TextStyle;
+  paragraph?: ParagraphFormat;
+}
+
 export interface DocumentData {
   id: string;
   title: string;
@@ -472,6 +499,8 @@ export interface DocumentData {
   updatedAt?: string;
   /** Comment threads anchored to spans of the document body. */
   threads?: import('./comments').DocsCommentThread[];
+  /** Named styles by style id (see `NamedStyle`). Synced in collaboration as the `namedStyles` Y map. */
+  namedStyles?: Record<string, NamedStyle>;
 }
 
 export interface SectionData {

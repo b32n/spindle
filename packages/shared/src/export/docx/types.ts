@@ -28,6 +28,8 @@ export interface DocRunBase {
   fontFamilyComplex?: string;
   /** Id of the comment thread (see `DocCommentThread`) whose anchored range covers this run. */
   commentThreadId?: string;
+  /** Id of the named character style (`w:rStyle`) of the run, a key of `namedStyles`. The run's own fields still hold the effective formatting. */
+  namedStyleId?: string;
 }
 
 export interface DocTextRun extends DocRunBase {
@@ -82,6 +84,30 @@ export interface DocParagraphStyle {
   /** Keep the lines of the paragraph together on one page (`w:keepLines`). */
   keepTogether?: boolean;
   pageBreakBefore?: boolean;
+  /** Id of the named paragraph style (`w:pStyle`) of the block, a key of `namedStyles`. The block's own fields still hold the effective formatting. */
+  namedStyleId?: string;
+}
+
+/**
+ * A named style of the document (a `w:style` of `styles.xml`). `text` and `paragraph` are the style's own
+ * properties, not the result of its `basedOn` chain.
+ */
+export interface DocNamedStyle {
+  /** Display name ("Callout", "heading 1"). */
+  name: string;
+  kind: 'paragraph' | 'character' | 'table';
+  /** Style id this style is based on. */
+  basedOn?: string;
+  /** Style id of the paragraph that follows one in this style when the user presses Enter. */
+  next?: string;
+  /** Style id of the linked paragraph/character counterpart. */
+  link?: string;
+  /** The default style of its kind (`w:default`). */
+  isDefault?: boolean;
+  /** Outline level 1 to 9 (`w:outlineLvl`) the style gives its paragraphs; 0 is body text (`w:outlineLvl` 9), which cancels an outline level inherited from the style it is based on. */
+  outlineLevel?: number;
+  text?: DocRunBase;
+  paragraph?: DocParagraphStyle;
 }
 
 export interface DocTableCell {
@@ -162,6 +188,8 @@ export interface DocumentExportInput {
   sections: DocSection[];
   /** Comment threads, anchored to the runs that carry the matching `commentThreadId` (a thread with no such run is written at the start of the document). */
   comments?: DocCommentThread[];
+  /** Named styles by style id, referenced by `namedStyleId` of blocks and runs. */
+  namedStyles?: Record<string, DocNamedStyle>;
 }
 
 export interface DocumentExportResult {
@@ -175,6 +203,8 @@ export interface DocumentImportResult {
   sections: DocSection[];
   /** Comment threads; the runs they are anchored to carry the matching `commentThreadId`. Absent when the file has none. */
   comments?: DocCommentThread[];
+  /** Named styles the document uses (and the styles they are based on, linked to or followed by), by style id. Absent when none. */
+  namedStyles?: Record<string, DocNamedStyle>;
   /** Non-fatal issues (unsupported feature, unparseable structure, etc.) — surfaced rather than silently dropped. */
   warnings: string[];
 }

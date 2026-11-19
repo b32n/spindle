@@ -55,20 +55,6 @@ const inRevisionProps = (path: readonly string[]) => path.some((t) => t === 'w:p
 // Styles and numbering lookups
 // ---------------------------------------------------------------------------
 
-function styleNames(xml: string): Map<string, string> {
-  const names = new Map<string, string>();
-  const root = xml ? parseXml(xml) : [];
-  const stylesEl = find(root, 'w:styles');
-  if (!stylesEl) return names;
-  for (const style of findAll(childrenOf(stylesEl), 'w:style')) {
-    const id = attr(style, 'w:styleId');
-    const nameEl = find(childrenOf(style), 'w:name');
-    const name = nameEl ? attr(nameEl, 'w:val') : undefined;
-    if (id) names.set(id, name ?? id);
-  }
-  return names;
-}
-
 interface NumberingLookup {
   /** numId -> abstractNumId */
   abstractOf: Map<string, string>;
@@ -120,11 +106,6 @@ function numberingLookup(xml: string): NumberingLookup {
 // Detectors
 // ---------------------------------------------------------------------------
 
-const HEADING_NAME = /^Heading\s*\d$/i;
-// Styles whose only effect is already reproduced by the import: Normal, the default character style, and
-// Word's List Paragraph (list indentation, which the list import carries).
-const PLAIN_STYLE_NAMES = new Set(['normal', 'default paragraph font', 'list paragraph', 'listparagraph']);
-
 /** Sections beyond the first: kept in the model and exported, but the editor shows and edits only the first. */
 function extraSections(root: XmlNode[]): Item[] {
   let sectPrs = 0;
@@ -140,23 +121,6 @@ function extraSections(root: XmlNode[]): Item[] {
     sectPrs - 1,
     'kept in the document and exported, but the editor shows and edits only the first section'
   );
-}
-
-/** Uses of a named paragraph/character style other than headings: the formatting is applied to the text, the name is not kept. */
-function namedStyles(root: XmlNode[], names: Map<string, string>): Item[] {
-  const used = new Map<string, number>();
-  let total = 0;
-  walk(root, (node, tag, path) => {
-    if (tag !== 'w:pStyle' && tag !== 'w:rStyle') return;
-    if (inRevisionProps(path)) return;
-    const id = attr(node, 'w:val');
-    if (!id) return;
-    const name = names.get(id) ?? id;
-    if (HEADING_NAME.test(name) || HEADING_NAME.test(id) || PLAIN_STYLE_NAMES.has(name.toLowerCase())) return;
-    total++;
-    bump(used, name);
-  });
-  return item('docx.namedStyles', 'use(s) of a named paragraph/character style', total, 'the style\'s formatting is applied to the text, but the style name is not kept', used);
 }
 
 const cellHasContent = (p: XmlNode) => {
@@ -529,7 +493,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
   return [
     ...drawings,
     ...safe(() => extraSections(root)),
-    ...safe(() => namedStyles(root, styleNames(input.styles))),
     ...safe(() => tableDetectors(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => bookmarks(root)),

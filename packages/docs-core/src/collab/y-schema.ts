@@ -4,6 +4,7 @@
 //   meta:               Y.Map<string, JSON>  — id, title, defaultPageConfig, timestamps
 //   content:            Y.XmlFragment        — body text (ProseMirror-compatible, bound via y-prosemirror)
 //   sectionsMeta:       Y.Array<Y.Map>       — per-section metadata (id, pageConfig, header, footer)
+//   namedStyles:        Y.Map<string, JSON>  — DOCX named style id → NamedStyle (additive)
 //   textStylePool:      Y.Map<string, JSON>  — styleId → TextStyle
 //   paragraphStylePool: Y.Map<string, JSON>  — styleId → ParagraphStyle
 //
@@ -28,6 +29,7 @@ import type {
   Document,
   DocumentData,
   HeaderFooterContent,
+  NamedStyle,
   PageConfig,
   ParagraphStyle,
   SectionData,
@@ -46,6 +48,8 @@ export interface YDocFields {
    * the body content is the position anchor; this map holds thread content.
    */
   threads: Y.Map<unknown>;
+  /** Named styles by style id (plain JSON; styles are not co-edited text). */
+  namedStyles: Y.Map<unknown>;
 }
 
 /** Return the named Y types used by the schema. Idempotent. */
@@ -63,6 +67,7 @@ export function getYDocFields(ydoc: Y.Doc): YDocFields {
     textStylePool: ydoc.getMap<unknown>('textStylePool'),
     paragraphStylePool: ydoc.getMap<unknown>('paragraphStylePool'),
     threads: ydoc.getMap<unknown>('threads'),
+    namedStyles: ydoc.getMap<unknown>('namedStyles'),
   };
 }
 
@@ -111,6 +116,11 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
       if (section.header) sectionMap.set('header', section.header);
       if (section.footer) sectionMap.set('footer', section.footer);
       fields.sectionsMeta.push([sectionMap]);
+    }
+
+    // Named styles — keyed by style id, stored as plain JSON.
+    for (const [id, style] of Object.entries(data.namedStyles ?? {})) {
+      if (!isUnsafeKey(id)) fields.namedStyles.set(id, style);
     }
 
     // Comment threads — keyed by thread id, stored as plain JSON.
@@ -205,6 +215,8 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
   const rebuilt = proseMirrorToDocument(pmDoc, seedDoc);
   sections[0].blocks = rebuilt.sections[0].blocks;
 
+  const namedStyles = readNamedStyles(fields.namedStyles);
+
   const threads: DocsCommentThread[] = [];
   for (const value of fields.threads.values()) {
     threads.push(value as DocsCommentThread);
@@ -220,5 +232,16 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
     createdAt,
     updatedAt,
     threads: threads.length > 0 ? threads : undefined,
+    namedStyles,
   };
+}
+
+/** The named styles of a Y map as plain JSON (undefined when there are none). */
+export function readNamedStyles(map: Y.Map<unknown>): Record<string, NamedStyle> | undefined {
+  const out: Record<string, NamedStyle> = {};
+  for (const [k, v] of map.entries()) {
+    if (isUnsafeKey(k)) continue; // guard against __proto__/constructor from a peer
+    out[k] = v as NamedStyle;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }

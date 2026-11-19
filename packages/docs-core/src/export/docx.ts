@@ -9,6 +9,7 @@ import type {
   DocHeaderFooter,
   DocHeaderFooterParagraph,
   DocInline,
+  DocNamedStyle,
   DocParagraphStyle,
   DocRunBase,
   DocSection,
@@ -24,6 +25,7 @@ import type {
   HeaderFooterParagraph,
   InlineContent,
   LineSpacing,
+  NamedStyle,
   ParagraphFormat,
   ParagraphStyle,
   SectionData,
@@ -52,7 +54,33 @@ function toDocumentExportInput(data: DocumentData): DocumentExportInput {
     title: data.title,
     sections: data.sections.map((s) => toSection(s, data.title, textStylePool, paragraphStylePool)),
     ...(data.threads && data.threads.length > 0 && { comments: data.threads.map(toThreadForDocx) }),
+    ...(data.namedStyles && Object.keys(data.namedStyles).length > 0 && { namedStyles: toDocNamedStyles(data.namedStyles) }),
   };
+}
+
+function toDocNamedStyles(styles: Record<string, NamedStyle>): Record<string, DocNamedStyle> {
+  const out: Record<string, DocNamedStyle> = {};
+  for (const [id, style] of Object.entries(styles)) {
+    const text = style.text ? defined(toDocRunBase(style.text)) : undefined;
+    const paragraph = style.paragraph ? defined(resolveParagraphStyle(style.paragraph, {})) : undefined;
+    out[id] = {
+      name: style.name,
+      kind: style.kind,
+      ...(style.basedOn && { basedOn: style.basedOn }),
+      ...(style.next && { next: style.next }),
+      ...(style.link && { link: style.link }),
+      ...(style.isDefault && { isDefault: true }),
+      ...(style.outlineLevel !== undefined && { outlineLevel: style.outlineLevel }),
+      ...(text && { text }),
+      ...(paragraph && { paragraph }),
+    };
+  }
+  return out;
+}
+
+/** Drops `undefined` fields so the interchange object only carries what is set. */
+function defined<T extends object>(value: T): T {
+  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
 }
 
 function toThreadForDocx(thread: DocsCommentThread): DocCommentThread {
@@ -212,6 +240,7 @@ function resolveParagraphStyle(block: ParagraphLikeBlock, pool: Record<string, P
     ...(keepWithNext && { keepWithNext: true }),
     ...(keepTogether && { keepTogether: true }),
     ...(pageBreakBefore && { pageBreakBefore: true }),
+    ...(block.namedStyleId && { namedStyleId: block.namedStyleId }),
   };
 }
 
@@ -222,13 +251,20 @@ function toInlineContent(content: InlineContent[], title: string, pool: Record<s
 function toInline(item: InlineContent, title: string, pool: Record<string, TextStyle>): DocInline | null {
   switch (item.type) {
     case 'text':
-      return { type: 'text', text: item.text, ...resolveTextStyle(item, pool), ...(item.commentThreadId && { commentThreadId: item.commentThreadId }) };
+      return {
+        type: 'text',
+        text: item.text,
+        ...resolveTextStyle(item, pool),
+        ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
+        ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
+      };
     case 'link':
       return {
         type: 'link',
         text: item.text,
         href: item.href,
         ...(item.styleId && pool[item.styleId] ? toDocRunBase(pool[item.styleId]) : {}),
+        ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
       };
     case 'image':
@@ -354,7 +390,7 @@ export async function importFromDocx(
 /**
  * What importing this .docx would not bring across (tracked changes, footnotes, content controls,
  * floating images…). Read-only: nothing is imported or modified. `detail: 'full'` also lists formatting and
- * structure that is flattened or ignored (named styles, table formatting, tabs and breaks, sections…).
+ * structure that is flattened or ignored (table formatting, tabs and breaks, sections…).
  */
 export function inspectDocx(bytes: Uint8Array, options?: { detail?: 'summary' | 'full' }): Promise<ImportLossReport> {
   return loadIo().then((io) => io.detectDocxLoss(bytes, options));
@@ -373,7 +409,26 @@ function toDocumentData(result: DocumentImportResult, document: DocumentImpl): D
     createdAt: existing.createdAt,
     updatedAt: new Date().toISOString(),
     ...(result.comments && result.comments.length > 0 && { threads: result.comments.map(toThreadFromDocx) }),
+    ...(result.namedStyles && Object.keys(result.namedStyles).length > 0 && { namedStyles: toNamedStyles(result.namedStyles) }),
   };
+}
+
+function toNamedStyles(styles: Record<string, DocNamedStyle>): Record<string, NamedStyle> {
+  const out: Record<string, NamedStyle> = {};
+  for (const [id, style] of Object.entries(styles)) {
+    out[id] = {
+      name: style.name,
+      kind: style.kind,
+      ...(style.basedOn && { basedOn: style.basedOn }),
+      ...(style.next && { next: style.next }),
+      ...(style.link && { link: style.link }),
+      ...(style.isDefault && { isDefault: true }),
+      ...(style.outlineLevel !== undefined && { outlineLevel: style.outlineLevel }),
+      ...(style.text && { text: defined(toTextStyle(style.text)) }),
+      ...(style.paragraph && { paragraph: toParagraphFormat(style.paragraph) }),
+    };
+  }
+  return out;
 }
 
 function toThreadFromDocx(thread: DocCommentThread): DocsCommentThread {
@@ -441,6 +496,7 @@ function toParagraphFormat(style: DocParagraphStyle): ParagraphFormat {
     ...(style.keepWithNext && { keepWithNext: true }),
     ...(style.keepTogether && { keepTogether: true }),
     ...(style.pageBreakBefore && { pageBreakBefore: true }),
+    ...(style.namedStyleId && { namedStyleId: style.namedStyleId }),
   };
 }
 
@@ -550,7 +606,13 @@ function toInlineContentFromDocx(content: DocInline[], textStylePool: TextStyleP
 function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): InlineContent | null {
   switch (item.type) {
     case 'text':
-      return { type: 'text', text: item.text, ...toTextStyle(item), ...(item.commentThreadId && { commentThreadId: item.commentThreadId }) };
+      return {
+        type: 'text',
+        text: item.text,
+        ...toTextStyle(item),
+        ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
+        ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
+      };
     case 'link':
       // InlineLink carries no inline style fields of its own — only a
       // styleId reference — so any run formatting on the link has to go
@@ -560,6 +622,7 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
         text: item.text,
         href: item.href,
         styleId: hasAnyRunStyle(item) ? textStylePool.getOrCreate(toTextStyle(item)) : undefined,
+        ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
       };
     case 'image':
