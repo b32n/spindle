@@ -12,6 +12,18 @@
       "effect": "not imported",
       "id": "docx.embeddedObjects",
       "label": "embedded object(s)"
+    },
+    {
+      "count": 7,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "caption ×3",
+        "Body Text ×2",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
     }
   ]
 }

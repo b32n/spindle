@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { exportToDocx, importFromDocx } from './docx';
+import { exportToDocx, importFromDocx, inspectDocx } from './docx';
 import { DocumentImpl } from '../document';
 import type { DocumentData } from '../types';
 
@@ -440,5 +440,24 @@ describe('importFromDocx', () => {
     expect(warnings).toEqual([]);
     const block = target.getData().sections[0].blocks[0];
     expect(block).toMatchObject({ type: 'image', src: onePxPng, width: 10, height: 10, alt: 'dot' });
+  });
+});
+
+describe('inspectDocx detail', () => {
+  async function bytesWithTab() {
+    const exported = await exportToDocx(docWith({}));
+    const zip = await JSZip.loadAsync(exported.bytes);
+    const xml = await zip.file('word/document.xml')!.async('string');
+    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:r><w:t>a</w:t><w:tab/></w:r></w:p></w:body>'));
+    return zip.generateAsync({ type: 'uint8array' });
+  }
+
+  it('reports only confirmation-level losses by default', async () => {
+    expect((await inspectDocx(await bytesWithTab())).items).toEqual([]);
+  });
+
+  it("reports formatting and structure losses with detail 'full'", async () => {
+    const report = await inspectDocx(await bytesWithTab(), { detail: 'full' });
+    expect(report.items.map((i) => i.id)).toEqual(['docx.tabsAndBreaks']);
   });
 });

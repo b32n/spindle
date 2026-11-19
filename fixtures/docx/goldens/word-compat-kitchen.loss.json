@@ -2,6 +2,16 @@
   "format": "docx",
   "items": [
     {
+      "count": 16,
+      "effect": "bookmarks are dropped and internal links become plain text",
+      "id": "docx.bookmarks",
+      "label": "bookmark(s) and internal link(s)",
+      "where": [
+        "bookmarks ×8",
+        "internal links ×8"
+      ]
+    },
+    {
       "count": 6,
       "effect": "not imported",
       "id": "docx.charts",
@@ -26,10 +36,29 @@
       "label": "embedded object(s)"
     },
     {
-      "count": 28,
+      "count": 27,
       "effect": "their displayed value is dropped",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, cross-references, dates…)"
+      "label": "field(s) (table of contents, cross-references, dates…)",
+      "where": [
+        "PAGEREF ×7",
+        "SEQ ×4",
+        "IF ×2",
+        "AUTHOR ×1",
+        "DATE ×1",
+        "FORMCHECKBOX ×1",
+        "FORMDROPDOWN ×1",
+        "FORMTEXT ×1",
+        "HYPERLINK ×1",
+        "MERGEFIELD ×1",
+        "NUMWORDS ×1",
+        "REF ×1",
+        "SECTIONPAGES ×1",
+        "STYLEREF ×1",
+        "TIME ×1",
+        "TITLE ×1",
+        "TOC ×1"
+      ]
     },
     {
       "count": 6,
@@ -42,6 +71,57 @@
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
+    },
+    {
+      "count": 86,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×47",
+        "Hyperlink ×16",
+        "caption ×9",
+        "toc 1 ×4",
+        "annotation reference ×2",
+        "Subtitle ×2",
+        "Title ×2",
+        "toc 2 ×2",
+        "footnote reference ×1",
+        "TOC Heading ×1"
+      ]
+    },
+    {
+      "count": 12,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "table style ×12",
+        "widths ×11",
+        "shading ×4",
+        "repeating header rows ×3",
+        "borders ×1",
+        "vertical alignment ×1"
+      ]
+    },
+    {
+      "count": 6,
+      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
+      "id": "docx.tableStructure",
+      "label": "nested table(s) / multi-paragraph cell(s)",
+      "where": [
+        "multi-paragraph cells ×4",
+        "nested tables ×2"
+      ]
+    },
+    {
+      "count": 6,
+      "effect": "dropped from the text",
+      "id": "docx.tabsAndBreaks",
+      "label": "tab(s) and line break(s)",
+      "where": [
+        "tab ×6"
+      ]
     },
     {
       "count": 5,

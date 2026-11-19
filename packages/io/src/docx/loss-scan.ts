@@ -1,0 +1,446 @@
+import type { ImportLossItem } from '@b32nio/spindle-shared';
+import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
+
+/**
+ * XML-based detectors for constructs the importer does not bring across. They parse the part and walk the
+ * element tree, so they count real elements (not look-alike text) and know their ancestors, which a regex
+ * cannot. Each returns zero or one loss item; the caller appends them to the report.
+ */
+
+export interface DocxScanInput {
+  /** word/document.xml */
+  document: string;
+  /** word/styles.xml ('' when absent) */
+  styles: string;
+  /** word/numbering.xml ('' when absent) */
+  numbering: string;
+  /** word/settings.xml ('' when absent) */
+  settings: string;
+}
+
+type Item = Omit<ImportLossItem, 'where'> & { where?: string[] };
+
+const MAX_WHERE = 10;
+
+const isOff = (v: string | undefined) => v === '0' || v === 'false' || v === 'off';
+const isOn = (node: XmlNode) => !isOff(attrsOf(node)['@_w:val']);
+const attr = (node: XmlNode, name: string) => attrsOf(node)[`@_${name}`];
+
+/** "PAGEREF ×111" entries, largest first; the tail is folded into one entry. */
+function breakdown(counts: Map<string, number>, max = MAX_WHERE): string[] {
+  const entries = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const shown = entries.slice(0, max).map(([k, n]) => `${k} ×${n}`);
+  const rest = entries.slice(max).reduce((sum, [, n]) => sum + n, 0);
+  if (rest > 0) shown.push(`other ×${rest}`);
+  return shown;
+}
+
+function bump(map: Map<string, number>, key: string, by = 1) {
+  map.set(key, (map.get(key) ?? 0) + by);
+}
+
+function item(id: string, label: string, count: number, effect: string, where?: Map<string, number>, maxWhere = MAX_WHERE): Item[] {
+  if (count <= 0) return [];
+  return [{ id, label, count, effect, ...(where && where.size > 0 && { where: breakdown(where, maxWhere) }) }];
+}
+
+const inRevisionProps = (path: readonly string[]) => path.some((t) => t === 'w:pPrChange' || t === 'w:rPrChange' || t === 'w:sectPrChange' || t === 'w:tblPrChange' || t === 'w:tcPrChange' || t === 'w:trPrChange');
+
+// ---------------------------------------------------------------------------
+// Styles and numbering lookups
+// ---------------------------------------------------------------------------
+
+function styleNames(xml: string): Map<string, string> {
+  const names = new Map<string, string>();
+  const root = xml ? parseXml(xml) : [];
+  const stylesEl = find(root, 'w:styles');
+  if (!stylesEl) return names;
+  for (const style of findAll(childrenOf(stylesEl), 'w:style')) {
+    const id = attr(style, 'w:styleId');
+    const nameEl = find(childrenOf(style), 'w:name');
+    const name = nameEl ? attr(nameEl, 'w:val') : undefined;
+    if (id) names.set(id, name ?? id);
+  }
+  return names;
+}
+
+interface NumberingLookup {
+  /** numId -> abstractNumId */
+  abstractOf: Map<string, string>;
+  /** `${abstractId}:${ilvl}` -> { fmt, start } */
+  levels: Map<string, { fmt?: string; start?: string }>;
+  /** `${numId}:${ilvl}` -> the override's own start value / level definition */
+  overrides: Map<string, { fmt?: string; start?: string }>;
+}
+
+function numberingLookup(xml: string): NumberingLookup {
+  const out: NumberingLookup = { abstractOf: new Map(), levels: new Map(), overrides: new Map() };
+  const numberingEl = xml ? find(parseXml(xml), 'w:numbering') : undefined;
+  if (!numberingEl) return out;
+  for (const abs of findAll(childrenOf(numberingEl), 'w:abstractNum')) {
+    const absId = attr(abs, 'w:abstractNumId');
+    if (!absId) continue;
+    for (const lvl of findAll(childrenOf(abs), 'w:lvl')) {
+      const kids = childrenOf(lvl);
+      const fmtEl = find(kids, 'w:numFmt');
+      const startEl = find(kids, 'w:start');
+      out.levels.set(`${absId}:${attr(lvl, 'w:ilvl') ?? '0'}`, {
+        fmt: fmtEl ? attr(fmtEl, 'w:val') : undefined,
+        start: startEl ? attr(startEl, 'w:val') : undefined,
+      });
+    }
+  }
+  for (const num of findAll(childrenOf(numberingEl), 'w:num')) {
+    const numId = attr(num, 'w:numId');
+    const absEl = find(childrenOf(num), 'w:abstractNumId');
+    const absId = absEl ? attr(absEl, 'w:val') : undefined;
+    if (!numId) continue;
+    if (absId) out.abstractOf.set(numId, absId);
+    for (const ov of findAll(childrenOf(num), 'w:lvlOverride')) {
+      const kids = childrenOf(ov);
+      const startEl = find(kids, 'w:startOverride');
+      const lvl = find(kids, 'w:lvl');
+      const lvlKids = lvl ? childrenOf(lvl) : [];
+      const fmtEl = find(lvlKids, 'w:numFmt');
+      const lvlStart = find(lvlKids, 'w:start');
+      const start = startEl ? attr(startEl, 'w:val') : lvlStart ? attr(lvlStart, 'w:val') : undefined;
+      const fmt = fmtEl ? attr(fmtEl, 'w:val') : undefined;
+      if (start !== undefined || fmt !== undefined) out.overrides.set(`${numId}:${attr(ov, 'w:ilvl') ?? '0'}`, { fmt, start });
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Detectors
+// ---------------------------------------------------------------------------
+
+const HEADING_NAME = /^Heading\s*\d$/i;
+// Styles whose only effect is already reproduced by the import: Normal, the default character style, and
+// Word's List Paragraph (list indentation, which the list import carries).
+const PLAIN_STYLE_NAMES = new Set(['normal', 'default paragraph font', 'list paragraph', 'listparagraph']);
+
+/** Sections beyond the first: kept in the model and exported, but the editor shows and edits only the first. */
+function extraSections(root: XmlNode[]): Item[] {
+  let sectPrs = 0;
+  // Only body-level and paragraph-level section properties end a section (as in the reader).
+  walk(root, (_n, tag, path) => {
+    if (tag !== 'w:sectPr') return;
+    const p = path.join('/');
+    if (p === 'w:document/w:body' || p === 'w:document/w:body/w:p/w:pPr') sectPrs++;
+  });
+  return item(
+    'docx.sections',
+    'extra section(s)',
+    sectPrs - 1,
+    'kept in the document and exported, but the editor shows and edits only the first section'
+  );
+}
+
+/** Uses of a named paragraph/character style other than headings: no formatting is applied and the name is not kept. */
+function namedStyles(root: XmlNode[], names: Map<string, string>): Item[] {
+  const used = new Map<string, number>();
+  let total = 0;
+  walk(root, (node, tag, path) => {
+    if (tag !== 'w:pStyle' && tag !== 'w:rStyle') return;
+    if (inRevisionProps(path)) return;
+    const id = attr(node, 'w:val');
+    if (!id) return;
+    const name = names.get(id) ?? id;
+    if (HEADING_NAME.test(name) || HEADING_NAME.test(id) || PLAIN_STYLE_NAMES.has(name.toLowerCase())) return;
+    total++;
+    bump(used, name);
+  });
+  return item('docx.namedStyles', 'use(s) of a named paragraph/character style', total, 'the style\'s formatting is not applied and its name is not kept', used);
+}
+
+const cellHasContent = (p: XmlNode) => {
+  let has = false;
+  walk([p], (n, tag) => {
+    if (tag === 'w:drawing' || tag === 'w:pict') has = true;
+    if (tag === 'w:t' && childrenOf(n).some((c) => String((c as Record<string, unknown>)['#text'] ?? '') !== '')) has = true;
+  });
+  return has;
+};
+
+/** Visits each table's own properties and rows, without descending into nested tables (those are visited as tables themselves). */
+function ownTableNodes(tbl: XmlNode, visit: (node: XmlNode, tag: string, path: readonly string[]) => void) {
+  walk(childrenOf(tbl), (n, tag, path) => visit(n, tag, path));
+}
+
+function tableDetectors(root: XmlNode[]): Item[] {
+  const tables: { node: XmlNode; nested: boolean }[] = [];
+  walk(root, (node, tag, path) => {
+    if (tag === 'w:tbl') tables.push({ node, nested: path.includes('w:tc') });
+  });
+
+  const formatting = new Map<string, number>();
+  let formattedTables = 0;
+  let nestedTables = 0;
+  let multiParagraphCells = 0;
+
+  for (const { node: tbl, nested } of tables) {
+    if (nested) nestedTables++;
+    const kinds = new Set<string>();
+    // Anything below a nested w:tbl belongs to that table, not this one.
+    ownTableNodes(tbl, (n, tag, path) => {
+      if (path.includes('w:tbl')) return;
+      const parent = path[path.length - 1];
+      if (tag === 'w:tblBorders' || tag === 'w:tcBorders') kinds.add('borders');
+      else if (tag === 'w:shd' && (parent === 'w:tblPr' || parent === 'w:tcPr')) {
+        if (attr(n, 'w:fill') && attr(n, 'w:fill') !== 'auto') kinds.add('shading');
+      } else if ((tag === 'w:tcW' || tag === 'w:tblW') && attr(n, 'w:type') !== 'auto' && Number(attr(n, 'w:w') ?? 0) > 0) kinds.add('widths');
+      else if (tag === 'w:tblHeader' && isOn(n)) kinds.add('repeating header rows');
+      else if (tag === 'w:vAlign' && parent === 'w:tcPr' && attr(n, 'w:val') !== 'top') kinds.add('vertical alignment');
+      else if (tag === 'w:tblStyle' && attr(n, 'w:val') !== 'TableNormal') kinds.add('table style');
+      else if (tag === 'w:tc') {
+        const paragraphs = findAll(childrenOf(n), 'w:p').filter(cellHasContent);
+        if (paragraphs.length > 1) multiParagraphCells++;
+      }
+    });
+    if (kinds.size > 0) {
+      formattedTables++;
+      for (const k of kinds) bump(formatting, k);
+    }
+  }
+
+  return [
+    ...item('docx.tableFormatting', 'table(s) with borders, shading, widths, header rows or styles', formattedTables, 'the formatting is dropped', formatting),
+    ...item(
+      'docx.tableStructure',
+      'nested table(s) / multi-paragraph cell(s)',
+      nestedTables + multiParagraphCells,
+      'nested tables are dropped and only the first paragraph of a cell is kept',
+      new Map([...(nestedTables ? [['nested tables', nestedTables] as const] : []), ...(multiParagraphCells ? [['multi-paragraph cells', multiParagraphCells] as const] : [])])
+    ),
+  ];
+}
+
+function paragraphFormatting(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  const hit = (k: string) => {
+    total++;
+    bump(kinds, k);
+  };
+  walk(root, (node, tag, path) => {
+    if (inRevisionProps(path)) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:pPr') {
+      if (tag === 'w:spacing' && (attr(node, 'w:line') || attr(node, 'w:lineRule'))) hit('line spacing');
+      else if (tag === 'w:ind' && (attr(node, 'w:right') || attr(node, 'w:end') || attr(node, 'w:hanging'))) hit('right/hanging indent');
+      else if ((tag === 'w:keepNext' || tag === 'w:keepLines') && isOn(node)) hit('keep with next/lines');
+      else if (tag === 'w:pageBreakBefore' && isOn(node)) hit('page break before');
+    } else if (tag === 'w:vanish' && parent === 'w:rPr' && path[path.length - 2] === 'w:r' && isOn(node)) {
+      hit('hidden text');
+    }
+  });
+  return item(
+    'docx.paragraphFormatting',
+    'paragraph/run formatting occurrence(s)',
+    total,
+    'line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)',
+    kinds
+  );
+}
+
+function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  walk(root, (node, tag, path) => {
+    if (tag !== 'w:p' || inRevisionProps(path)) return;
+    const pPr = find(childrenOf(node), 'w:pPr');
+    const numPr = pPr ? find(childrenOf(pPr), 'w:numPr') : undefined;
+    if (!numPr) return;
+    const numIdEl = find(childrenOf(numPr), 'w:numId');
+    const ilvlEl = find(childrenOf(numPr), 'w:ilvl');
+    const numId = numIdEl ? attr(numIdEl, 'w:val') : undefined;
+    if (!numId || numId === '0') return;
+    const ilvl = ilvlEl ? (attr(ilvlEl, 'w:val') ?? '0') : '0';
+    const abs = numbering.abstractOf.get(numId);
+    const base = abs ? numbering.levels.get(`${abs}:${ilvl}`) : undefined;
+    const override = numbering.overrides.get(`${numId}:${ilvl}`);
+    const fmt = override?.fmt ?? base?.fmt;
+    const start = override?.start ?? base?.start;
+    const reasons: string[] = [];
+    if (fmt && fmt !== 'decimal' && fmt !== 'bullet') reasons.push(fmt);
+    if (fmt !== 'bullet' && start && start !== '1') reasons.push('custom start');
+    if (reasons.length === 0) return;
+    total++;
+    for (const r of reasons) bump(kinds, r);
+  });
+  return item(
+    'docx.listFormatting',
+    'list item(s) with another number format or a custom start',
+    total,
+    'imported as plain bullet or decimal-numbered items; the number format and start value are not kept',
+    kinds
+  );
+}
+
+/** w:tab, non-page w:br and the two hyphen characters are dropped from the text. */
+function tabsAndBreaks(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  walk(root, (node, tag, path) => {
+    const parent = path[path.length - 1];
+    let k: string | undefined;
+    if (tag === 'w:tab' && parent === 'w:r') k = 'tab';
+    else if (tag === 'w:ptab') k = 'tab';
+    else if (tag === 'w:br' && attr(node, 'w:type') !== 'page') k = attr(node, 'w:type') === 'column' ? 'column break' : 'line break';
+    else if (tag === 'w:noBreakHyphen') k = 'non-breaking hyphen';
+    else if (tag === 'w:softHyphen') k = 'soft hyphen';
+    if (!k) return;
+    total++;
+    bump(kinds, k);
+  });
+  return item('docx.tabsAndBreaks', 'tab(s) and line break(s)', total, 'dropped from the text', kinds);
+}
+
+function bookmarks(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  walk(root, (node, tag) => {
+    if (tag === 'w:bookmarkStart' && !(attr(node, 'w:name') ?? '').startsWith('_GoBack')) {
+      total++;
+      bump(kinds, 'bookmarks');
+    } else if (tag === 'w:hyperlink' && attr(node, 'w:anchor')) {
+      total++;
+      bump(kinds, 'internal links');
+    }
+  });
+  return item('docx.bookmarks', 'bookmark(s) and internal link(s)', total, 'bookmarks are dropped and internal links become plain text', kinds);
+}
+
+function sectionDetectors(root: XmlNode[], evenAndOdd: boolean): Item[] {
+  const variantKinds = new Map<string, number>();
+  const propKinds = new Map<string, number>();
+  let variantSections = 0;
+  let propSections = 0;
+  walk(root, (sectPr, tag, path) => {
+    if (tag !== 'w:sectPr' || inRevisionProps(path)) return;
+    const kids = childrenOf(sectPr);
+    const reasons: string[] = [];
+    const titlePg = find(kids, 'w:titlePg');
+    if (titlePg && isOn(titlePg)) reasons.push('first-page header/footer (titlePg)');
+    const refs = kids.filter((k) => tagOf(k) === 'w:headerReference' || tagOf(k) === 'w:footerReference');
+    for (const ref of refs) {
+      const type = attr(ref, 'w:type');
+      if (type === 'first' && !titlePg) reasons.push('first-page reference');
+      if (type === 'even') reasons.push('even-page reference');
+    }
+    if (evenAndOdd && refs.length > 0) reasons.push('even/odd headers setting');
+    if (reasons.length > 0) {
+      variantSections++;
+      for (const r of new Set(reasons)) bump(variantKinds, r);
+    }
+
+    const props: string[] = [];
+    const pgNum = find(kids, 'w:pgNumType');
+    if (pgNum && (attr(pgNum, 'w:start') || attr(pgNum, 'w:fmt') || attr(pgNum, 'w:chapStyle'))) props.push('page numbering');
+    const vAlign = find(kids, 'w:vAlign');
+    if (vAlign && attr(vAlign, 'w:val') && attr(vAlign, 'w:val') !== 'top') props.push('vertical alignment');
+    if (props.length > 0) {
+      propSections++;
+      for (const p of props) bump(propKinds, p);
+    }
+  });
+  return [
+    ...item(
+      'docx.headerFooterVariants',
+      'section(s) with first-page or even/odd headers and footers',
+      variantSections,
+      'only the first header/footer reference of each section is used, as its default header/footer',
+      variantKinds
+    ),
+    ...item(
+      'docx.sectionProperties',
+      'section(s) with page-number format/restart or vertical alignment',
+      propSections,
+      'not imported',
+      propKinds
+    ),
+  ];
+}
+
+/** Field instructions in document order: complex fields (begin..end, nested ones included) and fldSimple. */
+export function fieldInstructions(root: XmlNode[]): string[] {
+  const out: string[] = [];
+  const stack: { instr: string; separated: boolean }[] = [];
+  walk(root, (node, tag) => {
+    if (tag === 'w:fldChar') {
+      const type = attr(node, 'w:fldCharType');
+      if (type === 'begin') stack.push({ instr: '', separated: false });
+      else if (type === 'separate') {
+        if (stack.length) stack[stack.length - 1].separated = true;
+      } else if (type === 'end') {
+        const f = stack.pop();
+        if (f) out.push(f.instr);
+      }
+    } else if (tag === 'w:instrText') {
+      const text = childrenOf(node)
+        .map((c) => String((c as Record<string, unknown>)['#text'] ?? ''))
+        .join('');
+      const f = stack[stack.length - 1];
+      if (!f) out.push(text); // instruction outside any begin..end: damaged file, still count it
+      else if (!f.separated) f.instr += text;
+    } else if (tag === 'w:fldSimple') {
+      out.push(attr(node, 'w:instr') ?? '');
+    }
+  });
+  // A begin without an end (truncated or hand-edited file) is still a field.
+  for (const f of stack.reverse()) out.push(f.instr);
+  return out;
+}
+
+/** Fields other than PAGE / NUMPAGES lose their cached result; `where` says which kinds. A complex field is counted once even when its instruction is split over several instrText runs. */
+function fields(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  for (const raw of fieldInstructions(root)) {
+    const instr = raw.trim().toUpperCase();
+    if (!instr) continue;
+    if ((instr.startsWith('PAGE') && !instr.startsWith('PAGEREF')) || instr.startsWith('NUMPAGES')) continue;
+    total++;
+    bump(kinds, instr.split(/[\s\\]/)[0]);
+  }
+  return item('docx.fields', 'field(s) (table of contents, cross-references, dates…)', total, 'their displayed value is dropped', kinds, 20);
+}
+
+/** `full` adds the formatting/structure detectors and the per-kind field breakdown; otherwise only the fields item (counts only). */
+export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
+  let root: XmlNode[];
+  try {
+    root = parseXml(input.document);
+  } catch {
+    return [];
+  }
+  const evenAndOdd = (() => {
+    try {
+      const settings = input.settings ? find(parseXml(input.settings), 'w:settings') : undefined;
+      const el = settings ? find(childrenOf(settings), 'w:evenAndOddHeaders') : undefined;
+      return !!el && isOn(el);
+    } catch {
+      return false;
+    }
+  })();
+  const safe = (fn: () => Item[]): Item[] => {
+    try {
+      return fn();
+    } catch {
+      return [];
+    }
+  };
+  if (!full) return safe(() => fields(root)).map(({ where: _where, ...rest }) => rest);
+  return [
+    ...safe(() => extraSections(root)),
+    ...safe(() => namedStyles(root, styleNames(input.styles))),
+    ...safe(() => tableDetectors(root)),
+    ...safe(() => paragraphFormatting(root)),
+    ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
+    ...safe(() => tabsAndBreaks(root)),
+    ...safe(() => bookmarks(root)),
+    ...safe(() => sectionDetectors(root, evenAndOdd)),
+    ...safe(() => fields(root)),
+  ];
+}

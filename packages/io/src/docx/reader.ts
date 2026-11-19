@@ -1,5 +1,4 @@
 import JSZip from 'jszip';
-import { XMLParser } from 'fast-xml-parser';
 import type {
   DocBlock,
   DocHeaderFooter,
@@ -12,53 +11,7 @@ import type {
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
 
-// ---------------------------------------------------------------------------
-// XML tree utilities. Parsed with preserveOrder: true — required because a
-// document body interleaves <w:p> and <w:tbl> children in document order;
-// fast-xml-parser's default mode groups same-tag siblings into separate
-// arrays and loses that interleaving entirely. The tradeoff is a more
-// verbose node shape: each element is `{ tagName: [children], ':@': attrs }`.
-// ---------------------------------------------------------------------------
-
-type XmlNode = Record<string, unknown> & { ':@'?: Record<string, string> };
-
-const xmlParser = new XMLParser({
-  preserveOrder: true,
-  ignoreAttributes: false,
-  attributeNamePrefix: '@_',
-  textNodeName: '#text',
-  trimValues: false,
-  parseTagValue: false,
-  parseAttributeValue: false,
-});
-
-function parseXml(xml: string): XmlNode[] {
-  return xmlParser.parse(xml) as XmlNode[];
-}
-
-/** The single non-attribute key of a preserveOrder node, e.g. "w:p". */
-function tagOf(node: XmlNode): string | undefined {
-  return Object.keys(node).find((k) => k !== ':@');
-}
-
-function childrenOf(node: XmlNode): XmlNode[] {
-  const tag = tagOf(node);
-  if (!tag) return [];
-  const value = node[tag];
-  return Array.isArray(value) ? (value as XmlNode[]) : [];
-}
-
-function attrsOf(node: XmlNode): Record<string, string> {
-  return node[':@'] ?? {};
-}
-
-function findAll(nodes: XmlNode[], tag: string): XmlNode[] {
-  return nodes.filter((n) => tagOf(n) === tag);
-}
-
-function find(nodes: XmlNode[], tag: string): XmlNode | undefined {
-  return nodes.find((n) => tagOf(n) === tag);
-}
+import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, type XmlNode } from './xml-tree';
 
 /** Depth-first search for the first descendant with the given tag, regardless of exact nesting path (drawing markup nests several levels deep and the path is more than we want to hard-code). */
 function findDeep(node: XmlNode, tag: string): XmlNode | undefined {

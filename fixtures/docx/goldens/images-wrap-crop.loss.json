@@ -5,13 +5,47 @@
       "count": 1,
       "effect": "their displayed value is dropped",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, cross-references, dates…)"
+      "label": "field(s) (table of contents, cross-references, dates…)",
+      "where": [
+        "SEQ ×1"
+      ]
     },
     {
       "count": 5,
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
       "label": "floating image(s)"
+    },
+    {
+      "count": 15,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×8",
+        "caption ×5",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "table style ×1",
+        "widths ×1"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
+      "id": "docx.tableStructure",
+      "label": "nested table(s) / multi-paragraph cell(s)",
+      "where": [
+        "multi-paragraph cells ×4"
+      ]
     }
   ]
 }

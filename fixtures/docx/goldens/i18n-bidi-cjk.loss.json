@@ -1,4 +1,26 @@
 {
   "format": "docx",
-  "items": []
+  "items": [
+    {
+      "count": 19,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×17",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "table style ×2",
+        "widths ×2"
+      ]
+    }
+  ]
 }

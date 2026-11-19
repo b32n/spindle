@@ -1,4 +1,37 @@
 {
   "format": "docx",
-  "items": []
+  "items": [
+    {
+      "count": 17,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×15",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
+      "id": "docx.paragraphFormatting",
+      "label": "paragraph/run formatting occurrence(s)",
+      "where": [
+        "keep with next/lines ×2",
+        "line spacing ×2"
+      ]
+    },
+    {
+      "count": 12,
+      "effect": "dropped from the text",
+      "id": "docx.tabsAndBreaks",
+      "label": "tab(s) and line break(s)",
+      "where": [
+        "tab ×8",
+        "soft hyphen ×3",
+        "non-breaking hyphen ×1"
+      ]
+    }
+  ]
 }

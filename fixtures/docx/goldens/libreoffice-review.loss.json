@@ -8,6 +8,48 @@
       "label": "comment(s)"
     },
     {
+      "count": 9,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×7",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
+      "id": "docx.paragraphFormatting",
+      "label": "paragraph/run formatting occurrence(s)",
+      "where": [
+        "line spacing ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.sectionProperties",
+      "label": "section(s) with page-number format/restart or vertical alignment",
+      "where": [
+        "page numbering ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "borders ×1",
+        "repeating header rows ×1",
+        "shading ×1",
+        "table style ×1",
+        "widths ×1"
+      ]
+    },
+    {
       "count": 6,
       "effect": "applied (the deleted text is gone)",
       "id": "docx.trackedDeletions",

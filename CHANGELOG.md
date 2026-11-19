@@ -15,6 +15,13 @@ lockstep.
   dependencies (`exceljs`, `docx`, `jszip`, `fast-xml-parser`) moved out of `@b32nio/spindle-shared`, so
   Phase 1 fidelity work grows there instead of in shared's always-on path. Subpaths `@b32nio/spindle-io/xlsx`
   and `/docx` load one format only; the root re-exports both plus the CSV helpers. See `packages/io/README.md`.
+- **Full DOCX loss report.** `detectDocxLoss(bytes, { detail: 'full' })` (`@b32nio/spindle-io/docx`) and
+  `inspectDocx(bytes, { detail: 'full' })` (`@b32nio/spindle-docs-core`) additionally report ten new ids for
+  content the importer flattens or ignores: `docx.sections`, `docx.namedStyles`, `docx.tableFormatting`,
+  `docx.tableStructure`, `docx.paragraphFormatting`, `docx.listFormatting`, `docx.tabsAndBreaks`, `docx.bookmarks`,
+  `docx.headerFooterVariants` and `docx.sectionProperties`, and `docx.fields` lists its field kinds in `where`.
+  The default report (`detail: 'summary'`), and so the import-confirmation dialog, is unchanged apart from the
+  `docx.fields` count fix below. The new detectors parse the XML instead of matching text.
 
 ### Changed
 
@@ -32,6 +39,8 @@ lockstep.
 
 ### Fixed
 
+- **DOCX loss report: `docx.fields` counts a complex field once** even when its instruction is split across
+  several runs (for example `IF 1 > 0 ...`, which was counted twice).
 - **DOCX: landscape sections no longer lose their orientation on a round trip.** `exportDocx` handed the `docx`
   library an already-swapped page size and the library swapped it again, so a landscape section was written
   as 8.5x11in with `w:orient="landscape"` and re-imported as portrait-shaped. The writer now emits the on-page

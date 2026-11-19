@@ -7,7 +7,7 @@ export const sourceApi: EditorApi = {
   createDocument: () => new DocumentImpl('fixture', 'Untitled'),
   importFromDocx: (bytes, document) => importFromDocx(bytes, document as DocumentImpl),
   exportToDocx: (document) => exportToDocx(document as DocumentImpl),
-  inspectDocx: (bytes) => inspectDocx(bytes),
+  inspectDocx: (bytes) => inspectDocx(bytes, { detail: 'full' }),
 };
 
 /** Read a nested value by dotted path (`sections.0.blocks.1.id`) so tests need no `any`. */

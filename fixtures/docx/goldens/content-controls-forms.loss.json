@@ -11,7 +11,34 @@
       "count": 3,
       "effect": "their displayed value is dropped",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, cross-references, dates…)"
+      "label": "field(s) (table of contents, cross-references, dates…)",
+      "where": [
+        "FORMCHECKBOX ×1",
+        "FORMDROPDOWN ×1",
+        "FORMTEXT ×1"
+      ]
+    },
+    {
+      "count": 12,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×8",
+        "Subtitle ×2",
+        "Title ×2"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "shading ×1",
+        "table style ×1",
+        "widths ×1"
+      ]
     }
   ]
 }

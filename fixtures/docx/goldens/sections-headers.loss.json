@@ -6,6 +6,53 @@
       "effect": "laid out as a single column",
       "id": "docx.columns",
       "label": "multi-column section(s)"
+    },
+    {
+      "count": 4,
+      "effect": "only the first header/footer reference of each section is used, as its default header/footer",
+      "id": "docx.headerFooterVariants",
+      "label": "section(s) with first-page or even/odd headers and footers",
+      "where": [
+        "even/odd headers setting ×4",
+        "even-page reference ×2",
+        "first-page header/footer (titlePg) ×1",
+        "first-page reference ×1"
+      ]
+    },
+    {
+      "count": 30,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×28",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "not imported",
+      "id": "docx.sectionProperties",
+      "label": "section(s) with page-number format/restart or vertical alignment",
+      "where": [
+        "page numbering ×3"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "kept in the document and exported, but the editor shows and edits only the first section",
+      "id": "docx.sections",
+      "label": "extra section(s)"
+    },
+    {
+      "count": 1,
+      "effect": "dropped from the text",
+      "id": "docx.tabsAndBreaks",
+      "label": "tab(s) and line break(s)",
+      "where": [
+        "column break ×1"
+      ]
     }
   ]
 }

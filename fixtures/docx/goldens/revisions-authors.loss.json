@@ -8,6 +8,29 @@
       "label": "comment(s)"
     },
     {
+      "count": 21,
+      "effect": "the style's formatting is not applied and its name is not kept",
+      "id": "docx.namedStyles",
+      "label": "use(s) of a named paragraph/character style",
+      "where": [
+        "Body Text ×13",
+        "annotation reference ×6",
+        "Subtitle ×1",
+        "Title ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "the formatting is dropped",
+      "id": "docx.tableFormatting",
+      "label": "table(s) with borders, shading, widths, header rows or styles",
+      "where": [
+        "repeating header rows ×1",
+        "table style ×1",
+        "widths ×1"
+      ]
+    },
+    {
       "count": 13,
       "effect": "applied (the deleted text is gone)",
       "id": "docx.trackedDeletions",
