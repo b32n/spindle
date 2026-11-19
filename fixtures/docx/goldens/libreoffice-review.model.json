@@ -57,11 +57,19 @@
                 "type": "text"
               },
               {
+                "text": "72",
+                "type": "text"
+              },
+              {
                 "text": " hours",
                 "type": "text"
               },
               {
                 "text": " without a permit. ",
+                "type": "text"
+              },
+              {
+                "text": "Permits are issued by the harbour office. ",
                 "type": "text"
               },
               {
@@ -79,6 +87,10 @@
                 "type": "text"
               },
               {
+                "text": " by the harbour board",
+                "type": "text"
+              },
+              {
                 "text": ". The harbour committee measured a ledger of unpaid berth fees during the long spring inspection. Local fishing crews recorded the fog-signal schedule as the tide turned.",
                 "type": "text"
               }
@@ -92,7 +104,12 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "This paragraph is new: night mooring requires a lit stern light.",
+                "type": "text"
+              }
+            ],
             "id": "block-7",
             "type": "paragraph"
           },
@@ -114,7 +131,16 @@
                 "type": "text"
               },
               {
+                "bold": true,
+                "text": "and day-trip operators ",
+                "type": "text"
+              },
+              {
                 "text": "may land catch at the east quay. ",
+                "type": "text"
+              },
+              {
+                "text": "Auctions start at seven. ",
                 "type": "text"
               },
               {
@@ -168,7 +194,13 @@
                     "id": "cell-3"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "fontSize": 11,
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-4"
                   }
                 ],
@@ -230,7 +262,12 @@
             "type": "list-item"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Insurance schedule",
+                "type": "text"
+              }
+            ],
             "id": "block-14",
             "level": 0,
             "listType": "bullet",

@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 21,
-      "effect": "their content is not imported",
+      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
       "id": "docx.contentControls",
       "label": "content control(s)"
     },

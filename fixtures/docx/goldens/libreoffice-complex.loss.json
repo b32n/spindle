@@ -19,7 +19,7 @@
     },
     {
       "count": 1,
-      "effect": "their content is not imported",
+      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
       "id": "docx.contentControls",
       "label": "content control(s)"
     },
@@ -146,16 +146,6 @@
       "where": [
         "multi-paragraph cells ×4",
         "nested tables ×2"
-      ]
-    },
-    {
-      "count": 6,
-      "effect": "dropped from the text",
-      "id": "docx.tabsAndBreaks",
-      "label": "tab(s) and line break(s)",
-      "where": [
-        "tab ×5",
-        "column break ×1"
       ]
     }
   ]

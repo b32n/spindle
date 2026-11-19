@@ -54,7 +54,6 @@ describe('detectDocxLoss: XML-based detectors', () => {
     expect(ids).not.toContain('docx.listFormatting');
     expect(ids).not.toContain('docx.namedStyles');
     expect(ids).not.toContain('docx.sections');
-    expect(ids).not.toContain('docx.tabsAndBreaks');
   });
 
   describe('docx.sections', () => {
@@ -197,24 +196,6 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.tabsAndBreaks', () => {
-    it('counts tabs, line/column breaks and hyphen characters, not tab stops or page breaks', async () => {
-      const bytes = await docx(
-        '<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs></w:pPr>' +
-          '<w:r><w:t>a</w:t><w:tab/><w:t>b</w:t><w:br/><w:br w:type="textWrapping"/><w:br w:type="column"/><w:br w:type="page"/>' +
-          '<w:noBreakHyphen/><w:softHyphen/></w:r></w:p>'
-      );
-      expect(await item(bytes, 'docx.tabsAndBreaks')).toMatchObject({
-        count: 6,
-        where: ['line break ×2', 'column break ×1', 'non-breaking hyphen ×1', 'soft hyphen ×1', 'tab ×1'],
-      });
-    });
-    it('is silent for a paragraph with only a page break and tab stops', async () => {
-      const bytes = await docx('<w:p><w:pPr><w:tabs><w:tab w:pos="720"/></w:tabs></w:pPr><w:r><w:br w:type="page"/></w:r></w:p>');
-      expect(await item(bytes, 'docx.tabsAndBreaks')).toBeUndefined();
-    });
-  });
-
   describe('docx.bookmarks', () => {
     it('counts bookmarks (not _GoBack) and internal-anchor hyperlinks (not external ones)', async () => {
       const bytes = await docx(
@@ -310,7 +291,6 @@ describe('detectDocxLoss: XML-based detectors', () => {
     it('leaves out the formatting/structure ids and the per-kind field breakdown', async () => {
       const bytes = await docx(
         p('styled', '<w:pStyle w:val="Callout"/><w:spacing w:line="360"/>') +
-          '<w:p><w:r><w:t>a</w:t><w:tab/></w:r></w:p>' +
           '<w:p><w:fldSimple w:instr=" DATE "><w:r><w:t>x</w:t></w:r></w:fldSimple></w:p>' +
           '<w:sectPr><w:pgNumType w:start="3"/></w:sectPr>'
       );
@@ -324,7 +304,6 @@ describe('detectDocxLoss: XML-based detectors', () => {
         'docx.namedStyles',
         'docx.paragraphFormatting',
         'docx.sectionProperties',
-        'docx.tabsAndBreaks',
       ]);
       expect(full.items.find((i) => i.id === 'docx.fields')?.where).toEqual(['DATE ×1']);
     });
@@ -423,14 +402,16 @@ describe('detectDocxLoss: long-tail detectors', () => {
     });
   });
 
-  it('docx.ruby, docx.smartTags and docx.altChunk count their elements', async () => {
+  it('docx.ruby and docx.altChunk count their elements; tabs, breaks and smart tags are no longer reported (their text is kept)', async () => {
     const bytes = await docx(
       '<w:p><w:r><w:ruby><w:rt/><w:rubyBase/></w:ruby></w:r><w:smartTag w:uri="u" w:element="place"><w:r><w:t>Paris</w:t></w:r></w:smartTag></w:p>' +
         '<w:altChunk r:id="rId9"/>'
     );
     expect(await run(bytes, 'docx.ruby')).toMatchObject({ count: 1 });
-    expect(await run(bytes, 'docx.smartTags')).toMatchObject({ count: 1 });
     expect(await run(bytes, 'docx.altChunk')).toMatchObject({ count: 1 });
+    expect(await run(bytes, 'docx.smartTags')).toBeUndefined();
+    const text = await docx('<w:p><w:r><w:t>a</w:t><w:tab/><w:br/><w:noBreakHyphen/><w:softHyphen/></w:r></w:p>');
+    expect(await run(text, 'docx.tabsAndBreaks')).toBeUndefined();
   });
 
   it('docx.embeddedFonts counts font files under word/fonts', async () => {

@@ -74,11 +74,23 @@
                 "type": "text"
               },
               {
+                "text": "­",
+                "type": "text"
+              },
+              {
                 "text": "dis",
                 "type": "text"
               },
               {
+                "text": "­",
+                "type": "text"
+              },
+              {
                 "text": "establishment",
+                "type": "text"
+              },
+              {
+                "text": "­",
                 "type": "text"
               },
               {
@@ -87,6 +99,10 @@
               },
               {
                 "text": "Non-breaking hyphen: ",
+                "type": "text"
+              },
+              {
+                "text": "‑",
                 "type": "text"
               },
               {
@@ -124,6 +140,10 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "iii",
                 "type": "text"
               }
@@ -135,6 +155,10 @@
             "content": [
               {
                 "text": "Chapter one",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               },
               {
@@ -152,6 +176,10 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "17",
                 "type": "text"
               }
@@ -163,6 +191,10 @@
             "content": [
               {
                 "text": "Appendix",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               },
               {
@@ -180,6 +212,10 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "240",
                 "type": "text"
               }
@@ -194,11 +230,23 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "12.50",
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "1,204.75",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               },
               {

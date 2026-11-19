@@ -57,6 +57,10 @@
                 "type": "text"
               },
               {
+                "text": "2025",
+                "type": "text"
+              },
+              {
                 "text": " rose ",
                 "type": "text"
               },
@@ -65,7 +69,16 @@
                 "type": "text"
               },
               {
+                "text": "eleven",
+                "type": "text"
+              },
+              {
                 "text": " percent, ",
+                "type": "text"
+              },
+              {
+                "italic": true,
+                "text": "mostly because of the new grain terminal, ",
                 "type": "text"
               },
               {
@@ -83,6 +96,11 @@
                 "type": "text"
               },
               {
+                "bold": true,
+                "text": "A replacement sentence was supplied by the fourth reviewer, with a note about winter dredging. ",
+                "type": "text"
+              },
+              {
                 "text": "Nobody remembered who had painted the clock face blue, but everybody agreed it suited the square.",
                 "type": "text"
               }
@@ -91,7 +109,12 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Entire paragraph inserted by Dana: berth fees will be reviewed in spring.",
+                "type": "text"
+              }
+            ],
             "id": "block-6",
             "type": "paragraph"
           },
@@ -242,7 +265,12 @@
             "type": "heading"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Order dredging equipment",
+                "type": "text"
+              }
+            ],
             "id": "block-18",
             "level": 0,
             "listType": "numbered",
@@ -349,15 +377,30 @@
               {
                 "cells": [
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "East (new)",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-7"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "7",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-8"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "55",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-9"
                   }
                 ],
@@ -392,7 +435,12 @@
                     "id": "cell-13"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "10",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-14"
                   },
                   {
@@ -431,6 +479,19 @@
               {
                 "text": "Final paragraph: ",
                 "type": "text"
+              },
+              {
+                "text": "alpha ",
+                "type": "text"
+              },
+              {
+                "text": "gamma ",
+                "type": "text"
+              },
+              {
+                "text": "epsilon ",
+                "type": "text",
+                "underline": true
               },
               {
                 "text": "zeta.",

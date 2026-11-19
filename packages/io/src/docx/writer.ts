@@ -1,5 +1,6 @@
 import {
   AlignmentType,
+  BuilderElement,
   Document,
   ExternalHyperlink,
   Footer,
@@ -16,6 +17,7 @@ import {
   Table,
   TableCell,
   TableRow,
+  Tab,
   TextRun,
   UnderlineType,
   WidthType,
@@ -90,26 +92,43 @@ class DocxBuilder {
   readonly warnings: string[] = [];
 
   buildRuns(content: DocInline[]): ParagraphChild[] {
-    return content.map((inline) => this.buildRun(inline)).filter((r): r is ParagraphChild => r != null);
+    return content.flatMap((inline) => this.buildRun(inline)).filter((r): r is ParagraphChild => r != null);
   }
 
-  private buildRun(inline: DocInline): ParagraphChild | null {
+  /**
+   * A text run's text with '\t' written as w:tab and '\n' as w:br, all inside one run so the formatting
+   * is shared. Text with neither stays a plain `text` run.
+   */
+  private textRuns(base: DocRunBase, text: string, extra: Partial<IRunOptions> = {}): TextRun[] {
+    if (!/[\t\n]/.test(text)) return [new TextRun(this.runOptions(base, { ...extra, text }))];
+    const children: (string | Tab | BuilderElement)[] = [];
+    for (const part of text.split(/(\t|\n)/)) {
+      if (part === '\t') children.push(new Tab());
+      else if (part === '\n') children.push(new BuilderElement({ name: 'w:br' }));
+      else if (part) children.push(part);
+    }
+    return [new TextRun(this.runOptions(base, { ...extra, children }))];
+  }
+
+  private buildRun(inline: DocInline): (ParagraphChild | null)[] {
     switch (inline.type) {
       case 'text':
-        return new TextRun(this.runOptions(inline, { text: inline.text }));
+        return this.textRuns(inline, inline.text);
       case 'link':
-        return new ExternalHyperlink({
-          link: inline.href,
-          children: [new TextRun(this.runOptions(inline, { text: inline.text, style: 'Hyperlink' }))],
-        });
+        return [
+          new ExternalHyperlink({
+            link: inline.href,
+            children: this.textRuns(inline, inline.text, { style: 'Hyperlink' }),
+          }),
+        ];
       case 'image':
-        return this.buildImage(inline.src, inline.width, inline.height, inline.alt);
+        return [this.buildImage(inline.src, inline.width, inline.height, inline.alt)];
       case 'pageNumber':
-        return new TextRun({ children: [PageNumber.CURRENT] });
+        return [new TextRun({ children: [PageNumber.CURRENT] })];
       case 'totalPages':
-        return new TextRun({ children: [PageNumber.TOTAL_PAGES] });
+        return [new TextRun({ children: [PageNumber.TOTAL_PAGES] })];
       default:
-        return null;
+        return [];
     }
   }
 

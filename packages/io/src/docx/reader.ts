@@ -189,6 +189,37 @@ function runProps(rPrNode: XmlNode | undefined): DocRunBase {
   };
 }
 
+const NON_BREAKING_HYPHEN = '\u2011';
+const SOFT_HYPHEN = '\u00ad';
+
+/** Content controls and custom XML wrap block or inline content: replace each wrapper by what it contains (its properties are dropped). */
+function unwrapContainer(node: XmlNode): XmlNode[] {
+  const tag = tagOf(node);
+  if (tag === 'w:sdt') {
+    const content = find(childrenOf(node), 'w:sdtContent');
+    return content ? childrenOf(content) : [];
+  }
+  return childrenOf(node).filter((k) => tagOf(k) !== 'w:customXmlPr');
+}
+
+/** Block-level children with w:sdt / w:customXml wrappers replaced by their content, at any depth. */
+function flattenBlocks(nodes: XmlNode[]): XmlNode[] {
+  return nodes.flatMap((n) => {
+    const tag = tagOf(n);
+    return tag === 'w:sdt' || tag === 'w:customXml' ? flattenBlocks(unwrapContainer(n)) : [n];
+  });
+}
+
+/** Paragraph-level children with w:sdt, w:customXml, w:smartTag and w:ins (tracked insertion) wrappers replaced by their content, at any depth. */
+function flattenInline(nodes: XmlNode[]): XmlNode[] {
+  return nodes.flatMap((n) => {
+    const tag = tagOf(n);
+    if (tag === 'w:sdt' || tag === 'w:customXml') return flattenInline(unwrapContainer(n));
+    if (tag === 'w:smartTag' || tag === 'w:ins') return flattenInline(childrenOf(n).filter((k) => tagOf(k) !== 'w:smartTagPr'));
+    return [n];
+  });
+}
+
 /**
  * Walk a paragraph's direct children, producing inline content. Handles
  * plain runs, hyperlinks (resolved through rels), and field-code sequences
@@ -216,6 +247,12 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     const rPr = find(childrenOf(runNode), 'w:rPr');
     const props = runProps(rPr);
     let text = '';
+    const flush = () => {
+      if (!text) return;
+      if (target) out.push({ type: 'link', text, href: target, ...props });
+      else out.push({ type: 'text', text, ...props });
+      text = '';
+    };
     for (const piece of childrenOf(runNode)) {
       const pieceTag = tagOf(piece);
       if (pieceTag === 'w:fldChar') {
@@ -233,6 +270,22 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         if (inField) pendingField += textOf(piece);
       } else if (pieceTag === 'w:t') {
         if (!inField) text += textOf(piece); // inField's w:t is cached display text — discard, we use the instruction
+      } else if (pieceTag === 'w:tab' || pieceTag === 'w:ptab') {
+        if (!inField) text += '\t';
+      } else if (pieceTag === 'w:br') {
+        // A page break is a structural block (see pageBreakPlacement); every other break is a line break.
+        if (!inField && attrsOf(piece)['@_w:type'] !== 'page') text += '\n';
+      } else if (pieceTag === 'w:cr') {
+        if (!inField) text += '\n';
+      } else if (pieceTag === 'w:noBreakHyphen') {
+        if (!inField) text += NON_BREAKING_HYPHEN;
+      } else if (pieceTag === 'w:softHyphen') {
+        if (!inField) text += SOFT_HYPHEN;
+      } else if (pieceTag === 'w:ruby') {
+        // Keep the base text; the reading marks (w:rt) are not imported.
+        flush();
+        const base = find(childrenOf(piece), 'w:rubyBase');
+        if (base) consumeRuns(childrenOf(base), target);
       } else if (pieceTag === 'w:drawing') {
         const image = parseDrawing(piece, ctx.media, warnings);
         if (image) out.push(image);
@@ -244,21 +297,18 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         if (image) out.push(image);
       }
     }
-    if (text) {
-      if (target) out.push({ type: 'link', text, href: target, ...props });
-      else out.push({ type: 'text', text, ...props });
-    }
+    flush();
   };
 
   const consumeRuns = (runs: XmlNode[], target: string | undefined) => {
-    for (const child of runs) {
+    for (const child of flattenInline(runs)) {
       const tag = tagOf(child);
       if (tag === 'w:fldSimple') out.push(...fieldRunFor(attrsOf(child)['@_w:instr'] ?? '', warnings));
       else if (tag === 'w:r') consumeRun(child, target);
     }
   };
 
-  for (const child of childrenOf(pNode)) {
+  for (const child of flattenInline(childrenOf(pNode))) {
     const tag = tagOf(child);
     if (tag === 'w:hyperlink') {
       const target = resolveHyperlinkTarget(child, ctx.rels, warnings);
@@ -488,7 +538,7 @@ function parseParagraph(
 // ---------------------------------------------------------------------------
 
 function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): DocBlock {
-  const rowsXml = findAll(childrenOf(tblNode), 'w:tr');
+  const rowsXml = findAll(flattenBlocks(childrenOf(tblNode)), 'w:tr');
   const rows: DocTableRow[] = [];
   // Column index -> the DocTableCell object currently accumulating a
   // vertical merge, so a later row's continuation cell can bump its rowspan
@@ -496,7 +546,7 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
   const openVMerge = new Map<number, { cell: DocTableRow['cells'][number] }>();
 
   for (const trNode of rowsXml) {
-    const cellsXml = findAll(childrenOf(trNode), 'w:tc');
+    const cellsXml = findAll(flattenBlocks(childrenOf(trNode)), 'w:tc');
     const rowCells: DocTableRow['cells'] = [];
     let col = 0;
     for (const tcNode of cellsXml) {
@@ -530,7 +580,7 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
 
 /** A table cell's content is one or more paragraphs; flatten to the first non-empty paragraph's inline content (our own writer only ever emits one). */
 function collectCellContent(tcNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
-  for (const p of findAll(childrenOf(tcNode), 'w:p')) {
+  for (const p of findAll(flattenBlocks(childrenOf(tcNode)), 'w:p')) {
     const content = paragraphInlineContent(p, ctx, warnings);
     if (content.length > 0) return content;
   }
@@ -601,7 +651,7 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
   const rootEl = find(root, 'w:hdr') ?? find(root, 'w:ftr');
   const paragraphs: DocHeaderFooterParagraph[] = [];
   if (rootEl) {
-    for (const p of findAll(childrenOf(rootEl), 'w:p')) {
+    for (const p of findAll(flattenBlocks(childrenOf(rootEl)), 'w:p')) {
       const pPr = find(childrenOf(p), 'w:pPr');
       const jcEl = pPr ? find(childrenOf(pPr), 'w:jc') : undefined;
       const alignment = jcEl ? ALIGN_MAP[attrsOf(jcEl)['@_w:val']] : undefined;
@@ -645,7 +695,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const root = parseXml(documentXml);
   const documentEl = find(root, 'w:document');
   const bodyEl = documentEl ? find(childrenOf(documentEl), 'w:body') : undefined;
-  const bodyChildren = bodyEl ? childrenOf(bodyEl) : [];
+  const bodyChildren = bodyEl ? flattenBlocks(childrenOf(bodyEl)) : [];
 
   const sections: DocSection[] = [];
   let currentBlocks: DocBlock[] = [];

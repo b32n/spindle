@@ -210,6 +210,8 @@ export class DomMeasurer {
       font-family: ${this.config.fontFamily};
       font-size: ${this.config.fontSize}px;
       line-height: ${this.config.lineHeight};
+      white-space: pre-wrap;
+      word-wrap: break-word;
     `;
     document.body.appendChild(this.measureContainer);
   }

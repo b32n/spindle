@@ -44,15 +44,6 @@
       "effect": "kept in the document and exported, but the editor shows and edits only the first section",
       "id": "docx.sections",
       "label": "extra section(s)"
-    },
-    {
-      "count": 1,
-      "effect": "dropped from the text",
-      "id": "docx.tabsAndBreaks",
-      "label": "tab(s) and line break(s)",
-      "where": [
-        "column break ×1"
-      ]
     }
   ]
 }

@@ -22,7 +22,10 @@
           {
             "content": [
               {
-                "text": "Contents",
+                "bold": true,
+                "color": "#1f3864",
+                "fontSize": 28,
+                "text": "Quarterly Harbour Operations Report",
                 "type": "text"
               }
             ],
@@ -30,14 +33,19 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Q4 2025 — Marguerite Harbour Authority",
+                "type": "text"
+              }
+            ],
             "id": "block-2",
             "type": "paragraph"
           },
           {
             "content": [
               {
-                "text": "Operations",
+                "text": "Prepared by the Records Office",
                 "type": "text"
               }
             ],
@@ -45,29 +53,18 @@
             "type": "paragraph"
           },
           {
-            "content": [
-              {
-                "text": "Vessel traffic",
-                "type": "text"
-              }
-            ],
+            "content": [],
             "id": "block-4",
             "type": "paragraph"
           },
           {
-            "content": [
-              {
-                "text": "Cargo",
-                "type": "text"
-              }
-            ],
             "id": "block-5",
-            "type": "paragraph"
+            "type": "page-break"
           },
           {
             "content": [
               {
-                "text": "Finance",
+                "text": "Contents",
                 "type": "text"
               }
             ],
@@ -75,18 +72,83 @@
             "type": "paragraph"
           },
           {
-            "content": [
-              {
-                "text": "Outlook",
-                "type": "text"
-              }
-            ],
+            "content": [],
             "id": "block-7",
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Operations",
+                "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
+              }
+            ],
             "id": "block-8",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Vessel traffic",
+                "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Cargo",
+                "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Finance",
+                "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Outlook",
+                "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
+              }
+            ],
+            "id": "block-12",
+            "type": "paragraph"
+          },
+          {
+            "content": [],
+            "id": "block-13",
             "type": "paragraph"
           },
           {
@@ -96,7 +158,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-9",
+            "id": "block-14",
             "level": 1,
             "type": "heading"
           },
@@ -107,7 +169,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-10",
+            "id": "block-15",
             "type": "paragraph"
           },
           {
@@ -117,7 +179,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-11",
+            "id": "block-16",
             "level": 1,
             "type": "heading"
           },
@@ -128,7 +190,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-12",
+            "id": "block-17",
             "type": "paragraph"
           },
           {
@@ -138,7 +200,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-13",
+            "id": "block-18",
             "level": 2,
             "type": "heading"
           },
@@ -149,7 +211,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-14",
+            "id": "block-19",
             "type": "paragraph"
           },
           {
@@ -159,7 +221,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-15",
+            "id": "block-20",
             "level": 2,
             "type": "heading"
           },
@@ -170,7 +232,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-16",
+            "id": "block-21",
             "type": "paragraph"
           },
           {
@@ -180,7 +242,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-17",
+            "id": "block-22",
             "level": 1,
             "type": "heading"
           },
@@ -191,7 +253,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-18",
+            "id": "block-23",
             "type": "paragraph"
           },
           {
@@ -201,7 +263,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-19",
+            "id": "block-24",
             "level": 1,
             "type": "heading"
           },
@@ -212,7 +274,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-20",
+            "id": "block-25",
             "type": "paragraph"
           },
           {
@@ -222,7 +284,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-21",
+            "id": "block-26",
             "level": 1,
             "type": "heading"
           },
@@ -233,7 +295,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-22",
+            "id": "block-27",
             "type": "paragraph"
           },
           {
@@ -251,7 +313,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-23",
+            "id": "block-28",
             "type": "paragraph"
           },
           {
@@ -273,7 +335,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-24",
+            "id": "block-29",
             "type": "paragraph"
           },
           {
@@ -299,7 +361,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-25",
+            "id": "block-30",
             "type": "paragraph"
           },
           {
@@ -333,7 +395,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-26",
+            "id": "block-31",
             "type": "paragraph"
           },
           {
@@ -351,7 +413,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-27",
+            "id": "block-32",
             "type": "paragraph"
           },
           {
@@ -374,7 +436,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-28",
+            "id": "block-33",
             "type": "paragraph"
           },
           {
@@ -409,7 +471,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-29",
+            "id": "block-34",
             "type": "paragraph"
           },
           {
@@ -419,7 +481,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-30",
+            "id": "block-35",
             "type": "paragraph"
           },
           {
@@ -445,7 +507,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-31",
+            "id": "block-36",
             "type": "paragraph"
           },
           {
@@ -455,7 +517,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-32",
+            "id": "block-37",
             "level": 1,
             "type": "heading"
           },
@@ -466,7 +528,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-33",
+            "id": "block-38",
             "type": "paragraph"
           },
           {
@@ -488,6 +550,10 @@
                 "type": "text"
               },
               {
+                "text": "Marguerite",
+                "type": "text"
+              },
+              {
                 "text": " is a smart-tagged place, ",
                 "type": "text"
               },
@@ -496,7 +562,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-34",
+            "id": "block-39",
             "type": "paragraph"
           },
           {
@@ -515,7 +581,7 @@
                 "type": "link"
               }
             ],
-            "id": "block-35",
+            "id": "block-40",
             "type": "paragraph"
           },
           {
@@ -525,7 +591,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-36",
+            "id": "block-41",
             "level": 1,
             "type": "heading"
           },
@@ -536,7 +602,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-37",
+            "id": "block-42",
             "level": 2,
             "type": "heading"
           },
@@ -580,14 +646,14 @@
                 "type": "text"
               }
             ],
-            "id": "block-38",
+            "id": "block-43",
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "alt": "checkerboard, block-level inline image",
             "height": 150,
-            "id": "block-39",
+            "id": "block-44",
             "src": "data:image/png;sha256=012db674810a3177;chars=836",
             "type": "image",
             "width": 240
@@ -604,7 +670,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-40",
+            "id": "block-45",
             "type": "paragraph"
           },
           {
@@ -614,7 +680,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-41",
+            "id": "block-46",
             "type": "paragraph"
           },
           {
@@ -624,7 +690,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-42",
+            "id": "block-47",
             "type": "paragraph"
           },
           {
@@ -634,7 +700,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-43",
+            "id": "block-48",
             "type": "paragraph"
           },
           {
@@ -644,7 +710,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-44",
+            "id": "block-49",
             "type": "paragraph"
           },
           {
@@ -654,7 +720,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-45",
+            "id": "block-50",
             "type": "paragraph"
           },
           {
@@ -664,11 +730,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-46",
+            "id": "block-51",
             "type": "paragraph"
           },
           {
-            "id": "block-47",
+            "id": "block-52",
             "rows": [
               {
                 "cells": [
@@ -740,7 +806,7 @@
                 "width": 40
               }
             ],
-            "id": "block-48",
+            "id": "block-53",
             "type": "paragraph"
           },
           {
@@ -750,14 +816,14 @@
                 "type": "text"
               }
             ],
-            "id": "block-49",
+            "id": "block-54",
             "level": 2,
             "type": "heading"
           },
           {
             "alignment": "center",
             "content": [],
-            "id": "block-50",
+            "id": "block-55",
             "type": "paragraph"
           },
           {
@@ -768,13 +834,13 @@
                 "type": "text"
               }
             ],
-            "id": "block-51",
+            "id": "block-56",
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [],
-            "id": "block-52",
+            "id": "block-57",
             "type": "paragraph"
           },
           {
@@ -785,13 +851,13 @@
                 "type": "text"
               }
             ],
-            "id": "block-53",
+            "id": "block-58",
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [],
-            "id": "block-54",
+            "id": "block-59",
             "type": "paragraph"
           },
           {
@@ -802,7 +868,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-55",
+            "id": "block-60",
             "type": "paragraph"
           },
           {
@@ -812,7 +878,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-56",
+            "id": "block-61",
             "type": "paragraph"
           },
           {
@@ -822,7 +888,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-57",
+            "id": "block-62",
             "level": 1,
             "type": "heading"
           },
@@ -833,11 +899,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-58",
+            "id": "block-63",
             "type": "paragraph"
           },
           {
-            "id": "block-59",
+            "id": "block-64",
             "rows": [
               {
                 "cells": [
@@ -940,7 +1006,7 @@
           },
           {
             "content": [],
-            "id": "block-60",
+            "id": "block-65",
             "type": "paragraph"
           },
           {
@@ -950,11 +1016,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-61",
+            "id": "block-66",
             "type": "paragraph"
           },
           {
-            "id": "block-62",
+            "id": "block-67",
             "rows": [
               {
                 "cells": [
@@ -1238,7 +1304,7 @@
           },
           {
             "content": [],
-            "id": "block-63",
+            "id": "block-68",
             "type": "paragraph"
           },
           {
@@ -1248,11 +1314,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-64",
+            "id": "block-69",
             "type": "paragraph"
           },
           {
-            "id": "block-65",
+            "id": "block-70",
             "rows": [
               {
                 "cells": [
@@ -1358,7 +1424,7 @@
           },
           {
             "content": [],
-            "id": "block-66",
+            "id": "block-71",
             "type": "paragraph"
           },
           {
@@ -1368,11 +1434,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-67",
+            "id": "block-72",
             "type": "paragraph"
           },
           {
-            "id": "block-68",
+            "id": "block-73",
             "rows": [
               {
                 "cells": [
@@ -2814,7 +2880,7 @@
           },
           {
             "content": [],
-            "id": "block-69",
+            "id": "block-74",
             "type": "paragraph"
           },
           {
@@ -2824,11 +2890,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-70",
+            "id": "block-75",
             "type": "paragraph"
           },
           {
-            "id": "block-71",
+            "id": "block-76",
             "rows": [
               {
                 "cells": [
@@ -2899,11 +2965,11 @@
           },
           {
             "content": [],
-            "id": "block-72",
+            "id": "block-77",
             "type": "paragraph"
           },
           {
-            "id": "block-73",
+            "id": "block-78",
             "rows": [
               {
                 "cells": [
@@ -2933,11 +2999,11 @@
           },
           {
             "content": [],
-            "id": "block-74",
+            "id": "block-79",
             "type": "paragraph"
           },
           {
-            "id": "block-75",
+            "id": "block-80",
             "rows": [
               {
                 "cells": [
@@ -2967,7 +3033,7 @@
           },
           {
             "content": [],
-            "id": "block-76",
+            "id": "block-81",
             "type": "paragraph"
           },
           {
@@ -2977,7 +3043,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-77",
+            "id": "block-82",
             "level": 1,
             "type": "heading"
           },
@@ -2988,7 +3054,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-78",
+            "id": "block-83",
             "type": "paragraph"
           },
           {
@@ -3002,7 +3068,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-79",
+            "id": "block-84",
             "type": "paragraph"
           },
           {
@@ -3032,7 +3098,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-80",
+            "id": "block-85",
             "type": "paragraph"
           },
           {
@@ -3042,7 +3108,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-81",
+            "id": "block-86",
             "type": "paragraph"
           },
           {
@@ -3052,7 +3118,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-82",
+            "id": "block-87",
             "type": "paragraph"
           },
           {
@@ -3062,12 +3128,61 @@
                 "type": "text"
               }
             ],
-            "id": "block-83",
+            "id": "block-88",
             "type": "paragraph"
           },
           {
             "content": [],
-            "id": "block-84",
+            "id": "block-89",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "color": "#808080",
+                "text": "Click here to enter a summary.",
+                "type": "text"
+              }
+            ],
+            "id": "block-90",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Rich text control with ",
+                "type": "text"
+              },
+              {
+                "bold": true,
+                "text": "bold",
+                "type": "text"
+              },
+              {
+                "text": " and ",
+                "type": "text"
+              },
+              {
+                "italic": true,
+                "text": "italic",
+                "type": "text"
+              },
+              {
+                "text": " runs.",
+                "type": "text"
+              }
+            ],
+            "id": "block-91",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "And a second paragraph inside the same control.",
+                "type": "text"
+              }
+            ],
+            "id": "block-92",
             "type": "paragraph"
           },
           {
@@ -3077,7 +3192,15 @@
                 "type": "text"
               },
               {
+                "text": "Ada Marlowe",
+                "type": "text"
+              },
+              {
                 "text": ", berth ",
+                "type": "text"
+              },
+              {
+                "text": "East",
                 "type": "text"
               },
               {
@@ -3085,7 +3208,15 @@
                 "type": "text"
               },
               {
+                "text": "Thornback",
+                "type": "text"
+              },
+              {
                 "text": ", arrival ",
+                "type": "text"
+              },
+              {
+                "text": "2 March 2026",
                 "type": "text"
               },
               {
@@ -3093,20 +3224,76 @@
                 "type": "text"
               },
               {
+                "fontFamily": "DejaVu Sans",
+                "text": "☒",
+                "type": "text"
+              },
+              {
                 "text": ".",
                 "type": "text"
               }
             ],
-            "id": "block-85",
+            "id": "block-93",
             "type": "paragraph"
           },
           {
-            "content": [],
-            "id": "block-86",
-            "type": "paragraph"
+            "alt": "logo placeholder",
+            "height": 80,
+            "id": "block-94",
+            "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
+            "type": "image",
+            "width": 80
           },
           {
-            "id": "block-87",
+            "content": [
+              {
+                "text": "Line item 1: ",
+                "type": "text"
+              },
+              {
+                "text": "rope, 40 m",
+                "type": "text"
+              }
+            ],
+            "id": "block-95",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 2: ",
+                "type": "text"
+              },
+              {
+                "text": "lamp glass, 6 pieces",
+                "type": "text"
+              }
+            ],
+            "id": "block-96",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 3: ",
+                "type": "text"
+              },
+              {
+                "text": "tar, 2 barrels",
+                "type": "text"
+              }
+            ],
+            "id": "block-97",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "id": "block-98",
             "rows": [
               {
                 "cells": [
@@ -3120,11 +3307,39 @@
                     "id": "cell-198"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-199"
                   }
                 ],
                 "id": "row-55"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Row inside a content control",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-200"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "yes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-201"
+                  }
+                ],
+                "id": "row-56"
               }
             ],
             "type": "table"
@@ -3134,9 +3349,45 @@
               {
                 "text": "Data-bound control: ",
                 "type": "text"
+              },
+              {
+                "text": "Bound title",
+                "type": "text"
               }
             ],
-            "id": "block-88",
+            "id": "block-99",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "bold": true,
+                "fontSize": 16,
+                "text": "Cover page building block",
+                "type": "text"
+              }
+            ],
+            "id": "block-100",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Wrapped in a docPartObj content control.",
+                "type": "text"
+              }
+            ],
+            "id": "block-101",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Innermost paragraph, 5 controls deep.",
+                "type": "text"
+              }
+            ],
+            "id": "block-102",
             "type": "paragraph"
           },
           {
@@ -3146,7 +3397,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-89",
+            "id": "block-103",
             "type": "paragraph"
           },
           {
@@ -3164,7 +3415,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-90",
+            "id": "block-104",
             "type": "paragraph"
           }
         ],
@@ -3200,6 +3451,14 @@
               "content": [
                 {
                   "text": "Marguerite Harbour Authority",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],

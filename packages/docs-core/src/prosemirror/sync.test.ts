@@ -73,6 +73,18 @@ describe('collab round-trip preserves inline content', () => {
     expect(out[0]).toMatchObject({ content: para.content });
   });
 
+  it('keeps tab characters inside a run, with or without formatting, and in a plain run with line breaks', () => {
+    const para: Block = {
+      id: 'p',
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Chapter one\t1', bold: true },
+        { type: 'text', text: ' plain\ttab\nnext\tline' },
+      ],
+    };
+    expect(roundTrip([para])[0]).toMatchObject({ content: para.content });
+  });
+
   it('resolves styleId runs from the pool when no pool is passed explicitly', () => {
     const pm = blocksToPmDoc([
       { id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'hi', styleId: 's1' }] },

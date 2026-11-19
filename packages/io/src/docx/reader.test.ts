@@ -310,6 +310,191 @@ describe('importDocx', () => {
     expect(result.sections[0].pageHeightPx).toBe(816);
   });
 
+  describe('text that used to be dropped', () => {
+    const W = 'xmlns:w="x"';
+    async function importXml(bodyXml: string) {
+      const exported = await exportDocx(section([{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }]));
+      const zip = await JSZip.loadAsync(exported.bytes);
+      let xml = await zip.file('word/document.xml')!.async('string');
+      xml = xml.replace(/<w:p>[\s\S]*?<\/w:p>/, bodyXml);
+      zip.file('word/document.xml', xml);
+      return importDocx(await zip.generateAsync({ type: 'uint8array' }));
+    }
+    const r = (inner: string, rPr = '') => `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ''}${inner}</w:r>`;
+    const t = (text: string) => `<w:t xml:space="preserve">${text}</w:t>`;
+    const para = (inner: string) => `<w:p ${W}>${inner}</w:p>`;
+    const firstText = async (xml: string) => (await importXml(xml)).sections[0].blocks[0];
+
+    it('imports a tab as a tab character, keeping the surrounding text and formatting', async () => {
+      const block = await firstText(para(r(`${t('Chapter one')}<w:tab/>${t('1')}`, '<w:b/>')));
+      expect(block).toEqual({ type: 'paragraph', content: [{ type: 'text', text: 'Chapter one\t1', bold: true }] });
+    });
+
+    it('imports an absolute-position tab as a tab character', async () => {
+      const block = await firstText(para(r(`${t('a')}<w:ptab w:relativeTo="margin" w:alignment="right" w:leader="none"/>${t('b')}`)));
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'a\tb' }] });
+    });
+
+    it.each([
+      ['a plain break', '<w:br/>'],
+      ['a text-wrapping break', '<w:br w:type="textWrapping"/>'],
+      ['a column break', '<w:br w:type="column"/>'],
+      ['a carriage return', '<w:cr/>'],
+    ])('imports %s as a line break', async (_name, br) => {
+      const block = await firstText(para(r(`${t('one')}${br}${t('two')}`)));
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'one\ntwo' }] });
+    });
+
+    it('keeps a page break structural and out of the text', async () => {
+      const result = await importXml(para(r(`${t('one')}`)) + para(r('<w:br w:type="page"/>')));
+      expect(result.sections[0].blocks).toEqual([
+        { type: 'paragraph', content: [{ type: 'text', text: 'one' }] },
+        { type: 'pageBreak' },
+      ]);
+    });
+
+    it('imports soft and non-breaking hyphens as their Unicode characters', async () => {
+      const block = await firstText(para(r(`${t('co')}<w:softHyphen/>${t('op')}<w:noBreakHyphen/>${t('erate')}`)));
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'co\u00adop\u2011erate' }] });
+    });
+
+    it('keeps tabs and breaks inside a hyperlink run', async () => {
+      const block = await firstText(para(`<w:hyperlink w:anchor="x">${r(`${t('a')}<w:tab/>${t('b')}`)}</w:hyperlink>`));
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'a\tb' }] });
+    });
+
+    it('does not add tabs or breaks from a field result', async () => {
+      const block = await firstText(
+        para(
+          `${r('<w:fldChar w:fldCharType="begin"/>')}${r('<w:instrText> PAGEREF _Toc1 </w:instrText>')}${r('<w:fldChar w:fldCharType="separate"/>')}` +
+            `${r(`${t('Chapter')}<w:tab/>${t('4')}<w:br/>`)}${r('<w:fldChar w:fldCharType="end"/>')}${r(t('after'))}`
+        )
+      );
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'after' }] });
+    });
+
+    it('keeps the text of smart tags, including a hyperlink inside one and nested tags', async () => {
+      const block = await firstText(
+        para(
+          r(t('Visit ')) +
+            `<w:smartTag w:uri="urn:x" w:element="place"><w:smartTagPr><w:attr w:name="a" w:val="b"/></w:smartTagPr>${r(t('Paris'))}` +
+            `<w:smartTag w:uri="urn:x" w:element="city">${r(t(' France'))}</w:smartTag></w:smartTag>`
+        )
+      );
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'Visit ' }, { type: 'text', text: 'Paris' }, { type: 'text', text: ' France' }] });
+    });
+
+    it('keeps the text of inline custom XML and inline content controls', async () => {
+      const block = await firstText(
+        para(
+          `<w:customXml w:element="e"><w:customXmlPr/>${r(t('custom '))}</w:customXml>` +
+            `<w:sdt><w:sdtPr><w:alias w:val="A"/></w:sdtPr><w:sdtContent>${r(t('control'))}</w:sdtContent></w:sdt>`
+        )
+      );
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'custom ' }, { type: 'text', text: 'control' }] });
+    });
+
+    it('keeps tracked insertions as ordinary text but still applies tracked deletions', async () => {
+      const block = await firstText(
+        para(r(t('kept ')) + `<w:ins w:id="1" w:author="A">${r(t('inserted '))}</w:ins>` + `<w:del w:id="2" w:author="A"><w:r><w:delText>deleted</w:delText></w:r></w:del>` + r(t('end')))
+      );
+      expect(block).toMatchObject({ content: [{ type: 'text', text: 'kept ' }, { type: 'text', text: 'inserted ' }, { type: 'text', text: 'end' }] });
+    });
+
+    it('keeps the base text of a ruby annotation and drops the reading marks', async () => {
+      const block = await firstText(
+        para(
+          r(
+            `<w:ruby><w:rubyPr/><w:rt><w:r>${t('かん')}</w:r></w:rt><w:rubyBase><w:r>${t('漢')}</w:r></w:rubyBase></w:ruby>`
+          ) + r(t('字'))
+        )
+      );
+      expect(block).toMatchObject({ content: [{ type: 'text', text: '漢' }, { type: 'text', text: '字' }] });
+    });
+
+    it('keeps the text of block-level content controls and custom XML, with block types intact', async () => {
+      const result = await importXml(
+        `<w:sdt ${W}><w:sdtPr/><w:sdtContent><w:p>${r(t('inside'))}</w:p></w:sdtContent></w:sdt>` +
+          `<w:customXml ${W} w:element="e"><w:p>${r(t('wrapped'))}</w:p></w:customXml>` +
+          `<w:sdt ${W}><w:sdtContent><w:sdt><w:sdtContent><w:p>${r(t('nested'))}</w:p></w:sdtContent></w:sdt></w:sdtContent></w:sdt>`
+      );
+      expect(result.sections[0].blocks.map((b) => (b.type === 'paragraph' ? b.content : b))).toEqual([
+        [{ type: 'text', text: 'inside' }],
+        [{ type: 'text', text: 'wrapped' }],
+        [{ type: 'text', text: 'nested' }],
+      ]);
+    });
+
+    it('keeps the text of content controls around table rows, cells and cell content', async () => {
+      const cell = (inner: string) => `<w:tc><w:p>${r(t(inner))}</w:p></w:tc>`;
+      const result = await importXml(
+        `<w:tbl ${W}><w:tblPr/><w:tblGrid/>` +
+          `<w:sdt><w:sdtContent><w:tr>${cell('row-level')}</w:tr></w:sdtContent></w:sdt>` +
+          `<w:tr><w:sdt><w:sdtContent>${cell('cell-level')}</w:sdtContent></w:sdt>` +
+          `<w:tc><w:sdt><w:sdtContent><w:p>${r(t('in-cell'))}</w:p></w:sdtContent></w:sdt></w:tc></w:tr></w:tbl>`
+      );
+      const table = result.sections[0].blocks[0];
+      expect(table.type).toBe('table');
+      if (table.type !== 'table') return;
+      expect(table.rows.map((row) => row.cells.map((c) => c.content))).toEqual([
+        [[{ type: 'text', text: 'row-level' }]],
+        [[{ type: 'text', text: 'cell-level' }], [{ type: 'text', text: 'in-cell' }]],
+      ]);
+    });
+
+    it('keeps a content control in a header', async () => {
+      const exported = await exportDocx(
+        section([{ type: 'paragraph', content: [] }], { header: { paragraphs: [{ content: [{ type: 'text', text: 'h' }] }] } })
+      );
+      const zip = await JSZip.loadAsync(exported.bytes);
+      const name = Object.keys(zip.files).find((n) => /^word\/header\d*\.xml$/.test(n))!;
+      let xml = await zip.file(name)!.async('string');
+      xml = xml.replace(/<w:p>[\s\S]*?<\/w:p>/, `<w:sdt><w:sdtContent><w:p><w:r><w:t>Header</w:t><w:tab/><w:t>Right</w:t></w:r></w:p></w:sdtContent></w:sdt>`);
+      zip.file(name, xml);
+      const result = await importDocx(await zip.generateAsync({ type: 'uint8array' }));
+      expect(result.sections[0].header?.paragraphs).toEqual([{ content: [{ type: 'text', text: 'Header\tRight' }] }]);
+    });
+  });
+
+  describe('tabs and line breaks round trip', () => {
+    it('writes \\t as w:tab and \\n as w:br, and reads them back with their formatting', async () => {
+      const input = section([
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Title\t12\nsecond line', bold: true },
+            { type: 'text', text: ' plain' },
+            { type: 'link', text: 'a\tlink\nhere', href: 'https://example.com/' },
+          ],
+        },
+      ]);
+      const exported = await exportDocx(input);
+      const xml = await (await JSZip.loadAsync(exported.bytes)).file('word/document.xml')!.async('string');
+      expect(xml).toContain('<w:tab/>');
+      expect(xml).toContain('<w:br/>');
+      expect(xml).not.toMatch(/<w:t[^>]*>[^<]*[\t\n][^<]*<\/w:t>/);
+      const result = await importDocx(exported.bytes);
+      const inlines = (result.sections[0].blocks[0] as { content: Array<{ type: string; text?: string; bold?: boolean; href?: string }> }).content;
+      expect(inlines.map((i) => i.text).join('|')).toBe('Title\t12\nsecond line| plain|a\tlink\nhere');
+      expect(inlines.filter((i) => i.bold).map((i) => i.text)).toEqual(['Title\t12\nsecond line']);
+      expect(inlines[inlines.length - 1]).toMatchObject({ type: 'link', href: 'https://example.com/' });
+    });
+
+    it('writes a line break at the start and end of a run, and consecutive tabs', async () => {
+      const exported = await exportDocx(section([{ type: 'paragraph', content: [{ type: 'text', text: '\n\t\tx\n' }] }]));
+      const result = await importDocx(exported.bytes);
+      expect(result.sections[0].blocks[0]).toEqual({ type: 'paragraph', content: [{ type: 'text', text: '\n\t\tx\n' }] });
+    });
+
+    it('writes tabs and breaks in header text', async () => {
+      const exported = await exportDocx(
+        section([{ type: 'paragraph', content: [] }], { header: { paragraphs: [{ content: [{ type: 'text', text: 'Left\tRight\nNext' }] }] } })
+      );
+      const result = await importDocx(exported.bytes);
+      expect(result.sections[0].header?.paragraphs[0].content).toEqual([{ type: 'text', text: 'Left\tRight\nNext' }]);
+    });
+  });
+
   describe('drawing kinds and warnings', () => {
     const NS = 'xmlns:wp="x" xmlns:a="x" xmlns:r="x" xmlns:pic="x" xmlns:wps="x" xmlns:o="x"';
     const drawing = (uri: string, inner: string, kind: 'inline' | 'anchor' = 'inline') =>

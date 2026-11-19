@@ -4,22 +4,26 @@
     "after": {
       "blocks": {
         "heading": 13,
-        "image": 1,
-        "paragraph": 67,
+        "image": 2,
+        "list-item": 3,
+        "page-break": 1,
+        "paragraph": 76,
         "table": 9
       },
       "sections": 1,
-      "textChars": 9336
+      "textChars": 9843
     },
     "before": {
       "blocks": {
         "heading": 13,
-        "image": 1,
-        "paragraph": 67,
+        "image": 2,
+        "list-item": 3,
+        "page-break": 1,
+        "paragraph": 76,
         "table": 9
       },
       "sections": 1,
-      "textChars": 9336
+      "textChars": 9843
     },
     "byField": {},
     "changed": 0,

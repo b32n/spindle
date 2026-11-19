@@ -589,6 +589,7 @@ export class DomPainter {
       line-height: ${this.config.lineHeight};
       color: #5f6368;
       min-height: ${20 * this.config.scale}px;
+      white-space: pre-wrap;
     `;
     
     // Interactive styles when editable

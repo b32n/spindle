@@ -141,6 +141,10 @@
               {
                 "text": "Lists and styles",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-13",
@@ -150,6 +154,10 @@
             "content": [
               {
                 "text": "Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -161,6 +169,10 @@
               {
                 "text": "Tables",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-15",
@@ -170,6 +182,10 @@
             "content": [
               {
                 "text": "Media",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -181,6 +197,10 @@
               {
                 "text": "Equations",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-17",
@@ -190,6 +210,10 @@
             "content": [
               {
                 "text": "Controls",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -201,6 +225,10 @@
               {
                 "text": "Languages",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-19",
@@ -211,6 +239,10 @@
               {
                 "text": "Typography",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-20",
@@ -220,6 +252,10 @@
             "content": [
               {
                 "text": "Charts",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -880,7 +916,15 @@
                   "type": "text"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -1171,6 +1215,11 @@
                 "type": "text"
               },
               {
+                "href": "https://example.com/tracked",
+                "text": "tracked hyperlink text",
+                "type": "link"
+              },
+              {
                 "text": ". A comment over a bookmark: ",
                 "type": "text"
               },
@@ -1231,7 +1280,12 @@
                     "id": "cell-6"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "inserted in cell",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-7"
                   },
                   {
@@ -1249,7 +1303,12 @@
               {
                 "cells": [
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "tracked row, cell 1",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-9"
                   },
                   {
@@ -1258,6 +1317,10 @@
                   },
                   {
                     "content": [
+                      {
+                        "text": "tracked row, cell 3",
+                        "type": "text"
+                      },
                       {
                         "text": " ",
                         "type": "text"
@@ -1289,7 +1352,12 @@
             "type": "list-item"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "A tracked list item at level 2",
+                "type": "text"
+              }
+            ],
             "id": "block-93",
             "level": 1,
             "listType": "numbered",
@@ -1314,6 +1382,10 @@
             "content": [
               {
                 "text": "Column break follows.",
+                "type": "text"
+              },
+              {
+                "text": "\n",
                 "type": "text"
               },
               {
@@ -1362,6 +1434,14 @@
               "content": [
                 {
                   "text": "Landscape section header",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -3901,7 +3981,15 @@
                   "type": "text"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -4183,27 +4271,8 @@
           {
             "content": [
               {
-                "text": "Inline controls: name ",
-                "type": "text"
-              },
-              {
-                "text": ", berth ",
-                "type": "text"
-              },
-              {
-                "text": ", vessel ",
-                "type": "text"
-              },
-              {
-                "text": ", arrival ",
-                "type": "text"
-              },
-              {
-                "text": ", inspected ",
-                "type": "text"
-              },
-              {
-                "text": ".",
+                "color": "#808080",
+                "text": "Click here to enter a summary.",
                 "type": "text"
               }
             ],
@@ -4211,12 +4280,152 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Rich text control with ",
+                "type": "text"
+              },
+              {
+                "bold": true,
+                "text": "bold",
+                "type": "text"
+              },
+              {
+                "text": " and ",
+                "type": "text"
+              },
+              {
+                "italic": true,
+                "text": "italic",
+                "type": "text"
+              },
+              {
+                "text": " runs.",
+                "type": "text"
+              }
+            ],
             "id": "block-165",
             "type": "paragraph"
           },
           {
+            "content": [
+              {
+                "text": "And a second paragraph inside the same control.",
+                "type": "text"
+              }
+            ],
             "id": "block-166",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline controls: name ",
+                "type": "text"
+              },
+              {
+                "text": "Ada Marlowe",
+                "type": "text"
+              },
+              {
+                "text": ", berth ",
+                "type": "text"
+              },
+              {
+                "text": "East",
+                "type": "text"
+              },
+              {
+                "text": ", vessel ",
+                "type": "text"
+              },
+              {
+                "text": "Thornback",
+                "type": "text"
+              },
+              {
+                "text": ", arrival ",
+                "type": "text"
+              },
+              {
+                "text": "2 March 2026",
+                "type": "text"
+              },
+              {
+                "text": ", inspected ",
+                "type": "text"
+              },
+              {
+                "fontFamily": "DejaVu Sans",
+                "text": "☒",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-167",
+            "type": "paragraph"
+          },
+          {
+            "alt": "logo placeholder",
+            "height": 80,
+            "id": "block-168",
+            "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
+            "type": "image",
+            "width": 80
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 1: ",
+                "type": "text"
+              },
+              {
+                "text": "rope, 40 m",
+                "type": "text"
+              }
+            ],
+            "id": "block-169",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 2: ",
+                "type": "text"
+              },
+              {
+                "text": "lamp glass, 6 pieces",
+                "type": "text"
+              }
+            ],
+            "id": "block-170",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 3: ",
+                "type": "text"
+              },
+              {
+                "text": "tar, 2 barrels",
+                "type": "text"
+              }
+            ],
+            "id": "block-171",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "id": "block-172",
             "rows": [
               {
                 "cells": [
@@ -4230,11 +4439,39 @@
                     "id": "cell-211"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-212"
                   }
                 ],
                 "id": "row-60"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Row inside a content control",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-213"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "yes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-214"
+                  }
+                ],
+                "id": "row-61"
               }
             ],
             "type": "table"
@@ -4244,9 +4481,45 @@
               {
                 "text": "Data-bound control: ",
                 "type": "text"
+              },
+              {
+                "text": "Bound title",
+                "type": "text"
               }
             ],
-            "id": "block-167",
+            "id": "block-173",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "bold": true,
+                "fontSize": 16,
+                "text": "Cover page building block",
+                "type": "text"
+              }
+            ],
+            "id": "block-174",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Wrapped in a docPartObj content control.",
+                "type": "text"
+              }
+            ],
+            "id": "block-175",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Innermost paragraph, 5 controls deep.",
+                "type": "text"
+              }
+            ],
+            "id": "block-176",
             "type": "paragraph"
           },
           {
@@ -4256,7 +4529,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-168",
+            "id": "block-177",
             "type": "paragraph"
           },
           {
@@ -4274,7 +4547,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-169",
+            "id": "block-178",
             "type": "paragraph"
           },
           {
@@ -4284,7 +4557,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-170",
+            "id": "block-179",
             "level": 1,
             "type": "heading"
           },
@@ -4295,7 +4568,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-171",
+            "id": "block-180",
             "type": "paragraph"
           },
           {
@@ -4307,7 +4580,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-172",
+            "id": "block-181",
             "type": "paragraph"
           },
           {
@@ -4319,7 +4592,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-173",
+            "id": "block-182",
             "type": "paragraph"
           },
           {
@@ -4331,7 +4604,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-174",
+            "id": "block-183",
             "type": "paragraph"
           },
           {
@@ -4341,7 +4614,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-175",
+            "id": "block-184",
             "type": "paragraph"
           },
           {
@@ -4353,7 +4626,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-176",
+            "id": "block-185",
             "type": "paragraph"
           },
           {
@@ -4365,7 +4638,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-177",
+            "id": "block-186",
             "type": "paragraph"
           },
           {
@@ -4375,7 +4648,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-178",
+            "id": "block-187",
             "type": "paragraph"
           },
           {
@@ -4401,7 +4674,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-179",
+            "id": "block-188",
             "type": "paragraph"
           },
           {
@@ -4427,7 +4700,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-180",
+            "id": "block-189",
             "type": "paragraph"
           },
           {
@@ -4437,11 +4710,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-181",
+            "id": "block-190",
             "type": "paragraph"
           },
           {
-            "id": "block-182",
+            "id": "block-191",
             "rows": [
               {
                 "cells": [
@@ -4452,143 +4725,12 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-213"
-                  },
-                  {
-                    "content": [
-                      {
-                        "text": "Right-to-left table cell",
-                        "type": "text"
-                      }
-                    ],
-                    "id": "cell-214"
-                  }
-                ],
-                "id": "row-61"
-              }
-            ],
-            "type": "table"
-          },
-          {
-            "content": [
-              {
-                "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
-                "type": "text"
-              }
-            ],
-            "id": "block-183",
-            "level": 0,
-            "listType": "bullet",
-            "type": "list-item"
-          },
-          {
-            "content": [
-              {
-                "text": "Chinese, Japanese and Korean with East Asian fonts:",
-                "type": "text"
-              }
-            ],
-            "id": "block-184",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "text": "这是一个用于测试中文排版的示例段落，包含标点符号、数字 2026 和英文单词 Spindle。",
-                "type": "text"
-              }
-            ],
-            "id": "block-185",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "text": "港口委员会每月召开一次会议，审议潮汐表和船舶进出记录。",
-                "type": "text"
-              }
-            ],
-            "id": "block-186",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "text": "これは日本語の組版を確認するためのサンプル文章です。ひらがな、カタカナ、漢字が混在しています。",
-                "type": "text"
-              }
-            ],
-            "id": "block-187",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "text": "港湾委員会は毎月会議を開き、潮汐表を確認します。",
-                "type": "text"
-              }
-            ],
-            "id": "block-188",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "text": "이것은 한국어 조판을 확인하기 위한 예시 문장입니다.",
-                "type": "text"
-              }
-            ],
-            "id": "block-189",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "text": "항만 위원회는 매달 모여 조석표를 검토합니다.",
-                "type": "text"
-              }
-            ],
-            "id": "block-190",
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "text": "12",
-                "type": "text"
-              },
-              {
-                "text": "  (combined digits), ruby: ",
-                "type": "text"
-              }
-            ],
-            "id": "block-191",
-            "type": "paragraph"
-          },
-          {
-            "id": "block-192",
-            "rows": [
-              {
-                "cells": [
-                  {
-                    "content": [
-                      {
-                        "text": "縦書きのテキスト",
-                        "type": "text"
-                      }
-                    ],
                     "id": "cell-215"
                   },
                   {
                     "content": [
                       {
-                        "text": "Vertical (tbRl) text direction in the neighbouring cell.",
+                        "text": "Right-to-left table cell",
                         "type": "text"
                       }
                     ],
@@ -4603,11 +4745,146 @@
           {
             "content": [
               {
-                "text": "Symbols: ",
+                "text": "ועדת הנמל מתכנסת בכל חודש כדי לסקור את לוחות הגאות והשפל.",
+                "type": "text"
+              }
+            ],
+            "id": "block-192",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Chinese, Japanese and Korean with East Asian fonts:",
                 "type": "text"
               }
             ],
             "id": "block-193",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "这是一个用于测试中文排版的示例段落，包含标点符号、数字 2026 和英文单词 Spindle。",
+                "type": "text"
+              }
+            ],
+            "id": "block-194",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "港口委员会每月召开一次会议，审议潮汐表和船舶进出记录。",
+                "type": "text"
+              }
+            ],
+            "id": "block-195",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "これは日本語の組版を確認するためのサンプル文章です。ひらがな、カタカナ、漢字が混在しています。",
+                "type": "text"
+              }
+            ],
+            "id": "block-196",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "港湾委員会は毎月会議を開き、潮汐表を確認します。",
+                "type": "text"
+              }
+            ],
+            "id": "block-197",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "이것은 한국어 조판을 확인하기 위한 예시 문장입니다.",
+                "type": "text"
+              }
+            ],
+            "id": "block-198",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "text": "항만 위원회는 매달 모여 조석표를 검토합니다.",
+                "type": "text"
+              }
+            ],
+            "id": "block-199",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "12",
+                "type": "text"
+              },
+              {
+                "text": "  (combined digits), ruby: ",
+                "type": "text"
+              },
+              {
+                "text": "漢字",
+                "type": "text"
+              }
+            ],
+            "id": "block-200",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-201",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "縦書きのテキスト",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-217"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "Vertical (tbRl) text direction in the neighbouring cell.",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-218"
+                  }
+                ],
+                "id": "row-63"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Symbols: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-202",
             "type": "paragraph"
           },
           {
@@ -4618,7 +4895,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-194",
+            "id": "block-203",
             "type": "paragraph"
           },
           {
@@ -4640,7 +4917,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-195",
+            "id": "block-204",
             "type": "paragraph"
           },
           {
@@ -4650,7 +4927,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-196",
+            "id": "block-205",
             "type": "paragraph"
           },
           {
@@ -4660,7 +4937,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-197",
+            "id": "block-206",
             "type": "paragraph"
           },
           {
@@ -4670,7 +4947,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-198",
+            "id": "block-207",
             "level": 1,
             "type": "heading"
           },
@@ -4698,11 +4975,23 @@
                 "type": "text"
               },
               {
+                "text": "­",
+                "type": "text"
+              },
+              {
                 "text": "dis",
                 "type": "text"
               },
               {
+                "text": "­",
+                "type": "text"
+              },
+              {
                 "text": "establishment",
+                "type": "text"
+              },
+              {
+                "text": "­",
                 "type": "text"
               },
               {
@@ -4714,11 +5003,15 @@
                 "type": "text"
               },
               {
+                "text": "‑",
+                "type": "text"
+              },
+              {
                 "text": ".",
                 "type": "text"
               }
             ],
-            "id": "block-199",
+            "id": "block-208",
             "type": "paragraph"
           },
           {
@@ -4728,7 +5021,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-200",
+            "id": "block-209",
             "type": "paragraph"
           },
           {
@@ -4738,7 +5031,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-201",
+            "id": "block-210",
             "type": "paragraph"
           },
           {
@@ -4748,11 +5041,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "iii",
                 "type": "text"
               }
             ],
-            "id": "block-202",
+            "id": "block-211",
             "type": "paragraph"
           },
           {
@@ -4762,11 +5059,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "1",
                 "type": "text"
               }
             ],
-            "id": "block-203",
+            "id": "block-212",
             "type": "paragraph"
           },
           {
@@ -4776,11 +5077,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "17",
                 "type": "text"
               }
             ],
-            "id": "block-204",
+            "id": "block-213",
             "type": "paragraph"
           },
           {
@@ -4790,11 +5095,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "203",
                 "type": "text"
               }
             ],
-            "id": "block-205",
+            "id": "block-214",
             "type": "paragraph"
           },
           {
@@ -4804,11 +5113,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "240",
                 "type": "text"
               }
             ],
-            "id": "block-206",
+            "id": "block-215",
             "type": "paragraph"
           },
           {
@@ -4818,7 +5131,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "12.50",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               },
               {
@@ -4826,11 +5147,15 @@
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "end",
                 "type": "text"
               }
             ],
-            "id": "block-207",
+            "id": "block-216",
             "type": "paragraph"
           },
           {
@@ -4840,7 +5165,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-208",
+            "id": "block-217",
             "type": "paragraph"
           },
           {
@@ -4853,7 +5178,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-209",
+            "id": "block-218",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -4864,7 +5189,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-210",
+            "id": "block-219",
             "type": "paragraph"
           },
           {
@@ -4877,7 +5202,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-211",
+            "id": "block-220",
             "spaceAfter": 0,
             "type": "paragraph"
           },
@@ -4888,7 +5213,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-212",
+            "id": "block-221",
             "type": "paragraph"
           },
           {
@@ -4942,7 +5267,7 @@
                 "underline": true
               }
             ],
-            "id": "block-213",
+            "id": "block-222",
             "type": "paragraph"
           },
           {
@@ -4952,7 +5277,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-214",
+            "id": "block-223",
             "type": "paragraph"
           },
           {
@@ -4962,7 +5287,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-215",
+            "id": "block-224",
             "type": "paragraph"
           },
           {
@@ -4972,14 +5297,14 @@
                 "type": "text"
               }
             ],
-            "id": "block-216",
+            "id": "block-225",
             "level": 1,
             "type": "heading"
           },
           {
             "alignment": "center",
             "content": [],
-            "id": "block-217",
+            "id": "block-226",
             "type": "paragraph"
           },
           {
@@ -4990,13 +5315,13 @@
                 "type": "text"
               }
             ],
-            "id": "block-218",
+            "id": "block-227",
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [],
-            "id": "block-219",
+            "id": "block-228",
             "type": "paragraph"
           },
           {
@@ -5007,13 +5332,13 @@
                 "type": "text"
               }
             ],
-            "id": "block-220",
+            "id": "block-229",
             "type": "paragraph"
           },
           {
             "alignment": "center",
             "content": [],
-            "id": "block-221",
+            "id": "block-230",
             "type": "paragraph"
           },
           {
@@ -5024,7 +5349,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-222",
+            "id": "block-231",
             "type": "paragraph"
           },
           {
@@ -5034,7 +5359,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-223",
+            "id": "block-232",
             "type": "paragraph"
           }
         ],
@@ -5073,7 +5398,15 @@
                   "type": "text"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -5132,6 +5465,7 @@
     "Unsupported field code \"IF 1 = 1 \"yes\" \"no\"\" — its cached value was dropped.",
     "Unsupported field code \"HYPERLINK \"https://example.com/harbour\"\" — its cached value was dropped.",
     "Unsupported field code \"MERGEFIELD Recipient \\* MERGEFORMAT\" — its cached value was dropped.",
+    "Unsupported field code \"DATE \\@ \"d MMM yyyy\"\" — its cached value was dropped.",
     "Unsupported field code \"SEQ Table \\* ARABIC\" — its cached value was dropped.",
     "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
     "A floating (anchored) image was skipped — only inline images are supported.",

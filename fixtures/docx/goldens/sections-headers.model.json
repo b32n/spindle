@@ -152,7 +152,15 @@
                   "type": "text"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -279,6 +287,10 @@
                 "type": "text"
               },
               {
+                "text": "\n",
+                "type": "text"
+              },
+              {
                 "text": "This text starts the second column.",
                 "type": "text"
               }
@@ -324,6 +336,14 @@
               "content": [
                 {
                   "text": "Landscape section header",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -494,7 +514,15 @@
                   "type": "text"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
@@ -600,7 +628,15 @@
                   "type": "text"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Harbour Report",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {
