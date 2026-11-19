@@ -25,7 +25,7 @@
     },
     {
       "count": 22,
-      "effect": "their content is not imported",
+      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
       "id": "docx.contentControls",
       "label": "content control(s)"
     },
@@ -102,12 +102,6 @@
       ]
     },
     {
-      "count": 1,
-      "effect": "their text is not imported",
-      "id": "docx.smartTags",
-      "label": "smart tag(s)"
-    },
-    {
       "count": 12,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",
@@ -129,15 +123,6 @@
       "where": [
         "multi-paragraph cells ×4",
         "nested tables ×2"
-      ]
-    },
-    {
-      "count": 6,
-      "effect": "dropped from the text",
-      "id": "docx.tabsAndBreaks",
-      "label": "tab(s) and line break(s)",
-      "where": [
-        "tab ×6"
       ]
     },
     {

@@ -328,6 +328,10 @@
               {
                 "text": "  (combined digits), ruby: ",
                 "type": "text"
+              },
+              {
+                "text": "漢字",
+                "type": "text"
               }
             ],
             "id": "block-24",

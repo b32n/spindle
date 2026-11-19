@@ -25,7 +25,7 @@
     },
     {
       "count": 1,
-      "effect": "the base text and reading marks are not imported",
+      "effect": "the base text is kept; the reading marks are not imported",
       "id": "docx.ruby",
       "label": "ruby annotation(s)"
     },

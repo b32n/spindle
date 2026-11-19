@@ -94,6 +94,10 @@
               {
                 "text": "1.1 Background",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-7",
@@ -103,6 +107,10 @@
             "content": [
               {
                 "text": "1.2 Current practice",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -114,6 +122,10 @@
               {
                 "text": "1.3 Responsibilities",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-9",
@@ -123,6 +135,10 @@
             "content": [
               {
                 "text": "1.4 Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -134,6 +150,10 @@
               {
                 "text": "1.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-11",
@@ -143,6 +163,10 @@
             "content": [
               {
                 "text": "1.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -154,6 +178,10 @@
               {
                 "text": "Chapter 2: Berth Allocation",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-13",
@@ -163,6 +191,10 @@
             "content": [
               {
                 "text": "2.1 Background",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -174,6 +206,10 @@
               {
                 "text": "2.2 Current practice",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-15",
@@ -183,6 +219,10 @@
             "content": [
               {
                 "text": "2.3 Responsibilities",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -194,6 +234,10 @@
               {
                 "text": "2.4 Records",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-17",
@@ -203,6 +247,10 @@
             "content": [
               {
                 "text": "2.5 Exceptions",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -214,6 +262,10 @@
               {
                 "text": "2.6 Review",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-19",
@@ -223,6 +275,10 @@
             "content": [
               {
                 "text": "Chapter 3: Cargo Handling",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -234,6 +290,10 @@
               {
                 "text": "3.1 Background",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-21",
@@ -243,6 +303,10 @@
             "content": [
               {
                 "text": "3.2 Current practice",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -254,6 +318,10 @@
               {
                 "text": "3.3 Responsibilities",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-23",
@@ -263,6 +331,10 @@
             "content": [
               {
                 "text": "3.4 Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -274,6 +346,10 @@
               {
                 "text": "3.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-25",
@@ -283,6 +359,10 @@
             "content": [
               {
                 "text": "3.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -294,6 +374,10 @@
               {
                 "text": "Chapter 4: Pilotage",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-27",
@@ -303,6 +387,10 @@
             "content": [
               {
                 "text": "4.1 Background",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -314,6 +402,10 @@
               {
                 "text": "4.2 Current practice",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-29",
@@ -323,6 +415,10 @@
             "content": [
               {
                 "text": "4.3 Responsibilities",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -334,6 +430,10 @@
               {
                 "text": "4.4 Records",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-31",
@@ -343,6 +443,10 @@
             "content": [
               {
                 "text": "4.5 Exceptions",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -354,6 +458,10 @@
               {
                 "text": "4.6 Review",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-33",
@@ -363,6 +471,10 @@
             "content": [
               {
                 "text": "Chapter 5: Lighthouse Operations",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -374,6 +486,10 @@
               {
                 "text": "5.1 Background",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-35",
@@ -383,6 +499,10 @@
             "content": [
               {
                 "text": "5.2 Current practice",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -394,6 +514,10 @@
               {
                 "text": "5.3 Responsibilities",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-37",
@@ -403,6 +527,10 @@
             "content": [
               {
                 "text": "5.4 Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -414,6 +542,10 @@
               {
                 "text": "5.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-39",
@@ -423,6 +555,10 @@
             "content": [
               {
                 "text": "5.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -434,6 +570,10 @@
               {
                 "text": "Chapter 6: Dredging",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-41",
@@ -443,6 +583,10 @@
             "content": [
               {
                 "text": "6.1 Background",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -454,6 +598,10 @@
               {
                 "text": "6.2 Current practice",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-43",
@@ -463,6 +611,10 @@
             "content": [
               {
                 "text": "6.3 Responsibilities",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -474,6 +626,10 @@
               {
                 "text": "6.4 Records",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-45",
@@ -483,6 +639,10 @@
             "content": [
               {
                 "text": "6.5 Exceptions",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -494,6 +654,10 @@
               {
                 "text": "6.6 Review",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-47",
@@ -503,6 +667,10 @@
             "content": [
               {
                 "text": "Chapter 7: Customs and Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -514,6 +682,10 @@
               {
                 "text": "7.1 Background",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-49",
@@ -523,6 +695,10 @@
             "content": [
               {
                 "text": "7.2 Current practice",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -534,6 +710,10 @@
               {
                 "text": "7.3 Responsibilities",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-51",
@@ -543,6 +723,10 @@
             "content": [
               {
                 "text": "7.4 Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -554,6 +738,10 @@
               {
                 "text": "7.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-53",
@@ -563,6 +751,10 @@
             "content": [
               {
                 "text": "7.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -574,6 +766,10 @@
               {
                 "text": "Chapter 8: Winter Procedures",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-55",
@@ -583,6 +779,10 @@
             "content": [
               {
                 "text": "8.1 Background",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -594,6 +794,10 @@
               {
                 "text": "8.2 Current practice",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-57",
@@ -603,6 +807,10 @@
             "content": [
               {
                 "text": "8.3 Responsibilities",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -614,6 +822,10 @@
               {
                 "text": "8.4 Records",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-59",
@@ -623,6 +835,10 @@
             "content": [
               {
                 "text": "8.5 Exceptions",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -634,6 +850,10 @@
               {
                 "text": "8.6 Review",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-61",
@@ -643,6 +863,10 @@
             "content": [
               {
                 "text": "Chapter 9: Fishing Fleet",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -654,6 +878,10 @@
               {
                 "text": "9.1 Background",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-63",
@@ -663,6 +891,10 @@
             "content": [
               {
                 "text": "9.2 Current practice",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -674,6 +906,10 @@
               {
                 "text": "9.3 Responsibilities",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-65",
@@ -683,6 +919,10 @@
             "content": [
               {
                 "text": "9.4 Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -694,6 +934,10 @@
               {
                 "text": "9.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-67",
@@ -703,6 +947,10 @@
             "content": [
               {
                 "text": "9.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -714,6 +962,10 @@
               {
                 "text": "Chapter 10: Ferry Services",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-69",
@@ -723,6 +975,10 @@
             "content": [
               {
                 "text": "10.1 Background",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -734,6 +990,10 @@
               {
                 "text": "10.2 Current practice",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-71",
@@ -743,6 +1003,10 @@
             "content": [
               {
                 "text": "10.3 Responsibilities",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -754,6 +1018,10 @@
               {
                 "text": "10.4 Records",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-73",
@@ -763,6 +1031,10 @@
             "content": [
               {
                 "text": "10.5 Exceptions",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -774,6 +1046,10 @@
               {
                 "text": "10.6 Review",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-75",
@@ -783,6 +1059,10 @@
             "content": [
               {
                 "text": "Chapter 11: Finance",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -794,6 +1074,10 @@
               {
                 "text": "11.1 Background",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-77",
@@ -803,6 +1087,10 @@
             "content": [
               {
                 "text": "11.2 Current practice",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -814,6 +1102,10 @@
               {
                 "text": "11.3 Responsibilities",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-79",
@@ -823,6 +1115,10 @@
             "content": [
               {
                 "text": "11.4 Records",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -834,6 +1130,10 @@
               {
                 "text": "11.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-81",
@@ -843,6 +1143,10 @@
             "content": [
               {
                 "text": "11.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -854,6 +1158,10 @@
               {
                 "text": "Chapter 12: Safety and Emergency",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-83",
@@ -863,6 +1171,10 @@
             "content": [
               {
                 "text": "12.1 Background",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -874,6 +1186,10 @@
               {
                 "text": "12.2 Current practice",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-85",
@@ -883,6 +1199,10 @@
             "content": [
               {
                 "text": "12.3 Responsibilities",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -894,6 +1214,10 @@
               {
                 "text": "12.4 Records",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-87",
@@ -904,6 +1228,10 @@
               {
                 "text": "12.5 Exceptions",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-88",
@@ -913,6 +1241,10 @@
             "content": [
               {
                 "text": "12.6 Review",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -946,6 +1278,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -960,6 +1300,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -1936,6 +2284,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -1950,6 +2306,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -2926,6 +3290,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -2940,6 +3312,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -3916,6 +4296,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -3930,6 +4318,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -4906,6 +5302,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -4920,6 +5324,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -5896,6 +6308,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -5910,6 +6330,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -6886,6 +7314,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -6900,6 +7336,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -7876,6 +8320,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -7890,6 +8342,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -8866,6 +9326,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -8880,6 +9348,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -9856,6 +10332,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -9870,6 +10354,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -10846,6 +11338,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -10860,6 +11360,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -11836,6 +12344,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -11850,6 +12366,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -12826,6 +13350,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -12840,6 +13372,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],
@@ -13497,6 +14037,14 @@
                   "type": "dynamicField"
                 },
                 {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
                   "text": "Confidential",
                   "type": "text"
                 }
@@ -13511,6 +14059,14 @@
               "content": [
                 {
                   "text": "The Marguerite Harbour Handbook",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 }
               ],

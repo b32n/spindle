@@ -80,15 +80,6 @@
         "table style ×12",
         "widths ×12"
       ]
-    },
-    {
-      "count": 84,
-      "effect": "dropped from the text",
-      "id": "docx.tabsAndBreaks",
-      "label": "tab(s) and line break(s)",
-      "where": [
-        "tab ×84"
-      ]
     }
   ]
 }

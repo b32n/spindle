@@ -53,27 +53,8 @@
           {
             "content": [
               {
-                "text": "Inline controls: name ",
-                "type": "text"
-              },
-              {
-                "text": ", berth ",
-                "type": "text"
-              },
-              {
-                "text": ", vessel ",
-                "type": "text"
-              },
-              {
-                "text": ", arrival ",
-                "type": "text"
-              },
-              {
-                "text": ", inspected ",
-                "type": "text"
-              },
-              {
-                "text": ".",
+                "color": "#808080",
+                "text": "Click here to enter a summary.",
                 "type": "text"
               }
             ],
@@ -81,12 +62,152 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Rich text control with ",
+                "type": "text"
+              },
+              {
+                "bold": true,
+                "text": "bold",
+                "type": "text"
+              },
+              {
+                "text": " and ",
+                "type": "text"
+              },
+              {
+                "italic": true,
+                "text": "italic",
+                "type": "text"
+              },
+              {
+                "text": " runs.",
+                "type": "text"
+              }
+            ],
             "id": "block-5",
             "type": "paragraph"
           },
           {
+            "content": [
+              {
+                "text": "And a second paragraph inside the same control.",
+                "type": "text"
+              }
+            ],
             "id": "block-6",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Inline controls: name ",
+                "type": "text"
+              },
+              {
+                "text": "Ada Marlowe",
+                "type": "text"
+              },
+              {
+                "text": ", berth ",
+                "type": "text"
+              },
+              {
+                "text": "East",
+                "type": "text"
+              },
+              {
+                "text": ", vessel ",
+                "type": "text"
+              },
+              {
+                "text": "Thornback",
+                "type": "text"
+              },
+              {
+                "text": ", arrival ",
+                "type": "text"
+              },
+              {
+                "text": "2 March 2026",
+                "type": "text"
+              },
+              {
+                "text": ", inspected ",
+                "type": "text"
+              },
+              {
+                "fontFamily": "DejaVu Sans",
+                "text": "☒",
+                "type": "text"
+              },
+              {
+                "text": ".",
+                "type": "text"
+              }
+            ],
+            "id": "block-7",
+            "type": "paragraph"
+          },
+          {
+            "alt": "logo placeholder",
+            "height": 80,
+            "id": "block-8",
+            "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
+            "type": "image",
+            "width": 80
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 1: ",
+                "type": "text"
+              },
+              {
+                "text": "rope, 40 m",
+                "type": "text"
+              }
+            ],
+            "id": "block-9",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 2: ",
+                "type": "text"
+              },
+              {
+                "text": "lamp glass, 6 pieces",
+                "type": "text"
+              }
+            ],
+            "id": "block-10",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "content": [
+              {
+                "text": "Line item 3: ",
+                "type": "text"
+              },
+              {
+                "text": "tar, 2 barrels",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
+            "level": 0,
+            "listType": "bullet",
+            "type": "list-item"
+          },
+          {
+            "id": "block-12",
             "rows": [
               {
                 "cells": [
@@ -100,11 +221,39 @@
                     "id": "cell-1"
                   },
                   {
-                    "content": [],
+                    "content": [
+                      {
+                        "text": "12",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-2"
                   }
                 ],
                 "id": "row-1"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [
+                      {
+                        "text": "Row inside a content control",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-3"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "yes",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-4"
+                  }
+                ],
+                "id": "row-2"
               }
             ],
             "type": "table"
@@ -114,9 +263,45 @@
               {
                 "text": "Data-bound control: ",
                 "type": "text"
+              },
+              {
+                "text": "Bound title",
+                "type": "text"
               }
             ],
-            "id": "block-7",
+            "id": "block-13",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "bold": true,
+                "fontSize": 16,
+                "text": "Cover page building block",
+                "type": "text"
+              }
+            ],
+            "id": "block-14",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Wrapped in a docPartObj content control.",
+                "type": "text"
+              }
+            ],
+            "id": "block-15",
+            "type": "paragraph"
+          },
+          {
+            "content": [
+              {
+                "text": "Innermost paragraph, 5 controls deep.",
+                "type": "text"
+              }
+            ],
+            "id": "block-16",
             "type": "paragraph"
           },
           {
@@ -126,7 +311,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-8",
+            "id": "block-17",
             "type": "paragraph"
           },
           {
@@ -144,7 +329,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-9",
+            "id": "block-18",
             "type": "paragraph"
           }
         ],

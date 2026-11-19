@@ -31,7 +31,7 @@
     },
     {
       "count": 21,
-      "effect": "their content is not imported",
+      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
       "id": "docx.contentControls",
       "label": "content control(s)"
     },
@@ -176,7 +176,7 @@
     },
     {
       "count": 1,
-      "effect": "the base text and reading marks are not imported",
+      "effect": "the base text is kept; the reading marks are not imported",
       "id": "docx.ruby",
       "label": "ruby annotation(s)"
     },
@@ -220,18 +220,6 @@
       ]
     },
     {
-      "count": 23,
-      "effect": "dropped from the text",
-      "id": "docx.tabsAndBreaks",
-      "label": "tab(s) and line break(s)",
-      "where": [
-        "tab ×18",
-        "soft hyphen ×3",
-        "column break ×1",
-        "non-breaking hyphen ×1"
-      ]
-    },
-    {
       "count": 9,
       "effect": "not imported (tabs use default stops)",
       "id": "docx.tabStops",
@@ -259,7 +247,7 @@
     },
     {
       "count": 7,
-      "effect": "their text is not imported",
+      "effect": "imported as ordinary text, as if accepted; author and date are lost",
       "id": "docx.trackedInsertions",
       "label": "tracked insertion(s)"
     },

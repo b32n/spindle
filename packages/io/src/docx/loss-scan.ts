@@ -283,25 +283,6 @@ function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
   );
 }
 
-/** w:tab, non-page w:br and the two hyphen characters are dropped from the text. */
-function tabsAndBreaks(root: XmlNode[]): Item[] {
-  const kinds = new Map<string, number>();
-  let total = 0;
-  walk(root, (node, tag, path) => {
-    const parent = path[path.length - 1];
-    let k: string | undefined;
-    if (tag === 'w:tab' && parent === 'w:r') k = 'tab';
-    else if (tag === 'w:ptab') k = 'tab';
-    else if (tag === 'w:br' && attr(node, 'w:type') !== 'page') k = attr(node, 'w:type') === 'column' ? 'column break' : 'line break';
-    else if (tag === 'w:noBreakHyphen') k = 'non-breaking hyphen';
-    else if (tag === 'w:softHyphen') k = 'soft hyphen';
-    if (!k) return;
-    total++;
-    bump(kinds, k);
-  });
-  return item('docx.tabsAndBreaks', 'tab(s) and line break(s)', total, 'dropped from the text', kinds);
-}
-
 function bookmarks(root: XmlNode[]): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
@@ -583,7 +564,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     ...safe(() => tableDetectors(root)),
     ...safe(() => paragraphFormatting(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
-    ...safe(() => tabsAndBreaks(root)),
     ...safe(() => bookmarks(root)),
     ...safe(() => sectionDetectors(root, evenAndOdd)),
     ...safe(() => fields(root)),
@@ -595,9 +575,8 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     ...safe(() => hyphenation(input.settings)),
     ...safe(() => tabStops(root)),
     ...safe(() => rtl(root)),
-    ...safe(() => countElements(root, 'w:ruby', 'docx.ruby', 'ruby annotation(s)', 'the base text and reading marks are not imported')),
+    ...safe(() => countElements(root, 'w:ruby', 'docx.ruby', 'ruby annotation(s)', 'the base text is kept; the reading marks are not imported')),
     ...item('docx.embeddedFonts', 'embedded font(s)', input.fontFiles, 'not imported (text uses installed fonts)'),
-    ...safe(() => countElements(root, 'w:smartTag', 'docx.smartTags', 'smart tag(s)', 'their text is not imported')),
     ...safe(() => countElements(root, 'w:altChunk', 'docx.altChunk', 'embedded alternative-format chunk(s)', 'not imported')),
     ...safe(() => legacyForms(root)),
   ];

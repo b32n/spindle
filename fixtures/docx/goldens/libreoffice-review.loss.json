@@ -63,7 +63,7 @@
     },
     {
       "count": 8,
-      "effect": "their text is not imported",
+      "effect": "imported as ordinary text, as if accepted; author and date are lost",
       "id": "docx.trackedInsertions",
       "label": "tracked insertion(s)"
     }

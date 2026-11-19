@@ -9,7 +9,7 @@
     },
     {
       "count": 13,
-      "effect": "their content is not imported",
+      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
       "id": "docx.contentControls",
       "label": "content control(s)"
     },
@@ -43,17 +43,6 @@
       ]
     },
     {
-      "count": 4,
-      "effect": "dropped from the text",
-      "id": "docx.tabsAndBreaks",
-      "label": "tab(s) and line break(s)",
-      "where": [
-        "tab ×2",
-        "line break ×1",
-        "non-breaking hyphen ×1"
-      ]
-    },
-    {
       "count": 1,
       "effect": "their text is not imported",
       "id": "docx.textBoxes",
@@ -67,7 +56,7 @@
     },
     {
       "count": 2,
-      "effect": "their text is not imported",
+      "effect": "imported as ordinary text, as if accepted; author and date are lost",
       "id": "docx.trackedInsertions",
       "label": "tracked insertion(s)"
     }

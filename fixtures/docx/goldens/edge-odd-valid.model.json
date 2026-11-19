@@ -59,11 +59,23 @@
                 "type": "text"
               },
               {
+                "text": "‑",
+                "type": "text"
+              },
+              {
                 "text": " non-breaking hyphen, ",
                 "type": "text"
               },
               {
+                "text": "\t",
+                "type": "text"
+              },
+              {
                 "text": "position tab, ",
+                "type": "text"
+              },
+              {
+                "text": "\n",
                 "type": "text"
               },
               {
@@ -72,6 +84,10 @@
               },
               {
                 "text": "NBSP here, zero-width​space, tab",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               },
               {
@@ -103,7 +119,12 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "text": "Text wrapped in a custom XML element, ",
+                "type": "text"
+              }
+            ],
             "id": "block-7",
             "type": "paragraph"
           },
@@ -112,6 +133,10 @@
               {
                 "text": "Field in a hyperlink in a tracked insertion: ",
                 "type": "text"
+              },
+              {
+                "fieldType": "pageNumber",
+                "type": "dynamicField"
               }
             ],
             "id": "block-8",
@@ -120,11 +145,45 @@
           {
             "content": [
               {
-                "text": "Anchored text box: ",
+                "text": "Ten controls deep, wrapping a paragraph and a table:",
                 "type": "text"
               }
             ],
             "id": "block-9",
+            "type": "paragraph"
+          },
+          {
+            "id": "block-10",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "content": [],
+                    "id": "cell-1"
+                  },
+                  {
+                    "content": [
+                      {
+                        "text": "plain",
+                        "type": "text"
+                      }
+                    ],
+                    "id": "cell-2"
+                  }
+                ],
+                "id": "row-1"
+              }
+            ],
+            "type": "table"
+          },
+          {
+            "content": [
+              {
+                "text": "Anchored text box: ",
+                "type": "text"
+              }
+            ],
+            "id": "block-11",
             "type": "paragraph"
           },
           {
@@ -134,11 +193,11 @@
                 "type": "text"
               }
             ],
-            "id": "block-10",
+            "id": "block-12",
             "type": "paragraph"
           },
           {
-            "id": "block-11",
+            "id": "block-13",
             "rows": [
               {
                 "cells": [
@@ -150,10 +209,10 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-1"
+                    "id": "cell-3"
                   }
                 ],
-                "id": "row-1"
+                "id": "row-2"
               },
               {
                 "cells": [
@@ -164,37 +223,37 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-2"
-                  },
-                  {
-                    "content": [],
-                    "id": "cell-3"
-                  }
-                ],
-                "id": "row-2"
-              },
-              {
-                "cells": [
-                  {
-                    "content": [],
                     "id": "cell-4"
                   },
                   {
                     "content": [],
                     "id": "cell-5"
-                  },
-                  {
-                    "content": [],
-                    "id": "cell-6"
                   }
                 ],
                 "id": "row-3"
+              },
+              {
+                "cells": [
+                  {
+                    "content": [],
+                    "id": "cell-6"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-7"
+                  },
+                  {
+                    "content": [],
+                    "id": "cell-8"
+                  }
+                ],
+                "id": "row-4"
               }
             ],
             "type": "table"
           },
           {
-            "id": "block-12",
+            "id": "block-14",
             "rows": [
               {
                 "cells": [
@@ -205,17 +264,17 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-7"
+                    "id": "cell-9"
                   }
                 ],
-                "id": "row-4"
+                "id": "row-5"
               }
             ],
             "type": "table"
           },
           {
             "content": [],
-            "id": "block-13",
+            "id": "block-15",
             "type": "paragraph"
           },
           {
@@ -257,7 +316,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-14",
+            "id": "block-16",
             "type": "paragraph"
           }
         ],
@@ -275,6 +334,10 @@
               "content": [
                 {
                   "text": "Content in the header: ",
+                  "type": "text"
+                },
+                {
+                  "text": "\t",
                   "type": "text"
                 },
                 {

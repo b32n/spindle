@@ -59,6 +59,10 @@
               {
                 "text": "Scope of the survey",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-5",
@@ -68,6 +72,10 @@
             "content": [
               {
                 "text": "Method",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -79,6 +87,10 @@
               {
                 "text": "Findings",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-7",
@@ -88,6 +100,10 @@
             "content": [
               {
                 "text": "Tonnage",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],
@@ -99,6 +115,10 @@
               {
                 "text": "Seasonal variation",
                 "type": "text"
+              },
+              {
+                "text": "\t",
+                "type": "text"
               }
             ],
             "id": "block-9",
@@ -108,6 +128,10 @@
             "content": [
               {
                 "text": "Recommendations",
+                "type": "text"
+              },
+              {
+                "text": "\t",
                 "type": "text"
               }
             ],

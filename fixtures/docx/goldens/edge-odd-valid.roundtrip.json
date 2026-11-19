@@ -3,19 +3,19 @@
     "added": 0,
     "after": {
       "blocks": {
-        "paragraph": 12,
-        "table": 2
+        "paragraph": 13,
+        "table": 3
       },
       "sections": 1,
-      "textChars": 2121
+      "textChars": 2235
     },
     "before": {
       "blocks": {
-        "paragraph": 12,
-        "table": 2
+        "paragraph": 13,
+        "table": 3
       },
       "sections": 1,
-      "textChars": 2121
+      "textChars": 2235
     },
     "byField": {},
     "changed": 0,

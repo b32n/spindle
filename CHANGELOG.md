@@ -18,10 +18,10 @@ lockstep.
 - **Full DOCX loss report.** `detectDocxLoss(bytes, { detail: 'full' })` (`@b32nio/spindle-io/docx`) and
   `inspectDocx(bytes, { detail: 'full' })` (`@b32nio/spindle-docs-core`) additionally report ten new ids for
   content the importer flattens or ignores: `docx.sections`, `docx.namedStyles`, `docx.tableFormatting`,
-  `docx.tableStructure`, `docx.paragraphFormatting`, `docx.listFormatting`, `docx.tabsAndBreaks`, `docx.bookmarks`,
+  `docx.tableStructure`, `docx.paragraphFormatting`, `docx.listFormatting`, `docx.bookmarks`,
   `docx.headerFooterVariants` and `docx.sectionProperties`, plus a long tail (`docx.trackedMoves`,
   `docx.formattingRevisions`, `docx.dropCaps`, `docx.watermarks`, `docx.pageBorders`, `docx.lineNumbers`,
-  `docx.hyphenation`, `docx.tabStops`, `docx.rtl`, `docx.ruby`, `docx.embeddedFonts`, `docx.smartTags`,
+  `docx.hyphenation`, `docx.tabStops`, `docx.rtl`, `docx.ruby`, `docx.embeddedFonts`,
   `docx.altChunk`, `docx.legacyForms`), and `docx.fields` lists its field kinds in `where`.
   The default report (`detail: 'summary'`), and so the import-confirmation dialog, is unchanged apart from the
   count fixes below. The new detectors parse the XML instead of matching text.
@@ -42,6 +42,19 @@ lockstep.
 
 ### Fixed
 
+- **DOCX import no longer drops text.** Tabs (`w:tab`, `w:ptab`) are imported as `\t`, line breaks (`w:br`
+  other than page breaks, `w:cr`) as `\n`, soft and non-breaking hyphens as U+00AD and U+2011, and the text inside
+  `w:smartTag`, `w:customXml`, content controls (`w:sdt`: inline, block, in table rows, cells and cell content, and
+  in headers and footers), tracked insertions (`w:ins`) and `w:ruby` base text is kept. The wrappers themselves
+  are still lost: tracked insertions show as ordinary text (as if accepted) while tracked deletions are still
+  applied, content controls lose their type, tag, placeholder and lock, and ruby reading marks are dropped.
+  `exportDocx` writes `\t` as `w:tab` and `\n` as `w:br`. Placeholder text of content controls is now imported
+  as ordinary text. The editor measures text with `white-space: pre-wrap`, like the pages it paints, so tabs get
+  a visible width (default tab stops; custom tab stops are still not imported), and header/footer text keeps tabs
+  and line breaks.
+- **DOCX loss report: effects narrowed.** `docx.trackedInsertions` and `docx.contentControls` keep their counts but
+  now say the text is kept and what is lost, and `docx.ruby` says only the reading marks are lost. Tabs, line
+  breaks and smart tags are no longer reported because nothing of them is dropped.
 - **DOCX loss report: `docx.charts` and `docx.floatingImages` count what their labels say.** `docx.charts`
   counted XML parts under `word/charts` and `word/diagrams` (one SmartArt is several parts) and now counts chart
   and SmartArt objects referenced from the document; `docx.floatingImages` counted every `wp:anchor`, including

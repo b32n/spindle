@@ -444,20 +444,55 @@ describe('importFromDocx', () => {
 });
 
 describe('inspectDocx detail', () => {
-  async function bytesWithTab() {
+  async function bytesWithBookmark() {
     const exported = await exportToDocx(docWith({}));
     const zip = await JSZip.loadAsync(exported.bytes);
     const xml = await zip.file('word/document.xml')!.async('string');
-    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:r><w:t>a</w:t><w:tab/></w:r></w:p></w:body>'));
+    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:bookmarkStart w:id="1" w:name="mark"/><w:r><w:t>a</w:t></w:r></w:p></w:body>'));
     return zip.generateAsync({ type: 'uint8array' });
   }
 
   it('reports only confirmation-level losses by default', async () => {
-    expect((await inspectDocx(await bytesWithTab())).items).toEqual([]);
+    expect((await inspectDocx(await bytesWithBookmark())).items).toEqual([]);
   });
 
   it("reports formatting and structure losses with detail 'full'", async () => {
-    const report = await inspectDocx(await bytesWithTab(), { detail: 'full' });
-    expect(report.items.map((i) => i.id)).toEqual(['docx.tabsAndBreaks']);
+    const report = await inspectDocx(await bytesWithBookmark(), { detail: 'full' });
+    expect(report.items.map((i) => i.id)).toEqual(['docx.bookmarks']);
+  });
+});
+
+describe('tabs, line breaks and wrapped text through the editor API', () => {
+  it('keeps tabs, line breaks, smart tags, tracked insertions and content controls on import, and writes tabs and breaks back', async () => {
+    const source = docWith({
+      sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'b1', type: 'paragraph', content: [{ type: 'text', text: 'x' }] }] }],
+    });
+    const exported = await exportToDocx(source);
+    const zip = await JSZip.loadAsync(exported.bytes);
+    const xml = await zip.file('word/document.xml')!.async('string');
+    zip.file(
+      'word/document.xml',
+      xml.replace(
+        /<w:p>[\s\S]*?<\/w:p>/,
+        '<w:p><w:r><w:t>Chapter</w:t><w:tab/><w:t>1</w:t><w:br/><w:t>next</w:t></w:r>' +
+          '<w:smartTag w:element="place"><w:r><w:t> Paris</w:t></w:r></w:smartTag>' +
+          '<w:ins w:id="1" w:author="A"><w:r><w:t> new</w:t></w:r></w:ins></w:p>' +
+          '<w:sdt><w:sdtContent><w:p><w:r><w:t>control</w:t></w:r></w:p></w:sdtContent></w:sdt>'
+      )
+    );
+    const bytes = await zip.generateAsync({ type: 'uint8array' });
+
+    const target = docWith({});
+    await importFromDocx(bytes, target);
+    const blocks = target.getData().sections[0].blocks;
+    expect(blocks).toHaveLength(2);
+    const first = blocks[0];
+    expect(first.type === 'paragraph' && first.content.map((c) => ('text' in c ? c.text : '')).join('')).toBe('Chapter\t1\nnext Paris new');
+    const second = blocks[1];
+    expect(second.type === 'paragraph' && second.content).toEqual([{ type: 'text', text: 'control' }]);
+
+    const { documentXml } = await exportAndUnzip(target);
+    expect(documentXml).toContain('<w:tab/>');
+    expect(documentXml).toContain('<w:br/>');
   });
 });
