@@ -82,32 +82,15 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.tableFormatting', () => {
-    const tbl = (tblPr: string, tcPr = '', trPr = '') =>
-      `<w:tbl><w:tblPr>${tblPr}</w:tblPr><w:tr>${trPr ? `<w:trPr>${trPr}</w:trPr>` : ''}<w:tc><w:tcPr>${tcPr}</w:tcPr>${p('x')}</w:tc></w:tr></w:tbl>`;
-    it('is silent for a table with no formatting (auto width, plain shading)', async () => {
-      const bytes = await docx(tbl('<w:tblW w:w="0" w:type="auto"/>', '<w:shd w:val="clear" w:fill="auto"/>'));
+  describe('table formatting', () => {
+    it('is no longer reported: borders, shading, widths, header rows, alignment and table styles are imported', async () => {
+      const bytes = await docx(
+        '<w:tbl><w:tblPr><w:tblStyle w:val="GridTable4"/><w:tblBorders><w:top w:val="single"/></w:tblBorders><w:tblW w:w="5000" w:type="pct"/></w:tblPr>' +
+          '<w:tr><w:trPr><w:tblHeader/></w:trPr><w:tc><w:tcPr><w:tcW w:w="2400" w:type="dxa"/><w:shd w:val="clear" w:fill="FFEE00"/><w:vAlign w:val="center"/></w:tcPr>' +
+          p('x') +
+          '</w:tc></w:tr></w:tbl>'
+      );
       expect(await item(bytes, 'docx.tableFormatting')).toBeUndefined();
-    });
-    it.each([
-      ['borders', '<w:tblBorders><w:top w:val="single"/></w:tblBorders>', '', ''],
-      ['borders', '', '<w:tcBorders><w:top w:val="single"/></w:tcBorders>', ''],
-      ['shading', '', '<w:shd w:val="clear" w:fill="FFEE00"/>', ''],
-      ['widths', '<w:tblW w:w="5000" w:type="pct"/>', '', ''],
-      ['widths', '', '<w:tcW w:w="2400" w:type="dxa"/>', ''],
-      ['repeating header rows', '', '', '<w:tblHeader/>'],
-      ['vertical alignment', '', '<w:vAlign w:val="center"/>', ''],
-      ['table style', '<w:tblStyle w:val="GridTable4"/>', '', ''],
-    ])('detects %s', async (kind, tblPr, tcPr, trPr) => {
-      const found = await item(await docx(tbl(tblPr, tcPr, trPr)), 'docx.tableFormatting');
-      expect(found).toMatchObject({ count: 1, where: [`${kind} ×1`] });
-    });
-    it('counts each table once however many kinds it has', async () => {
-      const bytes = await docx(tbl('<w:tblStyle w:val="X"/>', '<w:vAlign w:val="bottom"/>') + tbl('<w:tblBorders/>'));
-      expect(await item(bytes, 'docx.tableFormatting')).toMatchObject({ count: 2 });
-    });
-    it('does not treat w:tblHeader w:val="0" as a header row', async () => {
-      expect(await item(await docx(tbl('', '', '<w:tblHeader w:val="0"/>')), 'docx.tableFormatting')).toBeUndefined();
     });
   });
 

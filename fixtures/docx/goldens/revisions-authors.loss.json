@@ -12,17 +12,6 @@
       ]
     },
     {
-      "count": 1,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "repeating header rows ×1",
-        "table style ×1",
-        "widths ×1"
-      ]
-    },
-    {
       "count": 13,
       "effect": "applied (the deleted text is gone)",
       "id": "docx.trackedDeletions",

@@ -7,7 +7,7 @@ export interface DetectDocxLossOptions {
   /**
    * `'summary'` (default) is what the import-confirmation dialog shows: content the importer drops outright
    * (tracked changes, notes, comments, floating images, fields…). `'full'` also reports formatting and
-   * structure the importer flattens or ignores (table formatting, tabs and breaks, sections, …) and breaks fields down by kind; the DOCX fidelity harness uses it.
+   * structure the importer flattens or ignores (table structure, tabs and breaks, sections, …) and breaks fields down by kind; the DOCX fidelity harness uses it.
    */
   detail?: 'summary' | 'full';
 }

@@ -143,38 +143,22 @@ function tableDetectors(root: XmlNode[]): Item[] {
     if (tag === 'w:tbl') tables.push({ node, nested: path.includes('w:tc') });
   });
 
-  const formatting = new Map<string, number>();
-  let formattedTables = 0;
   let nestedTables = 0;
   let multiParagraphCells = 0;
 
   for (const { node: tbl, nested } of tables) {
     if (nested) nestedTables++;
-    const kinds = new Set<string>();
     // Anything below a nested w:tbl belongs to that table, not this one.
     ownTableNodes(tbl, (n, tag, path) => {
       if (path.includes('w:tbl')) return;
-      const parent = path[path.length - 1];
-      if (tag === 'w:tblBorders' || tag === 'w:tcBorders') kinds.add('borders');
-      else if (tag === 'w:shd' && (parent === 'w:tblPr' || parent === 'w:tcPr')) {
-        if (attr(n, 'w:fill') && attr(n, 'w:fill') !== 'auto') kinds.add('shading');
-      } else if ((tag === 'w:tcW' || tag === 'w:tblW') && attr(n, 'w:type') !== 'auto' && Number(attr(n, 'w:w') ?? 0) > 0) kinds.add('widths');
-      else if (tag === 'w:tblHeader' && isOn(n)) kinds.add('repeating header rows');
-      else if (tag === 'w:vAlign' && parent === 'w:tcPr' && attr(n, 'w:val') !== 'top') kinds.add('vertical alignment');
-      else if (tag === 'w:tblStyle' && attr(n, 'w:val') !== 'TableNormal') kinds.add('table style');
-      else if (tag === 'w:tc') {
+      if (tag === 'w:tc') {
         const paragraphs = findAll(childrenOf(n), 'w:p').filter(cellHasContent);
         if (paragraphs.length > 1) multiParagraphCells++;
       }
     });
-    if (kinds.size > 0) {
-      formattedTables++;
-      for (const k of kinds) bump(formatting, k);
-    }
   }
 
   return [
-    ...item('docx.tableFormatting', 'table(s) with borders, shading, widths, header rows or styles', formattedTables, 'the formatting is dropped', formatting),
     ...item(
       'docx.tableStructure',
       'nested table(s) / multi-paragraph cell(s)',

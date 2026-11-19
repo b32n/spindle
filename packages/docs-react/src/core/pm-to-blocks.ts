@@ -250,6 +250,8 @@ function convertTable(node: PmNode): TableBlock {
             rowspan: cellNode.attrs.rowspan as number | undefined,
             colwidth: cellNode.attrs.colwidth as number[] | undefined,
             backgroundColor: cellNode.attrs.backgroundColor as string | undefined,
+            ...(cellNode.attrs.borders ? { borders: cellNode.attrs.borders as TableCell['borders'] } : {}),
+            ...(cellNode.attrs.verticalAlign ? { verticalAlign: cellNode.attrs.verticalAlign as TableCell['verticalAlign'] } : {}),
             // pmStart and pmEnd will be set by createBlockPositionMapWithCells
           });
         }
@@ -258,6 +260,8 @@ function convertTable(node: PmNode): TableBlock {
       rows.push({
         id: generateBlockId(),
         cells,
+        ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
+        ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
       });
     }
   });
@@ -266,6 +270,7 @@ function convertTable(node: PmNode): TableBlock {
     kind: 'table',
     id: generateBlockId(),
     rows,
+    ...(node.attrs.borders ? { borders: node.attrs.borders as TableBlock['borders'] } : {}),
   };
 }
 

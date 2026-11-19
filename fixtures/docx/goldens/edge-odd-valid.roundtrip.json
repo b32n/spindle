@@ -1,6 +1,6 @@
 {
   "diff": {
-    "added": 0,
+    "added": 2,
     "after": {
       "blocks": {
         "paragraph": 13,
@@ -17,11 +17,25 @@
       "sections": 1,
       "textChars": 2235
     },
-    "byField": {},
+    "byField": {
+      "added sections[].blocks[].colWidths": 1,
+      "added sections[].blocks[].rows[].cells[].colwidth": 1
+    },
     "changed": 0,
-    "entries": [],
+    "entries": [
+      {
+        "after": "[624]",
+        "kind": "added",
+        "path": "sections[0].blocks[13].colWidths"
+      },
+      {
+        "after": "[624]",
+        "kind": "added",
+        "path": "sections[0].blocks[13].rows[0].cells[0].colwidth"
+      }
+    ],
     "removed": 0,
-    "total": 0,
+    "total": 2,
     "truncated": false
   },
   "exportWarnings": [],

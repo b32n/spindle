@@ -96,6 +96,38 @@
           "italic": true
         }
       },
+      "TableGrid": {
+        "basedOn": "TableNormal",
+        "kind": "table",
+        "name": "Table Grid",
+        "table": {
+          "borders": {
+            "bottom": {
+              "style": "single"
+            },
+            "insideH": {
+              "style": "single"
+            },
+            "insideV": {
+              "style": "single"
+            },
+            "left": {
+              "style": "single"
+            },
+            "right": {
+              "style": "single"
+            },
+            "top": {
+              "style": "single"
+            }
+          }
+        }
+      },
+      "TableNormal": {
+        "isDefault": true,
+        "kind": "table",
+        "name": "Normal Table"
+      },
       "Title": {
         "basedOn": "Normal",
         "kind": "paragraph",
@@ -421,11 +453,50 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "style": "single"
+              },
+              "insideH": {
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "style": "single"
+              }
+            },
+            "colWidths": [
+              160,
+              160,
+              160,
+              160
+            ],
             "id": "block-8",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "TableGrid",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#c0392b",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "color": "#ffffff",
@@ -438,6 +509,10 @@
                     "id": "cell-1"
                   },
                   {
+                    "backgroundColor": "#2980b9",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "color": "#ffffff",
@@ -450,6 +525,10 @@
                     "id": "cell-2"
                   },
                   {
+                    "backgroundColor": "#8e44ad",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "color": "#ffffff",
@@ -462,6 +541,10 @@
                     "id": "cell-3"
                   },
                   {
+                    "backgroundColor": "#16a085",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "color": "#ffffff",

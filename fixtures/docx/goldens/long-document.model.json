@@ -16,6 +16,41 @@
       }
     },
     "namedStyles": {
+      "BandedBlue": {
+        "basedOn": "TableGrid",
+        "kind": "table",
+        "name": "Banded Blue",
+        "table": {
+          "borders": {
+            "bottom": {
+              "color": "#4472c4",
+              "style": "single",
+              "widthPx": 1.33
+            },
+            "insideH": {
+              "color": "#b4c6e7",
+              "style": "single"
+            },
+            "top": {
+              "color": "#4472c4",
+              "style": "single",
+              "widthPx": 1.33
+            }
+          },
+          "conditions": {
+            "band1Horz": {
+              "backgroundColor": "#d9e2f3"
+            },
+            "firstRow": {
+              "backgroundColor": "#4472c4",
+              "text": {
+                "bold": true,
+                "color": "#ffffff"
+              }
+            }
+          }
+        }
+      },
       "BodyText": {
         "basedOn": "Normal",
         "kind": "paragraph",
@@ -213,6 +248,38 @@
         "name": "TOC Heading",
         "next": "Normal",
         "outlineLevel": 0
+      },
+      "TableGrid": {
+        "basedOn": "TableNormal",
+        "kind": "table",
+        "name": "Table Grid",
+        "table": {
+          "borders": {
+            "bottom": {
+              "style": "single"
+            },
+            "insideH": {
+              "style": "single"
+            },
+            "insideV": {
+              "style": "single"
+            },
+            "left": {
+              "style": "single"
+            },
+            "right": {
+              "style": "single"
+            },
+            "top": {
+              "style": "single"
+            }
+          }
+        }
+      },
+      "TableNormal": {
+        "isDefault": true,
+        "kind": "table",
+        "name": "Normal Table"
       },
       "Title": {
         "basedOn": "Normal",
@@ -4311,14 +4378,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-122",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -4328,9 +4440,14 @@
                     "id": "cell-1"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -4340,9 +4457,14 @@
                     "id": "cell-2"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -4352,9 +4474,14 @@
                     "id": "cell-3"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -4364,11 +4491,16 @@
                     "id": "cell-4"
                   }
                 ],
-                "id": "row-1"
+                "id": "row-1",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4380,6 +4512,10 @@
                     "id": "cell-5"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4391,6 +4527,10 @@
                     "id": "cell-6"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4402,6 +4542,10 @@
                     "id": "cell-7"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4418,6 +4562,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4429,6 +4576,9 @@
                     "id": "cell-9"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4440,6 +4590,9 @@
                     "id": "cell-10"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4451,6 +4604,9 @@
                     "id": "cell-11"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4467,6 +4623,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4478,6 +4638,10 @@
                     "id": "cell-13"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4489,6 +4653,10 @@
                     "id": "cell-14"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4500,6 +4668,10 @@
                     "id": "cell-15"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4516,6 +4688,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4527,6 +4702,9 @@
                     "id": "cell-17"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4538,6 +4716,9 @@
                     "id": "cell-18"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4549,6 +4730,9 @@
                     "id": "cell-19"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4565,6 +4749,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4576,6 +4764,10 @@
                     "id": "cell-21"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4587,6 +4779,10 @@
                     "id": "cell-22"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4598,6 +4794,10 @@
                     "id": "cell-23"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4614,6 +4814,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4625,6 +4828,9 @@
                     "id": "cell-25"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4636,6 +4842,9 @@
                     "id": "cell-26"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4647,6 +4856,9 @@
                     "id": "cell-27"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4663,6 +4875,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4674,6 +4890,10 @@
                     "id": "cell-29"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4685,6 +4905,10 @@
                     "id": "cell-30"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -4696,6 +4920,10 @@
                     "id": "cell-31"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -5967,14 +6195,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-178",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -5984,9 +6257,14 @@
                     "id": "cell-33"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -5996,9 +6274,14 @@
                     "id": "cell-34"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -6008,9 +6291,14 @@
                     "id": "cell-35"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -6020,11 +6308,16 @@
                     "id": "cell-36"
                   }
                 ],
-                "id": "row-9"
+                "id": "row-9",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6036,6 +6329,10 @@
                     "id": "cell-37"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6047,6 +6344,10 @@
                     "id": "cell-38"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6058,6 +6359,10 @@
                     "id": "cell-39"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6074,6 +6379,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6085,6 +6393,9 @@
                     "id": "cell-41"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6096,6 +6407,9 @@
                     "id": "cell-42"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6107,6 +6421,9 @@
                     "id": "cell-43"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6123,6 +6440,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6134,6 +6455,10 @@
                     "id": "cell-45"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6145,6 +6470,10 @@
                     "id": "cell-46"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6156,6 +6485,10 @@
                     "id": "cell-47"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6172,6 +6505,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6183,6 +6519,9 @@
                     "id": "cell-49"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6194,6 +6533,9 @@
                     "id": "cell-50"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6205,6 +6547,9 @@
                     "id": "cell-51"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6221,6 +6566,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6232,6 +6581,10 @@
                     "id": "cell-53"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6243,6 +6596,10 @@
                     "id": "cell-54"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6254,6 +6611,10 @@
                     "id": "cell-55"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6270,6 +6631,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6281,6 +6645,9 @@
                     "id": "cell-57"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6292,6 +6659,9 @@
                     "id": "cell-58"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6303,6 +6673,9 @@
                     "id": "cell-59"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6319,6 +6692,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6330,6 +6707,10 @@
                     "id": "cell-61"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6341,6 +6722,10 @@
                     "id": "cell-62"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -6352,6 +6737,10 @@
                     "id": "cell-63"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7623,14 +8012,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-234",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -7640,9 +8074,14 @@
                     "id": "cell-65"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -7652,9 +8091,14 @@
                     "id": "cell-66"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -7664,9 +8108,14 @@
                     "id": "cell-67"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -7676,11 +8125,16 @@
                     "id": "cell-68"
                   }
                 ],
-                "id": "row-17"
+                "id": "row-17",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7692,6 +8146,10 @@
                     "id": "cell-69"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7703,6 +8161,10 @@
                     "id": "cell-70"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7714,6 +8176,10 @@
                     "id": "cell-71"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7730,6 +8196,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7741,6 +8210,9 @@
                     "id": "cell-73"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7752,6 +8224,9 @@
                     "id": "cell-74"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7763,6 +8238,9 @@
                     "id": "cell-75"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7779,6 +8257,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7790,6 +8272,10 @@
                     "id": "cell-77"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7801,6 +8287,10 @@
                     "id": "cell-78"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7812,6 +8302,10 @@
                     "id": "cell-79"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7828,6 +8322,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7839,6 +8336,9 @@
                     "id": "cell-81"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7850,6 +8350,9 @@
                     "id": "cell-82"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7861,6 +8364,9 @@
                     "id": "cell-83"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7877,6 +8383,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7888,6 +8398,10 @@
                     "id": "cell-85"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7899,6 +8413,10 @@
                     "id": "cell-86"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7910,6 +8428,10 @@
                     "id": "cell-87"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7926,6 +8448,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7937,6 +8462,9 @@
                     "id": "cell-89"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7948,6 +8476,9 @@
                     "id": "cell-90"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7959,6 +8490,9 @@
                     "id": "cell-91"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7975,6 +8509,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7986,6 +8524,10 @@
                     "id": "cell-93"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -7997,6 +8539,10 @@
                     "id": "cell-94"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -8008,6 +8554,10 @@
                     "id": "cell-95"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9279,14 +9829,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-290",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -9296,9 +9891,14 @@
                     "id": "cell-97"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -9308,9 +9908,14 @@
                     "id": "cell-98"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -9320,9 +9925,14 @@
                     "id": "cell-99"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -9332,11 +9942,16 @@
                     "id": "cell-100"
                   }
                 ],
-                "id": "row-25"
+                "id": "row-25",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9348,6 +9963,10 @@
                     "id": "cell-101"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9359,6 +9978,10 @@
                     "id": "cell-102"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9370,6 +9993,10 @@
                     "id": "cell-103"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9386,6 +10013,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9397,6 +10027,9 @@
                     "id": "cell-105"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9408,6 +10041,9 @@
                     "id": "cell-106"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9419,6 +10055,9 @@
                     "id": "cell-107"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9435,6 +10074,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9446,6 +10089,10 @@
                     "id": "cell-109"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9457,6 +10104,10 @@
                     "id": "cell-110"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9468,6 +10119,10 @@
                     "id": "cell-111"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9484,6 +10139,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9495,6 +10153,9 @@
                     "id": "cell-113"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9506,6 +10167,9 @@
                     "id": "cell-114"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9517,6 +10181,9 @@
                     "id": "cell-115"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9533,6 +10200,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9544,6 +10215,10 @@
                     "id": "cell-117"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9555,6 +10230,10 @@
                     "id": "cell-118"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9566,6 +10245,10 @@
                     "id": "cell-119"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9582,6 +10265,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9593,6 +10279,9 @@
                     "id": "cell-121"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9604,6 +10293,9 @@
                     "id": "cell-122"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9615,6 +10307,9 @@
                     "id": "cell-123"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9631,6 +10326,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9642,6 +10341,10 @@
                     "id": "cell-125"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9653,6 +10356,10 @@
                     "id": "cell-126"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -9664,6 +10371,10 @@
                     "id": "cell-127"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -10935,14 +11646,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-346",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -10952,9 +11708,14 @@
                     "id": "cell-129"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -10964,9 +11725,14 @@
                     "id": "cell-130"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -10976,9 +11742,14 @@
                     "id": "cell-131"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -10988,11 +11759,16 @@
                     "id": "cell-132"
                   }
                 ],
-                "id": "row-33"
+                "id": "row-33",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11004,6 +11780,10 @@
                     "id": "cell-133"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11015,6 +11795,10 @@
                     "id": "cell-134"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11026,6 +11810,10 @@
                     "id": "cell-135"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11042,6 +11830,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11053,6 +11844,9 @@
                     "id": "cell-137"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11064,6 +11858,9 @@
                     "id": "cell-138"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11075,6 +11872,9 @@
                     "id": "cell-139"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11091,6 +11891,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11102,6 +11906,10 @@
                     "id": "cell-141"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11113,6 +11921,10 @@
                     "id": "cell-142"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11124,6 +11936,10 @@
                     "id": "cell-143"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11140,6 +11956,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11151,6 +11970,9 @@
                     "id": "cell-145"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11162,6 +11984,9 @@
                     "id": "cell-146"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11173,6 +11998,9 @@
                     "id": "cell-147"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11189,6 +12017,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11200,6 +12032,10 @@
                     "id": "cell-149"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11211,6 +12047,10 @@
                     "id": "cell-150"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11222,6 +12062,10 @@
                     "id": "cell-151"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11238,6 +12082,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11249,6 +12096,9 @@
                     "id": "cell-153"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11260,6 +12110,9 @@
                     "id": "cell-154"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11271,6 +12124,9 @@
                     "id": "cell-155"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11287,6 +12143,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11298,6 +12158,10 @@
                     "id": "cell-157"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11309,6 +12173,10 @@
                     "id": "cell-158"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -11320,6 +12188,10 @@
                     "id": "cell-159"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12591,14 +13463,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-402",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -12608,9 +13525,14 @@
                     "id": "cell-161"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -12620,9 +13542,14 @@
                     "id": "cell-162"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -12632,9 +13559,14 @@
                     "id": "cell-163"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -12644,11 +13576,16 @@
                     "id": "cell-164"
                   }
                 ],
-                "id": "row-41"
+                "id": "row-41",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12660,6 +13597,10 @@
                     "id": "cell-165"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12671,6 +13612,10 @@
                     "id": "cell-166"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12682,6 +13627,10 @@
                     "id": "cell-167"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12698,6 +13647,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12709,6 +13661,9 @@
                     "id": "cell-169"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12720,6 +13675,9 @@
                     "id": "cell-170"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12731,6 +13689,9 @@
                     "id": "cell-171"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12747,6 +13708,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12758,6 +13723,10 @@
                     "id": "cell-173"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12769,6 +13738,10 @@
                     "id": "cell-174"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12780,6 +13753,10 @@
                     "id": "cell-175"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12796,6 +13773,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12807,6 +13787,9 @@
                     "id": "cell-177"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12818,6 +13801,9 @@
                     "id": "cell-178"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12829,6 +13815,9 @@
                     "id": "cell-179"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12845,6 +13834,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12856,6 +13849,10 @@
                     "id": "cell-181"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12867,6 +13864,10 @@
                     "id": "cell-182"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12878,6 +13879,10 @@
                     "id": "cell-183"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12894,6 +13899,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12905,6 +13913,9 @@
                     "id": "cell-185"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12916,6 +13927,9 @@
                     "id": "cell-186"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12927,6 +13941,9 @@
                     "id": "cell-187"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12943,6 +13960,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12954,6 +13975,10 @@
                     "id": "cell-189"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12965,6 +13990,10 @@
                     "id": "cell-190"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -12976,6 +14005,10 @@
                     "id": "cell-191"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14247,14 +15280,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-458",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -14264,9 +15342,14 @@
                     "id": "cell-193"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -14276,9 +15359,14 @@
                     "id": "cell-194"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -14288,9 +15376,14 @@
                     "id": "cell-195"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -14300,11 +15393,16 @@
                     "id": "cell-196"
                   }
                 ],
-                "id": "row-49"
+                "id": "row-49",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14316,6 +15414,10 @@
                     "id": "cell-197"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14327,6 +15429,10 @@
                     "id": "cell-198"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14338,6 +15444,10 @@
                     "id": "cell-199"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14354,6 +15464,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14365,6 +15478,9 @@
                     "id": "cell-201"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14376,6 +15492,9 @@
                     "id": "cell-202"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14387,6 +15506,9 @@
                     "id": "cell-203"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14403,6 +15525,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14414,6 +15540,10 @@
                     "id": "cell-205"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14425,6 +15555,10 @@
                     "id": "cell-206"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14436,6 +15570,10 @@
                     "id": "cell-207"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14452,6 +15590,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14463,6 +15604,9 @@
                     "id": "cell-209"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14474,6 +15618,9 @@
                     "id": "cell-210"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14485,6 +15632,9 @@
                     "id": "cell-211"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14501,6 +15651,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14512,6 +15666,10 @@
                     "id": "cell-213"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14523,6 +15681,10 @@
                     "id": "cell-214"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14534,6 +15696,10 @@
                     "id": "cell-215"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14550,6 +15716,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14561,6 +15730,9 @@
                     "id": "cell-217"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14572,6 +15744,9 @@
                     "id": "cell-218"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14583,6 +15758,9 @@
                     "id": "cell-219"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14599,6 +15777,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14610,6 +15792,10 @@
                     "id": "cell-221"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14621,6 +15807,10 @@
                     "id": "cell-222"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -14632,6 +15822,10 @@
                     "id": "cell-223"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -15903,14 +17097,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-514",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -15920,9 +17159,14 @@
                     "id": "cell-225"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -15932,9 +17176,14 @@
                     "id": "cell-226"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -15944,9 +17193,14 @@
                     "id": "cell-227"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -15956,11 +17210,16 @@
                     "id": "cell-228"
                   }
                 ],
-                "id": "row-57"
+                "id": "row-57",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -15972,6 +17231,10 @@
                     "id": "cell-229"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -15983,6 +17246,10 @@
                     "id": "cell-230"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -15994,6 +17261,10 @@
                     "id": "cell-231"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16010,6 +17281,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16021,6 +17295,9 @@
                     "id": "cell-233"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16032,6 +17309,9 @@
                     "id": "cell-234"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16043,6 +17323,9 @@
                     "id": "cell-235"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16059,6 +17342,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16070,6 +17357,10 @@
                     "id": "cell-237"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16081,6 +17372,10 @@
                     "id": "cell-238"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16092,6 +17387,10 @@
                     "id": "cell-239"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16108,6 +17407,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16119,6 +17421,9 @@
                     "id": "cell-241"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16130,6 +17435,9 @@
                     "id": "cell-242"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16141,6 +17449,9 @@
                     "id": "cell-243"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16157,6 +17468,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16168,6 +17483,10 @@
                     "id": "cell-245"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16179,6 +17498,10 @@
                     "id": "cell-246"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16190,6 +17513,10 @@
                     "id": "cell-247"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16206,6 +17533,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16217,6 +17547,9 @@
                     "id": "cell-249"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16228,6 +17561,9 @@
                     "id": "cell-250"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16239,6 +17575,9 @@
                     "id": "cell-251"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16255,6 +17594,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16266,6 +17609,10 @@
                     "id": "cell-253"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16277,6 +17624,10 @@
                     "id": "cell-254"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -16288,6 +17639,10 @@
                     "id": "cell-255"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17559,14 +18914,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-570",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -17576,9 +18976,14 @@
                     "id": "cell-257"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -17588,9 +18993,14 @@
                     "id": "cell-258"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -17600,9 +19010,14 @@
                     "id": "cell-259"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -17612,11 +19027,16 @@
                     "id": "cell-260"
                   }
                 ],
-                "id": "row-65"
+                "id": "row-65",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17628,6 +19048,10 @@
                     "id": "cell-261"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17639,6 +19063,10 @@
                     "id": "cell-262"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17650,6 +19078,10 @@
                     "id": "cell-263"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17666,6 +19098,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17677,6 +19112,9 @@
                     "id": "cell-265"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17688,6 +19126,9 @@
                     "id": "cell-266"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17699,6 +19140,9 @@
                     "id": "cell-267"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17715,6 +19159,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17726,6 +19174,10 @@
                     "id": "cell-269"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17737,6 +19189,10 @@
                     "id": "cell-270"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17748,6 +19204,10 @@
                     "id": "cell-271"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17764,6 +19224,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17775,6 +19238,9 @@
                     "id": "cell-273"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17786,6 +19252,9 @@
                     "id": "cell-274"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17797,6 +19266,9 @@
                     "id": "cell-275"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17813,6 +19285,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17824,6 +19300,10 @@
                     "id": "cell-277"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17835,6 +19315,10 @@
                     "id": "cell-278"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17846,6 +19330,10 @@
                     "id": "cell-279"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17862,6 +19350,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17873,6 +19364,9 @@
                     "id": "cell-281"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17884,6 +19378,9 @@
                     "id": "cell-282"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17895,6 +19392,9 @@
                     "id": "cell-283"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17911,6 +19411,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17922,6 +19426,10 @@
                     "id": "cell-285"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17933,6 +19441,10 @@
                     "id": "cell-286"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -17944,6 +19456,10 @@
                     "id": "cell-287"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19215,14 +20731,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-626",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -19232,9 +20793,14 @@
                     "id": "cell-289"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -19244,9 +20810,14 @@
                     "id": "cell-290"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -19256,9 +20827,14 @@
                     "id": "cell-291"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -19268,11 +20844,16 @@
                     "id": "cell-292"
                   }
                 ],
-                "id": "row-73"
+                "id": "row-73",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19284,6 +20865,10 @@
                     "id": "cell-293"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19295,6 +20880,10 @@
                     "id": "cell-294"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19306,6 +20895,10 @@
                     "id": "cell-295"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19322,6 +20915,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19333,6 +20929,9 @@
                     "id": "cell-297"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19344,6 +20943,9 @@
                     "id": "cell-298"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19355,6 +20957,9 @@
                     "id": "cell-299"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19371,6 +20976,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19382,6 +20991,10 @@
                     "id": "cell-301"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19393,6 +21006,10 @@
                     "id": "cell-302"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19404,6 +21021,10 @@
                     "id": "cell-303"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19420,6 +21041,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19431,6 +21055,9 @@
                     "id": "cell-305"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19442,6 +21069,9 @@
                     "id": "cell-306"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19453,6 +21083,9 @@
                     "id": "cell-307"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19469,6 +21102,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19480,6 +21117,10 @@
                     "id": "cell-309"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19491,6 +21132,10 @@
                     "id": "cell-310"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19502,6 +21147,10 @@
                     "id": "cell-311"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19518,6 +21167,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19529,6 +21181,9 @@
                     "id": "cell-313"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19540,6 +21195,9 @@
                     "id": "cell-314"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19551,6 +21209,9 @@
                     "id": "cell-315"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19567,6 +21228,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19578,6 +21243,10 @@
                     "id": "cell-317"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19589,6 +21258,10 @@
                     "id": "cell-318"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -19600,6 +21273,10 @@
                     "id": "cell-319"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -20871,14 +22548,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-682",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -20888,9 +22610,14 @@
                     "id": "cell-321"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -20900,9 +22627,14 @@
                     "id": "cell-322"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -20912,9 +22644,14 @@
                     "id": "cell-323"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -20924,11 +22661,16 @@
                     "id": "cell-324"
                   }
                 ],
-                "id": "row-81"
+                "id": "row-81",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -20940,6 +22682,10 @@
                     "id": "cell-325"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -20951,6 +22697,10 @@
                     "id": "cell-326"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -20962,6 +22712,10 @@
                     "id": "cell-327"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -20978,6 +22732,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -20989,6 +22746,9 @@
                     "id": "cell-329"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21000,6 +22760,9 @@
                     "id": "cell-330"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21011,6 +22774,9 @@
                     "id": "cell-331"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21027,6 +22793,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21038,6 +22808,10 @@
                     "id": "cell-333"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21049,6 +22823,10 @@
                     "id": "cell-334"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21060,6 +22838,10 @@
                     "id": "cell-335"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21076,6 +22858,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21087,6 +22872,9 @@
                     "id": "cell-337"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21098,6 +22886,9 @@
                     "id": "cell-338"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21109,6 +22900,9 @@
                     "id": "cell-339"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21125,6 +22919,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21136,6 +22934,10 @@
                     "id": "cell-341"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21147,6 +22949,10 @@
                     "id": "cell-342"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21158,6 +22964,10 @@
                     "id": "cell-343"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21174,6 +22984,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21185,6 +22998,9 @@
                     "id": "cell-345"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21196,6 +23012,9 @@
                     "id": "cell-346"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21207,6 +23026,9 @@
                     "id": "cell-347"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21223,6 +23045,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21234,6 +23060,10 @@
                     "id": "cell-349"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21245,6 +23075,10 @@
                     "id": "cell-350"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -21256,6 +23090,10 @@
                     "id": "cell-351"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22527,14 +24365,59 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              },
+              "insideH": {
+                "color": "#b4c6e7",
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "color": "#4472c4",
+                "style": "single",
+                "widthPx": 1.33
+              }
+            },
+            "colWidths": [
+              146.67,
+              160,
+              160,
+              173.33
+            ],
             "id": "block-738",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "BandedBlue",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Item",
@@ -22544,9 +24427,14 @@
                     "id": "cell-353"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Owner",
@@ -22556,9 +24444,14 @@
                     "id": "cell-354"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Frequency",
@@ -22568,9 +24461,14 @@
                     "id": "cell-355"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "bold": true,
+                        "color": "#ffffff",
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
@@ -22580,11 +24478,16 @@
                     "id": "cell-356"
                   }
                 ],
-                "id": "row-89"
+                "id": "row-89",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22596,6 +24499,10 @@
                     "id": "cell-357"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22607,6 +24514,10 @@
                     "id": "cell-358"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22618,6 +24529,10 @@
                     "id": "cell-359"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22634,6 +24549,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22645,6 +24563,9 @@
                     "id": "cell-361"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22656,6 +24577,9 @@
                     "id": "cell-362"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22667,6 +24591,9 @@
                     "id": "cell-363"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22683,6 +24610,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22694,6 +24625,10 @@
                     "id": "cell-365"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22705,6 +24640,10 @@
                     "id": "cell-366"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22716,6 +24655,10 @@
                     "id": "cell-367"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22732,6 +24675,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22743,6 +24689,9 @@
                     "id": "cell-369"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22754,6 +24703,9 @@
                     "id": "cell-370"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22765,6 +24717,9 @@
                     "id": "cell-371"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22781,6 +24736,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22792,6 +24751,10 @@
                     "id": "cell-373"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22803,6 +24766,10 @@
                     "id": "cell-374"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22814,6 +24781,10 @@
                     "id": "cell-375"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22830,6 +24801,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22841,6 +24815,9 @@
                     "id": "cell-377"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22852,6 +24829,9 @@
                     "id": "cell-378"
                   },
                   {
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22863,6 +24843,9 @@
                     "id": "cell-379"
                   },
                   {
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22879,6 +24862,10 @@
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      146.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22890,6 +24877,10 @@
                     "id": "cell-381"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22901,6 +24892,10 @@
                     "id": "cell-382"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      160
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -22912,6 +24907,10 @@
                     "id": "cell-383"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      173.33
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",

@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import type { DocNamedStyle, DocParagraphStyle, DocRunBase } from '@b32nio/spindle-shared/export/docx';
+import type { DocBorder, DocBorders, DocNamedStyle, DocParagraphStyle, DocRunBase, DocTableStyle, DocTableStylePart } from '@b32nio/spindle-shared/export/docx';
 
 // ---------------------------------------------------------------------------
 // Named styles -> `w:style` elements of word/styles.xml.
@@ -80,6 +80,43 @@ function pPr(paragraph: DocParagraphStyle | undefined, outlineLevel: number | un
   return body ? `<w:pPr>${body}</w:pPr>` : '';
 }
 
+const BORDER_VAL: Record<DocBorder['style'], string> = { single: 'single', double: 'double', dashed: 'dashed', dotted: 'dotted', none: 'nil' };
+
+function borderXml(tag: string, border: DocBorder | undefined): string {
+  if (!border) return '';
+  if (border.style === 'none') return `<w:${tag} w:val="nil"/>`;
+  const size = Math.min(96, Math.max(2, Math.round((border.widthPx ?? 1) * 6)));
+  return `<w:${tag} w:val="${BORDER_VAL[border.style] ?? 'single'}" w:sz="${size}" w:space="0" w:color="${border.color ? hex(border.color) : 'auto'}"/>`;
+}
+
+/** `w:tblBorders` / `w:tcBorders` with the sides in schema order. */
+function bordersXml(tag: string, b: DocBorders | undefined): string {
+  if (!b) return '';
+  const body = borderXml('top', b.top) + borderXml('left', b.left) + borderXml('bottom', b.bottom) + borderXml('right', b.right) + borderXml('insideH', b.insideH) + borderXml('insideV', b.insideV);
+  return body ? `<w:${tag}>${body}</w:${tag}>` : '';
+}
+
+function tcPrXml(part: DocTableStylePart | undefined): string {
+  if (!part) return '';
+  const body =
+    bordersXml('tcBorders', part.borders) +
+    (part.backgroundColor ? `<w:shd w:val="clear" w:color="auto" w:fill="${hex(part.backgroundColor)}"/>` : '') +
+    (part.verticalAlign ? `<w:vAlign w:val="${part.verticalAlign}"/>` : '');
+  return body ? `<w:tcPr>${body}</w:tcPr>` : '';
+}
+
+/** The `tblPr`, `tcPr` and `tblStylePr` children of a table style, in schema order. */
+function tableStyleXml(table: DocTableStyle | undefined): string {
+  if (!table) return '';
+  const tblPr =
+    (table.rowBandSize ? `<w:tblStyleRowBandSize w:val="${table.rowBandSize}"/>` : '') + (table.colBandSize ? `<w:tblStyleColBandSize w:val="${table.colBandSize}"/>` : '') + bordersXml('tblBorders', table.borders);
+  const conditions = Object.entries(table.conditions ?? {})
+    .filter(([type]) => /^[A-Za-z0-9]+$/.test(type))
+    .map(([type, part]) => `<w:tblStylePr w:type="${type}">${rPr(part.text)}${tcPrXml(part)}</w:tblStylePr>`)
+    .join('');
+  return (tblPr ? `<w:tblPr>${tblPr}</w:tblPr>` : '') + tcPrXml(table.whole) + conditions;
+}
+
 const KINDS = new Set(['paragraph', 'character', 'table']);
 
 /** A style id that is safe to write and whose definition is usable, as the document's named styles hold it. */
@@ -103,7 +140,8 @@ function styleXml(id: string, style: DocNamedStyle, known: Set<string>): string 
     ref('link', style.kind === 'table' ? undefined : style.link) +
     (style.kind === 'table' ? '' : '<w:qFormat/>') +
     props +
-    rPr(style.text) +
+    rPr(style.kind === 'table' ? style.table?.whole?.text : style.text) +
+    (style.kind === 'table' ? tableStyleXml(style.table) : '') +
     '</w:style>'
   );
 }

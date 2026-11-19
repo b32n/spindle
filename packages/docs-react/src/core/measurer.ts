@@ -23,6 +23,7 @@ import {
   isRunContainingBlock,
   isTextRun,
 } from './flow-blocks';
+import { tableCellPlaces, cellBorderCss, cellLayoutCss } from './table-format';
 import {
   sanitizeHref,
   sanitizeImageSrc,
@@ -416,23 +417,18 @@ export class DomMeasurer {
     
     const rowHeights: number[] = [];
     
-    for (const row of block.rows) {
+    const places = tableCellPlaces(block);
+    for (const [rowIndex, row] of block.rows.entries()) {
       const tr = document.createElement('tr');
       
-      for (const cell of row.cells) {
+      for (const [cellIndex, cell] of row.cells.entries()) {
         const td = document.createElement('td');
-        let cellStyles = `
-          border: 1px solid #dadce0;
+        // Same borders, alignment and width as dom-painter, so the table measures at the height it is drawn at.
+        td.style.cssText = `
+          ${cellBorderCss(block, cell, places[rowIndex][cellIndex], 1)}
           padding: 4px 8px;
-          vertical-align: top;
+          ${cellLayoutCss(cell, 1)}
         `;
-        
-        // Apply column width if specified (use the same value as dom-painter)
-        if (cell.colwidth && cell.colwidth.length > 0 && cell.colwidth[0]) {
-          cellStyles += `width: ${cell.colwidth[0]}px;`;
-        }
-        
-        td.style.cssText = cellStyles;
         
         // Render cell content (simplified - just get text)
         for (const cellBlock of cell.blocks) {
