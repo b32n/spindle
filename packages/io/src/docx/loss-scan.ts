@@ -123,52 +123,6 @@ function extraSections(root: XmlNode[]): Item[] {
   );
 }
 
-const cellHasContent = (p: XmlNode) => {
-  let has = false;
-  walk([p], (n, tag) => {
-    if (tag === 'w:drawing' || tag === 'w:pict') has = true;
-    if (tag === 'w:t' && childrenOf(n).some((c) => String((c as Record<string, unknown>)['#text'] ?? '') !== '')) has = true;
-  });
-  return has;
-};
-
-/** Visits each table's own properties and rows, without descending into nested tables (those are visited as tables themselves). */
-function ownTableNodes(tbl: XmlNode, visit: (node: XmlNode, tag: string, path: readonly string[]) => void) {
-  walk(childrenOf(tbl), (n, tag, path) => visit(n, tag, path));
-}
-
-function tableDetectors(root: XmlNode[]): Item[] {
-  const tables: { node: XmlNode; nested: boolean }[] = [];
-  walk(root, (node, tag, path) => {
-    if (tag === 'w:tbl') tables.push({ node, nested: path.includes('w:tc') });
-  });
-
-  let nestedTables = 0;
-  let multiParagraphCells = 0;
-
-  for (const { node: tbl, nested } of tables) {
-    if (nested) nestedTables++;
-    // Anything below a nested w:tbl belongs to that table, not this one.
-    ownTableNodes(tbl, (n, tag, path) => {
-      if (path.includes('w:tbl')) return;
-      if (tag === 'w:tc') {
-        const paragraphs = findAll(childrenOf(n), 'w:p').filter(cellHasContent);
-        if (paragraphs.length > 1) multiParagraphCells++;
-      }
-    });
-  }
-
-  return [
-    ...item(
-      'docx.tableStructure',
-      'nested table(s) / multi-paragraph cell(s)',
-      nestedTables + multiParagraphCells,
-      'nested tables are dropped and only the first paragraph of a cell is kept',
-      new Map([...(nestedTables ? [['nested tables', nestedTables] as const] : []), ...(multiParagraphCells ? [['multi-paragraph cells', multiParagraphCells] as const] : [])])
-    ),
-  ];
-}
-
 function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
@@ -475,7 +429,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
   return [
     ...drawings,
     ...safe(() => extraSections(root)),
-    ...safe(() => tableDetectors(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root, evenAndOdd)),
     ...safe(() => fields(root)),

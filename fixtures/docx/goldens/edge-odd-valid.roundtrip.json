@@ -7,7 +7,7 @@
         "table": 3
       },
       "sections": 1,
-      "textChars": 2235
+      "textChars": 2236
     },
     "before": {
       "blocks": {
@@ -15,7 +15,7 @@
         "table": 3
       },
       "sections": 1,
-      "textChars": 2235
+      "textChars": 2236
     },
     "byField": {
       "added sections[].blocks[].colWidths": 1,

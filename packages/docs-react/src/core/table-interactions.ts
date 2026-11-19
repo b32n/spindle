@@ -245,10 +245,11 @@ export class TableInteractionManager {
     const containerRect = this.container.getBoundingClientRect();
     
     // Get column positions from first row
-    const firstRow = tableEl.querySelector('tr');
+    // `rows` and `cells` hold only this table's own, not those of tables nested in its cells
+    const firstRow = tableEl.rows[0];
     if (!firstRow) return;
     
-    const cells = firstRow.querySelectorAll('td, th');
+    const cells = Array.from(firstRow.cells);
     let accumulatedWidth = 0;
     
     cells.forEach((cell, index) => {
@@ -300,7 +301,7 @@ export class TableInteractionManager {
     const tableRect = tableEl.getBoundingClientRect();
     const containerRect = this.container.getBoundingClientRect();
     
-    const rows = tableEl.querySelectorAll('tr');
+    const rows = Array.from(tableEl.rows);
     let accumulatedHeight = 0;
     
     rows.forEach((row, index) => {
@@ -1069,9 +1070,9 @@ export class TableInteractionManager {
       const newWidth = Math.max(40, startSize + delta); // Minimum 40px width
       
       // Apply to all cells in this column
-      const rows = tableEl.querySelectorAll('tr');
+      const rows = Array.from(tableEl.rows);
       rows.forEach((row) => {
-        const cells = row.querySelectorAll('td, th');
+        const cells = Array.from(row.cells);
         if (cells[index]) {
           (cells[index] as HTMLElement).style.width = `${newWidth}px`;
         }
@@ -1080,7 +1081,7 @@ export class TableInteractionManager {
       const delta = e.clientY - startPos;
       const newHeight = Math.max(24, startSize + delta); // Minimum 24px height
       
-      const rows = tableEl.querySelectorAll('tr');
+      const rows = Array.from(tableEl.rows);
       if (rows[index]) {
         (rows[index] as HTMLElement).style.height = `${newHeight}px`;
       }
@@ -1115,10 +1116,10 @@ export class TableInteractionManager {
     
     if (type === 'column') {
       // Get the new width from the DOM (this is the rendered/scaled width)
-      const rows = tableEl.querySelectorAll('tr');
+      const rows = Array.from(tableEl.rows);
       if (rows.length === 0) return;
       
-      const cells = rows[0].querySelectorAll('td, th');
+      const cells = Array.from(rows[0].cells);
       if (!cells[index]) return;
       
       const renderedWidth = (cells[index] as HTMLElement).offsetWidth;

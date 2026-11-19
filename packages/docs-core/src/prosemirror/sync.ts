@@ -17,6 +17,7 @@ import type {
   TableCell,
   TableBorders,
   TableLook,
+  CellTextDirection,
   CellVerticalAlign,
   ListType,
   DynamicFieldType,
@@ -188,11 +189,11 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
               colwidth: cell.colwidth ?? null,
               borders: cell.borders ?? null,
               verticalAlign: cell.verticalAlign ?? null,
+              textDirection: cell.textDirection ?? null,
             },
-            content: [{
-              type: 'paragraph',
-              content: inlineContentToPm(cell.content, stylePool),
-            }],
+            content: cell.blocks && cell.blocks.length > 0
+              ? blocksToPmContent(cell.blocks, stylePool)
+              : [{ type: 'paragraph', content: inlineContentToPm(cell.content, stylePool) }],
           })),
         })),
       };
@@ -418,6 +419,26 @@ export function proseMirrorToDocument(
 }
 
 /**
+ * The content of a table cell: `content` is the inline content of its first paragraph that has any (what a cell of
+ * one paragraph holds), `blocks` the whole cell unless it is one paragraph.
+ */
+function pmCellContent(cellNode: PmNode, startIndex: number, stylePool?: TextStylePool): { content: InlineContent[]; blocks?: Block[] } {
+  const blocks: Block[] = [];
+  let previous: PmNode | undefined;
+  cellNode.forEach((child) => {
+    blocks.push(...pmNodeToBlocks(child, startIndex + blocks.length, stylePool, previous?.type.name === 'ordered_list'));
+    previous = child;
+  });
+  const inline = (block: Block | undefined): InlineContent[] => (block && 'content' in block ? block.content : []);
+  const paragraphs = blocks.filter((b) => b.type === 'paragraph' || b.type === 'heading' || b.type === 'list-item');
+  const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
+  // Bookmarks of the paragraphs before the first one with content stay in front of it
+  const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
+  const plain = blocks.length === 1 && blocks[0].type === 'paragraph';
+  return { content, ...(!plain && blocks.length > 0 ? { blocks } : {}) };
+}
+
+/**
  * Convert ProseMirror node to our block model
  * Returns an array because some nodes (like lists) expand to multiple blocks
  */
@@ -488,15 +509,11 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
       node.forEach((rowNode) => {
         const cells: TableCell[] = [];
         rowNode.forEach((cellNode) => {
-          let content: InlineContent[] = [];
-          cellNode.forEach((child) => {
-            if (child.type.name === 'paragraph') {
-              content = pmContentToInline(child, stylePool);
-            }
-          });
+          const { content, blocks } = pmCellContent(cellNode, startIndex, stylePool);
           cells.push({
             id: `cell_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             content,
+            ...(blocks ? { blocks } : {}),
             colspan: cellNode.attrs.colspan,
             rowspan: cellNode.attrs.rowspan,
             ...(cellNode.type.name === 'table_header' ? { isHeader: true } : {}),
@@ -505,6 +522,7 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
             ...(cellNode.attrs.colwidth ? { colwidth: cellNode.attrs.colwidth as number[] } : {}),
             ...(cellNode.attrs.borders ? { borders: cellNode.attrs.borders as TableBorders } : {}),
             ...(cellNode.attrs.verticalAlign ? { verticalAlign: cellNode.attrs.verticalAlign as CellVerticalAlign } : {}),
+            ...(cellNode.attrs.textDirection ? { textDirection: cellNode.attrs.textDirection as CellTextDirection } : {}),
           });
         });
         rows.push({
@@ -741,6 +759,17 @@ export function createPmDoc(json: PmNodeJSON): PmNode {
  * @param stylePool - Optional style pool for looking up styles by ID
  */
 export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNode {
+  const content = blocksToPmContent(blocks, stylePool);
+  const json = {
+    type: 'doc',
+    content: content.length > 0 ? content : [{ type: 'paragraph', content: [] }],
+  };
+  
+  return docsSchema.nodeFromJSON(json);
+}
+
+/** Blocks as ProseMirror node JSON, with consecutive list items grouped into lists (the content of a document or of a table cell). */
+function blocksToPmContent(blocks: Block[], stylePool?: TextStylePool): PmNodeJSON[] {
   const rawNodes = blocks
     .map(block => blockToPmNode(block, stylePool))
     .filter((node): node is PmNodeJSON => node !== null);
@@ -793,12 +822,7 @@ export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNod
   // Flush final list if any
   if (currentList) content.push(listNode(currentList));
   
-  const json = {
-    type: 'doc',
-    content: content.length > 0 ? content : [{ type: 'paragraph', content: [] }],
-  };
-  
-  return docsSchema.nodeFromJSON(json);
+  return content;
 }
 
 /**

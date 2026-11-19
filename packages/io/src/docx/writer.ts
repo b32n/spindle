@@ -21,6 +21,7 @@ import {
   PageOrientation,
   Paragraph,
   ShadingType,
+  TextDirection,
   Table,
   TableCell,
   TableRow,
@@ -116,13 +117,14 @@ function numberedReference(start: number): string {
 /** Every first number a numbered list in the document starts at, other than 1. */
 function numberedStarts(sections: DocSection[]): number[] {
   const starts = new Set<number>();
-  for (const section of sections) {
-    for (const block of section.blocks) {
-      if (block.type === 'listItem' && block.listType === 'numbered' && block.start !== undefined && block.start !== 1 && Number.isInteger(block.start) && block.start > 0) {
-        starts.add(block.start);
-      }
+  const visit = (block: DocBlock) => {
+    if (block.type === 'listItem' && block.listType === 'numbered' && block.start !== undefined && block.start !== 1 && Number.isInteger(block.start) && block.start > 0) {
+      starts.add(block.start);
+    } else if (block.type === 'table') {
+      for (const row of block.rows) for (const cell of row.cells) cell.blocks?.forEach(visit);
     }
-  }
+  };
+  for (const section of sections) section.blocks.forEach(visit);
   return [...starts];
 }
 
@@ -434,6 +436,16 @@ class DocxBuilder {
     }
   }
 
+  /** A cell's paragraphs and nested tables. A numbered list in a cell numbers on its own, and a cell must end with a paragraph. */
+  private buildCellChildren(cell: Extract<DocBlock, { type: 'table' }>['rows'][number]['cells'][number]): (Paragraph | Table)[] {
+    if (!cell.blocks || cell.blocks.length === 0) return [this.buildParagraph({}, this.buildRuns(cell.content))];
+    this.inNumberedRun = false;
+    const children = cell.blocks.map((b) => this.buildBlock(b));
+    this.inNumberedRun = false;
+    if (children[children.length - 1] instanceof Table) children.push(new Paragraph({}));
+    return children;
+  }
+
   private buildTable(block: Extract<DocBlock, { type: 'table' }>): Table {
     const { rows, colWidthsPx } = block;
     const tableRows = rows.map(
@@ -444,12 +456,13 @@ class DocxBuilder {
           children: row.cells.map((cell) => {
             const widthPx = cell.colwidthPx?.reduce((sum, w) => sum + w, 0);
             return new TableCell({
-              children: [this.buildParagraph({}, this.buildRuns(cell.content))],
+              children: this.buildCellChildren(cell),
               columnSpan: cell.colspan && cell.colspan > 1 ? cell.colspan : undefined,
               rowSpan: cell.rowspan && cell.rowspan > 1 ? cell.rowspan : undefined,
               ...(cell.backgroundColor && { shading: { type: ShadingType.CLEAR, color: 'auto', fill: cell.backgroundColor.replace('#', '').toUpperCase() } }),
               ...(cell.borders && { borders: cellBorders(cell.borders) }),
               ...(cell.verticalAlign && { verticalAlign: cell.verticalAlign }),
+              ...(cell.textDirection && { textDirection: cell.textDirection === 'btLr' ? TextDirection.BOTTOM_TO_TOP_LEFT_TO_RIGHT : TextDirection.TOP_TO_BOTTOM_RIGHT_TO_LEFT }),
               ...(widthPx && widthPx > 0 && { width: { size: pxToTwips(widthPx), type: WidthType.DXA } }),
             });
           }),

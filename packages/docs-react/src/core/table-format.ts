@@ -4,7 +4,7 @@
  * the height it is drawn at.
  */
 
-import type { TableBlock, TableBorder, TableBorders, TableCell } from './flow-blocks';
+import type { ListItemBlock, TableBlock, TableBorder, TableBorders, TableCell } from './flow-blocks';
 import { safeCssColor } from './sanitize';
 
 /** The line editor-made tables (no `borders` anywhere) show. */
@@ -79,4 +79,19 @@ export function cellLayoutCss(cell: TableCell, scale: number): string {
   const widths = cell.colwidth?.filter((w) => Number.isFinite(w) && w > 0);
   if (widths && widths.length > 0) css += `width: ${widths.reduce((sum, w) => sum + w, 0) * scale}px;`;
   return css;
+}
+
+/** Indent of a list item in a cell, in pixels: 24 per level, counting the first. */
+export function cellListIndent(item: ListItemBlock): number {
+  return 24 * (item.level + 1);
+}
+
+/** What a list item in a cell shows in front of its text. */
+export function cellListMarker(item: ListItemBlock): string {
+  return item.listType === 'bullet' ? '•\u00a0' : `${item.listIndex ?? 1}.\u00a0`;
+}
+
+/** True when a cell holds more than one plain paragraph: several blocks, a list, a nested table or an image. */
+export function isRichCell(cell: TableCell): boolean {
+  return cell.blocks.length > 1 || cell.blocks.some((b) => b.kind !== 'paragraph');
 }

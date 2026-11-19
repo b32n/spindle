@@ -96,6 +96,60 @@ describe('collab round-trip preserves table formatting', () => {
   });
 });
 
+describe('collab round-trip preserves table structure', () => {
+  const para = (id: string, text: string): Block => ({ id, type: 'paragraph', content: text ? [{ type: 'text', text }] : [] });
+  const cellOf = (extra: Partial<TableBlock['rows'][number]['cells'][number]> = {}) => ({ id: 'c', content: [], ...extra });
+  const tableOf = (cells: TableBlock['rows'][number]['cells'], id = 't'): TableBlock => ({ id, type: 'table', rows: [{ id: 'r', cells }] });
+  const cellsOf = (b: Block) => (b as TableBlock).rows[0].cells;
+
+  it('keeps the paragraphs of a cell and the first one with text as its content', () => {
+    const out = roundTrip([tableOf([cellOf({ content: [{ type: 'text', text: 'one' }], blocks: [para('a', 'one'), para('b', 'two'), para('c', '')] })])]);
+    const cell = cellsOf(out[0])[0];
+    expect(cell.content).toEqual([{ type: 'text', text: 'one' }]);
+    expect(cell.blocks?.map((b) => b.type)).toEqual(['paragraph', 'paragraph', 'paragraph']);
+    expect((cell.blocks?.[1] as { content: unknown }).content).toEqual([{ type: 'text', text: 'two' }]);
+  });
+
+  it('keeps paragraph formatting of the paragraphs in a multi-paragraph cell', () => {
+    const out = roundTrip([tableOf([cellOf({ blocks: [{ ...para('a', 'x'), alignment: 'center' } as Block, para('b', 'y')] })])]);
+    expect(cellsOf(out[0])[0].blocks?.[0]).toMatchObject({ alignment: 'center' });
+  });
+
+  it('keeps a cell of one plain paragraph as inline content only', () => {
+    const out = roundTrip([tableOf([cellOf({ content: [{ type: 'text', text: 'solo' }] })])]);
+    expect(cellsOf(out[0])[0].blocks).toBeUndefined();
+    expect(cellsOf(out[0])[0].content).toEqual([{ type: 'text', text: 'solo' }]);
+  });
+
+  it('keeps a table nested in a cell, three deep, with its own formatting', () => {
+    const innermost: TableBlock = { ...tableOf([cellOf({ content: [{ type: 'text', text: 'deep' }], backgroundColor: '#ffeeaa' })], 'i3'), borders: { top: { style: 'dotted' } } };
+    const middle = tableOf([cellOf({ blocks: [para('m', 'mid'), innermost, para('m2', '')] })], 'i2');
+    const outer = tableOf([cellOf({ blocks: [para('o', 'out'), middle, para('o2', '')] })], 'i1');
+    const out = roundTrip([outer]);
+    const middleOut = cellsOf(out[0])[0].blocks?.[1] as TableBlock;
+    const innerOut = cellsOf(middleOut)[0].blocks?.[1] as TableBlock;
+    expect(innerOut.type).toBe('table');
+    expect(innerOut.borders).toEqual({ top: { style: 'dotted' } });
+    expect(cellsOf(innerOut)[0]).toMatchObject({ backgroundColor: '#ffeeaa', content: [{ type: 'text', text: 'deep' }] });
+    expect(cellsOf(middleOut)[0].blocks?.map((b) => b.type)).toEqual(['paragraph', 'table', 'paragraph']);
+  });
+
+  it('keeps lists, headings and images in a cell', () => {
+    const li = (id: string, text: string, level = 0): Block => ({ id, type: 'list-item', listType: 'bullet', level, content: [{ type: 'text', text }] });
+    const image: Block = { id: 'img', type: 'image', src: 'data:image/png;base64,QQ==', width: 10, height: 20 };
+    const heading: Block = { id: 'h', type: 'heading', level: 2, content: [{ type: 'text', text: 'H' }] };
+    const out = roundTrip([tableOf([cellOf({ blocks: [heading, li('l1', 'a'), li('l2', 'b', 1), image] })])]);
+    expect(cellsOf(out[0])[0].blocks?.map((b) => b.type)).toEqual(['heading', 'list-item', 'list-item', 'image']);
+    expect((cellsOf(out[0])[0].blocks?.[2] as ListItemBlock).level).toBe(1);
+  });
+
+  it('keeps the text direction of a cell', () => {
+    const out = roundTrip([tableOf([cellOf({ textDirection: 'btLr' }), cellOf()])]);
+    expect(cellsOf(out[0])[0].textDirection).toBe('btLr');
+    expect(cellsOf(out[0])[1].textDirection).toBeUndefined();
+  });
+});
+
 describe('collab round-trip preserves inline content', () => {
   it('keeps inline images, dynamic fields, line breaks, and formatted links', () => {
     const para: Block = {

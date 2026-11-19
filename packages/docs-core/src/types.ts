@@ -311,9 +311,15 @@ export interface TableLook {
 
 export type CellVerticalAlign = 'top' | 'center' | 'bottom';
 
+/** Direction of the text in a cell when it is not horizontal (DOCX `w:textDirection`): bottom to top, or top to bottom. */
+export type CellTextDirection = 'btLr' | 'tbRl';
+
 export interface TableCell {
   id: string;
+  /** The cell's first paragraph with content (or its first paragraph). `blocks` holds the whole cell when it is more than one plain paragraph. */
   content: InlineContent[];
+  /** The whole content of a cell that has several blocks, a nested table, a list or a heading. Absent for a cell of one plain paragraph. */
+  blocks?: Block[];
   colspan?: number;
   rowspan?: number;
   styleId?: string;
@@ -321,6 +327,8 @@ export interface TableCell {
   /** The cell's own borders (with a table style's conditional borders already applied). */
   borders?: TableBorders;
   verticalAlign?: CellVerticalAlign;
+  /** Text direction when the text is not horizontal. Kept and exported; the editor shows the text horizontally. */
+  textDirection?: CellTextDirection;
   /** True for a header cell (`<th>`). */
   isHeader?: boolean;
   /** Per-column pixel widths for the columns this cell spans. */
