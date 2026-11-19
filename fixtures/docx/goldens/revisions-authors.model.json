@@ -65,6 +65,7 @@
                 "type": "text"
               },
               {
+                "commentThreadId": "thread-1",
                 "text": "by roughly ",
                 "type": "text"
               },
@@ -201,6 +202,7 @@
               },
               {
                 "bold": true,
+                "commentThreadId": "thread-2",
                 "text": "now bold",
                 "type": "text"
               },
@@ -267,6 +269,7 @@
           {
             "content": [
               {
+                "commentThreadId": "thread-3",
                 "text": "Order dredging equipment",
                 "type": "text"
               }
@@ -529,7 +532,86 @@
       }
     ],
     "textStylePool": {},
-    "threads": [],
+    "threads": [
+      {
+        "anchor": {
+          "quote": "by roughly "
+        },
+        "comments": [
+          {
+            "authorId": "Alice Archer",
+            "authorInitials": "AA",
+            "authorName": "Alice Archer",
+            "body": "Is the 2025 figure final? Please confirm with the harbourmaster.",
+            "createdAt": "2026-01-08T14:00:00Z",
+            "id": "comment-1"
+          },
+          {
+            "authorId": "Bram Keller",
+            "authorInitials": "BK",
+            "authorName": "Bram Keller",
+            "body": "Confirmed by phone on Monday, the number stands.",
+            "createdAt": "2026-01-09T14:00:00Z",
+            "id": "comment-2"
+          },
+          {
+            "authorId": "Chidi Okafor",
+            "authorInitials": "CO",
+            "authorName": "Chidi Okafor",
+            "body": "Thanks, I will cite the call in the footer.",
+            "createdAt": "2026-01-10T14:00:00Z",
+            "id": "comment-3"
+          }
+        ],
+        "createdAt": "2026-01-08T14:00:00Z",
+        "id": "thread-1",
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "quote": "now bold"
+        },
+        "comments": [
+          {
+            "authorId": "Dana Whitfield",
+            "authorInitials": "DW",
+            "authorName": "Dana Whitfield",
+            "body": "Bold here is for the board summary; please keep.",
+            "createdAt": "2026-01-09T14:00:00Z",
+            "id": "comment-4"
+          }
+        ],
+        "createdAt": "2026-01-09T14:00:00Z",
+        "id": "thread-2",
+        "status": "open"
+      },
+      {
+        "anchor": {
+          "quote": "Order dredging equipment"
+        },
+        "comments": [
+          {
+            "authorId": "Bram Keller",
+            "authorInitials": "BK",
+            "authorName": "Bram Keller",
+            "body": "Should the dredging item be first?",
+            "createdAt": "2026-01-10T14:00:00Z",
+            "id": "comment-5"
+          },
+          {
+            "authorId": "Alice Archer",
+            "authorInitials": "AA",
+            "authorName": "Alice Archer",
+            "body": "Yes; schedule risk is highest there.",
+            "createdAt": "2026-01-10T14:00:00Z",
+            "id": "comment-6"
+          }
+        ],
+        "createdAt": "2026-01-10T14:00:00Z",
+        "id": "thread-3",
+        "status": "open"
+      }
+    ],
     "title": "Revision review"
   },
   "importError": null,

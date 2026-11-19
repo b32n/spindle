@@ -19,6 +19,8 @@ export interface DocRunBase {
   color?: string;
   /** #rrggbb (rendered as a highlight — docx has no free-form run background). */
   backgroundColor?: string;
+  /** Id of the comment thread (see `DocCommentThread`) whose anchored range covers this run. */
+  commentThreadId?: string;
 }
 
 export interface DocTextRun extends DocRunBase {
@@ -111,6 +113,31 @@ export interface DocSection {
   footer?: DocHeaderFooter;
 }
 
+/** One comment of a thread: the root comment or a reply. */
+export interface DocComment {
+  /** Unique within the document (the source file's `w:id` on import). */
+  id: string;
+  /** Display name. */
+  author: string;
+  /** Stable identity of the author when the source records one (otherwise the display name). */
+  authorId?: string;
+  initials?: string;
+  /** ISO-8601 timestamp as written in the source (`w:date`). */
+  date?: string;
+  /** Plain text; paragraph breaks are `\n`. */
+  text: string;
+}
+
+/** A comment thread: `comments[0]` is the root, the rest are replies in order. */
+export interface DocCommentThread {
+  id: string;
+  /** `done` in Word's terms. */
+  resolved?: boolean;
+  /** Plain text of the anchored range (empty when the comment has no surviving anchor). */
+  quote: string;
+  comments: DocComment[];
+}
+
 export interface DocumentExportInput {
   title: string;
   sections: DocSection[];
@@ -125,6 +152,8 @@ export interface DocumentExportResult {
 export interface DocumentImportResult {
   title: string;
   sections: DocSection[];
+  /** Comment threads; the runs they are anchored to carry the matching `commentThreadId`. Absent when the file has none. */
+  comments?: DocCommentThread[];
   /** Non-fatal issues (unsupported feature, unparseable structure, etc.) — surfaced rather than silently dropped. */
   warnings: string[];
 }

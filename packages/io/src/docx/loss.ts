@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import { parseComments } from './comments';
 import { scanDocx } from './loss-scan';
 import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
 
@@ -42,7 +43,10 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
   add('docx.footnotes', 'footnote(s)', notes(footnotes), 'not imported');
   add('docx.endnotes', 'endnote(s)', notes(endnotes), 'not imported');
 
-  add('docx.comments', 'comment(s)', countMatches(await text('word/comments.xml'), /<w:comment[\s>/]/g), 'not imported');
+  // Comments are imported with their replies and anchors; only those in a damaged part are lost.
+  const commentsXml = await text('word/comments.xml');
+  const importedComments = parseComments({ comments: commentsXml }, []).threadOf.size;
+  add('docx.comments', 'comment(s)', Math.max(0, countMatches(commentsXml, /<w:comment[\s>/]/g) - importedComments), 'not imported (the comments part is damaged)');
   add('docx.textBoxes', 'text box(es)/shape(s)', countMatches(doc, /<w:txbxContent[\s>/]/g), 'their text is not imported');
   add('docx.equations', 'equation(s)', countMatches(doc, /<m:oMath[\s>/]/g), 'not imported');
   add('docx.embeddedObjects', 'embedded object(s)', countMatches(doc, /<w:object[\s>/]/g), 'not imported');

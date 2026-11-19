@@ -21,11 +21,35 @@
       "sections": 1,
       "textChars": 1419
     },
-    "byField": {},
+    "byField": {
+      "removed sections[].blocks[].content[].commentThreadId": 2,
+      "removed threads[]": 2
+    },
     "changed": 0,
-    "entries": [],
-    "removed": 0,
-    "total": 0,
+    "entries": [
+      {
+        "before": "\"thread-1\"",
+        "kind": "removed",
+        "path": "sections[0].blocks[3].content[2].commentThreadId"
+      },
+      {
+        "before": "\"thread-2\"",
+        "kind": "removed",
+        "path": "sections[0].blocks[4].content[0].commentThreadId"
+      },
+      {
+        "before": "{\"id\":\"thread-1\",\"anchor\":{\"quote\":\" hours\"},\"status\":\"open\",\"createdAt\":\"202...",
+        "kind": "removed",
+        "path": "threads[0]"
+      },
+      {
+        "before": "{\"id\":\"thread-2\",\"anchor\":{\"quote\":\"Fees are set annually\"},\"status\":\"open\",\"...",
+        "kind": "removed",
+        "path": "threads[1]"
+      }
+    ],
+    "removed": 4,
+    "total": 4,
     "truncated": false
   },
   "exportWarnings": [],

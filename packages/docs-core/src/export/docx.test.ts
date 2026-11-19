@@ -496,3 +496,61 @@ describe('tabs, line breaks and wrapped text through the editor API', () => {
     expect(documentXml).toContain('<w:br/>');
   });
 });
+
+describe('comments through the editor API', () => {
+  const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"';
+
+  async function withComments(): Promise<Uint8Array> {
+    const zip = await JSZip.loadAsync((await exportToDocx(docWith({}))).bytes);
+    zip.file(
+      'word/document.xml',
+      `<?xml version="1.0"?><w:document ${W}><w:body>` +
+        '<w:p><w:r><w:t xml:space="preserve">See </w:t></w:r><w:commentRangeStart w:id="1"/><w:r><w:t>this part</w:t></w:r><w:commentRangeEnd w:id="1"/><w:r><w:commentReference w:id="1"/></w:r></w:p>' +
+        '<w:sectPr/></w:body></w:document>'
+    );
+    zip.file(
+      'word/comments.xml',
+      `<w:comments ${W}>` +
+        '<w:comment w:id="1" w:author="Alice" w:date="2026-01-08T14:00:00Z" w:initials="AA"><w:p w14:paraId="A1"><w:r><w:t>Root</w:t></w:r></w:p></w:comment>' +
+        '<w:comment w:id="2" w:author="Bob" w:date="2026-01-09T14:00:00Z"><w:p w14:paraId="B2"><w:r><w:t>Reply</w:t></w:r></w:p></w:comment>' +
+        '<w:comment w:id="3" w:author="Cy"><w:p><w:r><w:t>Floating</w:t></w:r></w:p></w:comment></w:comments>'
+    );
+    zip.file('word/commentsExtended.xml', `<w15:commentsEx ${W}><w15:commentEx w15:paraId="A1" w15:done="1"/><w15:commentEx w15:paraId="B2" w15:paraIdParent="A1" w15:done="0"/></w15:commentsEx>`);
+    return zip.generateAsync({ type: 'uint8array' });
+  }
+
+  it('fills the comment store and tags the anchored run with the thread id', async () => {
+    const doc = docWith({});
+    const { warnings } = await importFromDocx(await withComments(), doc);
+    expect(warnings).toEqual([]);
+
+    const data = doc.getData();
+    const block = data.sections[0].blocks[0];
+    expect(block.type === 'paragraph' && block.content.map((c) => (c.type === 'text' ? [c.text, c.commentThreadId] : []))).toEqual([
+      ['See ', undefined],
+      ['this part', 'docx-thread-1'],
+    ]);
+
+    const threads = doc.getComments().getThreads();
+    expect(threads.map((t) => t.id)).toEqual(['docx-thread-1', 'docx-thread-3']);
+    expect(threads[0]).toMatchObject({
+      anchor: { quote: 'this part' },
+      status: 'resolved',
+      createdAt: '2026-01-08T14:00:00Z',
+      comments: [
+        { id: 'docx-comment-1', authorId: 'Alice', authorName: 'Alice', authorInitials: 'AA', body: 'Root', createdAt: '2026-01-08T14:00:00Z' },
+        { id: 'docx-comment-2', authorName: 'Bob', body: 'Reply', createdAt: '2026-01-09T14:00:00Z' },
+      ],
+    });
+    expect(threads[1]).toMatchObject({ status: 'open', anchor: { quote: '' }, createdAt: '1970-01-01T00:00:00.000Z' });
+    expect(data.threads).toHaveLength(2);
+  });
+
+  it('leaves no threads on a document without comments, replacing those of the previous content', async () => {
+    const doc = docWith({});
+    await importFromDocx(await withComments(), doc);
+    expect(doc.getComments().getThreads()).toHaveLength(2);
+    await importFromDocx((await exportToDocx(docWith({}))).bytes, doc);
+    expect(doc.getComments().getThreads()).toEqual([]);
+  });
+});

@@ -27,7 +27,7 @@ export function digestDataUrl(src: string): string {
 
 /**
  * Turn a docs-core `DocumentData` into a snapshot-stable value: ids become sequential placeholders
- * in document order (`section-1`, `block-1`, `row-1`, `cell-1`, ...), style-pool keys become
+ * in document order (`section-1`, `block-1`, `row-1`, `cell-1`, ...), comment-thread references follow their thread, style-pool keys become
  * `text-style-N` / `paragraph-style-N` in first-reference order (unreferenced entries follow in
  * content order), volatile fields (document id, timestamps) are dropped, and data-URL image sources
  * are replaced by a digest. Key order is not touched here; `stableStringify` sorts keys.
@@ -42,6 +42,13 @@ export function normalizeModel(data: unknown): Json {
 
   const counters: Record<string, number> = {};
   const nextId = (kind: string) => `${kind}-${(counters[kind] = (counters[kind] ?? 0) + 1)}`;
+  // A run's `commentThreadId` points at a thread: rename it to the placeholder that thread gets below.
+  const threadIds = new Map<string, string>();
+  if (Array.isArray(root.threads)) {
+    root.threads.forEach((t, i) => {
+      if (isObj(t) && typeof t.id === 'string') threadIds.set(t.id, `thread-${i + 1}`);
+    });
+  }
   const textPool = new PoolRenamer(root.textStylePool, 'text-style');
   const paragraphPool = new PoolRenamer(root.paragraphStylePool, 'paragraph-style');
 
@@ -56,6 +63,7 @@ export function normalizeModel(data: unknown): Json {
       const inline = value.type === 'text' || value.type === 'link' || value.type === 'dynamicField';
       value.styleId = (inline ? textPool : paragraphPool).rename(value.styleId);
     }
+    if (typeof value.commentThreadId === 'string') value.commentThreadId = threadIds.get(value.commentThreadId) ?? 'thread-unknown';
     if (typeof value.src === 'string' && value.src.startsWith('data:')) value.src = digestDataUrl(value.src);
     for (const [key, child] of Object.entries(value)) {
       if (key === 'textStylePool' || key === 'paragraphStylePool') continue;

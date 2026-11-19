@@ -24,12 +24,6 @@
       "label": "multi-column section(s)"
     },
     {
-      "count": 2,
-      "effect": "not imported",
-      "id": "docx.comments",
-      "label": "comment(s)"
-    },
-    {
       "count": 21,
       "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
       "id": "docx.contentControls",

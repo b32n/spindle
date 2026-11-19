@@ -82,6 +82,14 @@ describe('normalizeModel', () => {
     expect(out).not.toHaveProperty('textStylePool');
   });
 
+  it('renames a run\'s comment thread reference to the placeholder of its thread', () => {
+    const out = normalizeModel({
+      sections: [{ id: 's', blocks: [{ id: 'b', type: 'paragraph', content: [{ type: 'text', text: 'a', commentThreadId: 'zz' }, { type: 'text', text: 'b', commentThreadId: 'aa' }, { type: 'text', text: 'c', commentThreadId: 'gone' }] }] }],
+      threads: [{ id: 'aa', comments: [] }, { id: 'zz', comments: [] }],
+    });
+    expect([0, 1, 2].map((i) => get(out, `sections.0.blocks.0.content.${i}.commentThreadId`))).toEqual(['thread-2', 'thread-1', 'thread-unknown']);
+  });
+
   it('keeps references to styles that are not in the pool consistent', () => {
     const out = normalizeModel({ sections: [{ id: 's', blocks: [{ id: 'b', type: 'paragraph', styleId: 'ghost', content: [] }] }], paragraphStylePool: {} });
     expect(get(out, 'sections.0.blocks.0.styleId')).toBe('paragraph-style-1');

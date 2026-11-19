@@ -21,11 +21,45 @@
       "sections": 1,
       "textChars": 1492
     },
-    "byField": {},
+    "byField": {
+      "removed sections[].blocks[].content[].commentThreadId": 3,
+      "removed threads[]": 3
+    },
     "changed": 0,
-    "entries": [],
-    "removed": 0,
-    "total": 0,
+    "entries": [
+      {
+        "before": "\"thread-1\"",
+        "kind": "removed",
+        "path": "sections[0].blocks[3].content[3].commentThreadId"
+      },
+      {
+        "before": "\"thread-2\"",
+        "kind": "removed",
+        "path": "sections[0].blocks[13].content[1].commentThreadId"
+      },
+      {
+        "before": "\"thread-3\"",
+        "kind": "removed",
+        "path": "sections[0].blocks[17].content[0].commentThreadId"
+      },
+      {
+        "before": "{\"id\":\"thread-1\",\"anchor\":{\"quote\":\"by roughly \"},\"status\":\"open\",\"createdAt\"...",
+        "kind": "removed",
+        "path": "threads[0]"
+      },
+      {
+        "before": "{\"id\":\"thread-2\",\"anchor\":{\"quote\":\"now bold\"},\"status\":\"open\",\"createdAt\":\"2...",
+        "kind": "removed",
+        "path": "threads[1]"
+      },
+      {
+        "before": "{\"id\":\"thread-3\",\"anchor\":{\"quote\":\"Order dredging equipment\"},\"status\":\"open...",
+        "kind": "removed",
+        "path": "threads[2]"
+      }
+    ],
+    "removed": 6,
+    "total": 6,
     "truncated": false
   },
   "exportWarnings": [],
