@@ -133,7 +133,7 @@ describe('detectDocxLoss', () => {
         '</w:body>',
         '<w:p><w:ins w:id="1"><w:r><w:t>new</w:t></w:r></w:ins><w:del w:id="2"><w:r><w:delText>old</w:delText></w:r></w:del></w:p>' +
           '<w:sdt><w:sdtContent><w:p><w:r><w:t>cc</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
-          '<w:p><w:r><w:drawing><wp:anchor/></w:drawing></w:r></w:p>' +
+          '<w:p><w:r><w:drawing><wp:anchor><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"/></a:graphic></wp:anchor></w:drawing></w:r></w:p>' +
           '<w:p><w:r><w:pict><w:txbxContent><w:p/></w:txbxContent></w:pict></w:r></w:p>' +
           '<w:p><m:oMath/></w:p>' +
           '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TOC \\o "1-3" </w:instrText></w:r></w:p>' +

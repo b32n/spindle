@@ -2,6 +2,24 @@
   "format": "docx",
   "items": [
     {
+      "count": 2,
+      "effect": "shown as a normal paragraph",
+      "id": "docx.dropCaps",
+      "label": "drop cap(s)"
+    },
+    {
+      "count": 1,
+      "effect": "not applied (lines are broken without hyphenation)",
+      "id": "docx.hyphenation",
+      "label": "automatic hyphenation setting"
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.lineNumbers",
+      "label": "section(s) with line numbering"
+    },
+    {
       "count": 17,
       "effect": "the style's formatting is not applied and its name is not kept",
       "id": "docx.namedStyles",
@@ -11,6 +29,12 @@
         "Subtitle ×1",
         "Title ×1"
       ]
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.pageBorders",
+      "label": "section(s) with page borders"
     },
     {
       "count": 4,
@@ -32,6 +56,26 @@
         "soft hyphen ×3",
         "non-breaking hyphen ×1"
       ]
+    },
+    {
+      "count": 9,
+      "effect": "not imported (tabs use default stops)",
+      "id": "docx.tabStops",
+      "label": "custom tab stop(s)",
+      "where": [
+        "dot leader ×3",
+        "underscore leader ×2",
+        "heavy leader ×1",
+        "hyphen leader ×1",
+        "middleDot leader ×1",
+        "no leader ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.watermarks",
+      "label": "watermark(s)"
     }
   ]
 }

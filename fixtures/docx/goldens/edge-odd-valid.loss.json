@@ -2,16 +2,16 @@
   "format": "docx",
   "items": [
     {
+      "count": 1,
+      "effect": "not imported",
+      "id": "docx.altChunk",
+      "label": "embedded alternative-format chunk(s)"
+    },
+    {
       "count": 13,
       "effect": "their content is not imported",
       "id": "docx.contentControls",
       "label": "content control(s)"
-    },
-    {
-      "count": 1,
-      "effect": "not imported (only inline images are)",
-      "id": "docx.floatingImages",
-      "label": "floating image(s)"
     },
     {
       "count": 15,

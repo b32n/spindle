@@ -12,7 +12,7 @@
       ]
     },
     {
-      "count": 6,
+      "count": 4,
       "effect": "not imported",
       "id": "docx.charts",
       "label": "chart(s)/diagram(s)"
@@ -61,7 +61,7 @@
       ]
     },
     {
-      "count": 6,
+      "count": 5,
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
       "label": "floating image(s)"
@@ -71,6 +71,17 @@
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
+    },
+    {
+      "count": 3,
+      "effect": "their displayed value is dropped (also counted under docx.fields)",
+      "id": "docx.legacyForms",
+      "label": "legacy form field(s)",
+      "where": [
+        "FORMCHECKBOX ×1",
+        "FORMDROPDOWN ×1",
+        "FORMTEXT ×1"
+      ]
     },
     {
       "count": 86,
@@ -89,6 +100,12 @@
         "footnote reference ×1",
         "TOC Heading ×1"
       ]
+    },
+    {
+      "count": 1,
+      "effect": "their text is not imported",
+      "id": "docx.smartTags",
+      "label": "smart tag(s)"
     },
     {
       "count": 12,

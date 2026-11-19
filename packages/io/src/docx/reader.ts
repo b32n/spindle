@@ -11,17 +11,8 @@ import type {
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
 
-import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, type XmlNode } from './xml-tree';
-
-/** Depth-first search for the first descendant with the given tag, regardless of exact nesting path (drawing markup nests several levels deep and the path is more than we want to hard-code). */
-function findDeep(node: XmlNode, tag: string): XmlNode | undefined {
-  for (const child of childrenOf(node)) {
-    if (tagOf(child) === tag) return child;
-    const found = findDeep(child, tag);
-    if (found) return found;
-  }
-  return undefined;
-}
+import { drawingKind, type DrawingKind } from './drawing-kind';
+import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
 /** Depth-first concatenation of every #text leaf under a node (a run's <w:t>, a field's cached-result text, ...). */
 function textOf(node: XmlNode): string {
@@ -283,8 +274,6 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
 
 const EMU_TO_PX = 1 / 9525; // 914400 EMU/inch, 96px/inch
 
-type DrawingKind = 'picture' | 'chart' | 'diagram' | 'shape' | 'embeddedObject' | 'unknown';
-
 const DRAWING_KIND_WARNINGS: Record<Exclude<DrawingKind, 'picture'>, string> = {
   chart: 'A chart was not imported — charts are not supported yet.',
   diagram: 'A SmartArt diagram was not imported — diagrams are not supported yet.',
@@ -292,21 +281,6 @@ const DRAWING_KIND_WARNINGS: Record<Exclude<DrawingKind, 'picture'>, string> = {
   embeddedObject: 'An embedded object preview was not imported — embedded objects are not supported yet.',
   unknown: 'A drawing object of an unsupported kind was not imported.',
 };
-
-/** Classifies a <w:drawing> by its <a:graphicData uri="...">, which says what the drawing really is. A drawing with no graphicData that still carries a blip is treated as a picture. */
-function drawingKind(drawingNode: XmlNode): DrawingKind {
-  const graphicData = findDeep(drawingNode, 'a:graphicData');
-  const uri = (graphicData ? attrsOf(graphicData)['@_uri'] : undefined)?.toLowerCase() ?? '';
-  if (uri.endsWith('/drawingml/2006/picture')) return 'picture';
-  if (uri.includes('/chart')) return 'chart'; // .../drawingml/2006/chart, .../drawing/2014/chartex
-  if (uri.endsWith('/drawingml/2006/diagram')) return 'diagram';
-  if (uri.includes('wordprocessingshape') || uri.includes('wordprocessinggroup') || uri.includes('wordprocessingcanvas') || uri.endsWith('/drawingml/2006/lockedcanvas')) {
-    return 'shape';
-  }
-  if (/\/ole(\/|$)/.test(uri) || (graphicData && findDeep(graphicData, 'o:OLEObject'))) return 'embeddedObject';
-  if (!uri && findDeep(drawingNode, 'a:blip')) return 'picture';
-  return 'unknown';
-}
 
 /**
  * A <w:drawing> run child. Only inline pictures (<wp:inline> + <a:blip r:embed>) become images. Anchored

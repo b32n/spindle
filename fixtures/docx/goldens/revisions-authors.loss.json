@@ -8,6 +8,16 @@
       "label": "comment(s)"
     },
     {
+      "count": 5,
+      "effect": "the change history is dropped; the current formatting is imported",
+      "id": "docx.formattingRevisions",
+      "label": "tracked formatting change(s)",
+      "where": [
+        "rPrChange ×3",
+        "pPrChange ×2"
+      ]
+    },
+    {
       "count": 21,
       "effect": "the style's formatting is not applied and its name is not kept",
       "id": "docx.namedStyles",
@@ -41,6 +51,12 @@
       "effect": "their text is not imported",
       "id": "docx.trackedInsertions",
       "label": "tracked insertion(s)"
+    },
+    {
+      "count": 4,
+      "effect": "their text is not imported",
+      "id": "docx.trackedMoves",
+      "label": "tracked move(s)"
     }
   ]
 }

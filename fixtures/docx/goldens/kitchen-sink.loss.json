@@ -12,7 +12,7 @@
       ]
     },
     {
-      "count": 6,
+      "count": 4,
       "effect": "not imported",
       "id": "docx.charts",
       "label": "chart(s)/diagram(s)"
@@ -34,6 +34,12 @@
       "effect": "their content is not imported",
       "id": "docx.contentControls",
       "label": "content control(s)"
+    },
+    {
+      "count": 2,
+      "effect": "shown as a normal paragraph",
+      "id": "docx.dropCaps",
+      "label": "drop cap(s)"
     },
     {
       "count": 1,
@@ -79,7 +85,7 @@
       ]
     },
     {
-      "count": 6,
+      "count": 5,
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
       "label": "floating image(s)"
@@ -91,6 +97,15 @@
       "label": "footnote(s)"
     },
     {
+      "count": 1,
+      "effect": "the change history is dropped; the current formatting is imported",
+      "id": "docx.formattingRevisions",
+      "label": "tracked formatting change(s)",
+      "where": [
+        "rPrChange ×1"
+      ]
+    },
+    {
       "count": 4,
       "effect": "only the first header/footer reference of each section is used, as its default header/footer",
       "id": "docx.headerFooterVariants",
@@ -100,6 +115,23 @@
         "even-page reference ×2",
         "first-page header/footer (titlePg) ×1",
         "first-page reference ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "not applied (lines are broken without hyphenation)",
+      "id": "docx.hyphenation",
+      "label": "automatic hyphenation setting"
+    },
+    {
+      "count": 3,
+      "effect": "their displayed value is dropped (also counted under docx.fields)",
+      "id": "docx.legacyForms",
+      "label": "legacy form field(s)",
+      "where": [
+        "FORMCHECKBOX ×1",
+        "FORMDROPDOWN ×1",
+        "FORMTEXT ×1"
       ]
     },
     {
@@ -130,6 +162,23 @@
         "keep with next/lines ×2",
         "line spacing ×2"
       ]
+    },
+    {
+      "count": 23,
+      "effect": "the direction is not kept",
+      "id": "docx.rtl",
+      "label": "right-to-left setting(s)",
+      "where": [
+        "run direction ×13",
+        "paragraph direction ×9",
+        "table direction ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "the base text and reading marks are not imported",
+      "id": "docx.ruby",
+      "label": "ruby annotation(s)"
     },
     {
       "count": 3,
@@ -183,6 +232,20 @@
       ]
     },
     {
+      "count": 9,
+      "effect": "not imported (tabs use default stops)",
+      "id": "docx.tabStops",
+      "label": "custom tab stop(s)",
+      "where": [
+        "dot leader ×3",
+        "underscore leader ×2",
+        "heavy leader ×1",
+        "hyphen leader ×1",
+        "middleDot leader ×1",
+        "no leader ×1"
+      ]
+    },
+    {
       "count": 5,
       "effect": "their text is not imported",
       "id": "docx.textBoxes",
@@ -199,6 +262,12 @@
       "effect": "their text is not imported",
       "id": "docx.trackedInsertions",
       "label": "tracked insertion(s)"
+    },
+    {
+      "count": 2,
+      "effect": "their text is not imported",
+      "id": "docx.trackedMoves",
+      "label": "tracked move(s)"
     }
   ]
 }
