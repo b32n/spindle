@@ -138,16 +138,6 @@
       "label": "extra section(s)"
     },
     {
-      "count": 6,
-      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
-      "id": "docx.tableStructure",
-      "label": "nested table(s) / multi-paragraph cell(s)",
-      "where": [
-        "multi-paragraph cells ×4",
-        "nested tables ×2"
-      ]
-    },
-    {
       "count": 9,
       "effect": "not imported (tabs use default stops)",
       "id": "docx.tabStops",

@@ -16,10 +16,11 @@ import {
   HeadingBlock,
   ListItemBlock,
   TableBlock,
+  TableCell,
   ImageBlock,
   isRunContainingBlock,
 } from './flow-blocks';
-import { tableCellPlaces, cellBorderCss, cellLayoutCss } from './table-format';
+import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
 import { DocumentLayout, PageLayout, PageFragment, PageConfig } from './true-layout-engine';
 import {
@@ -1235,14 +1236,17 @@ export class DomPainter {
     _fragment: PageFragment
   ): void {
     const data = this.blockLookup.get(block.id);
-    const tablePmPos = data?.pmPos;
-    
+    container.appendChild(this.buildTableElement(block, data?.pmPos, false));
+  }
+
+  /** A table as DOM; a table nested in a cell has no margin around it and takes its position from the block itself. */
+  private buildTableElement(block: TableBlock, tablePmPos: { start: number; end: number } | undefined, nested: boolean): HTMLTableElement {
     const table = document.createElement('table');
-    table.className = 'table-block';
+    table.className = nested ? 'table-block nested-table' : 'table-block';
     table.style.cssText = `
       border-collapse: collapse;
       width: 100%;
-      margin: ${16 * this.config.scale}px 0;
+      margin: ${nested ? 0 : 16 * this.config.scale}px 0;
     `;
     
     // Add PM position data for the table
@@ -1278,94 +1282,7 @@ export class DomPainter {
           td.dataset.pmEnd = String(cell.pmEnd);
         }
         
-        // Render cell content with PM positions
-        let charOffset = 0;
-        for (const cellBlock of cell.blocks) {
-          if (isRunContainingBlock(cellBlock)) {
-            const p = document.createElement('p');
-            p.className = 'cell-paragraph';
-            
-            // Get paragraph attributes including alignment
-            const attrs = cellBlock.attrs || {};
-            p.style.margin = '0';
-            p.style.minHeight = '1em';
-            p.style.textAlign = safeCssKeyword(attrs.alignment) || 'left';
-            
-            // Calculate PM position for this paragraph within the cell
-            // Cell structure: cell_start + 1 (enter cell) + paragraph content
-            const paragraphPmStart = cell.pmStart !== undefined 
-              ? cell.pmStart + 1 + charOffset 
-              : undefined;
-            
-            // Render runs with PM position tracking
-            if (paragraphPmStart !== undefined) {
-              let runCharOffset = 0;
-              for (const run of cellBlock.runs) {
-                if (run.kind === 'text') {
-                  const span = document.createElement('span');
-                  span.textContent = run.text;
-                  span.style.cssText = this.getRunStyles(run);
-                  
-                  // Add PM position for this span
-                  const spanStart = paragraphPmStart + 1 + runCharOffset; // +1 to enter paragraph
-                  const spanEnd = spanStart + run.text.length;
-                  span.dataset.pmStart = String(spanStart);
-                  span.dataset.pmEnd = String(spanEnd);
-                  runCharOffset += run.text.length;
-
-                  this.applyCommentDecoration(span, run);
-                  p.appendChild(span);
-                } else if (run.kind === 'link') {
-                  // A link run must render as an anchor — the previous loop only
-                  // handled text/lineBreak, so links in a cell rendered as nothing.
-                  const a = document.createElement('a');
-                  a.textContent = run.text;
-                  a.href = sanitizeHref(run.href);
-                  a.style.cssText = `color: ${safeCssColor(run.color) || '#1a73e8'}; text-decoration: underline;${run.bold ? ' font-weight: bold;' : ''}${run.italic ? ' font-style: italic;' : ''}`;
-                  const linkStart = paragraphPmStart + 1 + runCharOffset;
-                  a.dataset.pmStart = String(linkStart);
-                  a.dataset.pmEnd = String(linkStart + run.text.length);
-                  runCharOffset += run.text.length;
-                  this.applyCommentDecoration(a, run);
-                  p.appendChild(a);
-                } else if (run.kind === 'image') {
-                  const img = document.createElement('img');
-                  img.src = sanitizeImageSrc(run.src);
-                  img.alt = run.alt || '';
-                  img.width = run.width * this.config.scale;
-                  img.height = run.height * this.config.scale;
-                  runCharOffset += 1; // an inline image is one PM position
-                  p.appendChild(img);
-                } else if (run.kind === 'lineBreak') {
-                  p.appendChild(document.createElement('br'));
-                  runCharOffset += 1; // a hard break is one PM position — advance,
-                  // or every subsequent cell's PM positions drift by one.
-                }
-              }
-              
-              // Add PM positions to the paragraph
-              p.dataset.pmStart = String(paragraphPmStart);
-              p.dataset.pmEnd = String(paragraphPmStart + 1 + runCharOffset + 1); // +1 enter, +1 exit
-              
-              charOffset += runCharOffset + 2; // paragraph nodeSize
-            } else {
-              // Fallback without PM positions
-              this.renderRuns(p, cellBlock.runs);
-            }
-            
-            // If paragraph is empty, add zero-width space
-            if (p.childNodes.length === 0) {
-              p.innerHTML = '&#8203;';
-              // Still set PM positions for empty paragraphs
-              if (cell.pmStart !== undefined) {
-                p.dataset.pmStart = String(cell.pmStart + 1);
-                p.dataset.pmEnd = String(cell.pmStart + 3); // Empty paragraph is 2 nodeSize
-              }
-            }
-            
-            td.appendChild(p);
-          }
-        }
+        this.renderCellBlocks(td, cell);
         
         // If cell is empty, ensure it has at least some content for clicking
         if (td.childNodes.length === 0) {
@@ -1389,7 +1306,115 @@ export class DomPainter {
       table.appendChild(tr);
     }
     
-    container.appendChild(table);
+    return table;
+  }
+
+  /** The content of a cell with PM positions: paragraphs, headings and list items, nested tables and images. */
+  private renderCellBlocks(td: HTMLElement, cell: TableCell): void {
+    let charOffset = 0;
+    for (const cellBlock of cell.blocks) {
+      if (isRunContainingBlock(cellBlock)) {
+        const p = document.createElement('p');
+        p.className = 'cell-paragraph';
+
+        // Get paragraph attributes including alignment
+        const attrs = cellBlock.attrs || {};
+        p.style.margin = '0';
+        p.style.minHeight = '1em';
+        p.style.textAlign = safeCssKeyword(attrs.alignment) || 'left';
+        if (cellBlock.kind === 'listItem') p.style.paddingLeft = `${cellListIndent(cellBlock) * this.config.scale}px`;
+
+        // PM position of the paragraph: recorded on the block, else counted from the start of the cell
+        // (cell start + 1 to enter it, then the paragraphs before this one)
+        const paragraphPmStart = cellBlock.pmStart ?? (cell.pmStart !== undefined ? cell.pmStart + 1 + charOffset : undefined);
+
+        // A list item shows its bullet or number in front of the text
+        if (cellBlock.kind === 'listItem') p.appendChild(document.createTextNode(cellListMarker(cellBlock)));
+
+        // Render runs with PM position tracking
+        if (paragraphPmStart !== undefined) {
+          let runCharOffset = 0;
+          for (const run of cellBlock.runs) {
+            if (run.kind === 'text') {
+              const span = document.createElement('span');
+              span.textContent = run.text;
+              span.style.cssText = this.getRunStyles(run);
+
+              // Add PM position for this span
+              const spanStart = paragraphPmStart + 1 + runCharOffset; // +1 to enter paragraph
+              const spanEnd = spanStart + run.text.length;
+              span.dataset.pmStart = String(spanStart);
+              span.dataset.pmEnd = String(spanEnd);
+              runCharOffset += run.text.length;
+
+              this.applyCommentDecoration(span, run);
+              p.appendChild(span);
+            } else if (run.kind === 'link') {
+              // A link run must render as an anchor — the previous loop only
+              // handled text/lineBreak, so links in a cell rendered as nothing.
+              const a = document.createElement('a');
+              a.textContent = run.text;
+              a.href = sanitizeHref(run.href);
+              a.style.cssText = `color: ${safeCssColor(run.color) || '#1a73e8'}; text-decoration: underline;${run.bold ? ' font-weight: bold;' : ''}${run.italic ? ' font-style: italic;' : ''}`;
+              const linkStart = paragraphPmStart + 1 + runCharOffset;
+              a.dataset.pmStart = String(linkStart);
+              a.dataset.pmEnd = String(linkStart + run.text.length);
+              runCharOffset += run.text.length;
+              this.applyCommentDecoration(a, run);
+              p.appendChild(a);
+            } else if (run.kind === 'image') {
+              const img = document.createElement('img');
+              img.src = sanitizeImageSrc(run.src);
+              img.alt = run.alt || '';
+              img.width = run.width * this.config.scale;
+              img.height = run.height * this.config.scale;
+              runCharOffset += 1; // an inline image is one PM position
+              p.appendChild(img);
+            } else if (run.kind === 'lineBreak') {
+              p.appendChild(document.createElement('br'));
+              runCharOffset += 1; // a hard break is one PM position — advance,
+              // or every subsequent cell's PM positions drift by one.
+            }
+          }
+
+          // Add PM positions to the paragraph
+          p.dataset.pmStart = String(paragraphPmStart);
+          p.dataset.pmEnd = String(paragraphPmStart + 1 + runCharOffset + 1); // +1 enter, +1 exit
+
+          charOffset += runCharOffset + 2; // paragraph nodeSize
+        } else {
+          // Fallback without PM positions
+          this.renderRuns(p, cellBlock.runs);
+        }
+
+        // If paragraph is empty, add zero-width space
+        if (!p.querySelector('span, a, img, br')) {
+          p.appendChild(document.createTextNode('\u200b'));
+          // Still set PM positions for empty paragraphs
+          if (paragraphPmStart !== undefined) {
+            p.dataset.pmStart = String(paragraphPmStart);
+            p.dataset.pmEnd = String(paragraphPmStart + 2); // Empty paragraph is 2 nodeSize
+          }
+        }
+
+        td.appendChild(p);
+      } else if (cellBlock.kind === 'table') {
+        const pmPos = cellBlock.pmStart !== undefined && cellBlock.pmEnd !== undefined ? { start: cellBlock.pmStart, end: cellBlock.pmEnd } : undefined;
+        td.appendChild(this.buildTableElement(cellBlock, pmPos, true));
+      } else if (cellBlock.kind === 'image') {
+        const img = document.createElement('img');
+        img.src = sanitizeImageSrc(cellBlock.src);
+        img.alt = cellBlock.alt || '';
+        img.width = cellBlock.width * this.config.scale;
+        img.height = cellBlock.height * this.config.scale;
+        img.style.display = 'block';
+        if (cellBlock.pmStart !== undefined && cellBlock.pmEnd !== undefined) {
+          img.dataset.pmStart = String(cellBlock.pmStart);
+          img.dataset.pmEnd = String(cellBlock.pmEnd);
+        }
+        td.appendChild(img);
+      }
+    }
   }
   
   /**

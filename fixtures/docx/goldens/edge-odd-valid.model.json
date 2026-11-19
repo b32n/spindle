@@ -491,6 +491,13 @@
                     "colwidth": [
                       66.67
                     ],
+                    "content": [],
+                    "id": "cell-4"
+                  },
+                  {
+                    "colwidth": [
+                      66.67
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -499,27 +506,20 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-4"
-                  },
-                  {
-                    "colwidth": [
-                      66.67
-                    ],
-                    "content": [],
                     "id": "cell-5"
-                  }
-                ],
-                "id": "row-3"
-              },
-              {
-                "cells": [
+                  },
                   {
                     "colwidth": [
                       66.67
                     ],
                     "content": [],
                     "id": "cell-6"
-                  },
+                  }
+                ],
+                "id": "row-3"
+              },
+              {
+                "cells": [
                   {
                     "colwidth": [
                       66.67
@@ -533,6 +533,13 @@
                     ],
                     "content": [],
                     "id": "cell-8"
+                  },
+                  {
+                    "colwidth": [
+                      66.67
+                    ],
+                    "content": [],
+                    "id": "cell-9"
                   }
                 ],
                 "id": "row-4"
@@ -555,7 +562,7 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-9"
+                    "id": "cell-10"
                   }
                 ],
                 "id": "row-5"

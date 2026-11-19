@@ -629,6 +629,7 @@ function populateTableCellPositions(
           // Set PM positions directly on the cell
           cell.pmStart = cellStart;
           cell.pmEnd = cellEnd;
+          assignCellBlockPositions(cellNode, cell, cellStart + 1);
           
           // Copy cell formatting attributes
           if (cellNode.attrs.backgroundColor) {
@@ -647,3 +648,73 @@ function populateTableCellPositions(
   });
 }
 
+
+/**
+ * Record where the blocks of a table cell sit in the document (paragraphs, headings, the paragraph of each list item,
+ * nested tables and images), in the order `nodeToFlowBlock` produced them: a list is flattened to its items, each
+ * followed by the items of its nested lists. A nested table gets its own cells' positions too.
+ */
+function assignCellBlockPositions(cellNode: PmNode, cell: TableCell, contentStart: number): void {
+  let index = 0;
+  const take = (): FlowBlock | undefined => cell.blocks[index++];
+  const placeItems = (listNode: PmNode, listStart: number) => {
+    let itemStart = listStart + 1;
+    listNode.forEach((item) => {
+      const block = take();
+      const paragraph = item.firstChild;
+      if (block?.kind === 'listItem' && paragraph) {
+        block.pmStart = itemStart + 1;
+        block.pmEnd = itemStart + 1 + paragraph.nodeSize;
+      }
+      let childStart = itemStart + 1;
+      item.forEach((child) => {
+        if (child.type.name === 'bullet_list' || child.type.name === 'ordered_list') placeItems(child, childStart);
+        childStart += child.nodeSize;
+      });
+      itemStart += item.nodeSize;
+    });
+  };
+
+  let offset = contentStart;
+  cellNode.forEach((child) => {
+    switch (child.type.name) {
+      case 'paragraph':
+      case 'heading': {
+        const block = take();
+        if (block && (block.kind === 'paragraph' || block.kind === 'heading')) {
+          block.pmStart = offset;
+          block.pmEnd = offset + child.nodeSize;
+        }
+        break;
+      }
+      case 'bullet_list':
+      case 'ordered_list':
+        placeItems(child, offset);
+        break;
+      case 'table': {
+        const block = take();
+        if (block?.kind === 'table') {
+          block.pmStart = offset;
+          block.pmEnd = offset + child.nodeSize;
+          populateTableCellPositions(child, block, offset);
+        }
+        break;
+      }
+      case 'image': {
+        const block = take();
+        if (block?.kind === 'image') {
+          block.pmStart = offset;
+          block.pmEnd = offset + child.nodeSize;
+        }
+        break;
+      }
+      case 'horizontal_rule':
+      case 'page_break':
+        take();
+        break;
+      default:
+        if (child.isTextblock) take();
+    }
+    offset += child.nodeSize;
+  });
+}

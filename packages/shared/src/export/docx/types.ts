@@ -169,6 +169,9 @@ export interface DocTableLook {
 
 export type DocCellVerticalAlign = 'top' | 'center' | 'bottom';
 
+/** Direction of the text in a cell when it is not horizontal (`w:textDirection`): bottom to top, or top to bottom. */
+export type DocCellTextDirection = 'btLr' | 'tbRl';
+
 /** Formatting a table style applies to one part of a table (a `w:tblStylePr`, or the style's whole-table cell properties). */
 export interface DocTableStylePart {
   text?: DocRunBase;
@@ -193,7 +196,10 @@ export interface DocTableStyle {
 }
 
 export interface DocTableCell {
+  /** The cell's first paragraph with content (or its first paragraph), as inline content. `blocks` holds the whole cell when it is more than one plain paragraph. */
   content: DocInline[];
+  /** The whole content of a cell that has several blocks, a nested table, a list or a heading (paragraphs, lists, images and tables). Absent for a cell of one plain paragraph. */
+  blocks?: DocBlock[];
   colspan?: number;
   rowspan?: number;
   /** Shading, a hex colour (`w:shd` fill), with a table style's conditional shading already applied. */
@@ -201,6 +207,8 @@ export interface DocTableCell {
   /** The cell's own borders, with a table style's conditional borders already applied. Sides not given come from the table's. */
   borders?: DocBorders;
   verticalAlign?: DocCellVerticalAlign;
+  /** Text direction when the text is not horizontal. Kept and written back; the editor shows the text horizontally. */
+  textDirection?: DocCellTextDirection;
   /** Widths in pixels of the grid columns the cell spans. */
   colwidthPx?: number[];
 }

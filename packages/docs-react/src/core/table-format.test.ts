@@ -1,7 +1,7 @@
 import { docsSchema } from '@b32nio/spindle-docs-core';
-import { proseMirrorToFlowBlocks } from './pm-to-blocks';
-import { cellBorderCss, cellLayoutCss, tableCellPlaces } from './table-format';
-import type { TableBlock, TableCell } from './flow-blocks';
+import { createBlockPositionMap, proseMirrorToFlowBlocks } from './pm-to-blocks';
+import { cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker, isRichCell, tableCellPlaces } from './table-format';
+import type { ListItemBlock, ParagraphBlock, TableBlock, TableCell } from './flow-blocks';
 
 const cell = (extra: Partial<TableCell> = {}): TableCell => ({ id: 'c', blocks: [], ...extra });
 const table = (rows: TableCell[][], extra: Partial<TableBlock> = {}): TableBlock => ({
@@ -80,5 +80,69 @@ describe('proseMirrorToFlowBlocks table formatting', () => {
     expect(block.borders).toEqual({ left: { style: 'double' } });
     expect(block.rows[0]).toMatchObject({ repeatHeader: true, cantSplit: true });
     expect(block.rows[0].cells[0]).toMatchObject({ borders: { top: { style: 'single' } }, verticalAlign: 'center', backgroundColor: '#ddeeff', colwidth: [96] });
+  });
+});
+
+describe('cell content helpers', () => {
+  const item = (extra: Partial<ListItemBlock> = {}): ListItemBlock => ({ kind: 'listItem', id: 'l', listType: 'bullet', level: 0, runs: [], ...extra });
+
+  it('indents a list item 24px per level, counting the first', () => {
+    expect(cellListIndent(item())).toBe(24);
+    expect(cellListIndent(item({ level: 2 }))).toBe(72);
+  });
+
+  it('marks a bullet with a dot and a numbered item with its number', () => {
+    expect(cellListMarker(item())).toBe('• ');
+    expect(cellListMarker(item({ listType: 'ordered', listIndex: 4 }))).toBe('4. ');
+    expect(cellListMarker(item({ listType: 'ordered' }))).toBe('1. ');
+  });
+
+  it('calls a cell rich unless it is one plain paragraph', () => {
+    const p = (): ParagraphBlock => ({ kind: 'paragraph', id: 'p', runs: [] });
+    expect(isRichCell(cell({ blocks: [] }))).toBe(false);
+    expect(isRichCell(cell({ blocks: [p()] }))).toBe(false);
+    expect(isRichCell(cell({ blocks: [p(), p()] }))).toBe(true);
+    expect(isRichCell(cell({ blocks: [item()] }))).toBe(true);
+    expect(isRichCell(cell({ blocks: [table([[cell()]])] }))).toBe(true);
+  });
+});
+
+describe('proseMirrorToFlowBlocks table structure', () => {
+  const s = docsSchema;
+  const para = (text: string) => s.nodes.paragraph.create(null, text ? s.text(text) : undefined);
+  const nestedTable = () => s.nodes.table.create(null, [s.nodes.table_row.create(null, [s.nodes.table_cell.create(null, [para('inner')])])]);
+  const list = () => s.nodes.bullet_list.create(null, [s.nodes.list_item.create({ level: 0 }, [para('a')]), s.nodes.list_item.create({ level: 0 }, [para('b')])]);
+
+  it('turns every block of a cell into a cell block, a nested table into a nested table block', () => {
+    const c = s.nodes.table_cell.create(null, [para('one'), nestedTable(), para('')]);
+    const t = s.nodes.table.create(null, [s.nodes.table_row.create(null, [c])]);
+    const block = proseMirrorToFlowBlocks(s.nodes.doc.create(null, t))[0] as TableBlock;
+    expect(block.rows[0].cells[0].blocks.map((b) => b.kind)).toEqual(['paragraph', 'table', 'paragraph']);
+    const nested = block.rows[0].cells[0].blocks[1] as TableBlock;
+    expect(nested.rows[0].cells[0].blocks.map((b) => b.kind)).toEqual(['paragraph']);
+  });
+
+  it('records where each block of a cell sits in the document, nested tables and lists included', () => {
+    const c = s.nodes.table_cell.create(null, [para('one'), list(), nestedTable(), para('')]);
+    const t = s.nodes.table.create(null, [s.nodes.table_row.create(null, [c])]);
+    const doc = s.nodes.doc.create(null, [para('before'), t]);
+    const flow = proseMirrorToFlowBlocks(doc);
+    createBlockPositionMap(doc, flow);
+    const table = flow[1] as TableBlock;
+    const cellBlocks = table.rows[0].cells[0].blocks;
+    // doc positions: "before" paragraph is 8 long; the table starts at 8, its row at 9, its cell at 10, the cell content at 11
+    const at = (pos: number) => doc.nodeAt(pos);
+    const [first, item1, item2, nested, last] = cellBlocks as [ParagraphBlock, ListItemBlock, ListItemBlock, TableBlock, ParagraphBlock];
+    expect(at(first.pmStart!)?.type.name).toBe('paragraph');
+    expect(at(first.pmStart!)?.textContent).toBe('one');
+    expect(at(item1.pmStart!)?.textContent).toBe('a');
+    expect(at(item2.pmStart!)?.textContent).toBe('b');
+    expect(at(nested.pmStart!)?.type.name).toBe('table');
+    expect(nested.pmEnd! - nested.pmStart!).toBe(at(nested.pmStart!)!.nodeSize);
+    // the nested table's own cell is positioned too
+    expect(at(nested.rows[0].cells[0].pmStart!)?.type.name).toBe('table_cell');
+    expect(at((nested.rows[0].cells[0].blocks[0] as ParagraphBlock).pmStart!)?.textContent).toBe('inner');
+    expect(at(last.pmStart!)?.type.name).toBe('paragraph');
+    expect(at(last.pmStart!)?.textContent).toBe('');
   });
 });

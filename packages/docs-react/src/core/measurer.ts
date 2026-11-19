@@ -23,7 +23,7 @@ import {
   isRunContainingBlock,
   isTextRun,
 } from './flow-blocks';
-import { tableCellPlaces, cellBorderCss, cellLayoutCss } from './table-format';
+import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker, isRichCell } from './table-format';
 import {
   sanitizeHref,
   sanitizeImageSrc,
@@ -407,15 +407,37 @@ export class DomMeasurer {
     // Margin value must match dom-painter.ts (16px at scale 1)
     const tableMargin = 16;
     
-    // Create table
+    const table = this.buildMeasureTable(block, tableMargin);
+    const rowHeights: number[] = [];
+    
+    this.measureContainer.appendChild(table);
+    
+    // Measure row heights (the rows of this table, not of tables nested in its cells)
+    for (const tr of Array.from(table.rows)) {
+      rowHeights.push(tr.getBoundingClientRect().height);
+    }
+    
+    // getBoundingClientRect doesn't include margins, so we add them explicitly
+    // Top margin + table height + bottom margin
+    const tableHeight = table.getBoundingClientRect().height;
+    const totalHeight = tableHeight + (tableMargin * 2);
+    
+    return {
+      kind: 'table',
+      blockId: block.id,
+      totalHeight,
+      rowHeights,
+    };
+  }
+  
+  /** A table as DOM with the CSS dom-painter.ts draws it with; a table nested in a cell has no margin. */
+  private buildMeasureTable(block: TableBlock, margin: number): HTMLTableElement {
     const table = document.createElement('table');
     table.style.cssText = `
       border-collapse: collapse;
       width: 100%;
-      margin: ${tableMargin}px 0;
+      margin: ${margin}px 0;
     `;
-    
-    const rowHeights: number[] = [];
     
     const places = tableCellPlaces(block);
     for (const [rowIndex, row] of block.rows.entries()) {
@@ -430,13 +452,31 @@ export class DomMeasurer {
           ${cellLayoutCss(cell, 1)}
         `;
         
-        // Render cell content (simplified - just get text)
+        // A cell of one paragraph is measured as before; a cell with more content as dom-painter draws it
+        const rich = isRichCell(cell);
         for (const cellBlock of cell.blocks) {
           if (isRunContainingBlock(cellBlock)) {
             const p = document.createElement('p');
             p.style.margin = '0';
+            if (rich) {
+              p.style.minHeight = '1em';
+              if (cellBlock.kind === 'listItem') {
+                p.style.paddingLeft = `${cellListIndent(cellBlock)}px`;
+                p.appendChild(document.createTextNode(cellListMarker(cellBlock)));
+              }
+            }
             this.renderRuns(p, cellBlock.runs);
+            // An empty paragraph is drawn with a zero-width space, so it keeps a line
+            if (rich && !p.querySelector('span, a, img, br')) p.appendChild(document.createTextNode('\u200b'));
             td.appendChild(p);
+          } else if (cellBlock.kind === 'table') {
+            td.appendChild(this.buildMeasureTable(cellBlock, 0));
+          } else if (cellBlock.kind === 'image') {
+            const img = document.createElement('img');
+            img.width = cellBlock.width;
+            img.height = cellBlock.height;
+            img.style.display = 'block';
+            td.appendChild(img);
           }
         }
         
@@ -448,26 +488,7 @@ export class DomMeasurer {
       
       table.appendChild(tr);
     }
-    
-    this.measureContainer.appendChild(table);
-    
-    // Measure row heights
-    const rows = table.querySelectorAll('tr');
-    rows.forEach((tr) => {
-      rowHeights.push(tr.getBoundingClientRect().height);
-    });
-    
-    // getBoundingClientRect doesn't include margins, so we add them explicitly
-    // Top margin + table height + bottom margin
-    const tableHeight = table.getBoundingClientRect().height;
-    const totalHeight = tableHeight + (tableMargin * 2);
-    
-    return {
-      kind: 'table',
-      blockId: block.id,
-      totalHeight,
-      rowHeights,
-    };
+    return table;
   }
   
   /**

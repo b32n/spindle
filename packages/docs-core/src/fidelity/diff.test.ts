@@ -56,6 +56,19 @@ describe('diffModels', () => {
     expect(same.total).toBe(0);
   });
 
+  it('compares the blocks inside table cells (several paragraphs, nested tables) when aligning and counting', () => {
+    const cellOf = (...texts: string[]): Json => ({ content: [{ type: 'text', text: texts[0] }], blocks: texts.map((t) => para(t)) });
+    const table = (...texts: string[]): Json => ({ type: 'table', rows: [{ cells: [cellOf(...texts)] }] });
+    // the first paragraph (`content`) is the same, the second differs
+    const d = diffModels(doc([table('a', 'b')]), doc([table('a', 'c')]));
+    expect(d.removed).toBe(1);
+    expect(d.added).toBe(1);
+    expect(d.before.textChars).toBe('a\nb'.length);
+    const nested: Json = { type: 'table', rows: [{ cells: [{ content: [], blocks: [table('deep')] }] }] };
+    expect(diffModels(doc([nested]), doc([nested])).total).toBe(0);
+    expect(diffModels(doc([nested]), doc([nested])).before.textChars).toBe('deep'.length);
+  });
+
   it('ignores pool key naming and compares resolved styles', () => {
     const a = doc([para('a', { styleId: 'text-style-1' })], { paragraphStylePool: { 'text-style-1': { alignment: 'center' } } });
     const b = doc([para('a', { styleId: 'paragraph-style-9' })], { paragraphStylePool: { 'paragraph-style-9': { alignment: 'center' } } });
