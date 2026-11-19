@@ -1,5 +1,6 @@
 import {
   AlignmentType,
+  Column,
   Bookmark,
   BorderStyle,
   BuilderElement,
@@ -29,6 +30,8 @@ import {
   TextRun,
   UnderlineType,
   WidthType,
+  NumberFormat,
+  VerticalAlignSection,
   type IBorderOptions,
   type IRunOptions,
   type ITableBordersOptions,
@@ -179,6 +182,8 @@ class DocxBuilder {
   private inNumberedRun = false;
   private numberedRun = { reference: NUMBERED_REFERENCE, instance: 0 };
   private numberedInstances = 0;
+  /** Some header or footer of the document shows other content on even pages, so the document switches even/odd headers on. */
+  evenAndOdd = false;
 
   constructor(
     private readonly comments: CommentPlan,
@@ -486,14 +491,34 @@ class DocxBuilder {
     );
   }
 
-  buildHeader(hf: DocHeaderFooter | undefined): Header | undefined {
+  /**
+   * The parts a header or footer is written as: the default one, a first-page one and an even-page one. A variant that
+   * has content is written as it is. One that is switched on without content gets no part (the first page, or the even
+   * pages, are blank, or take the previous section's, as in Word). One that is not switched on for this header or
+   * footer but is for the section (`w:titlePg` because the header differs) or the document (even/odd headers) repeats
+   * the default content, so the header or footer still shows there.
+   */
+  private buildVariants<T>(
+    hf: DocHeaderFooter | undefined,
+    titlePage: boolean,
+    make: (paragraphs: DocHeaderFooterParagraph[]) => T
+  ): { default: T; first?: T; even?: T } | undefined {
     if (!hf) return undefined;
-    return new Header({ children: this.buildHeaderFooterParagraphs(hf.paragraphs) });
+    const firstParagraphs = hf.firstPageParagraphs ?? (titlePage && !hf.differentFirstPage ? hf.paragraphs : undefined);
+    const evenParagraphs = hf.evenPageParagraphs ?? (this.evenAndOdd && !hf.differentOddEven ? hf.paragraphs : undefined);
+    return {
+      default: make(hf.paragraphs),
+      ...(firstParagraphs && { first: make(firstParagraphs) }),
+      ...(evenParagraphs && { even: make(evenParagraphs) }),
+    };
   }
 
-  buildFooter(hf: DocHeaderFooter | undefined): Footer | undefined {
-    if (!hf) return undefined;
-    return new Footer({ children: this.buildHeaderFooterParagraphs(hf.paragraphs) });
+  buildHeader(hf: DocHeaderFooter | undefined, titlePage = false) {
+    return this.buildVariants(hf, titlePage, (paragraphs) => new Header({ children: this.buildHeaderFooterParagraphs(paragraphs) }));
+  }
+
+  buildFooter(hf: DocHeaderFooter | undefined, titlePage = false) {
+    return this.buildVariants(hf, titlePage, (paragraphs) => new Footer({ children: this.buildHeaderFooterParagraphs(paragraphs) }));
   }
 
   buildSection(section: DocSection) {
@@ -503,8 +528,12 @@ class DocxBuilder {
     const width = pxToTwips(landscape ? section.pageHeightPx : section.pageWidthPx);
     const height = pxToTwips(landscape ? section.pageWidthPx : section.pageHeightPx);
     this.inNumberedRun = false;
-    const header = this.buildHeader(section.header);
-    const footer = this.buildFooter(section.footer);
+    const titlePage = !!(section.header?.differentFirstPage || section.footer?.differentFirstPage);
+    const header = this.buildHeader(section.header, titlePage);
+    const footer = this.buildFooter(section.footer, titlePage);
+    const numbering = section.pageNumbering;
+    const numberFormat = numbering?.format && (Object.values(NumberFormat) as string[]).includes(numbering.format) ? numbering.format : undefined;
+    const columns = section.columns;
     return {
       properties: {
         page: {
@@ -515,11 +544,28 @@ class DocxBuilder {
             bottom: pxToTwips(section.marginBottomPx),
             left: pxToTwips(section.marginLeftPx),
           },
+          ...(numbering && {
+            pageNumbers: {
+              ...(numbering.start !== undefined && Number.isInteger(numbering.start) && { start: numbering.start }),
+              ...(numberFormat && { formatType: numberFormat as (typeof NumberFormat)[keyof typeof NumberFormat] }),
+            },
+          }),
         },
-        titlePage: section.header?.differentFirstPage || section.footer?.differentFirstPage,
+        titlePage: titlePage || undefined,
+        ...(section.verticalAlign && { verticalAlign: VerticalAlignSection[section.verticalAlign.toUpperCase() as 'CENTER' | 'BOTTOM' | 'BOTH'] }),
+        ...(columns && columns.count > 1 && {
+          column: {
+            count: columns.count,
+            ...(columns.spacingPx !== undefined && { space: pxToTwips(columns.spacingPx) }),
+            ...(columns.separator && { separate: true }),
+            ...(columns.widthsPx && columns.widthsPx.length === columns.count
+              ? { equalWidth: false, children: columns.widthsPx.map((w) => new Column({ width: pxToTwips(w), space: columns.spacingPx !== undefined ? pxToTwips(columns.spacingPx) : undefined })) }
+              : {}),
+          },
+        }),
       },
-      headers: header ? { default: header } : undefined,
-      footers: footer ? { default: footer } : undefined,
+      headers: header,
+      footers: footer,
       children: section.blocks.map((b) => this.buildBlock(b)),
     };
   }
@@ -555,8 +601,10 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   const comments = planComments(input.comments, input.sections);
   const namedStyles = usableNamedStyles(input.namedStyles);
   const builder = new DocxBuilder(comments, namedStyles);
+  builder.evenAndOdd = input.sections.some((s) => s.header?.differentOddEven || s.footer?.differentOddEven);
   const doc = new Document({
     title: input.title,
+    ...(builder.evenAndOdd && { evenAndOddHeaderAndFooters: true }),
     numbering: numberingConfig(numberedStarts(input.sections)),
     sections: input.sections.map((s) => builder.buildSection(s)),
   });

@@ -3,30 +3,9 @@
   "items": [
     {
       "count": 2,
-      "effect": "laid out as a single column",
+      "effect": "kept for export; laid out as a single column",
       "id": "docx.columns",
       "label": "multi-column section(s)"
-    },
-    {
-      "count": 4,
-      "effect": "only the first header/footer reference of each section is used, as its default header/footer",
-      "id": "docx.headerFooterVariants",
-      "label": "section(s) with first-page or even/odd headers and footers",
-      "where": [
-        "even/odd headers setting ×4",
-        "even-page reference ×2",
-        "first-page header/footer (titlePg) ×1",
-        "first-page reference ×1"
-      ]
-    },
-    {
-      "count": 3,
-      "effect": "not imported",
-      "id": "docx.sectionProperties",
-      "label": "section(s) with page-number format/restart or vertical alignment",
-      "where": [
-        "page numbering ×3"
-      ]
     },
     {
       "count": 3,

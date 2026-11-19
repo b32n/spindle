@@ -161,45 +161,31 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.headerFooterVariants', () => {
+  describe('header/footer variants and section properties (imported, so no longer a loss)', () => {
     const ref = (type: string) => `<w:headerReference w:type="${type}" r:id="rId1"/>`;
-    it('detects titlePg, first-page and even-page references', async () => {
+    it('are not reported: first-page and even-page headers, even/odd setting, page numbering and vertical alignment', async () => {
       const bytes = await docx(
-        `${p('a', `<w:sectPr>${ref('default')}${ref('first')}<w:titlePg/></w:sectPr>`)}` +
-          `${p('b', `<w:sectPr>${ref('even')}</w:sectPr>`)}` +
-          `<w:sectPr>${ref('default')}</w:sectPr>`
+        `${p('a', `<w:sectPr>${ref('default')}${ref('first')}<w:titlePg/><w:pgNumType w:start="3" w:fmt="lowerRoman"/></w:sectPr>`)}` +
+          `${p('b', `<w:sectPr>${ref('even')}<w:vAlign w:val="center"/></w:sectPr>`)}` +
+          `<w:sectPr>${ref('default')}</w:sectPr>`,
+        { 'word/settings.xml': `<w:settings ${NS}><w:evenAndOddHeaders/></w:settings>` }
       );
-      expect(await item(bytes, 'docx.headerFooterVariants')).toMatchObject({
-        count: 2,
-        where: ['even-page reference ×1', 'first-page header/footer (titlePg) ×1'],
-      });
-    });
-    it('counts sections with headers when evenAndOddHeaders is on in settings', async () => {
-      const bytes = await docx(`<w:sectPr>${ref('default')}</w:sectPr>`, {
-        'word/settings.xml': `<w:settings ${NS}><w:evenAndOddHeaders/></w:settings>`,
-      });
-      expect(await item(bytes, 'docx.headerFooterVariants')).toMatchObject({ count: 1, where: ['even/odd headers setting ×1'] });
-    });
-    it('is silent for a plain default header', async () => {
-      expect(await item(await docx(`<w:sectPr>${ref('default')}</w:sectPr>`), 'docx.headerFooterVariants')).toBeUndefined();
+      expect(await item(bytes, 'docx.headerFooterVariants')).toBeUndefined();
+      expect(await item(bytes, 'docx.sectionProperties')).toBeUndefined();
     });
   });
 
   describe('docx.sectionProperties', () => {
-    it('detects page-number format/restart and vertical alignment', async () => {
+    it('detects chapter numbers in the page numbers, the part of page numbering that is not kept', async () => {
       const bytes = await docx(
-        p('a', '<w:sectPr><w:pgNumType w:start="1" w:fmt="lowerRoman"/></w:sectPr>') +
-          `<w:sectPr><w:vAlign w:val="center"/></w:sectPr>`
+        p('a', '<w:sectPr><w:pgNumType w:start="1" w:chapStyle="1"/></w:sectPr>') + `<w:sectPr><w:pgNumType w:chapStyle="2" w:chapSep="hyphen"/></w:sectPr>`
       );
-      expect(await item(bytes, 'docx.sectionProperties')).toMatchObject({
-        count: 2,
-        where: ['page numbering ×1', 'vertical alignment ×1'],
-      });
+      expect(await item(bytes, 'docx.sectionProperties')).toMatchObject({ count: 2, where: ['chapter numbering ×2'] });
     });
-    it('is silent for a bare pgNumType, top alignment, and table cell vAlign', async () => {
+    it('is silent for a numbering restart, a number format, top alignment, and table cell vAlign', async () => {
       const bytes = await docx(
         '<w:tbl><w:tr><w:tc><w:tcPr><w:vAlign w:val="center"/></w:tcPr><w:p/></w:tc></w:tr></w:tbl>' +
-          '<w:sectPr><w:pgNumType/><w:vAlign w:val="top"/></w:sectPr>'
+          '<w:sectPr><w:pgNumType w:start="4" w:fmt="upperRoman"/><w:vAlign w:val="top"/></w:sectPr>'
       );
       expect(await item(bytes, 'docx.sectionProperties')).toBeUndefined();
     });
@@ -246,7 +232,7 @@ describe('detectDocxLoss: XML-based detectors', () => {
       const bytes = await docx(
         p('styled', '<w:pStyle w:val="Callout"/><w:spacing w:line="360"/>') +
           '<w:p><w:fldSimple w:instr=" TOC "><w:r><w:t>x</w:t></w:r></w:fldSimple></w:p>' +
-          '<w:sectPr><w:pgNumType w:start="3"/></w:sectPr>'
+          '<w:sectPr><w:pgNumType w:chapStyle="1"/></w:sectPr>'
       );
       const summary = await detectDocxLoss(bytes);
       expect(summary.items).toEqual([

@@ -1925,6 +1925,36 @@
         "footer": {
           "blocks": [
             {
+              "alignment": "center",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentFirstPage": true,
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
               "alignment": "left",
               "content": [
                 {
@@ -1940,6 +1970,20 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "First-page footer",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
           ]
         },
         "header": {
@@ -1950,7 +1994,42 @@
                 {
                   "fontFamily": "Liberation Sans",
                   "fontSize": 11,
+                  "text": "Default header\tHarbour Report\t",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentFirstPage": true,
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
                   "text": "Even-page header (left pages)",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "bold": true,
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "FIRST PAGE HEADER: title page only",
                   "type": "text"
                 }
               ],
@@ -2655,6 +2734,35 @@
         "footer": {
           "blocks": [
             {
+              "alignment": "center",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
               "alignment": "left",
               "content": [
                 {
@@ -2670,10 +2778,36 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [],
+              "type": "paragraph"
+            }
           ]
         },
         "header": {
           "blocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Landscape section header\t\t",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
             {
               "alignment": "left",
               "content": [
@@ -2686,10 +2820,22 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [],
+              "type": "paragraph"
+            }
           ]
         },
         "id": "section-2",
         "pageConfig": {
+          "columns": {
+            "count": 2,
+            "separator": true,
+            "spacing": 36
+          },
           "margins": {
             "bottom": 96,
             "left": 96,
@@ -2701,6 +2847,10 @@
             "h": 1056,
             "w": 816
           }
+        },
+        "pageNumbering": {
+          "format": "lowerRoman",
+          "start": 1
         }
       },
       {
@@ -8895,6 +9045,35 @@
         "footer": {
           "blocks": [
             {
+              "alignment": "center",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
               "alignment": "left",
               "content": [
                 {
@@ -8910,10 +9089,36 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [],
+              "type": "paragraph"
+            }
           ]
         },
         "header": {
           "blocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Default header\tHarbour Report\t",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
             {
               "alignment": "left",
               "content": [
@@ -8926,10 +9131,21 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [],
+              "type": "paragraph"
+            }
           ]
         },
         "id": "section-3",
         "pageConfig": {
+          "columns": {
+            "count": 3,
+            "spacing": 24
+          },
           "margins": {
             "bottom": 96,
             "left": 96,
@@ -8941,6 +9157,9 @@
             "h": 1056,
             "w": 816
           }
+        },
+        "pageNumbering": {
+          "start": 10
         }
       },
       {
@@ -9034,6 +9253,35 @@
         "footer": {
           "blocks": [
             {
+              "alignment": "center",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Page ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": " of ",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "totalPages",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
               "alignment": "left",
               "content": [
                 {
@@ -9049,6 +9297,13 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [],
+              "type": "paragraph"
+            }
           ]
         },
         "header": {
@@ -9059,10 +9314,36 @@
                 {
                   "fontFamily": "Liberation Sans",
                   "fontSize": 11,
+                  "text": "Default header\tHarbour Report\t",
+                  "type": "text"
+                },
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
                   "text": "Even-page header (left pages)",
                   "type": "text"
                 }
               ],
+              "type": "paragraph"
+            }
+          ],
+          "firstPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [],
               "type": "paragraph"
             }
           ]
@@ -9080,6 +9361,9 @@
             "h": 1123,
             "w": 794
           }
+        },
+        "pageNumbering": {
+          "start": 1
         }
       }
     ],

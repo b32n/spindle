@@ -90,6 +90,13 @@ starts after skipped grid columns (`w:gridBefore`, in `edge-odd-valid`) gets an 
 in their columns. The harness now counts the text of the blocks inside cells too, so the round-trip `textChars` went up while
 every round-trip diff stayed where it was.
 
+Header and footer variants and section properties (`sections.firstPage`, `sections.oddEven`, `sections.pageNumberRestart`,
+`sections.columns`) are imported, so the loss goldens no longer report `docx.headerFooterVariants` or `docx.sectionProperties`
+(and `docx.columns` reads "kept for export; laid out as a single column"); the `model.json` goldens show `firstPageBlocks`,
+`evenPageBlocks`, `differentFirstPage` and `differentOddEven` on headers and footers, `pageNumbering` on sections
+(`sections-headers` and `long-document`: lowerRoman, 10, 1) and `columns` in the page configuration. The round trip of every file
+is unchanged.
+
 When an importer change shrinks a loss or alters the model, the goldens will fail. Re-run with
 `docs:docx-fidelity:update`, read the diff, and commit the new goldens in the same PR as the importer
 change. An improvement should be visible in review as a smaller loss snapshot.

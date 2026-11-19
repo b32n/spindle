@@ -31,11 +31,35 @@ export interface PageMargins {
   footer?: number;
 }
 
+/** Text columns of a section (DOCX `w:cols`). Kept and exported; the editor lays the text out in one column. */
+export interface PageColumns {
+  count: number;
+  /** Space between columns, in pixels. */
+  spacing?: number;
+  /** A line between the columns. */
+  separator?: boolean;
+  /** Widths in pixels of columns of different widths; absent when the columns are equal. */
+  widths?: number[];
+}
+
 export interface PageConfig {
   size: PageSize;
   margins: PageMargins;
   orientation: 'portrait' | 'landscape';
+  /** Text columns. Kept and exported; the editor lays the text out in one column. */
+  columns?: PageColumns;
 }
+
+/** Page numbering of a section (DOCX `w:pgNumType`). Kept and exported; the page numbers the editor shows do not follow it yet. */
+export interface PageNumbering {
+  /** The number of the section's first page, when it restarts or continues from another number. */
+  start?: number;
+  /** DOCX number format name of the page numbers (e.g. `lowerRoman`); absent for decimal. */
+  format?: string;
+}
+
+/** Where the text sits between the top and bottom margins of a section's pages (DOCX `w:vAlign`; top is the default). */
+export type SectionVerticalAlign = 'center' | 'bottom' | 'both';
 
 /** Default page configuration (Letter, portrait, 1-inch margins) */
 export const DEFAULT_PAGE_CONFIG: PageConfig = {
@@ -429,6 +453,10 @@ export interface HeaderFooterContent {
   differentFirstPage?: boolean;
   /** Content for first page (if differentFirstPage is true) */
   firstPageBlocks?: HeaderFooterParagraph[];
+  /** Whether even pages use different content (DOCX `w:evenAndOddHeaders`); the editor does not draw it yet */
+  differentOddEven?: boolean;
+  /** Content for even pages (if differentOddEven is true) */
+  evenPageBlocks?: HeaderFooterParagraph[];
 }
 
 /** @deprecated Use HeaderFooterContent instead */
@@ -458,6 +486,8 @@ export interface Section {
   blocks: Block[];
   header?: HeaderFooterContent;
   footer?: HeaderFooterContent;
+  pageNumbering?: PageNumbering;
+  verticalAlign?: SectionVerticalAlign;
 }
 
 // ============================================================================
@@ -614,5 +644,7 @@ export interface SectionData {
   blocks: Block[];
   header?: HeaderFooterContent;
   footer?: HeaderFooterContent;
+  pageNumbering?: PageNumbering;
+  verticalAlign?: SectionVerticalAlign;
 }
 

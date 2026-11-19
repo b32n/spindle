@@ -80,5 +80,21 @@ describe('DocumentImpl — getData / setData round-trip', () => {
     expect(d2.getTitle()).toBe('Round Trip');
     expect(d2.getData()).toEqual(data);
   });
-});
 
+  it('keeps the page numbering, vertical alignment, columns and header/footer variants of a section', () => {
+    const d = new DocumentImpl('doc-y', 'Sections');
+    const data = d.getData();
+    data.sections[0] = {
+      ...data.sections[0],
+      pageConfig: { ...data.sections[0].pageConfig, columns: { count: 2, spacing: 24 } },
+      header: { blocks: [], differentOddEven: true, evenPageBlocks: [] },
+      pageNumbering: { start: 3, format: 'lowerRoman' },
+      verticalAlign: 'bottom',
+    };
+    const d2 = new DocumentImpl();
+    d2.setData(data);
+    expect(d2.getData()).toEqual(data);
+    expect(d2.getData().sections[0]).toMatchObject({ pageNumbering: { start: 3, format: 'lowerRoman' }, verticalAlign: 'bottom', header: { differentOddEven: true, evenPageBlocks: [] } });
+    expect(d2.getData().sections[0].pageConfig.columns).toEqual({ count: 2, spacing: 24 });
+  });
+});
