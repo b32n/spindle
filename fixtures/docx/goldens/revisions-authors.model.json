@@ -35,6 +35,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Revision review: quarterly harbour report",
                 "type": "text"
@@ -48,6 +49,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Four reviewers marked up this draft; tracked changes and comments are preserved.",
@@ -63,6 +65,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "1. Insertions and deletions",
                 "type": "text"
@@ -77,43 +80,51 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Total tonnage handled in ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "2025",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " rose ",
                 "type": "text"
               },
               {
                 "commentThreadId": "thread-1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "by roughly ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "eleven",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " percent, ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "italic": true,
                 "text": "mostly because of the new grain terminal, ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "while passenger traffic was flat.",
                 "type": "text"
@@ -127,17 +138,20 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Wind, salt and patience shaped the town more than any decree ever did. ",
                 "type": "text"
               },
               {
                 "bold": true,
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A replacement sentence was supplied by the fourth reviewer, with a note about winter dredging. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Nobody remembered who had painted the clock face blue, but everybody agreed it suited the square.",
                 "type": "text"
@@ -151,6 +165,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Entire paragraph inserted by Dana: berth fees will be reviewed in spring.",
                 "type": "text"
@@ -172,6 +187,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "2. Moved text",
                 "type": "text"
@@ -186,11 +202,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Before the move: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " (that sentence used to be here).",
                 "type": "text"
@@ -204,11 +222,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The orchard on the northern slope produced more pears than the town could eat or trade. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " It now lives in this paragraph.",
                 "type": "text"
@@ -222,6 +242,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " ",
                 "type": "text"
@@ -235,6 +256,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Second move target: ",
                 "type": "text"
@@ -249,6 +271,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "3. Formatting changes",
                 "type": "text"
@@ -263,6 +286,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Run formatting: ",
                 "type": "text"
@@ -270,33 +294,39 @@
               {
                 "bold": true,
                 "commentThreadId": "thread-2",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "now bold",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
                 "color": "#c00000",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "italic": true,
                 "text": "now italic and red",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "text": "larger",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " and plain again.",
                 "type": "text"
@@ -310,6 +340,7 @@
             "alignment": "center",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "This paragraph was centred by Alice (paragraph property change).",
                 "type": "text"
@@ -324,6 +355,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 13,
                 "text": "Promoted from body text to a heading by Chidi",
                 "type": "text"
@@ -339,6 +371,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "4. Lists and tables",
                 "type": "text"
@@ -353,6 +386,7 @@
             "content": [
               {
                 "commentThreadId": "thread-3",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Order dredging equipment",
                 "type": "text"
@@ -367,6 +401,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Inspect the sea wall",
                 "type": "text"
@@ -389,6 +424,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Publish the report",
                 "type": "text"
@@ -408,6 +444,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Berth",
                         "type": "text"
@@ -418,6 +455,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Vessels",
                         "type": "text"
@@ -428,6 +466,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Fee",
                         "type": "text"
@@ -443,6 +482,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "North",
                         "type": "text"
@@ -453,6 +493,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "12",
                         "type": "text"
@@ -463,6 +504,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "40",
                         "type": "text"
@@ -478,6 +520,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "East (new)",
                         "type": "text"
@@ -488,6 +531,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "7",
                         "type": "text"
@@ -498,6 +542,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "55",
                         "type": "text"
@@ -530,6 +575,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "South",
                         "type": "text"
@@ -540,6 +586,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "10",
                         "type": "text"
@@ -550,6 +597,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "45",
                         "type": "text"
@@ -575,6 +623,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "5. Mixed revisions in one paragraph",
                 "type": "text"
@@ -589,27 +638,32 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Final paragraph: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "alpha ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "gamma ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "epsilon ",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "zeta.",
                 "type": "text"
@@ -623,6 +677,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A closing paragraph without markup, so the document ends cleanly. Letters addressed to the old mill were still delivered, although the mill had burned down years ago. A single bell, rung at noon, was enough to pause the market for exactly one breath.",
                 "type": "text"

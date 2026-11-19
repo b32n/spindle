@@ -27,6 +27,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Advanced tables",
                 "type": "text"
@@ -40,6 +41,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Nested, merged, bordered, shaded, banded and autofit tables",
@@ -55,6 +57,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Tables",
                 "type": "text"
@@ -69,6 +72,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Nested tables (outer, inner, innermost):",
                 "type": "text"
@@ -86,6 +90,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Outer 1",
                         "type": "text"
@@ -96,6 +101,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Outer 2",
                         "type": "text"
@@ -106,6 +112,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Outer 3",
                         "type": "text"
@@ -121,6 +128,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "a",
                         "type": "text"
@@ -131,6 +139,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Contains a nested table:",
                         "type": "text"
@@ -141,6 +150,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "c",
                         "type": "text"
@@ -156,6 +166,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "d",
                         "type": "text"
@@ -166,6 +177,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "e",
                         "type": "text"
@@ -176,6 +188,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "f",
                         "type": "text"
@@ -199,6 +212,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Merged cells (horizontal and vertical, with a repeating three-row header):",
                 "type": "text"
@@ -218,6 +232,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Quarter schedule",
                         "type": "text"
@@ -233,6 +248,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Berth",
                         "type": "text"
@@ -245,6 +261,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Week 1-2",
                         "type": "text"
@@ -256,6 +273,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Week 3-4",
                         "type": "text"
@@ -271,6 +289,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "In",
                         "type": "text"
@@ -281,6 +300,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Out",
                         "type": "text"
@@ -291,6 +311,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "In",
                         "type": "text"
@@ -301,6 +322,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Out",
                         "type": "text"
@@ -316,6 +338,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "North",
                         "type": "text"
@@ -327,6 +350,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "12",
                         "type": "text"
@@ -337,6 +361,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "9",
                         "type": "text"
@@ -347,6 +372,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "14",
                         "type": "text"
@@ -357,6 +383,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "11",
                         "type": "text"
@@ -373,6 +400,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "note",
                         "type": "text"
@@ -384,6 +412,7 @@
                     "colspan": 2,
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "n/a",
                         "type": "text"
@@ -399,6 +428,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "East",
                         "type": "text"
@@ -410,6 +440,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "7",
                         "type": "text"
@@ -421,6 +452,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "3",
                         "type": "text"
@@ -431,6 +463,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "8",
                         "type": "text"
@@ -441,6 +474,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2",
                         "type": "text"
@@ -456,6 +490,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "4",
                         "type": "text"
@@ -466,6 +501,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "5",
                         "type": "text"
@@ -476,6 +512,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "6",
                         "type": "text"
@@ -492,6 +529,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Total",
                         "type": "text"
@@ -503,6 +541,7 @@
                     "colspan": 4,
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "all berths combined",
                         "type": "text"
@@ -526,6 +565,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Borders and shading:",
                 "type": "text"
@@ -544,6 +584,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Style",
                         "type": "text"
@@ -555,6 +596,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Fill",
                         "type": "text"
@@ -566,6 +608,7 @@
                     "content": [
                       {
                         "bold": true,
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Notes",
                         "type": "text"
@@ -581,6 +624,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Double / dashed / thick / dotted",
                         "type": "text"
@@ -591,6 +635,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Solid green",
                         "type": "text"
@@ -601,6 +646,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Light blue",
                         "type": "text"
@@ -616,6 +662,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "No borders",
                         "type": "text"
@@ -626,6 +673,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Grey",
                         "type": "text"
@@ -636,6 +684,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Bottom aligned",
                         "type": "text"
@@ -659,6 +708,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A banded table style with a repeating header row across pages:",
                 "type": "text"
@@ -676,6 +726,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Date",
                         "type": "text"
@@ -686,6 +737,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Vessel",
                         "type": "text"
@@ -696,6 +748,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Cargo",
                         "type": "text"
@@ -706,6 +759,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Tonnes",
                         "type": "text"
@@ -721,6 +775,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-01",
                         "type": "text"
@@ -731,6 +786,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Marguerite 1",
                         "type": "text"
@@ -741,6 +797,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "grain",
                         "type": "text"
@@ -751,6 +808,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "120",
                         "type": "text"
@@ -766,6 +824,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-02",
                         "type": "text"
@@ -776,6 +835,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Thornback 2",
                         "type": "text"
@@ -786,6 +846,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
@@ -796,6 +857,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "157",
                         "type": "text"
@@ -811,6 +873,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-03",
                         "type": "text"
@@ -821,6 +884,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Ostrich Bay 3",
                         "type": "text"
@@ -831,6 +895,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "fish",
                         "type": "text"
@@ -841,6 +906,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "194",
                         "type": "text"
@@ -856,6 +922,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-04",
                         "type": "text"
@@ -866,6 +933,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Calloway 4",
                         "type": "text"
@@ -876,6 +944,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "coal",
                         "type": "text"
@@ -886,6 +955,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "231",
                         "type": "text"
@@ -901,6 +971,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-05",
                         "type": "text"
@@ -911,6 +982,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Bright Venture 5",
                         "type": "text"
@@ -921,6 +993,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "salt",
                         "type": "text"
@@ -931,6 +1004,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "268",
                         "type": "text"
@@ -946,6 +1020,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-06",
                         "type": "text"
@@ -956,6 +1031,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Lantern Moth 6",
                         "type": "text"
@@ -966,6 +1042,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "timber",
                         "type": "text"
@@ -976,6 +1053,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "305",
                         "type": "text"
@@ -991,6 +1069,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-07",
                         "type": "text"
@@ -1001,6 +1080,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Marguerite 7",
                         "type": "text"
@@ -1011,6 +1091,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "grain",
                         "type": "text"
@@ -1021,6 +1102,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "342",
                         "type": "text"
@@ -1036,6 +1118,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-08",
                         "type": "text"
@@ -1046,6 +1129,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Thornback 8",
                         "type": "text"
@@ -1056,6 +1140,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
@@ -1066,6 +1151,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "379",
                         "type": "text"
@@ -1081,6 +1167,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-09",
                         "type": "text"
@@ -1091,6 +1178,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Ostrich Bay 9",
                         "type": "text"
@@ -1101,6 +1189,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "fish",
                         "type": "text"
@@ -1111,6 +1200,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "416",
                         "type": "text"
@@ -1126,6 +1216,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-10",
                         "type": "text"
@@ -1136,6 +1227,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Calloway 10",
                         "type": "text"
@@ -1146,6 +1238,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "coal",
                         "type": "text"
@@ -1156,6 +1249,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "453",
                         "type": "text"
@@ -1171,6 +1265,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-11",
                         "type": "text"
@@ -1181,6 +1276,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Bright Venture 11",
                         "type": "text"
@@ -1191,6 +1287,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "salt",
                         "type": "text"
@@ -1201,6 +1298,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "490",
                         "type": "text"
@@ -1216,6 +1314,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-12",
                         "type": "text"
@@ -1226,6 +1325,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Lantern Moth 12",
                         "type": "text"
@@ -1236,6 +1336,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "timber",
                         "type": "text"
@@ -1246,6 +1347,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "527",
                         "type": "text"
@@ -1261,6 +1363,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-13",
                         "type": "text"
@@ -1271,6 +1374,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Marguerite 13",
                         "type": "text"
@@ -1281,6 +1385,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "grain",
                         "type": "text"
@@ -1291,6 +1396,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "564",
                         "type": "text"
@@ -1306,6 +1412,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-14",
                         "type": "text"
@@ -1316,6 +1423,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Thornback 14",
                         "type": "text"
@@ -1326,6 +1434,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
@@ -1336,6 +1445,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "601",
                         "type": "text"
@@ -1351,6 +1461,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-15",
                         "type": "text"
@@ -1361,6 +1472,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Ostrich Bay 15",
                         "type": "text"
@@ -1371,6 +1483,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "fish",
                         "type": "text"
@@ -1381,6 +1494,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "638",
                         "type": "text"
@@ -1396,6 +1510,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-16",
                         "type": "text"
@@ -1406,6 +1521,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Calloway 16",
                         "type": "text"
@@ -1416,6 +1532,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "coal",
                         "type": "text"
@@ -1426,6 +1543,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "675",
                         "type": "text"
@@ -1441,6 +1559,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-17",
                         "type": "text"
@@ -1451,6 +1570,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Bright Venture 17",
                         "type": "text"
@@ -1461,6 +1581,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "salt",
                         "type": "text"
@@ -1471,6 +1592,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "712",
                         "type": "text"
@@ -1486,6 +1608,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-18",
                         "type": "text"
@@ -1496,6 +1619,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Lantern Moth 18",
                         "type": "text"
@@ -1506,6 +1630,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "timber",
                         "type": "text"
@@ -1516,6 +1641,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "749",
                         "type": "text"
@@ -1531,6 +1657,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-19",
                         "type": "text"
@@ -1541,6 +1668,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Marguerite 19",
                         "type": "text"
@@ -1551,6 +1679,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "grain",
                         "type": "text"
@@ -1561,6 +1690,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "786",
                         "type": "text"
@@ -1576,6 +1706,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-20",
                         "type": "text"
@@ -1586,6 +1717,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Thornback 20",
                         "type": "text"
@@ -1596,6 +1728,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
@@ -1606,6 +1739,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "823",
                         "type": "text"
@@ -1621,6 +1755,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-21",
                         "type": "text"
@@ -1631,6 +1766,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Ostrich Bay 21",
                         "type": "text"
@@ -1641,6 +1777,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "fish",
                         "type": "text"
@@ -1651,6 +1788,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "860",
                         "type": "text"
@@ -1666,6 +1804,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-22",
                         "type": "text"
@@ -1676,6 +1815,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Calloway 22",
                         "type": "text"
@@ -1686,6 +1826,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "coal",
                         "type": "text"
@@ -1696,6 +1837,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "897",
                         "type": "text"
@@ -1711,6 +1853,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-23",
                         "type": "text"
@@ -1721,6 +1864,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Bright Venture 23",
                         "type": "text"
@@ -1731,6 +1875,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "salt",
                         "type": "text"
@@ -1741,6 +1886,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "934",
                         "type": "text"
@@ -1756,6 +1902,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-24",
                         "type": "text"
@@ -1766,6 +1913,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Lantern Moth 24",
                         "type": "text"
@@ -1776,6 +1924,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "timber",
                         "type": "text"
@@ -1786,6 +1935,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "971",
                         "type": "text"
@@ -1801,6 +1951,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-25",
                         "type": "text"
@@ -1811,6 +1962,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Marguerite 25",
                         "type": "text"
@@ -1821,6 +1973,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "grain",
                         "type": "text"
@@ -1831,6 +1984,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "1008",
                         "type": "text"
@@ -1846,6 +2000,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-26",
                         "type": "text"
@@ -1856,6 +2011,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Thornback 26",
                         "type": "text"
@@ -1866,6 +2022,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
@@ -1876,6 +2033,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "145",
                         "type": "text"
@@ -1891,6 +2049,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-27",
                         "type": "text"
@@ -1901,6 +2060,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Ostrich Bay 27",
                         "type": "text"
@@ -1911,6 +2071,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "fish",
                         "type": "text"
@@ -1921,6 +2082,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "182",
                         "type": "text"
@@ -1936,6 +2098,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-28",
                         "type": "text"
@@ -1946,6 +2109,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Calloway 28",
                         "type": "text"
@@ -1956,6 +2120,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "coal",
                         "type": "text"
@@ -1966,6 +2131,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "219",
                         "type": "text"
@@ -1981,6 +2147,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-01",
                         "type": "text"
@@ -1991,6 +2158,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Bright Venture 29",
                         "type": "text"
@@ -2001,6 +2169,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "salt",
                         "type": "text"
@@ -2011,6 +2180,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "256",
                         "type": "text"
@@ -2026,6 +2196,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-02",
                         "type": "text"
@@ -2036,6 +2207,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Lantern Moth 30",
                         "type": "text"
@@ -2046,6 +2218,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "timber",
                         "type": "text"
@@ -2056,6 +2229,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "293",
                         "type": "text"
@@ -2071,6 +2245,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-03",
                         "type": "text"
@@ -2081,6 +2256,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Marguerite 31",
                         "type": "text"
@@ -2091,6 +2267,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "grain",
                         "type": "text"
@@ -2101,6 +2278,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "330",
                         "type": "text"
@@ -2116,6 +2294,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-04",
                         "type": "text"
@@ -2126,6 +2305,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Thornback 32",
                         "type": "text"
@@ -2136,6 +2316,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "ballast stone",
                         "type": "text"
@@ -2146,6 +2327,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "367",
                         "type": "text"
@@ -2161,6 +2343,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-05",
                         "type": "text"
@@ -2171,6 +2354,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Ostrich Bay 33",
                         "type": "text"
@@ -2181,6 +2365,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "fish",
                         "type": "text"
@@ -2191,6 +2376,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "404",
                         "type": "text"
@@ -2206,6 +2392,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "2026-02-06",
                         "type": "text"
@@ -2216,6 +2403,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Calloway 34",
                         "type": "text"
@@ -2226,6 +2414,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "coal",
                         "type": "text"
@@ -2236,6 +2425,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "441",
                         "type": "text"
@@ -2259,6 +2449,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Autofit, percentage widths, cell margins and rotated text:",
                 "type": "text"
@@ -2276,6 +2467,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "autofit col 1",
                         "type": "text"
@@ -2286,6 +2478,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "autofit column two is wider",
                         "type": "text"
@@ -2296,6 +2489,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "c3",
                         "type": "text"
@@ -2311,6 +2505,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "x",
                         "type": "text"
@@ -2321,6 +2516,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "y",
                         "type": "text"
@@ -2331,6 +2527,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "z",
                         "type": "text"
@@ -2358,6 +2555,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "30%",
                         "type": "text"
@@ -2368,6 +2566,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "70% (percentage widths, autofit)",
                         "type": "text"
@@ -2395,6 +2594,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Rotated",
                         "type": "text"
@@ -2405,6 +2605,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "The harbour committee repainted the winter storage sheds according to the standing orders.",
                         "type": "text"

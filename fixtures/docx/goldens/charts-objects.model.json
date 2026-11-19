@@ -27,6 +27,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Charts and embedded objects",
                 "type": "text"
@@ -40,6 +41,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "Three charts with embedded workbooks and an OLE worksheet object",
@@ -55,6 +57,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Charts and embedded objects",
                 "type": "text"
@@ -77,6 +80,7 @@
             "content": [
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": "Chart 1: Vessels per month.",
@@ -99,6 +103,7 @@
             "content": [
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": "Chart 2: Tonnage trend.",
@@ -121,6 +126,7 @@
             "content": [
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": "Chart 3: Cargo share.",
@@ -135,6 +141,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Embedded worksheet object (OLE package with a preview image): ",
                 "type": "text"
@@ -148,6 +155,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The quay-side bakery rebuilt a bundle of weathered charts as the tide turned. The tide almanac relocated the lamp oil inventory while the market was closed. A visiting engineer relocated an index of local pilots without waiting for approval. The quay-side bakery reviewed every outstanding repair order and filed the result in triplicate.",
                 "type": "text"

@@ -1,5 +1,6 @@
 import type { DocParagraphStyle, DocRunBase } from '@b32nio/spindle-shared/export/docx';
 
+import { preferRecorded, themeColor, themeFont, type Theme } from './theme';
 import { attrsOf, childrenOf, find, findAll, parseXml, type XmlNode } from './xml-tree';
 
 // ---------------------------------------------------------------------------
@@ -61,7 +62,7 @@ function onOff(node: XmlNode | undefined): boolean | undefined {
   return !(v === '0' || v === 'false' || v === 'off');
 }
 
-export function parseRPr(rPr: XmlNode | undefined): RunPartial {
+export function parseRPr(rPr: XmlNode | undefined, theme?: Theme): RunPartial {
   if (!rPr) return {};
   const props = childrenOf(rPr);
   const out: RunPartial = {};
@@ -79,8 +80,11 @@ export function parseRPr(rPr: XmlNode | undefined): RunPartial {
   if (vertVal === 'superscript' || vertVal === 'subscript' || vertVal === 'baseline') out.vertAlign = vertVal;
   const colorEl = find(props, 'w:color');
   if (colorEl) {
-    const val = attrsOf(colorEl)['@_w:val'];
-    set('color', val && val !== 'auto' ? `#${val.toLowerCase()}` : null);
+    const a = attrsOf(colorEl);
+    // A theme colour (with its tint/shade) takes precedence over the literal value Word writes next to it.
+    const fromTheme = themeColor(theme, a['@_w:themeColor'], a['@_w:themeTint'], a['@_w:themeShade']);
+    const val = a['@_w:val'];
+    set('color', fromTheme ? preferRecorded(fromTheme, val) : val && val !== 'auto' ? `#${val.toLowerCase()}` : null);
   }
   const szEl = find(props, 'w:sz');
   if (szEl) {
@@ -88,15 +92,21 @@ export function parseRPr(rPr: XmlNode | undefined): RunPartial {
     if (half > 0) out.fontSize = half / 2;
   }
   const fontsEl = find(props, 'w:rFonts');
-  if (fontsEl) set('fontFamily', attrsOf(fontsEl)['@_w:ascii'] || undefined);
+  if (fontsEl) {
+    const a = attrsOf(fontsEl);
+    set('fontFamily', themeFont(theme, a['@_w:asciiTheme']) ?? (a['@_w:ascii'] || undefined));
+  }
   const shdEl = find(props, 'w:shd');
   const highlightEl = find(props, 'w:highlight');
   if (highlightEl) {
     const v = attrsOf(highlightEl)['@_w:val'];
     set('backgroundColor', v && v !== 'none' ? (HIGHLIGHT_TO_HEX[v] ?? null) : null);
   } else if (shdEl) {
-    const fill = attrsOf(shdEl)['@_w:fill'];
-    if (fill !== undefined) set('backgroundColor', fill && fill !== 'auto' && fill !== 'none' ? `#${fill.toLowerCase()}` : null);
+    const a = attrsOf(shdEl);
+    const fromTheme = themeColor(theme, a['@_w:themeFill'], a['@_w:themeFillTint'], a['@_w:themeFillShade']);
+    const fill = a['@_w:fill'];
+    if (fromTheme) out.backgroundColor = preferRecorded(fromTheme, fill);
+    else if (fill !== undefined) set('backgroundColor', fill && fill !== 'auto' && fill !== 'none' ? `#${fill.toLowerCase()}` : null);
   }
   return out;
 }
@@ -169,7 +179,10 @@ export class StyleSheet {
   private readonly paragraphCache = new Map<string, { run: RunPartial; para: ParagraphPartial; headingLevel?: number }>();
   private readonly characterCache = new Map<string, RunPartial>();
 
-  constructor(xml?: string) {
+  constructor(
+    xml?: string,
+    private readonly theme?: Theme
+  ) {
     if (!xml) return;
     let root: XmlNode[];
     try {
@@ -184,7 +197,7 @@ export class StyleSheet {
     if (defaults) {
       const rDef = find(childrenOf(defaults), 'w:rPrDefault');
       const pDef = find(childrenOf(defaults), 'w:pPrDefault');
-      this.docDefaultRun = parseRPr(rDef ? find(childrenOf(rDef), 'w:rPr') : undefined);
+      this.docDefaultRun = parseRPr(rDef ? find(childrenOf(rDef), 'w:rPr') : undefined, theme);
       this.docDefaultPara = parsePPr(pDef ? find(childrenOf(pDef), 'w:pPr') : undefined);
     }
     for (const el of findAll(kids, 'w:style')) {
@@ -203,7 +216,7 @@ export class StyleSheet {
         basedOn: attr('w:basedOn'),
         link: attr('w:link'),
         isDefault: a['@_w:default'] === '1' || a['@_w:default'] === 'true',
-        run: parseRPr(find(sk, 'w:rPr')),
+        run: parseRPr(find(sk, 'w:rPr'), theme),
         para: parsePPr(find(sk, 'w:pPr')),
       };
       this.styles.set(id, def);
@@ -283,7 +296,7 @@ export class StyleSheet {
 
   /** Effective run formatting: layers from docDefaults up to the run's own `w:rPr` (which may name a character style). */
   run(rPr: XmlNode | undefined, pStyleId: string | undefined): DocRunBase {
-    const direct = parseRPr(rPr);
+    const direct = parseRPr(rPr, this.theme);
     const rStyleEl = rPr ? find(childrenOf(rPr), 'w:rStyle') : undefined;
     const rStyleId = rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined;
     const paragraph = this.paragraphLayers(pStyleId).run;

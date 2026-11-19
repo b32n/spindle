@@ -31,6 +31,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Fields, notes and navigation",
                 "type": "text"
@@ -44,6 +45,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "TOC, PAGE / PAGEREF / REF / SEQ / DATE, bookmarks, hyperlinks, footnotes and endnotes",
@@ -59,6 +61,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Contents",
                 "type": "text"
@@ -80,12 +83,14 @@
             "content": [
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Scope of the survey",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
@@ -100,12 +105,14 @@
             "content": [
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Method",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
@@ -120,12 +127,14 @@
             "content": [
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Findings",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
@@ -140,12 +149,14 @@
             "content": [
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Tonnage",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
@@ -160,12 +171,14 @@
             "content": [
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Seasonal variation",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
@@ -180,12 +193,14 @@
             "content": [
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Recommendations",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
@@ -207,6 +222,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Overview",
                 "type": "text"
@@ -221,6 +237,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A junior surveyor catalogued three disputed boundary stones after several rounds of discussion. The harbour committee compared the sluice gate mechanism with unusual care. The grain exchange approved last season's tonnage figures according to the standing orders.",
                 "type": "text"
@@ -235,6 +252,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 13,
                 "text": "Scope of the survey",
                 "type": "text"
@@ -249,6 +267,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The regional council recorded the eastern jetty in time for the autumn meeting. Local fishing crews rebuilt the winter storage sheds and filed the result in triplicate. A visiting engineer compared an index of local pilots in time for the autumn meeting.",
                 "type": "text"
@@ -263,6 +282,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 13,
                 "text": "Method",
                 "type": "text"
@@ -277,6 +297,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "An experienced pilot compared the dredging contract while the market was closed. The harbour committee compared last season's tonnage figures during the long spring inspection. The tide almanac repainted the dredging contract and filed the result in triplicate.",
                 "type": "text"
@@ -291,6 +312,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Findings",
                 "type": "text"
@@ -305,6 +327,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Several market traders catalogued two dozen mooring rings in the presence of two witnesses. The bridge authority rebuilt three disputed boundary stones as the tide turned. Our records office inspected a draft of the annual report before the first frost.",
                 "type": "text"
@@ -319,6 +342,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 13,
                 "text": "Tonnage",
                 "type": "text"
@@ -333,6 +357,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A careful archivist measured a bundle of weathered charts according to the standing orders. A junior surveyor compared the ferry timetable before the first frost. The northern ferry service catalogued two dozen mooring rings using only the instruments on hand.",
                 "type": "text"
@@ -347,6 +372,7 @@
               {
                 "bold": true,
                 "color": "#1f3763",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 12,
                 "text": "Seasonal variation",
                 "type": "text"
@@ -361,6 +387,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The bridge authority reorganised the lamp oil inventory before the first frost. The bridge authority rebuilt two dozen mooring rings without waiting for approval. Every lighthouse keeper postponed every outstanding repair order to the satisfaction of nobody in particular.",
                 "type": "text"
@@ -375,6 +402,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Recommendations",
                 "type": "text"
@@ -389,6 +417,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The grain exchange postponed the eastern jetty to the satisfaction of nobody in particular. A junior surveyor compared the dredging contract during the long spring inspection. A junior surveyor rebuilt the ferry timetable without waiting for approval.",
                 "type": "text"
@@ -403,6 +432,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Fields and cross-references",
                 "type": "text"
@@ -417,6 +447,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The key figure of this report is 42 vessels per day.",
                 "type": "text"
@@ -430,16 +461,19 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "As stated on page ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ": ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -453,6 +487,7 @@
             "content": [
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": "Figure ",
@@ -460,6 +495,7 @@
               },
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": " shows the quay; Figure ",
@@ -467,6 +503,7 @@
               },
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": " shows the lighthouse; Table ",
@@ -474,6 +511,7 @@
               },
               {
                 "color": "#44546a",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": " lists berths.",
@@ -488,26 +526,31 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Generated on ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " at ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " by ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " for ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -521,6 +564,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Page ",
                 "type": "text"
@@ -530,6 +574,7 @@
                 "type": "dynamicField"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " of ",
                 "type": "text"
@@ -539,16 +584,19 @@
                 "type": "dynamicField"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " (section pages: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "; words: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ").",
                 "type": "text"
@@ -562,16 +610,19 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Current chapter: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ". Conditional: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -585,11 +636,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "External field link: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " and run link: ",
                 "type": "text"
@@ -601,6 +654,7 @@
                 "type": "link"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -614,30 +668,35 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Internal links: ",
                 "type": "text"
               },
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "jump to the key figure",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ", ",
                 "type": "text"
               },
               {
                 "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "jump to Findings",
                 "type": "text",
                 "underline": true
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "; a mail link: ",
                 "type": "text"
@@ -649,6 +708,7 @@
                 "type": "link"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -662,6 +722,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " (unresolved mail-merge field) and a ",
                 "type": "text"
@@ -675,6 +736,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Simple field: ",
                 "type": "text"
@@ -684,6 +746,7 @@
                 "type": "dynamicField"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " and a nested field: ",
                 "type": "text"
@@ -693,6 +756,7 @@
                 "type": "dynamicField"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "single page",
                 "type": "text"
@@ -707,6 +771,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Footnotes and endnotes",
                 "type": "text"
@@ -721,21 +786,25 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Harbour tonnage rose again last year.",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " A second claim needs support too.",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " The third claim is contested",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
                 "type": "text"
@@ -749,11 +818,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Rich footnote here.",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " And an endnote right after it.",
                 "type": "text"
@@ -771,6 +842,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Cell with note",
                         "type": "text"
@@ -781,6 +853,7 @@
                   {
                     "content": [
                       {
+                        "fontFamily": "Liberation Sans",
                         "fontSize": 11,
                         "text": "Plain cell",
                         "type": "text"
@@ -804,11 +877,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The grain exchange repainted the sluice gate mechanism in time for the autumn meeting. An experienced pilot mapped a draft of the annual report without waiting for approval. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
@@ -822,11 +897,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A visiting engineer rebuilt every outstanding repair order while the market was closed. A visiting engineer approved an index of local pilots according to the standing orders. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
@@ -840,11 +917,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Our records office relocated the fog-signal schedule without waiting for approval. An experienced pilot mapped a ledger of unpaid berth fees as the tide turned. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
@@ -858,11 +937,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The northern ferry service inspected a ledger of unpaid berth fees as the tide turned. The grain exchange approved the fog-signal schedule after several rounds of discussion. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
@@ -876,11 +957,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A junior surveyor rebuilt the winter storage sheds in the presence of two witnesses. The regional council mapped every outstanding repair order without waiting for approval. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
@@ -894,11 +977,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The harbour committee documented the sluice gate mechanism according to the standing orders. The grain exchange approved the sluice gate mechanism to the satisfaction of nobody in particular. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
@@ -928,6 +1013,7 @@
     "textStylePool": {
       "text-style-1": {
         "color": "#0563c1",
+        "fontFamily": "Liberation Sans",
         "fontSize": 11,
         "underline": true
       }

@@ -27,6 +27,7 @@
           {
             "content": [
               {
+                "fontFamily": "Liberation Serif",
                 "fontSize": 28,
                 "text": "Shapes, text boxes, SmartArt",
                 "type": "text"
@@ -40,6 +41,7 @@
             "content": [
               {
                 "color": "#595959",
+                "fontFamily": "Liberation Sans",
                 "fontSize": 14,
                 "italic": true,
                 "text": "DrawingML and VML shapes, a group, text boxes and a SmartArt diagram with its fallback drawing",
@@ -55,6 +57,7 @@
               {
                 "bold": true,
                 "color": "#2f5496",
+                "fontFamily": "Liberation Serif",
                 "fontSize": 16,
                 "text": "Shapes, text boxes and SmartArt",
                 "type": "text"
@@ -69,11 +72,13 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A paragraph that wraps around an anchored shape containing text. ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Our records office compared an index of local pilots before the first frost. A visiting engineer relocated a draft of the annual report during the long spring inspection. Every lighthouse keeper mapped a ledger of unpaid berth fees without waiting for approval. The tide almanac compared the dredging contract as the tide turned. A careful archivist documented every outstanding repair order during the long spring inspection. The regional council negotiated last season's tonnage figures after several rounds of discussion.",
                 "type": "text"
@@ -87,31 +92,37 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Inline shapes: ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "  ",
                 "type": "text"
               },
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "  ",
                 "type": "text"
@@ -125,6 +136,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A shape group with two children containing text: ",
                 "type": "text"
@@ -138,6 +150,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A legacy VML text box (Word 2003 style) that contains a table: ",
                 "type": "text"
@@ -151,6 +164,7 @@
             "alignment": "justify",
             "content": [
               {
+                "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "A SmartArt diagram (basic block list) with its cached fallback drawing:",
                 "type": "text"
