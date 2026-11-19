@@ -310,6 +310,95 @@ describe('importDocx', () => {
     expect(result.sections[0].pageHeightPx).toBe(816);
   });
 
+  describe('drawing kinds and warnings', () => {
+    const NS = 'xmlns:wp="x" xmlns:a="x" xmlns:r="x" xmlns:pic="x" xmlns:wps="x" xmlns:o="x"';
+    const drawing = (uri: string, inner: string, kind: 'inline' | 'anchor' = 'inline') =>
+      `<w:p><w:r><w:drawing ${NS}><wp:${kind}><wp:extent cx="952500" cy="476250"/><wp:docPr id="1" name="Obj"/>` +
+      `<a:graphic><a:graphicData uri="${uri}">${inner}</a:graphicData></a:graphic></wp:${kind}></w:drawing></w:r></w:p>`;
+    const OOXML = 'http://schemas.openxmlformats.org/drawingml/2006';
+    const picture = (blipAttrs: string, kind: 'inline' | 'anchor' = 'inline') =>
+      drawing(`${OOXML}/picture`, `<pic:pic><pic:blipFill><a:blip ${blipAttrs}/></pic:blipFill></pic:pic>`, kind);
+
+    async function importBody(paragraphsXml: string, extraRel?: string) {
+      const exported = await exportDocx(section([{ type: 'image', src: ONE_PX_PNG, width: 5, height: 5 }]));
+      const zip = await JSZip.loadAsync(exported.bytes);
+      let xml = await zip.file('word/document.xml')!.async('string');
+      xml = xml.replace(/<w:p>[\s\S]*?<\/w:p>/, paragraphsXml);
+      zip.file('word/document.xml', xml);
+      if (extraRel) {
+        const relsPath = 'word/_rels/document.xml.rels';
+        const rels = await zip.file(relsPath)!.async('string');
+        zip.file(relsPath, rels.replace('</Relationships>', `${extraRel}</Relationships>`));
+      }
+      return importDocx(await zip.generateAsync({ type: 'uint8array' }));
+    }
+
+    it('imports a resolvable inline picture with no warning', async () => {
+      const exported = await exportDocx(section([{ type: 'image', src: ONE_PX_PNG, width: 5, height: 5 }]));
+      const result = await importDocx(exported.bytes);
+      expect(result.sections[0].blocks[0]).toMatchObject({ type: 'image' });
+      expect(result.warnings).toEqual([]);
+    });
+
+    it('keeps "could not be resolved" for a picture whose blip target is missing', async () => {
+      const result = await importBody(picture('r:embed="rId999"'));
+      expect(result.warnings).toEqual(['An embedded image could not be resolved and was skipped.']);
+    });
+
+    it('keeps "could not be resolved" for a picture with no blip reference at all', async () => {
+      const result = await importBody(picture(''));
+      expect(result.warnings).toEqual(['An embedded image could not be resolved and was skipped.']);
+    });
+
+    it('gives a linked (r:link) picture its own warning and never resolves it', async () => {
+      const rel = '<Relationship Id="rId900" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/linked.png" TargetMode="External"/>';
+      const result = await importBody(picture('r:link="rId900"'), rel);
+      expect(result.warnings).toEqual(['A linked picture was skipped — images linked from outside the document are never fetched.']);
+      expect(result.sections[0].blocks.some((b) => b.type === 'image')).toBe(false);
+    });
+
+    it('prefers r:embed over r:link when both are present', async () => {
+      const exported = await exportDocx(section([{ type: 'image', src: ONE_PX_PNG, width: 5, height: 5 }]));
+      const zip = await JSZip.loadAsync(exported.bytes);
+      const xml = await zip.file('word/document.xml')!.async('string');
+      const embed = xml.match(/r:embed="([^"]+)"/)![1];
+      const result = await importBody(picture(`r:embed="${embed}" r:link="rId900"`));
+      expect(result.warnings).toEqual([]);
+      expect(result.sections[0].blocks[0]).toMatchObject({ type: 'image' });
+    });
+
+    it('keeps the floating-image warning for an anchored picture', async () => {
+      const result = await importBody(picture('r:embed="rId1"', 'anchor'));
+      expect(result.warnings).toEqual(['A floating (anchored) image was skipped — only inline images are supported.']);
+    });
+
+    it.each([
+      ['a chart', `${OOXML}/chart`, '<c:chart xmlns:c="x" r:id="rId5"/>', 'A chart was not imported — charts are not supported yet.'],
+      ['a chartex chart', 'http://schemas.microsoft.com/office/drawing/2014/chartex', '<cx:chart xmlns:cx="x"/>', 'A chart was not imported — charts are not supported yet.'],
+      ['a SmartArt diagram', `${OOXML}/diagram`, '<dgm:relIds xmlns:dgm="x"/>', 'A SmartArt diagram was not imported — diagrams are not supported yet.'],
+      ['a shape', 'http://schemas.microsoft.com/office/word/2010/wordprocessingShape', '<wps:wsp/>', 'A shape or text box was not imported — shapes and text boxes are not supported yet.'],
+      ['a shape group', 'http://schemas.microsoft.com/office/word/2010/wordprocessingGroup', '<wpg:wgp xmlns:wpg="x"/>', 'A shape or text box was not imported — shapes and text boxes are not supported yet.'],
+      ['an OLE preview', 'urn:example:ole', '<o:OLEObject/>', 'An embedded object preview was not imported — embedded objects are not supported yet.'],
+      ['an unknown drawing', 'urn:example:other', '<x:thing xmlns:x="x"/>', 'A drawing object of an unsupported kind was not imported.'],
+    ])('reports %s as what it is, not as a missing image', async (_name, uri, inner, expected) => {
+      const result = await importBody(drawing(uri, inner));
+      expect(result.warnings).toEqual([expected]);
+    });
+
+    it('reports an anchored non-picture by its kind', async () => {
+      const result = await importBody(drawing(`${OOXML}/chart`, '<c:chart xmlns:c="x"/>', 'anchor'));
+      expect(result.warnings).toEqual(['A chart was not imported — charts are not supported yet.']);
+    });
+
+    it('classifies a drawing inside mc:AlternateContent', async () => {
+      const inner = drawing('http://schemas.microsoft.com/office/word/2010/wordprocessingShape', '<wps:wsp/>', 'anchor')
+        .replace('<w:p><w:r>', '<w:p><w:r><mc:AlternateContent xmlns:mc="x"><mc:Choice>')
+        .replace('</w:r></w:p>', '</mc:Choice></mc:AlternateContent></w:r></w:p>');
+      const result = await importBody(inner);
+      expect(result.warnings).toEqual(['A shape or text box was not imported — shapes and text boxes are not supported yet.']);
+    });
+  });
+
   describe('page size from pgSz', () => {
     async function importPgSz(attrs: string) {
       const exported = await exportDocx(section([{ type: 'paragraph', content: [] }]));

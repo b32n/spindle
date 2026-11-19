@@ -37,6 +37,13 @@ lockstep.
   as 8.5x11in with `w:orient="landscape"` and re-imported as portrait-shaped. The writer now emits the on-page
   size (width larger than height for landscape), and the reader also accepts landscape written with
   `w:w` < `w:h` or with `w:w` > `w:h` and no `w:orient`. `PageConfig.size` keeps its natural-size convention.
+- **DOCX import: accurate warnings for drawings that are not pictures.** `importDocx` reported every `w:drawing`
+  without a picture as "An embedded image could not be resolved". Drawings are now classified by their
+  `graphicData` URI: charts, SmartArt diagrams, shapes/text boxes/groups and embedded-object previews each get
+  their own warning, linked (`r:link`) pictures get "A linked picture was skipped" and are never fetched, and the
+  "could not be resolved" warning is kept only for real pictures. Warning text is observable by hosts; no content
+  or loss-report change. Anchored non-picture drawings now carry the kind-specific warning instead of the
+  floating-image one.
 
 ## [0.4.0] - 2026-10-26
 

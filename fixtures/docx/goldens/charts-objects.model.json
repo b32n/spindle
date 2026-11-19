@@ -144,8 +144,8 @@
   },
   "importError": null,
   "warnings": [
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped.",
-    "An embedded image could not be resolved and was skipped."
+    "A chart was not imported — charts are not supported yet.",
+    "A chart was not imported — charts are not supported yet.",
+    "A chart was not imported — charts are not supported yet."
   ]
 }
