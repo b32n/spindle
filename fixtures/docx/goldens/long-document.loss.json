@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "laid out as a single column",
+      "effect": "kept for export; laid out as a single column",
       "id": "docx.columns",
       "label": "multi-column section(s)"
     },
@@ -21,15 +21,6 @@
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
-    },
-    {
-      "count": 2,
-      "effect": "not imported",
-      "id": "docx.sectionProperties",
-      "label": "section(s) with page-number format/restart or vertical alignment",
-      "where": [
-        "page numbering ×2"
-      ]
     },
     {
       "count": 14,

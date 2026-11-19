@@ -325,6 +325,44 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "differentFirstPage": true,
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
+              "content": [
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Even footer",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "firstPageBlocks": [
+            {
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "First-page footer",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
           ]
         },
         "header": {
@@ -358,6 +396,36 @@
                 {
                   "fieldType": "pageNumber",
                   "type": "dynamicField"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "differentFirstPage": true,
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Even-page header (left pages)",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "firstPageBlocks": [
+            {
+              "content": [
+                {
+                  "bold": true,
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "FIRST PAGE HEADER: title page only",
+                  "type": "text"
                 }
               ],
               "type": "paragraph"
@@ -627,7 +695,8 @@
               ],
               "type": "paragraph"
             }
-          ]
+          ],
+          "differentOddEven": true
         },
         "header": {
           "blocks": [
@@ -658,10 +727,16 @@
               ],
               "type": "paragraph"
             }
-          ]
+          ],
+          "differentOddEven": true
         },
         "id": "section-2",
         "pageConfig": {
+          "columns": {
+            "count": 2,
+            "separator": true,
+            "spacing": 36
+          },
           "margins": {
             "bottom": 96,
             "left": 96,
@@ -673,6 +748,10 @@
             "h": 1056,
             "w": 816
           }
+        },
+        "pageNumbering": {
+          "format": "lowerRoman",
+          "start": 1
         }
       },
       {
@@ -911,6 +990,43 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
+              "content": [
+                {
+                  "fieldType": "pageNumber",
+                  "type": "dynamicField"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "\t",
+                  "type": "text"
+                },
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Even footer",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "firstPageBlocks": [
+            {
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "First-page footer",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
           ]
         },
         "header": {
@@ -948,10 +1064,43 @@
               ],
               "type": "paragraph"
             }
+          ],
+          "differentOddEven": true,
+          "evenPageBlocks": [
+            {
+              "alignment": "left",
+              "content": [
+                {
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "Even-page header (left pages)",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "firstPageBlocks": [
+            {
+              "content": [
+                {
+                  "bold": true,
+                  "fontFamily": "Liberation Sans",
+                  "fontSize": 11,
+                  "text": "FIRST PAGE HEADER: title page only",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
           ]
         },
         "id": "section-3",
         "pageConfig": {
+          "columns": {
+            "count": 3,
+            "spacing": 24
+          },
           "margins": {
             "bottom": 96,
             "left": 96,
@@ -963,6 +1112,9 @@
             "h": 1056,
             "w": 816
           }
+        },
+        "pageNumbering": {
+          "start": 10
         }
       },
       {
@@ -1077,7 +1229,8 @@
               ],
               "type": "paragraph"
             }
-          ]
+          ],
+          "differentOddEven": true
         },
         "header": {
           "blocks": [
@@ -1114,7 +1267,8 @@
               ],
               "type": "paragraph"
             }
-          ]
+          ],
+          "differentOddEven": true
         },
         "id": "section-4",
         "pageConfig": {
@@ -1129,6 +1283,9 @@
             "h": 1123,
             "w": 794
           }
+        },
+        "pageNumbering": {
+          "start": 1
         }
       }
     ],

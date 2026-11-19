@@ -149,6 +149,21 @@ lockstep.
   images and nested tables of a cell, with the document positions of each so clicking and selecting work inside a nested table.
   The table resize handles and the context menu act on the table under the pointer, not on the tables nested in it.
 
+- **DOCX header/footer variants and section properties are imported and exported.** A section's headers and footers are
+  chosen by `w:type` (default, first, even) instead of taking whichever reference comes first: `w:titlePg` becomes
+  `differentFirstPage` with `firstPageParagraphs`, and the document's `w:evenAndOddHeaders` setting becomes the additive
+  `DocHeaderFooter.differentOddEven` with `evenPageParagraphs`. Each section also keeps its page number restart and format
+  (`w:pgNumType`, the additive `DocSection.pageNumbering`), vertical alignment (`w:vAlign`, `verticalAlign`) and text columns
+  (`w:cols`, `columns`: count, spacing, separator, unequal widths). The export writes all of these, including first-page and
+  even-page header and footer parts and the even/odd setting (a document written with a first-page header used to get no first-page
+  part). `docx.headerFooterVariants` is removed from the full loss report, `docx.sectionProperties` now only counts chapter
+  numbers in page numbers, and the effect of `docx.columns` reads "kept for export; laid out as a single column".
+- **Editor: header/footer variants and section properties in the document model.** Additive `HeaderFooterContent.differentOddEven`
+  and `evenPageBlocks`, `PageConfig.columns` (`PageColumns`), `Section.pageNumbering` (`PageNumbering`) and
+  `Section.verticalAlign`, kept by `getData`/`setData` and by the shared Yjs document (`sectionsMeta`), so collaboration carries them.
+  Nothing is laid out from them yet: the editor draws the first-page header and footer as before, and even-page headers, page
+  number restarts and formats, vertical alignment and columns are stored and exported only.
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it

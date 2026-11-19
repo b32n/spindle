@@ -488,3 +488,35 @@ describe('header / footer content under collab', () => {
     expect(out.footer).toEqual(data.sections[0].footer);
   });
 });
+
+describe('header/footer variants and section properties under collab', () => {
+  it('even-page content, columns, page numbering and vertical alignment survive hydrate -> sync -> serialize', () => {
+    const data = dataWith([para('p', [text('body')])]);
+    data.sections[0].pageConfig = { ...DEFAULT_PAGE_CONFIG, columns: { count: 3, spacing: 24, separator: true, widths: [100, 200, 300] } };
+    data.sections[0].header = {
+      blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'odd' }] }],
+      differentFirstPage: true,
+      differentOddEven: true,
+      evenPageBlocks: [{ type: 'paragraph', alignment: 'right', content: [{ type: 'text', text: 'even' }] }],
+    };
+    data.sections[0].pageNumbering = { start: 10, format: 'lowerRoman' };
+    data.sections[0].verticalAlign = 'center';
+    const a = new Y.Doc();
+    hydrateYDocFromData(a, data);
+    const b = new Y.Doc();
+    Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
+    const out = serializeYDocToData(b).sections[0];
+    expect(out.header).toEqual(data.sections[0].header);
+    expect(out.pageConfig.columns).toEqual({ count: 3, spacing: 24, separator: true, widths: [100, 200, 300] });
+    expect(out.pageNumbering).toEqual({ start: 10, format: 'lowerRoman' });
+    expect(out.verticalAlign).toBe('center');
+  });
+
+  it('a section without them reads back without the fields', () => {
+    const a = new Y.Doc();
+    hydrateYDocFromData(a, dataWith([para('p', [text('body')])]));
+    const out = serializeYDocToData(a).sections[0];
+    expect(out).not.toHaveProperty('pageNumbering');
+    expect(out).not.toHaveProperty('verticalAlign');
+  });
+});

@@ -240,10 +240,37 @@ export interface DocHeaderFooterParagraph {
 }
 
 export interface DocHeaderFooter {
+  /** The header/footer of the pages that have no variant of their own (`w:type="default"`; the odd pages when `differentOddEven`). */
   paragraphs: DocHeaderFooterParagraph[];
+  /** The first page shows `firstPageParagraphs` (`w:titlePg`; the first page is blank when there are none). */
   differentFirstPage?: boolean;
   firstPageParagraphs?: DocHeaderFooterParagraph[];
+  /** Even pages show `evenPageParagraphs` (the document's `w:evenAndOddHeaders`; the even pages are blank when there are none). */
+  differentOddEven?: boolean;
+  evenPageParagraphs?: DocHeaderFooterParagraph[];
 }
+
+/** Text columns of a section (`w:cols`). Kept and written back; the editor lays the text out in one column. */
+export interface DocColumns {
+  count: number;
+  /** Space between columns, in pixels. */
+  spacingPx?: number;
+  /** A line between the columns. */
+  separator?: boolean;
+  /** Widths in pixels of columns of different widths (`w:equalWidth="0"`); absent when the columns are equal. */
+  widthsPx?: number[];
+}
+
+/** Page numbering of a section (`w:pgNumType`). Kept and written back; page numbers shown by the editor do not follow it yet. */
+export interface DocPageNumbering {
+  /** The number of the section's first page (`w:start`), when it restarts or continues from another number. */
+  start?: number;
+  /** DOCX number format name of the page numbers (`w:fmt`, e.g. `lowerRoman`); absent for decimal. */
+  format?: string;
+}
+
+/** Where the text sits between the top and bottom margins of the section's pages (`w:vAlign`; `top` is the default and is not kept). */
+export type DocSectionVerticalAlign = 'center' | 'bottom' | 'both';
 
 export interface DocSection {
   /** Pixels (96dpi). */
@@ -257,6 +284,9 @@ export interface DocSection {
   blocks: DocBlock[];
   header?: DocHeaderFooter;
   footer?: DocHeaderFooter;
+  columns?: DocColumns;
+  pageNumbering?: DocPageNumbering;
+  verticalAlign?: DocSectionVerticalAlign;
 }
 
 /** One comment of a thread: the root comment or a reply. */
