@@ -1,6 +1,9 @@
 import {
   AlignmentType,
   BuilderElement,
+  CommentRangeEnd,
+  CommentRangeStart,
+  CommentReference,
   Document,
   ExternalHyperlink,
   Footer,
@@ -36,6 +39,8 @@ import type {
   DocumentExportInput,
   DocumentExportResult,
 } from '@b32nio/spindle-shared/export/docx';
+
+import { addCommentParts, buildCommentParts, planComments, type CommentPlan, type CommentPlanThread } from './comments-writer';
 
 // docx's own unit conventions: twips (1/1440in) for most measurements, but
 // half-points for font size — both derived from our px-at-96dpi convention.
@@ -90,9 +95,48 @@ function numberingConfig() {
 
 class DocxBuilder {
   readonly warnings: string[] = [];
+  /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
+  private pendingOrphans: CommentPlanThread[];
 
-  buildRuns(content: DocInline[]): ParagraphChild[] {
-    return content.flatMap((inline) => this.buildRun(inline)).filter((r): r is ParagraphChild => r != null);
+  constructor(private readonly comments: CommentPlan) {
+    this.pendingOrphans = comments.orphans;
+  }
+
+  /** `anchorComments: false` for header/footer content, which has no comment anchors. */
+  buildRuns(content: DocInline[], anchorComments = true): ParagraphChild[] {
+    const out: ParagraphChild[] = [];
+    for (const inline of content) {
+      const planned =
+        anchorComments && (inline.type === 'text' || inline.type === 'link') && inline.commentThreadId
+          ? this.comments.threads.get(inline.commentThreadId)
+          : undefined;
+      // A comment's range runs from its first tagged run to its last; replies share the range of their root.
+      if (planned && planned.seen === 0) out.push(...this.rangeStarts(planned));
+      out.push(...this.buildRun(inline).filter((r): r is ParagraphChild => r != null));
+      if (planned && ++planned.seen === planned.total) out.push(...this.rangeEnds(planned));
+    }
+    return out;
+  }
+
+  private rangeStarts(planned: CommentPlanThread): ParagraphChild[] {
+    return planned.ids.map((id) => new CommentRangeStart(id));
+  }
+
+  private rangeEnds(planned: CommentPlanThread): ParagraphChild[] {
+    return planned.ids.flatMap((id) => [new CommentRangeEnd(id), new TextRun({ children: [new CommentReference(id)] })]);
+  }
+
+  /** Comments without a surviving anchor are kept as collapsed ranges at the start of the first body paragraph. */
+  private withOrphans(children: ParagraphChild[]): ParagraphChild[] {
+    if (this.pendingOrphans.length === 0) return children;
+    const markers = this.pendingOrphans.flatMap((planned) => [...this.rangeStarts(planned), ...this.rangeEnds(planned)]);
+    this.pendingOrphans = [];
+    return [...markers, ...children];
+  }
+
+  /** Orphan threads that never found a body paragraph (a document without one), so cannot be written. */
+  unplaced(): CommentPlanThread[] {
+    return this.pendingOrphans;
   }
 
   /**
@@ -189,11 +233,11 @@ class DocxBuilder {
   buildBlock(block: DocBlock): Paragraph | Table {
     switch (block.type) {
       case 'paragraph':
-        return this.buildParagraph(block, this.buildRuns(block.content));
+        return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)));
       case 'heading':
-        return this.buildParagraph(block, this.buildRuns(block.content), { heading: HEADING_MAP[block.level] });
+        return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)), { heading: HEADING_MAP[block.level] });
       case 'listItem':
-        return this.buildParagraph(block, this.buildRuns(block.content), {
+        return this.buildParagraph(block, this.withOrphans(this.buildRuns(block.content)), {
           numbering: {
             reference: block.listType === 'bullet' ? BULLET_REFERENCE : NUMBERED_REFERENCE,
             level: Math.min(block.level, NUMBERING_LEVELS - 1),
@@ -241,7 +285,7 @@ class DocxBuilder {
 
   buildHeaderFooterParagraphs(paragraphs: DocHeaderFooterParagraph[]): Paragraph[] {
     return paragraphs.map((p) =>
-      this.buildParagraph({ alignment: p.alignment }, this.buildRuns(p.content))
+      this.buildParagraph({ alignment: p.alignment }, this.buildRuns(p.content, false))
     );
   }
 
@@ -310,7 +354,8 @@ function truncate(s: string, max = 60): string {
 }
 
 export async function exportDocx(input: DocumentExportInput): Promise<DocumentExportResult> {
-  const builder = new DocxBuilder();
+  const comments = planComments(input.comments, input.sections);
+  const builder = new DocxBuilder(comments);
   const doc = new Document({
     title: input.title,
     numbering: numberingConfig(),
@@ -319,5 +364,13 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   // toArrayBuffer, not toBuffer: JSZip's "nodebuffer" output does not exist in browsers,
   // so toBuffer made every in-browser DOCX download fail.
   const buffer = await Packer.toArrayBuffer(doc);
-  return { bytes: new Uint8Array(buffer), warnings: builder.warnings };
+  let bytes = new Uint8Array(buffer);
+  if (comments.threads.size > 0) {
+    const unplaced = builder.unplaced();
+    const lost = unplaced.reduce((n, t) => n + t.ids.length, 0);
+    if (lost > 0) builder.warnings.push(`${lost} comment(s) could not be anchored (the document has no paragraph) and were not written.`);
+    for (const t of unplaced) comments.threads.delete(t.thread.id);
+    if (comments.threads.size > 0) bytes = await addCommentParts(bytes, buildCommentParts(comments));
+  }
+  return { bytes, warnings: builder.warnings };
 }

@@ -35,6 +35,9 @@ import { createSection } from '../document';
 import { TextStylePoolImpl, ParagraphStylePoolImpl } from '../style-pool';
 import { generateBlockId, generateCellId, generateRowId } from '../blocks/utils';
 
+/** A comment with no recorded date still needs a timestamp (the model requires one); the epoch marks it unknown. */
+const UNKNOWN_COMMENT_DATE = new Date(0).toISOString();
+
 export async function exportToDocx(document: DocumentImpl): Promise<{ bytes: Uint8Array; warnings: string[] }> {
   const data = document.getData();
   const { exportDocx } = await loadIo();
@@ -47,6 +50,23 @@ function toDocumentExportInput(data: DocumentData): DocumentExportInput {
   return {
     title: data.title,
     sections: data.sections.map((s) => toSection(s, data.title, textStylePool, paragraphStylePool)),
+    ...(data.threads && data.threads.length > 0 && { comments: data.threads.map(toThreadForDocx) }),
+  };
+}
+
+function toThreadForDocx(thread: DocsCommentThread): DocCommentThread {
+  return {
+    id: thread.id,
+    quote: thread.anchor.quote,
+    ...(thread.status === 'resolved' && { resolved: true }),
+    comments: thread.comments.map((c) => ({
+      id: c.id,
+      author: c.authorName,
+      authorId: c.authorId,
+      ...(c.authorInitials && { initials: c.authorInitials }),
+      ...(c.createdAt !== UNKNOWN_COMMENT_DATE && { date: c.createdAt }),
+      text: c.body,
+    })),
   };
 }
 
@@ -172,13 +192,14 @@ function toInlineContent(content: InlineContent[], title: string, pool: Record<s
 function toInline(item: InlineContent, title: string, pool: Record<string, TextStyle>): DocInline | null {
   switch (item.type) {
     case 'text':
-      return { type: 'text', text: item.text, ...resolveTextStyle(item, pool) };
+      return { type: 'text', text: item.text, ...resolveTextStyle(item, pool), ...(item.commentThreadId && { commentThreadId: item.commentThreadId }) };
     case 'link':
       return {
         type: 'link',
         text: item.text,
         href: item.href,
         ...(item.styleId && pool[item.styleId] ? toDocRunBase(pool[item.styleId]) : {}),
+        ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
       };
     case 'image':
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };
@@ -333,9 +354,6 @@ function toDocumentData(result: DocumentImportResult, document: DocumentImpl): D
     ...(result.comments && result.comments.length > 0 && { threads: result.comments.map(toThreadFromDocx) }),
   };
 }
-
-/** A comment with no recorded date still needs a timestamp (the model requires one); the epoch marks it unknown. */
-const UNKNOWN_COMMENT_DATE = new Date(0).toISOString();
 
 function toThreadFromDocx(thread: DocCommentThread): DocsCommentThread {
   const createdAt = thread.comments[0]?.date ?? UNKNOWN_COMMENT_DATE;

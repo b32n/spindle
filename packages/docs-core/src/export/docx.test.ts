@@ -553,4 +553,42 @@ describe('comments through the editor API', () => {
     await importFromDocx((await exportToDocx(docWith({}))).bytes, doc);
     expect(doc.getComments().getThreads()).toEqual([]);
   });
+
+  it('writes threads on export and re-imports them intact (author, initials, dates, replies, resolved, anchors)', async () => {
+    const source = docWith({});
+    await importFromDocx(await withComments(), source);
+    // A thread made in the editor: anchored run plus a reply, never dated through a file.
+    const store = source.getComments();
+    const added = store.addThread({ quote: 'See ' }, 'From the editor', { id: 'u1', name: 'Eve' });
+    store.addReply(added.id, 'A reply', { id: 'u2', name: 'Fay' });
+    const data = source.getData();
+    const block = data.sections[0].blocks[0];
+    if (block.type !== 'paragraph') throw new Error('expected a paragraph');
+    block.content[0] = { ...block.content[0], commentThreadId: added.id } as typeof block.content[0];
+    source.setData(data);
+
+    const { zip, documentXml } = await exportAndUnzip(source);
+    expect(documentXml.match(/<w:commentRangeStart /g)).toHaveLength(2 + 2 + 1); // 2 for the file's thread, 2 for the new one, 1 orphan
+    const comments = await zip.file('word/comments.xml')!.async('string');
+    expect(comments).toContain('w:author="Alice"');
+    expect(comments).toContain('w:author="Eve"');
+
+    const target = docWith({});
+    await importFromDocx((await exportToDocx(source)).bytes, target);
+    const threads = target.getComments().getThreads();
+    expect(threads).toHaveLength(3);
+    const strip = (ts: typeof threads) =>
+      ts.map((t) => ({ quote: t.anchor.quote, status: t.status, comments: t.comments.map((c) => [c.authorName, c.authorInitials, c.body]) }));
+    expect(strip(threads)).toEqual(strip(source.getComments().getThreads()));
+    const resolved = threads.find((t) => t.status === 'resolved');
+    expect(resolved?.comments.map((c) => c.body)).toEqual(['Root', 'Reply']);
+  });
+
+  it('does not write the unknown-date placeholder as a date', async () => {
+    const source = docWith({});
+    await importFromDocx(await withComments(), source);
+    const { zip } = await exportAndUnzip(source);
+    const comments = await zip.file('word/comments.xml')!.async('string');
+    expect(comments).toMatch(/<w:comment w:id="\d+" w:author="Cy">/);
+  });
 });

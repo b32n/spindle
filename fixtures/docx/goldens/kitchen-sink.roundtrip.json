@@ -23,25 +23,11 @@
       "sections": 4,
       "textChars": 27037
     },
-    "byField": {
-      "removed sections[].blocks[].content[].commentThreadId": 1,
-      "removed threads[]": 1
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "\"thread-1\"",
-        "kind": "removed",
-        "path": "sections[1].blocks[23].content[4].commentThreadId"
-      },
-      {
-        "before": "{\"id\":\"thread-1\",\"anchor\":{\"quote\":\"bookmarked and commented\"},\"status\":\"open...",
-        "kind": "removed",
-        "path": "threads[0]"
-      }
-    ],
-    "removed": 2,
-    "total": 2,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
   "exportWarnings": [],
