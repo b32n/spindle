@@ -43,3 +43,58 @@ describe('proseMirrorToFlowBlocks — link marks', () => {
     expect(run.href).toBe('');
   });
 });
+
+// The real docs schema: paragraph formatting and run flags travel through ProseMirror attrs and marks.
+import { docsSchema } from '@b32nio/spindle-docs-core';
+import type { ListItemBlock, TextRun } from './flow-blocks';
+
+const j = (json: unknown) => docsSchema.nodeFromJSON({ type: 'doc', content: json });
+const text = (s: string, marks?: Array<{ type: string; attrs?: object }>) => (marks ? { type: 'text', text: s, marks } : { type: 'text', text: s });
+
+describe('proseMirrorToFlowBlocks: DOCX paragraph and run properties', () => {
+  it('maps indents, spacing and a custom line spacing of a paragraph', () => {
+    const doc = j([
+      { type: 'paragraph', attrs: { leftIndent: 36, rightIndent: 12, firstLineIndent: -18, spaceAfter: 0, lineSpacing: { type: 'multiple', value: 1.2 } }, content: [text('x')] },
+    ]);
+    const para = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
+    expect(para.attrs).toMatchObject({ leftIndent: 36, rightIndent: 12, firstLineIndent: -18, spaceAfter: 0 });
+    expect(para.attrs?.lineHeight).toBeCloseTo(1.8); // 1.2 x the layout's single-spacing default of 1.5
+  });
+
+  it('scales the keyword spacings and ignores heights it cannot express', () => {
+    const lineHeight = (lineSpacing: unknown) =>
+      (proseMirrorToFlowBlocks(j([{ type: 'paragraph', attrs: { lineSpacing }, content: [text('x')] }]))[0] as ParagraphBlock).attrs?.lineHeight;
+    expect(lineHeight('single')).toBeUndefined();
+    expect(lineHeight({ type: 'onePointFive' })).toBe(2.25);
+    expect(lineHeight({ type: 'double' })).toBe(3);
+    expect(lineHeight({ type: 'exactly', value: 20 })).toBeUndefined();
+    expect(lineHeight({ type: 'atLeast', value: 20 })).toBeUndefined();
+    expect(lineHeight({ type: 'multiple', value: 0 })).toBeUndefined();
+    expect(lineHeight({ type: 'multiple', value: 99 })).toBeUndefined();
+  });
+
+  it('carries heading spacing and indents', () => {
+    const doc = j([{ type: 'heading', attrs: { level: 2, spaceBefore: 12, spaceAfter: 0, leftIndent: 8 }, content: [text('H')] }]);
+    expect(proseMirrorToFlowBlocks(doc)[0]).toMatchObject({ kind: 'heading', attrs: { spaceBefore: 12, spaceAfter: 0, leftIndent: 8 } });
+  });
+
+  it('maps small caps, all caps and hidden marks onto the run', () => {
+    const doc = j([
+      { type: 'paragraph', content: [text('a', [{ type: 'smallCaps' }]), text('b', [{ type: 'allCaps' }]), text('c', [{ type: 'hidden' }]), text('d')] },
+    ]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs as TextRun[];
+    expect(runs.map((r) => [r.smallCaps, r.allCaps, r.hidden])).toEqual([
+      [true, undefined, undefined],
+      [undefined, true, undefined],
+      [undefined, undefined, true],
+      [undefined, undefined, undefined],
+    ]);
+  });
+
+  it('numbers an ordered list from its start attribute', () => {
+    const item = (s: string) => ({ type: 'list_item', attrs: { level: 0 }, content: [{ type: 'paragraph', content: [text(s)] }] });
+    const doc = j([{ type: 'ordered_list', attrs: { start: 7 }, content: [item('a'), item('b')] }, { type: 'ordered_list', content: [item('c')] }]);
+    const items = proseMirrorToFlowBlocks(doc) as ListItemBlock[];
+    expect(items.map((i) => i.listIndex)).toEqual([7, 8, 1]);
+  });
+});

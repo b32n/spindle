@@ -9,6 +9,31 @@ import {
 } from './sanitize';
 
 /**
+ * Paragraph formatting that paragraphs and headings carry beyond alignment and spacing: indents in pixels
+ * (first-line negative for a hanging indent) and the pagination flags. All optional, absent by default.
+ */
+const PARAGRAPH_FORMAT_ATTRS = {
+  leftIndent: { default: null },
+  rightIndent: { default: null },
+  firstLineIndent: { default: null },
+  keepWithNext: { default: null },
+  keepTogether: { default: null },
+  pageBreakBefore: { default: null },
+};
+
+/** CSS for the indents of a paragraph/heading (sanitised: the attrs come from loaded or collaborative JSON). */
+function indentStyle(attrs: Record<string, unknown>): string {
+  let css = '';
+  const left = safeCssNumber(attrs.leftIndent as number | null);
+  const right = safeCssNumber(attrs.rightIndent as number | null);
+  const first = safeCssNumber(attrs.firstLineIndent as number | null);
+  if (left) css += ` margin-left: ${left}px;`;
+  if (right) css += ` margin-right: ${right}px;`;
+  if (first) css += ` text-indent: ${first}px;`;
+  return css;
+}
+
+/**
  * Node specifications matching our document model
  */
 const nodes: Record<string, NodeSpec> = {
@@ -22,9 +47,11 @@ const nodes: Record<string, NodeSpec> = {
     attrs: {
       alignment: { default: 'left' },
       indent: { default: 0 },
+      // 'single', or a LineSpacing object ({ type, value? }) for anything else.
       lineSpacing: { default: 'single' },
       spaceBefore: { default: 0 },
       spaceAfter: { default: 8 },
+      ...PARAGRAPH_FORMAT_ATTRS,
     },
     parseDOM: [{ tag: 'p' }],
     toDOM(node): DOMOutputSpec {
@@ -34,7 +61,7 @@ const nodes: Record<string, NodeSpec> = {
       const align = safeCssKeyword(node.attrs.alignment) || 'left';
       const before = safeCssNumber(node.attrs.spaceBefore) ?? 0;
       const after = safeCssNumber(node.attrs.spaceAfter) ?? 8;
-      const style = `text-align: ${align}; margin-top: ${before}px; margin-bottom: ${after}px;`;
+      const style = `text-align: ${align}; margin-top: ${before}px; margin-bottom: ${after}px;${indentStyle(node.attrs)}`;
       return ['p', { style }, 0];
     },
   },
@@ -45,6 +72,10 @@ const nodes: Record<string, NodeSpec> = {
     attrs: {
       level: { default: 1 },
       alignment: { default: 'left' },
+      lineSpacing: { default: 'single' },
+      spaceBefore: { default: null },
+      spaceAfter: { default: null },
+      ...PARAGRAPH_FORMAT_ATTRS,
     },
     parseDOM: [
       { tag: 'h1', attrs: { level: 1 } },
@@ -60,7 +91,10 @@ const nodes: Record<string, NodeSpec> = {
       // a string or out of 1-6 would make `h${level}` an invalid tag name and
       // throw InvalidCharacterError in createElement, aborting the render.
       const lvl = Math.min(6, Math.max(1, Math.trunc(Number(node.attrs.level)) || 1));
-      return [`h${lvl}`, { style: `text-align: ${align}` }, 0];
+      const before = safeCssNumber(node.attrs.spaceBefore);
+      const after = safeCssNumber(node.attrs.spaceAfter);
+      const extras = `${before != null ? ` margin-top: ${before}px;` : ''}${after != null ? ` margin-bottom: ${after}px;` : ''}${indentStyle(node.attrs)}`;
+      return [`h${lvl}`, { style: extras ? `text-align: ${align};${extras}` : `text-align: ${align}` }, 0];
     },
   },
 
@@ -452,6 +486,9 @@ const marks: Record<string, MarkSpec> = {
       backgroundColor: { default: null },
       fontSize: { default: null },
       fontFamily: { default: null },
+      // East Asian and complex-script fonts (only when they differ from fontFamily).
+      fontFamilyEastAsia: { default: null },
+      fontFamilyComplex: { default: null },
     },
     parseDOM: [
       {
@@ -490,6 +527,27 @@ const marks: Record<string, MarkSpec> = {
     ],
     toDOM(): DOMOutputSpec {
       return ['span', { style: 'font-variant: small-caps' }, 0];
+    },
+  },
+
+  allCaps: {
+    parseDOM: [
+      {
+        style: 'text-transform',
+        getAttrs: (value: string) => value === 'uppercase' && null,
+      },
+    ],
+    toDOM(): DOMOutputSpec {
+      return ['span', { style: 'text-transform: uppercase' }, 0];
+    },
+  },
+
+  // Hidden text (DOCX `vanish`). Kept in the document and exported; the editor shows it dimmed rather than
+  // removing it from the layout, so every character stays reachable by the caret.
+  hidden: {
+    parseDOM: [{ tag: 'span[data-hidden-text]' }],
+    toDOM(): DOMOutputSpec {
+      return ['span', { 'data-hidden-text': 'true', style: 'opacity: 0.5' }, 0];
     },
   },
 

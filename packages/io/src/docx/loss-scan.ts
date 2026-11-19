@@ -221,34 +221,6 @@ function tableDetectors(root: XmlNode[]): Item[] {
   ];
 }
 
-function paragraphFormatting(root: XmlNode[]): Item[] {
-  const kinds = new Map<string, number>();
-  let total = 0;
-  const hit = (k: string) => {
-    total++;
-    bump(kinds, k);
-  };
-  walk(root, (node, tag, path) => {
-    if (inRevisionProps(path)) return;
-    const parent = path[path.length - 1];
-    if (parent === 'w:pPr') {
-      if (tag === 'w:spacing' && (attr(node, 'w:line') || attr(node, 'w:lineRule'))) hit('line spacing');
-      else if (tag === 'w:ind' && (attr(node, 'w:right') || attr(node, 'w:end') || attr(node, 'w:hanging'))) hit('right/hanging indent');
-      else if ((tag === 'w:keepNext' || tag === 'w:keepLines') && isOn(node)) hit('keep with next/lines');
-      else if (tag === 'w:pageBreakBefore' && isOn(node)) hit('page break before');
-    } else if (tag === 'w:vanish' && parent === 'w:rPr' && path[path.length - 2] === 'w:r' && isOn(node)) {
-      hit('hidden text');
-    }
-  });
-  return item(
-    'docx.paragraphFormatting',
-    'paragraph/run formatting occurrence(s)',
-    total,
-    'line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)',
-    kinds
-  );
-}
-
 function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
@@ -266,19 +238,16 @@ function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
     const base = abs ? numbering.levels.get(`${abs}:${ilvl}`) : undefined;
     const override = numbering.overrides.get(`${numId}:${ilvl}`);
     const fmt = override?.fmt ?? base?.fmt;
-    const start = override?.start ?? base?.start;
-    const reasons: string[] = [];
-    if (fmt && fmt !== 'decimal' && fmt !== 'bullet') reasons.push(fmt);
-    if (fmt !== 'bullet' && start && start !== '1') reasons.push('custom start');
-    if (reasons.length === 0) return;
+    if (!fmt || fmt === 'decimal' || fmt === 'bullet') return;
     total++;
-    for (const r of reasons) bump(kinds, r);
+    bump(kinds, fmt);
   });
+  // The first number of a list and restarts are imported; only the number format is not.
   return item(
     'docx.listFormatting',
-    'list item(s) with another number format or a custom start',
+    'list item(s) with another number format',
     total,
-    'imported as plain bullet or decimal-numbered items; the number format and start value are not kept',
+    'imported as plain bullet or decimal-numbered items; the number format is not kept',
     kinds
   );
 }
@@ -562,7 +531,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     ...safe(() => extraSections(root)),
     ...safe(() => namedStyles(root, styleNames(input.styles))),
     ...safe(() => tableDetectors(root)),
-    ...safe(() => paragraphFormatting(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => bookmarks(root)),
     ...safe(() => sectionDetectors(root, evenAndOdd)),

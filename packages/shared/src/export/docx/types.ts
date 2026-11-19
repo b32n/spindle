@@ -19,6 +19,13 @@ export interface DocRunBase {
   color?: string;
   /** #rrggbb (rendered as a highlight — docx has no free-form run background). */
   backgroundColor?: string;
+  /** All capitals (`w:caps`). */
+  allCaps?: boolean;
+  /** Hidden text (`w:vanish`). */
+  hidden?: boolean;
+  /** East Asian and complex-script fonts (`w:rFonts` `eastAsia` / `cs`); `fontFamily` is the Latin font. */
+  fontFamilyEastAsia?: string;
+  fontFamilyComplex?: string;
   /** Id of the comment thread (see `DocCommentThread`) whose anchored range covers this run. */
   commentThreadId?: string;
 }
@@ -64,9 +71,17 @@ export interface DocParagraphStyle {
   spaceAfterPt?: number;
   /** Points. */
   leftIndentPt?: number;
-  /** Points. */
+  /** Points; negative for a hanging indent. */
   firstLineIndentPt?: number;
+  /** Points. */
+  rightIndentPt?: number;
   lineSpacing?: 'single' | 'onePointFive' | 'double';
+  /** Line spacing other than the three keywords: a `multiple` of single spacing, or `atLeast` / `exactly` a height in points. Takes precedence over `lineSpacing`. */
+  lineSpacingCustom?: { rule: 'multiple' | 'atLeast' | 'exactly'; value: number };
+  keepWithNext?: boolean;
+  /** Keep the lines of the paragraph together on one page (`w:keepLines`). */
+  keepTogether?: boolean;
+  pageBreakBefore?: boolean;
 }
 
 export interface DocTableCell {
@@ -79,10 +94,14 @@ export interface DocTableRow {
   cells: DocTableCell[];
 }
 
+/**
+ * `listItem.start` is the number of the first item of a numbered list. Set it on the first item of each list
+ * when it is not 1; a `start` on a later item begins a new list (a restart), even when it is 1.
+ */
 export type DocBlock =
   | ({ type: 'paragraph'; content: DocInline[] } & DocParagraphStyle)
   | ({ type: 'heading'; level: 1 | 2 | 3 | 4 | 5 | 6; content: DocInline[] } & DocParagraphStyle)
-  | ({ type: 'listItem'; listType: 'bullet' | 'numbered'; level: number; content: DocInline[] } & DocParagraphStyle)
+  | ({ type: 'listItem'; listType: 'bullet' | 'numbered'; level: number; content: DocInline[]; start?: number } & DocParagraphStyle)
   | { type: 'table'; rows: DocTableRow[]; colWidthsPx?: number[] }
   | { type: 'image'; src: string; width: number; height: number; alt?: string; alignment?: 'left' | 'center' | 'right' }
   | { type: 'horizontalRule' }

@@ -1,6 +1,6 @@
 import type { DocParagraphStyle, DocRunBase } from '@b32nio/spindle-shared/export/docx';
 
-import { preferRecorded, themeColor, themeFont, type Theme } from './theme';
+import { preferRecorded, themeColor, themeFont, themeScriptFont, type Theme } from './theme';
 import { attrsOf, childrenOf, find, findAll, parseXml, type XmlNode } from './xml-tree';
 
 // ---------------------------------------------------------------------------
@@ -32,20 +32,37 @@ export interface RunPartial {
   italic?: boolean;
   strike?: boolean;
   smallCaps?: boolean;
+  allCaps?: boolean;
+  hidden?: boolean;
   underline?: boolean;
   vertAlign?: 'superscript' | 'subscript' | 'baseline';
   color?: string | null;
   fontSize?: number;
   fontFamily?: string;
+  fontFamilyEastAsia?: string;
+  fontFamilyComplex?: string;
   backgroundColor?: string | null;
+}
+
+/** `w:spacing` `w:line` / `w:lineRule`: `auto` is a multiple of single spacing (240 = 1), the others a height in points. */
+export interface LineSpacingPartial {
+  rule: 'auto' | 'atLeast' | 'exact';
+  /** Multiplier for `auto`, points otherwise. */
+  value: number;
 }
 
 export interface ParagraphPartial {
   alignment?: DocParagraphStyle['alignment'];
   spaceBeforePt?: number;
   spaceAfterPt?: number;
+  lineSpacing?: LineSpacingPartial;
   leftIndentPt?: number;
+  rightIndentPt?: number;
+  /** Negative for a hanging indent. */
   firstLineIndentPt?: number;
+  keepNext?: boolean;
+  keepLines?: boolean;
+  pageBreakBefore?: boolean;
   /** numPr: `numId` 0 switches numbering off. */
   numId?: string;
   ilvl?: number;
@@ -53,7 +70,7 @@ export interface ParagraphPartial {
   outlineLvl?: number;
 }
 
-const TOGGLES = ['bold', 'italic', 'strike', 'smallCaps'] as const;
+const TOGGLES = ['bold', 'italic', 'strike', 'smallCaps', 'allCaps', 'hidden'] as const;
 
 /** An on/off element: absent -> undefined, `w:val` 0/false/off -> false, anything else true. */
 function onOff(node: XmlNode | undefined): boolean | undefined {
@@ -73,6 +90,8 @@ export function parseRPr(rPr: XmlNode | undefined, theme?: Theme): RunPartial {
   set('italic', onOff(find(props, 'w:i')));
   set('strike', onOff(find(props, 'w:strike')));
   set('smallCaps', onOff(find(props, 'w:smallCaps')));
+  set('allCaps', onOff(find(props, 'w:caps')));
+  set('hidden', onOff(find(props, 'w:vanish')));
   const uEl = find(props, 'w:u');
   if (uEl) set('underline', attrsOf(uEl)['@_w:val'] !== 'none');
   const vert = find(props, 'w:vertAlign');
@@ -94,7 +113,13 @@ export function parseRPr(rPr: XmlNode | undefined, theme?: Theme): RunPartial {
   const fontsEl = find(props, 'w:rFonts');
   if (fontsEl) {
     const a = attrsOf(fontsEl);
-    set('fontFamily', themeFont(theme, a['@_w:asciiTheme']) ?? (a['@_w:ascii'] || undefined));
+    // The Latin font is the ASCII one, else the high-ANSI one (what Word uses for non-ASCII Latin text).
+    set(
+      'fontFamily',
+      themeFont(theme, a['@_w:asciiTheme']) ?? (a['@_w:ascii'] || undefined) ?? themeFont(theme, a['@_w:hAnsiTheme']) ?? (a['@_w:hAnsi'] || undefined)
+    );
+    set('fontFamilyEastAsia', themeScriptFont(theme, a['@_w:eastAsiaTheme'], 'eastAsia') ?? (a['@_w:eastAsia'] || undefined));
+    set('fontFamilyComplex', themeScriptFont(theme, a['@_w:cstheme'], 'complex') ?? (a['@_w:cs'] || undefined));
   }
   const shdEl = find(props, 'w:shd');
   const highlightEl = find(props, 'w:highlight');
@@ -127,14 +152,30 @@ export function parsePPr(pPr: XmlNode | undefined): ParagraphPartial {
     const a = attrsOf(spacing);
     if (a['@_w:before']) out.spaceBeforePt = Number(a['@_w:before']) / 20;
     if (a['@_w:after']) out.spaceAfterPt = Number(a['@_w:after']) / 20;
+    const line = Number(a['@_w:line']);
+    if (a['@_w:line'] && Number.isFinite(line) && line > 0) {
+      const rule = a['@_w:lineRule'];
+      out.lineSpacing =
+        rule === 'atLeast' || rule === 'exact' ? { rule, value: line / 20 } : { rule: 'auto', value: line / 240 };
+    }
   }
   const ind = find(kids, 'w:ind');
   if (ind) {
     const a = attrsOf(ind);
     const left = a['@_w:left'] ?? a['@_w:start'];
     if (left) out.leftIndentPt = Number(left) / 20;
-    if (a['@_w:firstLine']) out.firstLineIndentPt = Number(a['@_w:firstLine']) / 20;
+    const right = a['@_w:right'] ?? a['@_w:end'];
+    if (right) out.rightIndentPt = Number(right) / 20;
+    // firstLine and hanging are alternatives; a hanging indent is a negative first-line indent.
+    if (a['@_w:hanging']) out.firstLineIndentPt = -Number(a['@_w:hanging']) / 20;
+    else if (a['@_w:firstLine']) out.firstLineIndentPt = Number(a['@_w:firstLine']) / 20;
   }
+  const keepNext = onOff(find(kids, 'w:keepNext'));
+  if (keepNext !== undefined) out.keepNext = keepNext;
+  const keepLines = onOff(find(kids, 'w:keepLines'));
+  if (keepLines !== undefined) out.keepLines = keepLines;
+  const pageBreakBefore = onOff(find(kids, 'w:pageBreakBefore'));
+  if (pageBreakBefore !== undefined) out.pageBreakBefore = pageBreakBefore;
   const numPr = find(kids, 'w:numPr');
   if (numPr) {
     const numKids = childrenOf(numPr);
@@ -321,11 +362,17 @@ function toRunBase(p: RunPartial): DocRunBase {
     ...(p.strike && { strikethrough: true }),
     ...(p.underline && { underline: true }),
     ...(p.smallCaps && { smallCaps: true }),
+    ...(p.allCaps && { allCaps: true }),
+    ...(p.hidden && { hidden: true }),
     ...(p.vertAlign === 'superscript' && { superscript: true }),
     ...(p.vertAlign === 'subscript' && { subscript: true }),
     ...(p.color && { color: p.color }),
     ...(p.fontSize && { fontSize: p.fontSize }),
     ...(p.fontFamily && { fontFamily: p.fontFamily }),
+    // The East Asian and complex-script fonts are kept only where they differ from the Latin one (Word, and
+    // the `docx` library, write the same name into all of them for an ordinary font).
+    ...(p.fontFamilyEastAsia && p.fontFamilyEastAsia !== p.fontFamily && { fontFamilyEastAsia: p.fontFamilyEastAsia }),
+    ...(p.fontFamilyComplex && p.fontFamilyComplex !== p.fontFamily && { fontFamilyComplex: p.fontFamilyComplex }),
     ...(p.backgroundColor && { backgroundColor: p.backgroundColor }),
   };
 }

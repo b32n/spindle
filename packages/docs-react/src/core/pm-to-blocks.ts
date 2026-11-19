@@ -145,7 +145,9 @@ function convertHeading(node: PmNode): HeadingBlock {
  */
 function convertList(node: PmNode, listType: 'bullet' | 'ordered'): ListItemBlock[] {
   const items: ListItemBlock[] = [];
-  let topLevelIndex = 0;
+  // A numbered list may begin at a number other than 1.
+  const start = typeof node.attrs.start === 'number' && node.attrs.start > 0 ? Math.trunc(node.attrs.start) : 1;
+  let topLevelIndex = start - 1;
   
   node.forEach((listItem) => {
     topLevelIndex++;
@@ -407,6 +409,18 @@ function applyMarkToRun(run: TextRun, mark: Mark): void {
     case 'subscript':
       run.subscript = true;
       break;
+
+    case 'smallCaps':
+      run.smallCaps = true;
+      break;
+
+    case 'allCaps':
+      run.allCaps = true;
+      break;
+
+    case 'hidden':
+      run.hidden = true;
+      break;
     
     case 'textStyle':
       // Handle text style attributes
@@ -437,6 +451,21 @@ function applyMarkToRun(run: TextRun, mark: Mark): void {
   }
 }
 
+/** The layout's default line-height multiplier, which a paragraph with 'single' spacing uses. */
+const SINGLE_LINE_HEIGHT = 1.5;
+
+/**
+ * A paragraph's `lineSpacing` attr ('single' or a { type, value } object) as the layout's line-height
+ * multiplier, scaled from the single-spacing default. `atLeast` / `exactly` heights have no multiplier
+ * equivalent and keep the default.
+ */
+function lineHeightOf(spacing: unknown): number | undefined {
+  if (!spacing || typeof spacing !== 'object') return undefined;
+  const { type, value } = spacing as { type?: string; value?: number };
+  const factor = type === 'onePointFive' ? 1.5 : type === 'double' ? 2 : type === 'multiple' && typeof value === 'number' ? value : undefined;
+  return factor !== undefined && factor > 0 && factor <= 10 ? SINGLE_LINE_HEIGHT * factor : undefined;
+}
+
 /**
  * Extract paragraph-level attributes from a node
  */
@@ -450,6 +479,8 @@ function extractParagraphAttrs(node: PmNode): ParagraphAttrs {
     if (node.attrs.lineHeight !== undefined) {
       attrs.lineHeight = node.attrs.lineHeight as number;
     }
+    const lineHeight = lineHeightOf(node.attrs.lineSpacing);
+    if (lineHeight !== undefined) attrs.lineHeight = lineHeight;
     if (node.attrs.spaceBefore !== undefined) {
       attrs.spaceBefore = node.attrs.spaceBefore as number;
     }

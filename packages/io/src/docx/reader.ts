@@ -12,7 +12,8 @@ import type {
 
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { drawingKind, type DrawingKind } from './drawing-kind';
-import { parsePPr, StyleSheet } from './styles';
+import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './numbering';
+import { parsePPr, StyleSheet, type ParagraphPartial } from './styles';
 import { parseTheme } from './theme';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
@@ -51,6 +52,8 @@ interface PartContext {
   rels: Map<string, string>;
   media: Map<string, string>;
   styles: StyleSheet;
+  /** Follows list numbering through the body (absent for headers/footers). */
+  lists?: ListCounter;
   /** Comment ranges open at the current position of the body walk (absent for headers/footers). */
   comments?: CommentTracker;
 }
@@ -70,52 +73,6 @@ async function buildMediaMap(zip: JSZip, rels: Map<string, string>): Promise<Map
     media.set(rId, `data:${mime};base64,${base64}`);
   }
   return media;
-}
-
-// ---------------------------------------------------------------------------
-// Numbering (word/numbering.xml): numId -> abstractNumId -> (per level) format.
-// A list item only tells you its numId + ilvl; the bullet-vs-numbered
-// distinction lives in this separate part.
-// ---------------------------------------------------------------------------
-
-interface NumberingInfo {
-  numIdToAbstract: Map<string, string>;
-  abstractLevelFormat: Map<string, Map<number, string>>; // abstractNumId -> ilvl -> w:numFmt value
-}
-
-function parseNumbering(xml: string | undefined): NumberingInfo {
-  const numIdToAbstract = new Map<string, string>();
-  const abstractLevelFormat = new Map<string, Map<number, string>>();
-  if (!xml) return { numIdToAbstract, abstractLevelFormat };
-  const root = parseXml(xml);
-  const numberingEl = find(root, 'w:numbering');
-  if (!numberingEl) return { numIdToAbstract, abstractLevelFormat };
-
-  for (const abstractNum of findAll(childrenOf(numberingEl), 'w:abstractNum')) {
-    const abstractId = attrsOf(abstractNum)['@_w:abstractNumId'];
-    if (!abstractId) continue;
-    const levels = new Map<number, string>();
-    for (const lvl of findAll(childrenOf(abstractNum), 'w:lvl')) {
-      const ilvl = Number(attrsOf(lvl)['@_w:ilvl'] ?? '0');
-      const numFmtEl = find(childrenOf(lvl), 'w:numFmt');
-      const fmt = numFmtEl ? attrsOf(numFmtEl)['@_w:val'] : undefined;
-      if (fmt) levels.set(ilvl, fmt);
-    }
-    abstractLevelFormat.set(abstractId, levels);
-  }
-  for (const num of findAll(childrenOf(numberingEl), 'w:num')) {
-    const numId = attrsOf(num)['@_w:numId'];
-    const abstractEl = find(childrenOf(num), 'w:abstractNumId');
-    const abstractId = abstractEl ? attrsOf(abstractEl)['@_w:val'] : undefined;
-    if (numId && abstractId) numIdToAbstract.set(numId, abstractId);
-  }
-  return { numIdToAbstract, abstractLevelFormat };
-}
-
-function listTypeFor(numbering: NumberingInfo, numId: string, ilvl: number): 'bullet' | 'numbered' {
-  const abstractId = numbering.numIdToAbstract.get(numId);
-  const fmt = abstractId ? numbering.abstractLevelFormat.get(abstractId)?.get(ilvl) : undefined;
-  return fmt === 'bullet' ? 'bullet' : 'numbered';
 }
 
 // ---------------------------------------------------------------------------
@@ -369,6 +326,63 @@ function pageBreakPlacement(pNode: XmlNode): 'before' | 'after' | null {
   return null;
 }
 
+/**
+ * Each numbered list item carries the number it shows (`start`), but the model keeps `start` only where a list
+ * begins at something other than 1 or restarts: on the first item of a run of numbered items, and on a later
+ * top-level item whose number is not simply the next one (a new list instance). Elsewhere the number follows from
+ * the order.
+ */
+function settleListStarts(blocks: DocBlock[]): DocBlock[] {
+  let inRun = false;
+  let lastTopLevel = 0;
+  for (const block of blocks) {
+    if (block.type !== 'listItem' || block.listType !== 'numbered') {
+      inRun = false;
+      continue;
+    }
+    if (block.level === 0 && block.start !== undefined) {
+      const n = block.start;
+      const keep = inRun ? n !== lastTopLevel + 1 : n !== 1;
+      lastTopLevel = n;
+      if (!keep) delete block.start;
+    } else {
+      delete block.start;
+    }
+    inRun = true;
+  }
+  return blocks;
+}
+
+const LINE_KEYWORDS: Array<[number, 'single' | 'onePointFive' | 'double']> = [
+  [1, 'single'],
+  [1.5, 'onePointFive'],
+  [2, 'double'],
+];
+
+/** The paragraph properties the interchange format carries, from a paragraph's effective formatting. */
+function toDocParagraphStyle(effective: ParagraphPartial): DocParagraphStyle {
+  const style: DocParagraphStyle = {
+    ...(effective.alignment && { alignment: effective.alignment }),
+    ...(effective.spaceBeforePt != null && { spaceBeforePt: effective.spaceBeforePt }),
+    ...(effective.spaceAfterPt != null && { spaceAfterPt: effective.spaceAfterPt }),
+    ...(effective.leftIndentPt != null && { leftIndentPt: effective.leftIndentPt }),
+    ...(effective.rightIndentPt != null && { rightIndentPt: effective.rightIndentPt }),
+    ...(effective.firstLineIndentPt != null && { firstLineIndentPt: effective.firstLineIndentPt }),
+    ...(effective.keepNext && { keepWithNext: true }),
+    ...(effective.keepLines && { keepTogether: true }),
+    ...(effective.pageBreakBefore && { pageBreakBefore: true }),
+  };
+  const spacing = effective.lineSpacing;
+  if (spacing?.rule === 'auto') {
+    const keyword = LINE_KEYWORDS.find(([factor]) => Math.abs(factor - spacing.value) < 0.001);
+    if (keyword) style.lineSpacing = keyword[1];
+    else style.lineSpacingCustom = { rule: 'multiple', value: Math.round(spacing.value * 1000) / 1000 };
+  } else if (spacing) {
+    style.lineSpacingCustom = { rule: spacing.rule === 'exact' ? 'exactly' : 'atLeast', value: spacing.value };
+  }
+  return style;
+}
+
 /** parseParagraph plus the page break it may carry alongside its content. */
 function parseParagraphBlocks(
   pNode: XmlNode,
@@ -401,13 +415,7 @@ function parseParagraph(
   // Effective formatting: docDefaults, then the paragraph's style chain, then its own properties.
   const direct = parsePPr(pPr);
   const effective = ctx.styles.paragraph(paragraphStyleId(pNode), direct);
-  const style: DocParagraphStyle = {
-    ...(effective.alignment && { alignment: effective.alignment }),
-    ...(effective.spaceBeforePt != null && { spaceBeforePt: effective.spaceBeforePt }),
-    ...(effective.spaceAfterPt != null && { spaceAfterPt: effective.spaceAfterPt }),
-    ...(effective.leftIndentPt != null && { leftIndentPt: effective.leftIndentPt }),
-    ...(effective.firstLineIndentPt != null && { firstLineIndentPt: effective.firstLineIndentPt }),
-  };
+  const style = toDocParagraphStyle(effective);
 
   // An otherwise-empty paragraph carrying only a page-break run or a
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
@@ -437,13 +445,12 @@ function parseParagraph(
   // A list item is a paragraph numbered directly, or through its style. A heading that is numbered through its
   // style (numbered headings) stays a heading.
   const level = effective.ilvl ?? 0;
-  const listItem = (numId: string | undefined): DocBlock => ({
-    type: 'listItem',
-    listType: numId ? listTypeFor(numbering, numId, level) : 'bullet',
-    level,
-    content,
-    ...style,
-  });
+  const listItem = (numId: string | undefined): DocBlock => {
+    const listType = numId ? listTypeFor(numbering, numId, level) : 'bullet';
+    // The number the item shows; importDocx keeps it as `start` only where a list begins or restarts.
+    const shown = numId && listType === 'numbered' ? ctx.lists?.next(numId, level) : undefined;
+    return { type: 'listItem', listType, level, content, ...(shown !== undefined && { start: shown }), ...style };
+  };
   if (find(pPrKids, 'w:numPr') && direct.numId !== '0') return listItem(direct.numId);
   if (effective.headingLevel) return { type: 'heading', level: effective.headingLevel as 1 | 2 | 3 | 4 | 5 | 6, content, ...style };
   if (effective.numId && effective.numId !== '0') return listItem(effective.numId);
@@ -626,8 +633,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const comments = createCommentTracker(parsedComments, documentXml);
   const themeXml = await readZipText(zip, 'word/theme/theme1.xml');
   const styles = new StyleSheet(stylesXml, parseTheme(themeXml));
-  const ctx: PartContext = { rels, media, styles, comments };
   const numbering = parseNumbering(numberingXml);
+  const ctx: PartContext = { rels, media, styles, lists: new ListCounter(numbering), comments };
 
   const root = parseXml(documentXml);
   const documentEl = find(root, 'w:document');
@@ -649,7 +656,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       marginBottomPx: parsed.marginBottomPx,
       marginLeftPx: parsed.marginLeftPx,
       orientation: parsed.orientation,
-      blocks: currentBlocks,
+      blocks: settleListStarts(currentBlocks),
       ...(header && { header }),
       ...(footer && { footer }),
     });
@@ -693,7 +700,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       marginBottomPx: 96,
       marginLeftPx: 96,
       orientation: 'portrait',
-      blocks: currentBlocks,
+      blocks: settleListStarts(currentBlocks),
     });
   }
 

@@ -8,6 +8,11 @@ import { attrsOf, childrenOf, find, parseXml, tagOf, type XmlNode } from './xml-
 export interface Theme {
   majorFont?: string;
   minorFont?: string;
+  /** East Asian and complex-script typefaces (most themes leave them empty and list per-script fonts instead). */
+  majorEastAsian?: string;
+  minorEastAsian?: string;
+  majorComplex?: string;
+  minorComplex?: string;
   /** Scheme slot (`dk1`, `lt1`, `accent1`, `hlink`, ...) -> `#rrggbb`. */
   colors: Map<string, string>;
 }
@@ -47,13 +52,17 @@ export function parseTheme(xml: string | undefined): Theme | undefined {
   }
 
   const fonts = find(childrenOf(elements), 'a:fontScheme');
-  const latin = (which: 'a:majorFont' | 'a:minorFont') => {
+  const typeface = (which: 'a:majorFont' | 'a:minorFont', script: 'a:latin' | 'a:ea' | 'a:cs') => {
     const f = fonts ? find(childrenOf(fonts), which) : undefined;
-    const l = f ? find(childrenOf(f), 'a:latin') : undefined;
+    const l = f ? find(childrenOf(f), script) : undefined;
     return l ? attrsOf(l)['@_typeface'] || undefined : undefined;
   };
-  out.majorFont = latin('a:majorFont');
-  out.minorFont = latin('a:minorFont');
+  out.majorFont = typeface('a:majorFont', 'a:latin');
+  out.minorFont = typeface('a:minorFont', 'a:latin');
+  out.majorEastAsian = typeface('a:majorFont', 'a:ea');
+  out.minorEastAsian = typeface('a:minorFont', 'a:ea');
+  out.majorComplex = typeface('a:majorFont', 'a:cs');
+  out.minorComplex = typeface('a:minorFont', 'a:cs');
   return out;
 }
 
@@ -62,6 +71,14 @@ export function themeFont(theme: Theme | undefined, value: string | undefined): 
   if (!theme || !value) return undefined;
   if (value.startsWith('major')) return theme.majorFont;
   if (value.startsWith('minor')) return theme.minorFont;
+  return undefined;
+}
+
+/** `majorEastAsia` / `minorBidi` (w:eastAsiaTheme, w:cstheme) -> the theme's East Asian or complex-script typeface, when it names one. */
+export function themeScriptFont(theme: Theme | undefined, value: string | undefined, script: 'eastAsia' | 'complex'): string | undefined {
+  if (!theme || !value) return undefined;
+  if (value.startsWith('major')) return script === 'eastAsia' ? theme.majorEastAsian : theme.majorComplex;
+  if (value.startsWith('minor')) return script === 'eastAsia' ? theme.minorEastAsian : theme.minorComplex;
   return undefined;
 }
 

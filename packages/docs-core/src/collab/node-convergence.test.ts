@@ -191,11 +191,49 @@ const li = (level: number, s: string): Json => ({
 /** One sample document per node type (non-default attrs), keyed by node name. */
 const NODE_SAMPLES: Record<string, Json[]> = {
   doc: [p([t('plain')])],
-  paragraph: [p([t('aligned')], { alignment: 'center', indent: 2, spaceBefore: 4, spaceAfter: 12 })],
-  heading: [{ type: 'heading', attrs: { level: 3, alignment: 'right' }, content: [t('Title')] }],
+  paragraph: [
+    p([t('aligned')], { alignment: 'center', indent: 2, spaceBefore: 4, spaceAfter: 12 }),
+    // DOCX paragraph formatting: line spacing, left/right/hanging indents, pagination flags, an explicit zero spacing.
+    p([t('formatted')], {
+      lineSpacing: { type: 'multiple', value: 1.15 },
+      spaceAfter: 0,
+      leftIndent: 36,
+      rightIndent: 12,
+      firstLineIndent: -18,
+      keepWithNext: true,
+      keepTogether: true,
+      pageBreakBefore: true,
+    }),
+    p([t('exact')], { lineSpacing: { type: 'exactly', value: 20 } }),
+  ],
+  heading: [
+    { type: 'heading', attrs: { level: 3, alignment: 'right' }, content: [t('Title')] },
+    {
+      type: 'heading',
+      attrs: { level: 1, lineSpacing: { type: 'atLeast', value: 24 }, spaceBefore: 16, spaceAfter: 0, leftIndent: 8, keepWithNext: true, pageBreakBefore: true },
+      content: [t('Styled')],
+    },
+  ],
   bullet_list: [{ type: 'bullet_list', content: [li(0, 'a'), li(2, 'b')] }],
-  ordered_list: [{ type: 'ordered_list', attrs: { start: 4 }, content: [li(0, 'a'), li(1, 'b')] }],
-  list_item: [{ type: 'bullet_list', content: [li(3, 'deep')] }],
+  // A second numbered list right after the first restarts at 1 (it must not merge into the first).
+  ordered_list: [
+    { type: 'ordered_list', attrs: { start: 4 }, content: [li(0, 'a'), li(1, 'b')] },
+    { type: 'ordered_list', content: [li(0, 'again')] },
+  ],
+  list_item: [
+    { type: 'bullet_list', content: [li(3, 'deep')] },
+    p([t('between')]), // adjacent bullet lists would merge into one
+    {
+      type: 'bullet_list',
+      content: [
+        {
+          type: 'list_item',
+          attrs: { level: 0 },
+          content: [p([t('indented')], { spaceAfter: 0, lineSpacing: { type: 'multiple', value: 1.5 }, leftIndent: 20, keepWithNext: true })],
+        },
+      ],
+    },
+  ],
   table: [
     {
       type: 'table',
@@ -258,8 +296,10 @@ const MARK_SAMPLES: Record<string, Json> = {
   superscript: { type: 'superscript' },
   subscript: { type: 'subscript' },
   smallCaps: { type: 'smallCaps' },
+  allCaps: { type: 'allCaps' },
+  hidden: { type: 'hidden' },
   link: { type: 'link', attrs: { href: 'https://example.com/a', title: null, target: '_blank' } },
-  textStyle: { type: 'textStyle', attrs: { color: '#ff0000', backgroundColor: '#00ff00', fontSize: 18, fontFamily: 'Georgia' } },
+  textStyle: { type: 'textStyle', attrs: { color: '#ff0000', backgroundColor: '#00ff00', fontSize: 18, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Arial' } },
   comment: { type: 'comment', attrs: { threadId: 'thread_1' } },
 };
 

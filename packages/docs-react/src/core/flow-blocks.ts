@@ -28,6 +28,11 @@ export interface TextRun {
   backgroundColor?: string;
   superscript?: boolean;
   subscript?: boolean;
+  smallCaps?: boolean;
+  /** Rendered in capitals (the text itself is unchanged). */
+  allCaps?: boolean;
+  /** Hidden text (DOCX `vanish`): kept in the flow so every character stays reachable, drawn dimmed. */
+  hidden?: boolean;
   /** Thread ID when this run is covered by a comment. */
   commentThreadId?: string;
 }

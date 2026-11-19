@@ -148,16 +148,6 @@
       ]
     },
     {
-      "count": 4,
-      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
-      "id": "docx.paragraphFormatting",
-      "label": "paragraph/run formatting occurrence(s)",
-      "where": [
-        "keep with next/lines ×2",
-        "line spacing ×2"
-      ]
-    },
-    {
       "count": 23,
       "effect": "the direction is not kept",
       "id": "docx.rtl",

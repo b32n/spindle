@@ -2,13 +2,12 @@
   "format": "docx",
   "items": [
     {
-      "count": 8,
-      "effect": "imported as plain bullet or decimal-numbered items; the number format and start value are not kept",
+      "count": 6,
+      "effect": "imported as plain bullet or decimal-numbered items; the number format is not kept",
       "id": "docx.listFormatting",
-      "label": "list item(s) with another number format or a custom start",
+      "label": "list item(s) with another number format",
       "where": [
         "lowerRoman ×3",
-        "custom start ×2",
         "upperLetter ×2",
         "lowerLetter ×1"
       ]
@@ -30,15 +29,6 @@
         "Callout Warning ×1",
         "Callout Warning Large ×1",
         "other ×4"
-      ]
-    },
-    {
-      "count": 1,
-      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
-      "id": "docx.paragraphFormatting",
-      "label": "paragraph/run formatting occurrence(s)",
-      "where": [
-        "line spacing ×1"
       ]
     }
   ]

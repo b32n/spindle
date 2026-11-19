@@ -894,6 +894,9 @@ export class DomMeasurer {
     if (runBgColor) styles.push(`background-color: ${runBgColor}`);
     if (run.superscript) styles.push('vertical-align: super; font-size: 0.8em');
     if (run.subscript) styles.push('vertical-align: sub; font-size: 0.8em');
+    if (run.smallCaps) styles.push('font-variant: small-caps');
+    if (run.allCaps) styles.push('text-transform: uppercase');
+    if (run.hidden) styles.push('opacity: 0.5');
     
     return styles.join('; ');
   }

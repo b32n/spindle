@@ -24,15 +24,6 @@
       ]
     },
     {
-      "count": 1,
-      "effect": "line spacing, right/hanging indents, keep-with-next, page-break-before and hidden text are not imported (hidden text is shown)",
-      "id": "docx.paragraphFormatting",
-      "label": "paragraph/run formatting occurrence(s)",
-      "where": [
-        "hidden text ×1"
-      ]
-    },
-    {
       "count": 3,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",

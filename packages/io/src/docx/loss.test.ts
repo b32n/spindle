@@ -145,29 +145,20 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.paragraphFormatting', () => {
+  describe('paragraph formatting (imported, so no longer a loss)', () => {
     it.each([
       ['line spacing', '<w:spacing w:line="360" w:lineRule="auto"/>'],
-      ['right/hanging indent', '<w:ind w:right="720"/>'],
-      ['right/hanging indent', '<w:ind w:left="720" w:hanging="360"/>'],
-      ['keep with next/lines', '<w:keepNext/>'],
-      ['keep with next/lines', '<w:keepLines/>'],
+      ['right indent', '<w:ind w:right="720"/>'],
+      ['hanging indent', '<w:ind w:left="720" w:hanging="360"/>'],
+      ['keep with next', '<w:keepNext/>'],
+      ['keep lines together', '<w:keepLines/>'],
       ['page break before', '<w:pageBreakBefore/>'],
-    ])('detects %s', async (kind, pPr) => {
-      expect(await item(await docx(p('a', pPr)), 'docx.paragraphFormatting')).toMatchObject({ count: 1, where: [`${kind} ×1`] });
+    ])('does not report %s', async (_kind, pPr) => {
+      expect(await item(await docx(p('a', pPr)), 'docx.paragraphFormatting')).toBeUndefined();
     });
-    it('detects hidden runs but not hidden paragraph marks', async () => {
-      const bytes = await docx(
-        '<w:p><w:r><w:rPr><w:vanish/></w:rPr><w:t>secret</w:t></w:r></w:p>' + p('mark', '<w:rPr><w:vanish/></w:rPr>')
-      );
-      expect(await item(bytes, 'docx.paragraphFormatting')).toMatchObject({ count: 1, where: ['hidden text ×1'] });
-    });
-    it('is silent for spacing before/after, left/first-line indents, switched-off flags and revisions', async () => {
-      const bytes = await docx(
-        p('a', '<w:spacing w:before="120" w:after="120"/><w:ind w:left="720" w:firstLine="360"/><w:keepNext w:val="0"/>') +
-          p('b', '<w:pPrChange w:id="1"><w:pPr><w:keepNext/></w:pPr></w:pPrChange>')
-      );
-      expect(await item(bytes, 'docx.paragraphFormatting')).toBeUndefined();
+    it('does not report hidden text', async () => {
+      const bytes = await docx('<w:p><w:r><w:rPr><w:vanish/></w:rPr><w:t>secret</w:t></w:r></w:p>');
+      expect((await detectDocxLoss(bytes, { detail: 'full' })).items).toEqual([]);
     });
   });
 
@@ -190,9 +181,10 @@ describe('detectDocxLoss: XML-based detectors', () => {
       const bytes = await docx(li('1') + li('4') + li('0') + li('6'), { 'word/numbering.xml': numbering });
       expect(await item(bytes, 'docx.listFormatting')).toBeUndefined();
     });
-    it('detects other formats, custom start values and start overrides', async () => {
+    it('detects other number formats only; custom starts and start overrides are imported', async () => {
       const bytes = await docx(li('2') + li('3') + li('5'), { 'word/numbering.xml': numbering });
-      expect(await item(bytes, 'docx.listFormatting')).toMatchObject({ count: 3, where: ['custom start ×2', 'lowerRoman ×1'] });
+      expect(await item(bytes, 'docx.listFormatting')).toMatchObject({ count: 1, where: ['lowerRoman ×1'] });
+      expect(await item(await docx(li('3') + li('5'), { 'word/numbering.xml': numbering }), 'docx.listFormatting')).toBeUndefined();
     });
   });
 
@@ -302,7 +294,6 @@ describe('detectDocxLoss: XML-based detectors', () => {
       expect(full.items.map((i) => i.id).sort()).toEqual([
         'docx.fields',
         'docx.namedStyles',
-        'docx.paragraphFormatting',
         'docx.sectionProperties',
       ]);
       expect(full.items.find((i) => i.id === 'docx.fields')?.where).toEqual(['DATE ×1']);

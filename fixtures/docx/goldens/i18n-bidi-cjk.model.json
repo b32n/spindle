@@ -15,16 +15,7 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {
-      "paragraph-style-1": {
-        "spaceAfter": 5.333333333333333,
-        "spaceBefore": 16
-      },
-      "paragraph-style-2": {
-        "leftIndent": 48,
-        "spaceAfter": 10.666666666666666
-      }
-    },
+    "paragraphStylePool": {},
     "sections": [
       {
         "blocks": [
@@ -38,6 +29,10 @@
               }
             ],
             "id": "block-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -53,6 +48,10 @@
               }
             ],
             "id": "block-2",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -68,8 +67,15 @@
               }
             ],
             "id": "block-3",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -83,6 +89,10 @@
               }
             ],
             "id": "block-4",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -97,6 +107,10 @@
               }
             ],
             "id": "block-5",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -111,6 +125,10 @@
               }
             ],
             "id": "block-6",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -125,6 +143,10 @@
               }
             ],
             "id": "block-7",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -139,6 +161,10 @@
               }
             ],
             "id": "block-8",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -153,6 +179,10 @@
               }
             ],
             "id": "block-9",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -167,6 +197,10 @@
               }
             ],
             "id": "block-10",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -181,6 +215,10 @@
               }
             ],
             "id": "block-11",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -218,6 +256,10 @@
               }
             ],
             "id": "block-12",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -256,6 +298,10 @@
               }
             ],
             "id": "block-13",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -269,6 +315,10 @@
               }
             ],
             "id": "block-14",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "type": "paragraph"
           },
@@ -315,9 +365,14 @@
               }
             ],
             "id": "block-16",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "bullet",
-            "styleId": "paragraph-style-2",
+            "spaceAfter": 10.666666666666666,
             "type": "list-item"
           },
           {
@@ -331,6 +386,10 @@
               }
             ],
             "id": "block-17",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -339,12 +398,17 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Sans CJK SC",
                 "fontSize": 11,
                 "text": "这是一个用于测试中文排版的示例段落，包含标点符号、数字 2026 和英文单词 Spindle。",
                 "type": "text"
               }
             ],
             "id": "block-18",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -353,12 +417,17 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Sans CJK SC",
                 "fontSize": 11,
                 "text": "港口委员会每月召开一次会议，审议潮汐表和船舶进出记录。",
                 "type": "text"
               }
             ],
             "id": "block-19",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -367,12 +436,17 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Sans CJK SC",
                 "fontSize": 11,
                 "text": "これは日本語の組版を確認するためのサンプル文章です。ひらがな、カタカナ、漢字が混在しています。",
                 "type": "text"
               }
             ],
             "id": "block-20",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -381,12 +455,17 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Sans CJK SC",
                 "fontSize": 11,
                 "text": "港湾委員会は毎月会議を開き、潮汐表を確認します。",
                 "type": "text"
               }
             ],
             "id": "block-21",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -395,12 +474,17 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Sans CJK SC",
                 "fontSize": 11,
                 "text": "이것은 한국어 조판을 확인하기 위한 예시 문장입니다.",
                 "type": "text"
               }
             ],
             "id": "block-22",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -409,12 +493,17 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Sans CJK SC",
                 "fontSize": 11,
                 "text": "항만 위원회는 매달 모여 조석표를 검토합니다.",
                 "type": "text"
               }
             ],
             "id": "block-23",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -423,6 +512,7 @@
             "content": [
               {
                 "fontFamily": "Liberation Sans",
+                "fontFamilyEastAsia": "Noto Serif CJK JP",
                 "fontSize": 11,
                 "text": "12",
                 "type": "text"
@@ -441,6 +531,10 @@
               }
             ],
             "id": "block-24",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -488,6 +582,10 @@
               }
             ],
             "id": "block-26",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -502,6 +600,10 @@
               }
             ],
             "id": "block-27",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -534,6 +636,10 @@
               }
             ],
             "id": "block-28",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -548,6 +654,10 @@
               }
             ],
             "id": "block-29",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -562,6 +672,10 @@
               }
             ],
             "id": "block-30",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           }

@@ -15,24 +15,7 @@
         "w": 816
       }
     },
-    "paragraphStylePool": {
-      "paragraph-style-1": {
-        "alignment": "left",
-        "spaceAfter": 5.333333333333333,
-        "spaceBefore": 16
-      },
-      "paragraph-style-2": {
-        "alignment": "left",
-        "spaceAfter": 5.333333333333333,
-        "spaceBefore": 10.666666666666666
-      },
-      "paragraph-style-3": {
-        "alignment": "left",
-        "leftIndent": 48,
-        "spaceAfter": 10.666666666666666,
-        "spaceBefore": 0
-      }
-    },
+    "paragraphStylePool": {},
     "sections": [
       {
         "blocks": [
@@ -48,6 +31,10 @@
               }
             ],
             "id": "block-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -65,6 +52,10 @@
               }
             ],
             "id": "block-2",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -80,6 +71,10 @@
               }
             ],
             "id": "block-3",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -95,6 +90,10 @@
               }
             ],
             "id": "block-4",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -110,6 +109,10 @@
               }
             ],
             "id": "block-5",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -125,6 +128,10 @@
               }
             ],
             "id": "block-6",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -140,6 +147,10 @@
               }
             ],
             "id": "block-7",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -155,6 +166,10 @@
               }
             ],
             "id": "block-8",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -170,6 +185,10 @@
               }
             ],
             "id": "block-9",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -186,6 +205,10 @@
               }
             ],
             "id": "block-10",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -203,6 +226,10 @@
               }
             ],
             "id": "block-11",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -220,6 +247,12 @@
               }
             ],
             "id": "block-12",
+            "keepTogether": true,
+            "keepWithNext": true,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 16,
             "type": "paragraph"
@@ -228,7 +261,11 @@
             "alignment": "left",
             "content": [],
             "id": "block-13",
-            "indent": 0,
+            "leftIndent": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 6.666666666666667,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -237,7 +274,11 @@
             "alignment": "left",
             "content": [],
             "id": "block-14",
-            "indent": 14.666666666666666,
+            "leftIndent": 14.666666666666666,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 6.666666666666667,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -246,7 +287,11 @@
             "alignment": "left",
             "content": [],
             "id": "block-15",
-            "indent": 14.666666666666666,
+            "leftIndent": 14.666666666666666,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 6.666666666666667,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -255,7 +300,11 @@
             "alignment": "left",
             "content": [],
             "id": "block-16",
-            "indent": 0,
+            "leftIndent": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 6.666666666666667,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -264,7 +313,11 @@
             "alignment": "left",
             "content": [],
             "id": "block-17",
-            "indent": 0,
+            "leftIndent": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 6.666666666666667,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -273,6 +326,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-18",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -290,8 +347,15 @@
               }
             ],
             "id": "block-19",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -305,6 +369,10 @@
               }
             ],
             "id": "block-20",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -322,8 +390,15 @@
               }
             ],
             "id": "block-21",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 2,
-            "styleId": "paragraph-style-2",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 10.666666666666666,
             "type": "heading"
           },
           {
@@ -337,6 +412,10 @@
               }
             ],
             "id": "block-22",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -354,8 +433,15 @@
               }
             ],
             "id": "block-23",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 2,
-            "styleId": "paragraph-style-2",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 10.666666666666666,
             "type": "heading"
           },
           {
@@ -369,6 +455,10 @@
               }
             ],
             "id": "block-24",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -386,8 +476,15 @@
               }
             ],
             "id": "block-25",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -401,6 +498,10 @@
               }
             ],
             "id": "block-26",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -418,8 +519,15 @@
               }
             ],
             "id": "block-27",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -433,6 +541,10 @@
               }
             ],
             "id": "block-28",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -450,8 +562,15 @@
               }
             ],
             "id": "block-29",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -465,6 +584,10 @@
               }
             ],
             "id": "block-30",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -492,6 +615,10 @@
               }
             ],
             "id": "block-31",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -533,6 +660,9 @@
               }
             ],
             "id": "block-32",
+            "lineSpacing": {
+              "type": "single"
+            },
             "spaceAfter": 13.333333333333334,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -572,6 +702,10 @@
               }
             ],
             "id": "block-33",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -619,6 +753,10 @@
               }
             ],
             "id": "block-34",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -646,6 +784,10 @@
               }
             ],
             "id": "block-35",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -685,6 +827,10 @@
               }
             ],
             "id": "block-36",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -740,6 +886,10 @@
               }
             ],
             "id": "block-37",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -761,6 +911,10 @@
               }
             ],
             "id": "block-38",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -786,6 +940,10 @@
               }
             ],
             "id": "block-39",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -803,8 +961,15 @@
               }
             ],
             "id": "block-40",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -836,6 +1001,10 @@
               }
             ],
             "id": "block-41",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -857,6 +1026,10 @@
               }
             ],
             "id": "block-42",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -898,6 +1071,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-44",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -919,6 +1096,10 @@
               }
             ],
             "id": "block-45",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -940,6 +1121,10 @@
               }
             ],
             "id": "block-46",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -961,6 +1146,10 @@
               }
             ],
             "id": "block-47",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -982,6 +1171,10 @@
               }
             ],
             "id": "block-48",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1003,6 +1196,10 @@
               }
             ],
             "id": "block-49",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1024,6 +1221,10 @@
               }
             ],
             "id": "block-50",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1032,6 +1233,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-51",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1103,8 +1308,15 @@
               }
             ],
             "id": "block-52",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -1118,6 +1330,10 @@
               }
             ],
             "id": "block-53",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1133,6 +1349,10 @@
               }
             ],
             "id": "block-54",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1148,6 +1368,10 @@
               }
             ],
             "id": "block-55",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1163,6 +1387,10 @@
               }
             ],
             "id": "block-56",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1178,6 +1406,10 @@
               }
             ],
             "id": "block-57",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1193,6 +1425,10 @@
               }
             ],
             "id": "block-58",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1208,6 +1444,10 @@
               }
             ],
             "id": "block-59",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1223,6 +1463,10 @@
               }
             ],
             "id": "block-60",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1240,11 +1484,19 @@
               }
             ],
             "id": "block-61",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1254,12 +1506,19 @@
               }
             ],
             "id": "block-62",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1269,12 +1528,19 @@
               }
             ],
             "id": "block-63",
+            "leftIndent": 48,
             "level": 1,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1284,12 +1550,19 @@
               }
             ],
             "id": "block-64",
+            "leftIndent": 48,
             "level": 2,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1299,12 +1572,19 @@
               }
             ],
             "id": "block-65",
+            "leftIndent": 48,
             "level": 2,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1314,12 +1594,19 @@
               }
             ],
             "id": "block-66",
+            "leftIndent": 48,
             "level": 1,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1329,12 +1616,19 @@
               }
             ],
             "id": "block-67",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1344,12 +1638,19 @@
               }
             ],
             "id": "block-68",
+            "leftIndent": 48,
             "level": 1,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1359,12 +1660,19 @@
               }
             ],
             "id": "block-69",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1374,12 +1682,20 @@
               }
             ],
             "id": "block-70",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
+            "start": 1,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1389,12 +1705,19 @@
               }
             ],
             "id": "block-71",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
+            "alignment": "left",
             "content": [
               {
                 "fontFamily": "Liberation Sans",
@@ -1404,9 +1727,15 @@
               }
             ],
             "id": "block-72",
+            "leftIndent": 48,
             "level": 0,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "listType": "numbered",
-            "styleId": "paragraph-style-3",
+            "spaceAfter": 10.666666666666666,
+            "spaceBefore": 0,
             "type": "list-item"
           },
           {
@@ -1422,7 +1751,12 @@
               }
             ],
             "id": "block-73",
-            "indent": 48,
+            "leftIndent": 48,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
+            "rightIndent": 48,
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1441,7 +1775,12 @@
               }
             ],
             "id": "block-74",
-            "indent": 48,
+            "leftIndent": 48,
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
+            "rightIndent": 48,
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1510,6 +1849,10 @@
               }
             ],
             "id": "block-75",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1525,6 +1868,10 @@
               }
             ],
             "id": "block-76",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1540,6 +1887,10 @@
               }
             ],
             "id": "block-77",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1555,6 +1906,10 @@
               }
             ],
             "id": "block-78",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1575,7 +1930,12 @@
                 "type": "text"
               }
             ],
+            "firstLineIndent": 0,
             "id": "block-79",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1584,6 +1944,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-80",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1655,8 +2019,15 @@
               }
             ],
             "id": "block-81",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -1670,6 +2041,10 @@
               }
             ],
             "id": "block-82",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1685,6 +2060,10 @@
               }
             ],
             "id": "block-83",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1700,6 +2079,10 @@
               }
             ],
             "id": "block-84",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1715,6 +2098,10 @@
               }
             ],
             "id": "block-85",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1730,6 +2117,10 @@
               }
             ],
             "id": "block-86",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1745,6 +2136,10 @@
               }
             ],
             "id": "block-87",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1760,6 +2155,10 @@
               }
             ],
             "id": "block-88",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1775,6 +2174,10 @@
               }
             ],
             "id": "block-89",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1790,6 +2193,10 @@
               }
             ],
             "id": "block-90",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1807,8 +2214,15 @@
               }
             ],
             "id": "block-91",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -1822,6 +2236,10 @@
               }
             ],
             "id": "block-92",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1950,6 +2368,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-94",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -1965,6 +2387,10 @@
               }
             ],
             "id": "block-95",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -2306,6 +2732,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-97",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -2321,6 +2751,10 @@
               }
             ],
             "id": "block-98",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -2452,6 +2886,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-100",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -2467,6 +2905,10 @@
               }
             ],
             "id": "block-101",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4204,6 +4646,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-103",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4219,6 +4665,10 @@
               }
             ],
             "id": "block-104",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4309,6 +4759,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-106",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4350,6 +4804,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-108",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4391,6 +4849,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-110",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4408,8 +4870,15 @@
               }
             ],
             "id": "block-111",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -4462,6 +4931,10 @@
               }
             ],
             "id": "block-112",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4496,6 +4969,9 @@
               }
             ],
             "id": "block-114",
+            "lineSpacing": {
+              "type": "single"
+            },
             "spaceAfter": 13.333333333333334,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4511,6 +4987,10 @@
               }
             ],
             "id": "block-115",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4526,6 +5006,10 @@
               }
             ],
             "id": "block-116",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4541,6 +5025,10 @@
               }
             ],
             "id": "block-117",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4556,6 +5044,10 @@
               }
             ],
             "id": "block-118",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4571,6 +5063,10 @@
               }
             ],
             "id": "block-119",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4586,6 +5082,10 @@
               }
             ],
             "id": "block-120",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4667,6 +5167,10 @@
               }
             ],
             "id": "block-122",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4675,6 +5179,10 @@
             "alignment": "left",
             "content": [],
             "id": "block-123",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
             "spaceAfter": 10.666666666666666,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4746,8 +5254,15 @@
               }
             ],
             "id": "block-124",
+            "keepTogether": true,
+            "keepWithNext": true,
             "level": 1,
-            "styleId": "paragraph-style-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 5.333333333333333,
+            "spaceBefore": 16,
             "type": "heading"
           },
           {
@@ -4761,6 +5276,10 @@
               }
             ],
             "id": "block-125",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4776,6 +5295,10 @@
               }
             ],
             "id": "block-126",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
@@ -4791,6 +5314,10 @@
               }
             ],
             "id": "block-127",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
             "spaceAfter": 8,
             "spaceBefore": 0,
             "type": "paragraph"
