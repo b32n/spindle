@@ -41,8 +41,9 @@ test.describe('docs: comments imported from a .docx', () => {
   }) => {
     await openReview(page);
 
-    // Both anchored ranges carry a comment highlight.
-    const anchors = doc.editor.locator('[data-comment-thread]');
+    // Both anchored ranges carry a comment highlight on the rendered pages (the ProseMirror
+    // instance is hidden off-screen, so it cannot be clicked).
+    const anchors = doc.pages.locator('[data-comment-thread]');
     await expect(anchors).not.toHaveCount(0);
     await expect(anchors.filter({ hasText: 'Fees are set annually' })).toHaveCount(1);
 
