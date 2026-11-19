@@ -6,15 +6,6 @@
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
       "label": "floating image(s)"
-    },
-    {
-      "count": 4,
-      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
-      "id": "docx.tableStructure",
-      "label": "nested table(s) / multi-paragraph cell(s)",
-      "where": [
-        "multi-paragraph cells ×4"
-      ]
     }
   ]
 }

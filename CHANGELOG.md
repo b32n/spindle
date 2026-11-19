@@ -132,6 +132,23 @@ lockstep.
   over Yjs, and `docx.fields` now counts only what is not kept as a field (tables of contents, indexes, legacy form
   fields). Code that switches exhaustively over `InlineContent` or `DocInline` needs a `field` case.
 
+- **DOCX table structure is imported and exported.** A table cell keeps all of its content: several paragraphs, lists,
+  headings, images and tables nested in the cell (to a depth of 20; the corpus goes three deep) are read into the additive
+  `DocTableCell.blocks`, with `content` still holding the cell's first paragraph that has text for code that does not read
+  `blocks` (a cell of one plain paragraph has no `blocks`). The export writes the blocks back, ends a cell that finishes with a
+  nested table with an empty paragraph as the file format requires, and numbers a list in a cell on its own. Merged cells are read
+  more carefully: a vertical merge is extended once per row however many continuation cells sit under it, ends in a row that
+  does not continue it, and a continuation cell with no merge above it keeps its content as an ordinary cell; a row that begins
+  after skipped grid columns (`w:gridBefore`) gets an empty cell without lines in front so its cells stay in their columns. A
+  rotated cell (`w:textDirection` `btLr` or `tbRl`) is recorded as the additive `textDirection` and written back (the editor
+  still shows the text horizontally). The conditional text formatting of a table style no longer reaches a table nested in one
+  of its cells. `docx.tableStructure` is removed from the full loss report.
+- **Editor: cells of several blocks and nested tables.** Additive `TableCell.blocks` and `TableCell.textDirection` and a
+  `textDirection` attribute on the ProseMirror cell nodes; they sync over Yjs like the other cell attributes (the cell nodes
+  already held any block). The page painter and the measurer draw the paragraphs, list items (with a bullet or number),
+  images and nested tables of a cell, with the document positions of each so clicking and selecting work inside a nested table.
+  The table resize handles and the context menu act on the table under the pointer, not on the tables nested in it.
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it

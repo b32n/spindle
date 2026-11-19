@@ -769,7 +769,8 @@
                         "type": "text"
                       }
                     ],
-                    "id": "cell-3"
+                    "id": "cell-3",
+                    "textDirection": "tbRl"
                   },
                   {
                     "colwidth": [

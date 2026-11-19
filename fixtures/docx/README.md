@@ -82,6 +82,14 @@ header and banded rows of `tables-advanced`), `repeatHeader` on rows, and the ta
 `edge-odd-valid` shows two added entries (`colWidths` and one cell `colwidth`) for its table with an empty grid, which the writer
 gives a derived grid.
 
+Table structure (`tables.nested`, `tables.mergeH`, `tables.mergeV`) is imported: a cell of several paragraphs, a list, a
+heading or a nested table keeps all of it in `blocks` (the model goldens show them next to the cell's `content`, which stays
+the first paragraph with text), nested tables up to three deep in `tables-advanced`, `kitchen-sink` and `word-compat-kitchen`,
+and a rotated cell records `textDirection` (`i18n-bidi-cjk`). The loss goldens no longer report `docx.tableStructure`. A row that
+starts after skipped grid columns (`w:gridBefore`, in `edge-odd-valid`) gets an empty, line-less cell in front so its cells stay
+in their columns. The harness now counts the text of the blocks inside cells too, so the round-trip `textChars` went up while
+every round-trip diff stayed where it was.
+
 When an importer change shrinks a loss or alters the model, the goldens will fail. Re-run with
 `docs:docx-fidelity:update`, read the diff, and commit the new goldens in the same PR as the importer
 change. An improvement should be visible in review as a smaller loss snapshot.

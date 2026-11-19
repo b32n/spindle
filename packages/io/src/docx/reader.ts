@@ -9,6 +9,7 @@ import type {
   DocSection,
   DocTextRun,
   DocBorders,
+  DocCellTextDirection,
   DocRunBase,
   DocTableRow,
   DocumentImportResult,
@@ -545,11 +546,13 @@ function hasBottomBorder(pPrKids: XmlNode[]): boolean {
   return !!pBdr && !!find(childrenOf(pBdr), 'w:bottom');
 }
 
+/** `plain`: a paragraph of a table cell, which stays a paragraph (inline image, no page break or rule block) rather than being promoted to a structural block. */
 function parseParagraph(
   pNode: XmlNode,
   numbering: NumberingInfo,
   ctx: PartContext,
-  warnings: string[]
+  warnings: string[],
+  plain = false
 ): DocBlock {
   const kids = childrenOf(pNode);
   const pPr = find(kids, 'w:pPr');
@@ -565,17 +568,17 @@ function parseParagraph(
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
   // to the corresponding structural block rather than an empty paragraph.
   const onlyBookmarks = content.every((c) => c.type === 'bookmark');
-  if (onlyBookmarks && hasPageBreakRun(pNode)) {
+  if (!plain && onlyBookmarks && hasPageBreakRun(pNode)) {
     return { type: 'pageBreak' };
   }
-  if (content.length === 0 && hasBottomBorder(pPrKids)) {
+  if (!plain && content.length === 0 && hasBottomBorder(pPrKids)) {
     return { type: 'horizontalRule' };
   }
 
   // A paragraph whose only content is a single image is how our own writer
   // (and most producers) represents a block-level image — promote it
   // rather than returning a "paragraph" block wrapping one inline image.
-  if (content.length === 1 && content[0].type === 'image') {
+  if (!plain && content.length === 1 && content[0].type === 'image') {
     const image = content[0];
     return {
       type: 'image',
@@ -620,7 +623,12 @@ const gridWidthPx = (el: XmlNode | undefined): number | undefined => {
   return Number.isFinite(w) && w > 0 ? pxFromTwips(w) : undefined;
 };
 
-function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): DocBlock {
+/** Nesting depth beyond which a table inside a table is flattened to its text (a guard against hostile files). */
+const MAX_TABLE_DEPTH = 20;
+
+function parseTable(tblNode: XmlNode, outerCtx: PartContext, numbering: NumberingInfo, warnings: string[], depth = 0): DocBlock {
+  // The conditional text formatting of an enclosing table's style does not reach a table nested in one of its cells.
+  const ctx = outerCtx.tableText ? { ...outerCtx, tableText: undefined } : outerCtx;
   const tblKids = childrenOf(tblNode);
   const tblPr = find(tblKids, 'w:tblPr');
   const tblPrKids = tblPr ? childrenOf(tblPr) : [];
@@ -670,7 +678,22 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
     const trPr = find(childrenOf(trNode), 'w:trPr');
     const trPrKids = trPr ? childrenOf(trPr) : [];
     const rowCells: DocTableRow['cells'] = [];
-    let col = gridBeforeOf(trNode);
+    const gridBefore = gridBeforeOf(trNode);
+    let col = gridBefore;
+    // Grid columns this row continues a vertical merge in, or opens one in.
+    const mergedHere = new Set<number>();
+    const extended = new Set<DocTableRow['cells'][number]>();
+    // A row that starts after skipped grid columns (`w:gridBefore`) keeps its cells where they are with an empty, line-less cell in front.
+    if (gridBefore > 0) {
+      const noLine = { style: 'none' } as const;
+      const widths = grid.length >= gridBefore ? grid.slice(0, gridBefore) : [];
+      rowCells.push({
+        content: [],
+        ...(gridBefore > 1 && { colspan: gridBefore }),
+        borders: { top: noLine, right: noLine, bottom: noLine, left: noLine },
+        ...(widths.length > 0 && widths.every((w) => w > 0) && { colwidthPx: widths }),
+      });
+    }
     for (const tcNode of flattenBlocks(childrenOf(trNode))) {
       if (tagOf(tcNode) !== 'w:tc') {
         if (tagOf(tcNode) !== 'w:trPr' && tagOf(tcNode) !== 'w:tblPrEx') ctx.comments?.mark(tcNode);
@@ -683,19 +706,23 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
       const vMergeEl = find(tcPrKids, 'w:vMerge');
       const vMergeVal = vMergeEl ? (attrsOf(vMergeEl)['@_w:val'] ?? 'continue') : undefined;
 
-      if (vMergeVal === 'continue') {
-        const open = openVMerge.get(col);
-        if (open) open.cell.rowspan = (open.cell.rowspan ?? 1) + 1;
+      const open = vMergeVal === 'continue' ? openVMerge.get(col) : undefined;
+      if (open) {
+        // Several continuation cells under one wider merged cell extend it once.
+        if (!extended.has(open.cell)) open.cell.rowspan = (open.cell.rowspan ?? 1) + 1;
+        extended.add(open.cell);
+        for (let i = 0; i < (colspan ?? 1); i++) mergedHere.add(col + i);
         col += colspan ?? 1;
         ctx.comments?.mark(tcNode);
         continue; // this cell contributes no content of its own
       }
+      // A continuation with no merge open above it is an ordinary cell, so that its content is not lost.
 
       // The parts of the table style that reach this cell (header row, banding...), lowest precedence first.
       const parts = style ? applicableParts(style, look, { row: rowIndex, rows: trNodes.length, col, colspan: colspan ?? 1, cols }) : [];
       const tableText = parts.reduce<DocRunBase>((acc, part) => (part.text ? { ...acc, ...part.text } : acc), {});
       const cellCtx = Object.keys(tableText).length > 0 ? { ...ctx, tableText } : ctx;
-      const content = collectCellContent(tcNode, cellCtx, warnings);
+      const { content, blocks } = parseCellContent(tcNode, cellCtx, numbering, warnings, depth);
 
       const shading = parseShading(find(tcPrKids, 'w:shd'), ctx.theme) ?? [...parts].reverse().find((p) => p.backgroundColor)?.backgroundColor;
       const cellBorders = [...parts.map((p) => p.borders), parseBorders(find(tcPrKids, 'w:tcBorders'), ctx.theme)].reduce<DocBorders | undefined>(
@@ -715,19 +742,30 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
             ? Array.from({ length: span }, () => pxFromTwips(widthTwips / span))
             : undefined;
 
+      const textDirection = parseTextDirection(find(tcPrKids, 'w:textDirection'));
       const cell: DocTableRow['cells'][number] = {
         content,
+        ...(blocks && { blocks }),
         ...(colspan && colspan > 1 ? { colspan } : {}),
         ...(shading && { backgroundColor: shading }),
         ...(cellBorders && { borders: cellBorders }),
         ...(verticalAlign && (verticalAlign !== 'top' || partAlign) && { verticalAlign }),
+        ...(textDirection && { textDirection }),
         ...(colwidthPx && { colwidthPx }),
       };
       rowCells.push(cell);
-      if (vMergeVal === 'restart') openVMerge.set(col, { cell });
-      else openVMerge.delete(col);
+      for (let i = 0; i < span; i++) {
+        if (vMergeVal === 'restart') {
+          openVMerge.set(col + i, { cell });
+          mergedHere.add(col + i);
+        } else {
+          openVMerge.delete(col + i);
+        }
+      }
       col += colspan ?? 1;
     }
+    // A merge that this row neither continues nor opens ends here: a later continuation cell is not part of it.
+    for (const openCol of [...openVMerge.keys()]) if (!mergedHere.has(openCol)) openVMerge.delete(openCol);
     const repeatHeader = isOnEl(find(trPrKids, 'w:tblHeader'));
     const cantSplit = isOnEl(find(trPrKids, 'w:cantSplit'));
     rows.push({ cells: rowCells, ...(repeatHeader && { repeatHeader }), ...(cantSplit && { cantSplit }) });
@@ -744,21 +782,67 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
   };
 }
 
-/** A table cell's content is one or more paragraphs; flatten to the first non-empty paragraph's inline content (our own writer only ever emits one). */
-function collectCellContent(tcNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
-  let result: DocInline[] | undefined;
-  const leading: DocInline[] = []; // bookmarks of paragraphs before the first one with content
+/** `w:textDirection` values that turn the text of a cell: bottom to top, and top to bottom (right to left). */
+function parseTextDirection(el: XmlNode | undefined): DocCellTextDirection | undefined {
+  const v = el ? attrsOf(el)['@_w:val'] : undefined;
+  if (v === 'btLr') return 'btLr';
+  if (v === 'tbRl' || v === 'tbRlV') return 'tbRl';
+  return undefined;
+}
+
+/**
+ * The content of a table cell: its paragraphs, lists and nested tables. `content` is the inline content of the first
+ * paragraph that has any (what a cell of one paragraph holds); `blocks` is the whole cell, set unless the cell is one
+ * plain paragraph.
+ */
+function parseCellContent(
+  tcNode: XmlNode,
+  ctx: PartContext,
+  numbering: NumberingInfo,
+  warnings: string[],
+  depth: number
+): { content: DocInline[]; blocks?: DocBlock[] } {
+  const blocks: DocBlock[] = [];
+  // A bookmark that starts between the cell's paragraphs is kept at the start of the next one.
+  const pendingBookmarks: DocInline[] = [];
+  const addParagraph = (block: DocBlock) => {
+    if (pendingBookmarks.length > 0 && 'content' in block) block.content.unshift(...pendingBookmarks.splice(0));
+    blocks.push(block);
+  };
   for (const child of flattenBlocks(childrenOf(tcNode))) {
-    if (!result && tagOf(child) === 'w:p') {
-      const content = paragraphInlineContent(child, ctx, warnings);
-      if (content.some((c) => c.type !== 'bookmark')) result = [...leading, ...content];
-      else leading.push(...content);
-    } else {
+    const tag = tagOf(child);
+    if (tag === 'w:p') {
+      addParagraph(parseParagraph(child, numbering, ctx, warnings, true));
+    } else if (tag === 'w:tbl') {
+      if (depth + 1 >= MAX_TABLE_DEPTH) {
+        warnings.push('A table nested too deeply was not imported.');
+        ctx.comments?.mark(child);
+      } else {
+        blocks.push(parseTable(child, ctx, numbering, warnings, depth + 1));
+      }
+    } else if (tag === 'w:bookmarkStart') {
+      const name = bookmarkName(child);
+      if (name) pendingBookmarks.push({ type: 'bookmark', name });
+    } else if (tag !== 'w:tcPr') {
       // Content that is not imported can still open or close a comment range.
       ctx.comments?.mark(child);
     }
   }
-  return result ?? leading;
+  // A bookmark with no paragraph after it goes to the end of the last paragraph, or to a paragraph of its own.
+  if (pendingBookmarks.length > 0) {
+    const last = blocks[blocks.length - 1];
+    if (last && 'content' in last) last.content.push(...pendingBookmarks);
+    else blocks.push({ type: 'paragraph', content: pendingBookmarks });
+  }
+  settleListStarts(blocks);
+
+  const inline = (block: DocBlock | undefined): DocInline[] => (block && 'content' in block ? block.content : []);
+  const paragraphs = blocks.filter((b) => b.type === 'paragraph' || b.type === 'heading' || b.type === 'listItem');
+  const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
+  // Bookmarks of the paragraphs before the first one with content stay in front of it
+  const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
+  const plain = blocks.length === 1 && blocks[0].type === 'paragraph';
+  return { content, ...(!plain && blocks.length > 0 && { blocks }) };
 }
 
 // ---------------------------------------------------------------------------
@@ -936,7 +1020,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       }
       currentBlocks.push(...paragraphBlocks(node));
     } else if (tag === 'w:tbl') {
-      currentBlocks.push(parseTable(node, ctx, warnings));
+      currentBlocks.push(parseTable(node, ctx, numbering, warnings));
     } else if (tag === 'w:sectPr') {
       // The trailing sectPr for the document's last section.
       await flushSection(node);
@@ -984,17 +1068,22 @@ function usedStyleIds(sections: DocSection[]): Set<string> {
   const hf = (part: DocHeaderFooter | undefined) => {
     for (const p of [...(part?.paragraphs ?? []), ...(part?.firstPageParagraphs ?? [])]) inlines(p.content);
   };
-  for (const section of sections) {
-    for (const block of section.blocks) {
-      if (block.type === 'table') {
-        if (block.namedStyleId) used.add(block.namedStyleId);
-        for (const row of block.rows) for (const cell of row.cells) inlines(cell.content);
+  const visit = (block: DocBlock) => {
+    if (block.type === 'table') {
+      if (block.namedStyleId) used.add(block.namedStyleId);
+      for (const row of block.rows) {
+        for (const cell of row.cells) {
+          if (cell.blocks) cell.blocks.forEach(visit);
+          else inlines(cell.content);
+        }
       }
-      else if ('content' in block) {
-        inlines(block.content);
-        if ('namedStyleId' in block && block.namedStyleId) used.add(block.namedStyleId);
-      }
+    } else if ('content' in block) {
+      inlines(block.content);
+      if ('namedStyleId' in block && block.namedStyleId) used.add(block.namedStyleId);
     }
+  };
+  for (const section of sections) {
+    section.blocks.forEach(visit);
     hf(section.header);
     hf(section.footer);
   }

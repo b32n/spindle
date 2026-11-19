@@ -106,6 +106,9 @@ export interface ParagraphBlock {
   id: string;
   runs: Run[];
   attrs?: ParagraphAttrs;
+  /** ProseMirror position of the paragraph node (set for blocks inside table cells) */
+  pmStart?: number;
+  pmEnd?: number;
 }
 
 /**
@@ -117,6 +120,9 @@ export interface HeadingBlock {
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: Run[];
   attrs?: ParagraphAttrs;
+  /** ProseMirror position of the heading node (set for blocks inside table cells) */
+  pmStart?: number;
+  pmEnd?: number;
 }
 
 /**
@@ -131,6 +137,9 @@ export interface ListItemBlock {
   attrs?: ParagraphAttrs;
   /** Index within the list (1-based) for ordered lists */
   listIndex?: number;
+  /** ProseMirror position of the item's paragraph (set for blocks inside table cells) */
+  pmStart?: number;
+  pmEnd?: number;
 }
 
 /** One border line of a table or cell (see docs-core `TableBorder`). */
@@ -192,6 +201,9 @@ export interface TableBlock {
   colWidths?: number[];
   /** Borders of the table; absent for the default grid, `{}` for no lines. */
   borders?: TableBorders;
+  /** ProseMirror position of the table node (set for a table nested in a cell) */
+  pmStart?: number;
+  pmEnd?: number;
 }
 
 /**

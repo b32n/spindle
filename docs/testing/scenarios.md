@@ -292,6 +292,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-RES-05 | undo under collaboration reverts only your own typing (B5) | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-07 | redo and the toolbar Undo/Redo buttons are also scoped to your own edits | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-TBL-02 | a cell with several paragraphs and a nested table is shown, and the nested table can be edited | covered |  |  | `e2e/docs/table-structure.spec.ts` |
 | D-GAP-01 | DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes | not covered | | Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet. | |
 | D-GAP-02 | Triple-click paragraph selection and mouse drag selection | not covered | | Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02). | |
 | D-GAP-03 | Ruler margin handles, table column resize, image resize handles | not covered | | Pointer gestures on the canvas-like page layer; to add. | |
@@ -438,7 +439,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 372
+- covered: 373
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

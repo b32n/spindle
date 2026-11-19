@@ -1,14 +1,4 @@
 {
   "format": "docx",
-  "items": [
-    {
-      "count": 2,
-      "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
-      "id": "docx.tableStructure",
-      "label": "nested table(s) / multi-paragraph cell(s)",
-      "where": [
-        "nested tables ×2"
-      ]
-    }
-  ]
+  "items": []
 }
