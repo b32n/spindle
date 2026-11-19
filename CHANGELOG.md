@@ -94,6 +94,20 @@ lockstep.
   document a new `namedStyles` map, so styles and references sync in collaboration (a late joiner receives the room's
   styles; no migration is needed). There is no style gallery or style editing UI yet.
 
+- **DOCX fields are kept with their cached result.** Import keeps every field other than `PAGE`/`NUMPAGES` (still page-number
+  fields), `HYPERLINK`, tables of contents and legacy form fields as the additive `DocFieldRun` interchange member
+  (`{ type: 'field', instruction, kind, result, dirty? }`): `REF`, `PAGEREF`, `SEQ`, `STYLEREF`, `DATE`, `TIME`, `TITLE`,
+  `AUTHOR`, `NUMWORDS`, `IF`, `MERGEFIELD`, `SECTIONPAGES` and the rest, complex and `fldSimple`. The result is the text (or
+  formatted runs) Word last computed; it is displayed as is and never recalculated, and the export writes it back as a
+  complex field (begin, instruction, separate, result, end, `w:dirty` kept) so Word can refresh it. A field inside another
+  field's result is part of that result. `HYPERLINK "url"` fields become links. A table of contents or index keeps its text as
+  static paragraphs (the field itself is not kept), legacy form fields (`FORMTEXT`, `FORMCHECKBOX`, `FORMDROPDOWN`) still lose
+  their value, and fields in headers and footers other than the page-number ones are still dropped with a warning.
+- **Editor: generic field in the document model.** Additive `InlineField` in `InlineContent` (`DocumentData` blocks and table
+  cells), a new `field` inline atom in the ProseMirror schema (attrs `instruction`, `kind`, `result`, `dirty`) that syncs
+  over Yjs, and `docx.fields` now counts only what is not kept as a field (tables of contents, indexes, legacy form
+  fields). Code that switches exhaustively over `InlineContent` or `DocInline` needs a `field` case.
+
 ### Changed
 
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it

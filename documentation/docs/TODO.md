@@ -23,8 +23,8 @@ Verified absent in code.
       `importFromDocx`, plus an Open button in the toolbar.)
 - [ ] **DOCX fidelity gaps** (work lands in `@b32nio/spindle-io`) — `data:` URI images only (remote images are
       skipped with a warning on export), floating/anchored images are skipped
-      on import, and unsupported field codes keep no value. `inspectDocx(bytes, { detail: 'full' })` and the
-      fixture goldens in `fixtures/docx/` list what else is flattened or ignored (named styles, table
+      on import, and tables of contents and legacy form fields keep no field (other fields are kept with their cached result, never recalculated). `inspectDocx(bytes, { detail: 'full' })` and the
+      fixture goldens in `fixtures/docx/` list what else is flattened or ignored (table
       formatting, sections, bookmarks…). DOCX comments round-trip with replies, resolved state and anchors.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
@@ -65,12 +65,6 @@ Verified absent in code.
 - [ ] **Single-section only under collab** — `setData` is disallowed while
       attached, and IndexedDB persistence is browser-only (`collab/binding.ts`,
       `collab/y-schema.ts`).
-- [ ] **Inline images & dynamic fields lost on the collab round-trip** — the
-      block↔ProseMirror conversion the collab hydrate/serialize path uses
-      (`prosemirror/sync.ts`) has no inline PM node type for an inline image run
-      or a `DynamicFieldRun`, so `inlineContentToPm` drops them. Needs new inline
-      schema nodes (+ their render paths). Non-collab `getData/setData` is
-      unaffected (it passes blocks by reference, never through PM).
 
 ## Known limitations (from code)
 

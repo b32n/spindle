@@ -3,9 +3,11 @@ import type {
   DocBlock,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
+  DocImageRun,
   DocInline,
   DocParagraphStyle,
   DocSection,
+  DocTextRun,
   DocTableRow,
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
@@ -112,10 +114,12 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
 
 /**
  * Walk a paragraph's direct children, producing inline content. Handles
- * plain runs, hyperlinks (resolved through rels), and field-code sequences
- * for PAGE/NUMPAGES — every other field type's cached display text is
- * dropped with a warning rather than silently kept (its literal value
- * would be stale outside Word's own pagination).
+ * plain runs, hyperlinks (resolved through rels) and field-code sequences:
+ * PAGE/NUMPAGES keep today's page-number mapping, HYPERLINK fields become
+ * links, tables of contents and indexes keep their result as static text,
+ * legacy form fields are dropped with a warning, and every other field is
+ * kept as a generic `field` carrying its instruction and the result Word
+ * last computed (nested fields end up as the outer field's cached content).
  *
  * A field is a fldChar "begin", an instrText carrying the instruction, an
  * optional "separate" marker, optional cached display text, then a fldChar
@@ -132,8 +136,30 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   const out: DocInline[] = [];
   const pStyleId = paragraphStyleId(pNode);
   ctx.comments?.paragraphStart();
-  let pendingField = ''; // accumulated instrText while inside a begin/.../end sequence
-  let inField = false;
+  const fields: OpenField[] = []; // begin/.../end sequences in progress, outermost first
+  const top = (): OpenField | undefined => fields[fields.length - 1];
+  const inInstruction = () => top()?.phase === 'instruction';
+
+  /** An image goes into the cached result of the field it is in, else into the paragraph. */
+  const place = (image: DocInline) => {
+    const open = top();
+    if (!open) out.push(image);
+    else if (open.phase === 'result' && image.type === 'image') open.result.push(image);
+  };
+
+  /** A field whose end was reached: nested in another field it becomes part of that field, else it is written to the paragraph. */
+  const finishField = (done: OpenField) => {
+    const parent = top();
+    if (!parent) {
+      emitField(done, out, warnings);
+    } else if (parent.phase === 'result') {
+      parent.result.push(...done.result);
+    } else {
+      // A field inside another field's instruction (IF { PAGE } > 1 ...) cannot be kept as such: its cached value stands in.
+      parent.instruction += resultText(done.result);
+      warnings.push(`A field nested in the instruction of "${parent.instruction.trim()}" was kept as its cached value.`);
+    }
+  };
 
   const consumeRun = (runNode: XmlNode, target: string | undefined) => {
     const rPr = find(childrenOf(runNode), 'w:rPr');
@@ -146,6 +172,13 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     const flush = () => {
       if (!text) return;
       const commentThreadId = ctx.comments?.anchorText(text);
+      const open = top();
+      if (open) {
+        // Inside a field the text is its cached result (nothing inside an instruction is displayed).
+        if (open.phase === 'result') open.result.push({ type: 'text', text, ...props });
+        text = '';
+        return;
+      }
       const runProps = commentThreadId ? { ...props, commentThreadId } : props;
       if (target) out.push({ type: 'link', text, href: target, ...runProps });
       else out.push({ type: 'text', text, ...runProps });
@@ -155,44 +188,47 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       const pieceTag = tagOf(piece);
       if (pieceTag === 'w:fldChar') {
         const type = attrsOf(piece)['@_w:fldCharType'];
+        flush();
         if (type === 'begin') {
-          inField = true;
-          pendingField = '';
+          const dirty = attrsOf(piece)['@_w:dirty'];
+          fields.push({ instruction: '', phase: 'instruction', result: [], dirty: dirty === 'true' || dirty === '1' });
+        } else if (type === 'separate') {
+          const open = top();
+          if (open) open.phase = 'result';
         } else if (type === 'end') {
-          if (inField) out.push(...fieldRunFor(pendingField, warnings));
-          inField = false;
-          pendingField = '';
+          const done = fields.pop();
+          if (done) finishField(done);
         }
-        // 'separate' — no-op marker between the instruction and its cached result.
       } else if (pieceTag === 'w:instrText') {
-        if (inField) pendingField += textOf(piece);
+        const open = top();
+        if (open?.phase === 'instruction') open.instruction += textOf(piece);
       } else if (pieceTag === 'w:t') {
-        if (!inField) text += textOf(piece); // inField's w:t is cached display text — discard, we use the instruction
+        if (!inInstruction()) text += textOf(piece);
       } else if (pieceTag === 'w:tab' || pieceTag === 'w:ptab') {
-        if (!inField) text += '\t';
+        if (!inInstruction()) text += '\t';
       } else if (pieceTag === 'w:br') {
         // A page break is a structural block (see pageBreakPlacement); every other break is a line break.
-        if (!inField && attrsOf(piece)['@_w:type'] !== 'page') text += '\n';
+        if (!inInstruction() && attrsOf(piece)['@_w:type'] !== 'page') text += '\n';
       } else if (pieceTag === 'w:cr') {
-        if (!inField) text += '\n';
+        if (!inInstruction()) text += '\n';
       } else if (pieceTag === 'w:noBreakHyphen') {
-        if (!inField) text += NON_BREAKING_HYPHEN;
+        if (!inInstruction()) text += NON_BREAKING_HYPHEN;
       } else if (pieceTag === 'w:softHyphen') {
-        if (!inField) text += SOFT_HYPHEN;
+        if (!inInstruction()) text += SOFT_HYPHEN;
       } else if (pieceTag === 'w:ruby') {
         // Keep the base text; the reading marks (w:rt) are not imported.
         flush();
         const base = find(childrenOf(piece), 'w:rubyBase');
         if (base) consumeRuns(childrenOf(base), target);
       } else if (pieceTag === 'w:drawing') {
-        const image = parseDrawing(piece, ctx.media, warnings);
-        if (image) out.push(image);
+        const image = inInstruction() ? null : parseDrawing(piece, ctx.media, warnings);
+        if (image) place(image);
       } else if (pieceTag === 'mc:AlternateContent') {
         // LibreOffice (and Word for some shapes) wrap the drawing in
         // <mc:AlternateContent><mc:Choice><w:drawing>; the Fallback is legacy VML.
         const drawing = findDeep(piece, 'w:drawing');
-        const image = drawing && parseDrawing(drawing, ctx.media, warnings);
-        if (image) out.push(image);
+        const image = drawing && !inInstruction() ? parseDrawing(drawing, ctx.media, warnings) : null;
+        if (image) place(image);
       }
     }
     flush();
@@ -201,8 +237,13 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   const consumeRuns = (runs: XmlNode[], target: string | undefined) => {
     for (const child of flattenInline(runs)) {
       const tag = tagOf(child);
-      if (tag === 'w:fldSimple') out.push(...fieldRunFor(attrsOf(child)['@_w:instr'] ?? '', warnings));
-      else if (tag === 'w:r') consumeRun(child, target);
+      if (tag === 'w:fldSimple') {
+        const dirty = attrsOf(child)['@_w:dirty'];
+        fields.push({ instruction: attrsOf(child)['@_w:instr'] ?? '', phase: 'result', result: [], dirty: dirty === 'true' || dirty === '1' });
+        consumeRuns(childrenOf(child), target);
+        const done = fields.pop();
+        if (done) finishField(done);
+      } else if (tag === 'w:r') consumeRun(child, target);
       else ctx.comments?.mark(child);
     }
   };
@@ -219,6 +260,15 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     }
     // Bookmarks, proofErr, and other structural markers carry no content — skipped.
   }
+
+  // A field still open here continues in a later paragraph (a table of contents, for instance): what it displayed
+  // so far stays as plain text. Anything open inside it is part of that text.
+  while (fields.length > 1) {
+    const inner = fields.pop() as OpenField;
+    const outer = top() as OpenField;
+    if (outer.phase === 'result') outer.result.push(...inner.result);
+  }
+  if (fields[0]?.phase === 'result') out.push(...fields[0].result);
 
   return out;
 }
@@ -272,13 +322,100 @@ function parseDrawing(drawingNode: XmlNode, media: Map<string, string>, warnings
   return { type: 'image', src, width, height, ...(alt && { alt }) };
 }
 
-function fieldRunFor(instruction: string, warnings: string[]): DocInline[] {
-  const norm = instruction.trim().toUpperCase();
-  if (norm.startsWith('PAGE') && !norm.startsWith('PAGEREF')) return [{ type: 'pageNumber' }];
-  if (norm.startsWith('NUMPAGES')) return [{ type: 'totalPages' }];
-  if (!norm) return [];
-  warnings.push(`Unsupported field code "${instruction.trim()}" — its cached value was dropped.`);
-  return [];
+/** A field being read: `phase` says whether its instruction or its cached result is being collected. */
+interface OpenField {
+  instruction: string;
+  phase: 'instruction' | 'result';
+  result: Array<DocTextRun | DocImageRun>;
+  dirty: boolean;
+}
+
+/** Fields whose result is block content (a table of contents, an index): the text stays, the field does not. */
+const STATIC_RESULT_FIELDS = new Set(['TOC', 'TOA', 'INDEX']);
+/** Legacy form fields: owned by the form-field work, so their value is still dropped. */
+const LEGACY_FORM_FIELDS = new Set(['FORMTEXT', 'FORMCHECKBOX', 'FORMDROPDOWN']);
+
+function resultText(result: Array<DocTextRun | DocImageRun>): string {
+  return result.map((r) => (r.type === 'text' ? r.text : '')).join('');
+}
+
+/** The field type: the first word of the instruction, upper case. */
+function fieldKind(instruction: string): string {
+  return instruction.trim().toUpperCase().split(/[\s\\"]/)[0];
+}
+
+/** `HYPERLINK "url" \l "anchor"`: the target of an external link field, or undefined for anything else (no URL, or an anchor only). */
+function hyperlinkFieldTarget(instruction: string): string | undefined {
+  const args = [...instruction.trim().matchAll(/"([^"]*)"|(\S+)/g)].map((m) => ({ value: m[1] ?? m[2], quoted: m[1] !== undefined }));
+  const rest = args.slice(1);
+  let url: string | undefined;
+  let anchor: string | undefined;
+  for (let i = 0; i < rest.length; i++) {
+    const arg = rest[i];
+    if (!arg.quoted && arg.value.startsWith('\\')) {
+      // Switches that take a value: \l (location) \t (target frame) \m (map); \n and the rest are flags.
+      const takesValue = /^\\[ltm]$/i.test(arg.value);
+      if (takesValue && rest[i + 1]) {
+        if (/^\\l$/i.test(arg.value)) anchor = rest[i + 1].value;
+        i++;
+      }
+    } else if (url === undefined) {
+      url = arg.value;
+    }
+  }
+  if (!url) return undefined;
+  return anchor ? `${url}#${anchor}` : url;
+}
+
+/** Whether a cached result run carries nothing but its text. */
+function isPlainText(run: DocTextRun | DocImageRun): run is DocTextRun {
+  return run.type === 'text' && Object.keys(run).every((k) => k === 'type' || k === 'text');
+}
+
+/** Writes a finished, outermost field into the paragraph (see paragraphInlineContent for what each kind becomes). */
+function emitField(field: OpenField, out: DocInline[], warnings: string[]): void {
+  const instruction = field.instruction.trim();
+  const kind = fieldKind(instruction);
+  if (!kind) {
+    out.push(...field.result);
+    return;
+  }
+  if (kind === 'PAGE') {
+    out.push({ type: 'pageNumber' });
+    return;
+  }
+  if (kind === 'NUMPAGES') {
+    out.push({ type: 'totalPages' });
+    return;
+  }
+  if (STATIC_RESULT_FIELDS.has(kind)) {
+    out.push(...field.result);
+    return;
+  }
+  if (LEGACY_FORM_FIELDS.has(kind)) {
+    warnings.push(`Unsupported field code "${instruction}" — its cached value was dropped.`);
+    return;
+  }
+  if (kind === 'HYPERLINK') {
+    const href = hyperlinkFieldTarget(instruction);
+    if (href && resultText(field.result)) {
+      for (const run of field.result) {
+        if (run.type === 'text') {
+          const { namedStyleId, ...props } = run;
+          out.push({ ...props, type: 'link', href, ...(namedStyleId && namedStyleId !== 'Hyperlink' && { namedStyleId }) });
+        } else out.push(run);
+      }
+      return;
+    }
+  }
+  const plain = field.result.every(isPlainText);
+  out.push({
+    type: 'field',
+    instruction,
+    kind,
+    result: plain ? resultText(field.result) : field.result,
+    ...(field.dirty && { dirty: true }),
+  });
 }
 
 function resolveHyperlinkTarget(hyperlinkNode: XmlNode, rels: Map<string, string>, warnings: string[]): string | undefined {
@@ -571,7 +708,13 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
     for (const p of findAll(flattenBlocks(childrenOf(rootEl)), 'w:p')) {
       const pPr = find(childrenOf(p), 'w:pPr');
       const alignment = ctx.styles.paragraph(paragraphStyleId(p), parsePPr(pPr)).alignment;
-      const content = paragraphInlineContent(p, ctx, warnings);
+      // A header or footer shows one value on every page, so a cached field result (STYLEREF, DATE...) would be wrong
+      // on most of them: only the page-number fields are kept there.
+      const content = paragraphInlineContent(p, ctx, warnings).filter((item) => {
+        if (item.type !== 'field') return true;
+        warnings.push(`Unsupported field code "${item.instruction}" — its cached value was dropped.`);
+        return false;
+      });
       paragraphs.push({ content, ...(alignment && alignment !== 'justify' ? { alignment } : {}) });
     }
   }

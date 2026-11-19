@@ -186,7 +186,23 @@ export interface InlineLink extends TextStyle {
   namedStyleId?: string;
 }
 
-export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun;
+/**
+ * A field the editor does not evaluate (REF, PAGEREF, SEQ, STYLEREF, AUTHOR, MERGEFIELD, IF, ...). It displays its
+ * cached result, which is only recomputed by the application that opens the exported file.
+ */
+export interface InlineField {
+  type: 'field';
+  /** The instruction as written, e.g. `REF _Ref123 \\h`. */
+  instruction: string;
+  /** The field type: the first word of the instruction, upper case (`REF`, `SEQ`, ...). */
+  kind: string;
+  /** The cached result: plain text, or runs when the result carries formatting or images. */
+  result: string | Array<TextRun | InlineImage>;
+  /** Flagged for the consuming application to recompute when the file is opened (`w:dirty`). */
+  dirty?: boolean;
+}
+
+export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField;
 
 // ============================================================================
 // Block Types

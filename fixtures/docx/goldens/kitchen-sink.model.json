@@ -423,7 +423,29 @@
             "type": "paragraph"
           },
           {
-            "content": [],
+            "content": [
+              {
+                "color": "#0563c1",
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "namedStyleId": "Hyperlink",
+                "text": "Navigation",
+                "type": "text",
+                "underline": true
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "\t",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "1",
+                "type": "text"
+              }
+            ],
             "id": "block-12",
             "leftIndent": 0,
             "lineSpacing": {
@@ -450,6 +472,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9001 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "1",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-13",
@@ -478,6 +513,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9002 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "2",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-14",
@@ -506,6 +554,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9003 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "2",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-15",
@@ -534,6 +595,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9004 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "3",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-16",
@@ -562,6 +636,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9005 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "3",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-17",
@@ -590,6 +677,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9006 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "4",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-18",
@@ -618,6 +718,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9007 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "4",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-19",
@@ -646,6 +759,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9008 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "5",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-20",
@@ -674,6 +800,19 @@
                 "fontSize": 11,
                 "text": "\t",
                 "type": "text"
+              },
+              {
+                "instruction": "PAGEREF _Toc9009 \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "5",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-21",
@@ -1179,10 +1318,36 @@
                 "type": "text"
               },
               {
+                "instruction": "PAGEREF keyfigure \\h",
+                "kind": "PAGEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "3",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ": ",
                 "type": "text"
+              },
+              {
+                "instruction": "REF keyfigure \\h",
+                "kind": "REF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "The key figure of this report is 42 vessels per day.",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1211,6 +1376,21 @@
                 "type": "text"
               },
               {
+                "instruction": "SEQ Figure \\* ARABIC",
+                "kind": "SEQ",
+                "result": [
+                  {
+                    "color": "#44546a",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 9,
+                    "italic": true,
+                    "text": "1",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "color": "#44546a",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 9,
@@ -1219,12 +1399,42 @@
                 "type": "text"
               },
               {
+                "instruction": "SEQ Figure \\* ARABIC",
+                "kind": "SEQ",
+                "result": [
+                  {
+                    "color": "#44546a",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 9,
+                    "italic": true,
+                    "text": "2",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "color": "#44546a",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 9,
                 "italic": true,
                 "text": " shows the lighthouse; Table ",
                 "type": "text"
+              },
+              {
+                "instruction": "SEQ Table \\* ARABIC",
+                "kind": "SEQ",
+                "result": [
+                  {
+                    "color": "#44546a",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 9,
+                    "italic": true,
+                    "text": "1",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               },
               {
                 "color": "#44546a",
@@ -1253,10 +1463,36 @@
                 "type": "text"
               },
               {
+                "instruction": "DATE \\@ \"yyyy-MM-dd\"",
+                "kind": "DATE",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "2026-01-15",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " at ",
                 "type": "text"
+              },
+              {
+                "instruction": "TIME \\@ \"HH:mm\"",
+                "kind": "TIME",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "09:00",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1265,10 +1501,36 @@
                 "type": "text"
               },
               {
+                "instruction": "AUTHOR",
+                "kind": "AUTHOR",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Spindle fixture generator",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " for ",
                 "type": "text"
+              },
+              {
+                "instruction": "TITLE",
+                "kind": "TITLE",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Fields and notes",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1316,10 +1578,36 @@
                 "type": "text"
               },
               {
+                "instruction": "SECTIONPAGES",
+                "kind": "SECTIONPAGES",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "9",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "; words: ",
                 "type": "text"
+              },
+              {
+                "instruction": "NUMWORDS",
+                "kind": "NUMWORDS",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "800",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1347,10 +1635,36 @@
                 "type": "text"
               },
               {
+                "instruction": "STYLEREF \"Heading 1\"",
+                "kind": "STYLEREF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Fields and cross-references",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ". Conditional: ",
                 "type": "text"
+              },
+              {
+                "instruction": "IF 1 = 1 \"yes\" \"no\"",
+                "kind": "IF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "yes",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1376,6 +1690,12 @@
                 "fontSize": 11,
                 "text": "External field link: ",
                 "type": "text"
+              },
+              {
+                "href": "https://example.com/harbour",
+                "styleId": "text-style-1",
+                "text": "example.com/harbour",
+                "type": "link"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -1470,6 +1790,19 @@
             "alignment": "justify",
             "content": [
               {
+                "instruction": "MERGEFIELD Recipient \\* MERGEFORMAT",
+                "kind": "MERGEFIELD",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "«Recipient»",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " (unresolved mail-merge field) and a ",
@@ -1505,14 +1838,17 @@
                 "type": "text"
               },
               {
-                "fieldType": "pageNumber",
-                "type": "dynamicField"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "single page",
-                "type": "text"
+                "instruction": "IF 1 > 1 \"multi-page\" \"single page\"",
+                "kind": "IF",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "single page",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
               }
             ],
             "id": "block-53",
@@ -2378,6 +2714,19 @@
                 "type": "text"
               },
               {
+                "instruction": "DATE \\@ \"d MMM yyyy\"",
+                "kind": "DATE",
+                "result": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "15 Jan 2026",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ". A tracked link: ",
@@ -2523,6 +2872,19 @@
                         "fontSize": 11,
                         "text": " ",
                         "type": "text"
+                      },
+                      {
+                        "instruction": "SEQ Table \\* ARABIC",
+                        "kind": "SEQ",
+                        "result": [
+                          {
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 11,
+                            "text": "2",
+                            "type": "text"
+                          }
+                        ],
+                        "type": "field"
                       }
                     ],
                     "id": "cell-11"
@@ -5662,6 +6024,21 @@
                 "type": "text"
               },
               {
+                "instruction": "SEQ Figure \\* ARABIC",
+                "kind": "SEQ",
+                "result": [
+                  {
+                    "color": "#44546a",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 9,
+                    "italic": true,
+                    "text": "1",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "color": "#44546a",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 9,
@@ -8351,34 +8728,7 @@
   },
   "importError": null,
   "warnings": [
-    "Unsupported field code \"PAGEREF _Toc9000 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9001 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9002 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9003 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9004 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9005 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9006 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9007 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9008 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF _Toc9009 \\h\" — its cached value was dropped.",
-    "Unsupported field code \"PAGEREF keyfigure \\h\" — its cached value was dropped.",
-    "Unsupported field code \"REF keyfigure \\h\" — its cached value was dropped.",
-    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
-    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
-    "Unsupported field code \"SEQ Table \\* ARABIC\" — its cached value was dropped.",
-    "Unsupported field code \"DATE \\@ \"yyyy-MM-dd\"\" — its cached value was dropped.",
-    "Unsupported field code \"TIME \\@ \"HH:mm\"\" — its cached value was dropped.",
-    "Unsupported field code \"AUTHOR\" — its cached value was dropped.",
-    "Unsupported field code \"TITLE\" — its cached value was dropped.",
-    "Unsupported field code \"SECTIONPAGES\" — its cached value was dropped.",
-    "Unsupported field code \"NUMWORDS\" — its cached value was dropped.",
-    "Unsupported field code \"STYLEREF \"Heading 1\"\" — its cached value was dropped.",
-    "Unsupported field code \"IF 1 = 1 \"yes\" \"no\"\" — its cached value was dropped.",
-    "Unsupported field code \"HYPERLINK \"https://example.com/harbour\"\" — its cached value was dropped.",
-    "Unsupported field code \"MERGEFIELD Recipient \\* MERGEFORMAT\" — its cached value was dropped.",
-    "Unsupported field code \"DATE \\@ \"d MMM yyyy\"\" — its cached value was dropped.",
-    "Unsupported field code \"SEQ Table \\* ARABIC\" — its cached value was dropped.",
-    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
+    "A field nested in the instruction of \"IF 1\" was kept as its cached value.",
     "A floating (anchored) image was skipped — only inline images are supported.",
     "A floating (anchored) image was skipped — only inline images are supported.",
     "A floating (anchored) image was skipped — only inline images are supported.",

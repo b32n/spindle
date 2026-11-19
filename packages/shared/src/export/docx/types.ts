@@ -63,7 +63,24 @@ export interface DocTotalPagesRun {
   type: 'totalPages';
 }
 
-export type DocInline = DocTextRun | DocLinkRun | DocImageRun | DocPageNumberRun | DocTotalPagesRun;
+/**
+ * A field the editor does not evaluate (REF, PAGEREF, SEQ, STYLEREF, AUTHOR, MERGEFIELD, IF, ...): its instruction and
+ * the result Word last computed. The result is what is displayed; it is written back as the field's cached result so
+ * Word can refresh it.
+ */
+export interface DocFieldRun {
+  type: 'field';
+  /** The instruction as written, e.g. `REF _Ref123 \\h`. */
+  instruction: string;
+  /** The field type: the first word of the instruction, upper case (`REF`, `SEQ`, ...). */
+  kind: string;
+  /** The cached result: plain text, or runs when the result carries formatting or images. */
+  result: string | Array<DocTextRun | DocImageRun>;
+  /** Set when the field is flagged for Word to recompute when the file is opened (`w:dirty`). */
+  dirty?: boolean;
+}
+
+export type DocInline = DocTextRun | DocLinkRun | DocImageRun | DocPageNumberRun | DocTotalPagesRun | DocFieldRun;
 
 export interface DocParagraphStyle {
   alignment?: 'left' | 'center' | 'right' | 'justify';
