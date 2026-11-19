@@ -25,25 +25,11 @@
       "sections": 1,
       "textChars": 9843
     },
-    "byField": {
-      "removed sections[].blocks[].content[].commentThreadId": 1,
-      "removed threads[]": 1
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "\"thread-1\"",
-        "kind": "removed",
-        "path": "sections[0].blocks[39].content[0].commentThreadId"
-      },
-      {
-        "before": "{\"id\":\"thread-1\",\"anchor\":{\"quote\":\"Throughput rose across all four quarters....",
-        "kind": "removed",
-        "path": "threads[0]"
-      }
-    ],
-    "removed": 2,
-    "total": 2,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
   "exportWarnings": [],

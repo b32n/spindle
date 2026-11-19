@@ -25,8 +25,7 @@ Verified absent in code.
       skipped with a warning on export), floating/anchored images are skipped
       on import, and unsupported field codes keep no value. `inspectDocx(bytes, { detail: 'full' })` and the
       fixture goldens in `fixtures/docx/` list what else is flattened or ignored (named styles, table
-      formatting, sections, bookmarks…). DOCX comments import with replies and anchors but are not yet written on
-      export.
+      formatting, sections, bookmarks…). DOCX comments round-trip with replies, resolved state and anchors.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Multi-section documents in the UI** — the model supports `sections[]`

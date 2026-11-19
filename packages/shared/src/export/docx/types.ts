@@ -141,6 +141,8 @@ export interface DocCommentThread {
 export interface DocumentExportInput {
   title: string;
   sections: DocSection[];
+  /** Comment threads, anchored to the runs that carry the matching `commentThreadId` (a thread with no such run is written at the start of the document). */
+  comments?: DocCommentThread[];
 }
 
 export interface DocumentExportResult {

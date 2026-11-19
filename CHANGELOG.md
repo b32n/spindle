@@ -34,7 +34,14 @@ lockstep.
   existing comments sidebar with author, initials (additive `Comment.authorInitials`), date, replies and resolved
   state. Overlapping comments are tagged with the innermost thread (all threads keep their anchor quote), a comment
   with no surviving anchor stays as a thread without one, and damaged comment parts import what they hold plus a
-  warning. Comments are not written back by `exportDocx` yet.
+  warning.
+- **DOCX comments are exported.** `exportDocx` accepts the additive `DocumentExportInput.comments` and writes
+  `word/comments.xml`, the range markers and reference runs, `commentsExtended.xml` (reply parentage and the
+  resolved state, on every comment of a resolved thread) and `people.xml`, with content types and relationships.
+  `exportToDocx` passes the document's threads and the runs' `commentThreadId`. Author, initials, date and reply order
+  survive a round trip, and a thread with no surviving anchor is written as a collapsed range at the start of the
+  first body paragraph so it is not lost. Comment dates are written without fractional seconds; the placeholder date of
+  an undated comment is omitted. LibreOffice reads the result (comments, replies, resolved state).
 
 ### Changed
 
