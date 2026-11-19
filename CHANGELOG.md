@@ -19,9 +19,12 @@ lockstep.
   `inspectDocx(bytes, { detail: 'full' })` (`@b32nio/spindle-docs-core`) additionally report ten new ids for
   content the importer flattens or ignores: `docx.sections`, `docx.namedStyles`, `docx.tableFormatting`,
   `docx.tableStructure`, `docx.paragraphFormatting`, `docx.listFormatting`, `docx.tabsAndBreaks`, `docx.bookmarks`,
-  `docx.headerFooterVariants` and `docx.sectionProperties`, and `docx.fields` lists its field kinds in `where`.
+  `docx.headerFooterVariants` and `docx.sectionProperties`, plus a long tail (`docx.trackedMoves`,
+  `docx.formattingRevisions`, `docx.dropCaps`, `docx.watermarks`, `docx.pageBorders`, `docx.lineNumbers`,
+  `docx.hyphenation`, `docx.tabStops`, `docx.rtl`, `docx.ruby`, `docx.embeddedFonts`, `docx.smartTags`,
+  `docx.altChunk`, `docx.legacyForms`), and `docx.fields` lists its field kinds in `where`.
   The default report (`detail: 'summary'`), and so the import-confirmation dialog, is unchanged apart from the
-  `docx.fields` count fix below. The new detectors parse the XML instead of matching text.
+  count fixes below. The new detectors parse the XML instead of matching text.
 
 ### Changed
 
@@ -39,6 +42,10 @@ lockstep.
 
 ### Fixed
 
+- **DOCX loss report: `docx.charts` and `docx.floatingImages` count what their labels say.** `docx.charts`
+  counted XML parts under `word/charts` and `word/diagrams` (one SmartArt is several parts) and now counts chart
+  and SmartArt objects referenced from the document; `docx.floatingImages` counted every `wp:anchor`, including
+  anchored shapes and text boxes, and now counts anchored pictures only.
 - **DOCX loss report: `docx.fields` counts a complex field once** even when its instruction is split across
   several runs (for example `IF 1 > 0 ...`, which was counted twice).
 - **DOCX: landscape sections no longer lose their orientation on a round trip.** `exportDocx` handed the `docx`

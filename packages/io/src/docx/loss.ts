@@ -43,11 +43,9 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
   add('docx.endnotes', 'endnote(s)', notes(endnotes), 'not imported');
 
   add('docx.comments', 'comment(s)', countMatches(await text('word/comments.xml'), /<w:comment[\s>/]/g), 'not imported');
-  add('docx.floatingImages', 'floating image(s)', countMatches(doc, /<wp:anchor[\s>/]/g), 'not imported (only inline images are)');
   add('docx.textBoxes', 'text box(es)/shape(s)', countMatches(doc, /<w:txbxContent[\s>/]/g), 'their text is not imported');
   add('docx.equations', 'equation(s)', countMatches(doc, /<m:oMath[\s>/]/g), 'not imported');
   add('docx.embeddedObjects', 'embedded object(s)', countMatches(doc, /<w:object[\s>/]/g), 'not imported');
-  add('docx.charts', 'chart(s)/diagram(s)', names.filter((n) => /^word\/(charts|diagrams)\//.test(n) && /\.xml$/.test(n) && !/rels|style|colors/i.test(n)).length, 'not imported');
 
   const columns = [...doc.matchAll(/<w:cols\b[^>]*\bw:num="(\d+)"/g)].filter((m) => Number(m[1]) > 1).length;
   add('docx.columns', 'multi-column section(s)', columns, 'laid out as a single column');
@@ -60,6 +58,8 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
         styles: await text('word/styles.xml'),
         numbering: await text('word/numbering.xml'),
         settings: await text('word/settings.xml'),
+        headerFooters: await Promise.all(names.filter((n) => /^word\/(header|footer)\d*\.xml$/.test(n)).map(text)),
+        fontFiles: names.filter((n) => /^word\/fonts\/[^/]+\.(odttf|ttf|otf|fntdata)$/i.test(n)).length,
       },
       options.detail === 'full'
     )

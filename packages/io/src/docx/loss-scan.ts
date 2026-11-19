@@ -1,4 +1,5 @@
 import type { ImportLossItem } from '@b32nio/spindle-shared';
+import { drawingKind } from './drawing-kind';
 import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
 
 /**
@@ -16,6 +17,10 @@ export interface DocxScanInput {
   numbering: string;
   /** word/settings.xml ('' when absent) */
   settings: string;
+  /** word/header*.xml and word/footer*.xml */
+  headerFooters: string[];
+  /** Number of embedded font files under word/fonts/ */
+  fontFiles: number;
 }
 
 type Item = Omit<ImportLossItem, 'where'> & { where?: string[] };
@@ -408,6 +413,141 @@ function fields(root: XmlNode[]): Item[] {
 }
 
 /** `full` adds the formatting/structure detectors and the per-kind field breakdown; otherwise only the fields item (counts only). */
+// ---------------------------------------------------------------------------
+// Round 2: long-tail constructs and drawing counts
+// ---------------------------------------------------------------------------
+
+const isSectPrChild = (path: readonly string[]) => path[path.length - 1] === 'w:sectPr' && !inRevisionProps(path);
+
+function trackedMoves(root: XmlNode[]): Item[] {
+  let total = 0;
+  walk(root, (_n, tag) => {
+    if (tag === 'w:moveFrom' || tag === 'w:moveTo') total++;
+  });
+  return item('docx.trackedMoves', 'tracked move(s)', total, 'their text is not imported');
+}
+
+function formattingRevisions(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  walk(root, (_n, tag) => {
+    if (tag === 'w:rPrChange' || tag === 'w:pPrChange' || tag === 'w:tblPrChange' || tag === 'w:sectPrChange') {
+      total++;
+      bump(kinds, tag.slice(2));
+    }
+  });
+  return item('docx.formattingRevisions', 'tracked formatting change(s)', total, 'the change history is dropped; the current formatting is imported', kinds);
+}
+
+function sectionLevel(root: XmlNode[]): Item[] {
+  let borders = 0;
+  let lineNumbers = 0;
+  walk(root, (_n, tag, path) => {
+    if (!isSectPrChild(path)) return;
+    if (tag === 'w:pgBorders') borders++;
+    else if (tag === 'w:lnNumType') lineNumbers++;
+  });
+  return [
+    ...item('docx.pageBorders', 'section(s) with page borders', borders, 'not imported'),
+    ...item('docx.lineNumbers', 'section(s) with line numbering', lineNumbers, 'not imported'),
+  ];
+}
+
+function dropCaps(root: XmlNode[]): Item[] {
+  let total = 0;
+  walk(root, (node, tag, path) => {
+    if (tag === 'w:framePr' && path[path.length - 1] === 'w:pPr' && !inRevisionProps(path)) {
+      const v = attr(node, 'w:dropCap');
+      if (v === 'drop' || v === 'margin') total++;
+    }
+  });
+  return item('docx.dropCaps', 'drop cap(s)', total, 'shown as a normal paragraph');
+}
+
+function tabStops(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  walk(root, (node, tag, path) => {
+    if (tag !== 'w:tab' || path[path.length - 1] !== 'w:tabs' || inRevisionProps(path)) return;
+    if (attr(node, 'w:val') === 'clear') return;
+    total++;
+    const leader = attr(node, 'w:leader');
+    bump(kinds, leader && leader !== 'none' ? `${leader} leader` : 'no leader');
+  });
+  return item('docx.tabStops', 'custom tab stop(s)', total, 'not imported (tabs use default stops)', kinds);
+}
+
+function rtl(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  walk(root, (node, tag, path) => {
+    if (inRevisionProps(path) || !isOn(node)) return;
+    const parent = path[path.length - 1];
+    let k: string | undefined;
+    if (tag === 'w:bidi' && parent === 'w:pPr') k = 'paragraph direction';
+    else if (tag === 'w:rtl' && parent === 'w:rPr') k = 'run direction';
+    else if (tag === 'w:bidiVisual' && parent === 'w:tblPr') k = 'table direction';
+    if (!k) return;
+    total++;
+    bump(kinds, k);
+  });
+  return item('docx.rtl', 'right-to-left setting(s)', total, 'the direction is not kept', kinds);
+}
+
+function countElements(root: XmlNode[], tag: string, id: string, label: string, effect: string): Item[] {
+  let total = 0;
+  walk(root, (_n, t) => {
+    if (t === tag) total++;
+  });
+  return item(id, label, total, effect);
+}
+
+function legacyForms(root: XmlNode[]): Item[] {
+  const kinds = new Map<string, number>();
+  let total = 0;
+  for (const raw of fieldInstructions(root)) {
+    const kind = raw.trim().toUpperCase().split(/[\s\\]/)[0];
+    if (kind !== 'FORMTEXT' && kind !== 'FORMCHECKBOX' && kind !== 'FORMDROPDOWN') continue;
+    total++;
+    bump(kinds, kind);
+  }
+  return item('docx.legacyForms', 'legacy form field(s)', total, 'their displayed value is dropped (also counted under docx.fields)', kinds);
+}
+
+function watermarks(headerFooters: string[]): Item[] {
+  let total = 0;
+  for (const xml of headerFooters) {
+    walk(parseXml(xml), (node, tag) => {
+      if (tag === 'v:shape' && /watermark/i.test(attr(node, 'id') ?? '')) total++;
+    });
+  }
+  return item('docx.watermarks', 'watermark(s)', total, 'not imported');
+}
+
+function hyphenation(settings: string): Item[] {
+  const el = settings ? find(childrenOf(find(parseXml(settings), 'w:settings') ?? {}), 'w:autoHyphenation') : undefined;
+  return item('docx.hyphenation', 'automatic hyphenation setting', el && isOn(el) ? 1 : 0, 'not applied (lines are broken without hyphenation)');
+}
+
+/**
+ * Drawings counted as objects, not as parts: a chart or SmartArt is one object however many XML parts back it,
+ * and only anchored pictures are floating images (anchored shapes, text boxes and charts are other things).
+ */
+function drawingCounts(root: XmlNode[]): { charts: Item[]; floating: Item[] } {
+  let charts = 0;
+  let floating = 0;
+  walk(root, (drawing, tag) => {
+    if (tag !== 'w:drawing') return;
+    const kind = drawingKind(drawing);
+    if (kind === 'chart' || kind === 'diagram') charts++;
+    else if (kind === 'picture' && childrenOf(drawing).some((c) => tagOf(c) === 'wp:anchor')) floating++;
+  });
+  return {
+    charts: item('docx.charts', 'chart(s)/diagram(s)', charts, 'not imported'),
+    floating: item('docx.floatingImages', 'floating image(s)', floating, 'not imported (only inline images are)'),
+  };
+}
+
 export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
   let root: XmlNode[];
   try {
@@ -431,8 +571,13 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
       return [];
     }
   };
-  if (!full) return safe(() => fields(root)).map(({ where: _where, ...rest }) => rest);
+  const drawings = safe(() => {
+    const { charts, floating } = drawingCounts(root);
+    return [...floating, ...charts];
+  });
+  if (!full) return [...drawings, ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
+    ...drawings,
     ...safe(() => extraSections(root)),
     ...safe(() => namedStyles(root, styleNames(input.styles))),
     ...safe(() => tableDetectors(root)),
@@ -442,5 +587,18 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     ...safe(() => bookmarks(root)),
     ...safe(() => sectionDetectors(root, evenAndOdd)),
     ...safe(() => fields(root)),
+    ...safe(() => trackedMoves(root)),
+    ...safe(() => formattingRevisions(root)),
+    ...safe(() => dropCaps(root)),
+    ...safe(() => watermarks(input.headerFooters)),
+    ...safe(() => sectionLevel(root)),
+    ...safe(() => hyphenation(input.settings)),
+    ...safe(() => tabStops(root)),
+    ...safe(() => rtl(root)),
+    ...safe(() => countElements(root, 'w:ruby', 'docx.ruby', 'ruby annotation(s)', 'the base text and reading marks are not imported')),
+    ...item('docx.embeddedFonts', 'embedded font(s)', input.fontFiles, 'not imported (text uses installed fonts)'),
+    ...safe(() => countElements(root, 'w:smartTag', 'docx.smartTags', 'smart tag(s)', 'their text is not imported')),
+    ...safe(() => countElements(root, 'w:altChunk', 'docx.altChunk', 'embedded alternative-format chunk(s)', 'not imported')),
+    ...safe(() => legacyForms(root)),
   ];
 }

@@ -2,6 +2,12 @@
   "format": "docx",
   "items": [
     {
+      "count": 1,
+      "effect": "not imported (text uses installed fonts)",
+      "id": "docx.embeddedFonts",
+      "label": "embedded font(s)"
+    },
+    {
       "count": 10,
       "effect": "the style's formatting is not applied and its name is not kept",
       "id": "docx.namedStyles",

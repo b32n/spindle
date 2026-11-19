@@ -60,3 +60,14 @@ export function walk(nodes: XmlNode[], visit: (node: XmlNode, tag: string, path:
     path.pop();
   }
 }
+
+/** Depth-first search for the first descendant with the given tag, regardless of exact nesting path (drawing markup nests several levels deep and the path is more than we want to hard-code). */
+export function findDeep(node: XmlNode, tag: string): XmlNode | undefined {
+  for (const child of childrenOf(node)) {
+    if (tagOf(child) === tag) return child;
+    const found = findDeep(child, tag);
+    if (found) return found;
+  }
+  return undefined;
+}
+

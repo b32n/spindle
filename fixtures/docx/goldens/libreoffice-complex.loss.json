@@ -75,6 +75,12 @@
       ]
     },
     {
+      "count": 1,
+      "effect": "not applied (lines are broken without hyphenation)",
+      "id": "docx.hyphenation",
+      "label": "automatic hyphenation setting"
+    },
+    {
       "count": 117,
       "effect": "the style's formatting is not applied and its name is not kept",
       "id": "docx.namedStyles",

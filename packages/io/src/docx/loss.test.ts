@@ -338,3 +338,156 @@ describe('detectDocxLoss: XML-based detectors', () => {
     expect((await detectDocxLoss(bytes, { detail: 'full' })).format).toBe('docx');
   });
 });
+
+describe('detectDocxLoss: long-tail detectors', () => {
+  const full = { detail: 'full' as const };
+  const run = (bytes: Uint8Array, id: string) => detectDocxLoss(bytes, full).then((r) => r.items.find((i) => i.id === id));
+  const drawing = (kind: 'inline' | 'anchor', uri: string) =>
+    `<w:p><w:r><w:drawing><wp:${kind}><a:graphic><a:graphicData uri="${uri}"/></a:graphic></wp:${kind}></w:drawing></w:r></w:p>`;
+  const OOXML = 'http://schemas.openxmlformats.org/drawingml/2006';
+
+  it('docx.trackedMoves counts move marks, not the range markers', async () => {
+    const bytes = await docx(
+      '<w:p><w:moveFromRangeStart w:id="1" w:name="m1"/><w:moveFrom w:id="2"><w:r><w:t>a</w:t></w:r></w:moveFrom><w:moveFromRangeEnd w:id="1"/>' +
+        '<w:moveTo w:id="3"><w:r><w:t>a</w:t></w:r></w:moveTo></w:p>'
+    );
+    expect(await run(bytes, 'docx.trackedMoves')).toMatchObject({ count: 2 });
+  });
+
+  it('docx.formattingRevisions counts the four change kinds by name', async () => {
+    const bytes = await docx(
+      '<w:p><w:pPr><w:pPrChange w:id="1"><w:pPr/></w:pPrChange></w:pPr><w:r><w:rPr><w:rPrChange w:id="2"><w:rPr/></w:rPrChange></w:rPr><w:t>a</w:t></w:r></w:p>' +
+        '<w:tbl><w:tblPr><w:tblPrChange w:id="3"><w:tblPr/></w:tblPrChange></w:tblPr></w:tbl>' +
+        '<w:sectPr><w:sectPrChange w:id="4"><w:sectPr/></w:sectPrChange></w:sectPr>'
+    );
+    expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({
+      count: 4,
+      where: ['pPrChange ×1', 'rPrChange ×1', 'sectPrChange ×1', 'tblPrChange ×1'],
+    });
+  });
+
+  it('docx.dropCaps counts drop and margin drop caps but not plain text frames', async () => {
+    const bytes = await docx(
+      p('a', '<w:framePr w:dropCap="drop" w:lines="3" w:wrap="around"/>') +
+        p('b', '<w:framePr w:dropCap="margin"/>') +
+        p('c', '<w:framePr w:w="2000" w:h="1000" w:hRule="exact" w:wrap="around"/>') +
+        p('d', '<w:framePr w:dropCap="none"/>')
+    );
+    expect(await run(bytes, 'docx.dropCaps')).toMatchObject({ count: 2 });
+  });
+
+  it('docx.watermarks looks in headers and footers for watermark shapes', async () => {
+    const header = (id: string) => `<w:hdr ${NS} xmlns:v="x"><w:p><w:r><w:pict><v:shape id="${id}"><v:textpath string="DRAFT"/></v:shape></w:pict></w:r></w:p></w:hdr>`;
+    const bytes = await docx(p('a'), {
+      'word/header1.xml': header('PowerPlusWaterMarkObject357476642'),
+      'word/header2.xml': header('Shape1'),
+      'word/footer1.xml': header('WordPictureWatermark1'),
+    });
+    expect(await run(bytes, 'docx.watermarks')).toMatchObject({ count: 2 });
+  });
+
+  it('docx.pageBorders and docx.lineNumbers count section properties', async () => {
+    const bytes = await docx(
+      p('a', '<w:sectPr><w:pgBorders w:offsetFrom="page"><w:top w:val="single"/></w:pgBorders><w:lnNumType w:countBy="1"/></w:sectPr>') +
+        '<w:sectPr><w:pgBorders/></w:sectPr>'
+    );
+    expect(await run(bytes, 'docx.pageBorders')).toMatchObject({ count: 2 });
+    expect(await run(bytes, 'docx.lineNumbers')).toMatchObject({ count: 1 });
+  });
+
+  it('docx.hyphenation reads autoHyphenation from settings and honours val=0', async () => {
+    const on = await docx(p('a'), { 'word/settings.xml': `<w:settings ${NS}><w:autoHyphenation/></w:settings>` });
+    const off = await docx(p('a'), { 'word/settings.xml': `<w:settings ${NS}><w:autoHyphenation w:val="0"/></w:settings>` });
+    expect(await run(on, 'docx.hyphenation')).toMatchObject({ count: 1 });
+    expect(await run(off, 'docx.hyphenation')).toBeUndefined();
+    expect(await run(await docx(p('a')), 'docx.hyphenation')).toBeUndefined();
+  });
+
+  it('docx.tabStops counts custom stops by leader and ignores cleared stops', async () => {
+    const bytes = await docx(
+      p('a', '<w:tabs><w:tab w:val="right" w:leader="dot" w:pos="9000"/><w:tab w:val="left" w:pos="720"/><w:tab w:val="clear" w:pos="1440"/><w:tab w:val="left" w:leader="none" w:pos="2000"/></w:tabs>')
+    );
+    expect(await run(bytes, 'docx.tabStops')).toMatchObject({ count: 3, where: ['no leader ×2', 'dot leader ×1'] });
+  });
+
+  it('docx.rtl counts paragraph, run and table direction and ignores switched-off ones', async () => {
+    const bytes = await docx(
+      p('a', '<w:bidi/>') +
+        p('b', '<w:bidi w:val="0"/>') +
+        '<w:p><w:r><w:rPr><w:rtl/></w:rPr><w:t>x</w:t></w:r></w:p>' +
+        '<w:tbl><w:tblPr><w:bidiVisual/></w:tblPr></w:tbl>'
+    );
+    expect(await run(bytes, 'docx.rtl')).toMatchObject({
+      count: 3,
+      where: ['paragraph direction ×1', 'run direction ×1', 'table direction ×1'],
+    });
+  });
+
+  it('docx.ruby, docx.smartTags and docx.altChunk count their elements', async () => {
+    const bytes = await docx(
+      '<w:p><w:r><w:ruby><w:rt/><w:rubyBase/></w:ruby></w:r><w:smartTag w:uri="u" w:element="place"><w:r><w:t>Paris</w:t></w:r></w:smartTag></w:p>' +
+        '<w:altChunk r:id="rId9"/>'
+    );
+    expect(await run(bytes, 'docx.ruby')).toMatchObject({ count: 1 });
+    expect(await run(bytes, 'docx.smartTags')).toMatchObject({ count: 1 });
+    expect(await run(bytes, 'docx.altChunk')).toMatchObject({ count: 1 });
+  });
+
+  it('docx.embeddedFonts counts font files under word/fonts', async () => {
+    const bytes = await docx(p('a'), {
+      'word/fonts/font1.odttf': 'x',
+      'word/fonts/font2.odttf': 'x',
+      'word/fonts/_rels/fontTable.xml.rels': '<Relationships/>',
+      'word/media/image1.png': 'x',
+    });
+    expect(await run(bytes, 'docx.embeddedFonts')).toMatchObject({ count: 2 });
+  });
+
+  it('docx.legacyForms counts FORMTEXT/FORMCHECKBOX/FORMDROPDOWN, which stay in docx.fields too', async () => {
+    const fld = (i: string) => `<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> ${i} </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
+    const bytes = await docx(fld('FORMTEXT') + fld('FORMCHECKBOX') + fld('FORMDROPDOWN') + fld('DATE'));
+    expect(await run(bytes, 'docx.legacyForms')).toMatchObject({ count: 3, where: ['FORMCHECKBOX ×1', 'FORMDROPDOWN ×1', 'FORMTEXT ×1'] });
+    expect(await run(bytes, 'docx.fields')).toMatchObject({ count: 4 });
+  });
+
+  describe('drawing counts (also in the summary report)', () => {
+    it('counts an anchored picture as a floating image, but not inline pictures or anchored shapes/text boxes/charts', async () => {
+      const bytes = await docx(
+        drawing('anchor', `${OOXML}/picture`) +
+          drawing('inline', `${OOXML}/picture`) +
+          drawing('anchor', 'http://schemas.microsoft.com/office/word/2010/wordprocessingShape') +
+          drawing('anchor', `${OOXML}/chart`)
+      );
+      for (const options of [undefined, full]) {
+        const items = (await detectDocxLoss(bytes, options)).items;
+        expect(items.find((i) => i.id === 'docx.floatingImages')).toMatchObject({ count: 1 });
+        expect(items.find((i) => i.id === 'docx.charts')).toMatchObject({ count: 1 });
+      }
+    });
+
+    it('counts charts and SmartArt as objects, however many parts back them', async () => {
+      const bytes = await docx(drawing('inline', `${OOXML}/chart`) + drawing('inline', `${OOXML}/chart`) + drawing('inline', `${OOXML}/diagram`), {
+        'word/charts/chart1.xml': '<c/>',
+        'word/charts/chart2.xml': '<c/>',
+        'word/charts/style1.xml': '<c/>',
+        'word/charts/colors1.xml': '<c/>',
+        'word/diagrams/data1.xml': '<d/>',
+        'word/diagrams/layout1.xml': '<d/>',
+        'word/diagrams/quickStyle1.xml': '<d/>',
+        'word/diagrams/colors1.xml': '<d/>',
+        'word/diagrams/drawing1.xml': '<d/>',
+      });
+      expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.charts')).toMatchObject({ count: 3 });
+    });
+
+    it('does not report charts for orphan parts that no drawing references', async () => {
+      const bytes = await docx(p('a'), { 'word/charts/chart1.xml': '<c/>' });
+      expect((await detectDocxLoss(bytes)).items).toEqual([]);
+    });
+  });
+
+  it('summary mode leaves the long-tail ids out', async () => {
+    const bytes = await docx(p('a', '<w:bidi/><w:framePr w:dropCap="drop"/>') + '<w:p><w:smartTag><w:r><w:t>x</w:t></w:r></w:smartTag></w:p>');
+    expect((await detectDocxLoss(bytes)).items).toEqual([]);
+  });
+});

@@ -36,7 +36,11 @@ but not shown or edited), `docx.namedStyles`, `docx.tableFormatting`, `docx.tabl
 indents, keep-with-next/lines, page-break-before, hidden text), `docx.listFormatting` (other number formats, custom starts), `docx.tabsAndBreaks`
 (tabs, line breaks and hyphen characters dropped from text), `docx.bookmarks` (bookmarks and internal links), `docx.headerFooterVariants` (first-page
 and even/odd headers) and `docx.sectionProperties` (page-number restarts and formats, vertical alignment), and a `where` breakdown by field kind on
-`docx.fields`. The DOCX fidelity harness (`fixtures/docx/`) records the full report.
+`docx.fields`. The full report also lists a long tail: `docx.trackedMoves`, `docx.formattingRevisions` (`rPrChange`, `pPrChange`, `tblPrChange`,
+`sectPrChange`), `docx.dropCaps`, `docx.watermarks`, `docx.pageBorders`, `docx.lineNumbers`, `docx.hyphenation`, `docx.tabStops` (custom stops and
+leaders), `docx.rtl`, `docx.ruby`, `docx.embeddedFonts`, `docx.smartTags`, `docx.altChunk` and `docx.legacyForms` (`FORMTEXT`/`FORMCHECKBOX`/`FORMDROPDOWN`,
+which `docx.fields` also counts). In both modes `docx.charts` counts chart and SmartArt objects referenced from the body (not the XML parts behind them) and
+`docx.floatingImages` counts anchored pictures only; anchored shapes and text boxes are not floating images. The DOCX fidelity harness (`fixtures/docx/`) records the full report.
 
 Parse-time problems found while importing (an unresolvable image, an unsupported field…) still arrive as `warnings`.
 

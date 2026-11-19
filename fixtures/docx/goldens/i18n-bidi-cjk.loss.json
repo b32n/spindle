@@ -13,6 +13,23 @@
       ]
     },
     {
+      "count": 23,
+      "effect": "the direction is not kept",
+      "id": "docx.rtl",
+      "label": "right-to-left setting(s)",
+      "where": [
+        "run direction ×13",
+        "paragraph direction ×9",
+        "table direction ×1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "the base text and reading marks are not imported",
+      "id": "docx.ruby",
+      "label": "ruby annotation(s)"
+    },
+    {
       "count": 2,
       "effect": "the formatting is dropped",
       "id": "docx.tableFormatting",
