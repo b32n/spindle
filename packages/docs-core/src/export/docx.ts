@@ -14,6 +14,8 @@ import type {
   DocParagraphStyle,
   DocRunBase,
   DocSection,
+  DocTableStyle,
+  DocTableStylePart,
   DocTextRun,
   DocumentExportInput,
   DocumentImportResult,
@@ -32,6 +34,8 @@ import type {
   ParagraphFormat,
   ParagraphStyle,
   SectionData,
+  TableStyleData,
+  TableStylePart,
   TextRun,
   TextStyle,
 } from '../types';
@@ -76,9 +80,40 @@ function toDocNamedStyles(styles: Record<string, NamedStyle>): Record<string, Do
       ...(style.outlineLevel !== undefined && { outlineLevel: style.outlineLevel }),
       ...(text && { text }),
       ...(paragraph && { paragraph }),
+      ...(style.table && { table: toDocTableStyle(style.table) }),
     };
   }
   return out;
+}
+
+function toDocTableStyle(table: TableStyleData): DocTableStyle {
+  const part = (p: TableStylePart): DocTableStylePart => {
+    const text = p.text ? defined(toDocRunBase(p.text)) : undefined;
+    return { ...(text && Object.keys(text).length > 0 && { text }), ...(p.backgroundColor && { backgroundColor: p.backgroundColor }), ...(p.borders && { borders: p.borders }), ...(p.verticalAlign && { verticalAlign: p.verticalAlign }) };
+  };
+  return {
+    ...(table.borders && { borders: table.borders }),
+    ...(table.whole && { whole: part(table.whole) }),
+    ...(table.conditions && { conditions: Object.fromEntries(Object.entries(table.conditions).map(([k, v]) => [k, part(v)])) }),
+    ...(table.rowBandSize && { rowBandSize: table.rowBandSize }),
+    ...(table.colBandSize && { colBandSize: table.colBandSize }),
+  };
+}
+
+function toTableStyleData(table: DocTableStyle): TableStyleData {
+  const part = (p: DocTableStylePart): TableStylePart => ({
+    ...(p.text && { text: defined(toTextStyle(p.text)) }),
+    ...(p.backgroundColor && { backgroundColor: p.backgroundColor }),
+    ...(p.borders && { borders: p.borders }),
+    ...(p.verticalAlign && { verticalAlign: p.verticalAlign }),
+  });
+  return {
+    ...(table.borders && { borders: table.borders }),
+    ...(table.whole && { whole: part(table.whole) }),
+    ...(table.conditions && { conditions: Object.fromEntries(Object.entries(table.conditions).map(([k, v]) => [k, part(v)])) }),
+    ...(table.rowBandSize && { rowBandSize: table.rowBandSize }),
+    ...(table.colBandSize && { colBandSize: table.colBandSize }),
+  };
 }
 
 /** Drops `undefined` fields so the interchange object only carries what is set. */
@@ -161,13 +196,22 @@ function toBlock(
       return {
         type: 'table',
         rows: block.rows.map((row) => ({
+          ...(row.repeatHeader && { repeatHeader: true }),
+          ...(row.cantSplit && { cantSplit: true }),
           cells: row.cells.map((cell) => ({
             content: toInlineContent(cell.content, title, textStylePool),
             colspan: cell.colspan,
             rowspan: cell.rowspan,
+            ...(cell.backgroundColor && { backgroundColor: cell.backgroundColor }),
+            ...(cell.borders && { borders: cell.borders }),
+            ...(cell.verticalAlign && { verticalAlign: cell.verticalAlign }),
+            ...(cell.colwidth && cell.colwidth.length > 0 && { colwidthPx: cell.colwidth }),
           })),
         })),
         colWidthsPx: block.colWidths,
+        ...(block.borders && { borders: block.borders }),
+        ...(block.look && { look: block.look }),
+        ...(block.namedStyleId && { namedStyleId: block.namedStyleId }),
       };
     case 'image':
       return { type: 'image', src: block.src, width: block.width, height: block.height, alt: block.alt, alignment: block.alignment };
@@ -446,6 +490,7 @@ function toNamedStyles(styles: Record<string, DocNamedStyle>): Record<string, Na
       ...(style.outlineLevel !== undefined && { outlineLevel: style.outlineLevel }),
       ...(style.text && { text: defined(toTextStyle(style.text)) }),
       ...(style.paragraph && { paragraph: toParagraphFormat(style.paragraph) }),
+      ...(style.table && { table: toTableStyleData(style.table) }),
     };
   }
   return out;
@@ -553,14 +598,23 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
         type: 'table',
         rows: block.rows.map((row) => ({
           id: generateRowId(),
+          ...(row.repeatHeader && { repeatHeader: true }),
+          ...(row.cantSplit && { cantSplit: true }),
           cells: row.cells.map((cell) => ({
             id: generateCellId(),
             content: toInlineContentFromDocx(cell.content, textStylePool),
             colspan: cell.colspan,
             rowspan: cell.rowspan,
+            ...(cell.backgroundColor && { backgroundColor: cell.backgroundColor }),
+            ...(cell.borders && { borders: cell.borders }),
+            ...(cell.verticalAlign && { verticalAlign: cell.verticalAlign }),
+            ...(cell.colwidthPx && { colwidth: cell.colwidthPx }),
           })),
         })),
         colWidths: block.colWidthsPx,
+        ...(block.borders && { borders: block.borders }),
+        ...(block.look && { look: block.look }),
+        ...(block.namedStyleId && { namedStyleId: block.namedStyleId }),
       };
     case 'image':
       return {

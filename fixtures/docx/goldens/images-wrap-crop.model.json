@@ -113,6 +113,38 @@
           "italic": true
         }
       },
+      "TableGrid": {
+        "basedOn": "TableNormal",
+        "kind": "table",
+        "name": "Table Grid",
+        "table": {
+          "borders": {
+            "bottom": {
+              "style": "single"
+            },
+            "insideH": {
+              "style": "single"
+            },
+            "insideV": {
+              "style": "single"
+            },
+            "left": {
+              "style": "single"
+            },
+            "right": {
+              "style": "single"
+            },
+            "top": {
+              "style": "single"
+            }
+          }
+        }
+      },
+      "TableNormal": {
+        "isDefault": true,
+        "kind": "table",
+        "name": "Normal Table"
+      },
       "Title": {
         "basedOn": "Normal",
         "kind": "paragraph",
@@ -418,11 +450,49 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "style": "single"
+              },
+              "insideH": {
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "style": "single"
+              }
+            },
+            "colWidths": [
+              153.33,
+              153.33,
+              153.33,
+              153.33
+            ],
             "id": "block-13",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "TableGrid",
             "rows": [
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      153.33
+                    ],
                     "content": [
                       {
                         "alt": "crop (0, 0, 0, 0)",
@@ -435,6 +505,9 @@
                     "id": "cell-1"
                   },
                   {
+                    "colwidth": [
+                      153.33
+                    ],
                     "content": [
                       {
                         "alt": "crop (25000, 0, 0, 0)",
@@ -447,6 +520,9 @@
                     "id": "cell-2"
                   },
                   {
+                    "colwidth": [
+                      153.33
+                    ],
                     "content": [
                       {
                         "alt": "crop (0, 30000, 30000, 0)",
@@ -459,6 +535,9 @@
                     "id": "cell-3"
                   },
                   {
+                    "colwidth": [
+                      153.33
+                    ],
                     "content": [
                       {
                         "alt": "crop (10000, 10000, 40000, 40000)",

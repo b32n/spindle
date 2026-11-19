@@ -19,6 +19,7 @@ import {
   ImageBlock,
   isRunContainingBlock,
 } from './flow-blocks';
+import { tableCellPlaces, cellBorderCss, cellLayoutCss } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
 import { DocumentLayout, PageLayout, PageFragment, PageConfig } from './true-layout-engine';
 import {
@@ -1250,27 +1251,24 @@ export class DomPainter {
       table.dataset.pmEnd = String(tablePmPos.end);
     }
     
-    for (const row of block.rows) {
+    const places = tableCellPlaces(block);
+    for (const [rowIndex, row] of block.rows.entries()) {
       const tr = document.createElement('tr');
       
-      for (const cell of row.cells) {
+      for (const [cellIndex, cell] of row.cells.entries()) {
         const td = document.createElement('td');
         td.className = 'table-cell';
         
-        // Build cell styles including optional background color and width
+        // Build cell styles including borders, vertical alignment, optional background color and width
         let cellStyles = `
-          border: 1px solid #dadce0;
+          ${cellBorderCss(block, cell, places[rowIndex][cellIndex], this.config.scale)}
           padding: ${4 * this.config.scale}px ${8 * this.config.scale}px;
-          vertical-align: top;
+          ${cellLayoutCss(cell, this.config.scale)}
           min-height: 1em;
         `;
         const cellBg = safeCssColor(cell.backgroundColor);
         if (cellBg) {
           cellStyles += `background-color: ${cellBg};`;
-        }
-        // Apply column width if specified
-        if (cell.colwidth && cell.colwidth.length > 0 && cell.colwidth[0]) {
-          cellStyles += `width: ${cell.colwidth[0] * this.config.scale}px;`;
         }
         td.style.cssText = cellStyles;
         

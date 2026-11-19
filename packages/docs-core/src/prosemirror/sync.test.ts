@@ -57,6 +57,45 @@ describe('collab round-trip preserves table metadata', () => {
   });
 });
 
+describe('collab round-trip preserves table formatting', () => {
+  it('keeps borders, look, table style, row flags and cell borders, alignment, shading and widths', () => {
+    const table: TableBlock = {
+      id: 't',
+      type: 'table',
+      borders: { top: { style: 'single', widthPx: 2, color: '#ff0000' }, insideV: { style: 'none' } },
+      look: { firstRow: true, noHBand: true },
+      namedStyleId: 'Banded',
+      rows: [
+        {
+          id: 'r0',
+          repeatHeader: true,
+          cantSplit: true,
+          cells: [
+            { id: 'c0', content: [{ type: 'text', text: 'A' }], backgroundColor: '#ddeeff', verticalAlign: 'bottom', borders: { left: { style: 'dotted' } }, colwidth: [96] },
+            { id: 'c1', content: [{ type: 'text', text: 'B' }] },
+          ],
+        },
+        { id: 'r1', cells: [{ id: 'c2', content: [] }] },
+      ],
+    };
+    const t = roundTrip([table]).find((b) => b.type === 'table') as TableBlock;
+    expect(t.borders).toEqual(table.borders);
+    expect(t.look).toEqual(table.look);
+    expect(t.namedStyleId).toBe('Banded');
+    expect(t.rows[0]).toMatchObject({ repeatHeader: true, cantSplit: true });
+    expect(t.rows[0].cells[0]).toMatchObject({ backgroundColor: '#ddeeff', verticalAlign: 'bottom', borders: { left: { style: 'dotted' } }, colwidth: [96] });
+    expect(t.rows[1].repeatHeader).toBeUndefined();
+    expect(t.rows[1].cells[0].borders).toBeUndefined();
+  });
+
+  it('keeps an empty borders object (a table with no lines) distinct from none set', () => {
+    const noLines = roundTrip([{ id: 't', type: 'table', borders: {}, rows: [{ id: 'r', cells: [{ id: 'c', content: [] }] }] }])[0] as TableBlock;
+    expect(noLines.borders).toEqual({});
+    const unset = roundTrip([{ id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'c', content: [] }] }] }])[0] as TableBlock;
+    expect(unset.borders).toBeUndefined();
+  });
+});
+
 describe('collab round-trip preserves inline content', () => {
   it('keeps inline images, dynamic fields, line breaks, and formatted links', () => {
     const para: Block = {

@@ -15,6 +15,9 @@ import type {
   HeadingBlock,
   TableRow,
   TableCell,
+  TableBorders,
+  TableLook,
+  CellVerticalAlign,
   ListType,
   DynamicFieldType,
   InlineField,
@@ -171,10 +174,10 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
     case 'table':
       return {
         type: 'table',
-        attrs: { colWidths: block.colWidths ?? null, styleId: block.styleId ?? null },
+        attrs: { colWidths: block.colWidths ?? null, styleId: block.styleId ?? null, borders: block.borders ?? null, look: block.look ?? null, namedStyleId: block.namedStyleId ?? null },
         content: block.rows.map(row => ({
           type: 'table_row',
-          attrs: { height: row.height ?? null },
+          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false },
           content: row.cells.map(cell => ({
             type: cell.isHeader ? 'table_header' : 'table_cell',
             attrs: {
@@ -183,6 +186,8 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
               styleId: cell.styleId ?? null,
               backgroundColor: cell.backgroundColor ?? null,
               colwidth: cell.colwidth ?? null,
+              borders: cell.borders ?? null,
+              verticalAlign: cell.verticalAlign ?? null,
             },
             content: [{
               type: 'paragraph',
@@ -498,12 +503,16 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
             ...(cellNode.attrs.styleId ? { styleId: cellNode.attrs.styleId as string } : {}),
             ...(cellNode.attrs.backgroundColor ? { backgroundColor: cellNode.attrs.backgroundColor as string } : {}),
             ...(cellNode.attrs.colwidth ? { colwidth: cellNode.attrs.colwidth as number[] } : {}),
+            ...(cellNode.attrs.borders ? { borders: cellNode.attrs.borders as TableBorders } : {}),
+            ...(cellNode.attrs.verticalAlign ? { verticalAlign: cellNode.attrs.verticalAlign as CellVerticalAlign } : {}),
           });
         });
         rows.push({
           id: `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           cells,
           ...(rowNode.attrs.height != null ? { height: rowNode.attrs.height as number } : {}),
+          ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
+          ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
         });
       });
 
@@ -513,6 +522,9 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
         rows,
         ...(node.attrs.colWidths ? { colWidths: node.attrs.colWidths as number[] } : {}),
         ...(node.attrs.styleId ? { styleId: node.attrs.styleId as string } : {}),
+        ...(node.attrs.borders ? { borders: node.attrs.borders as TableBorders } : {}),
+        ...(node.attrs.look ? { look: node.attrs.look as TableLook } : {}),
+        ...(node.attrs.namedStyleId ? { namedStyleId: node.attrs.namedStyleId as string } : {}),
       }];
     }
       

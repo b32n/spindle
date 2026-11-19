@@ -24,8 +24,8 @@ Verified absent in code.
 - [ ] **DOCX fidelity gaps** (work lands in `@b32nio/spindle-io`) — `data:` URI images only (remote images are
       skipped with a warning on export), floating/anchored images are skipped
       on import, and tables of contents and legacy form fields keep no field (other fields are kept with their cached result, never recalculated). `inspectDocx(bytes, { detail: 'full' })` and the
-      fixture goldens in `fixtures/docx/` list what else is flattened or ignored (table
-      formatting, sections…). DOCX comments round-trip with replies, resolved state and anchors.
+      fixture goldens in `fixtures/docx/` list what else is flattened or ignored (sections…). DOCX table formatting (borders, shading, header rows, widths, table styles) and
+      comments round-trip with replies, resolved state and anchors.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Multi-section documents in the UI** — the model supports `sections[]`

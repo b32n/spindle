@@ -8,16 +8,6 @@
       "label": "chart(s)/diagram(s)"
     },
     {
-      "count": 1,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "table style ×1",
-        "widths ×1"
-      ]
-    },
-    {
       "count": 5,
       "effect": "their text is not imported",
       "id": "docx.textBoxes",
