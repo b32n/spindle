@@ -150,6 +150,25 @@ describe('inline image / page-number field survive collab', () => {
     }
   });
 
+  it('generic fields (plain and formatted results) hydrate, sync and serialize back unchanged', () => {
+    const REF: InlineContent = { type: 'field', instruction: 'REF _Ref1 \\h', kind: 'REF', result: 'Figure 1' };
+    const SEQ: InlineContent = {
+      type: 'field',
+      instruction: 'SEQ Table',
+      kind: 'SEQ',
+      result: [{ type: 'text', text: '2', bold: true }, { type: 'text', text: 'a' }],
+      dirty: true,
+    };
+    const [a, b] = pair([para('p', [text('x '), REF, IMAGE, SEQ, PAGE_NUMBER, DATE_FIELD])]);
+    for (const c of [a, b]) {
+      expect(inlineOf(c.blocks())).toEqual([text('x '), REF, IMAGE, SEQ, PAGE_NUMBER, DATE_FIELD]);
+    }
+    // an edit next to the atoms leaves them alone
+    b.edit((tr) => tr.insertText('!', 2));
+    sync(a, b);
+    expect(inlineOf(a.blocks()).filter((i) => i.type === 'field')).toEqual([REF, SEQ]);
+  });
+
   it('getData() on a DocumentImpl under collab keeps inline nodes (InMemoryProvider)', async () => {
     __resetInMemoryRooms();
     const id = (n: string): CollabIdentity => ({ userId: n, displayName: n, color: '#111' });
@@ -288,6 +307,13 @@ const NODE_SAMPLES: Record<string, Json[]> = {
   hard_break: [p([t('line1'), { type: 'hard_break' }, t('line2')])],
   text: [p([t('just text')])],
   inline_image: [p([t('x'), { type: 'inline_image', attrs: { src: 'data:image/png;base64,QQ==', width: 33, height: 22, alt: 'i' } }])],
+  field: [
+    p([
+      t('see '),
+      { type: 'field', attrs: { instruction: 'REF _Ref1 \\h', kind: 'REF', result: 'Figure 1', dirty: false } },
+      { type: 'field', attrs: { instruction: 'SEQ Table', kind: 'SEQ', result: [{ type: 'text', text: '2', bold: true }], dirty: true } },
+    ]),
+  ],
   dynamic_field: [p([{ type: 'dynamic_field', attrs: { fieldType: 'date', format: 'YYYY' } }, t(' / '), { type: 'dynamic_field', attrs: { fieldType: 'pageNumber' } }])],
 };
 

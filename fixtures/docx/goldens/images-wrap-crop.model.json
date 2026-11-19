@@ -272,6 +272,21 @@
                 "type": "text"
               },
               {
+                "instruction": "SEQ Figure \\* ARABIC",
+                "kind": "SEQ",
+                "result": [
+                  {
+                    "color": "#44546a",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 9,
+                    "italic": true,
+                    "text": "1",
+                    "type": "text"
+                  }
+                ],
+                "type": "field"
+              },
+              {
                 "color": "#44546a",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 9,
@@ -510,7 +525,6 @@
   },
   "importError": null,
   "warnings": [
-    "Unsupported field code \"SEQ Figure \\* ARABIC\" — its cached value was dropped.",
     "A floating (anchored) image was skipped — only inline images are supported.",
     "A floating (anchored) image was skipped — only inline images are supported.",
     "A floating (anchored) image was skipped — only inline images are supported.",

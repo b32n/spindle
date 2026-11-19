@@ -312,18 +312,31 @@ export function fieldInstructions(root: XmlNode[]): string[] {
   return out;
 }
 
-/** Fields other than PAGE / NUMPAGES lose their cached result; `where` says which kinds. A complex field is counted once even when its instruction is split over several instrText runs. */
+/**
+ * Fields whose displayed value is not kept as a field: a table of contents or index keeps its text but not the field
+ * (it is static), and legacy form fields lose their value. Every other field keeps its instruction and cached result.
+ * A complex field is counted once even when its instruction is split over several instrText runs.
+ */
+const STATIC_FIELD_KINDS = new Set(['TOC', 'TOA', 'INDEX']);
+const LEGACY_FORM_KINDS = new Set(['FORMTEXT', 'FORMCHECKBOX', 'FORMDROPDOWN']);
+
 function fields(root: XmlNode[]): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
   for (const raw of fieldInstructions(root)) {
-    const instr = raw.trim().toUpperCase();
-    if (!instr) continue;
-    if ((instr.startsWith('PAGE') && !instr.startsWith('PAGEREF')) || instr.startsWith('NUMPAGES')) continue;
+    const kind = raw.trim().toUpperCase().split(/[\s\\"]/)[0];
+    if (!STATIC_FIELD_KINDS.has(kind) && !LEGACY_FORM_KINDS.has(kind)) continue;
     total++;
-    bump(kinds, instr.split(/[\s\\]/)[0]);
+    bump(kinds, kind);
   }
-  return item('docx.fields', 'field(s) (table of contents, cross-references, dates…)', total, 'their displayed value is dropped', kinds, 20);
+  return item(
+    'docx.fields',
+    'field(s) (table of contents, index, legacy form fields)',
+    total,
+    'tables of contents and indexes are kept as static text, legacy form fields lose their value',
+    kinds,
+    20
+  );
 }
 
 /** `full` adds the formatting/structure detectors and the per-kind field breakdown; otherwise only the fields item (counts only). */

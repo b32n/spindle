@@ -2,15 +2,6 @@
   "format": "docx",
   "items": [
     {
-      "count": 1,
-      "effect": "their displayed value is dropped",
-      "id": "docx.fields",
-      "label": "field(s) (table of contents, cross-references, dates…)",
-      "where": [
-        "SEQ ×1"
-      ]
-    },
-    {
       "count": 5,
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",

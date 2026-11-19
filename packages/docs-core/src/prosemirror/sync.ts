@@ -17,6 +17,7 @@ import type {
   TableCell,
   ListType,
   DynamicFieldType,
+  InlineField,
 } from '../types';
 
 /**
@@ -343,6 +344,18 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       };
     }
 
+    if (item.type === 'field') {
+      return {
+        type: 'field',
+        attrs: {
+          instruction: item.instruction,
+          kind: item.kind,
+          result: item.result,
+          dirty: item.dirty ?? false,
+        },
+      };
+    }
+
     if (item.type === 'dynamicField') {
       return {
         type: 'dynamic_field',
@@ -603,6 +616,17 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
         width: (child.attrs.width as number | null) ?? 100,
         height: (child.attrs.height as number | null) ?? 100,
         ...(child.attrs.alt ? { alt: child.attrs.alt as string } : {}),
+      });
+      return;
+    }
+
+    if (child.type.name === 'field') {
+      content.push({
+        type: 'field',
+        instruction: child.attrs.instruction as string,
+        kind: child.attrs.kind as string,
+        result: child.attrs.result as InlineField['result'],
+        ...(child.attrs.dirty ? { dirty: true } : {}),
       });
       return;
     }

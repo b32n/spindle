@@ -32,6 +32,7 @@ import type {
   DocBlock,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
+  DocFieldRun,
   DocInline,
   DocNamedStyle,
   DocParagraphStyle,
@@ -220,9 +221,46 @@ class DocxBuilder {
         return [new TextRun({ children: [PageNumber.CURRENT] })];
       case 'totalPages':
         return [new TextRun({ children: [PageNumber.TOTAL_PAGES] })];
+      case 'field':
+        return this.buildField(inline);
       default:
         return [];
     }
+  }
+
+  /** A complex field: begin, instruction, separate, the cached result runs, end, so Word can refresh it. */
+  private buildField(field: DocFieldRun): ParagraphChild[] {
+    const fldChar = (type: 'begin' | 'separate' | 'end') =>
+      new TextRun({
+        children: [
+          new BuilderElement({
+            name: 'w:fldChar',
+            attributes: {
+              type: { key: 'w:fldCharType', value: type },
+              ...(type === 'begin' && field.dirty && { dirty: { key: 'w:dirty', value: 'true' } }),
+            },
+          }),
+        ],
+      });
+    const instruction = new TextRun({
+      children: [
+        new BuilderElement({
+          name: 'w:instrText',
+          attributes: { space: { key: 'xml:space', value: 'preserve' } },
+          // The xml formatter writes string children as the element's text.
+          children: [` ${field.instruction} `] as unknown as BuilderElement[],
+        }),
+      ],
+    });
+    const result: ParagraphChild[] =
+      typeof field.result === 'string'
+        ? field.result
+          ? this.textRuns({}, field.result)
+          : []
+        : field.result.flatMap((r) =>
+            r.type === 'text' ? this.textRuns(r, r.text) : [this.buildImage(r.src, r.width, r.height, r.alt)].filter((c): c is ParagraphChild => c != null)
+          );
+    return [fldChar('begin'), instruction, fldChar('separate'), ...result, fldChar('end')];
   }
 
   private runOptions(base: DocRunBase, extra: Partial<IRunOptions>): IRunOptions {

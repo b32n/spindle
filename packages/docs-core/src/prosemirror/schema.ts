@@ -23,6 +23,13 @@ const PARAGRAPH_FORMAT_ATTRS = {
   namedStyleId: { default: null },
 };
 
+/** The displayed text of a field's cached result (a string, or text/image runs stored as JSON in the node attr). */
+export function fieldResultText(result: unknown): string {
+  if (typeof result === 'string') return result;
+  if (!Array.isArray(result)) return '';
+  return result.map((r) => (r && typeof r === 'object' && typeof (r as { text?: unknown }).text === 'string' ? (r as { text: string }).text : '')).join('');
+}
+
 /** CSS for the indents of a paragraph/heading (sanitised: the attrs come from loaded or collaborative JSON). */
 function indentStyle(attrs: Record<string, unknown>): string {
   let css = '';
@@ -371,6 +378,44 @@ const nodes: Record<string, NodeSpec> = {
       };
       if (node.attrs.format) attrs['data-format'] = String(node.attrs.format);
       return ['span', attrs, `\u2039${String(node.attrs.fieldType)}\u203A`];
+    },
+  },
+
+  // Field the editor does not evaluate (REF, SEQ, STYLEREF, ...). An atom that
+  // displays its cached `result` (a string, or text/image runs as JSON) and
+  // keeps the `instruction` so it can be written back as a field.
+  field: {
+    inline: true,
+    group: 'inline',
+    atom: true,
+    selectable: true,
+    attrs: {
+      instruction: { default: '' },
+      kind: { default: '' },
+      result: { default: '' },
+      dirty: { default: false },
+    },
+    parseDOM: [
+      {
+        tag: 'span[data-field]',
+        getAttrs(dom: HTMLElement) {
+          return {
+            kind: dom.getAttribute('data-field') || '',
+            instruction: dom.getAttribute('data-instruction') || '',
+            result: dom.textContent || '',
+            dirty: dom.getAttribute('data-dirty') === 'true',
+          };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      const attrs: Record<string, string> = {
+        class: 'field',
+        'data-field': String(node.attrs.kind),
+        'data-instruction': String(node.attrs.instruction),
+      };
+      if (node.attrs.dirty) attrs['data-dirty'] = 'true';
+      return ['span', attrs, fieldResultText(node.attrs.result)];
     },
   },
 

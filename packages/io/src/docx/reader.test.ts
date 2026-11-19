@@ -374,14 +374,14 @@ describe('importDocx', () => {
       expect(block).toMatchObject({ content: [{ type: 'text', text: 'a\tb' }] });
     });
 
-    it('does not add tabs or breaks from a field result', async () => {
+    it('keeps tabs and breaks of a field result in the field, not in the text around it', async () => {
       const block = await firstText(
         para(
           `${r('<w:fldChar w:fldCharType="begin"/>')}${r('<w:instrText> PAGEREF _Toc1 </w:instrText>')}${r('<w:fldChar w:fldCharType="separate"/>')}` +
             `${r(`${t('Chapter')}<w:tab/>${t('4')}<w:br/>`)}${r('<w:fldChar w:fldCharType="end"/>')}${r(t('after'))}`
         )
       );
-      expect(block).toMatchObject({ content: [{ type: 'text', text: 'after' }] });
+      expect(block).toMatchObject({ content: [{ type: 'field', kind: 'PAGEREF', result: 'Chapter\t4\n' }, { type: 'text', text: 'after' }] });
     });
 
     it('keeps the text of smart tags, including a hyperlink inside one and nested tags', async () => {

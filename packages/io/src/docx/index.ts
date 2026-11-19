@@ -12,6 +12,7 @@ export type {
   DocImageRun,
   DocPageNumberRun,
   DocTotalPagesRun,
+  DocFieldRun,
   DocInline,
   DocParagraphStyle,
   DocTableCell,

@@ -73,6 +73,19 @@ describe('collab round-trip preserves inline content', () => {
     expect(out[0]).toMatchObject({ content: para.content });
   });
 
+  it('keeps generic fields with their instruction, cached result and dirty flag', () => {
+    const para: Block = {
+      id: 'p',
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'see ' },
+        { type: 'field', instruction: 'REF _Ref1 \\h', kind: 'REF', result: 'Figure 1' },
+        { type: 'field', instruction: 'SEQ Table', kind: 'SEQ', result: [{ type: 'text', text: '2', bold: true }], dirty: true },
+      ],
+    };
+    expect(roundTrip([para])[0]).toMatchObject({ content: para.content });
+  });
+
   it('keeps tab characters inside a run, with or without formatting, and in a plain run with line breaks', () => {
     const para: Block = {
       id: 'p',

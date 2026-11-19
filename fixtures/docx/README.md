@@ -67,6 +67,10 @@ which files were omitted; the JSON artifact always has everything. A loss or a r
 The report code is format-neutral (`scripts/docx-fidelity/report.ts`: `FidelityReport`, `formatMarkdown`,
 `formatJson`). The XLSX and PPTX corpora can map their own harness results onto `FidelityReport` and reuse it.
 
+Fields (`fields.*`) are imported as generic fields with their cached result, so the loss goldens count only tables of
+contents, indexes and legacy form fields under `docx.fields`; the `model.json` goldens show each field's instruction and
+result, and the remaining `Unsupported field code` warnings are fields in headers and footers.
+
 When an importer change shrinks a loss or alters the model, the goldens will fail. Re-run with
 `docs:docx-fidelity:update`, read the diff, and commit the new goldens in the same PR as the importer
 change. An improvement should be visible in review as a smaller loss snapshot.

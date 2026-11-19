@@ -8,6 +8,13 @@
 
 import { Node as PmNode, Mark } from 'prosemirror-model';
 import { sanitizeHref } from './sanitize';
+
+/** The displayed text of a field's cached result (a string, or text/image runs). */
+function fieldResultText(result: unknown): string {
+  if (typeof result === 'string') return result;
+  if (!Array.isArray(result)) return '';
+  return result.map((r) => (typeof (r as { text?: unknown })?.text === 'string' ? (r as { text: string }).text : '')).join('');
+}
 import {
   FlowBlock,
   Run,
@@ -326,6 +333,9 @@ function extractRuns(node: PmNode): Run[] {
       // Body fields are resolved at paint time only in headers/footers; in the
       // body they render as a visible placeholder so they stay selectable.
       runs.push({ kind: 'text', text: `\u2039${String(child.attrs.fieldType)}\u203A` });
+    } else if (child.type.name === 'field') {
+      // A field shows the result Word last computed; it is never recalculated here.
+      runs.push({ kind: 'text', text: fieldResultText(child.attrs.result) });
     } else if (child.type.name === 'image' || child.type.name === 'inline_image') {
       runs.push({
         kind: 'image',

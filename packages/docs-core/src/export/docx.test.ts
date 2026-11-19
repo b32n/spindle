@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import { exportToDocx, importFromDocx, inspectDocx } from './docx';
 import { DocumentImpl } from '../document';
-import type { DocumentData, ParagraphBlock } from '../types';
+import type { DocumentData, InlineContent, ParagraphBlock } from '../types';
 
 const PAGE_CONFIG = {
   size: { w: 816, h: 1056 },
@@ -419,6 +419,21 @@ describe('importFromDocx', () => {
     await importFromDocx(exported.bytes, target);
     const footer = target.getData().sections[0].footer;
     expect(footer?.blocks[0].content).toEqual([{ type: 'dynamicField', fieldType: 'pageNumber' }]);
+  });
+
+  it('round-trips generic fields with their instruction and cached result through the model', async () => {
+    const content: InlineContent[] = [
+      { type: 'text', text: 'See ' },
+      { type: 'field', instruction: 'REF _Ref1 \\h', kind: 'REF', result: 'Figure 1' },
+      { type: 'field', instruction: 'SEQ Table', kind: 'SEQ', result: [{ type: 'text', text: '2', bold: true }], dirty: true },
+    ];
+    const source = docWith({
+      sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'b1', type: 'paragraph', content }] }],
+    });
+    const { result: exported } = await exportAndUnzip(source);
+    const target = docWith({});
+    await importFromDocx(exported.bytes, target);
+    expect(target.getData().sections[0].blocks[0]).toMatchObject({ content });
   });
 
   it('round-trips a block-level image', async () => {

@@ -8,11 +8,13 @@ import type {
   DocCommentThread,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
+  DocImageRun,
   DocInline,
   DocNamedStyle,
   DocParagraphStyle,
   DocRunBase,
   DocSection,
+  DocTextRun,
   DocumentExportInput,
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
@@ -24,6 +26,7 @@ import type {
   HeaderFooterInlineContent,
   HeaderFooterParagraph,
   InlineContent,
+  InlineImage,
   LineSpacing,
   NamedStyle,
   ParagraphFormat,
@@ -271,6 +274,21 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };
     case 'dynamicField':
       return toDynamicFieldRun(item, title);
+    case 'field':
+      return {
+        type: 'field',
+        instruction: item.instruction,
+        kind: item.kind,
+        result:
+          typeof item.result === 'string'
+            ? item.result
+            : item.result.map((r): DocTextRun | DocImageRun =>
+                r.type === 'text'
+                  ? { type: 'text', text: r.text, ...toDocRunBase(r), ...(r.namedStyleId && { namedStyleId: r.namedStyleId }) }
+                  : { type: 'image', src: r.src, width: r.width, height: r.height, alt: r.alt }
+              ),
+        ...(item.dirty && { dirty: true }),
+      };
   }
 }
 
@@ -631,6 +649,26 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
       return { type: 'dynamicField', fieldType: 'pageNumber' };
     case 'totalPages':
       return { type: 'dynamicField', fieldType: 'totalPages' };
+    case 'field':
+      return {
+        type: 'field',
+        instruction: item.instruction,
+        kind: item.kind,
+        result:
+          typeof item.result === 'string'
+            ? item.result
+            : item.result.map((r): TextRun | InlineImage =>
+                r.type === 'text'
+                  ? {
+                      type: 'text',
+                      text: r.text,
+                      ...toTextStyle(r),
+                      ...(r.namedStyleId && { namedStyleId: r.namedStyleId }),
+                    }
+                  : { type: 'image', src: r.src, width: r.width, height: r.height, alt: r.alt }
+              ),
+        ...(item.dirty && { dirty: true }),
+      };
   }
 }
 
@@ -673,5 +711,8 @@ function toHeaderFooterInlineFromDocx(item: DocInline): HeaderFooterInlineConten
       return { type: 'dynamicField', fieldType: 'pageNumber' };
     case 'totalPages':
       return { type: 'dynamicField', fieldType: 'totalPages' };
+    // Headers and footers have no generic field; the reader does not produce one there.
+    case 'field':
+      return null;
   }
 }

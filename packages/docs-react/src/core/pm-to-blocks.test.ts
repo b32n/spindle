@@ -109,3 +109,32 @@ describe('proseMirrorToFlowBlocks: DOCX paragraph and run properties', () => {
     expect(items.map((i) => i.listIndex)).toEqual([7, 8, 1]);
   });
 });
+
+describe('field nodes', () => {
+  const fieldSchema = new Schema({
+    nodes: {
+      doc: { content: 'block+' },
+      paragraph: { group: 'block', content: 'inline*', toDOM: () => ['p', 0] },
+      text: { group: 'inline' },
+      field: { inline: true, group: 'inline', atom: true, attrs: { instruction: {}, kind: {}, result: {}, dirty: { default: false } } },
+    },
+  });
+
+  it('displays the cached result of a field, from a string or from runs', () => {
+    const doc = fieldSchema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'see ' },
+            { type: 'field', attrs: { instruction: 'REF x', kind: 'REF', result: 'Figure 1' } },
+            { type: 'field', attrs: { instruction: 'SEQ a', kind: 'SEQ', result: [{ type: 'text', text: '2', bold: true }, { type: 'text', text: 'b' }] } },
+          ],
+        },
+      ],
+    });
+    const para = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
+    expect(para.runs.map((r) => (r.kind === 'text' ? r.text : ''))).toEqual(['see ', 'Figure 1', '2b']);
+  });
+});
