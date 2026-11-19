@@ -134,16 +134,83 @@ export interface DocNamedStyle {
   outlineLevel?: number;
   text?: DocRunBase;
   paragraph?: DocParagraphStyle;
+  /** The table-specific part of a table style (`kind: 'table'`). */
+  table?: DocTableStyle;
+}
+
+/** One border line. `widthPx` defaults to 1; `color` is a hex colour, absent for automatic (black). */
+export interface DocBorder {
+  style: 'single' | 'double' | 'dashed' | 'dotted' | 'none';
+  widthPx?: number;
+  color?: string;
+}
+
+/** Borders of a table (with the lines between its rows and columns) or of one cell (the four sides). */
+export interface DocBorders {
+  top?: DocBorder;
+  right?: DocBorder;
+  bottom?: DocBorder;
+  left?: DocBorder;
+  /** Lines between rows (tables only). */
+  insideH?: DocBorder;
+  /** Lines between columns (tables only). */
+  insideV?: DocBorder;
+}
+
+/** Which parts of a table style apply (`w:tblLook`). */
+export interface DocTableLook {
+  firstRow?: boolean;
+  lastRow?: boolean;
+  firstColumn?: boolean;
+  lastColumn?: boolean;
+  noHBand?: boolean;
+  noVBand?: boolean;
+}
+
+export type DocCellVerticalAlign = 'top' | 'center' | 'bottom';
+
+/** Formatting a table style applies to one part of a table (a `w:tblStylePr`, or the style's whole-table cell properties). */
+export interface DocTableStylePart {
+  text?: DocRunBase;
+  /** Cell shading, a hex colour. */
+  backgroundColor?: string;
+  /** Cell borders. */
+  borders?: DocBorders;
+  verticalAlign?: DocCellVerticalAlign;
+}
+
+/**
+ * The table part of a table style: the borders of the whole table, the formatting of every cell (`whole`) and
+ * of the parts selected by `tblLook`, keyed by `w:tblStylePr` type (`firstRow`, `lastRow`, `firstCol`, `lastCol`,
+ * `band1Horz`, `band2Horz`, `band1Vert`, `band2Vert`, `nwCell`, `neCell`, `swCell`, `seCell`).
+ */
+export interface DocTableStyle {
+  borders?: DocBorders;
+  whole?: DocTableStylePart;
+  conditions?: Record<string, DocTableStylePart>;
+  rowBandSize?: number;
+  colBandSize?: number;
 }
 
 export interface DocTableCell {
   content: DocInline[];
   colspan?: number;
   rowspan?: number;
+  /** Shading, a hex colour (`w:shd` fill), with a table style's conditional shading already applied. */
+  backgroundColor?: string;
+  /** The cell's own borders, with a table style's conditional borders already applied. Sides not given come from the table's. */
+  borders?: DocBorders;
+  verticalAlign?: DocCellVerticalAlign;
+  /** Widths in pixels of the grid columns the cell spans. */
+  colwidthPx?: number[];
 }
 
 export interface DocTableRow {
   cells: DocTableCell[];
+  /** Repeat the row at the top of each page the table continues on (`w:tblHeader`). */
+  repeatHeader?: boolean;
+  /** Keep the row on one page (`w:cantSplit`). */
+  cantSplit?: boolean;
 }
 
 /**
@@ -154,7 +221,7 @@ export type DocBlock =
   | ({ type: 'paragraph'; content: DocInline[] } & DocParagraphStyle)
   | ({ type: 'heading'; level: 1 | 2 | 3 | 4 | 5 | 6; content: DocInline[] } & DocParagraphStyle)
   | ({ type: 'listItem'; listType: 'bullet' | 'numbered'; level: number; content: DocInline[]; start?: number } & DocParagraphStyle)
-  | { type: 'table'; rows: DocTableRow[]; colWidthsPx?: number[] }
+  | { type: 'table'; rows: DocTableRow[]; colWidthsPx?: number[]; borders?: DocBorders; look?: DocTableLook; namedStyleId?: string }
   | { type: 'image'; src: string; width: number; height: number; alt?: string; alignment?: 'left' | 'center' | 'right' }
   | { type: 'horizontalRule' }
   | { type: 'pageBreak' };

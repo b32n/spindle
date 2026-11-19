@@ -96,6 +96,38 @@
           "italic": true
         }
       },
+      "TableGrid": {
+        "basedOn": "TableNormal",
+        "kind": "table",
+        "name": "Table Grid",
+        "table": {
+          "borders": {
+            "bottom": {
+              "style": "single"
+            },
+            "insideH": {
+              "style": "single"
+            },
+            "insideV": {
+              "style": "single"
+            },
+            "left": {
+              "style": "single"
+            },
+            "right": {
+              "style": "single"
+            },
+            "top": {
+              "style": "single"
+            }
+          }
+        }
+      },
+      "TableNormal": {
+        "isDefault": true,
+        "kind": "table",
+        "name": "Normal Table"
+      },
       "Title": {
         "basedOn": "Normal",
         "kind": "paragraph",
@@ -425,11 +457,47 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "style": "single"
+              },
+              "insideH": {
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "style": "single"
+              }
+            },
+            "colWidths": [
+              300,
+              300
+            ],
             "id": "block-15",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "TableGrid",
             "rows": [
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      300
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -441,6 +509,9 @@
                     "id": "cell-1"
                   },
                   {
+                    "colwidth": [
+                      300
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -649,11 +720,47 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "style": "single"
+              },
+              "insideH": {
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "style": "single"
+              }
+            },
+            "colWidths": [
+              60,
+              400
+            ],
             "id": "block-25",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "TableGrid",
             "rows": [
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      60
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -665,6 +772,9 @@
                     "id": "cell-3"
                   },
                   {
+                    "colwidth": [
+                      400
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",

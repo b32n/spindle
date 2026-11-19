@@ -371,6 +371,51 @@ describe('importFromDocx', () => {
     }
   });
 
+  it('round-trips table borders, shading, header row, widths, alignment and a table style through DOCX', async () => {
+    const source = docWith({
+      namedStyles: {
+        Banded: { name: 'Banded', kind: 'table', table: { borders: { top: { style: 'single' } }, conditions: { firstRow: { backgroundColor: '#336699', text: { bold: true } } } } },
+      },
+      sections: [
+        {
+          id: 'sec1',
+          pageConfig: PAGE_CONFIG,
+          blocks: [
+            {
+              id: 'b1',
+              type: 'table',
+              colWidths: [96, 192],
+              borders: { top: { style: 'double', widthPx: 2, color: '#ff0000' } },
+              look: { firstRow: true },
+              namedStyleId: 'Banded',
+              rows: [
+                {
+                  id: 'r1',
+                  repeatHeader: true,
+                  cantSplit: true,
+                  cells: [
+                    { id: 'c1', content: [{ type: 'text', text: 'H' }], backgroundColor: '#ddeeff', verticalAlign: 'center', colwidth: [96], borders: { bottom: { style: 'dashed' } } },
+                    { id: 'c2', content: [{ type: 'text', text: 'I' }], colwidth: [192] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const { result: exported } = await exportAndUnzip(source);
+    const target = docWith({});
+    await importFromDocx(exported.bytes, target);
+    const data = target.getData();
+    const block = data.sections[0].blocks[0];
+    if (block.type !== 'table') throw new Error('expected a table');
+    expect(block).toMatchObject({ colWidths: [96, 192], namedStyleId: 'Banded', look: { firstRow: true }, borders: { top: { style: 'double', widthPx: 2, color: '#ff0000' } } });
+    expect(block.rows[0]).toMatchObject({ repeatHeader: true, cantSplit: true });
+    expect(block.rows[0].cells[0]).toMatchObject({ backgroundColor: '#ddeeff', verticalAlign: 'center', colwidth: [96], borders: { bottom: { style: 'dashed' } } });
+    expect(data.namedStyles?.Banded).toMatchObject({ kind: 'table', table: { conditions: { firstRow: { backgroundColor: '#336699', text: { bold: true } } } } });
+  });
+
   it('round-trips a hyperlink via the text style pool when it carries formatting', async () => {
     const source = docWith({
       textStylePool: { style_1: { bold: true } },

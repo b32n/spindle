@@ -55,20 +55,6 @@
       ]
     },
     {
-      "count": 12,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "table style ×12",
-        "widths ×11",
-        "shading ×4",
-        "repeating header rows ×3",
-        "borders ×1",
-        "vertical alignment ×1"
-      ]
-    },
-    {
       "count": 6,
       "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
       "id": "docx.tableStructure",

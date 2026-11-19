@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import { exportDocx } from './writer';
 import { importDocx } from './reader';
-import type { DocSection, DocumentExportInput } from '@b32nio/spindle-shared/export/docx';
+import type { DocBlock, DocSection, DocumentExportInput } from '@b32nio/spindle-shared/export/docx';
 
 const BASE_SECTION: Omit<DocSection, 'blocks'> = {
   pageWidthPx: 816,
@@ -139,7 +139,8 @@ describe('importDocx', () => {
         },
       ])
     );
-    expect(result.sections[0].blocks).toEqual([
+    // The writer's default grid comes back as explicit single borders and the grid widths, on top of the structure.
+    expect(result.sections[0].blocks).toMatchObject([
       {
         type: 'table',
         rows: [
@@ -154,6 +155,10 @@ describe('importDocx', () => {
         ],
       },
     ]);
+    const table = result.sections[0].blocks[0] as Extract<DocBlock, { type: 'table' }>;
+    expect(table.borders?.top?.style).toBe('single');
+    expect(table.borders?.insideV?.style).toBe('single');
+    expect(table.colWidthsPx).toHaveLength(2);
   });
 
   it('round-trips an external hyperlink', async () => {

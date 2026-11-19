@@ -138,20 +138,6 @@
       "label": "extra section(s)"
     },
     {
-      "count": 17,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "table style ×17",
-        "widths ×16",
-        "shading ×5",
-        "repeating header rows ×4",
-        "borders ×1",
-        "vertical alignment ×1"
-      ]
-    },
-    {
       "count": 6,
       "effect": "nested tables are dropped and only the first paragraph of a cell is kept",
       "id": "docx.tableStructure",

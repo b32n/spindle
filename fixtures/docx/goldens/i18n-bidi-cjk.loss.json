@@ -17,16 +17,6 @@
       "effect": "the base text is kept; the reading marks are not imported",
       "id": "docx.ruby",
       "label": "ruby annotation(s)"
-    },
-    {
-      "count": 2,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "table style ×2",
-        "widths ×2"
-      ]
     }
   ]
 }

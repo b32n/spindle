@@ -276,6 +276,41 @@ export interface ListItemBlock extends BaseBlock, ParagraphFormat {
   styleId?: string;
 }
 
+/** One border line. `widthPx` defaults to 1; `color` is a hex colour, absent for automatic (black). */
+export interface TableBorder {
+  style: 'single' | 'double' | 'dashed' | 'dotted' | 'none';
+  widthPx?: number;
+  color?: string;
+}
+
+/**
+ * Borders of a table or of one cell. On a table, a side that is not listed has no line (`{}` is a table without
+ * borders); a table without `borders` shows the editor's default grid. On a cell, a side that is not listed
+ * takes the table's line there.
+ */
+export interface TableBorders {
+  top?: TableBorder;
+  right?: TableBorder;
+  bottom?: TableBorder;
+  left?: TableBorder;
+  /** Lines between rows (tables only). */
+  insideH?: TableBorder;
+  /** Lines between columns (tables only). */
+  insideV?: TableBorder;
+}
+
+/** Which parts of a table style apply to a table (DOCX `w:tblLook`). */
+export interface TableLook {
+  firstRow?: boolean;
+  lastRow?: boolean;
+  firstColumn?: boolean;
+  lastColumn?: boolean;
+  noHBand?: boolean;
+  noVBand?: boolean;
+}
+
+export type CellVerticalAlign = 'top' | 'center' | 'bottom';
+
 export interface TableCell {
   id: string;
   content: InlineContent[];
@@ -283,6 +318,9 @@ export interface TableCell {
   rowspan?: number;
   styleId?: string;
   backgroundColor?: string;
+  /** The cell's own borders (with a table style's conditional borders already applied). */
+  borders?: TableBorders;
+  verticalAlign?: CellVerticalAlign;
   /** True for a header cell (`<th>`). */
   isHeader?: boolean;
   /** Per-column pixel widths for the columns this cell spans. */
@@ -293,6 +331,10 @@ export interface TableRow {
   id: string;
   cells: TableCell[];
   height?: number;
+  /** Repeat the row at the top of each page the table continues on (DOCX `w:tblHeader`). Kept and exported; tables are not split across pages yet. */
+  repeatHeader?: boolean;
+  /** Keep the row on one page (DOCX `w:cantSplit`). */
+  cantSplit?: boolean;
 }
 
 export interface TableBlock extends BaseBlock {
@@ -300,6 +342,12 @@ export interface TableBlock extends BaseBlock {
   rows: TableRow[];
   colWidths?: number[];
   styleId?: string;
+  /** Borders of the table (see `TableBorders`). */
+  borders?: TableBorders;
+  /** Which parts of the table style apply (DOCX `w:tblLook`). */
+  look?: TableLook;
+  /** Id of the table's named table style, a key of `namedStyles`. The cells hold the formatting the style gives them. */
+  namedStyleId?: string;
 }
 
 export interface ImageBlock extends BaseBlock {
@@ -512,6 +560,29 @@ export interface NamedStyle {
   outlineLevel?: number;
   text?: TextStyle;
   paragraph?: ParagraphFormat;
+  /** The table-specific part of a table style (`kind: 'table'`). */
+  table?: TableStyleData;
+}
+
+/** Formatting a table style gives one part of a table. */
+export interface TableStylePart {
+  text?: TextStyle;
+  backgroundColor?: string;
+  borders?: TableBorders;
+  verticalAlign?: CellVerticalAlign;
+}
+
+/**
+ * The table part of a table style: the table's borders, the formatting of every cell (`whole`) and of the parts
+ * a table's `look` selects, keyed by DOCX `w:tblStylePr` type (`firstRow`, `lastRow`, `firstCol`, `lastCol`,
+ * `band1Horz`, `band2Horz`, `band1Vert`, `band2Vert`, `nwCell`, `neCell`, `swCell`, `seCell`).
+ */
+export interface TableStyleData {
+  borders?: TableBorders;
+  whole?: TableStylePart;
+  conditions?: Record<string, TableStylePart>;
+  rowBandSize?: number;
+  colBandSize?: number;
 }
 
 export interface DocumentData {

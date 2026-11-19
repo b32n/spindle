@@ -158,7 +158,7 @@ const nodes: Record<string, NodeSpec> = {
     isolating: true,
     // colWidths/styleId are model metadata carried across collab round-trips;
     // toDOM doesn't emit them (the painter reads them from the block model).
-    attrs: { colWidths: { default: null }, styleId: { default: null } },
+    attrs: { colWidths: { default: null }, styleId: { default: null }, borders: { default: null }, look: { default: null }, namedStyleId: { default: null } },
     parseDOM: [{ tag: 'table' }],
     toDOM(): DOMOutputSpec {
       return ['table', { class: 'docs-table' }, ['tbody', 0]];
@@ -168,7 +168,7 @@ const nodes: Record<string, NodeSpec> = {
   table_row: {
     content: '(table_cell | table_header)+',
     tableRole: 'row',
-    attrs: { height: { default: null } },
+    attrs: { height: { default: null }, repeatHeader: { default: false }, cantSplit: { default: false } },
     parseDOM: [{ tag: 'tr' }],
     toDOM(): DOMOutputSpec {
       return ['tr', 0];
@@ -183,6 +183,8 @@ const nodes: Record<string, NodeSpec> = {
       colwidth: { default: null },
       backgroundColor: { default: null },
       styleId: { default: null },
+      borders: { default: null },
+      verticalAlign: { default: null },
     },
     tableRole: 'cell',
     isolating: true,
@@ -219,6 +221,8 @@ const nodes: Record<string, NodeSpec> = {
       colwidth: { default: null },
       backgroundColor: { default: null },
       styleId: { default: null },
+      borders: { default: null },
+      verticalAlign: { default: null },
     },
     tableRole: 'header_cell',
     isolating: true,

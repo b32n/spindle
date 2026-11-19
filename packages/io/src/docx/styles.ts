@@ -1,6 +1,7 @@
-import type { DocNamedStyle, DocParagraphStyle, DocRunBase } from '@b32nio/spindle-shared/export/docx';
+import type { DocNamedStyle, DocParagraphStyle, DocRunBase, DocTableStyle } from '@b32nio/spindle-shared/export/docx';
 
 import { preferRecorded, themeColor, themeFont, themeScriptFont, type Theme } from './theme';
+import { mergeTableStyle, parseTableStyle } from './table-props';
 import { attrsOf, childrenOf, find, findAll, parseXml, type XmlNode } from './xml-tree';
 
 // ---------------------------------------------------------------------------
@@ -239,6 +240,8 @@ interface StyleDef {
   isDefault: boolean;
   run: RunPartial;
   para: ParagraphPartial;
+  /** The table part of a table style. */
+  table?: DocTableStyle;
 }
 
 const MAX_CHAIN = 50;
@@ -292,6 +295,7 @@ export class StyleSheet {
         run: parseRPr(find(sk, 'w:rPr'), theme),
         para: parsePPr(find(sk, 'w:pPr')),
       };
+      if (def.type === 'table') def.table = parseTableStyle(sk, theme, { text: (rPr) => toStyleText(parseRPr(rPr, theme)) });
       this.styles.set(id, def);
       if (def.type === 'paragraph' && def.isDefault && !this.defaultParagraphStyle) this.defaultParagraphStyle = id;
     }
@@ -325,7 +329,8 @@ export class StyleSheet {
       const def = this.styles.get(id);
       if (!def || Object.prototype.hasOwnProperty.call(out, id)) continue;
       if (def.type !== 'paragraph' && def.type !== 'character' && def.type !== 'table') continue;
-      const text = toStyleText(def.run);
+      // A table style's run properties are part of its table formatting (`table.whole.text`).
+      const text = def.type === 'table' ? {} : toStyleText(def.run);
       const paragraph = def.type === 'paragraph' ? toDocParagraphStyle(def.para) : {};
       const outline = def.para.outlineLvl;
       out[id] = {
@@ -338,10 +343,26 @@ export class StyleSheet {
         ...(outline !== undefined && outline >= 0 && outline <= 9 && { outlineLevel: outline <= 8 ? outline + 1 : 0 }),
         ...(Object.keys(text).length > 0 && { text }),
         ...(Object.keys(paragraph).length > 0 && { paragraph }),
+        ...(def.table && { table: def.table }),
       };
       for (const related of [def.basedOn, def.next, def.link]) if (related) queue.push(related);
     }
     return out;
+  }
+
+  /** A table style with the styles it is based on folded in (what a table in that style looks like); undefined for an unknown or non-table style. */
+  tableStyle(styleId: string | undefined): DocTableStyle | undefined {
+    const chain = this.chain(styleId).filter((d) => d.type === 'table');
+    if (chain.length === 0) return undefined;
+    let out: DocTableStyle | undefined;
+    for (const def of chain) out = mergeTableStyle(out, def.table);
+    return out ?? {};
+  }
+
+  /** The id of a table style to keep on a table: one the file defines (the default `TableNormal` is what an unstyled table is in anyway). */
+  namedTableStyle(styleId: string | undefined): string | undefined {
+    const def = styleId ? this.styles.get(styleId) : undefined;
+    return def && def.type === 'table' && !def.isDefault ? def.id : undefined;
   }
 
   /** The style and its ancestors, root first; stops at a missing base or a loop. */
@@ -390,6 +411,20 @@ export class StyleSheet {
     return undefined;
   }
 
+  /**
+   * Run formatting with a table style's text properties applied: the table style sits above docDefaults, and a
+   * paragraph style overrides it only for the properties it sets to something other than the docDefaults value
+   * (Word's rule, which lets a table style restyle text in the default paragraph style).
+   */
+  private withTableLayer(paragraphRun: RunPartial, tableText: DocRunBase): RunPartial {
+    const fromTable = overlay(this.docDefaultRun, runFromDoc(tableText));
+    const changedByParagraph: RunPartial = {};
+    for (const [k, v] of Object.entries(paragraphRun)) {
+      if (v !== undefined && JSON.stringify(v) !== JSON.stringify((this.docDefaultRun as Record<string, unknown>)[k])) (changedByParagraph as Record<string, unknown>)[k] = v;
+    }
+    return overlay(fromTable, changedByParagraph);
+  }
+
   private characterLayer(styleId: string | undefined): RunPartial {
     if (!styleId) return {};
     const cached = this.characterCache.get(styleId);
@@ -410,11 +445,11 @@ export class StyleSheet {
   }
 
   /** Effective run formatting: layers from docDefaults up to the run's own `w:rPr` (which may name a character style). */
-  run(rPr: XmlNode | undefined, pStyleId: string | undefined): DocRunBase {
+  run(rPr: XmlNode | undefined, pStyleId: string | undefined, tableText?: DocRunBase): DocRunBase {
     const direct = parseRPr(rPr, this.theme);
     const rStyleEl = rPr ? find(childrenOf(rPr), 'w:rStyle') : undefined;
     const rStyleId = rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined;
-    const paragraph = this.paragraphLayers(pStyleId).run;
+    const paragraph = tableText ? this.withTableLayer(this.paragraphLayers(pStyleId).run, tableText) : this.paragraphLayers(pStyleId).run;
     const character = this.characterLayer(rStyleId);
 
     const linked = !!rStyleId && !!pStyleId && (this.styles.get(rStyleId)?.link === pStyleId || this.styles.get(pStyleId)?.link === rStyleId);
@@ -427,6 +462,30 @@ export class StyleSheet {
     }
     return toRunBase(merged);
   }
+}
+
+/** The run properties of a stored style as the partial record the layers are merged in (the inverse of `toStyleText`). */
+function runFromDoc(t: DocRunBase): RunPartial {
+  const out: RunPartial = {};
+  const set = <K extends keyof RunPartial>(k: K, v: RunPartial[K] | undefined) => {
+    if (v !== undefined) out[k] = v;
+  };
+  set('bold', t.bold);
+  set('italic', t.italic);
+  set('strike', t.strikethrough);
+  set('smallCaps', t.smallCaps);
+  set('allCaps', t.allCaps);
+  set('hidden', t.hidden);
+  set('underline', t.underline);
+  if (t.superscript) out.vertAlign = 'superscript';
+  else if (t.subscript) out.vertAlign = 'subscript';
+  set('color', t.color);
+  set('fontSize', t.fontSize);
+  set('fontFamily', t.fontFamily);
+  set('fontFamilyEastAsia', t.fontFamilyEastAsia);
+  set('fontFamilyComplex', t.fontFamilyComplex);
+  set('backgroundColor', t.backgroundColor);
+  return out;
 }
 
 /** A style's own run properties: unlike an effective run, an explicit "off" is kept (it overrides the style it is based on). */

@@ -21,16 +21,6 @@
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
-    },
-    {
-      "count": 1,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "table style ×1",
-        "widths ×1"
-      ]
     }
   ]
 }

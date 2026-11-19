@@ -94,6 +94,21 @@ lockstep.
   document a new `namedStyles` map, so styles and references sync in collaboration (a late joiner receives the room's
   styles; no migration is needed). There is no style gallery or style editing UI yet.
 
+- **DOCX table formatting is imported and exported.** Import keeps table and cell borders (line style, width, colour), cell
+  shading, vertical alignment, repeating header rows (`w:tblHeader`), `w:cantSplit`, column widths (`w:tblGrid` and `w:tcW`),
+  the table style id and `w:tblLook`. A table style's conditional formatting (header and total rows, first and last column,
+  banded rows and columns, corner cells, resolved through the style's `basedOn` chain and the table's `tblLook`) is applied to
+  the cells it reaches: shading, borders, vertical alignment and text properties land on the cells and their runs, below the
+  paragraph and run formatting. Table styles are kept in `namedStyles` (`kind: 'table'`, with the additive `table` member holding
+  borders, whole-table and per-`tblStylePr` formatting) and written back to `styles.xml`; the export writes borders, shading,
+  header rows, `cantSplit`, vertical alignment, widths, the table style and `tblLook`. `docx.tableFormatting` is removed from the
+  full loss report.
+- **Editor: table formatting in the document model.** Additive `TableBorders`, `TableLook` and `CellVerticalAlign` types;
+  `borders`, `look` and `namedStyleId` on `TableBlock`, `borders` and `verticalAlign` on `TableCell`, `repeatHeader` and
+  `cantSplit` on `TableRow` (matching attributes on the ProseMirror table nodes, so they sync over Yjs), and
+  `NamedStyle.table`. The page painter and the measurer draw cell borders, vertical alignment and cell widths; a table with no
+  `borders` keeps the default grid and a table whose `borders` is `{}` shows no lines. Repeating header rows and `cantSplit` are
+  stored and exported; tables are not split across pages yet, so the editor does not act on them.
 - **DOCX bookmarks and internal links are imported and exported.** A `w:bookmarkStart` becomes the additive `DocBookmarkRun`
   interchange member (`{ type: 'bookmark', name }`; `_Toc` and `_Ref` names kept, Word's `_GoBack` marker dropped), a
   `w:hyperlink` with `w:anchor` becomes a link whose `href` is `#name` (`url#name` with a target too), and the export writes
