@@ -63,7 +63,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "exceljs": "^4.4.0",
     "jszip": "^3.10.2",
-    "lint-staged": "^17.6.0",
+    "lint-staged": "^17.6.1",
     "prettier": "^3.10.1",
     "simple-git-hooks": "^2.14.0",
     "tslib": "^2.9.1",
