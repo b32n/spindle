@@ -1,4 +1,4 @@
-import { addTitle, revisionDecoration } from './revision-decoration';
+import { addTitle, revisionDecoration, rowRevisionTint } from './revision-decoration';
 import { DEFAULT_REVISION_COLOR, type Run } from './flow-blocks';
 
 const insertion = { id: '1', author: 'Ada', color: '#1a73e8' };
@@ -15,6 +15,7 @@ describe('revisionDecoration', () => {
     expect(revisionDecoration({ kind: 'text', text: 'x', revision: { insertion } })).toEqual({
       color: '#1a73e8',
       textDecoration: 'underline',
+      textDecorationColor: '#1a73e8',
       data: { revisionAuthor: 'Ada', revisionInsertion: '1' },
       title: 'Inserted by Ada',
     });
@@ -24,6 +25,7 @@ describe('revisionDecoration', () => {
     expect(revisionDecoration({ kind: 'text', text: 'x', revision: { deletion } })).toEqual({
       color: '#188038',
       textDecoration: 'line-through',
+      textDecorationColor: '#188038',
       data: { revisionAuthor: 'Bo', revisionDeletion: '2' },
       title: 'Deleted by Bo',
     });
@@ -33,6 +35,7 @@ describe('revisionDecoration', () => {
     expect(revisionDecoration({ kind: 'text', text: 'x', revision: { insertion, deletion } })).toEqual({
       color: '#188038',
       textDecoration: 'underline line-through',
+      textDecorationColor: '#188038',
       data: { revisionAuthor: 'Bo', revisionInsertion: '1', revisionDeletion: '2' },
       title: 'Inserted by Ada; Deleted by Bo',
     });
@@ -54,6 +57,51 @@ describe('revisionDecoration', () => {
     expect(revisionDecoration({ kind: 'text', text: 'x', revision: { insertion: { id: '1', author: 'Ada' } as never } })?.color).toBe(DEFAULT_REVISION_COLOR);
     expect(revisionDecoration({ kind: 'text', text: 'x', revision: { insertion: { id: '1', author: 'Ada', color: 'red; background: url(x)' } } })?.color).toBe(DEFAULT_REVISION_COLOR);
     expect(revisionDecoration({ kind: 'text', text: 'x', revision: { insertion: { id: '1', author: 'Ada', color: '' } } })?.color).toBe(DEFAULT_REVISION_COLOR);
+  });
+});
+
+describe('revisionDecoration of moves and formatting changes', () => {
+  const format = { id: '3', author: 'Cy', color: '#a142f4' };
+
+  it('draws the two ends of a move with a double line and says which end it is', () => {
+    const from = revisionDecoration({ kind: 'text', text: 'x', revision: { deletion: { ...deletion, moveId: 'm1' } } });
+    expect(from).toMatchObject({ textDecoration: 'line-through', textDecorationStyle: 'double', data: { revisionMove: 'm1' }, title: 'Moved from here by Bo' });
+    const to = revisionDecoration({ kind: 'text', text: 'x', revision: { insertion: { ...insertion, moveId: 'm1' } } });
+    expect(to).toMatchObject({ textDecoration: 'underline', textDecorationStyle: 'double', data: { revisionMove: 'm1' }, title: 'Moved to here by Ada' });
+  });
+
+  it('draws a change of formatting alone dotted, in the author\'s colour, and keeps the text colour', () => {
+    const d = revisionDecoration({ kind: 'text', text: 'x', revision: { formatChange: format } })!;
+    expect(d).toMatchObject({ textDecoration: 'underline', textDecorationColor: '#a142f4', textDecorationStyle: 'dotted', data: { revisionFormat: '3', revisionAuthor: 'Cy' }, title: 'Formatted by Cy' });
+    expect(d).not.toHaveProperty('color');
+  });
+
+  it('shows an underlined run with a formatting change alone as dotted, and keeps its strike-through', () => {
+    expect(revisionDecoration({ kind: 'text', text: 'x', underline: true, strikethrough: true, revision: { formatChange: format } })).toMatchObject({ textDecoration: 'underline line-through', textDecorationStyle: 'dotted' });
+  });
+
+  it('shows an insertion over a formatting change, and names the author of both', () => {
+    const d = revisionDecoration({ kind: 'text', text: 'x', revision: { insertion, formatChange: format } })!;
+    expect(d).toMatchObject({ color: '#1a73e8', data: { revisionAuthor: 'Ada', revisionInsertion: '1', revisionFormat: '3', revisionFormatAuthor: 'Cy' }, title: 'Inserted by Ada; Formatted by Cy' });
+    expect(d).not.toHaveProperty('textDecorationStyle');
+  });
+});
+
+describe('rowRevisionTint', () => {
+  it('tints an inserted or a deleted row in the author\'s colour, the deletion first', () => {
+    expect(rowRevisionTint({ insertion: { id: '1', author: 'Ada', color: '#1a73e8' } })).toEqual({
+      backgroundImage: 'linear-gradient(#1a73e826, #1a73e826)',
+      data: { revisionRow: 'insertion', revisionAuthor: 'Ada' },
+    });
+    expect(rowRevisionTint({ insertion: insertion, deletion })).toMatchObject({ data: { revisionRow: 'deletion', revisionAuthor: 'Bo' } });
+  });
+
+  it('is nothing for a row without a change, or with a colour that is not a six digit hex colour', () => {
+    expect(rowRevisionTint(undefined)).toBeNull();
+    expect(rowRevisionTint({})).toBeNull();
+    expect(rowRevisionTint({ insertion: { id: '1', author: 'Ada', color: 'red' } })).toBeNull();
+    expect(rowRevisionTint({ insertion: { id: '1', author: 'Ada', color: '#fff' } })).toBeNull();
+    expect(rowRevisionTint({ insertion: { id: '1', author: 'Ada', color: 'url(x)' } })).toBeNull();
   });
 });
 

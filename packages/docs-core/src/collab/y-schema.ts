@@ -52,10 +52,11 @@ import type { DocsCommentThread } from '../comments';
  * The Y document layout this build reads and writes. 1 is the layout without section breaks (the key is then absent),
  * 2 adds `section_break` nodes, 3 adds the `content_control` and `content_control_inline` nodes, 4 adds the `note_ref`
  * node (a footnote or endnote reference holding the note's text), 5 adds the `toc` node (a table of contents with its
- * entries), 6 adds the `insertion` and `deletion` marks (tracked changes). Raised by any later change an older client could
- * not read.
+ * entries), 6 adds the `insertion` and `deletion` marks (tracked changes), 7 adds the `formatChange` mark and the `revisionInsertion`,
+ * `revisionDeletion` and `revisionFormat` attributes of paragraphs, headings and table rows, and `moveId` on the change marks (tracked moves, formatting changes,
+ * paragraph marks and rows). Raised by any later change an older client could not read.
  */
-export const COLLAB_SCHEMA_VERSION = 6;
+export const COLLAB_SCHEMA_VERSION = 7;
 
 /** Thrown when a room was written with a newer Y document layout than this client understands. */
 export class CollabSchemaVersionError extends Error {
@@ -79,9 +80,9 @@ export function readSchemaVersion(ydoc: Y.Doc): number {
 }
 
 /** Throw a CollabSchemaVersionError when the Y.Doc was written with a newer schema than this client supports. */
-export function assertSchemaVersion(ydoc: Y.Doc): void {
+export function assertSchemaVersion(ydoc: Y.Doc, supported: number = COLLAB_SCHEMA_VERSION): void {
   const version = readSchemaVersion(ydoc);
-  if (version > COLLAB_SCHEMA_VERSION) throw new CollabSchemaVersionError(version);
+  if (version > supported) throw new CollabSchemaVersionError(version, supported);
 }
 
 export interface YDocFields {

@@ -4,9 +4,11 @@ import {
   sanitizeImageSrc,
   safeCssColor,
   safeFontFamily,
+  safeFontName,
   safeCssKeyword,
   safeCssNumber,
 } from './sanitize';
+import { BLOCK_REVISION_ATTRS } from './block-revision';
 
 /**
  * Paragraph formatting that paragraphs and headings carry beyond alignment and spacing: indents in pixels
@@ -21,6 +23,9 @@ const PARAGRAPH_FORMAT_ATTRS = {
   pageBreakBefore: { default: null },
   // Named paragraph style (DOCX `w:pStyle`), a key of the document's `namedStyles`.
   namedStyleId: { default: null },
+  // Tracked changes of the paragraph mark, one attribute per kind (see `BlockRevision`): `revisionInsertion`,
+  // `revisionDeletion`, `revisionFormat` (each a change record or null), so concurrent suggestions of different kinds merge.
+  ...BLOCK_REVISION_ATTRS,
 };
 
 /**
@@ -232,7 +237,7 @@ const nodes: Record<string, NodeSpec> = {
   table_row: {
     content: '(table_cell | table_header)+',
     tableRole: 'row',
-    attrs: { height: { default: null }, repeatHeader: { default: false }, cantSplit: { default: false } },
+    attrs: { height: { default: null }, repeatHeader: { default: false }, cantSplit: { default: false }, ...BLOCK_REVISION_ATTRS },
     parseDOM: [{ tag: 'tr' }],
     toDOM(): DOMOutputSpec {
       return ['tr', 0];
@@ -598,15 +603,37 @@ const nodes: Record<string, NodeSpec> = {
   },
 };
 
-/**
- * Mark specifications for inline formatting
- */
 /** Above the default (50) of the `span` rule of `textStyle`, so a pasted change is parsed as a change. */
 export const REVISION_PARSE_PRIORITY = 60;
 
+const RUN_FORMAT_FLAGS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden'] as const;
+
+/** The run formatting read back from a `data-format-previous` attribute or from a collaborator's change record (untrusted): known fields of the right type only. */
+export function sanitizeRunFormat(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const r = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const flag of RUN_FORMAT_FLAGS) if (typeof r[flag] === 'boolean') out[flag] = r[flag];
+  for (const key of ['fontFamily', 'fontFamilyEastAsia', 'fontFamilyComplex'] as const) {
+    const v = typeof r[key] === 'string' ? safeFontName(r[key]) : undefined;
+    if (v) out[key] = v;
+  }
+  for (const key of ['color', 'backgroundColor'] as const) {
+    const v = typeof r[key] === 'string' ? safeCssColor(r[key]) : undefined;
+    if (v) out[key] = v;
+  }
+  if (typeof r.fontSize === 'number' && Number.isFinite(r.fontSize) && r.fontSize > 0 && r.fontSize < 1000) out.fontSize = r.fontSize;
+  if (typeof r.namedStyleId === 'string' && r.namedStyleId.length > 0 && r.namedStyleId.length <= 100) out.namedStyleId = r.namedStyleId;
+  return out;
+}
+
+/** The longest id, author or move name taken from pasted HTML (a longer one is cut). */
+const MAX_PASTED_REVISION_FIELD = 200;
+const cap = (value: string | null): string | null => (value === null ? null : value.slice(0, MAX_PASTED_REVISION_FIELD));
+
 function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): MarkSpec {
   return {
-    attrs: { revisionId: {}, author: {}, date: { default: null } },
+    attrs: { revisionId: {}, author: {}, date: { default: null }, moveId: { default: null } },
     inclusive: false,
     parseDOM: [
       {
@@ -616,7 +643,7 @@ function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): Mar
         getAttrs(dom: HTMLElement) {
           const revisionId = dom.getAttribute(dataAttr);
           const author = dom.getAttribute('data-revision-author');
-          return revisionId && author ? { revisionId, author, date: dom.getAttribute('data-revision-date') } : false;
+          return revisionId && author ? { revisionId: cap(revisionId), author: cap(author), date: cap(dom.getAttribute('data-revision-date')), moveId: cap(dom.getAttribute('data-revision-move')) } : false;
         },
       },
     ],
@@ -627,6 +654,7 @@ function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): Mar
           [dataAttr]: String(node.attrs.revisionId),
           'data-revision-author': String(node.attrs.author),
           ...(node.attrs.date ? { 'data-revision-date': String(node.attrs.date) } : {}),
+          ...(node.attrs.moveId ? { 'data-revision-move': String(node.attrs.moveId) } : {}),
           class: `revision-${kind}`,
         },
         0,
@@ -635,6 +663,9 @@ function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): Mar
   };
 }
 
+/**
+ * Mark specifications for inline formatting
+ */
 const marks: Record<string, MarkSpec> = {
   bold: {
     parseDOM: [
@@ -850,6 +881,44 @@ const marks: Record<string, MarkSpec> = {
   // adds the marks itself.
   insertion: revisionMarkSpec('insertion', 'data-insertion'),
   deletion: revisionMarkSpec('deletion', 'data-deletion'),
+
+  // A change of the formatting of the text (a Word `w:rPrChange`): `previous` holds the formatting the text had before
+  // (the same fields as a run: bold, italic, fontSize, color, ..., namedStyleId); the marks on the text are the formatting now.
+  formatChange: {
+    attrs: { revisionId: {}, author: {}, date: { default: null }, previous: { default: null } },
+    inclusive: false,
+    parseDOM: [
+      {
+        tag: 'span[data-format-change]',
+        priority: REVISION_PARSE_PRIORITY,
+        getAttrs(dom: HTMLElement) {
+          const revisionId = dom.getAttribute('data-format-change');
+          const author = dom.getAttribute('data-revision-author');
+          if (!revisionId || !author) return false;
+          let previous: unknown = {};
+          try {
+            previous = JSON.parse(dom.getAttribute('data-format-previous') || '{}');
+          } catch {
+            previous = {};
+          }
+          return { revisionId: cap(revisionId), author: cap(author), date: cap(dom.getAttribute('data-revision-date')), previous: sanitizeRunFormat(previous) };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      return [
+        'span',
+        {
+          'data-format-change': String(node.attrs.revisionId),
+          'data-revision-author': String(node.attrs.author),
+          ...(node.attrs.date ? { 'data-revision-date': String(node.attrs.date) } : {}),
+          'data-format-previous': JSON.stringify(node.attrs.previous ?? {}),
+          class: 'revision-format-change',
+        },
+        0,
+      ];
+    },
+  },
 };
 
 /**

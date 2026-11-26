@@ -306,6 +306,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-REV-01 | a .docx with tracked changes shows insertions underlined and deletions struck through in each author’s colour, with a legend of the authors | covered | yes |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-02 | the tracked changes are kept when the document is downloaded | covered |  |  | `e2e/docs/revisions.spec.ts` |
+| D-REV-03 | moves, formatting changes, paragraph changes and inserted or deleted rows are marked, and kept in the download | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-08 | typing in the middle of a deleted run is live text, not more deleted text | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-09 | pasting a copied tracked range never repeats a change id | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-SEC-01 | a .docx with four sections shows each with its own page size and headers | covered | yes |  | `e2e/docs/sections.spec.ts` |
@@ -470,7 +471,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 405
+- covered: 406
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

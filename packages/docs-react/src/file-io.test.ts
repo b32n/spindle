@@ -60,25 +60,25 @@ describe('docs file I/O', () => {
 });
 
 describe('docs import loss report', () => {
-  // A tracked insertion of a paragraph mark: the one kind of tracked change the importer does not keep yet.
+  // A tracked insertion around a whole paragraph: a tracked change the importer does not keep (its content is not imported).
   async function docxWithTrackedChange(): Promise<File> {
     const out = await exportDocumentFile(makeDoc('Hello'), 'docx');
     const zip = await JSZip.loadAsync(out.data as Uint8Array);
     const xml = await zip.file('word/document.xml')!.async('string');
-    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:pPr><w:rPr><w:ins w:id="9" w:author="A"/></w:rPr></w:pPr><w:r><w:t>x</w:t></w:r></w:p></w:body>'));
+    zip.file('word/document.xml', xml.replace('</w:body>', '<w:ins w:id="9" w:author="A"><w:p><w:r><w:t>x</w:t></w:r></w:p></w:ins></w:body>'));
     return new File([new Uint8Array(await zip.generateAsync({ type: 'uint8array' }))], 'tracked.docx');
   }
 
   it('inspectDocumentFile reports losses without touching the document', async () => {
     const doc = makeDoc('Keep');
     const report = await inspectDocumentFile(await docxWithTrackedChange());
-    expect(report.items.map((i) => i.id)).toEqual(['docx.trackedInsertions']);
+    expect(report.items.map((i) => i.id)).toEqual(['docx.trackedBlockChanges']);
     expect(JSON.stringify(doc.getData())).toContain('Keep');
   });
 
   it('importDocumentFile returns the report; a clean file reports none', async () => {
     const result = await importDocumentFile(makeDoc('x'), await docxWithTrackedChange());
-    expect(result.loss.items.map((i) => i.id)).toEqual(['docx.trackedInsertions']);
+    expect(result.loss.items.map((i) => i.id)).toEqual(['docx.trackedBlockChanges']);
     const clean = await exportDocumentFile(makeDoc('Hello'), 'docx');
     expect((await inspectDocumentFile(new File([new Uint8Array(clean.data as Uint8Array)], 'ok.docx'))).items).toEqual([]);
   });

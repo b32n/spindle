@@ -1,10 +1,12 @@
 import { Node as PmNode, type Mark } from 'prosemirror-model';
-import { docsSchema } from './schema';
+import { docsSchema, sanitizeRunFormat } from './schema';
+import { blockRevisionAttrs, cloneJson, readBlockRevision } from './block-revision';
 import type {
   Document,
   Block,
   Section,
   InlineContent,
+  RunFormat,
   RunRevision,
   TextRun,
   InlineLink,
@@ -105,6 +107,7 @@ function formatAttrs(block: ParagraphFormat): Record<string, unknown> {
     keepTogether: block.keepTogether || null,
     pageBreakBefore: block.pageBreakBefore || null,
     namedStyleId: block.namedStyleId ?? null,
+    ...blockRevisionAttrs(block.revision),
   };
 }
 
@@ -125,6 +128,8 @@ function readFormat(attrs: Record<string, unknown>, defaults: { spaceBefore: num
   if (attrs.keepTogether === true) out.keepTogether = true;
   if (attrs.pageBreakBefore === true) out.pageBreakBefore = true;
   if (typeof attrs.namedStyleId === 'string' && attrs.namedStyleId) out.namedStyleId = attrs.namedStyleId;
+  const revision = readBlockRevision(attrs);
+  if (revision) out.revision = revision;
   return out;
 }
 
@@ -239,7 +244,7 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
         attrs: { colWidths: block.colWidths ?? null, styleId: block.styleId ?? null, borders: block.borders ?? null, look: block.look ?? null, namedStyleId: block.namedStyleId ?? null },
         content: block.rows.map(row => ({
           type: 'table_row',
-          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false },
+          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false, ...blockRevisionAttrs(row.revision) },
           content: row.cells.map(cell => ({
             type: cell.isHeader ? 'table_header' : 'table_cell',
             attrs: {
@@ -585,7 +590,8 @@ function pmCellContent(cellNode: PmNode, startIndex: number, stylePool?: TextSty
   const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
   // Bookmarks of the paragraphs before the first one with content stay in front of it
   const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
-  const plain = blocks.length === 1 && blocks[0].type === 'paragraph';
+  // A paragraph with a tracked change of its mark keeps its block, so the change is not lost on save and export.
+  const plain = blocks.length === 1 && blocks[0].type === 'paragraph' && !blocks[0].revision;
   return { content, ...(!plain && blocks.length > 0 ? { blocks } : {}) };
 }
 
@@ -676,12 +682,14 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
             ...(cellNode.attrs.textDirection ? { textDirection: cellNode.attrs.textDirection as CellTextDirection } : {}),
           });
         });
+        const rowRevision = readBlockRevision(rowNode.attrs);
         rows.push({
           id: `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           cells,
           ...(rowNode.attrs.height != null ? { height: rowNode.attrs.height as number } : {}),
           ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
           ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
+          ...(rowRevision ? { revision: rowRevision } : {}),
         });
       });
 
@@ -934,8 +942,10 @@ function revisionMarks(revision: RunRevision | undefined): PmMarkJSON[] {
   const marks: PmMarkJSON[] = [];
   for (const kind of ['insertion', 'deletion'] as const) {
     const meta = revision?.[kind];
-    if (meta) marks.push({ type: kind, attrs: { revisionId: meta.id, author: meta.author, ...(meta.date && { date: meta.date }) } });
+    if (meta) marks.push({ type: kind, attrs: { revisionId: meta.id, author: meta.author, ...(meta.date && { date: meta.date }), ...(meta.moveId && { moveId: meta.moveId }) } });
   }
+  const change = revision?.formatChange;
+  if (change) marks.push({ type: 'formatChange', attrs: { revisionId: change.id, author: change.author, ...(change.date && { date: change.date }), previous: cloneJson(change.previous) } });
   return marks;
 }
 
@@ -946,10 +956,22 @@ export function revisionOf(marks: readonly { type: { name: string }; attrs: Reco
     const mark = marks.find((m) => m.type.name === kind);
     if (mark) {
       const date = mark.attrs.date;
-      revision[kind] = { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), ...(typeof date === 'string' && date && { date }) };
+      const moveId = mark.attrs.moveId;
+      revision[kind] = { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), ...(typeof date === 'string' && date && { date }), ...(typeof moveId === 'string' && moveId && { moveId }) };
     }
   }
-  return revision.insertion || revision.deletion ? revision : undefined;
+  const change = marks.find((m) => m.type.name === 'formatChange');
+  if (change) {
+    const date = change.attrs.date;
+    const previous = change.attrs.previous;
+    revision.formatChange = {
+      id: String(change.attrs.revisionId),
+      author: String(change.attrs.author),
+      ...(typeof date === 'string' && date && { date }),
+      previous: sanitizeRunFormat(previous) as RunFormat,
+    };
+  }
+  return revision.insertion || revision.deletion || revision.formatChange ? revision : undefined;
 }
 
 /** True if a text run carries any formatting or comment anchor. */

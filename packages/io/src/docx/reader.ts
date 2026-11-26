@@ -7,8 +7,11 @@ import type {
   DocInline,
   DocParagraphStyle,
   DocSection,
+  DocBlockRevision,
+  DocParagraphFormat,
   DocRevision,
   DocRevisionMeta,
+  DocRunFormat,
   DocTextRun,
   DocBorders,
   DocCellTextDirection,
@@ -142,11 +145,51 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
   });
 }
 
+/** The numbers given to changes without an id of their own, unique within one import. */
+const anonymousRevisionId = (ctx: PartContext) => () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`;
+
 /** The tracked change a `w:ins` / `w:del` element records. A change without an id gets the next number of its import. */
 function revisionMeta(node: XmlNode, fallbackId: () => string): DocRevisionMeta {
   const attrs = attrsOf(node);
   const date = attrs['@_w:date'];
   return { id: attrs['@_w:id'] || fallbackId(), author: attrs['@_w:author'] || 'Unknown', ...(date && { date }) };
+}
+
+/** The formatting a run had before a tracked change of it (`w:rPrChange`): the effective formatting its old properties give. */
+function previousRunFormat(change: XmlNode, pStyleId: string | undefined, ctx: PartContext): DocRunFormat {
+  const oldRPr = find(childrenOf(change), 'w:rPr');
+  const oldStyleEl = oldRPr ? find(childrenOf(oldRPr), 'w:rStyle') : undefined;
+  const oldStyle = ctx.styles.namedCharacterStyle(oldStyleEl ? attrsOf(oldStyleEl)['@_w:val'] : undefined);
+  return { ...ctx.styles.run(oldRPr, pStyleId, ctx.tableText), ...(oldStyle && { namedStyleId: oldStyle }) };
+}
+
+/**
+ * The tracked changes of a paragraph: its mark inserted or deleted (`w:ins` / `w:del`, or the ends of a move, in the
+ * paragraph mark's run properties) and its formatting changed (`w:pPrChange`, holding the old properties).
+ */
+function paragraphRevision(pPr: XmlNode | undefined, ctx: PartContext): DocBlockRevision | undefined {
+  if (!pPr) return undefined;
+  const kids = childrenOf(pPr);
+  const markProps = find(kids, 'w:rPr');
+  const mark = (tags: string[]) => {
+    const el = markProps ? childrenOf(markProps).find((k) => tags.includes(tagOf(k) ?? '')) : undefined;
+    return el ? revisionMeta(el, anonymousRevisionId(ctx)) : undefined;
+  };
+  const insertion = mark(['w:ins', 'w:moveTo']);
+  const deletion = mark(['w:del', 'w:moveFrom']);
+  const change = find(kids, 'w:pPrChange');
+  let formatChange: DocBlockRevision['formatChange'];
+  if (change) {
+    const oldPPr = find(childrenOf(change), 'w:pPr');
+    const oldStyleEl = oldPPr ? find(childrenOf(oldPPr), 'w:pStyle') : undefined;
+    const oldStyleId = oldStyleEl ? attrsOf(oldStyleEl)['@_w:val'] : undefined;
+    const effective = ctx.styles.paragraph(oldStyleId, parsePPr(oldPPr));
+    const oldNamed = ctx.styles.namedParagraphStyle(oldStyleId);
+    const previous: DocParagraphFormat = { ...toDocParagraphStyle(effective), ...(oldNamed && { namedStyleId: oldNamed }), ...(effective.headingLevel && { headingLevel: effective.headingLevel }) };
+    formatChange = { ...revisionMeta(change, anonymousRevisionId(ctx)), previous };
+  }
+  if (!insertion && !deletion && !formatChange) return undefined;
+  return { ...(insertion && { insertion }), ...(deletion && { deletion }), ...(formatChange && { formatChange }) };
 }
 
 /**
@@ -175,6 +218,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   ctx.comments?.paragraphStart();
   /** Tracked changes (`w:ins`, `w:del`) the content being read is inside of. */
   let revision: DocRevision | undefined;
+  /** The names of the move ranges open at this point (`w:moveFromRangeStart` ... `w:moveFromRangeEnd`), which the moved text belongs to. */
+  const openMove: { moveFrom?: string; moveTo?: string } = {};
   const deleted = () => revision?.deletion !== undefined;
   const fields: OpenField[] = []; // begin/.../end sequences in progress, outermost first
   const top = (): OpenField | undefined => fields[fields.length - 1];
@@ -220,8 +265,12 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     // `Hyperlink` on a link is Word's implicit link style, which the writer applies to every link again.
     const characterStyle = ctx.styles.namedCharacterStyle(rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined);
     const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
-    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(revision && !top() && { revision }) };
+    const change = rPr ? find(childrenOf(rPr), 'w:rPrChange') : undefined;
+    const runRevision: DocRevision | undefined = change ? { ...revision, formatChange: { ...revisionMeta(change, anonymousRevisionId(ctx)), previous: previousRunFormat(change, pStyleId, ctx) } } : revision;
+    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(runRevision && !top() && { revision: runRevision }) };
     let text = '';
+    /** Set once the run's formatting change is on text that stays in the document. */
+    let formatChangeKept = false;
     /** A reference followed by its custom mark (`w:customMarkFollows`): the text after it in the run is that mark. */
     let markOf: Extract<DocInline, { type: 'noteRef' }> | undefined;
     const flush = () => {
@@ -244,6 +293,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         return;
       }
       const runProps = commentThreadId ? { ...props, commentThreadId } : props;
+      if (props.revision?.formatChange) formatChangeKept = true;
       if (target) out.push({ type: 'link', text, href: target, ...runProps });
       else out.push({ type: 'text', text, ...runProps });
       text = '';
@@ -320,6 +370,11 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       }
     }
     flush();
+    // A formatting change travels on text (a mark): one on a run that has none left (a field result, an image, a note
+    // reference) is not kept, and says so.
+    if (change && !formatChangeKept) {
+      warnings.push('A tracked formatting change of a run without text of its own (a field result, image or note reference) was not kept; the current formatting is imported.');
+    }
     // A note with a custom mark starts with that mark as text (not with the reference mark): it is not part of the note's text.
     if (markOf?.customMark) dropCustomMark(markOf.content, markOf.customMark);
   };
@@ -342,10 +397,20 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   const consumeRuns = (runs: XmlNode[], target: string | undefined) => {
     for (const child of flattenInline(runs)) {
       const tag = tagOf(child);
-      if (tag === 'w:ins' || tag === 'w:del') {
+      if (tag === 'w:moveFromRangeStart' || tag === 'w:moveToRangeStart') {
+        openMove[tag === 'w:moveFromRangeStart' ? 'moveFrom' : 'moveTo'] = attrsOf(child)['@_w:name'];
+      } else if (tag === 'w:moveFromRangeEnd' || tag === 'w:moveToRangeEnd') {
+        openMove[tag === 'w:moveFromRangeEnd' ? 'moveFrom' : 'moveTo'] = undefined;
+      } else if (tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo') {
         const outer = revision;
-        const meta = revisionMeta(child, () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`);
-        revision = { ...outer, ...(tag === 'w:ins' ? { insertion: meta } : { deletion: meta }) };
+        // The two ends of a move are a deletion (from) and an insertion (to) that share the name of the move.
+        const moveId = tag === 'w:moveFrom' || tag === 'w:moveTo' ? openMove[tag === 'w:moveFrom' ? 'moveFrom' : 'moveTo'] : undefined;
+        if ((tag === 'w:moveFrom' || tag === 'w:moveTo') && !moveId) {
+          const note = 'A moved run whose move range starts in another paragraph is kept as a plain deletion or insertion, without the name of the move.';
+          if (!warnings.includes(note)) warnings.push(note);
+        }
+        const meta = { ...revisionMeta(child, anonymousRevisionId(ctx)), ...(moveId && { moveId }) };
+        revision = { ...outer, ...(tag === 'w:ins' || tag === 'w:moveTo' ? { insertion: meta } : { deletion: meta }) };
         consumeRuns(childrenOf(child), target);
         revision = outer;
       } else if (tag === 'w:fldSimple') {
@@ -580,7 +645,7 @@ function pageBreakPlacement(pNode: XmlNode): 'before' | 'after' | null {
       const br = find(runKids, 'w:br');
       if (br && attrsOf(br)['@_w:type'] === 'page') return sawContent ? 'after' : 'before';
       if (runKids.some((k) => ['w:t', 'w:drawing', 'w:pict', 'w:tab'].includes(tagOf(k) ?? ''))) sawContent = true;
-    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:del' || tag === 'w:sdt' || tag === 'w:smartTag') {
+    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo' || tag === 'w:sdt' || tag === 'w:smartTag') {
       sawContent = true;
     }
   }
@@ -649,23 +714,28 @@ function parseParagraph(
   const direct = parsePPr(pPr);
   const effective = ctx.styles.paragraph(paragraphStyleId(pNode), direct);
   const namedStyleId = ctx.styles.namedParagraphStyle(paragraphStyleId(pNode));
-  const style: DocParagraphStyle = { ...toDocParagraphStyle(effective), ...(namedStyleId && { namedStyleId }) };
+  const markRevision = paragraphRevision(pPr, ctx);
+  const style: DocParagraphStyle = { ...toDocParagraphStyle(effective), ...(namedStyleId && { namedStyleId }), ...(markRevision && { revision: markRevision }) };
 
   // An otherwise-empty paragraph carrying only a page-break run or a
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
   // to the corresponding structural block rather than an empty paragraph.
   const onlyBookmarks = content.every((c) => c.type === 'bookmark');
+  // Those blocks have no place for a tracked change of their paragraph mark, so the change is reported as lost.
   if (!plain && onlyBookmarks && hasPageBreakRun(pNode)) {
+    if (markRevision) warnings.push('A tracked change of the paragraph mark of a page break was not kept.');
     return { type: 'pageBreak' };
   }
   if (!plain && content.length === 0 && hasBottomBorder(pPrKids)) {
+    if (markRevision) warnings.push('A tracked change of the paragraph mark of a horizontal rule was not kept.');
     return { type: 'horizontalRule' };
   }
 
   // A paragraph whose only content is a single image is how our own writer
   // (and most producers) represents a block-level image — promote it
   // rather than returning a "paragraph" block wrapping one inline image.
-  if (!plain && content.length === 1 && content[0].type === 'image') {
+  // A tracked change of the paragraph mark keeps the paragraph (an image block has no place for it).
+  if (!plain && !markRevision && content.length === 1 && content[0].type === 'image') {
     const image = content[0];
     return {
       type: 'image',
@@ -855,7 +925,18 @@ function parseTable(tblNode: XmlNode, outerCtx: PartContext, numbering: Numberin
     for (const openCol of [...openVMerge.keys()]) if (!mergedHere.has(openCol)) openVMerge.delete(openCol);
     const repeatHeader = isOnEl(find(trPrKids, 'w:tblHeader'));
     const cantSplit = isOnEl(find(trPrKids, 'w:cantSplit'));
-    rows.push({ cells: rowCells, ...(repeatHeader && { repeatHeader }), ...(cantSplit && { cantSplit }) });
+    const rowChange = (tag: string) => {
+      const el = find(trPrKids, tag);
+      return el ? revisionMeta(el, anonymousRevisionId(ctx)) : undefined;
+    };
+    const rowInsertion = rowChange('w:ins');
+    const rowDeletion = rowChange('w:del');
+    rows.push({
+      cells: rowCells,
+      ...(repeatHeader && { repeatHeader }),
+      ...(cantSplit && { cantSplit }),
+      ...((rowInsertion || rowDeletion) && { revision: { ...(rowInsertion && { insertion: rowInsertion }), ...(rowDeletion && { deletion: rowDeletion }) } }),
+    });
   }
 
   const colWidthsPx = grid.length > 0 && grid.every((w) => w > 0) ? grid : undefined;
@@ -1002,7 +1083,7 @@ function parseControlBlock(
 /**
  * The content of a table cell: its paragraphs, lists and nested tables. `content` is the inline content of the first
  * paragraph that has any (what a cell of one paragraph holds); `blocks` is the whole cell, set unless the cell is one
- * plain paragraph.
+ * paragraph without a tracked change of its mark.
  */
 function parseCellContent(
   tcNode: XmlNode,
@@ -1052,7 +1133,8 @@ function parseCellContent(
   const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
   // Bookmarks of the paragraphs before the first one with content stay in front of it
   const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
-  const plain = blocks.length === 1 && blocks[0].type === 'paragraph';
+  // A paragraph with a tracked change of its mark keeps its block (like the export does), so the change is not lost.
+  const plain = blocks.length === 1 && blocks[0].type === 'paragraph' && !blocks[0].revision;
   return { content, ...(!plain && blocks.length > 0 && { blocks }) };
 }
 
@@ -1192,6 +1274,7 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
       // on most of them: only the page-number fields are kept there.
       let dropped = 0;
       let flattened = 0;
+      let formatOnly = 0;
       const content = paragraphInlineContent(p, ctx, warnings)
         .filter((item) => {
           if (item.type === 'bookmark') return false; // headers and footers keep no bookmarks
@@ -1206,12 +1289,14 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
             dropped++;
             return [];
           }
-          flattened++;
+          if (item.revision.insertion) flattened++;
+          else formatOnly++;
           const { revision: _revision, ...plain } = item;
           return [plain];
         });
       if (dropped > 0) warnings.push('Tracked deleted text in a header or footer was not kept; it was dropped.');
       if (flattened > 0) warnings.push('A tracked insertion in a header or footer was not kept as a change.');
+      if (formatOnly > 0) warnings.push('A tracked formatting change in a header or footer was not kept as a change.');
       paragraphs.push({ content, ...(alignment && alignment !== 'justify' ? { alignment } : {}) });
     }
   }

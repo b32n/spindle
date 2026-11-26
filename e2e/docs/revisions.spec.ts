@@ -71,6 +71,79 @@ test.describe('docs: tracked changes in a .docx', () => {
     expect(xml).toMatch(/<w:ins [^>]*w:author="Alice Archer"[^>]*w:date="2026-01-05T10:00:00Z"/);
   });
 
+  test('D-REV-03 moves, formatting changes, paragraph changes and inserted or deleted rows are marked, and kept in the download', async ({
+    page,
+  }) => {
+    // Both ends of a move have a double line and share the name of the move.
+    const moves = doc.pages.locator('[data-revision-move]');
+    await expect(moves.first()).toBeVisible();
+    await expect(moves.first()).toHaveCSS('text-decoration-style', 'double');
+    // Each name has one end that is a deletion (moved from) and one that is an insertion (moved to).
+    const ends = await moves.evaluateAll((els) =>
+      els.map((el) => ({
+        name: (el as HTMLElement).dataset.revisionMove ?? '',
+        deletion: el.hasAttribute('data-revision-deletion'),
+        insertion: el.hasAttribute('data-revision-insertion'),
+      }))
+    );
+    const names = [...new Set(ends.map((end) => end.name))];
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) {
+      const named = ends.filter((end) => end.name === name);
+      expect(
+        named.some((end) => end.deletion),
+        `${name}: moved from`
+      ).toBe(true);
+      expect(
+        named.some((end) => end.insertion),
+        `${name}: moved to`
+      ).toBe(true);
+    }
+    // A change of formatting alone is dotted and keeps the text's colour.
+    const formatted = doc.pages
+      .locator(
+        '[data-revision-format]:not([data-revision-insertion]):not([data-revision-deletion])'
+      )
+      .first();
+    await expect(formatted).toHaveCSS('text-decoration-style', 'dotted');
+    // A paragraph with a change has a bar in the margin; a row inserted or deleted is tinted.
+    await expect(page.locator('.change-bar').first()).toBeVisible();
+    await expect(page.locator('.change-bar').first()).not.toHaveCSS(
+      'background-color',
+      'rgba(0, 0, 0, 0)'
+    );
+    await expect(doc.pages.locator('p[data-revision-block]').first()).toBeVisible();
+    await expect(doc.pages.locator('td[data-revision-row="insertion"]').first()).toBeVisible();
+    // The tint is a gradient over the cell's own background.
+    await expect(doc.pages.locator('td[data-revision-row="insertion"]').first()).not.toHaveCSS(
+      'background-image',
+      'none'
+    );
+    await expect(doc.pages.locator('td[data-revision-row="deletion"]').first()).toBeVisible();
+
+    const file = await captureDownload(page, () =>
+      page.getByRole('button', { name: 'Download as Microsoft Word (.docx)' }).click()
+    );
+    const xml =
+      (await (await JSZip.loadAsync(file.bytes)).file('word/document.xml')?.async('string')) ?? '';
+    for (const element of [
+      '<w:moveFrom ',
+      '<w:moveTo ',
+      '<w:rPrChange ',
+      '<w:pPrChange ',
+      '<w:trPr><w:ins ',
+      '<w:trPr><w:del ',
+    ]) {
+      expect(xml, element).toContain(element);
+    }
+    expect(xml).toMatch(/<w:moveFromRangeStart [^>]*w:name="move-1"/);
+    // The records carry their author and date, and the formatting before the change.
+    expect(xml).toMatch(/<w:rPrChange [^>]*w:author="[^"]+"[^>]*w:date="[^"]+"/);
+    expect(xml).toMatch(/<w:rPrChange [^>]*>\s*<w:rPr[ >]/);
+    expect(xml).toMatch(/<w:pPrChange [^>]*>\s*<w:pPr[ >]/);
+    expect(xml).toMatch(/<w:pPrChange [^>]*w:author="[^"]+"/);
+  });
+
   test('D-REV-08 typing in the middle of a deleted run is live text, not more deleted text', async ({
     page,
   }) => {

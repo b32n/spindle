@@ -425,6 +425,13 @@
               "value": 1.15
             },
             "namedStyleId": "BodyText",
+            "revision": {
+              "insertion": {
+                "author": "Dana Whitfield",
+                "date": "2026-01-07T10:00:00Z",
+                "id": "id-9"
+              }
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -438,7 +445,7 @@
                   "deletion": {
                     "author": "Bram Keller",
                     "date": "2026-01-07T10:00:00Z",
-                    "id": "id-9"
+                    "id": "id-10"
                   }
                 },
                 "text": "Entire paragraph deleted by Bram: the old fee table is obsolete.",
@@ -451,6 +458,13 @@
               "value": 1.15
             },
             "namedStyleId": "BodyText",
+            "revision": {
+              "deletion": {
+                "author": "Bram Keller",
+                "date": "2026-01-07T10:00:00Z",
+                "id": "id-11"
+              }
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -490,6 +504,20 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-07T10:00:00Z",
+                    "id": "id-12",
+                    "moveId": "move-1"
+                  }
+                },
+                "text": "The dredging schedule is published every October.",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": " (that sentence used to be here).",
                 "type": "text"
               }
@@ -515,6 +543,20 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-07T10:00:00Z",
+                    "id": "id-13",
+                    "moveId": "move-1"
+                  }
+                },
+                "text": "The dredging schedule is published every October.",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": " It now lives in this paragraph.",
                 "type": "text"
               }
@@ -531,6 +573,20 @@
           {
             "alignment": "justify",
             "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-08T10:00:00Z",
+                    "id": "id-14",
+                    "moveId": "move-2"
+                  }
+                },
+                "text": "Tide tables are posted at the north gate.",
+                "type": "text"
+              },
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
@@ -554,6 +610,20 @@
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "Second move target: ",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-08T10:00:00Z",
+                    "id": "id-15",
+                    "moveId": "move-2"
+                  }
+                },
+                "text": "Tide tables are posted at the north gate.",
                 "type": "text"
               }
             ],
@@ -604,6 +674,17 @@
                 "commentThreadId": "thread-2",
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "formatChange": {
+                    "author": "Dana Whitfield",
+                    "date": "2026-01-06T10:00:00Z",
+                    "id": "id-16",
+                    "previous": {
+                      "fontFamily": "Liberation Sans",
+                      "fontSize": 11
+                    }
+                  }
+                },
                 "text": "now bold",
                 "type": "text"
               },
@@ -618,6 +699,18 @@
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "italic": true,
+                "revision": {
+                  "formatChange": {
+                    "author": "Bram Keller",
+                    "date": "2026-01-06T10:00:00Z",
+                    "id": "id-17",
+                    "previous": {
+                      "bold": true,
+                      "fontFamily": "Liberation Sans",
+                      "fontSize": 11
+                    }
+                  }
+                },
                 "text": "now italic and red",
                 "type": "text"
               },
@@ -630,6 +723,17 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 14,
+                "revision": {
+                  "formatChange": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-08T10:00:00Z",
+                    "id": "id-18",
+                    "previous": {
+                      "fontFamily": "Liberation Sans",
+                      "fontSize": 11
+                    }
+                  }
+                },
                 "text": "larger",
                 "type": "text"
               },
@@ -665,6 +769,22 @@
               "value": 1.15
             },
             "namedStyleId": "BodyText",
+            "revision": {
+              "formatChange": {
+                "author": "Alice Archer",
+                "date": "2026-01-08T10:00:00Z",
+                "id": "id-19",
+                "previous": {
+                  "alignment": "justify",
+                  "lineSpacing": {
+                    "type": "multiple",
+                    "value": 1.15
+                  },
+                  "namedStyleId": "BodyText",
+                  "spaceAfter": 8
+                }
+              }
+            },
             "spaceAfter": 8,
             "type": "paragraph"
           },
@@ -688,6 +808,22 @@
               "value": 1.079
             },
             "namedStyleId": "Heading2",
+            "revision": {
+              "formatChange": {
+                "author": "Chidi Okafor",
+                "date": "2026-01-08T10:00:00Z",
+                "id": "id-20",
+                "previous": {
+                  "alignment": "justify",
+                  "lineSpacing": {
+                    "type": "multiple",
+                    "value": 1.15
+                  },
+                  "namedStyleId": "BodyText",
+                  "spaceAfter": 8
+                }
+              }
+            },
             "spaceAfter": 5.333333333333333,
             "spaceBefore": 10.666666666666666,
             "type": "heading"
@@ -726,7 +862,7 @@
                   "insertion": {
                     "author": "Alice Archer",
                     "date": "2026-01-09T10:00:00Z",
-                    "id": "id-10"
+                    "id": "id-21"
                   }
                 },
                 "text": "Order dredging equipment",
@@ -773,7 +909,7 @@
                   "deletion": {
                     "author": "Chidi Okafor",
                     "date": "2026-01-09T10:00:00Z",
-                    "id": "id-11"
+                    "id": "id-22"
                   }
                 },
                 "text": "Repaint the buoys",
@@ -957,7 +1093,7 @@
                           "insertion": {
                             "author": "Dana Whitfield",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-12"
+                            "id": "id-24"
                           }
                         },
                         "text": "East (new)",
@@ -978,7 +1114,7 @@
                           "insertion": {
                             "author": "Dana Whitfield",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-13"
+                            "id": "id-25"
                           }
                         },
                         "text": "7",
@@ -999,7 +1135,7 @@
                           "insertion": {
                             "author": "Dana Whitfield",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-14"
+                            "id": "id-26"
                           }
                         },
                         "text": "55",
@@ -1009,7 +1145,14 @@
                     "id": "cell-9"
                   }
                 ],
-                "id": "row-3"
+                "id": "row-3",
+                "revision": {
+                  "insertion": {
+                    "author": "Dana Whitfield",
+                    "date": "2026-01-09T10:00:00Z",
+                    "id": "id-23"
+                  }
+                }
               },
               {
                 "cells": [
@@ -1025,7 +1168,7 @@
                           "deletion": {
                             "author": "Bram Keller",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-15"
+                            "id": "id-28"
                           }
                         },
                         "text": "West (closed)",
@@ -1046,7 +1189,7 @@
                           "deletion": {
                             "author": "Bram Keller",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-16"
+                            "id": "id-29"
                           }
                         },
                         "text": "0",
@@ -1067,7 +1210,7 @@
                           "deletion": {
                             "author": "Bram Keller",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-17"
+                            "id": "id-30"
                           }
                         },
                         "text": "0",
@@ -1077,7 +1220,14 @@
                     "id": "cell-12"
                   }
                 ],
-                "id": "row-4"
+                "id": "row-4",
+                "revision": {
+                  "deletion": {
+                    "author": "Bram Keller",
+                    "date": "2026-01-09T10:00:00Z",
+                    "id": "id-27"
+                  }
+                }
               },
               {
                 "cells": [
@@ -1107,7 +1257,7 @@
                           "deletion": {
                             "author": "Alice Archer",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-18"
+                            "id": "id-31"
                           }
                         },
                         "text": "9",
@@ -1120,7 +1270,7 @@
                           "insertion": {
                             "author": "Alice Archer",
                             "date": "2026-01-09T10:00:00Z",
-                            "id": "id-19"
+                            "id": "id-32"
                           }
                         },
                         "text": "10",
@@ -1201,7 +1351,7 @@
                   "insertion": {
                     "author": "Alice Archer",
                     "date": "2026-01-10T10:00:00Z",
-                    "id": "id-20"
+                    "id": "id-33"
                   }
                 },
                 "text": "alpha ",
@@ -1214,7 +1364,7 @@
                   "deletion": {
                     "author": "Bram Keller",
                     "date": "2026-01-10T10:00:00Z",
-                    "id": "id-21"
+                    "id": "id-34"
                   }
                 },
                 "text": "beta ",
@@ -1227,7 +1377,7 @@
                   "insertion": {
                     "author": "Chidi Okafor",
                     "date": "2026-01-10T10:00:00Z",
-                    "id": "id-22"
+                    "id": "id-35"
                   }
                 },
                 "text": "gamma ",
@@ -1240,7 +1390,7 @@
                   "deletion": {
                     "author": "Dana Whitfield",
                     "date": "2026-01-10T10:00:00Z",
-                    "id": "id-23"
+                    "id": "id-36"
                   }
                 },
                 "text": "delta ",
@@ -1253,7 +1403,7 @@
                   "insertion": {
                     "author": "Bram Keller",
                     "date": "2026-01-11T10:00:00Z",
-                    "id": "id-24"
+                    "id": "id-37"
                   }
                 },
                 "text": "epsilon ",

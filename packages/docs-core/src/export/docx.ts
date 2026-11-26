@@ -13,6 +13,7 @@ import type {
   DocImageRun,
   DocInline,
   DocNamedStyle,
+  DocBlockRevision,
   DocParagraphStyle,
   DocRunBase,
   DocSection,
@@ -24,6 +25,7 @@ import type {
 } from '@b32nio/spindle-shared/export/docx';
 import type {
   Block,
+  BlockRevision,
   ContentControl,
   DocumentData,
   DynamicFieldRun,
@@ -48,6 +50,7 @@ import type { DocumentImpl } from '../document';
 import { createSection } from '../document';
 import { TextStylePoolImpl } from '../style-pool';
 import { generateBlockId, generateCellId, generateRowId } from '../blocks/utils';
+import { cloneJson } from '../prosemirror/block-revision';
 
 /** A comment with no recorded date still needs a timestamp (the model requires one); the epoch marks it unknown. */
 const UNKNOWN_COMMENT_DATE = new Date(0).toISOString();
@@ -207,6 +210,7 @@ function toBlock(
         rows: block.rows.map((row) => ({
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
+          ...(row.revision && { revision: cloneJson(row.revision) }),
           cells: row.cells.map((cell) => ({
             content: toInlineContent(cell.content, title, textStylePool),
             ...(cell.blocks && { blocks: cell.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) }),
@@ -303,7 +307,32 @@ function resolveParagraphStyle(block: ParagraphLikeBlock, pool: Record<string, P
     ...(keepTogether && { keepTogether: true }),
     ...(pageBreakBefore && { pageBreakBefore: true }),
     ...(block.namedStyleId && { namedStyleId: block.namedStyleId }),
+    ...(block.revision && { revision: toDocBlockRevision(block.revision) }),
   };
+}
+
+/** A paragraph's tracked changes for the interchange format: what the formatting was before is in points. */
+function toDocBlockRevision(revision: BlockRevision): DocBlockRevision {
+  const { formatChange, ...rest } = revision;
+  const marks = cloneJson(rest);
+  if (!formatChange) return marks;
+  const { headingLevel, ...previous } = formatChange.previous;
+  const { revision: _nested, ...format } = resolveParagraphStyle(previous, {});
+  return { ...marks, formatChange: { ...formatChange, previous: { ...compact(format), ...(headingLevel && { headingLevel }) } } };
+}
+
+/** A paragraph's tracked changes from the interchange format: what the formatting was before is in pixels. */
+function fromDocBlockRevision(revision: DocBlockRevision): BlockRevision {
+  const { formatChange, ...rest } = revision;
+  const marks = cloneJson(rest);
+  if (!formatChange) return marks;
+  const { headingLevel, ...previous } = formatChange.previous;
+  return { ...marks, formatChange: { ...formatChange, previous: { ...toParagraphFormat(previous), ...(headingLevel && { headingLevel }) } } };
+}
+
+/** The object without the keys whose value is undefined (they would not survive being stored as JSON). */
+function compact<T extends object>(value: T): T {
+  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
 }
 
 function toInlineContent(content: InlineContent[], title: string, pool: Record<string, TextStyle>): DocInline[] {
@@ -319,7 +348,7 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
         ...resolveTextStyle(item, pool),
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
-        ...(item.revision && { revision: item.revision }),
+        ...(item.revision && { revision: cloneJson(item.revision) }),
       };
     case 'link':
       return {
@@ -329,7 +358,7 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
         ...(item.styleId && pool[item.styleId] ? toDocRunBase(pool[item.styleId]) : {}),
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
-        ...(item.revision && { revision: item.revision }),
+        ...(item.revision && { revision: cloneJson(item.revision) }),
       };
     case 'image':
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };
@@ -612,6 +641,7 @@ function toParagraphFormat(style: DocParagraphStyle): ParagraphFormat {
     ...(style.keepTogether && { keepTogether: true }),
     ...(style.pageBreakBefore && { pageBreakBefore: true }),
     ...(style.namedStyleId && { namedStyleId: style.namedStyleId }),
+    ...(style.revision && { revision: fromDocBlockRevision(style.revision) }),
   };
 }
 
@@ -650,6 +680,7 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
           id: generateRowId(),
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
+          ...(row.revision && { revision: cloneJson(row.revision) }),
           cells: row.cells.map((cell) => ({
             id: generateCellId(),
             content: toInlineContentFromDocx(cell.content, textStylePool),
@@ -742,7 +773,7 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
         ...toTextStyle(item),
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
-        ...(item.revision && { revision: item.revision }),
+        ...(item.revision && { revision: cloneJson(item.revision) }),
       };
     case 'link':
       // InlineLink carries no inline style fields of its own — only a
@@ -755,7 +786,7 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
         styleId: hasAnyRunStyle(item) ? textStylePool.getOrCreate(toTextStyle(item)) : undefined,
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
-        ...(item.revision && { revision: item.revision }),
+        ...(item.revision && { revision: cloneJson(item.revision) }),
       };
     case 'image':
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };

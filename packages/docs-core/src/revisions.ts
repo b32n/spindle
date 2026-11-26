@@ -1,6 +1,7 @@
 // Tracked changes: how they are told apart on screen and read out of a document.
 
 import type { Node as PmNode } from 'prosemirror-model';
+import { readBlockRevision } from './prosemirror/block-revision';
 
 /** Colours the authors of tracked changes are drawn in, dark enough to read on white. */
 export const REVISION_COLORS: readonly string[] = ['#c5221f', '#1a73e8', '#188038', '#a142f4', '#e8710a', '#129eaf', '#d01884', '#7b5e00'];
@@ -44,11 +45,24 @@ export function assignAuthorColors(authors: Iterable<string>): Map<string, strin
   return colors;
 }
 
-/** The authors with tracked changes in a document (the marks of its text), in order of first appearance. */
+/**
+ * The authors with tracked changes in a document, in order of first appearance: the marks of its text (insertions, deletions,
+ * formatting changes) and the changes recorded on paragraphs, headings and table rows (a paragraph mark, a row, formatting).
+ */
 export function documentRevisionAuthors(doc: PmNode): string[] {
   const authors = new Set<string>();
   doc.descendants((node) => {
-    if (node.isText) for (const mark of node.marks) if (mark.type.name === 'insertion' || mark.type.name === 'deletion') authors.add(String(mark.attrs.author));
+    if (node.isText) {
+      for (const mark of node.marks) if (mark.type.name === 'insertion' || mark.type.name === 'deletion' || mark.type.name === 'formatChange') authors.add(String(mark.attrs.author));
+      return true;
+    }
+    const revision = readBlockRevision(node.attrs);
+    if (revision) {
+      for (const kind of ['insertion', 'deletion', 'formatChange'] as const) {
+        const author = revision[kind]?.author;
+        if (typeof author === 'string') authors.add(author);
+      }
+    }
     return true;
   });
   return [...authors];

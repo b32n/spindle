@@ -14,6 +14,8 @@ export {
   redo,
 } from './plugins';
 export type { ActiveState, BlockState } from './plugins';
+export { BLOCK_REVISION_ATTRS, BLOCK_REVISION_ATTR_OF, blockRevisionAttrs, readBlockRevision, withBlockRevision, withBlockRevisionKind } from './block-revision';
+export type { BlockRevisionAttrs, BlockRevisionKind } from './block-revision';
 export { newRevisionId, freshRevisionIds, typeOutsideDeletion, pasteOutsideDeletion, insertTrackedLineBreak, createRevisionEditPlugin } from './revision-edit';
 
 // Commands

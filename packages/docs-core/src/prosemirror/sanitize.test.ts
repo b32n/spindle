@@ -1,4 +1,4 @@
-import { sanitizeHref, sanitizeImageSrc, safeCssColor, safeFontFamily } from './sanitize';
+import { sanitizeHref, sanitizeImageSrc, safeCssColor, safeFontFamily, safeFontName } from './sanitize';
 
 describe('sanitizeHref', () => {
   it('neutralizes javascript: hrefs', () => {
@@ -62,5 +62,16 @@ describe('safeFontFamily', () => {
     expect(safeFontFamily('Arial, sans-serif')).toBe('Arial, sans-serif');
     expect(safeFontFamily('Arial; background: url(//evil)')).toBeUndefined();
     expect(safeFontFamily('url(//evil)')).toBeUndefined();
+  });
+});
+
+describe('safeFontName', () => {
+  it('keeps non-ASCII and punctuated font names', () => {
+    for (const name of ['宋体', '游ゴシック', 'ＭＳ 明朝', 'Arial Narrow', 'Cambria Math', 'AT&T Garamond', "Book's Roman", 'Sylfaen.2']) expect(safeFontName(name)).toBe(name);
+    expect(safeFontName('  Arial  ')).toBe('Arial');
+  });
+
+  it('rejects empty, long, control and injecting names', () => {
+    for (const bad of ['', '   ', null, undefined, 'a;b', 'a{b}', 'a(b)', 'a<b>', 'a\\b', 'a:b', 'url(//evil)', 'a\u0000b', 'a\nb'.replace('\n', '\u0007'), 'x'.repeat(101)]) expect(safeFontName(bad as never)).toBeUndefined();
   });
 });

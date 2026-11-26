@@ -325,8 +325,31 @@ lockstep.
   when a page break follows it. Copied tracked text now keeps its changes when pasted in the browser (the clipboard HTML was parsed as plain text style before: the parse rules of the change marks have a priority of their own). Updating a table of contents lists the final text of a heading (words in a tracked
   deletion are left out). The authors of the changes are collected when typing pauses, not on every key. The paragraph break between the paragraphs of a note no longer becomes part of a tracked change at the end of the paragraph before it, and the same change id from two authors counts as two changes in the list of changes.
 
+- **Tracked moves, formatting changes, paragraph-mark and table-row changes are kept, shown and written back.** The two ends
+  of a move (`w:moveFrom` / `w:moveTo` with their range markers) are read as a deletion and an insertion that share the name of
+  the move (`moveId`) and written back with the range markers; a change of a run's formatting (`w:rPrChange`) keeps what the
+  formatting was before (`formatChange`: the effective formatting, in the same fields as a run) next to the formatting now;
+  likewise `w:pPrChange` for a paragraph (with the heading level it had); an inserted or deleted paragraph mark
+  (`w:pPr/w:rPr/w:ins|w:del|w:moveFrom|w:moveTo`; a move of a paragraph mark is written as an insertion or deletion, as the writer's
+  library has no move there) and an inserted or deleted table row (`w:trPr`). Additive: `DocRevisionMeta.moveId`,
+  `DocFormatChange`, `DocRunFormat`, `DocParagraphFormat`, `DocBlockRevision`, `DocRevision.formatChange`,
+  `DocParagraphStyle.revision` and `DocTableRow.revision` in the interchange types; `RevisionMeta.moveId`, `FormatChange`,
+  `RunFormat`, `PreviousParagraphFormat`, `BlockRevision`, `RunRevision.formatChange`, `ParagraphFormat.revision` and
+  `TableRow.revision` in docs-core. `docsSchema` gains the `formatChange` mark (attributes `revisionId`, `author`, `date`,
+  `previous`; the formatting read back from pasted HTML is limited to known fields), a `moveId` attribute on the `insertion` and
+  `deletion` marks, and the attributes `revisionInsertion`, `revisionDeletion` and `revisionFormat` on paragraphs, headings and table rows (one per kind of change, so two people suggesting different things on the same paragraph mark or row at once both keep theirs; the same kind from two people is last-writer-wins; after a concurrent split a record made on the whole paragraph stays with the first half, next to the insertion the split recorded there, not on the half that holds the original mark; a record read from another client is rebuilt from the fields it should have, and one without a usable id is ignored); all are plain ProseMirror content that
+  syncs over Yjs; the collaboration `schemaVersion` is now 7 (a client at 6 would drop the `formatChange` mark and the new attributes, so it refuses to join such a room). A move that spans several paragraphs (what Word writes for a moved block) loses its shared name on import: its two ends are read as an ordinary deletion and insertion, with a warning, and are no longer paired in the editor. Pressing Shift+Enter in text that only has a formatting change inserts a newline character in the text (a `hard_break` node would not sync its change). The font names kept as the formatting before a change may contain any letter, digit or space (CJK names included). The editor draws the two ends of a move with a
+  double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
+  paragraph with a change, and a tint on the cells of an inserted or deleted row. `documentRevisionAuthors` also lists the authors of changes recorded on paragraphs and rows and of formatting changes, so they share out the palette like the others.
+
 ### Changed
 
+- **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
+  counts only what is still lost**: insertions, deletions and moves of text, of paragraph marks (also in a table cell of one
+  paragraph, which keeps its block when its paragraph has a change, like the export does) and of table rows are kept. What
+  is left: the formatting change of a paragraph mark's own formatting, a paragraph change of numbering, tab stops, borders or
+  shading (the old value is not kept, so rejecting cannot restore it) and changes of tables, table rows, cells and sections (`w:tblPrChange`,
+  `w:trPrChange`, `w:tcPrChange`, `w:sectPrChange`, and the cell changes `w:cellIns`, `w:cellDel`, `w:cellMerge`, whose cell is imported as an ordinary cell), and `docx.trackedBlockChanges` / `docx.trackedHeaderFooterChanges`. A change inside a field result is not kept, and neither is a formatting change on a run with no text of its own (a field result, an image, a note reference); each adds a warning. A paragraph whose only content is an image keeps its paragraph (and the change of its mark); a tracked change of the mark of a page-break or rule paragraph is reported as lost (`docx.trackedStructureChanges`, plus a warning). A formatting change (`w:pPrChange`) in a header or footer is counted with the other changes there. Text moved away (`w:moveFrom`) is skipped in a comment's text and counts as content before a page break. The `w:id` of a change is no longer renumbered when a move's range markers are written, and pasting renews a numeric record id too.
 - **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
   `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
   deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted
@@ -337,10 +360,7 @@ lockstep.
   an id gets a number that is unique in the import. A line break inside changed text keeps the change (it stays in the text node
   in the editor, because the collaboration binding keeps marks on text only), and the export drops characters XML cannot carry
   from an author and a date that is not a date (a date out of range is dropped too, and two authors' changes with the same id get two `w:id`s). The still-lost changes around a field, an
-  image or a note reference, and deleted text in a field result, are counted as `docx.trackedChangesNotKept` in the loss report; a deleted image in `mc:AlternateContent` is dropped like a plain one.
-- **DOCX loss report: `docx.trackedInsertions` and `docx.trackedDeletions` count only what is still lost**: a change on a
-  paragraph mark (`w:pPr/w:rPr`) or on a table row (`w:trPr`), whose paragraph or row is imported as ordinary content. Changes
-  around runs are kept and no longer counted (32 and 22 occurrences in the corpus before).
+  image or a note reference, and deleted text in a field result, are counted as `docx.trackedChangesNotKept` in the loss report (a `w:moveFrom` or `w:moveTo` around them too, and a change inside another one counts once); a deleted image in `mc:AlternateContent` is dropped like a plain one.
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,
   citation, bibliography and group controls, and controls wrapping table rows or cells, whose content is kept without the
   control), by reason in `where`, in both detail levels; it counted every `w:sdt` before. `docx.fields` no longer counts the

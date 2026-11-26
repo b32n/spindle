@@ -9,13 +9,14 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { docsSchema } from './prosemirror/schema';
 import { blocksToPmDoc, proseMirrorToDocument, revisionOf } from './prosemirror/sync';
+import { readBlockRevision } from './prosemirror/block-revision';
 import { DocumentImpl } from './document';
 import { getCollabBlockers } from './collab/blockers';
-import { getYDocFields, hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
+import { COLLAB_SCHEMA_VERSION, CollabSchemaVersionError, assertSchemaVersion, getYDocFields, hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
 import { exportToDocx, importFromDocx } from './export/docx';
 import { REVISION_COLORS, assignAuthorColors, authorColor, collectRevisions, documentRevisionAuthors, revisionAuthors, sameRevisionAuthors } from './revisions';
 import { DEFAULT_PAGE_CONFIG } from './types';
-import type { Block, DocumentData, InlineContent, ParagraphBlock } from './types';
+import type { Block, DocumentData, InlineContent, ParagraphBlock, RunFormat } from './types';
 
 const ADA = { id: '1', author: 'Ada', date: '2024-05-06T07:08:09Z' };
 const BO = { id: '2', author: 'Bo' };
@@ -78,8 +79,12 @@ describe('tracked changes in the ProseMirror document', () => {
     expect((bare.type.spec.toDOM!(bare, true) as readonly unknown[])[1]).not.toHaveProperty('data-revision-date');
     const read = (kind: typeof insertion, attrs: Record<string, string | null>) =>
       (kind.spec.parseDOM![0].getAttrs as (d: unknown) => unknown)({ getAttribute: (n: string) => attrs[n] ?? null });
-    expect(read(insertion, { 'data-insertion': '9', 'data-revision-author': 'Ada', 'data-revision-date': 'd' })).toEqual({ revisionId: '9', author: 'Ada', date: 'd' });
+    expect(read(insertion, { 'data-insertion': '9', 'data-revision-author': 'Ada', 'data-revision-date': 'd' })).toEqual({ revisionId: '9', author: 'Ada', date: 'd', moveId: null });
+    expect(read(deletion, { 'data-deletion': '9', 'data-revision-author': 'Bo', 'data-revision-move': 'm1' })).toMatchObject({ moveId: 'm1' });
     expect(read(deletion, { 'data-deletion': '9' })).toBe(false);
+    // Pasted HTML is not trusted for size: an id, author, date or move name is cut at 200 characters.
+    const long = 'y'.repeat(900);
+    expect(read(deletion, { 'data-deletion': long, 'data-revision-author': long, 'data-revision-date': long, 'data-revision-move': long })).toEqual({ revisionId: 'y'.repeat(200), author: 'y'.repeat(200), date: 'y'.repeat(200), moveId: 'y'.repeat(200) });
     expect(read(deletion, { 'data-revision-author': 'x' })).toBe(false);
   });
 
@@ -214,6 +219,16 @@ describe('author colours and the list of changes', () => {
     expect(new Set(many.values()).size).toBe(REVISION_COLORS.length);
   });
 
+  it('lists the authors of changes recorded on paragraphs and rows, and of formatting changes, too', () => {
+    const pm = blocksToPmDoc([
+      { id: 'a', type: 'paragraph', content: [{ type: 'text', text: 'x', revision: { formatChange: { id: '5', author: 'Cy', previous: {} } } }] },
+      { id: 'b', type: 'paragraph', content: [{ type: 'text', text: 'y' }], revision: { insertion: { id: '6', author: 'Di' }, formatChange: { id: '7', author: 'Ed', previous: {} } } },
+      { id: 'c', type: 'heading', level: 1, content: [{ type: 'text', text: 'z' }], revision: { deletion: { id: '8', author: 'Flo' } } },
+      { id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'k', content: [{ type: 'text', text: 'c' }] }], revision: { insertion: { id: '9', author: 'Gus' } } }] },
+    ] as Block[]);
+    expect(documentRevisionAuthors(pm)).toEqual(['Cy', 'Di', 'Ed', 'Flo', 'Gus']);
+  });
+
   it('lists the authors of changes in a document\'s marks', () => {
     const pm = blocksToPmDoc([{ id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'x', revision: { insertion: ADA } }, { type: 'text', text: 'y', revision: { deletion: BO } }, { type: 'text', text: 'z' }] }]);
     expect(documentRevisionAuthors(pm)).toEqual(['Ada', 'Bo']);
@@ -320,4 +335,198 @@ describe('tracked changes in DOCX', () => {
     expect(getCollabBlockers(doc.getData())).toEqual([]);
     expect(JSON.stringify(viaYjs(doc.getSections()[0].blocks))).toContain('"revision"');
   });
+});
+
+
+// Moves, formatting changes, and changes of paragraph marks and table rows.
+describe('moves, formatting changes, paragraph marks and rows', () => {
+  const MOVE_FROM = { id: '5', author: 'Cy', date: '2024-01-02T00:00:00Z', moveId: 'move-1' };
+  const MOVE_TO = { id: '6', author: 'Cy', moveId: 'move-1' };
+  const FORMAT = { id: '7', author: 'Di', date: '2024-03-04T00:00:00Z', previous: { bold: true, fontSize: 14, color: '#c00000', namedStyleId: 'Strong' } };
+  const KINDS: Block[] = [
+    {
+      id: 'p',
+      type: 'paragraph',
+      revision: { insertion: { id: '8', author: 'Ada' }, formatChange: { id: '9', author: 'Bo', previous: { alignment: 'right', leftIndent: 24, headingLevel: 2 } } },
+      content: [
+        { type: 'text', text: 'from', revision: { deletion: MOVE_FROM } },
+        { type: 'text', text: 'to', revision: { insertion: MOVE_TO } },
+        { type: 'text', text: 'now', italic: true, revision: { formatChange: FORMAT } },
+        { type: 'link', text: 'link', href: 'https://example.com/', revision: { insertion: ADA, formatChange: FORMAT } },
+      ],
+    },
+    { id: 'h', type: 'heading', level: 2, content: [{ type: 'text', text: 'H' }], revision: { deletion: { id: '10', author: 'Bo' } } },
+    {
+      id: 't',
+      type: 'table',
+      rows: [
+        { id: 'r1', cells: [{ id: 'c1', content: [{ type: 'text', text: 'new row' }] }], revision: { insertion: { id: '11', author: 'Ada' } } },
+        { id: 'r2', cells: [{ id: 'c2', content: [{ type: 'text', text: 'old row' }] }], revision: { deletion: { id: '12', author: 'Bo' } } },
+        { id: 'r3', cells: [{ id: 'c3', content: [{ type: 'text', text: 'row' }] }] },
+      ],
+    },
+  ];
+
+  it('travel through the ProseMirror document and the Y document unchanged', () => {
+    for (const via of [viaPm, viaYjs]) {
+      const back = via(KINDS);
+      expect(strip(back.slice(0, 2))).toEqual(strip(KINDS.slice(0, 2)));
+      expect((back[2] as Extract<Block, { type: 'table' }>).rows.map((r) => r.revision)).toEqual([{ insertion: { id: '11', author: 'Ada' } }, { deletion: { id: '12', author: 'Bo' } }, undefined]);
+    }
+    expect(getCollabBlockers(dataWith(KINDS))).toEqual([]);
+  });
+
+  it('are PM marks and attributes of their own', () => {
+    const pm = blocksToPmDoc(KINDS);
+    const para = pm.child(0);
+    expect(para.attrs.revisionInsertion).toMatchObject({ id: '8' });
+    expect(para.attrs.revisionDeletion).toBeNull();
+    expect(para.attrs.revisionFormat).toMatchObject({ id: '9', previous: { headingLevel: 2 } });
+    expect(readBlockRevision(para.attrs)).toMatchObject({ insertion: { id: '8' }, formatChange: { id: '9', previous: { headingLevel: 2 } } });
+    expect(para.child(0).marks.map((m) => [m.type.name, m.attrs.moveId])).toEqual([['deletion', 'move-1']]);
+    expect(para.child(2).marks.find((m) => m.type.name === 'formatChange')!.attrs).toMatchObject({ revisionId: '7', previous: { bold: true, fontSize: 14 } });
+    expect(pm.child(2).child(0).attrs).toMatchObject({ revisionInsertion: { id: '11', author: 'Ada' }, revisionDeletion: null, revisionFormat: null });
+    expect(pm.child(2).child(2).attrs).toMatchObject({ revisionInsertion: null, revisionDeletion: null, revisionFormat: null });
+    expect(revisionOf(para.child(2).marks)).toEqual({ formatChange: { id: '7', author: 'Di', date: '2024-03-04T00:00:00Z', previous: FORMAT.previous } });
+  });
+
+  it('keep what the model gave them apart from the model (no shared objects)', () => {
+    const blocks = JSON.parse(JSON.stringify(KINDS)) as Block[];
+    const pm = blocksToPmDoc(blocks);
+    (blocks[0] as ParagraphBlock).revision!.insertion!.author = 'changed';
+    expect(pm.child(0).attrs.revisionInsertion.author).toBe('Ada');
+  });
+
+  it('are copied, not shared, into the interchange format of an export (also the formatting change of a text run)', async () => {
+    let captured: { sections: { blocks: { content: { revision?: { formatChange?: { previous: { fontSize?: number } }; insertion?: { author: string } } }[] }[] }[] } | undefined;
+    await jest.isolateModulesAsync(async () => {
+      jest.doMock('@b32nio/spindle-io/docx', () => ({ exportDocx: async (input: typeof captured) => ((captured = input), { bytes: new Uint8Array(), warnings: [] }) }));
+      const { exportToDocx: exportWithMock } = await import('./export/docx');
+      const { DocumentImpl: Impl } = await import('./document');
+      const doc = new Impl('doc', 'Doc');
+      doc.setData(dataWith(KINDS));
+      await exportWithMock(doc);
+    });
+    jest.dontMock('@b32nio/spindle-io/docx');
+    const run = captured!.sections[0].blocks[0].content.find((c) => c.revision?.formatChange)!;
+    const source = (KINDS[0] as ParagraphBlock).content.find((c) => c.type === 'text' && c.revision?.formatChange)!;
+    expect(run.revision).toEqual((source as { revision: object }).revision);
+    expect(run.revision).not.toBe((source as { revision: object }).revision);
+    expect(run.revision!.formatChange!.previous).not.toBe((source as { revision: { formatChange: { previous: object } } }).revision.formatChange.previous);
+    run.revision!.formatChange!.previous.fontSize = 99;
+    expect((source as { revision: { formatChange: { previous: { fontSize?: number } } } }).revision.formatChange.previous.fontSize).toBe(14);
+  });
+
+  it('survive a DOCX export and import through the editor model', async () => {
+    const doc = new DocumentImpl('doc', 'Doc');
+    doc.setData(dataWith(KINDS));
+    const { bytes } = await exportToDocx(doc);
+    const xml = await (await JSZip.loadAsync(bytes)).file('word/document.xml')!.async('string');
+    for (const element of ['<w:moveFrom ', '<w:moveTo ', '<w:rPrChange ', '<w:pPrChange ', '<w:trPr><w:ins ', '<w:trPr><w:del ']) expect(xml).toContain(element);
+    const reopened = new DocumentImpl('doc2', 'Doc2');
+    await importFromDocx(bytes, reopened);
+    const [para, heading, table] = reopened.getSections()[0].blocks;
+    expect((para as ParagraphBlock).revision).toMatchObject({ insertion: { id: '8', author: 'Ada' }, formatChange: { id: '9', author: 'Bo', previous: { alignment: 'right', leftIndent: 24 } } });
+    expect((para as ParagraphBlock).content).toMatchObject([
+      { revision: { deletion: { id: '5', moveId: 'move-1' } } },
+      { revision: { insertion: { id: '6', moveId: 'move-1' } } },
+      { italic: true, revision: { formatChange: { id: '7', author: 'Di', previous: { bold: true, fontSize: 14, color: '#c00000' } } } },
+      { type: 'link', revision: { insertion: { author: 'Ada' }, formatChange: { id: '7' } } },
+    ]);
+    expect(heading).toMatchObject({ revision: { deletion: { id: '10', author: 'Bo' } } });
+    expect((table as Extract<Block, { type: 'table' }>).rows.map((r) => r.revision)).toMatchObject([{ insertion: { id: '11' } }, { deletion: { id: '12' } }, undefined]);
+  });
+
+  it('read a formatting change from pasted HTML with known fields of the right type only', () => {
+    const { formatChange } = docsSchema.marks;
+    const read = (previous: string) => (formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => { previous: unknown } | false)({
+      getAttribute: (n: string) => ({ 'data-format-change': '1', 'data-revision-author': 'A', 'data-format-previous': previous })[n] ?? null,
+    });
+    expect(read('{"bold":true,"fontSize":12,"color":"#112233","fontFamily":"Arial","namedStyleId":"S","evil":1,"italic":"yes","backgroundColor":"url(x)"}')).toMatchObject({
+      previous: { bold: true, fontSize: 12, color: '#112233', fontFamily: 'Arial', namedStyleId: 'S' },
+    });
+    expect(Object.keys((read('{"bold":true,"evil":1,"italic":"yes","backgroundColor":"url(x)","fontSize":-3}') as { previous: object }).previous)).toEqual(['bold']);
+    expect(read('{"fontFamilyEastAsia":"宋体","fontFamily":"游ゴシック","fontFamilyComplex":"Arial; x:y"}')).toMatchObject({ previous: { fontFamilyEastAsia: '宋体', fontFamily: '游ゴシック' } });
+    expect((read('{"fontFamilyComplex":"Arial; x:y"}') as { previous: object }).previous).toEqual({});
+    expect(read('not json')).toMatchObject({ previous: {} });
+    expect(read('[1]')).toMatchObject({ previous: {} });
+    expect(read('null')).toMatchObject({ previous: {} });
+    const mark = formatChange.create({ revisionId: '1', author: 'A', previous: { bold: true } });
+    expect(formatChange.spec.toDOM!(mark, true)).toEqual(['span', expect.objectContaining({ 'data-format-change': '1', 'data-format-previous': '{"bold":true}', class: 'revision-format-change' }), 0]);
+    expect((formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => unknown)({ getAttribute: () => null })).toBe(false);
+  });
+
+  it('keep a non-ASCII font of the formatting before a change through a save', () => {
+    const previous = { bold: true, fontFamily: '游ゴシック', fontFamilyEastAsia: '宋体', fontFamilyComplex: 'Arial Narrow' };
+    const paragraph: ParagraphBlock = { id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'x', italic: true, revision: { formatChange: { id: '5', author: 'Cy', previous } } }] };
+    const saved = viaPm([paragraph])[0] as ParagraphBlock;
+    expect(saved.content[0]).toMatchObject({ revision: { formatChange: { previous } } });
+  });
+
+  it('keep a tracked paragraph mark in a table cell of one paragraph when the document is saved', () => {
+    const cellParagraph: ParagraphBlock = { id: 'c', type: 'paragraph', content: [{ type: 'text', text: 'cell' }], revision: { insertion: { id: '4', author: 'Ada' } } };
+    const table: Block = { id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'k', content: [{ type: 'text', text: 'cell' }], blocks: [cellParagraph] }] }] } as never;
+    const saved = viaPm([table])[0] as Extract<Block, { type: 'table' }>;
+    expect(saved.rows[0].cells[0].blocks).toMatchObject([{ type: 'paragraph', revision: { insertion: { id: '4', author: 'Ada' } } }]);
+    // Without a change the cell stays the plain one it was.
+    const plainParagraph: ParagraphBlock = { id: 'c', type: 'paragraph', content: [{ type: 'text', text: 'cell' }] };
+    const plainTable: Block = { id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'k', content: [{ type: 'text', text: 'cell' }], blocks: [plainParagraph] }] }] } as never;
+    const plain = viaPm([plainTable])[0] as Extract<Block, { type: 'table' }>;
+    expect(plain.rows[0].cells[0].blocks).toBeUndefined();
+  });
+
+  it('keep every field of a run format through copy and paste (HTML)', () => {
+    // Typed as a record of every field, so a field added to the run format has to be added here (and to the sanitiser).
+    const everything: Required<RunFormat> = {
+      bold: true, italic: true, underline: true, strikethrough: true, superscript: true, subscript: true, smallCaps: true, allCaps: true, hidden: true,
+      fontFamily: 'Arial', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Tahoma', fontSize: 13, color: '#112233', backgroundColor: '#445566', namedStyleId: 'Strong',
+    };
+    const { formatChange } = docsSchema.marks;
+    const mark = formatChange.create({ revisionId: '1', author: 'A', previous: everything });
+    const dom = formatChange.spec.toDOM!(mark, true) as unknown as [string, Record<string, string>];
+    const read = (formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => { previous: unknown })({ getAttribute: (n: string) => dom[1][n] ?? null });
+    expect(read.previous).toEqual(everything);
+  });
+});
+
+describe('the collaboration schema version', () => {
+  it('is 7: the formatChange mark and the revision attributes need a client that knows them', () => {
+    // 6 added the insertion and deletion marks; a client at 6 drops formatChange marks and the new attributes.
+    expect(COLLAB_SCHEMA_VERSION).toBe(7);
+  });
+
+  it('is what a room is written with, and a client that supports less refuses it', () => {
+    const ydoc = new Y.Doc();
+    hydrateYDocFromData(ydoc, dataWith([PARAGRAPH]));
+    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(7);
+    expect(() => assertSchemaVersion(ydoc)).not.toThrow();
+    // A build from before the formatChange mark (supporting 6) refuses the room.
+    let refused: unknown;
+    try {
+      assertSchemaVersion(ydoc, 6);
+    } catch (e) {
+      refused = e;
+    }
+    expect(refused).toBeInstanceOf(CollabSchemaVersionError);
+    expect(refused).toMatchObject({ roomVersion: 7, supportedVersion: 6 });
+  });
+});
+
+describe('change records that come from another client are not trusted', () => {
+  it('keeps known fields of the right type in the formatting before a change, for a paragraph and for text', () => {
+    const para = docsSchema.nodes.paragraph.create({
+      revisionFormat: {
+        id: '1',
+        author: 'Bo',
+        previous: { alignment: 'diagonal', leftIndent: 'wide', rightIndent: Infinity, spaceBefore: 12, keepTogether: 'yes', lineSpacing: { type: 'exactly', value: 'x' }, headingLevel: 9, namedStyleId: 'Callout', evil: 1 },
+      },
+    }, [docsSchema.text('x')]);
+    expect(readBlockRevision(para.attrs)!.formatChange!.previous).toEqual({ spaceBefore: 12, lineSpacing: { type: 'exactly' }, namedStyleId: 'Callout' });
+    // Not an object at all.
+    expect(readBlockRevision({ revisionFormat: { id: '1', author: 'Bo', previous: 'x' } })!.formatChange!.previous).toEqual({});
+    const mark = docsSchema.marks.formatChange.create({ revisionId: '2', author: 'Bo', previous: { bold: true, fontSize: 'big', color: 'url(x)', extra: true } });
+    const back = revisionOf([mark])!;
+    expect(back.formatChange!.previous).toEqual({ bold: true });
+  });
+
 });

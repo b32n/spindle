@@ -51,15 +51,6 @@
     },
     {
       "count": 1,
-      "effect": "the change history is dropped; the current formatting is imported",
-      "id": "docx.formattingRevisions",
-      "label": "tracked formatting change(s)",
-      "where": [
-        "rPrChange ×1"
-      ]
-    },
-    {
-      "count": 1,
       "effect": "not applied (lines are broken without hyphenation)",
       "id": "docx.hyphenation",
       "label": "automatic hyphenation setting"
@@ -121,18 +112,6 @@
         "field ×1",
         "note reference ×1"
       ]
-    },
-    {
-      "count": 1,
-      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
-      "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s) of a paragraph mark or table row"
-    },
-    {
-      "count": 2,
-      "effect": "their text is not imported",
-      "id": "docx.trackedMoves",
-      "label": "tracked move(s)"
     }
   ]
 }

@@ -32,7 +32,7 @@ describe('pasting tracked HTML', () => {
   const rulesOf = (name: string) => docsSchema.marks[name].spec.parseDOM ?? [];
   const textStyleRule = rulesOf('textStyle').find((rule) => rule.tag === 'span')!;
 
-  it.each(['insertion', 'deletion'])('parses a %s span before the plain span rule of the text style', (name) => {
+  it.each(['insertion', 'deletion', 'formatChange'])('parses a %s span before the plain span rule of the text style', (name) => {
     expect(textStyleRule).toBeDefined();
     const [rule] = rulesOf(name);
     expect(rule.priority ?? 50).toBeGreaterThan(textStyleRule.priority ?? 50);
@@ -73,6 +73,64 @@ describe('freshRevisionIds', () => {
     const list = docsSchema.nodes.bullet_list.create(null, li);
     const out = freshRevisionIds(new Slice(Fragment.from(list), 0, 0), () => 'fresh');
     expect(markIds(docsSchema.node('doc', null, [out.content.firstChild!]) as never, 'insertion')).toEqual(['fresh']);
+  });
+
+  it('gives a pasted move one new name for both ends, and a pasted formatting change an id of its own', () => {
+    const sliceMove = sliceOf(
+      text('x', deletion.create({ ...BO, moveId: 'mv' })),
+      text('y', insertion.create({ ...ADA, revisionId: '7', moveId: 'mv' })),
+      text('z', insertion.create({ ...ADA, revisionId: '8', moveId: 'other' })),
+      text('w', docsSchema.marks.formatChange.create({ revisionId: '4', author: 'Di', previous: { bold: true } }))
+    );
+    let n = 0;
+    const out = freshRevisionIds(sliceMove, () => `f${++n}`);
+    const kids: ReturnType<typeof text>[] = [];
+    out.content.firstChild!.forEach((c) => kids.push(c as never));
+    const attrs = kids.map((c) => c.marks[0].attrs);
+    expect(attrs[0].moveId).toBe(attrs[1].moveId);
+    expect(attrs[0].moveId).not.toBe('mv');
+    expect(attrs[2].moveId).not.toBe(attrs[0].moveId);
+    expect(attrs.slice(0, 3).map((a) => a.revisionId)).toHaveLength(3);
+    expect(new Set(attrs.map((a) => a.revisionId)).size).toBe(4);
+    expect(attrs[3]).toMatchObject({ author: 'Di', previous: { bold: true } });
+    expect(attrs[3].revisionId).not.toBe('4');
+    // No move name on a change that had none.
+    expect(freshRevisionIds(sliceOf(text('p', insertion.create(ADA)))).content.firstChild!.firstChild!.marks[0].attrs.moveId).toBeNull();
+  });
+
+  it('renews the change records of paragraphs and table rows, sharing the new id with text of the same change and kind', () => {
+    const rec = (id: string) => ({ id, author: 'Ada' });
+    const marked = docsSchema.nodes.paragraph.create(
+      { revisionInsertion: rec('7'), revisionDeletion: rec('8'), revisionFormat: rec('9') },
+      [text('x', insertion.create({ ...ADA, revisionId: '7' }))]
+    );
+    const plain = docsSchema.nodes.paragraph.create(null, [text('y')]);
+    const row = docsSchema.nodes.table_row.create({ revisionDeletion: rec('8') }, [docsSchema.nodes.table_cell.create(null, [plain])]);
+    let n = 0;
+    const out = freshRevisionIds(new Slice(Fragment.from([marked, plain, docsSchema.nodes.table.create(null, row)]), 0, 0), () => `f${++n}`);
+    const [m, pl, tbl] = [out.content.child(0), out.content.child(1), out.content.child(2)];
+    expect(m.attrs.revisionInsertion).toEqual({ id: 'f1', author: 'Ada' });
+    expect(m.firstChild!.marks[0].attrs.revisionId).toBe('f1');
+    expect(m.attrs.revisionDeletion.id).not.toBe('8');
+    expect(m.attrs.revisionFormat.id).not.toBe('9');
+    expect(pl.attrs.revisionInsertion).toBeNull();
+    // The same source deletion on the paragraph and on the row is one change: one new id.
+    expect(tbl.firstChild!.attrs.revisionDeletion.id).toBe(m.attrs.revisionDeletion.id);
+    expect(marked.attrs.revisionInsertion.id).toBe('7');
+  });
+
+  it('renews a move name when only one end of the move is in the slice', () => {
+    const out = freshRevisionIds(sliceOf(text('x', deletion.create({ ...BO, moveId: 'mv' }))), () => 'f1');
+    const attrs = out.content.firstChild!.firstChild!.marks[0].attrs;
+    expect(attrs.moveId).toBe('f1');
+    expect(attrs.revisionId).toBe('f1');
+  });
+
+  it('renews a record on a paragraph whose id is a number (as another client can write it)', () => {
+    const para = docsSchema.nodes.paragraph.create({ revisionInsertion: { id: 7, author: 'Ada' } }, [text('x')]);
+    const out = freshRevisionIds(new Slice(Fragment.from(para), 0, 0), () => 'f1');
+    expect(out.content.firstChild!.attrs.revisionInsertion).toEqual({ id: 'f1', author: 'Ada' });
+    expect(para.attrs.revisionInsertion.id).toBe(7);
   });
 
   it('makes ids that differ from call to call', () => {
@@ -215,6 +273,16 @@ describe('a line break typed inside tracked text', () => {
     });
     expect(hardBreaks).toBe(0);
     expect(markIds(next.doc as never, 'insertion')).toEqual(['1']); // one text node: the break is inside the run
+  });
+
+  it('is also a newline in text that only has a formatting change (marks sync on text only)', () => {
+    const change = docsSchema.marks.formatChange.create({ revisionId: '3', author: 'Cy', previous: { bold: true } });
+    const state = at(stateOf(docOf(docsSchema.text('ab', [change]))), 2);
+    let tr;
+    expect(insertTrackedLineBreak(state, (t) => (tr = t))).toBe(true);
+    const next = state.apply(tr!);
+    expect(next.doc.textContent).toBe('a\nb');
+    expect(next.doc.firstChild!.childCount).toBe(1);
   });
 
   it('inside a deletion the break is live; elsewhere the command passes', () => {
