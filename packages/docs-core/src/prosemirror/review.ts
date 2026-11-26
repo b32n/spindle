@@ -149,7 +149,7 @@ export function listChanges(doc: PmNode): ReviewChange[] {
       continue;
     }
     const joined = open.get(unit.key);
-    if (joined && joined.to === unit.from) {
+    if (joined && joined.kind !== 'move' && joined.to === unit.from) {
       joined.to = unit.to;
       joined.text += unit.text;
       joined.units.push(unit);

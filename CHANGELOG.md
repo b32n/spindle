@@ -359,7 +359,7 @@ lockstep.
   paragraphs (a paragraph mark that goes) keeps the first one's formatting and the second one's mark with its changes (a deletion of somebody else on the first mark moves to the joined mark, so rejecting a concurrent split keeps the other person's suggestion; the same happens when somebody deletes a mark that somebody else inserted earlier and the insertion is rejected: the deletion stays on the joined mark). A move
   is settled whole, also for one author (it belongs to the author of the end it went to). Everything one action does is one
   transaction, so one undo takes it back. Known limits: the Original view restores character formatting only (not links or the
-  character style from before a change); deleting text with a comment on it removes the comment's anchor and leaves the thread
+  character style from before a change); a change mark on an inline object (an image, a field, a note reference) is still drawn in the Final and Original views, while the placeholder of a hidden link is plain text; rejecting all with an inserted paragraph mark before a table whose only row is also rejected joins the paragraph with the one after the table, while rejecting that mark alone leaves them apart; deleting text with a comment on it removes the comment's anchor and leaves the thread
   in the document; the legend counts changes the way the panel lists them (a move once, the runs of one change as one), not runs.
   The list of changes is kept only while the panel is open. Switching between editable and read-only (these views, a host's `readOnly`) no longer rebuilds the editor from the document it was mounted with: the editor reads `editable` live, so edits and accepted or rejected changes made before the switch stay.
 

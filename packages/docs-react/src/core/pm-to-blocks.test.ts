@@ -592,6 +592,9 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(runs.every((r) => r.revision === undefined)).toBe(true);
     expect(runs[3].bold).toBe(true);
     expect(runs[3].italic).toBeUndefined();
+    // The placeholder of a deleted link is no link (nothing to click), and the link is back in the original view.
+    expect(runs[4]).toEqual({ kind: 'text', text: '\u200B\u200B' });
+    expect(runsOf('original')[4]).toMatchObject({ kind: 'link', href: 'https://example.com/' });
     const blocks = proseMirrorToFlowBlocks(doc(), { revisionView: 'final' });
     expect((blocks[0] as ParagraphBlock).attrs?.changeBar).toBeUndefined();
     expect((blocks[1] as import('./flow-blocks').TableBlock).rows[0].revision).toBeUndefined();

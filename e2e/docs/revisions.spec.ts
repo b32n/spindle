@@ -314,10 +314,21 @@ test.describe('docs: tracked changes in a .docx', () => {
     const view = panel(page).getByRole('group', { name: 'Show changes as' });
     const banner = page.getByTestId('revision-view-banner');
     // A read-only editor takes no focus (so `clickText` cannot be used): click the text and send the keys anyway.
+    // Typing, deleting, cutting, pasting and undoing all go to the same locked editor.
     const tryTyping = async () => {
+      const before = await doc.pages.first().innerText();
       await doc.pages.getByText('Total tonnage handled in').first().click();
       await page.keyboard.press('Home');
       await page.keyboard.type('ZZ');
+      await page.keyboard.press('Delete');
+      await page.keyboard.press('End');
+      await page.keyboard.press('Backspace');
+      await page.keyboard.press('Shift+Home');
+      await page.keyboard.press('Control+x');
+      await page.keyboard.press('Control+v');
+      await page.keyboard.press('Control+z');
+      await expect(doc.pages.first()).not.toContainText('ZZ');
+      expect(await doc.pages.first().innerText()).toBe(before);
     };
     await expect(banner).toHaveCount(0);
 

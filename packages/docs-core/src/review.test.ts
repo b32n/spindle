@@ -517,3 +517,20 @@ describe('author colours of the list of changes', () => {
     expect(revisionAuthors(changes).find((a) => a.name === 'Di')!.color).not.toBe(page.get('Di'));
   });
 });
+
+describe('the list of changes with a move that has a second deleted run', () => {
+  it('does not add a deletion that starts where the moved-in text ends to the text of the move', () => {
+    const blocks = [
+      para([
+        run('old', { deletion: { id: '1', author: 'Bo', moveId: 'm' } }),
+        run('new', { insertion: { id: '2', author: 'Ada', moveId: 'm' } }),
+        run('more', { deletion: { id: '1', author: 'Bo', moveId: 'm' } }),
+      ]),
+    ];
+    const [change, ...rest] = listChanges(stateOf(blocks).doc);
+    expect(rest).toEqual([]);
+    expect(change).toMatchObject({ kind: 'move', text: 'new', author: 'Ada' });
+    expect(change.to - change.from).toBe('new'.length);
+    expect(change.units).toHaveLength(3);
+  });
+});

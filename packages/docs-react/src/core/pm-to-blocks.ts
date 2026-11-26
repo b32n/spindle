@@ -655,7 +655,12 @@ function inRevisionView<T extends TextRun | LinkRun>(run: T): T {
   if (convertedView === 'markup' || !run.revision) return run;
   const { revision, ...plain } = run;
   const gone = convertedView === 'final' ? revision.deletion : revision.insertion;
-  if (gone) return { ...plain, text: '\u200B'.repeat(run.text.length) } as T;
+  if (gone) {
+    const hidden = '\u200B'.repeat(run.text.length);
+    // A link that is gone stays no link: its placeholder must not be clickable.
+    if (plain.kind === 'link') return { kind: 'text', text: hidden, ...(plain.control && { control: plain.control }) } as unknown as T;
+    return { ...plain, text: hidden } as T;
+  }
   if (convertedView === 'original' && revision.formatChange && plain.kind === 'text') {
     const text = plain as TextRun;
     for (const key of FORMAT_KEYS) delete (text as unknown as Record<string, unknown>)[key];

@@ -476,7 +476,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 409
-- fixme + bug: 8
+- covered: 411
+- fixme + bug: 7
 - not covered: 8
 - n/a: 6

@@ -323,9 +323,10 @@ export const DocumentEditor = memo(function DocumentEditor({
     // The walk over the whole document waits until typing pauses, so a long document is not scanned on every key.
     clearTimeout(authorsTimer.current);
     authorsTimer.current = setTimeout(() => {
-      const nextChanges = listChanges(state.doc);
       // The colours are shared out among every author of the document (a move's other end can have another author than the change lists).
       const everyone = documentRevisionAuthors(state.doc);
+      // A document without a tracked change has no list to build (the common case).
+      const nextChanges = everyone.length === 0 ? [] : listChanges(state.doc);
       const next = revisionAuthors(nextChanges, everyone);
       setPalette((prev) => (prev.length === everyone.length && prev.every((name, i) => name === everyone[i]) ? prev : everyone));
       // Keep the old list (and skip a render) when nothing in it changed.
