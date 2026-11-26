@@ -162,6 +162,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   const showNotice = useCallback((text: string | null) => setNoticeState((prev) => (text === null ? null : { text, n: (prev?.n ?? 0) + 1 })), []);
   const directNoticeShown = useRef(false);
   // In a shared document the author of a suggestion is the name the user joined under, and people who are in the room are drawn in the colour of their cursor.
+  // (Attaching collaboration emits a documentChange, which re-renders the editor through the document context, so the handle is read again.)
   const collabHandle = docModel.getCollabHandle();
   const [presence, setPresence] = useState<ReadonlyMap<string, string>>(NO_COLORS);
   useEffect(() => {

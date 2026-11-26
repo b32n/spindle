@@ -343,6 +343,14 @@ describe('the room’s version and people’s colours', () => {
     expect(collabAuthorColors(room('#112233', 'blue')).get('Ann')).toBe('#112233');
   });
 
+  it('keys the cursor colour by the trimmed name a suggestion is written under, and ignores a blank name', () => {
+    const room = (...users: Array<{ name: string; color: string }>) => ({ awareness: { getStates: () => new Map(users.map((user, i) => [i, { user }])) } }) as never;
+    const colors = collabAuthorColors(room({ name: ' Ada ', color: '#00aa00' }, { name: '   ', color: '#112233' }));
+    expect(colors.get('Ada')).toBe('#00aa00');
+    expect(colors.size).toBe(1);
+    expect(assignAuthorColors(['Ada'], colors).get('Ada')).toBe('#00aa00');
+  });
+
   it('people in the room are drawn in the colour of their cursor, and nobody else takes that colour', () => {
     const awareness = new Awareness(new Y.Doc());
     awareness.setLocalStateField('user', { userId: 'u1', name: 'Ada', color: '#00AA00' });
