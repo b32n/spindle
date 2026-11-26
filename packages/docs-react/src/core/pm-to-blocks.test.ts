@@ -641,6 +641,19 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(run.revision?.insertion?.color).not.toBe('#112233');
   });
 
+  it('lets go of the colours of a sectioned conversion that threw as well', () => {
+    const doc = () => j([{ type: 'paragraph', content: [text('a', [insertion])] }]);
+    class Throwing extends Map<string, string> {
+      get(): string | undefined {
+        throw new Error('colour lookup failed');
+      }
+    }
+    expect(() => proseMirrorToSectionedFlowBlocks(doc(), { authorColors: new Throwing([['Ada', '#112233']]) })).toThrow('colour lookup failed');
+    const run = (proseMirrorToSectionedFlowBlocks(doc()).blocks[0] as ParagraphBlock).runs[0] as TextRun;
+    expect(run.revision?.insertion?.color).toBe(assignAuthorColors(['Ada']).get('Ada'));
+    expect(run.revision?.insertion?.color).not.toBe('#112233');
+  });
+
   it('breaks lines at the line break of tracked text that a view shows, and nowhere in text a view leaves out', () => {
     const breaks = () => j([{ type: 'paragraph', content: [text('a\nb', [deletion]), text('c\nd', [insertion])] }]);
     const kinds = (view: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(breaks(), { revisionView: view })[0] as ParagraphBlock).runs.map((r) => (r.kind === 'text' ? r.text : r.kind));

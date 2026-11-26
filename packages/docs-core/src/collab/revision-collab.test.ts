@@ -418,6 +418,10 @@ describe('the room’s version and people’s colours', () => {
     const states = (...all: Awareness[]) => ({ awareness: { getStates: () => new Map(all.map((aw, i) => [i, aw.getLocalState() as unknown]))} as unknown as Awareness });
     expect(collabAuthorColors(states(twins, other)).get('Ann')).toBe('#aa0000');
     expect(collabAuthorColors(states(other, twins)).get('Ann')).toBe('#aa0000');
+    // Two spellings of one colour: the same one wins whatever the order.
+    other.setLocalStateField('user', { name: 'Ann', color: '#bb0000' });
+    expect(collabAuthorColors(states(twins, other)).get('Ann')).toBe('#BB0000');
+    expect(collabAuthorColors(states(other, twins)).get('Ann')).toBe('#BB0000');
     // A colour that is not a hex colour never beats one that is.
     other.setLocalStateField('user', { name: 'Ann', color: '!!' });
     expect(collabAuthorColors(states(other, twins)).get('Ann')).toBe('#BB0000');
