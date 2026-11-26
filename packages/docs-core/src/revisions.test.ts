@@ -479,3 +479,22 @@ describe('the collaboration schema version', () => {
     expect(refused).toMatchObject({ roomVersion: 7, supportedVersion: 6 });
   });
 });
+
+describe('change records that come from another client are not trusted', () => {
+  it('keeps known fields of the right type in the formatting before a change, for a paragraph and for text', () => {
+    const para = docsSchema.nodes.paragraph.create({
+      revisionFormat: {
+        id: '1',
+        author: 'Bo',
+        previous: { alignment: 'diagonal', leftIndent: 'wide', rightIndent: Infinity, spaceBefore: 12, keepTogether: 'yes', lineSpacing: { type: 'exactly', value: 'x' }, headingLevel: 9, namedStyleId: 'Callout', evil: 1 },
+      },
+    }, [docsSchema.text('x')]);
+    expect(readBlockRevision(para.attrs)!.formatChange!.previous).toEqual({ spaceBefore: 12, lineSpacing: { type: 'exactly' }, namedStyleId: 'Callout' });
+    // Not an object at all.
+    expect(readBlockRevision({ revisionFormat: { id: '1', author: 'Bo', previous: 'x' } })!.formatChange!.previous).toEqual({});
+    const mark = docsSchema.marks.formatChange.create({ revisionId: '2', author: 'Bo', previous: { bold: true, fontSize: 'big', color: 'url(x)', extra: true } });
+    const back = revisionOf([mark])!;
+    expect(back.formatChange!.previous).toEqual({ bold: true });
+  });
+
+});

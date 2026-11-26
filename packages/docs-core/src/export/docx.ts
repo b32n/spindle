@@ -313,7 +313,8 @@ function resolveParagraphStyle(block: ParagraphLikeBlock, pool: Record<string, P
 
 /** A paragraph's tracked changes for the interchange format: what the formatting was before is in points. */
 function toDocBlockRevision(revision: BlockRevision): DocBlockRevision {
-  const { formatChange, ...marks } = revision;
+  const { formatChange, ...rest } = revision;
+  const marks = cloneJson(rest);
   if (!formatChange) return marks;
   const { headingLevel, ...previous } = formatChange.previous;
   const { revision: _nested, ...format } = resolveParagraphStyle(previous, {});
@@ -322,7 +323,8 @@ function toDocBlockRevision(revision: BlockRevision): DocBlockRevision {
 
 /** A paragraph's tracked changes from the interchange format: what the formatting was before is in pixels. */
 function fromDocBlockRevision(revision: DocBlockRevision): BlockRevision {
-  const { formatChange, ...marks } = revision;
+  const { formatChange, ...rest } = revision;
+  const marks = cloneJson(rest);
   if (!formatChange) return marks;
   const { headingLevel, ...previous } = formatChange.previous;
   return { ...marks, formatChange: { ...formatChange, previous: { ...toParagraphFormat(previous), ...(headingLevel && { headingLevel }) } } };

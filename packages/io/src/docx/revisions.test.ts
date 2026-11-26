@@ -198,6 +198,25 @@ describe('tracked changes the importer does not keep as changes', () => {
   });
 });
 
+describe('a formatting change in a footer', () => {
+  it('is not kept, with a warning that names a formatting change, and is counted in the loss report', async () => {
+    const exported = await exportDocx({
+      title: 'T',
+      sections: [{ ...BASE, blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }], footer: { paragraphs: [{ content: [{ type: 'text', text: 'F' }] }] } }],
+    });
+    const zip = await JSZip.loadAsync(exported.bytes);
+    const name = Object.keys(zip.files).find((n) => /^word\/footer\d*\.xml$/.test(n))!;
+    const xml = await zip.file(name)!.async('string');
+    zip.file(name, xml.replace(/<w:p>[\s\S]*?<\/w:p>|<w:p [^>]*>[\s\S]*?<\/w:p>/, `<w:p>${r(t('bold now'), '<w:b/><w:rPrChange w:id="1" w:author="Ada"><w:rPr/></w:rPrChange>')}</w:p>`));
+    const bytes = await zip.generateAsync({ type: 'uint8array' });
+    const result = await importDocx(bytes);
+    expect(JSON.stringify(result.sections[0].footer!.paragraphs[0].content)).not.toContain('revision');
+    expect(result.warnings).toEqual(expect.arrayContaining([expect.stringMatching(/formatting change in a header or footer/)]));
+    expect(result.warnings.some((w) => /tracked insertion in a header/.test(w))).toBe(false);
+    expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedHeaderFooterChanges')).toMatchObject({ count: 1 });
+  });
+});
+
 describe('writing tracked changes', () => {
   const content: DocInline[] = [
     { type: 'text', text: 'keep ' },

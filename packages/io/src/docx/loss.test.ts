@@ -302,6 +302,13 @@ describe('detectDocxLoss: long-tail detectors', () => {
     });
   });
 
+  it('docx.formattingRevisions names the change of a table row and of a table cell, which are not read', async () => {
+    const bytes = await docx(
+      '<w:tbl><w:tr><w:trPr><w:trPrChange w:id="1"><w:trPr/></w:trPrChange></w:trPr><w:tc><w:tcPr><w:tcPrChange w:id="2"><w:tcPr/></w:tcPrChange></w:tcPr><w:p/></w:tc></w:tr></w:tbl>'
+    );
+    expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({ count: 2, where: ['tcPrChange ×1', 'trPrChange ×1'] });
+  });
+
   it('reports no paragraph-mark change as lost, in the body, in a table cell of one paragraph or of several, or on a row', async () => {
     const mark = (tag: string) => `<w:p><w:pPr><w:rPr><${tag} w:id="1" w:author="A"/></w:rPr></w:pPr></w:p>`;
     const bytes = await docx(

@@ -610,8 +610,8 @@ export const REVISION_PARSE_PRIORITY = 60;
 
 const RUN_FORMAT_FLAGS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden'] as const;
 
-/** The run formatting read back from a `data-format-previous` attribute (pasted HTML is untrusted): known fields of the right type only. */
-function sanitizeRunFormat(raw: unknown): Record<string, unknown> {
+/** The run formatting read back from a `data-format-previous` attribute or from a collaborator's change record (untrusted): known fields of the right type only. */
+export function sanitizeRunFormat(raw: unknown): Record<string, unknown> {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
   const r = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
@@ -880,7 +880,7 @@ const marks: Record<string, MarkSpec> = {
   // A change of the formatting of the text (a Word `w:rPrChange`): `previous` holds the formatting the text had before
   // (the same fields as a run: bold, italic, fontSize, color, ..., namedStyleId); the marks on the text are the formatting now.
   formatChange: {
-    attrs: { revisionId: {}, author: {}, date: { default: null }, previous: { default: {} } },
+    attrs: { revisionId: {}, author: {}, date: { default: null }, previous: { default: null } },
     inclusive: false,
     parseDOM: [
       {

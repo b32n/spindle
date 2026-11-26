@@ -1,5 +1,5 @@
 import { Node as PmNode, type Mark } from 'prosemirror-model';
-import { docsSchema } from './schema';
+import { docsSchema, sanitizeRunFormat } from './schema';
 import { blockRevisionAttrs, cloneJson, readBlockRevision } from './block-revision';
 import type {
   Document,
@@ -682,13 +682,14 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
             ...(cellNode.attrs.textDirection ? { textDirection: cellNode.attrs.textDirection as CellTextDirection } : {}),
           });
         });
+        const rowRevision = readBlockRevision(rowNode.attrs);
         rows.push({
           id: `row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           cells,
           ...(rowNode.attrs.height != null ? { height: rowNode.attrs.height as number } : {}),
           ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
           ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
-          ...(readBlockRevision(rowNode.attrs) ? { revision: readBlockRevision(rowNode.attrs) as TableRow['revision'] } : {}),
+          ...(rowRevision ? { revision: rowRevision } : {}),
         });
       });
 
@@ -967,7 +968,7 @@ export function revisionOf(marks: readonly { type: { name: string }; attrs: Reco
       id: String(change.attrs.revisionId),
       author: String(change.attrs.author),
       ...(typeof date === 'string' && date && { date }),
-      previous: previous && typeof previous === 'object' ? cloneJson(previous as RunFormat) : {},
+      previous: sanitizeRunFormat(previous) as RunFormat,
     };
   }
   return revision.insertion || revision.deletion || revision.formatChange ? revision : undefined;

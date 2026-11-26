@@ -1262,6 +1262,7 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
       // on most of them: only the page-number fields are kept there.
       let dropped = 0;
       let flattened = 0;
+      let formatOnly = 0;
       const content = paragraphInlineContent(p, ctx, warnings)
         .filter((item) => {
           if (item.type === 'bookmark') return false; // headers and footers keep no bookmarks
@@ -1276,12 +1277,14 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
             dropped++;
             return [];
           }
-          flattened++;
+          if (item.revision.insertion) flattened++;
+          else formatOnly++;
           const { revision: _revision, ...plain } = item;
           return [plain];
         });
       if (dropped > 0) warnings.push('Tracked deleted text in a header or footer was not kept; it was dropped.');
       if (flattened > 0) warnings.push('A tracked insertion in a header or footer was not kept as a change.');
+      if (formatOnly > 0) warnings.push('A tracked formatting change in a header or footer was not kept as a change.');
       paragraphs.push({ content, ...(alignment && alignment !== 'justify' ? { alignment } : {}) });
     }
   }

@@ -309,7 +309,7 @@ const NODE_SAMPLES: Record<string, Json[]> = {
     {
       type: 'table',
       content: [
-        { type: 'table_row', attrs: { revision: { insertion: { id: '8', author: 'Ada' }, deletion: { id: '9', author: 'Bo', date: '2024-01-01T00:00:00Z' } } }, content: [{ type: 'table_cell', content: [p([t('r')])] }] },
+        { type: 'table_row', attrs: { revisionInsertion: { id: '8', author: 'Ada' }, revisionDeletion: { id: '9', author: 'Bo', date: '2024-01-01T00:00:00Z' }, revisionFormat: { id: '10', author: 'Cy', previous: { namedStyleId: 'Old' } } }, content: [{ type: 'table_cell', content: [p([t('r')])] }] },
       ],
     },
     {
@@ -453,6 +453,27 @@ const MARK_SAMPLES: Record<string, Json> = {
 
 const nodeNames = Object.keys(docsSchema.nodes);
 const markNames = Object.keys(docsSchema.marks);
+
+describe('the revision attributes of the samples are real attributes', () => {
+  // A sample that names an attribute the schema does not have is silently dropped by Node.fromJSON, which would make the
+  // schema-wide checks pass without ever exercising it.
+  it.each(['paragraph', 'table_row'] as const)('a %s sample with all three kinds keeps them through the model and the Y document', (name) => {
+    const original = docOf(NODE_SAMPLES[name]);
+    const kept: Record<string, unknown>[] = [];
+    original.descendants((n) => {
+      if (n.type.name === name && n.attrs.revisionInsertion && n.attrs.revisionDeletion !== undefined) kept.push(n.attrs);
+    });
+    const full = kept.filter((a) => a.revisionInsertion && a.revisionFormat);
+    expect(full.length).toBeGreaterThan(0);
+    const [a] = pair([]);
+    a.edit((tr) => tr.replaceWith(0, tr.doc.content.size, original.content));
+    const back: Record<string, unknown>[] = [];
+    sectionsToPmDoc(a.data().sections).descendants((n) => {
+      if (n.type.name === name && n.attrs.revisionInsertion && n.attrs.revisionFormat) back.push(n.attrs);
+    });
+    expect(back).toEqual(full);
+  });
+});
 
 describe('schema coverage', () => {
   it('has a sample for every node and mark type', () => {

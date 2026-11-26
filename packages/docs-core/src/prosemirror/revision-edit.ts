@@ -12,11 +12,17 @@ export function newRevisionId(): string {
 }
 
 const TRACKED = ['insertion', 'deletion', 'formatChange'] as const;
+/** The change kind of each paragraph and row attribute (ids are shared with the text marks of the same kind). */
+const BLOCK_KINDS: ReadonlyArray<[string, string]> = [
+  ['insertion', 'revisionInsertion'],
+  ['deletion', 'revisionDeletion'],
+  ['formatChange', 'revisionFormat'],
+];
 
 /**
  * The slice with a fresh change id for every distinct change in it (per kind), so pasting a copy of tracked text makes a
  * change of its own: accepting or rejecting one place never touches the other. Author and date stay as in the source.
- * The runs of one change inside the slice still share one id, and so do the two ends of a move that are both in it
+ * Records on paragraphs and table rows get the same treatment, and share the new id of text marks of the same change and kind. The runs of one change inside the slice still share one id, and so do the two ends of a move that are both in it
  * (they get one new move name).
  */
 export function freshRevisionIds(slice: Slice, makeId: () => string = newRevisionId): Slice {
@@ -53,7 +59,20 @@ export function freshRevisionIds(slice: Slice, makeId: () => string = newRevisio
         )
       );
     }
-    return node.content.size ? node.copy(mapFragment(node.content)) : node;
+    const content = node.content.size ? mapFragment(node.content) : node.content;
+    const attrs = freshBlockAttrs(node);
+    return attrs ? node.type.create(attrs, content, node.marks) : node.copy(content);
+  };
+  /** The attributes of a paragraph or row with the ids of its change records renewed, or null when it has none. */
+  const freshBlockAttrs = (node: PmNode): Record<string, unknown> | null => {
+    let out: Record<string, unknown> | null = null;
+    for (const [kind, attr] of BLOCK_KINDS) {
+      const record = node.attrs[attr];
+      if (!record || typeof record !== 'object' || typeof (record as { id?: unknown }).id !== 'string') continue;
+      out ??= { ...node.attrs };
+      out[attr] = { ...(record as object), id: freshId(kind, (record as { id: string }).id) };
+    }
+    return out;
   };
   const mapFragment = (fragment: Fragment): Fragment => {
     const out: PmNode[] = [];

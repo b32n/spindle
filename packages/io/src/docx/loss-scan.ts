@@ -238,14 +238,14 @@ interface RevisionLosses {
 /**
  * The tracked changes that are lost. Insertions, deletions and moves around runs, on paragraph marks (also of a table
  * cell's only paragraph) and on table rows, and formatting changes of runs and paragraphs are kept. What is left:
- * formatting changes of a paragraph mark's own formatting, and changes of tables and sections.
+ * formatting changes of a paragraph mark's own formatting, and changes of tables, table rows and cells, and sections.
  * Text boxes are reported as such and not counted here.
  */
 function revisionLosses(root: XmlNode[]): RevisionLosses {
   const out: RevisionLosses = { formatting: new Map() };
   walk(root, (_node, tag, path) => {
     if (path.includes('w:txbxContent')) return;
-    if (tag === 'w:tblPrChange' || tag === 'w:sectPrChange') {
+    if (tag === 'w:tblPrChange' || tag === 'w:sectPrChange' || tag === 'w:trPrChange' || tag === 'w:tcPrChange') {
       bump(out.formatting, tag.slice(2));
       return;
     }
@@ -307,7 +307,7 @@ function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item
   let headers = 0;
   for (const xml of headerFooters) {
     walk(parseXml(xml), (_n, tag, path) => {
-      if ((tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo') && !inRevisionProps(path)) headers++;
+      if ((tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo' || tag === 'w:rPrChange') && !inRevisionProps(path)) headers++;
     });
   }
   return [

@@ -111,6 +111,9 @@ test.describe('docs: tracked changes in a .docx', () => {
       expect(xml, element).toContain(element);
     }
     expect(xml).toMatch(/<w:moveFromRangeStart [^>]*w:name="move-1"/);
+    // The records carry their author and date, and the formatting before the change.
+    expect(xml).toMatch(/<w:rPrChange [^>]*w:author="[^"]+"[^>]*w:date="[^"]+"/);
+    expect(xml).toMatch(/<w:pPrChange [^>]*w:author="[^"]+"/);
   });
 
   test('D-REV-08 typing in the middle of a deleted run is live text, not more deleted text', async ({

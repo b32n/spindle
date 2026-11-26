@@ -98,6 +98,27 @@ describe('freshRevisionIds', () => {
     expect(freshRevisionIds(sliceOf(text('p', insertion.create(ADA)))).content.firstChild!.firstChild!.marks[0].attrs.moveId).toBeNull();
   });
 
+  it('renews the change records of paragraphs and table rows, sharing the new id with text of the same change and kind', () => {
+    const rec = (id: string) => ({ id, author: 'Ada' });
+    const marked = docsSchema.nodes.paragraph.create(
+      { revisionInsertion: rec('7'), revisionDeletion: rec('8'), revisionFormat: rec('9') },
+      [text('x', insertion.create({ ...ADA, revisionId: '7' }))]
+    );
+    const plain = docsSchema.nodes.paragraph.create(null, [text('y')]);
+    const row = docsSchema.nodes.table_row.create({ revisionDeletion: rec('8') }, [docsSchema.nodes.table_cell.create(null, [plain])]);
+    let n = 0;
+    const out = freshRevisionIds(new Slice(Fragment.from([marked, plain, docsSchema.nodes.table.create(null, row)]), 0, 0), () => `f${++n}`);
+    const [m, pl, tbl] = [out.content.child(0), out.content.child(1), out.content.child(2)];
+    expect(m.attrs.revisionInsertion).toEqual({ id: 'f1', author: 'Ada' });
+    expect(m.firstChild!.marks[0].attrs.revisionId).toBe('f1');
+    expect(m.attrs.revisionDeletion.id).not.toBe('8');
+    expect(m.attrs.revisionFormat.id).not.toBe('9');
+    expect(pl.attrs.revisionInsertion).toBeNull();
+    // The same source deletion on the paragraph and on the row is one change: one new id.
+    expect(tbl.firstChild!.attrs.revisionDeletion.id).toBe(m.attrs.revisionDeletion.id);
+    expect(marked.attrs.revisionInsertion.id).toBe('7');
+  });
+
   it('makes ids that differ from call to call', () => {
     expect(newRevisionId()).not.toBe(newRevisionId());
   });
