@@ -17,3 +17,6 @@ test-results/
 
 # DOCX fidelity report (written by CI / --report json)
 docx-fidelity-report.json
+
+# Python bytecode from the fixture generators
+__pycache__/

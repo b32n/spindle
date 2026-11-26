@@ -34,6 +34,7 @@
     "dev": "rollup -c -w",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests",
+    "test:fidelity:coverage": "jest -c jest.xlsx-fidelity.config.cjs --coverage",
     "clean": "rm -rf dist tsconfig.tsbuildinfo .rollup.cache"
   },
   "keywords": [
