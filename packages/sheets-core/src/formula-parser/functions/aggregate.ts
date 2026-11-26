@@ -7,6 +7,7 @@ import {
   isErrorValue,
   matchesCriterion,
   strictNumbers,
+  toMatrix,
   toNum,
 } from './helpers';
 import { mean, median, modeOf, percentile, variance } from './stats';
@@ -18,12 +19,16 @@ import { percentileExc, quartileExc, quartileInc } from './stats-ext';
  */
 function extremeIfs(args: unknown[], pick: (a: number, b: number) => number): number {
   if (args.length < 3 || args.length % 2 === 0) throw new Error('#VALUE!');
+  const shape = (v: unknown): string => {
+    const m = toMatrix(v);
+    return `${m.length}x${m.reduce((w, row) => Math.max(w, row.length), 0)}`;
+  };
   const values = flatten([args[0]]);
   const ranges: unknown[][] = [];
   const criteria: unknown[] = [];
   for (let i = 1; i < args.length; i += 2) {
     const range = flatten([args[i]]);
-    if (range.length !== values.length) throw new Error('#VALUE!');
+    if (shape(args[i]) !== shape(args[0])) throw new Error('#VALUE!');
     ranges.push(range);
     criteria.push(args[i + 1]);
   }
@@ -47,8 +52,8 @@ const REFERENCE_FORMS: Array<(nums: number[], all: unknown[]) => number> = [
   (n) => mean(need(n)), // 1 AVERAGE
   (n) => n.length, // 2 COUNT
   (_n, all) => all.filter((v) => v != null && v !== '').length, // 3 COUNTA
-  (n) => (n.length ? Math.max(...n) : 0), // 4 MAX
-  (n) => (n.length ? Math.min(...n) : 0), // 5 MIN
+  (n) => n.reduce((a, b) => (b > a ? b : a), n.length ? n[0] : 0), // 4 MAX
+  (n) => n.reduce((a, b) => (b < a ? b : a), n.length ? n[0] : 0), // 5 MIN
   (n) => (n.length ? n.reduce((a, b) => a * b, 1) : 0), // 6 PRODUCT
   (n) => Math.sqrt(variance(n, true)), // 7 STDEV.S
   (n) => Math.sqrt(variance(n, false)), // 8 STDEV.P
@@ -106,8 +111,12 @@ export const aggregateFunctions: Record<string, EagerFn> = {
     };
     if (fn <= 13) {
       checkArity(args, 3, Infinity);
-      const all = clean(flatten(args.slice(2)));
-      return REFERENCE_FORMS[fn - 1](strictNumbers(all), all);
+      const pooled = flatten(args.slice(2));
+      // COUNT and COUNTA never propagate an error cell: COUNT skips it, COUNTA counts it.
+      const counting = fn === 2 || fn === 3;
+      const all = counting && !ignoreErrors ? pooled : clean(pooled);
+      const numeric = counting ? all.filter((v) => !isErrorValue(v)) : all;
+      return REFERENCE_FORMS[fn - 1](strictNumbers(numeric), all);
     }
     checkArity(args, 4);
     const sorted = strictNumbers(clean(flatten([args[2]]))).sort((a, b) => a - b);

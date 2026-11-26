@@ -51,11 +51,37 @@ describe('MAXIFS / MINIFS', () => {
     expect(call('MAXIFS', withErr, col('x', 'y', 'x'), 'x')).toBe(9);
   });
 
+  it('need ranges of the same shape, not just the same cell count', () => {
+    const grid = [
+      ['x', 'x'],
+      ['x', 'x'],
+    ];
+    expect(err('MAXIFS', col(1, 2, 3, 4), grid, 'x')).toBe('#VALUE!');
+    expect(
+      call(
+        'MAXIFS',
+        grid.map((r) => r.map(() => 5)),
+        grid,
+        'x'
+      )
+    ).toBe(5);
+    expect(err('MAXIFS', [[1, 2, 3, 4]], col('x', 'x', 'x', 'x'), 'x')).toBe('#VALUE!');
+  });
+
   it('need matching sizes and complete (range, criterion) pairs', () => {
     expect(err('MAXIFS', values, col('x', 'y'), 'x')).toBe('#VALUE!');
     expect(err('MAXIFS', values, tags)).toBe('#VALUE!');
     expect(err('MAXIFS', values)).toBe('#VALUE!');
     expect(err('MINIFS', values, tags, 'x', nums)).toBe('#VALUE!');
+  });
+});
+
+describe('large inputs', () => {
+  it('AGGREGATE MAX / MIN do not overflow the stack on a long column', () => {
+    const big = Array.from({ length: 300000 }, (_, i) => [i % 1000]);
+    expect(call('AGGREGATE', 4, 6, big)).toBe(999);
+    expect(call('AGGREGATE', 5, 6, big)).toBe(0);
+    expect(call('AGGREGATE', 5, 6, col(9, 2, 5))).toBe(2);
   });
 });
 
@@ -98,8 +124,11 @@ describe('AGGREGATE', () => {
   it('options 2, 3, 6 and 7 skip errors; 0, 1, 4 and 5 propagate them', () => {
     for (const option of [2, 3, 6, 7]) expect(call('AGGREGATE', 9, option, data)).toBe(31);
     for (const option of [0, 1, 4, 5]) expect(err('AGGREGATE', 9, option, data)).toBe('#DIV/0!');
-    expect(err('AGGREGATE', 2, 0, data)).toBe('#DIV/0!');
-    expect(err('AGGREGATE', 3, 4, data)).toBe('#DIV/0!');
+    // COUNT skips an error cell and COUNTA counts it, whatever the option.
+    for (const option of [0, 1, 4, 5]) {
+      expect(call('AGGREGATE', 2, option, data)).toBe(5);
+      expect(call('AGGREGATE', 3, option, data)).toBe(7);
+    }
     expect(call('AGGREGATE', 9, 4, col(1, 2))).toBe(3);
   });
 

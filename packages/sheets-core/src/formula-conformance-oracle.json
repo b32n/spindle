@@ -2958,6 +2958,22 @@
   {
    "id": "factdouble-05",
    "function": "FACTDOUBLE",
+   "formula": "FACTDOUBLE(-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel returns 1 for -1 (and #NUM! below); LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "factdouble-06",
+   "function": "FACTDOUBLE",
    "formula": "FACTDOUBLE(-2)",
    "sheet": null,
    "cell": "AA1",
@@ -3511,6 +3527,32 @@
   {
    "id": "ceiling_math-08",
    "function": "CEILING.MATH",
+   "formula": "CEILING.MATH(1000000.0000001)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 1000001,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "ceiling_math-09",
+   "function": "CEILING.MATH",
+   "formula": "CEILING.MATH(A1,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 10000000000000.1
+   },
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 10000000000001,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "ceiling_math-10",
+   "function": "CEILING.MATH",
    "formula": "CEILING.MATH(A1,1)",
    "sheet": null,
    "cell": "AA1",
@@ -3723,35 +3765,28 @@
   {
    "id": "maxifs-05",
    "function": "MAXIFS",
-   "formula": "MAXIFS(A1:A5,C1:C5,\">=2\",C1:C5,\"<=4\")",
+   "formula": "MAXIFS(A1:A4,B1:C2,\"x\")",
    "sheet": null,
    "cell": "AA1",
    "cells": {
-    "A1": 10,
-    "A2": 25,
-    "A3": 7,
-    "A4": 40,
-    "A5": 15,
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
     "B1": "x",
-    "B2": "y",
-    "B3": "x",
-    "B4": "y",
-    "B5": "x",
-    "C1": 1,
-    "C2": 2,
-    "C3": 3,
-    "C4": 4,
-    "C5": 5
+    "B2": "x",
+    "C1": "x",
+    "C2": "x"
    },
    "group": "batch-a",
-   "expectation": "value",
-   "expected": 40,
+   "expectation": "error",
+   "expected": "#VALUE!",
    "oracle": "libreoffice"
   },
   {
    "id": "maxifs-06",
    "function": "MAXIFS",
-   "formula": "MAXIFS(A1:A5,B1:B5,\"?\")",
+   "formula": "MAXIFS(A1:A5,C1:C5,\">=2\",C1:C5,\"<=4\")",
    "sheet": null,
    "cell": "AA1",
    "cells": {
@@ -3779,6 +3814,34 @@
   {
    "id": "maxifs-07",
    "function": "MAXIFS",
+   "formula": "MAXIFS(A1:A5,B1:B5,\"?\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 10,
+    "A2": 25,
+    "A3": 7,
+    "A4": 40,
+    "A5": 15,
+    "B1": "x",
+    "B2": "y",
+    "B3": "x",
+    "B4": "y",
+    "B5": "x",
+    "C1": 1,
+    "C2": 2,
+    "C3": 3,
+    "C4": 4,
+    "C5": 5
+   },
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 40,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "maxifs-08",
+   "function": "MAXIFS",
    "formula": "MAXIFS(A1:A3,B1:B3,\"x\")",
    "sheet": null,
    "cell": "AA1",
@@ -3796,7 +3859,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "maxifs-08",
+   "id": "maxifs-09",
    "function": "MAXIFS",
    "formula": "MAXIFS(A1:A4,B1:B4,\"x\")",
    "sheet": null,
@@ -3817,7 +3880,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "maxifs-09",
+   "id": "maxifs-10",
    "function": "MAXIFS",
    "formula": "MAXIFS(A1:A4,B1:B4,\"x\")",
    "sheet": null,
@@ -4370,6 +4433,56 @@
   {
    "id": "aggregate-20",
    "function": "AGGREGATE",
+   "formula": "AGGREGATE(2,0,A1:A3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": "#DIV/0!",
+    "A3": 3
+   },
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 2,
+   "oracle": "libreoffice",
+   "note": "COUNT skips an error cell whatever the option"
+  },
+  {
+   "id": "aggregate-21",
+   "function": "AGGREGATE",
+   "formula": "AGGREGATE(3,0,A1:A3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": "#DIV/0!",
+    "A3": 3
+   },
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 3,
+   "oracle": "libreoffice",
+   "note": "COUNTA counts an error cell whatever the option"
+  },
+  {
+   "id": "aggregate-22",
+   "function": "AGGREGATE",
+   "formula": "AGGREGATE(2,4,A1:A3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": "#DIV/0!",
+    "A3": 3
+   },
+   "group": "batch-a",
+   "expectation": "value",
+   "expected": 2,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "aggregate-23",
+   "function": "AGGREGATE",
    "formula": "AGGREGATE(14,6,A1:A8,2)",
    "sheet": null,
    "cell": "AA1",
@@ -4389,7 +4502,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-21",
+   "id": "aggregate-24",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(14,6,A1:A8,9)",
    "sheet": null,
@@ -4414,7 +4527,7 @@
    "note": "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
   },
   {
-   "id": "aggregate-22",
+   "id": "aggregate-25",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(15,6,A1:A8,1)",
    "sheet": null,
@@ -4435,7 +4548,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-23",
+   "id": "aggregate-26",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(16,6,A1:A8,0.5)",
    "sheet": null,
@@ -4456,7 +4569,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-24",
+   "id": "aggregate-27",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(17,6,A1:A8,3)",
    "sheet": null,
@@ -4477,7 +4590,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-25",
+   "id": "aggregate-28",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(18,6,A1:A8,0.5)",
    "sheet": null,
@@ -4498,7 +4611,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-26",
+   "id": "aggregate-29",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(19,6,A1:A8,1)",
    "sheet": null,
@@ -4519,7 +4632,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-27",
+   "id": "aggregate-30",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(14,6,A1:A5/(A1:A5>3),1)",
    "sheet": null,
@@ -4537,7 +4650,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-28",
+   "id": "aggregate-31",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(15,6,A1:A5/(A1:A5>3),2)",
    "sheet": null,
@@ -4555,7 +4668,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-29",
+   "id": "aggregate-32",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(14,0,A1:A5/(A1:A5>3),1)",
    "sheet": null,
@@ -4573,7 +4686,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-30",
+   "id": "aggregate-33",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(0,6,A1:A3)",
    "sheet": null,
@@ -4594,7 +4707,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-31",
+   "id": "aggregate-34",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(20,6,A1:A3)",
    "sheet": null,
@@ -4615,7 +4728,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-32",
+   "id": "aggregate-35",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(9,8,A1:A3)",
    "sheet": null,
@@ -4636,7 +4749,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-33",
+   "id": "aggregate-36",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(9,-1,A1:A3)",
    "sheet": null,
@@ -4657,7 +4770,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-34",
+   "id": "aggregate-37",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(14,6,A1:A3)",
    "sheet": null,
@@ -4678,7 +4791,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-35",
+   "id": "aggregate-38",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(1,6,A3)",
    "sheet": null,
@@ -4699,7 +4812,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-36",
+   "id": "aggregate-39",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(12,6,A6:A7)",
    "sheet": null,
@@ -4724,7 +4837,7 @@
    "note": "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
   },
   {
-   "id": "aggregate-37",
+   "id": "aggregate-40",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(13,6,A1:A5)",
    "sheet": null,
@@ -4749,7 +4862,7 @@
    "note": "MODE of values without a repeat is #N/A in Excel; LibreOffice gives #VALUE!"
   },
   {
-   "id": "aggregate-38",
+   "id": "aggregate-41",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(14,6,A1:A3,5)",
    "sheet": null,
@@ -4774,7 +4887,7 @@
    "note": "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
   },
   {
-   "id": "aggregate-39",
+   "id": "aggregate-42",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(16,6,A1:A5,1.5)",
    "sheet": null,
@@ -4799,7 +4912,7 @@
    "note": "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
   },
   {
-   "id": "aggregate-40",
+   "id": "aggregate-43",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(7,6,A1:A2)",
    "sheet": null,
@@ -4814,7 +4927,7 @@
    "oracle": "libreoffice"
   },
   {
-   "id": "aggregate-41",
+   "id": "aggregate-44",
    "function": "AGGREGATE",
    "formula": "AGGREGATE(7,6,A1:A2)",
    "sheet": null,

@@ -42,6 +42,13 @@ statistical, date/time, information, financial, reference and array categories
       `SUBTOTAL` 101-111 act like their visible-everything counterparts: the
       evaluation context does not expose row visibility or which cells hold
       subtotals (`functions/aggregate.ts`).
+- [ ] **Range versus direct arguments in the statistics functions** — eager
+      functions receive values, not references, so `strictNumbers` treats a range
+      and a typed argument alike: numeric text inside a range counts as a number
+      (Excel ignores it), and a typed `"a"` or `TRUE` is dropped (Excel gives
+      `#VALUE!` and 1). Affects the whole SUM / STDEV / SUMSQ / GEOMEAN /
+      FREQUENCY family, not just batch A; fixing it needs argument provenance in
+      the evaluator.
 - [ ] **`ARRAYFORMULA`** — not implemented at all (no catalog entry, zero
       references); needs full elementwise scalar broadcast.
 - [ ] **Custom date codes in the formula bar and editor** — an imported date whose code has no structured type (`d-mmm-yy`, `dddd, mmmm d, yyyy`) is a

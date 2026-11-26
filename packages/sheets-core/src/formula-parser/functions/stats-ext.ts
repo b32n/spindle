@@ -55,17 +55,25 @@ const forecast: EagerFn = (args) => {
   return intercept + slope * x;
 };
 
+/** An existing function under another name, with Excel's argument count enforced. */
+function alias(fn: EagerFn, min: number, max: number = min): EagerFn {
+  return (args, ctx) => {
+    checkArity(args, min, max);
+    return fn(args, ctx);
+  };
+}
+
 const sorted = (arg: unknown): number[] => strictNumbers([arg]).sort((a, b) => a - b);
 
 export const statsExtFunctions: Record<string, EagerFn> = {
-  'STDEV.S': statsFunctions.STDEV,
-  'STDEV.P': statsFunctions.STDEVP,
-  'VAR.S': statsFunctions.VAR,
-  'VAR.P': statsFunctions.VARP,
-  'PERCENTILE.INC': statsFunctions.PERCENTILE,
-  'QUARTILE.INC': statsFunctions.QUARTILE,
-  'RANK.EQ': statsFunctions.RANK,
-  'MODE.SNGL': statsFunctions.MODE,
+  'STDEV.S': alias(statsFunctions.STDEV, 1, Infinity),
+  'STDEV.P': alias(statsFunctions.STDEVP, 1, Infinity),
+  'VAR.S': alias(statsFunctions.VAR, 1, Infinity),
+  'VAR.P': alias(statsFunctions.VARP, 1, Infinity),
+  'PERCENTILE.INC': alias(statsFunctions.PERCENTILE, 2),
+  'QUARTILE.INC': alias(statsFunctions.QUARTILE, 2),
+  'RANK.EQ': alias(statsFunctions.RANK, 2, 3),
+  'MODE.SNGL': alias(statsFunctions.MODE, 1, Infinity),
 
   'PERCENTILE.EXC': (args) => {
     checkArity(args, 2);

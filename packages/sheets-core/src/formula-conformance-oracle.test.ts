@@ -104,7 +104,7 @@ function normalise(v: unknown): unknown {
   return v;
 }
 
-export function sameValue(actual: unknown, expected: unknown): boolean {
+function sameValue(actual: unknown, expected: unknown): boolean {
   if (Array.isArray(expected)) {
     return (
       Array.isArray(actual) &&

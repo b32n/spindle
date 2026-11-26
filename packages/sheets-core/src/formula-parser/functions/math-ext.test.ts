@@ -102,6 +102,15 @@ describe('argument coercion', () => {
 });
 
 describe('array lifting', () => {
+  it('is linear in the size of the range', () => {
+    const big = Array.from({ length: 50000 }, (_, i) => [i]);
+    const start = Date.now();
+    const out = call('SIN', big) as number[][];
+    expect(out).toHaveLength(50000);
+    expect(out[49999][0]).toBeCloseTo(Math.sin(49999), 9);
+    expect(Date.now() - start).toBeLessThan(2000);
+  });
+
   it('maps a unary function over a range, element errors stay local', () => {
     expect(call('COS', [[0], ['x'], [Math.PI]])).toEqual([[1], ['#VALUE!'], [-1]]);
     expect(call('ASIN', [[0, 2]])).toEqual([[0, '#NUM!']]);
@@ -137,7 +146,10 @@ describe('FACT and FACTDOUBLE', () => {
     expect(call('FACTDOUBLE', 8)).toBe(384);
     expect(call('FACTDOUBLE', 0)).toBe(1);
     expect(call('FACTDOUBLE', 1)).toBe(1);
-    expect(err('FACTDOUBLE', -1)).toBe('#NUM!');
+    expect(call('FACTDOUBLE', -1)).toBe(1);
+    expect(call('FACTDOUBLE', -0.5)).toBe(1);
+    expect(err('FACTDOUBLE', -1.5)).toBe('#NUM!');
+    expect(err('FACTDOUBLE', -2)).toBe('#NUM!');
     expect(err('FACTDOUBLE', 400)).toBe('#NUM!');
   });
 });
@@ -243,6 +255,12 @@ describe('CEILING.MATH and FLOOR.MATH', () => {
   it('absorbs floating-point noise in the quotient', () => {
     expect(call('CEILING.MATH', 0.9, 0.3)).toBeCloseTo(0.9, 12);
     expect(call('FLOOR.MATH', 0.7, 0.1)).toBeCloseTo(0.7, 12);
+  });
+
+  it('only absorbs floating-point noise, not a real fractional part of a large quotient', () => {
+    expect(call('CEILING.MATH', 1000000.0000001)).toBe(1000001);
+    expect(call('CEILING.MATH', 10000000000000.1)).toBe(10000000000001);
+    expect(call('FLOOR.MATH', 1000000.9999999)).toBe(1000000);
   });
 
   it('lifts over arrays and propagates errors', () => {

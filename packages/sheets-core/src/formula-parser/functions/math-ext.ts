@@ -19,7 +19,7 @@ function finite(n: number): number {
  */
 function snap(q: number): number {
   const r = Math.round(q);
-  return Math.abs(q - r) <= 1e-12 * Math.max(1, Math.abs(q)) ? r : q;
+  return Math.abs(q - r) <= 4 * Number.EPSILON * Math.max(1, Math.abs(q)) ? r : q;
 }
 
 /** A one-number function lifted over arrays. */
@@ -114,7 +114,8 @@ export const mathExtFunctions: Record<string, EagerFn> = {
   }),
 
   FACTDOUBLE: unary((n) => {
-    if (n < 0) throw new Error('#NUM!');
+    // -1!! is 1 (Excel); anything below is #NUM!.
+    if (n < -1) throw new Error('#NUM!');
     let r = 1;
     for (let i = Math.trunc(n); i > 1; i -= 2) r = finite(r * i);
     return r;

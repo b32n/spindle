@@ -105,16 +105,16 @@ export function checkArity(args: unknown[], min: number, max: number = min): voi
 export function liftScalar(args: unknown[], fn: (scalars: unknown[]) => unknown): unknown {
   if (!args.some((a) => Array.isArray(a))) return fn(args);
   const grids = args.map((a) => toMatrix(a));
-  const colsOf = (g: unknown[][]): number => g.reduce((m, row) => Math.max(m, row.length), 0);
+  const widths = grids.map((g) => g.reduce((m, row) => Math.max(m, row.length), 0));
   const rows = Math.max(...grids.map((g) => g.length));
-  const cols = Math.max(...grids.map(colsOf));
+  const cols = Math.max(...widths);
   const out: unknown[][] = [];
   for (let i = 0; i < rows; i++) {
     const row: unknown[] = [];
     for (let j = 0; j < cols; j++) {
-      const cells = grids.map((g) => {
+      const cells = grids.map((g, k) => {
         const r = g.length === 1 ? 0 : i;
-        const c = colsOf(g) === 1 ? 0 : j;
+        const c = widths[k] === 1 ? 0 : j;
         return r < g.length && c < g[r].length ? { v: g[r][c] } : undefined;
       });
       if (cells.includes(undefined)) {

@@ -55,6 +55,18 @@ describe('dotted names', () => {
   });
 });
 
+describe('dotted names check their argument count', () => {
+  it('rejects too few or too many arguments with #VALUE!', () => {
+    for (const name of ['STDEV.S', 'STDEV.P', 'VAR.S', 'VAR.P', 'MODE.SNGL'])
+      expect(err(name)).toBe('#VALUE!');
+    expect(err('PERCENTILE.INC', DATA)).toBe('#VALUE!');
+    expect(err('PERCENTILE.INC', DATA, 0.5, 1)).toBe('#VALUE!');
+    expect(err('QUARTILE.INC', DATA)).toBe('#VALUE!');
+    expect(err('RANK.EQ', 1)).toBe('#VALUE!');
+    expect(err('RANK.EQ', 1, DATA, 0, 0)).toBe('#VALUE!');
+  });
+});
+
 describe('MODE tie-breaking', () => {
   it('returns the first value that appears among the most frequent', () => {
     expect(call('MODE.SNGL', col(1, 2, 2, 1, 3, 3))).toBe(1);
