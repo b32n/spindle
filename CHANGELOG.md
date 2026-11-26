@@ -489,6 +489,29 @@ lockstep.
   11 to 20 matching values, and the XLSX `values` goldens from 134 to 147 of 214 engine-evaluated values matching (the harness now counts
   the 11 formulas the engine cannot parse, which keep the file's value, separately as `passthrough`); the 4 left in that probe
   are the `_xlfn.` prefixed forms (`SINGLE`, `ANCHORARRAY`, `SEQUENCE`) that wait for the prefix mapping.
+- **Excel number-format engine and `TEXT()` date codes (S3, engine part).** New module
+  `packages/sheets-core/src/number-format/` implements the ECMA-376 format-code grammar: sections and conditions,
+  colours, locale and currency tokens, digit placeholders, thousands and scaling commas, percent, exponent,
+  fractions (variable and fixed denominators), literals, `_x` padding and `*x` fill, `@`, Excel's General
+  (11 characters, E notation), dates and times (`[h]` elapsed, fractional seconds, minutes versus months,
+  `[$-F800]`) in the 1900 system (with its 29 February 1900) and the 1904 system, negative dates as `####`, rounding
+  half away from zero on 15 digits, Excel's 255-character, five-denominator-digit and three-fractional-second limits. `formatValue`, `formatDisplay`, `formatGeneral`,
+  `compileFormat`, `isValidFormatCode`, `isDateTimeFormatCode`, `serialToDate` and `dateToSerial` are exported
+  (additive); codes are compiled once and cached. It replaces the `formatCustomPattern` stub: the custom, scientific,
+  fraction, date, time, datetime and duration format types and unformatted cells now render through it (unformatted
+  numbers use General, so `0.1+0.2` shows `0.3`; the duration types show `[hh]:mm:ss`, `[mm]:ss`, `[ss]` and
+  `[ss].000` of a value in days instead of `5h`; scientific shows `1.23E+03` instead of `1.23e+3`).
+  `TEXT(value, code)` uses it: `TEXT(date,"yyyy-mm-dd")`, `"dddd"`, `"mmm d, yyyy"`, `[h]:mm`, sections, conditions,
+  scaling and fractions work; an empty code gives `""` and an invalid code `#VALUE!`. A conformance table of 1,023
+  (code, value) rows with LibreOffice's display strings (`fixtures/xlsx/generators/build_numfmt_oracle.py`, the
+  33-code probe first, then the 60-code corpus, ECMA-style examples, conditions, literals, General, dates, times and 1904
+  dates) is checked by Jest. The engine agrees with LibreOffice alone on 802 rows (78.4%); the other 221 rows carry a
+  correction where Excel is believed to differ (negative dates `####`, the 1900 calendar before March 1900, `-0.00`
+  keeping its sign, General's width, ...) with the reason, and 51 of them (time rounding, `am/pm` case) plus 9 condition
+  rows are tagged `unverified` pending real Excel files; the Excel strings are self-authored, not an independent oracle.
+  `TEXT(x,"General")` gives 15 significant digits and `TEXT` reads `"$5"`, `"1,234"`, `"50%"`, `"(5)"` and date text like Excel.
+  The `formulas-core` XLSX goldens record the two `TEXT` formulas that now match (probe values 110 to 112 of 159).
+  Mapping imported codes onto the model follows in the next change.
 
 ## [0.4.0] - 2026-10-26
 

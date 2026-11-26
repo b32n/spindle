@@ -1,0 +1,7702 @@
+{
+ "generator": "fixtures/xlsx/generators/build_numfmt_oracle.py",
+ "libreoffice": "25.2.3.2",
+ "builtinSpelling": {
+  "mm-dd-yy": "m/d/yyyy",
+  "m/d/yy h:mm": "m/d/yyyy h:mm"
+ },
+ "rows": [
+  {
+   "group": "probe",
+   "code": "0",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "probe",
+   "code": "0",
+   "value": -0.256,
+   "libreoffice": "0",
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "probe",
+   "code": "0",
+   "value": 46024.75,
+   "libreoffice": "46025",
+   "expected": "46025"
+  },
+  {
+   "group": "probe",
+   "code": "0.00",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "probe",
+   "code": "0.00",
+   "value": -0.256,
+   "libreoffice": "-0.26",
+   "expected": "-0.26"
+  },
+  {
+   "group": "probe",
+   "code": "0.00",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "46024.75"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0",
+   "value": 1234.5678,
+   "libreoffice": "1,235",
+   "expected": "1,235"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0",
+   "value": -0.256,
+   "libreoffice": "0",
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0",
+   "value": 46024.75,
+   "libreoffice": "46,025",
+   "expected": "46,025"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57",
+   "expected": "1,234.57"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.00",
+   "value": -0.256,
+   "libreoffice": "-0.26",
+   "expected": "-0.26"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.00",
+   "value": 46024.75,
+   "libreoffice": "46,024.75",
+   "expected": "46,024.75"
+  },
+  {
+   "group": "probe",
+   "code": "$#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "$1,234.57",
+   "expected": "$1,234.57"
+  },
+  {
+   "group": "probe",
+   "code": "$#,##0.00",
+   "value": -0.256,
+   "libreoffice": "-$0.26",
+   "expected": "-$0.26"
+  },
+  {
+   "group": "probe",
+   "code": "$#,##0.00",
+   "value": 46024.75,
+   "libreoffice": "$46,024.75",
+   "expected": "$46,024.75"
+  },
+  {
+   "group": "probe",
+   "code": "\"$\"#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "$1,234.57",
+   "expected": "$1,234.57"
+  },
+  {
+   "group": "probe",
+   "code": "\"$\"#,##0.00",
+   "value": -0.256,
+   "libreoffice": "-$0.26",
+   "expected": "-$0.26"
+  },
+  {
+   "group": "probe",
+   "code": "\"$\"#,##0.00",
+   "value": 46024.75,
+   "libreoffice": "$46,024.75",
+   "expected": "$46,024.75"
+  },
+  {
+   "group": "probe",
+   "code": "0%",
+   "value": 1234.5678,
+   "libreoffice": "123457%",
+   "expected": "123457%"
+  },
+  {
+   "group": "probe",
+   "code": "0%",
+   "value": -0.256,
+   "libreoffice": "-26%",
+   "expected": "-26%"
+  },
+  {
+   "group": "probe",
+   "code": "0%",
+   "value": 46024.75,
+   "libreoffice": "4602475%",
+   "expected": "4602475%"
+  },
+  {
+   "group": "probe",
+   "code": "0.00%",
+   "value": 1234.5678,
+   "libreoffice": "123456.78%",
+   "expected": "123456.78%"
+  },
+  {
+   "group": "probe",
+   "code": "0.00%",
+   "value": -0.256,
+   "libreoffice": "-25.60%",
+   "expected": "-25.60%"
+  },
+  {
+   "group": "probe",
+   "code": "0.00%",
+   "value": 46024.75,
+   "libreoffice": "4602475.00%",
+   "expected": "4602475.00%"
+  },
+  {
+   "group": "probe",
+   "code": "0.00E+00",
+   "value": 1234.5678,
+   "libreoffice": "1.23E+03",
+   "expected": "1.23E+03"
+  },
+  {
+   "group": "probe",
+   "code": "0.00E+00",
+   "value": -0.256,
+   "libreoffice": "-2.56E-01",
+   "expected": "-2.56E-01"
+  },
+  {
+   "group": "probe",
+   "code": "0.00E+00",
+   "value": 46024.75,
+   "libreoffice": "4.60E+04",
+   "expected": "4.60E+04"
+  },
+  {
+   "group": "probe",
+   "code": "# ?/?",
+   "value": 1234.5678,
+   "libreoffice": "1234 4/7",
+   "expected": "1234 4/7"
+  },
+  {
+   "group": "probe",
+   "code": "# ?/?",
+   "value": -0.256,
+   "libreoffice": "- 1/4",
+   "expected": "- 1/4"
+  },
+  {
+   "group": "probe",
+   "code": "# ?/?",
+   "value": 46024.75,
+   "libreoffice": "46024 3/4",
+   "expected": "46024 3/4"
+  },
+  {
+   "group": "probe",
+   "code": "# ??/??",
+   "value": 1234.5678,
+   "libreoffice": "1234 46/81",
+   "expected": "1234 46/81"
+  },
+  {
+   "group": "probe",
+   "code": "# ??/??",
+   "value": -0.256,
+   "libreoffice": "- 21/82",
+   "expected": "- 21/82"
+  },
+  {
+   "group": "probe",
+   "code": "# ??/??",
+   "value": 46024.75,
+   "libreoffice": "46024  3/4 ",
+   "expected": "46024  3/4 "
+  },
+  {
+   "group": "probe",
+   "code": "yyyy-mm-dd",
+   "value": 1234.5678,
+   "libreoffice": "1903-05-18",
+   "expected": "1903-05-18"
+  },
+  {
+   "group": "probe",
+   "code": "yyyy-mm-dd",
+   "value": -0.256,
+   "libreoffice": "1899-12-29",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "yyyy-mm-dd",
+   "value": 46024.75,
+   "libreoffice": "2026-01-02",
+   "expected": "2026-01-02"
+  },
+  {
+   "group": "probe",
+   "code": "m/d/yyyy",
+   "value": 1234.5678,
+   "libreoffice": "5/18/1903",
+   "expected": "5/18/1903"
+  },
+  {
+   "group": "probe",
+   "code": "m/d/yyyy",
+   "value": -0.256,
+   "libreoffice": "12/29/1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "m/d/yyyy",
+   "value": 46024.75,
+   "libreoffice": "1/2/2026",
+   "expected": "1/2/2026"
+  },
+  {
+   "group": "probe",
+   "code": "d-mmm-yy",
+   "value": 1234.5678,
+   "libreoffice": "18-May-03",
+   "expected": "18-May-03"
+  },
+  {
+   "group": "probe",
+   "code": "d-mmm-yy",
+   "value": -0.256,
+   "libreoffice": "29-Dec-99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "d-mmm-yy",
+   "value": 46024.75,
+   "libreoffice": "2-Jan-26",
+   "expected": "2-Jan-26"
+  },
+  {
+   "group": "probe",
+   "code": "dd/mm/yyyy",
+   "value": 1234.5678,
+   "libreoffice": "18/05/1903",
+   "expected": "18/05/1903"
+  },
+  {
+   "group": "probe",
+   "code": "dd/mm/yyyy",
+   "value": -0.256,
+   "libreoffice": "29/12/1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "dd/mm/yyyy",
+   "value": 46024.75,
+   "libreoffice": "02/01/2026",
+   "expected": "02/01/2026"
+  },
+  {
+   "group": "probe",
+   "code": "mmm d, yyyy",
+   "value": 1234.5678,
+   "libreoffice": "May 18, 1903",
+   "expected": "May 18, 1903"
+  },
+  {
+   "group": "probe",
+   "code": "mmm d, yyyy",
+   "value": -0.256,
+   "libreoffice": "Dec 29, 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "mmm d, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Jan 2, 2026",
+   "expected": "Jan 2, 2026"
+  },
+  {
+   "group": "probe",
+   "code": "dddd",
+   "value": 1234.5678,
+   "libreoffice": "Monday",
+   "expected": "Monday"
+  },
+  {
+   "group": "probe",
+   "code": "dddd",
+   "value": -0.256,
+   "libreoffice": "Friday",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "dddd",
+   "value": 46024.75,
+   "libreoffice": "Friday",
+   "expected": "Friday"
+  },
+  {
+   "group": "probe",
+   "code": "h:mm AM/PM",
+   "value": 1234.5678,
+   "libreoffice": "1:37 PM",
+   "expected": "1:37 PM"
+  },
+  {
+   "group": "probe",
+   "code": "h:mm AM/PM",
+   "value": -0.256,
+   "libreoffice": "5:51 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "h:mm AM/PM",
+   "value": 46024.75,
+   "libreoffice": "6:00 PM",
+   "expected": "6:00 PM"
+  },
+  {
+   "group": "probe",
+   "code": "hh:mm:ss",
+   "value": 1234.5678,
+   "libreoffice": "13:37:37",
+   "expected": "13:37:38",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "probe",
+   "code": "hh:mm:ss",
+   "value": -0.256,
+   "libreoffice": "17:51:21",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "hh:mm:ss",
+   "value": 46024.75,
+   "libreoffice": "18:00:00",
+   "expected": "18:00:00"
+  },
+  {
+   "group": "probe",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 1234.5678,
+   "libreoffice": "1903-05-18 13:37",
+   "expected": "1903-05-18 13:37"
+  },
+  {
+   "group": "probe",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": -0.256,
+   "libreoffice": "1899-12-29 17:51",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 46024.75,
+   "libreoffice": "2026-01-02 18:00",
+   "expected": "2026-01-02 18:00"
+  },
+  {
+   "group": "probe",
+   "code": "[h]:mm:ss",
+   "value": 1234.5678,
+   "libreoffice": "29629:37:38",
+   "expected": "29629:37:38"
+  },
+  {
+   "group": "probe",
+   "code": "[h]:mm:ss",
+   "value": -0.256,
+   "libreoffice": "-6:08:38",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "[h]:mm:ss",
+   "value": 46024.75,
+   "libreoffice": "1104594:00:00",
+   "expected": "1104594:00:00"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0;[Red]-#,##0",
+   "value": 1234.5678,
+   "libreoffice": "1,235",
+   "expected": "1,235"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0;[Red]-#,##0",
+   "value": -0.256,
+   "libreoffice": "-0",
+   "expected": "-0"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0;[Red]-#,##0",
+   "value": 46024.75,
+   "libreoffice": "46,025",
+   "expected": "46,025"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0;(#,##0)",
+   "value": 1234.5678,
+   "libreoffice": "1,235",
+   "expected": "1,235"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0;(#,##0)",
+   "value": -0.256,
+   "libreoffice": "(0)",
+   "expected": "(0)"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0;(#,##0)",
+   "value": 46024.75,
+   "libreoffice": "46,025",
+   "expected": "46,025"
+  },
+  {
+   "group": "probe",
+   "code": "0.0,,\"M\"",
+   "value": 1234.5678,
+   "libreoffice": "0.0M",
+   "expected": "0.0M"
+  },
+  {
+   "group": "probe",
+   "code": "0.0,,\"M\"",
+   "value": -0.256,
+   "libreoffice": "0.0M",
+   "expected": "-0.0M",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "probe",
+   "code": "0.0,,\"M\"",
+   "value": 46024.75,
+   "libreoffice": "0.0M",
+   "expected": "0.0M"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57 ",
+   "expected": "1,234.57 "
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": -0.256,
+   "libreoffice": "(0.26)",
+   "expected": "(0.26)"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 46024.75,
+   "libreoffice": "46,024.75 ",
+   "expected": "46,024.75 "
+  },
+  {
+   "group": "probe",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 1234.5678,
+   "libreoffice": "big",
+   "expected": "big"
+  },
+  {
+   "group": "probe",
+   "code": "[>100]\"big\";\"small\"",
+   "value": -0.256,
+   "libreoffice": "small",
+   "expected": "small"
+  },
+  {
+   "group": "probe",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 46024.75,
+   "libreoffice": "big",
+   "expected": "big"
+  },
+  {
+   "group": "probe",
+   "code": "000-00",
+   "value": 1234.5678,
+   "libreoffice": "012-35",
+   "expected": "012-35"
+  },
+  {
+   "group": "probe",
+   "code": "000-00",
+   "value": -0.256,
+   "libreoffice": "000-00",
+   "expected": "-000-00",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "probe",
+   "code": "000-00",
+   "value": 46024.75,
+   "libreoffice": "460-25",
+   "expected": "460-25"
+  },
+  {
+   "group": "probe",
+   "code": "@",
+   "value": 1234.5678,
+   "libreoffice": "1234.5678",
+   "expected": "1234.5678"
+  },
+  {
+   "group": "probe",
+   "code": "@",
+   "value": -0.256,
+   "libreoffice": "-0.256",
+   "expected": "-0.256"
+  },
+  {
+   "group": "probe",
+   "code": "@",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "46024.75"
+  },
+  {
+   "group": "probe",
+   "code": "0.0 \"kg\"",
+   "value": 1234.5678,
+   "libreoffice": "1234.6 kg",
+   "expected": "1234.6 kg"
+  },
+  {
+   "group": "probe",
+   "code": "0.0 \"kg\"",
+   "value": -0.256,
+   "libreoffice": "-0.3 kg",
+   "expected": "-0.3 kg"
+  },
+  {
+   "group": "probe",
+   "code": "0.0 \"kg\"",
+   "value": 46024.75,
+   "libreoffice": "46024.8 kg",
+   "expected": "46024.8 kg"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.0,\"K\"",
+   "value": 1234.5678,
+   "libreoffice": "1.2K",
+   "expected": "1.2K"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.0,\"K\"",
+   "value": -0.256,
+   "libreoffice": "0.0K",
+   "expected": "-0.0K",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "probe",
+   "code": "#,##0.0,\"K\"",
+   "value": 46024.75,
+   "libreoffice": "46.0K",
+   "expected": "46.0K"
+  },
+  {
+   "group": "probe",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": 1234.5678,
+   "libreoffice": " $1,234.57 ",
+   "expected": " $1,234.57 "
+  },
+  {
+   "group": "probe",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": -0.256,
+   "libreoffice": " $(0.26)",
+   "expected": " $(0.26)"
+  },
+  {
+   "group": "probe",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": 46024.75,
+   "libreoffice": " $46,024.75 ",
+   "expected": " $46,024.75 "
+  },
+  {
+   "group": "probe",
+   "code": "[$€-407] #,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "€ 1,234.57",
+   "expected": "€ 1,234.57"
+  },
+  {
+   "group": "probe",
+   "code": "[$€-407] #,##0.00",
+   "value": -0.256,
+   "libreoffice": "-€ 0.26",
+   "expected": "-€ 0.26"
+  },
+  {
+   "group": "probe",
+   "code": "[$€-407] #,##0.00",
+   "value": 46024.75,
+   "libreoffice": "€ 46,024.75",
+   "expected": "€ 46,024.75"
+  },
+  {
+   "group": "probe",
+   "code": "mmmm yyyy",
+   "value": 1234.5678,
+   "libreoffice": "May 1903",
+   "expected": "May 1903"
+  },
+  {
+   "group": "probe",
+   "code": "mmmm yyyy",
+   "value": -0.256,
+   "libreoffice": "December 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "probe",
+   "code": "mmmm yyyy",
+   "value": 46024.75,
+   "libreoffice": "January 2026",
+   "expected": "January 2026"
+  },
+  {
+   "group": "corpus",
+   "code": "General",
+   "value": 1234.5678,
+   "libreoffice": "1234.5678",
+   "expected": "1234.5678"
+  },
+  {
+   "group": "corpus",
+   "code": "General",
+   "value": -0.256,
+   "libreoffice": "-0.256",
+   "expected": "-0.256"
+  },
+  {
+   "group": "corpus",
+   "code": "General",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "46024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "General",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "0",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "corpus",
+   "code": "0",
+   "value": -0.256,
+   "libreoffice": "0",
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "0",
+   "value": 46024.75,
+   "libreoffice": "46025",
+   "expected": "46025"
+  },
+  {
+   "group": "corpus",
+   "code": "0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00",
+   "value": -0.256,
+   "libreoffice": "-0.26",
+   "expected": "-0.26"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "46024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0",
+   "value": 1234.5678,
+   "libreoffice": "1,235",
+   "expected": "1,235"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0",
+   "value": -0.256,
+   "libreoffice": "0",
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0",
+   "value": 46024.75,
+   "libreoffice": "46,025",
+   "expected": "46,025"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57",
+   "expected": "1,234.57"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00",
+   "value": -0.256,
+   "libreoffice": "-0.26",
+   "expected": "-0.26"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00",
+   "value": 46024.75,
+   "libreoffice": "46,024.75",
+   "expected": "46,024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "corpus",
+   "code": "0%",
+   "value": 1234.5678,
+   "libreoffice": "123457%",
+   "expected": "123457%"
+  },
+  {
+   "group": "corpus",
+   "code": "0%",
+   "value": -0.256,
+   "libreoffice": "-26%",
+   "expected": "-26%"
+  },
+  {
+   "group": "corpus",
+   "code": "0%",
+   "value": 46024.75,
+   "libreoffice": "4602475%",
+   "expected": "4602475%"
+  },
+  {
+   "group": "corpus",
+   "code": "0%",
+   "value": 0,
+   "libreoffice": "0%",
+   "expected": "0%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%",
+   "value": 1234.5678,
+   "libreoffice": "123456.78%",
+   "expected": "123456.78%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%",
+   "value": -0.256,
+   "libreoffice": "-25.60%",
+   "expected": "-25.60%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%",
+   "value": 46024.75,
+   "libreoffice": "4602475.00%",
+   "expected": "4602475.00%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%",
+   "value": 0,
+   "libreoffice": "0.00%",
+   "expected": "0.00%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00E+00",
+   "value": 1234.5678,
+   "libreoffice": "1.23E+03",
+   "expected": "1.23E+03"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00E+00",
+   "value": -0.256,
+   "libreoffice": "-2.56E-01",
+   "expected": "-2.56E-01"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00E+00",
+   "value": 46024.75,
+   "libreoffice": "4.60E+04",
+   "expected": "4.60E+04"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00E+00",
+   "value": 0,
+   "libreoffice": "0.00E+00",
+   "expected": "0.00E+00"
+  },
+  {
+   "group": "corpus",
+   "code": "##0.0E+0",
+   "value": 1234.5678,
+   "libreoffice": "1.2E+3",
+   "expected": "1.2E+3"
+  },
+  {
+   "group": "corpus",
+   "code": "##0.0E+0",
+   "value": -0.256,
+   "libreoffice": "-256.0E-3",
+   "expected": "-256.0E-3"
+  },
+  {
+   "group": "corpus",
+   "code": "##0.0E+0",
+   "value": 46024.75,
+   "libreoffice": "46.0E+3",
+   "expected": "46.0E+3"
+  },
+  {
+   "group": "corpus",
+   "code": "##0.0E+0",
+   "value": 0,
+   "libreoffice": "0.0E+0",
+   "expected": "0.0E+0"
+  },
+  {
+   "group": "corpus",
+   "code": "# ?/?",
+   "value": 1234.5678,
+   "libreoffice": "1234 4/7",
+   "expected": "1234 4/7"
+  },
+  {
+   "group": "corpus",
+   "code": "# ?/?",
+   "value": -0.256,
+   "libreoffice": "- 1/4",
+   "expected": "- 1/4"
+  },
+  {
+   "group": "corpus",
+   "code": "# ?/?",
+   "value": 46024.75,
+   "libreoffice": "46024 3/4",
+   "expected": "46024 3/4"
+  },
+  {
+   "group": "corpus",
+   "code": "# ?/?",
+   "value": 0,
+   "libreoffice": "0    ",
+   "expected": "0    "
+  },
+  {
+   "group": "corpus",
+   "code": "# ??/??",
+   "value": 1234.5678,
+   "libreoffice": "1234 46/81",
+   "expected": "1234 46/81"
+  },
+  {
+   "group": "corpus",
+   "code": "# ??/??",
+   "value": -0.256,
+   "libreoffice": "- 21/82",
+   "expected": "- 21/82"
+  },
+  {
+   "group": "corpus",
+   "code": "# ??/??",
+   "value": 46024.75,
+   "libreoffice": "46024  3/4 ",
+   "expected": "46024  3/4 "
+  },
+  {
+   "group": "corpus",
+   "code": "# ??/??",
+   "value": 0,
+   "libreoffice": "0      ",
+   "expected": "0      "
+  },
+  {
+   "group": "corpus",
+   "code": "# ???/???",
+   "value": 1234.5678,
+   "libreoffice": "1234  67/118",
+   "expected": "1234  67/118"
+  },
+  {
+   "group": "corpus",
+   "code": "# ???/???",
+   "value": -0.256,
+   "libreoffice": "-  32/125",
+   "expected": "-  32/125"
+  },
+  {
+   "group": "corpus",
+   "code": "# ???/???",
+   "value": 46024.75,
+   "libreoffice": "46024   3/4  ",
+   "expected": "46024   3/4  "
+  },
+  {
+   "group": "corpus",
+   "code": "# ???/???",
+   "value": 0,
+   "libreoffice": "0        ",
+   "expected": "0        "
+  },
+  {
+   "group": "corpus",
+   "code": "mm-dd-yy",
+   "value": 1234.5678,
+   "libreoffice": "05-18-03",
+   "expected": "05-18-03"
+  },
+  {
+   "group": "corpus",
+   "code": "mm-dd-yy",
+   "value": -0.256,
+   "libreoffice": "12-29-99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "mm-dd-yy",
+   "value": 46024.75,
+   "libreoffice": "01-02-26",
+   "expected": "01-02-26"
+  },
+  {
+   "group": "corpus",
+   "code": "mm-dd-yy",
+   "value": 0,
+   "libreoffice": "12-30-99",
+   "expected": "01-00-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm-yy",
+   "value": 1234.5678,
+   "libreoffice": "18-May-03",
+   "expected": "18-May-03"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm-yy",
+   "value": -0.256,
+   "libreoffice": "29-Dec-99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm-yy",
+   "value": 46024.75,
+   "libreoffice": "2-Jan-26",
+   "expected": "2-Jan-26"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm-yy",
+   "value": 0,
+   "libreoffice": "30-Dec-99",
+   "expected": "0-Jan-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm",
+   "value": 1234.5678,
+   "libreoffice": "18-May",
+   "expected": "18-May"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm",
+   "value": -0.256,
+   "libreoffice": "29-Dec",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm",
+   "value": 46024.75,
+   "libreoffice": "2-Jan",
+   "expected": "2-Jan"
+  },
+  {
+   "group": "corpus",
+   "code": "d-mmm",
+   "value": 0,
+   "libreoffice": "30-Dec",
+   "expected": "0-Jan",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm-yy",
+   "value": 1234.5678,
+   "libreoffice": "May-03",
+   "expected": "May-03"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm-yy",
+   "value": -0.256,
+   "libreoffice": "Dec-99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm-yy",
+   "value": 46024.75,
+   "libreoffice": "Jan-26",
+   "expected": "Jan-26"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm-yy",
+   "value": 0,
+   "libreoffice": "Dec-99",
+   "expected": "Jan-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm AM/PM",
+   "value": 1234.5678,
+   "libreoffice": "1:37 PM",
+   "expected": "1:37 PM"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm AM/PM",
+   "value": -0.256,
+   "libreoffice": "5:51 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm AM/PM",
+   "value": 46024.75,
+   "libreoffice": "6:00 PM",
+   "expected": "6:00 PM"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm AM/PM",
+   "value": 0,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 AM"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss AM/PM",
+   "value": 1234.5678,
+   "libreoffice": "1:37:37 PM",
+   "expected": "1:37:38 PM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss AM/PM",
+   "value": -0.256,
+   "libreoffice": "5:51:21 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss AM/PM",
+   "value": 46024.75,
+   "libreoffice": "6:00:00 PM",
+   "expected": "6:00:00 PM"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss AM/PM",
+   "value": 0,
+   "libreoffice": "12:00:00 AM",
+   "expected": "12:00:00 AM"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm",
+   "value": 1234.5678,
+   "libreoffice": "13:37",
+   "expected": "13:37"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm",
+   "value": -0.256,
+   "libreoffice": "17:51",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm",
+   "value": 46024.75,
+   "libreoffice": "18:00",
+   "expected": "18:00"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm",
+   "value": 0,
+   "libreoffice": "0:00",
+   "expected": "0:00"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss",
+   "value": 1234.5678,
+   "libreoffice": "13:37:37",
+   "expected": "13:37:38",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss",
+   "value": -0.256,
+   "libreoffice": "17:51:21",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss",
+   "value": 46024.75,
+   "libreoffice": "18:00:00",
+   "expected": "18:00:00"
+  },
+  {
+   "group": "corpus",
+   "code": "h:mm:ss",
+   "value": 0,
+   "libreoffice": "0:00:00",
+   "expected": "0:00:00"
+  },
+  {
+   "group": "corpus",
+   "code": "m/d/yy h:mm",
+   "value": 1234.5678,
+   "libreoffice": "5/18/03 13:37",
+   "expected": "5/18/03 13:37"
+  },
+  {
+   "group": "corpus",
+   "code": "m/d/yy h:mm",
+   "value": -0.256,
+   "libreoffice": "12/29/99 17:51",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "m/d/yy h:mm",
+   "value": 46024.75,
+   "libreoffice": "1/2/26 18:00",
+   "expected": "1/2/26 18:00"
+  },
+  {
+   "group": "corpus",
+   "code": "m/d/yy h:mm",
+   "value": 0,
+   "libreoffice": "12/30/99 0:00",
+   "expected": "1/0/00 0:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd",
+   "value": 1234.5678,
+   "libreoffice": "1903-05-18",
+   "expected": "1903-05-18"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd",
+   "value": -0.256,
+   "libreoffice": "1899-12-29",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd",
+   "value": 46024.75,
+   "libreoffice": "2026-01-02",
+   "expected": "2026-01-02"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd",
+   "value": 0,
+   "libreoffice": "1899-12-30",
+   "expected": "1900-01-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "dd/mm/yyyy",
+   "value": 1234.5678,
+   "libreoffice": "18/05/1903",
+   "expected": "18/05/1903"
+  },
+  {
+   "group": "corpus",
+   "code": "dd/mm/yyyy",
+   "value": -0.256,
+   "libreoffice": "29/12/1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "dd/mm/yyyy",
+   "value": 46024.75,
+   "libreoffice": "02/01/2026",
+   "expected": "02/01/2026"
+  },
+  {
+   "group": "corpus",
+   "code": "dd/mm/yyyy",
+   "value": 0,
+   "libreoffice": "30/12/1899",
+   "expected": "00/01/1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm d, yyyy",
+   "value": 1234.5678,
+   "libreoffice": "May 18, 1903",
+   "expected": "May 18, 1903"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm d, yyyy",
+   "value": -0.256,
+   "libreoffice": "Dec 29, 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm d, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Jan 2, 2026",
+   "expected": "Jan 2, 2026"
+  },
+  {
+   "group": "corpus",
+   "code": "mmm d, yyyy",
+   "value": 0,
+   "libreoffice": "Dec 30, 1899",
+   "expected": "Jan 0, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd",
+   "value": 1234.5678,
+   "libreoffice": "Monday",
+   "expected": "Monday"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd",
+   "value": -0.256,
+   "libreoffice": "Friday",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd",
+   "value": 46024.75,
+   "libreoffice": "Friday",
+   "expected": "Friday"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd",
+   "value": 0,
+   "libreoffice": "Saturday",
+   "expected": "Saturday"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 1234.5678,
+   "libreoffice": "Monday, May 18, 1903",
+   "expected": "Monday, May 18, 1903"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd, mmmm d, yyyy",
+   "value": -0.256,
+   "libreoffice": "Friday, December 29, 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Friday, January 2, 2026",
+   "expected": "Friday, January 2, 2026"
+  },
+  {
+   "group": "corpus",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 0,
+   "libreoffice": "Saturday, December 30, 1899",
+   "expected": "Saturday, January 0, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "mmmm yyyy",
+   "value": 1234.5678,
+   "libreoffice": "May 1903",
+   "expected": "May 1903"
+  },
+  {
+   "group": "corpus",
+   "code": "mmmm yyyy",
+   "value": -0.256,
+   "libreoffice": "December 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "mmmm yyyy",
+   "value": 46024.75,
+   "libreoffice": "January 2026",
+   "expected": "January 2026"
+  },
+  {
+   "group": "corpus",
+   "code": "mmmm yyyy",
+   "value": 0,
+   "libreoffice": "December 1899",
+   "expected": "January 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd hh:mm:ss",
+   "value": 1234.5678,
+   "libreoffice": "1903-05-18 13:37:37",
+   "expected": "1903-05-18 13:37:38",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd hh:mm:ss",
+   "value": -0.256,
+   "libreoffice": "1899-12-29 17:51:21",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd hh:mm:ss",
+   "value": 46024.75,
+   "libreoffice": "2026-01-02 18:00:00",
+   "expected": "2026-01-02 18:00:00"
+  },
+  {
+   "group": "corpus",
+   "code": "yyyy-mm-dd hh:mm:ss",
+   "value": 0,
+   "libreoffice": "1899-12-30 00:00:00",
+   "expected": "1900-01-00 00:00:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "[h]:mm:ss",
+   "value": 1234.5678,
+   "libreoffice": "29629:37:38",
+   "expected": "29629:37:38"
+  },
+  {
+   "group": "corpus",
+   "code": "[h]:mm:ss",
+   "value": -0.256,
+   "libreoffice": "-6:08:38",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "[h]:mm:ss",
+   "value": 46024.75,
+   "libreoffice": "1104594:00:00",
+   "expected": "1104594:00:00"
+  },
+  {
+   "group": "corpus",
+   "code": "[h]:mm:ss",
+   "value": 0,
+   "libreoffice": "0:00:00",
+   "expected": "0:00:00"
+  },
+  {
+   "group": "corpus",
+   "code": "[mm]:ss",
+   "value": 1234.5678,
+   "libreoffice": "1777777:38",
+   "expected": "1777777:38"
+  },
+  {
+   "group": "corpus",
+   "code": "[mm]:ss",
+   "value": -0.256,
+   "libreoffice": "-368:38",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "[mm]:ss",
+   "value": 46024.75,
+   "libreoffice": "66275640:00",
+   "expected": "66275640:00"
+  },
+  {
+   "group": "corpus",
+   "code": "[mm]:ss",
+   "value": 0,
+   "libreoffice": "00:00",
+   "expected": "00:00"
+  },
+  {
+   "group": "corpus",
+   "code": "mm:ss.0",
+   "value": 1234.5678,
+   "libreoffice": "37:37.9",
+   "expected": "37:37.9"
+  },
+  {
+   "group": "corpus",
+   "code": "mm:ss.0",
+   "value": -0.256,
+   "libreoffice": "51:21.6",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "mm:ss.0",
+   "value": 46024.75,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "corpus",
+   "code": "mm:ss.0",
+   "value": 0,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0",
+   "value": 1234.5678,
+   "libreoffice": "$1,235",
+   "expected": "$1,235"
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0",
+   "value": -0.256,
+   "libreoffice": "$0",
+   "expected": "-$0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0",
+   "value": 46024.75,
+   "libreoffice": "$46,025",
+   "expected": "$46,025"
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0",
+   "value": 0,
+   "libreoffice": "$0",
+   "expected": "$0"
+  },
+  {
+   "group": "corpus",
+   "code": "\"$\"#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "$1,234.57",
+   "expected": "$1,234.57"
+  },
+  {
+   "group": "corpus",
+   "code": "\"$\"#,##0.00",
+   "value": -0.256,
+   "libreoffice": "-$0.26",
+   "expected": "-$0.26"
+  },
+  {
+   "group": "corpus",
+   "code": "\"$\"#,##0.00",
+   "value": 46024.75,
+   "libreoffice": "$46,024.75",
+   "expected": "$46,024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "\"$\"#,##0.00",
+   "value": 0,
+   "libreoffice": "$0.00",
+   "expected": "$0.00"
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0.00_);[Red]($#,##0.00)",
+   "value": 1234.5678,
+   "libreoffice": "$1,234.57 ",
+   "expected": "$1,234.57 "
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0.00_);[Red]($#,##0.00)",
+   "value": -0.256,
+   "libreoffice": "($0.26)",
+   "expected": "($0.26)"
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0.00_);[Red]($#,##0.00)",
+   "value": 46024.75,
+   "libreoffice": "$46,024.75 ",
+   "expected": "$46,024.75 "
+  },
+  {
+   "group": "corpus",
+   "code": "$#,##0.00_);[Red]($#,##0.00)",
+   "value": 0,
+   "libreoffice": "$0.00 ",
+   "expected": "$0.00 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0_);(#,##0)",
+   "value": 1234.5678,
+   "libreoffice": "1,235 ",
+   "expected": "1,235 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0_);(#,##0)",
+   "value": -0.256,
+   "libreoffice": "(0)",
+   "expected": "(0)"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0_);(#,##0)",
+   "value": 46024.75,
+   "libreoffice": "46,025 ",
+   "expected": "46,025 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0_);(#,##0)",
+   "value": 0,
+   "libreoffice": "0 ",
+   "expected": "0 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57 ",
+   "expected": "1,234.57 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": -0.256,
+   "libreoffice": "(0.26)",
+   "expected": "(0.26)"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 46024.75,
+   "libreoffice": "46,024.75 ",
+   "expected": "46,024.75 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 0,
+   "libreoffice": "0.00 ",
+   "expected": "0.00 "
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0;[Red]-#,##0",
+   "value": 1234.5678,
+   "libreoffice": "1,235",
+   "expected": "1,235"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0;[Red]-#,##0",
+   "value": -0.256,
+   "libreoffice": "-0",
+   "expected": "-0"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0;[Red]-#,##0",
+   "value": 46024.75,
+   "libreoffice": "46,025",
+   "expected": "46,025"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0;[Red]-#,##0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": 1234.5678,
+   "libreoffice": " $1,234.57 ",
+   "expected": " $1,234.57 "
+  },
+  {
+   "group": "corpus",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": -0.256,
+   "libreoffice": " $(0.26)",
+   "expected": " $(0.26)"
+  },
+  {
+   "group": "corpus",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": 46024.75,
+   "libreoffice": " $46,024.75 ",
+   "expected": " $46,024.75 "
+  },
+  {
+   "group": "corpus",
+   "code": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+   "value": 0,
+   "libreoffice": " $-   ",
+   "expected": " $-   "
+  },
+  {
+   "group": "corpus",
+   "code": "_(* #,##0_);_(* (#,##0);_(* \"-\"_);_(@_)",
+   "value": 1234.5678,
+   "libreoffice": " 1,235 ",
+   "expected": " 1,235 "
+  },
+  {
+   "group": "corpus",
+   "code": "_(* #,##0_);_(* (#,##0);_(* \"-\"_);_(@_)",
+   "value": -0.256,
+   "libreoffice": " (0)",
+   "expected": " (0)"
+  },
+  {
+   "group": "corpus",
+   "code": "_(* #,##0_);_(* (#,##0);_(* \"-\"_);_(@_)",
+   "value": 46024.75,
+   "libreoffice": " 46,025 ",
+   "expected": " 46,025 "
+  },
+  {
+   "group": "corpus",
+   "code": "_(* #,##0_);_(* (#,##0);_(* \"-\"_);_(@_)",
+   "value": 0,
+   "libreoffice": " - ",
+   "expected": " - "
+  },
+  {
+   "group": "corpus",
+   "code": "0.0,,\"M\"",
+   "value": 1234.5678,
+   "libreoffice": "0.0M",
+   "expected": "0.0M"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0,,\"M\"",
+   "value": -0.256,
+   "libreoffice": "0.0M",
+   "expected": "-0.0M",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0,,\"M\"",
+   "value": 46024.75,
+   "libreoffice": "0.0M",
+   "expected": "0.0M"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0,,\"M\"",
+   "value": 0,
+   "libreoffice": "0.0M",
+   "expected": "0.0M"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.0,\"K\"",
+   "value": 1234.5678,
+   "libreoffice": "1.2K",
+   "expected": "1.2K"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.0,\"K\"",
+   "value": -0.256,
+   "libreoffice": "0.0K",
+   "expected": "-0.0K",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.0,\"K\"",
+   "value": 46024.75,
+   "libreoffice": "46.0K",
+   "expected": "46.0K"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.0,\"K\"",
+   "value": 0,
+   "libreoffice": "0.0K",
+   "expected": "0.0K"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0 \"kg\"",
+   "value": 1234.5678,
+   "libreoffice": "1234.6 kg",
+   "expected": "1234.6 kg"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0 \"kg\"",
+   "value": -0.256,
+   "libreoffice": "-0.3 kg",
+   "expected": "-0.3 kg"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0 \"kg\"",
+   "value": 46024.75,
+   "libreoffice": "46024.8 kg",
+   "expected": "46024.8 kg"
+  },
+  {
+   "group": "corpus",
+   "code": "0.0 \"kg\"",
+   "value": 0,
+   "libreoffice": "0.0 kg",
+   "expected": "0.0 kg"
+  },
+  {
+   "group": "corpus",
+   "code": "\"Total: \"0",
+   "value": 1234.5678,
+   "libreoffice": "Total: 1235",
+   "expected": "Total: 1235"
+  },
+  {
+   "group": "corpus",
+   "code": "\"Total: \"0",
+   "value": -0.256,
+   "libreoffice": "Total: 0",
+   "expected": "-Total: 0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "\"Total: \"0",
+   "value": 46024.75,
+   "libreoffice": "Total: 46025",
+   "expected": "Total: 46025"
+  },
+  {
+   "group": "corpus",
+   "code": "\"Total: \"0",
+   "value": 0,
+   "libreoffice": "Total: 0",
+   "expected": "Total: 0"
+  },
+  {
+   "group": "corpus",
+   "code": "000-00",
+   "value": 1234.5678,
+   "libreoffice": "012-35",
+   "expected": "012-35"
+  },
+  {
+   "group": "corpus",
+   "code": "000-00",
+   "value": -0.256,
+   "libreoffice": "000-00",
+   "expected": "-000-00",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "000-00",
+   "value": 46024.75,
+   "libreoffice": "460-25",
+   "expected": "460-25"
+  },
+  {
+   "group": "corpus",
+   "code": "000-00",
+   "value": 0,
+   "libreoffice": "000-00",
+   "expected": "000-00"
+  },
+  {
+   "group": "corpus",
+   "code": "00000",
+   "value": 1234.5678,
+   "libreoffice": "01235",
+   "expected": "01235"
+  },
+  {
+   "group": "corpus",
+   "code": "00000",
+   "value": -0.256,
+   "libreoffice": "00000",
+   "expected": "-00000",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "00000",
+   "value": 46024.75,
+   "libreoffice": "46025",
+   "expected": "46025"
+  },
+  {
+   "group": "corpus",
+   "code": "00000",
+   "value": 0,
+   "libreoffice": "00000",
+   "expected": "00000"
+  },
+  {
+   "group": "corpus",
+   "code": "(000) 000-0000",
+   "value": 1234.5678,
+   "libreoffice": "(000) 000-1235",
+   "expected": "(000) 000-1235"
+  },
+  {
+   "group": "corpus",
+   "code": "(000) 000-0000",
+   "value": -0.256,
+   "libreoffice": "(000) 000-0000",
+   "expected": "-(000) 000-0000",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "(000) 000-0000",
+   "value": 46024.75,
+   "libreoffice": "(000) 004-6025",
+   "expected": "(000) 004-6025"
+  },
+  {
+   "group": "corpus",
+   "code": "(000) 000-0000",
+   "value": 0,
+   "libreoffice": "(000) 000-0000",
+   "expected": "(000) 000-0000"
+  },
+  {
+   "group": "corpus",
+   "code": "@",
+   "value": 1234.5678,
+   "libreoffice": "1234.5678",
+   "expected": "1234.5678"
+  },
+  {
+   "group": "corpus",
+   "code": "@",
+   "value": -0.256,
+   "libreoffice": "-0.256",
+   "expected": "-0.256"
+  },
+  {
+   "group": "corpus",
+   "code": "@",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "46024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "@",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "@\" (text)\"",
+   "value": 1234.5678,
+   "libreoffice": "1234.5678",
+   "expected": "1234.5678"
+  },
+  {
+   "group": "corpus",
+   "code": "@\" (text)\"",
+   "value": -0.256,
+   "libreoffice": "-0.256",
+   "expected": "-0.256"
+  },
+  {
+   "group": "corpus",
+   "code": "@\" (text)\"",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "46024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "@\" (text)\"",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "0;-0;;@",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "corpus",
+   "code": "0;-0;;@",
+   "value": -0.256,
+   "libreoffice": "-0",
+   "expected": "-0"
+  },
+  {
+   "group": "corpus",
+   "code": "0;-0;;@",
+   "value": 46024.75,
+   "libreoffice": "46025",
+   "expected": "46025"
+  },
+  {
+   "group": "corpus",
+   "code": "0;-0;;@",
+   "value": 0,
+   "libreoffice": "",
+   "expected": ""
+  },
+  {
+   "group": "corpus",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 1234.5678,
+   "libreoffice": "big",
+   "expected": "big"
+  },
+  {
+   "group": "corpus",
+   "code": "[>100]\"big\";\"small\"",
+   "value": -0.256,
+   "libreoffice": "small",
+   "expected": "small"
+  },
+  {
+   "group": "corpus",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 46024.75,
+   "libreoffice": "big",
+   "expected": "big"
+  },
+  {
+   "group": "corpus",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 0,
+   "libreoffice": "small",
+   "expected": "small"
+  },
+  {
+   "group": "corpus",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": 1234.5678,
+   "libreoffice": "1234.6",
+   "expected": "1234.6"
+  },
+  {
+   "group": "corpus",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": -0.256,
+   "libreoffice": "0.3",
+   "expected": "0.3"
+  },
+  {
+   "group": "corpus",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": 46024.75,
+   "libreoffice": "46024.8",
+   "expected": "46024.8"
+  },
+  {
+   "group": "corpus",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": 0,
+   "libreoffice": "0.0",
+   "expected": "0.0"
+  },
+  {
+   "group": "corpus",
+   "code": "[=0]\"zero\";0",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "corpus",
+   "code": "[=0]\"zero\";0",
+   "value": -0.256,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "[=0]\"zero\";0",
+   "value": 46024.75,
+   "libreoffice": "46025",
+   "expected": "46025"
+  },
+  {
+   "group": "corpus",
+   "code": "[=0]\"zero\";0",
+   "value": 0,
+   "libreoffice": "zero",
+   "expected": "zero"
+  },
+  {
+   "group": "corpus",
+   "code": "[$€-407] #,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "€ 1,234.57",
+   "expected": "€ 1,234.57"
+  },
+  {
+   "group": "corpus",
+   "code": "[$€-407] #,##0.00",
+   "value": -0.256,
+   "libreoffice": "-€ 0.26",
+   "expected": "-€ 0.26"
+  },
+  {
+   "group": "corpus",
+   "code": "[$€-407] #,##0.00",
+   "value": 46024.75,
+   "libreoffice": "€ 46,024.75",
+   "expected": "€ 46,024.75"
+  },
+  {
+   "group": "corpus",
+   "code": "[$€-407] #,##0.00",
+   "value": 0,
+   "libreoffice": "€ 0.00",
+   "expected": "€ 0.00"
+  },
+  {
+   "group": "corpus",
+   "code": "[$¥-411] #,##0",
+   "value": 1234.5678,
+   "libreoffice": "¥ 1,235",
+   "expected": "¥ 1,235"
+  },
+  {
+   "group": "corpus",
+   "code": "[$¥-411] #,##0",
+   "value": -0.256,
+   "libreoffice": "¥ 0",
+   "expected": "-¥ 0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "[$¥-411] #,##0",
+   "value": 46024.75,
+   "libreoffice": "¥ 46,025",
+   "expected": "¥ 46,025"
+  },
+  {
+   "group": "corpus",
+   "code": "[$¥-411] #,##0",
+   "value": 0,
+   "libreoffice": "¥ 0",
+   "expected": "¥ 0"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-409]mmmm d, yyyy",
+   "value": 1234.5678,
+   "libreoffice": "May 18, 1903",
+   "expected": "May 18, 1903"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-409]mmmm d, yyyy",
+   "value": -0.256,
+   "libreoffice": "December 29, 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-409]mmmm d, yyyy",
+   "value": 46024.75,
+   "libreoffice": "January 2, 2026",
+   "expected": "January 2, 2026"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-409]mmmm d, yyyy",
+   "value": 0,
+   "libreoffice": "December 30, 1899",
+   "expected": "January 0, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-F800]dddd, mmmm dd, yyyy",
+   "value": 1234.5678,
+   "libreoffice": "Monday, May 18, 1903",
+   "expected": "Monday, May 18, 1903"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-F800]dddd, mmmm dd, yyyy",
+   "value": -0.256,
+   "libreoffice": "Friday, December 29, 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-F800]dddd, mmmm dd, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Friday, January 2, 2026",
+   "expected": "Friday, January 02, 2026",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "corpus",
+   "code": "[$-F800]dddd, mmmm dd, yyyy",
+   "value": 0,
+   "libreoffice": "Saturday, December 30, 1899",
+   "expected": "Saturday, January 00, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%;[Red]-0.00%",
+   "value": 1234.5678,
+   "libreoffice": "123456.78%",
+   "expected": "123456.78%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%;[Red]-0.00%",
+   "value": -0.256,
+   "libreoffice": "-25.60%",
+   "expected": "-25.60%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%;[Red]-0.00%",
+   "value": 46024.75,
+   "libreoffice": "4602475.00%",
+   "expected": "4602475.00%"
+  },
+  {
+   "group": "corpus",
+   "code": "0.00%;[Red]-0.00%",
+   "value": 0,
+   "libreoffice": "0.00%",
+   "expected": "0.00%"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.000",
+   "value": 1234.5678,
+   "libreoffice": "1,234.568",
+   "expected": "1,234.568"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.000",
+   "value": -0.256,
+   "libreoffice": "-0.256",
+   "expected": "-0.256"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.000",
+   "value": 46024.75,
+   "libreoffice": "46,024.750",
+   "expected": "46,024.750"
+  },
+  {
+   "group": "corpus",
+   "code": "#,##0.000",
+   "value": 0,
+   "libreoffice": "0.000",
+   "expected": "0.000"
+  },
+  {
+   "group": "corpus",
+   "code": "* 0",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "corpus",
+   "code": "* 0",
+   "value": -0.256,
+   "libreoffice": "0",
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "* 0",
+   "value": 46024.75,
+   "libreoffice": "46025",
+   "expected": "46025"
+  },
+  {
+   "group": "corpus",
+   "code": "* 0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "corpus",
+   "code": "0_)",
+   "value": 1234.5678,
+   "libreoffice": "1235 ",
+   "expected": "1235 "
+  },
+  {
+   "group": "corpus",
+   "code": "0_)",
+   "value": -0.256,
+   "libreoffice": "0 ",
+   "expected": "-0 ",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "corpus",
+   "code": "0_)",
+   "value": 46024.75,
+   "libreoffice": "46025 ",
+   "expected": "46025 "
+  },
+  {
+   "group": "corpus",
+   "code": "0_)",
+   "value": 0,
+   "libreoffice": "0 ",
+   "expected": "0 "
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy",
+   "value": 1234.5678,
+   "libreoffice": "5/18/1903",
+   "expected": "5/18/1903"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy",
+   "value": -0.256,
+   "libreoffice": "12/29/1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy",
+   "value": 46024.75,
+   "libreoffice": "1/2/2026",
+   "expected": "1/2/2026"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy",
+   "value": 0,
+   "libreoffice": "12/30/1899",
+   "expected": "1/0/1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy h:mm",
+   "value": 1234.5678,
+   "libreoffice": "5/18/1903 13:37",
+   "expected": "5/18/1903 13:37"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy h:mm",
+   "value": -0.256,
+   "libreoffice": "12/29/1899 17:51",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy h:mm",
+   "value": 46024.75,
+   "libreoffice": "1/2/2026 18:00",
+   "expected": "1/2/2026 18:00"
+  },
+  {
+   "group": "builtin",
+   "code": "m/d/yyyy h:mm",
+   "value": 0,
+   "libreoffice": "12/30/1899 0:00",
+   "expected": "1/0/1900 0:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "ecma",
+   "code": "#.000",
+   "value": 8.9,
+   "libreoffice": "8.900",
+   "expected": "8.900"
+  },
+  {
+   "group": "ecma",
+   "code": "#.000",
+   "value": 0.631,
+   "libreoffice": ".631",
+   "expected": ".631"
+  },
+  {
+   "group": "ecma",
+   "code": "#.000",
+   "value": -2,
+   "libreoffice": "-2.000",
+   "expected": "-2.000"
+  },
+  {
+   "group": "ecma",
+   "code": "0.#",
+   "value": 0.631,
+   "libreoffice": "0.6",
+   "expected": "0.6"
+  },
+  {
+   "group": "ecma",
+   "code": "0.#",
+   "value": 1.3,
+   "libreoffice": "1.3",
+   "expected": "1.3"
+  },
+  {
+   "group": "ecma",
+   "code": "0.#",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5.",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "ecma",
+   "code": "#.0#",
+   "value": 1234.568,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "ecma",
+   "code": "#.0#",
+   "value": 1.5,
+   "libreoffice": "1.5",
+   "expected": "1.5"
+  },
+  {
+   "group": "ecma",
+   "code": "#.0#",
+   "value": 0.049,
+   "libreoffice": ".05",
+   "expected": ".05"
+  },
+  {
+   "group": "ecma",
+   "code": "???.???",
+   "value": 44.398,
+   "libreoffice": " 44.398",
+   "expected": " 44.398"
+  },
+  {
+   "group": "ecma",
+   "code": "???.???",
+   "value": 102.65,
+   "libreoffice": "102.65 ",
+   "expected": "102.65 "
+  },
+  {
+   "group": "ecma",
+   "code": "???.???",
+   "value": 2.8,
+   "libreoffice": "  2.8  ",
+   "expected": "  2.8  "
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0",
+   "value": 999.5,
+   "libreoffice": "1,000",
+   "expected": "1,000"
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0",
+   "value": 1234567.891,
+   "libreoffice": "1,234,568",
+   "expected": "1,234,568"
+  },
+  {
+   "group": "ecma",
+   "code": "#,###",
+   "value": 0,
+   "libreoffice": "",
+   "expected": ""
+  },
+  {
+   "group": "ecma",
+   "code": "#,###",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5"
+  },
+  {
+   "group": "ecma",
+   "code": "#,###",
+   "value": 1234567,
+   "libreoffice": "1,234,567",
+   "expected": "1,234,567"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0,",
+   "value": 12200000,
+   "libreoffice": "12200.0",
+   "expected": "12200.0"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0,",
+   "value": 999999,
+   "libreoffice": "1000.0",
+   "expected": "1000.0"
+  },
+  {
+   "group": "ecma",
+   "code": "0,",
+   "value": 1500,
+   "libreoffice": "2",
+   "expected": "2"
+  },
+  {
+   "group": "ecma",
+   "code": "0,",
+   "value": 499,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/?",
+   "value": 1.75,
+   "libreoffice": "1 3/4",
+   "expected": "1 3/4"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/?",
+   "value": 0.5,
+   "libreoffice": " 1/2",
+   "expected": " 1/2"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/?",
+   "value": 3,
+   "libreoffice": "3    ",
+   "expected": "3    "
+  },
+  {
+   "group": "ecma",
+   "code": "# ??/??",
+   "value": 3.14159,
+   "libreoffice": "3 14/99",
+   "expected": "3 14/99"
+  },
+  {
+   "group": "ecma",
+   "code": "# ??/??",
+   "value": 0.333,
+   "libreoffice": "  1/3 ",
+   "expected": "  1/3 "
+  },
+  {
+   "group": "ecma",
+   "code": "?/?",
+   "value": 1.5,
+   "libreoffice": "3/2",
+   "expected": "3/2"
+  },
+  {
+   "group": "ecma",
+   "code": "?/?",
+   "value": 0.25,
+   "libreoffice": "1/4",
+   "expected": "1/4"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/8",
+   "value": 2.3,
+   "libreoffice": "2 2/8",
+   "expected": "2 2/8"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/8",
+   "value": 0.5,
+   "libreoffice": " 4/8",
+   "expected": " 4/8"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/8",
+   "value": 4,
+   "libreoffice": "4   ",
+   "expected": "4   "
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/16",
+   "value": 0.3,
+   "libreoffice": " 5/16",
+   "expected": " 5/16"
+  },
+  {
+   "group": "ecma",
+   "code": "# ?/16",
+   "value": 1.5,
+   "libreoffice": "1 8/16",
+   "expected": "1 8/16"
+  },
+  {
+   "group": "ecma",
+   "code": "0/16",
+   "value": 0.3,
+   "libreoffice": "5/16",
+   "expected": "5/16"
+  },
+  {
+   "group": "ecma",
+   "code": "0/16",
+   "value": 2,
+   "libreoffice": "32/16",
+   "expected": "32/16"
+  },
+  {
+   "group": "ecma",
+   "code": "# ??/100",
+   "value": 0.123,
+   "libreoffice": " 12/100",
+   "expected": " 12/100"
+  },
+  {
+   "group": "ecma",
+   "code": "# ??/100",
+   "value": 2.5,
+   "libreoffice": "2 50/100",
+   "expected": "2 50/100"
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": -1234.5,
+   "libreoffice": "(1,234.50)",
+   "expected": "(1,234.50)"
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 0,
+   "libreoffice": "0.00 ",
+   "expected": "0.00 "
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0.00_);(#,##0.00)",
+   "value": 12,
+   "libreoffice": "12.00 ",
+   "expected": "12.00 "
+  },
+  {
+   "group": "ecma",
+   "code": "0.00E+00",
+   "value": 12345.6789,
+   "libreoffice": "1.23E+04",
+   "expected": "1.23E+04"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00E+00",
+   "value": 0.000123,
+   "libreoffice": "1.23E-04",
+   "expected": "1.23E-04"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00E+00",
+   "value": 0,
+   "libreoffice": "0.00E+00",
+   "expected": "0.00E+00"
+  },
+  {
+   "group": "ecma",
+   "code": "##0.0E+0",
+   "value": 12345.6789,
+   "libreoffice": "12.3E+3",
+   "expected": "12.3E+3"
+  },
+  {
+   "group": "ecma",
+   "code": "##0.0E+0",
+   "value": 0.000123,
+   "libreoffice": "123.0E-6",
+   "expected": "123.0E-6"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0E+00",
+   "value": -1234.5,
+   "libreoffice": "-1.2E+03",
+   "expected": "-1.2E+03"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0E+00",
+   "value": 99999,
+   "libreoffice": "1.0E+05",
+   "expected": "1.0E+05"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00E-00",
+   "value": 12345.6789,
+   "libreoffice": "1.23E04",
+   "expected": "1.23E04"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00E-00",
+   "value": 0.000123,
+   "libreoffice": "1.23E-04",
+   "expected": "1.23E-04"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0e+0",
+   "value": 1234.5,
+   "libreoffice": "1.2e+3",
+   "expected": "1.2e+3"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0e+0",
+   "value": 0.00123,
+   "libreoffice": "1.2e-3",
+   "expected": "1.2e-3"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00%",
+   "value": 0.256,
+   "libreoffice": "25.60%",
+   "expected": "25.60%"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00%",
+   "value": -0.001,
+   "libreoffice": "-0.10%",
+   "expected": "-0.10%"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00%",
+   "value": 1.5,
+   "libreoffice": "150.00%",
+   "expected": "150.00%"
+  },
+  {
+   "group": "ecma",
+   "code": "0%",
+   "value": 0.5,
+   "libreoffice": "50%",
+   "expected": "50%"
+  },
+  {
+   "group": "ecma",
+   "code": "0%",
+   "value": 0.005,
+   "libreoffice": "1%",
+   "expected": "1%"
+  },
+  {
+   "group": "ecma",
+   "code": "0%",
+   "value": 12,
+   "libreoffice": "1200%",
+   "expected": "1200%"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0%;-0.0%;\"zero\"",
+   "value": 0.123,
+   "libreoffice": "12.3%",
+   "expected": "12.3%"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0%;-0.0%;\"zero\"",
+   "value": -0.456,
+   "libreoffice": "-45.6%",
+   "expected": "-45.6%"
+  },
+  {
+   "group": "ecma",
+   "code": "0.0%;-0.0%;\"zero\"",
+   "value": 0,
+   "libreoffice": "zero",
+   "expected": "zero"
+  },
+  {
+   "group": "ecma",
+   "code": "$#,##0.00",
+   "value": 1234.5,
+   "libreoffice": "$1,234.50",
+   "expected": "$1,234.50"
+  },
+  {
+   "group": "ecma",
+   "code": "$#,##0.00",
+   "value": -1234.5,
+   "libreoffice": "-$1,234.50",
+   "expected": "-$1,234.50"
+  },
+  {
+   "group": "ecma",
+   "code": "$#,##0.00",
+   "value": 0,
+   "libreoffice": "$0.00",
+   "expected": "$0.00"
+  },
+  {
+   "group": "ecma",
+   "code": "00000",
+   "value": 42,
+   "libreoffice": "00042",
+   "expected": "00042"
+  },
+  {
+   "group": "ecma",
+   "code": "00000",
+   "value": 123456,
+   "libreoffice": "123456",
+   "expected": "123456"
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0.0;[Red]-#,##0.0",
+   "value": 1234.55,
+   "libreoffice": "1,234.6",
+   "expected": "1,234.6"
+  },
+  {
+   "group": "ecma",
+   "code": "#,##0.0;[Red]-#,##0.0",
+   "value": -1234.55,
+   "libreoffice": "-1,234.6",
+   "expected": "-1,234.6"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00;-0.00;;@",
+   "value": 1,
+   "libreoffice": "1.00",
+   "expected": "1.00"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00;-0.00;;@",
+   "value": -1,
+   "libreoffice": "-1.00",
+   "expected": "-1.00"
+  },
+  {
+   "group": "ecma",
+   "code": "0.00;-0.00;;@",
+   "value": 0,
+   "libreoffice": "",
+   "expected": ""
+  },
+  {
+   "group": "ecma",
+   "code": "0.00;-0.00;;@",
+   "value": "text",
+   "libreoffice": "text",
+   "expected": "text"
+  },
+  {
+   "group": "ecma",
+   "code": "m/d/yyyy h:mm",
+   "value": 46024.75,
+   "libreoffice": "1/2/2026 18:00",
+   "expected": "1/2/2026 18:00"
+  },
+  {
+   "group": "ecma",
+   "code": "m/d/yyyy h:mm",
+   "value": 36526.5,
+   "libreoffice": "1/1/2000 12:00",
+   "expected": "1/1/2000 12:00"
+  },
+  {
+   "group": "ecma",
+   "code": "hh:mm AM/PM",
+   "value": 0.25,
+   "libreoffice": "06:00 AM",
+   "expected": "06:00 AM"
+  },
+  {
+   "group": "ecma",
+   "code": "hh:mm AM/PM",
+   "value": 0.75,
+   "libreoffice": "06:00 PM",
+   "expected": "06:00 PM"
+  },
+  {
+   "group": "ecma",
+   "code": "hh:mm AM/PM",
+   "value": 0.5,
+   "libreoffice": "12:00 PM",
+   "expected": "12:00 PM"
+  },
+  {
+   "group": "ecma",
+   "code": "d-mmm-yyyy",
+   "value": 46024,
+   "libreoffice": "2-Jan-2026",
+   "expected": "2-Jan-2026"
+  },
+  {
+   "group": "ecma",
+   "code": "d-mmm-yyyy",
+   "value": 36526,
+   "libreoffice": "1-Jan-2000",
+   "expected": "1-Jan-2000"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 150,
+   "libreoffice": "big",
+   "expected": "big"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 50,
+   "libreoffice": "small",
+   "expected": "small"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"big\";\"small\"",
+   "value": -5,
+   "libreoffice": "small",
+   "expected": "small",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"big\";\"small\"",
+   "value": 0,
+   "libreoffice": "small",
+   "expected": "small"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]0\"big\";0\"small\"",
+   "value": 150,
+   "libreoffice": "150big",
+   "expected": "150big"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]0\"big\";0\"small\"",
+   "value": 50,
+   "libreoffice": "50small",
+   "expected": "50small"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]0\"big\";0\"small\"",
+   "value": -5,
+   "libreoffice": "5small",
+   "expected": "5small",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";[<0]\"b\";\"c\"",
+   "value": 150,
+   "libreoffice": "a",
+   "expected": "a"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";[<0]\"b\";\"c\"",
+   "value": 50,
+   "libreoffice": "c",
+   "expected": "c"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";[<0]\"b\";\"c\"",
+   "value": -5,
+   "libreoffice": "b",
+   "expected": "b",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";[<0]\"b\";\"c\"",
+   "value": 0,
+   "libreoffice": "c",
+   "expected": "c"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";\"b\";\"c\"",
+   "value": 150,
+   "libreoffice": "a",
+   "expected": "a"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";\"b\";\"c\"",
+   "value": 50,
+   "libreoffice": "c",
+   "expected": "c"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";\"b\";\"c\"",
+   "value": -5,
+   "libreoffice": "b",
+   "expected": "b",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[>100]\"a\";\"b\";\"c\"",
+   "value": 0,
+   "libreoffice": "c",
+   "expected": "c"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=5]0.0;0.00",
+   "value": 3,
+   "libreoffice": "3.0",
+   "expected": "3.0"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=5]0.0;0.00",
+   "value": 5,
+   "libreoffice": "5.0",
+   "expected": "5.0"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=5]0.0;0.00",
+   "value": 6,
+   "libreoffice": "6.00",
+   "expected": "6.00"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=5]0.0;0.00",
+   "value": -5,
+   "libreoffice": "-5.0",
+   "expected": "-5.0",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": -5,
+   "libreoffice": "5.0",
+   "expected": "5.0"
+  },
+  {
+   "group": "conditions",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": 5,
+   "libreoffice": "5.0",
+   "expected": "5.0"
+  },
+  {
+   "group": "conditions",
+   "code": "[<0][Red]0.0;[Blue]0.0",
+   "value": 0,
+   "libreoffice": "0.0",
+   "expected": "0.0"
+  },
+  {
+   "group": "conditions",
+   "code": "[=0]\"zero\";0",
+   "value": 0,
+   "libreoffice": "zero",
+   "expected": "zero"
+  },
+  {
+   "group": "conditions",
+   "code": "[=0]\"zero\";0",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5"
+  },
+  {
+   "group": "conditions",
+   "code": "[=0]\"zero\";0",
+   "value": -5,
+   "libreoffice": "5",
+   "expected": "5",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[<10]0.0;[>=100]0.00;0",
+   "value": 6,
+   "libreoffice": "6.0",
+   "expected": "6.0"
+  },
+  {
+   "group": "conditions",
+   "code": "[<10]0.0;[>=100]0.00;0",
+   "value": 50,
+   "libreoffice": "50",
+   "expected": "50"
+  },
+  {
+   "group": "conditions",
+   "code": "[<10]0.0;[>=100]0.00;0",
+   "value": 150,
+   "libreoffice": "150.00",
+   "expected": "150.00"
+  },
+  {
+   "group": "conditions",
+   "code": "[<10]0.0;[>=100]0.00;0",
+   "value": -5,
+   "libreoffice": "-5.0",
+   "expected": "-5.0",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=0]\"n\"0;0",
+   "value": -5,
+   "libreoffice": "n5",
+   "expected": "n5",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=0]\"n\"0;0",
+   "value": 0,
+   "libreoffice": "n0",
+   "expected": "n0"
+  },
+  {
+   "group": "conditions",
+   "code": "[<=0]\"n\"0;0",
+   "value": 2,
+   "libreoffice": "2",
+   "expected": "2"
+  },
+  {
+   "group": "conditions",
+   "code": "[Red]0;[Blue]-0",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5"
+  },
+  {
+   "group": "conditions",
+   "code": "[Red]0;[Blue]-0",
+   "value": -5,
+   "libreoffice": "-5",
+   "expected": "-5"
+  },
+  {
+   "group": "conditions",
+   "code": "0;[>3]0\"x\";0\"y\"",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5"
+  },
+  {
+   "group": "conditions",
+   "code": "0;[>3]0\"x\";0\"y\"",
+   "value": 2,
+   "libreoffice": "2",
+   "expected": "2"
+  },
+  {
+   "group": "conditions",
+   "code": "0;[>3]0\"x\";0\"y\"",
+   "value": -2,
+   "libreoffice": "-2",
+   "expected": "-2",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
+  },
+  {
+   "group": "conditions",
+   "code": "0;-0;;@",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5"
+  },
+  {
+   "group": "conditions",
+   "code": "0;-0;;@",
+   "value": -5,
+   "libreoffice": "-5",
+   "expected": "-5"
+  },
+  {
+   "group": "conditions",
+   "code": "0;-0;;@",
+   "value": 0,
+   "libreoffice": "",
+   "expected": ""
+  },
+  {
+   "group": "conditions",
+   "code": "\"p\"0;\"n\"0;\"z\"0;\"t\"@",
+   "value": 5,
+   "libreoffice": "p5",
+   "expected": "p5"
+  },
+  {
+   "group": "conditions",
+   "code": "\"p\"0;\"n\"0;\"z\"0;\"t\"@",
+   "value": -5,
+   "libreoffice": "n5",
+   "expected": "n5"
+  },
+  {
+   "group": "conditions",
+   "code": "\"p\"0;\"n\"0;\"z\"0;\"t\"@",
+   "value": 0,
+   "libreoffice": "z0",
+   "expected": "z0"
+  },
+  {
+   "group": "conditions",
+   "code": "\"p\"0;\"n\"0;\"z\"0;\"t\"@",
+   "value": "abc",
+   "libreoffice": "tabc",
+   "expected": "tabc"
+  },
+  {
+   "group": "conditions",
+   "code": "0;0;0;\"t\"@",
+   "value": 5,
+   "libreoffice": "5",
+   "expected": "5"
+  },
+  {
+   "group": "conditions",
+   "code": "0;0;0;\"t\"@",
+   "value": "abc",
+   "libreoffice": "tabc",
+   "expected": "tabc"
+  },
+  {
+   "group": "conditions",
+   "code": "0.00;(0.00)",
+   "value": 5,
+   "libreoffice": "5.00",
+   "expected": "5.00"
+  },
+  {
+   "group": "conditions",
+   "code": "0.00;(0.00)",
+   "value": -5,
+   "libreoffice": "(5.00)",
+   "expected": "(5.00)"
+  },
+  {
+   "group": "conditions",
+   "code": "0.00;(0.00)",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "conditions",
+   "code": "0.00;(0.00);\"-\"",
+   "value": 5,
+   "libreoffice": "5.00",
+   "expected": "5.00"
+  },
+  {
+   "group": "conditions",
+   "code": "0.00;(0.00);\"-\"",
+   "value": -5,
+   "libreoffice": "(5.00)",
+   "expected": "(5.00)"
+  },
+  {
+   "group": "conditions",
+   "code": "0.00;(0.00);\"-\"",
+   "value": 0,
+   "libreoffice": "-",
+   "expected": "-"
+  },
+  {
+   "group": "conditions",
+   "code": "[Blue]0.0;[Red]-0.0;[Green]0",
+   "value": 1.25,
+   "libreoffice": "1.3",
+   "expected": "1.3"
+  },
+  {
+   "group": "conditions",
+   "code": "[Blue]0.0;[Red]-0.0;[Green]0",
+   "value": -1.25,
+   "libreoffice": "-1.3",
+   "expected": "-1.3"
+  },
+  {
+   "group": "conditions",
+   "code": "[Blue]0.0;[Red]-0.0;[Green]0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "text",
+   "code": "@",
+   "value": "abc",
+   "libreoffice": "abc",
+   "expected": "abc"
+  },
+  {
+   "group": "text",
+   "code": "@",
+   "value": "",
+   "libreoffice": "",
+   "expected": ""
+  },
+  {
+   "group": "text",
+   "code": "@\" (text)\"",
+   "value": "abc",
+   "libreoffice": "abc (text)",
+   "expected": "abc (text)"
+  },
+  {
+   "group": "text",
+   "code": "0;0;0;\"t\"@",
+   "value": "abc",
+   "libreoffice": "tabc",
+   "expected": "tabc"
+  },
+  {
+   "group": "text",
+   "code": "0.00",
+   "value": "abc",
+   "libreoffice": "abc",
+   "expected": "abc"
+  },
+  {
+   "group": "text",
+   "code": "\"a\"@;\"b\"",
+   "value": "abc",
+   "libreoffice": "abc",
+   "expected": "abc"
+  },
+  {
+   "group": "text",
+   "code": "0;\"t\"@",
+   "value": "abc",
+   "libreoffice": "tabc",
+   "expected": "tabc"
+  },
+  {
+   "group": "text",
+   "code": "\"[\" @ \"]\"",
+   "value": "x",
+   "libreoffice": "[ x ]",
+   "expected": "[ x ]"
+  },
+  {
+   "group": "text",
+   "code": "General",
+   "value": "abc",
+   "libreoffice": "abc",
+   "expected": "abc"
+  },
+  {
+   "group": "literals",
+   "code": "0.0 \"kg\"",
+   "value": 1234.5678,
+   "libreoffice": "1234.6 kg",
+   "expected": "1234.6 kg"
+  },
+  {
+   "group": "literals",
+   "code": "0.0 \"kg\"",
+   "value": -7.5,
+   "libreoffice": "-7.5 kg",
+   "expected": "-7.5 kg"
+  },
+  {
+   "group": "literals",
+   "code": "0.0 \"kg\"",
+   "value": 0,
+   "libreoffice": "0.0 kg",
+   "expected": "0.0 kg"
+  },
+  {
+   "group": "literals",
+   "code": "\"Total: \"0",
+   "value": 1234.5678,
+   "libreoffice": "Total: 1235",
+   "expected": "Total: 1235"
+  },
+  {
+   "group": "literals",
+   "code": "\"Total: \"0",
+   "value": -7.5,
+   "libreoffice": "-Total: 8",
+   "expected": "-Total: 8"
+  },
+  {
+   "group": "literals",
+   "code": "\"Total: \"0",
+   "value": 0,
+   "libreoffice": "Total: 0",
+   "expected": "Total: 0"
+  },
+  {
+   "group": "literals",
+   "code": "000-00",
+   "value": 1234.5678,
+   "libreoffice": "012-35",
+   "expected": "012-35"
+  },
+  {
+   "group": "literals",
+   "code": "000-00",
+   "value": -7.5,
+   "libreoffice": "-000-08",
+   "expected": "-000-08"
+  },
+  {
+   "group": "literals",
+   "code": "000-00",
+   "value": 0,
+   "libreoffice": "000-00",
+   "expected": "000-00"
+  },
+  {
+   "group": "literals",
+   "code": "(000) 000-0000",
+   "value": 1234.5678,
+   "libreoffice": "(000) 000-1235",
+   "expected": "(000) 000-1235"
+  },
+  {
+   "group": "literals",
+   "code": "(000) 000-0000",
+   "value": -7.5,
+   "libreoffice": "-(000) 000-0008",
+   "expected": "-(000) 000-0008"
+  },
+  {
+   "group": "literals",
+   "code": "(000) 000-0000",
+   "value": 0,
+   "libreoffice": "(000) 000-0000",
+   "expected": "(000) 000-0000"
+  },
+  {
+   "group": "literals",
+   "code": "0 \"a\" 0",
+   "value": 1234.5678,
+   "libreoffice": "123 a 5",
+   "expected": "123 a 5"
+  },
+  {
+   "group": "literals",
+   "code": "0 \"a\" 0",
+   "value": -7.5,
+   "libreoffice": "-0 a 8",
+   "expected": "-0 a 8"
+  },
+  {
+   "group": "literals",
+   "code": "0 \"a\" 0",
+   "value": 0,
+   "libreoffice": "0 a 0",
+   "expected": "0 a 0"
+  },
+  {
+   "group": "literals",
+   "code": "0\\x",
+   "value": 1234.5678,
+   "libreoffice": "1235x",
+   "expected": "1235x"
+  },
+  {
+   "group": "literals",
+   "code": "0\\x",
+   "value": -7.5,
+   "libreoffice": "-8x",
+   "expected": "-8x"
+  },
+  {
+   "group": "literals",
+   "code": "0\\x",
+   "value": 0,
+   "libreoffice": "0x",
+   "expected": "0x"
+  },
+  {
+   "group": "literals",
+   "code": "\\$0.00",
+   "value": 1234.5678,
+   "libreoffice": "$1234.57",
+   "expected": "$1234.57"
+  },
+  {
+   "group": "literals",
+   "code": "\\$0.00",
+   "value": -7.5,
+   "libreoffice": "-$7.50",
+   "expected": "-$7.50"
+  },
+  {
+   "group": "literals",
+   "code": "\\$0.00",
+   "value": 0,
+   "libreoffice": "$0.00",
+   "expected": "$0.00"
+  },
+  {
+   "group": "literals",
+   "code": "0_)",
+   "value": 1234.5678,
+   "libreoffice": "1235 ",
+   "expected": "1235 "
+  },
+  {
+   "group": "literals",
+   "code": "0_)",
+   "value": -7.5,
+   "libreoffice": "-8 ",
+   "expected": "-8 "
+  },
+  {
+   "group": "literals",
+   "code": "0_)",
+   "value": 0,
+   "libreoffice": "0 ",
+   "expected": "0 "
+  },
+  {
+   "group": "literals",
+   "code": "_(0_)",
+   "value": 1234.5678,
+   "libreoffice": " 1235 ",
+   "expected": " 1235 "
+  },
+  {
+   "group": "literals",
+   "code": "_(0_)",
+   "value": -7.5,
+   "libreoffice": "- 8 ",
+   "expected": "- 8 "
+  },
+  {
+   "group": "literals",
+   "code": "_(0_)",
+   "value": 0,
+   "libreoffice": " 0 ",
+   "expected": " 0 "
+  },
+  {
+   "group": "literals",
+   "code": "0.0\\%",
+   "value": 1234.5678,
+   "libreoffice": "1234.6%",
+   "expected": "1234.6%"
+  },
+  {
+   "group": "literals",
+   "code": "0.0\\%",
+   "value": -7.5,
+   "libreoffice": "-7.5%",
+   "expected": "-7.5%"
+  },
+  {
+   "group": "literals",
+   "code": "0.0\\%",
+   "value": 0,
+   "libreoffice": "0.0%",
+   "expected": "0.0%"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.00 \"USD\"",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57 USD",
+   "expected": "1,234.57 USD"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.00 \"USD\"",
+   "value": -7.5,
+   "libreoffice": "-7.50 USD",
+   "expected": "-7.50 USD"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.00 \"USD\"",
+   "value": 0,
+   "libreoffice": "0.00 USD",
+   "expected": "0.00 USD"
+  },
+  {
+   "group": "literals",
+   "code": "0 \"%\"",
+   "value": 1234.5678,
+   "libreoffice": "1235 %",
+   "expected": "1235 %"
+  },
+  {
+   "group": "literals",
+   "code": "0 \"%\"",
+   "value": -7.5,
+   "libreoffice": "-8 %",
+   "expected": "-8 %"
+  },
+  {
+   "group": "literals",
+   "code": "0 \"%\"",
+   "value": 0,
+   "libreoffice": "0 %",
+   "expected": "0 %"
+  },
+  {
+   "group": "literals",
+   "code": "\"x\"0.00\"y\"",
+   "value": 1234.5678,
+   "libreoffice": "x1234.57y",
+   "expected": "x1234.57y"
+  },
+  {
+   "group": "literals",
+   "code": "\"x\"0.00\"y\"",
+   "value": -7.5,
+   "libreoffice": "-x7.50y",
+   "expected": "-x7.50y"
+  },
+  {
+   "group": "literals",
+   "code": "\"x\"0.00\"y\"",
+   "value": 0,
+   "libreoffice": "x0.00y",
+   "expected": "x0.00y"
+  },
+  {
+   "group": "literals",
+   "code": "0.00-",
+   "value": 1234.5678,
+   "libreoffice": "1234.57-",
+   "expected": "1234.57-"
+  },
+  {
+   "group": "literals",
+   "code": "0.00-",
+   "value": -7.5,
+   "libreoffice": "-7.50-",
+   "expected": "-7.50-"
+  },
+  {
+   "group": "literals",
+   "code": "0.00-",
+   "value": 0,
+   "libreoffice": "0.00-",
+   "expected": "0.00-"
+  },
+  {
+   "group": "literals",
+   "code": "($0.00)",
+   "value": 1234.5678,
+   "libreoffice": "($1234.57)",
+   "expected": "($1234.57)"
+  },
+  {
+   "group": "literals",
+   "code": "($0.00)",
+   "value": -7.5,
+   "libreoffice": "-($7.50)",
+   "expected": "-($7.50)"
+  },
+  {
+   "group": "literals",
+   "code": "($0.00)",
+   "value": 0,
+   "libreoffice": "($0.00)",
+   "expected": "($0.00)"
+  },
+  {
+   "group": "literals",
+   "code": "[$USD] #,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "USD 1,234.57",
+   "expected": "USD 1,234.57"
+  },
+  {
+   "group": "literals",
+   "code": "[$USD] #,##0.00",
+   "value": -7.5,
+   "libreoffice": "-USD 7.50",
+   "expected": "-USD 7.50"
+  },
+  {
+   "group": "literals",
+   "code": "[$USD] #,##0.00",
+   "value": 0,
+   "libreoffice": "USD 0.00",
+   "expected": "USD 0.00"
+  },
+  {
+   "group": "literals",
+   "code": "[$€-407] #,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "€ 1,234.57",
+   "expected": "€ 1,234.57"
+  },
+  {
+   "group": "literals",
+   "code": "[$€-407] #,##0.00",
+   "value": -7.5,
+   "libreoffice": "-€ 7.50",
+   "expected": "-€ 7.50"
+  },
+  {
+   "group": "literals",
+   "code": "[$€-407] #,##0.00",
+   "value": 0,
+   "libreoffice": "€ 0.00",
+   "expected": "€ 0.00"
+  },
+  {
+   "group": "literals",
+   "code": "[$-409]#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57",
+   "expected": "1,234.57"
+  },
+  {
+   "group": "literals",
+   "code": "[$-409]#,##0.00",
+   "value": -7.5,
+   "libreoffice": "-7.50",
+   "expected": "-7.50"
+  },
+  {
+   "group": "literals",
+   "code": "[$-409]#,##0.00",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "literals",
+   "code": "[$£-809]#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "£1,234.57",
+   "expected": "£1,234.57"
+  },
+  {
+   "group": "literals",
+   "code": "[$£-809]#,##0.00",
+   "value": -7.5,
+   "libreoffice": "-£7.50",
+   "expected": "-£7.50"
+  },
+  {
+   "group": "literals",
+   "code": "[$£-809]#,##0.00",
+   "value": 0,
+   "libreoffice": "£0.00",
+   "expected": "£0.00"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.00[$ kr-41D]",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57 kr",
+   "expected": "1,234.57 kr"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.00[$ kr-41D]",
+   "value": -7.5,
+   "libreoffice": "-7.50 kr",
+   "expected": "-7.50 kr"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.00[$ kr-41D]",
+   "value": 0,
+   "libreoffice": "0.00 kr",
+   "expected": "0.00 kr"
+  },
+  {
+   "group": "literals",
+   "code": "0.0,,,",
+   "value": 1234.5678,
+   "libreoffice": "0.0",
+   "expected": "0.0"
+  },
+  {
+   "group": "literals",
+   "code": "0.0,,,",
+   "value": -7.5,
+   "libreoffice": "0.0",
+   "expected": "-0.0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "0.0,,,",
+   "value": 0,
+   "libreoffice": "0.0",
+   "expected": "0.0"
+  },
+  {
+   "group": "literals",
+   "code": "0.00,,",
+   "value": 1234.5678,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "literals",
+   "code": "0.00,,",
+   "value": -7.5,
+   "libreoffice": "0.00",
+   "expected": "-0.00",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "0.00,,",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.0,\"K\"",
+   "value": 1234.5678,
+   "libreoffice": "1.2K",
+   "expected": "1.2K"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.0,\"K\"",
+   "value": -7.5,
+   "libreoffice": "0.0K",
+   "expected": "-0.0K",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "#,##0.0,\"K\"",
+   "value": 0,
+   "libreoffice": "0.0K",
+   "expected": "0.0K"
+  },
+  {
+   "group": "literals",
+   "code": "#.##",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "literals",
+   "code": "#.##",
+   "value": -7.5,
+   "libreoffice": "-7.5",
+   "expected": "-7.5"
+  },
+  {
+   "group": "literals",
+   "code": "#.##",
+   "value": 0,
+   "libreoffice": "",
+   "expected": ".",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "#.",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235.",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "#.",
+   "value": -7.5,
+   "libreoffice": "-8",
+   "expected": "-8.",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "#.",
+   "value": 0,
+   "libreoffice": "",
+   "expected": ".",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": ".00",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "literals",
+   "code": ".00",
+   "value": -7.5,
+   "libreoffice": "-7.50",
+   "expected": "-7.50"
+  },
+  {
+   "group": "literals",
+   "code": ".00",
+   "value": 0,
+   "libreoffice": ".00",
+   "expected": ".00"
+  },
+  {
+   "group": "literals",
+   "code": "0.",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235.",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "0.",
+   "value": -7.5,
+   "libreoffice": "-8",
+   "expected": "-8.",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "0.",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0.",
+   "excel": true,
+   "note": "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+  },
+  {
+   "group": "literals",
+   "code": "###0.00",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "literals",
+   "code": "###0.00",
+   "value": -7.5,
+   "libreoffice": "-7.50",
+   "expected": "-7.50"
+  },
+  {
+   "group": "literals",
+   "code": "###0.00",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "literals",
+   "code": "?",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "literals",
+   "code": "?",
+   "value": -7.5,
+   "libreoffice": "-8",
+   "expected": "-8"
+  },
+  {
+   "group": "literals",
+   "code": "?",
+   "value": 0,
+   "libreoffice": " ",
+   "expected": " "
+  },
+  {
+   "group": "literals",
+   "code": "??0",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "literals",
+   "code": "??0",
+   "value": -7.5,
+   "libreoffice": "-  8",
+   "expected": "-  8"
+  },
+  {
+   "group": "literals",
+   "code": "??0",
+   "value": 0,
+   "libreoffice": "  0",
+   "expected": "  0"
+  },
+  {
+   "group": "literals",
+   "code": "#?#",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "literals",
+   "code": "#?#",
+   "value": -7.5,
+   "libreoffice": "- 8",
+   "expected": "- 8"
+  },
+  {
+   "group": "literals",
+   "code": "#?#",
+   "value": 0,
+   "libreoffice": " ",
+   "expected": " "
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": 1,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": -1,
+   "libreoffice": "-1",
+   "expected": "-1"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": 0.5,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": 1234.5678,
+   "libreoffice": "1235",
+   "expected": "1235"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": -1234.5678,
+   "libreoffice": "-1235",
+   "expected": "-1235"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": 1e-07,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "numbers",
+   "code": "0",
+   "value": 123456789012,
+   "libreoffice": "123456789012",
+   "expected": "123456789012"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": 1,
+   "libreoffice": "1.00",
+   "expected": "1.00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": -1,
+   "libreoffice": "-1.00",
+   "expected": "-1.00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": 0.5,
+   "libreoffice": "0.50",
+   "expected": "0.50"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": -1234.5678,
+   "libreoffice": "-1234.57",
+   "expected": "-1234.57"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": 1e-07,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00",
+   "value": 123456789012,
+   "libreoffice": "123456789012.00",
+   "expected": "123456789012.00"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": 0,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": 1,
+   "libreoffice": "1.00",
+   "expected": "1.00"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": -1,
+   "libreoffice": "-1.00",
+   "expected": "-1.00"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": 0.5,
+   "libreoffice": "0.50",
+   "expected": "0.50"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": 1234.5678,
+   "libreoffice": "1,234.57",
+   "expected": "1,234.57"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": -1234.5678,
+   "libreoffice": "-1,234.57",
+   "expected": "-1,234.57"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": 1e-07,
+   "libreoffice": "0.00",
+   "expected": "0.00"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0.00",
+   "value": 123456789012,
+   "libreoffice": "123,456,789,012.00",
+   "expected": "123,456,789,012.00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": 0,
+   "libreoffice": "0.0000",
+   "expected": "0.0000"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": 1,
+   "libreoffice": "1.0000",
+   "expected": "1.0000"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": -1,
+   "libreoffice": "-1.0000",
+   "expected": "-1.0000"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": 0.5,
+   "libreoffice": "0.5000",
+   "expected": "0.5000"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": 1234.5678,
+   "libreoffice": "1234.5678",
+   "expected": "1234.5678"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": -1234.5678,
+   "libreoffice": "-1234.5678",
+   "expected": "-1234.5678"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": 1e-07,
+   "libreoffice": "0.0000",
+   "expected": "0.0000"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0000",
+   "value": 123456789012,
+   "libreoffice": "123456789012.0000",
+   "expected": "123456789012.0000"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": 0,
+   "libreoffice": "0.00E+00",
+   "expected": "0.00E+00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": 1,
+   "libreoffice": "1.00E+00",
+   "expected": "1.00E+00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": -1,
+   "libreoffice": "-1.00E+00",
+   "expected": "-1.00E+00"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": 0.5,
+   "libreoffice": "5.00E-01",
+   "expected": "5.00E-01"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": 1234.5678,
+   "libreoffice": "1.23E+03",
+   "expected": "1.23E+03"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": -1234.5678,
+   "libreoffice": "-1.23E+03",
+   "expected": "-1.23E+03"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": 1e-07,
+   "libreoffice": "1.00E-07",
+   "expected": "1.00E-07"
+  },
+  {
+   "group": "numbers",
+   "code": "0.00E+00",
+   "value": 123456789012,
+   "libreoffice": "1.23E+11",
+   "expected": "1.23E+11"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": 1,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": -1,
+   "libreoffice": "-1",
+   "expected": "-1"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": 0.5,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": 1234.5678,
+   "libreoffice": "1,235",
+   "expected": "1,235"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": -1234.5678,
+   "libreoffice": "-1,235",
+   "expected": "-1,235"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": 1e-07,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "numbers",
+   "code": "#,##0",
+   "value": 123456789012,
+   "libreoffice": "123,456,789,012",
+   "expected": "123,456,789,012"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": 0,
+   "libreoffice": "0%",
+   "expected": "0%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": 1,
+   "libreoffice": "100%",
+   "expected": "100%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": -1,
+   "libreoffice": "-100%",
+   "expected": "-100%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": 0.5,
+   "libreoffice": "50%",
+   "expected": "50%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": 1234.5678,
+   "libreoffice": "123457%",
+   "expected": "123457%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": -1234.5678,
+   "libreoffice": "-123457%",
+   "expected": "-123457%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": 1e-07,
+   "libreoffice": "0%",
+   "expected": "0%"
+  },
+  {
+   "group": "numbers",
+   "code": "0%",
+   "value": 123456789012,
+   "libreoffice": "12345678901200%",
+   "expected": "12345678901200%"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": 0,
+   "libreoffice": "0.0",
+   "expected": "0.0"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": 1,
+   "libreoffice": "1.0",
+   "expected": "1.0"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": -1,
+   "libreoffice": "-1.0",
+   "expected": "-1.0"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": 0.5,
+   "libreoffice": "0.5",
+   "expected": "0.5"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": 1234.5678,
+   "libreoffice": "1234.57",
+   "expected": "1234.57"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": -1234.5678,
+   "libreoffice": "-1234.57",
+   "expected": "-1234.57"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": 1e-07,
+   "libreoffice": "0.0",
+   "expected": "0.0"
+  },
+  {
+   "group": "numbers",
+   "code": "0.0#",
+   "value": 123456789012,
+   "libreoffice": "123456789012.0",
+   "expected": "123456789012.0"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 0,
+   "libreoffice": "1899-12-30",
+   "expected": "1900-01-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 1,
+   "libreoffice": "1899-12-31",
+   "expected": "1900-01-01",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 59,
+   "libreoffice": "1900-02-27",
+   "expected": "1900-02-28",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 60,
+   "libreoffice": "1900-02-28",
+   "expected": "1900-02-29",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 61,
+   "libreoffice": "1900-03-01",
+   "expected": "1900-03-01"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 366,
+   "libreoffice": "1900-12-31",
+   "expected": "1900-12-31"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 36526,
+   "libreoffice": "2000-01-01",
+   "expected": "2000-01-01"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 45000.5,
+   "libreoffice": "2023-03-15",
+   "expected": "2023-03-15"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 46024.75,
+   "libreoffice": "2026-01-02",
+   "expected": "2026-01-02"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": 2958465,
+   "libreoffice": "9999-12-31",
+   "expected": "9999-12-31"
+  },
+  {
+   "group": "dates",
+   "code": "yyyy-mm-dd",
+   "value": -1,
+   "libreoffice": "1899-12-29",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 0,
+   "libreoffice": "Saturday",
+   "expected": "Saturday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 1,
+   "libreoffice": "Sunday",
+   "expected": "Sunday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 59,
+   "libreoffice": "Tuesday",
+   "expected": "Tuesday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 60,
+   "libreoffice": "Wednesday",
+   "expected": "Wednesday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 61,
+   "libreoffice": "Thursday",
+   "expected": "Thursday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 366,
+   "libreoffice": "Monday",
+   "expected": "Monday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 36526,
+   "libreoffice": "Saturday",
+   "expected": "Saturday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 45000.5,
+   "libreoffice": "Wednesday",
+   "expected": "Wednesday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 46024.75,
+   "libreoffice": "Friday",
+   "expected": "Friday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": 2958465,
+   "libreoffice": "Friday",
+   "expected": "Friday"
+  },
+  {
+   "group": "dates",
+   "code": "dddd",
+   "value": -1,
+   "libreoffice": "Friday",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 0,
+   "libreoffice": "Dec 30 1899",
+   "expected": "Jan 0 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 1,
+   "libreoffice": "Dec 31 1899",
+   "expected": "Jan 1 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 59,
+   "libreoffice": "Feb 27 1900",
+   "expected": "Feb 28 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 60,
+   "libreoffice": "Feb 28 1900",
+   "expected": "Feb 29 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 61,
+   "libreoffice": "Mar 1 1900",
+   "expected": "Mar 1 1900"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 366,
+   "libreoffice": "Dec 31 1900",
+   "expected": "Dec 31 1900"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 36526,
+   "libreoffice": "Jan 1 2000",
+   "expected": "Jan 1 2000"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 45000.5,
+   "libreoffice": "Mar 15 2023",
+   "expected": "Mar 15 2023"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 46024.75,
+   "libreoffice": "Jan 2 2026",
+   "expected": "Jan 2 2026"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": 2958465,
+   "libreoffice": "Dec 31 9999",
+   "expected": "Dec 31 9999"
+  },
+  {
+   "group": "dates",
+   "code": "mmm d yyyy",
+   "value": -1,
+   "libreoffice": "Dec 29 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 0,
+   "libreoffice": "Saturday, December 30, 1899",
+   "expected": "Saturday, January 0, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 1,
+   "libreoffice": "Sunday, December 31, 1899",
+   "expected": "Sunday, January 1, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 59,
+   "libreoffice": "Tuesday, February 27, 1900",
+   "expected": "Tuesday, February 28, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 60,
+   "libreoffice": "Wednesday, February 28, 1900",
+   "expected": "Wednesday, February 29, 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 61,
+   "libreoffice": "Thursday, March 1, 1900",
+   "expected": "Thursday, March 1, 1900"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 366,
+   "libreoffice": "Monday, December 31, 1900",
+   "expected": "Monday, December 31, 1900"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 36526,
+   "libreoffice": "Saturday, January 1, 2000",
+   "expected": "Saturday, January 1, 2000"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 45000.5,
+   "libreoffice": "Wednesday, March 15, 2023",
+   "expected": "Wednesday, March 15, 2023"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Friday, January 2, 2026",
+   "expected": "Friday, January 2, 2026"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": 2958465,
+   "libreoffice": "Friday, December 31, 9999",
+   "expected": "Friday, December 31, 9999"
+  },
+  {
+   "group": "dates",
+   "code": "dddd, mmmm d, yyyy",
+   "value": -1,
+   "libreoffice": "Friday, December 29, 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 0,
+   "libreoffice": "12/30/99",
+   "expected": "1/0/00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 1,
+   "libreoffice": "12/31/99",
+   "expected": "1/1/00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 59,
+   "libreoffice": "2/27/00",
+   "expected": "2/28/00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 60,
+   "libreoffice": "2/28/00",
+   "expected": "2/29/00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 61,
+   "libreoffice": "3/1/00",
+   "expected": "3/1/00"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 366,
+   "libreoffice": "12/31/00",
+   "expected": "12/31/00"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 36526,
+   "libreoffice": "1/1/00",
+   "expected": "1/1/00"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 45000.5,
+   "libreoffice": "3/15/23",
+   "expected": "3/15/23"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 46024.75,
+   "libreoffice": "1/2/26",
+   "expected": "1/2/26"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": 2958465,
+   "libreoffice": "12/31/99",
+   "expected": "12/31/99"
+  },
+  {
+   "group": "dates",
+   "code": "m/d/yy",
+   "value": -1,
+   "libreoffice": "12/29/99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 0,
+   "libreoffice": "D",
+   "expected": "J",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 1,
+   "libreoffice": "D",
+   "expected": "J",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 59,
+   "libreoffice": "F",
+   "expected": "F"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 60,
+   "libreoffice": "F",
+   "expected": "F"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 61,
+   "libreoffice": "M",
+   "expected": "M"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 366,
+   "libreoffice": "D",
+   "expected": "D"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 36526,
+   "libreoffice": "J",
+   "expected": "J"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 45000.5,
+   "libreoffice": "M",
+   "expected": "M"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 46024.75,
+   "libreoffice": "J",
+   "expected": "J"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": 2958465,
+   "libreoffice": "D",
+   "expected": "D"
+  },
+  {
+   "group": "dates",
+   "code": "mmmmm",
+   "value": -1,
+   "libreoffice": "D",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 0,
+   "libreoffice": "99",
+   "expected": "00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 1,
+   "libreoffice": "99",
+   "expected": "00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 59,
+   "libreoffice": "00",
+   "expected": "00"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 60,
+   "libreoffice": "00",
+   "expected": "00"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 61,
+   "libreoffice": "00",
+   "expected": "00"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 366,
+   "libreoffice": "00",
+   "expected": "00"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 36526,
+   "libreoffice": "00",
+   "expected": "00"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 45000.5,
+   "libreoffice": "23",
+   "expected": "23"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 46024.75,
+   "libreoffice": "26",
+   "expected": "26"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": 2958465,
+   "libreoffice": "99",
+   "expected": "99"
+  },
+  {
+   "group": "dates",
+   "code": "yy",
+   "value": -1,
+   "libreoffice": "99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 0,
+   "libreoffice": "30",
+   "expected": "0",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 1,
+   "libreoffice": "31",
+   "expected": "1",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 59,
+   "libreoffice": "27",
+   "expected": "28",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 60,
+   "libreoffice": "28",
+   "expected": "29",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 61,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 366,
+   "libreoffice": "31",
+   "expected": "31"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 36526,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 45000.5,
+   "libreoffice": "15",
+   "expected": "15"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 46024.75,
+   "libreoffice": "2",
+   "expected": "2"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": 2958465,
+   "libreoffice": "31",
+   "expected": "31"
+  },
+  {
+   "group": "dates",
+   "code": "d",
+   "value": -1,
+   "libreoffice": "29",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 0,
+   "libreoffice": "12",
+   "expected": "1",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 1,
+   "libreoffice": "12",
+   "expected": "1",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 59,
+   "libreoffice": "2",
+   "expected": "2"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 60,
+   "libreoffice": "2",
+   "expected": "2"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 61,
+   "libreoffice": "3",
+   "expected": "3"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 366,
+   "libreoffice": "12",
+   "expected": "12"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 36526,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 45000.5,
+   "libreoffice": "3",
+   "expected": "3"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 46024.75,
+   "libreoffice": "1",
+   "expected": "1"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": 2958465,
+   "libreoffice": "12",
+   "expected": "12"
+  },
+  {
+   "group": "dates",
+   "code": "m",
+   "value": -1,
+   "libreoffice": "12",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 0,
+   "libreoffice": "30 Dec 1899",
+   "expected": "0 Jan 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 1,
+   "libreoffice": "31 Dec 1899",
+   "expected": "1 Jan 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 59,
+   "libreoffice": "27 Feb 1900",
+   "expected": "28 Feb 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 60,
+   "libreoffice": "28 Feb 1900",
+   "expected": "29 Feb 1900",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 61,
+   "libreoffice": "1 Mar 1900",
+   "expected": "1 Mar 1900"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 366,
+   "libreoffice": "31 Dec 1900",
+   "expected": "31 Dec 1900"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 36526,
+   "libreoffice": "1 Jan 2000",
+   "expected": "1 Jan 2000"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 45000.5,
+   "libreoffice": "15 Mar 2023",
+   "expected": "15 Mar 2023"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 46024.75,
+   "libreoffice": "2 Jan 2026",
+   "expected": "2 Jan 2026"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": 2958465,
+   "libreoffice": "31 Dec 9999",
+   "expected": "31 Dec 9999"
+  },
+  {
+   "group": "dates",
+   "code": "[$-409]d mmm yyyy",
+   "value": -1,
+   "libreoffice": "29 Dec 1899",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 0,
+   "libreoffice": "Dec-99",
+   "expected": "Jan-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 1,
+   "libreoffice": "Dec-99",
+   "expected": "Jan-00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 59,
+   "libreoffice": "Feb-00",
+   "expected": "Feb-00"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 60,
+   "libreoffice": "Feb-00",
+   "expected": "Feb-00"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 61,
+   "libreoffice": "Mar-00",
+   "expected": "Mar-00"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 366,
+   "libreoffice": "Dec-00",
+   "expected": "Dec-00"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 36526,
+   "libreoffice": "Jan-00",
+   "expected": "Jan-00"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 45000.5,
+   "libreoffice": "Mar-23",
+   "expected": "Mar-23"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 46024.75,
+   "libreoffice": "Jan-26",
+   "expected": "Jan-26"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": 2958465,
+   "libreoffice": "Dec-99",
+   "expected": "Dec-99"
+  },
+  {
+   "group": "dates",
+   "code": "mmm-yy",
+   "value": -1,
+   "libreoffice": "Dec-99",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 0.5,
+   "libreoffice": "12:00:00",
+   "expected": "12:00:00"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 0.75,
+   "libreoffice": "18:00:00",
+   "expected": "18:00:00"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 1.5,
+   "libreoffice": "12:00:00",
+   "expected": "12:00:00"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 100.25,
+   "libreoffice": "6:00:00",
+   "expected": "6:00:00"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 0.123456789,
+   "libreoffice": "2:57:46",
+   "expected": "2:57:47",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 1.157407e-05,
+   "libreoffice": "0:00:00",
+   "expected": "0:00:01",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 0.999994213,
+   "libreoffice": "23:59:59",
+   "expected": "0:00:00",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 0.99999999,
+   "libreoffice": "23:59:59",
+   "expected": "0:00:00",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 1.000000001,
+   "libreoffice": "0:00:00",
+   "expected": "0:00:00"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": 0.0001,
+   "libreoffice": "0:00:08",
+   "expected": "0:00:09",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss",
+   "value": -0.5,
+   "libreoffice": "12:00:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 0.5,
+   "libreoffice": "12:00",
+   "expected": "12:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 0.75,
+   "libreoffice": "18:00",
+   "expected": "18:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 1.5,
+   "libreoffice": "12:00",
+   "expected": "12:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 100.25,
+   "libreoffice": "06:00",
+   "expected": "06:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 0.123456789,
+   "libreoffice": "02:57",
+   "expected": "02:57"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 1.157407e-05,
+   "libreoffice": "00:00",
+   "expected": "00:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 0.999994213,
+   "libreoffice": "23:59",
+   "expected": "23:59"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 0.99999999,
+   "libreoffice": "23:59",
+   "expected": "23:59"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 1.000000001,
+   "libreoffice": "00:00",
+   "expected": "00:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": 0.0001,
+   "libreoffice": "00:00",
+   "expected": "00:00"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm",
+   "value": -0.5,
+   "libreoffice": "12:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 0.5,
+   "libreoffice": "12:00 PM",
+   "expected": "12:00 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 0.75,
+   "libreoffice": "6:00 PM",
+   "expected": "6:00 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 1.5,
+   "libreoffice": "12:00 PM",
+   "expected": "12:00 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 100.25,
+   "libreoffice": "6:00 AM",
+   "expected": "6:00 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 0.123456789,
+   "libreoffice": "2:57 AM",
+   "expected": "2:57 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 1.157407e-05,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 0.999994213,
+   "libreoffice": "11:59 PM",
+   "expected": "11:59 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 0.99999999,
+   "libreoffice": "11:59 PM",
+   "expected": "11:59 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 1.000000001,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": 0.0001,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm AM/PM",
+   "value": -0.5,
+   "libreoffice": "12:00 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 0.5,
+   "libreoffice": "12:00:00 PM",
+   "expected": "12:00:00 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 0.75,
+   "libreoffice": "6:00:00 PM",
+   "expected": "6:00:00 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 1.5,
+   "libreoffice": "12:00:00 PM",
+   "expected": "12:00:00 PM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 100.25,
+   "libreoffice": "6:00:00 AM",
+   "expected": "6:00:00 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 0.123456789,
+   "libreoffice": "2:57:46 AM",
+   "expected": "2:57:47 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 1.157407e-05,
+   "libreoffice": "12:00:00 AM",
+   "expected": "12:00:01 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 0.999994213,
+   "libreoffice": "11:59:59 PM",
+   "expected": "12:00:00 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 0.99999999,
+   "libreoffice": "11:59:59 PM",
+   "expected": "12:00:00 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 1.000000001,
+   "libreoffice": "12:00:00 AM",
+   "expected": "12:00:00 AM"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": 0.0001,
+   "libreoffice": "12:00:08 AM",
+   "expected": "12:00:09 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss AM/PM",
+   "value": -0.5,
+   "libreoffice": "12:00:00 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 0.5,
+   "libreoffice": "12:00 PM",
+   "expected": "12:00 pm",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 0.75,
+   "libreoffice": "6:00 PM",
+   "expected": "6:00 pm",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 1.5,
+   "libreoffice": "12:00 PM",
+   "expected": "12:00 pm",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 100.25,
+   "libreoffice": "6:00 AM",
+   "expected": "6:00 am",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 0.123456789,
+   "libreoffice": "2:57 AM",
+   "expected": "2:57 am",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 1.157407e-05,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 am",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 0.999994213,
+   "libreoffice": "11:59 PM",
+   "expected": "11:59 pm",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 0.99999999,
+   "libreoffice": "11:59 PM",
+   "expected": "11:59 pm",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 1.000000001,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 am",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": 0.0001,
+   "libreoffice": "12:00 AM",
+   "expected": "12:00 am",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm am/pm",
+   "value": -0.5,
+   "libreoffice": "12:00 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 0.5,
+   "libreoffice": "12:00 p",
+   "expected": "12:00 P",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 0.75,
+   "libreoffice": "6:00 p",
+   "expected": "6:00 P",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 1.5,
+   "libreoffice": "12:00 p",
+   "expected": "12:00 P",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 100.25,
+   "libreoffice": "6:00 a",
+   "expected": "6:00 A",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 0.123456789,
+   "libreoffice": "2:57 a",
+   "expected": "2:57 A",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 1.157407e-05,
+   "libreoffice": "12:00 a",
+   "expected": "12:00 A",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 0.999994213,
+   "libreoffice": "11:59 p",
+   "expected": "11:59 P",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 0.99999999,
+   "libreoffice": "11:59 p",
+   "expected": "11:59 P",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 1.000000001,
+   "libreoffice": "12:00 a",
+   "expected": "12:00 A",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": 0.0001,
+   "libreoffice": "12:00 a",
+   "expected": "12:00 A",
+   "excel": true,
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm A/P",
+   "value": -0.5,
+   "libreoffice": "12:00 p",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 0.5,
+   "libreoffice": "12:00:00",
+   "expected": "12:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 0.75,
+   "libreoffice": "18:00:00",
+   "expected": "18:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 1.5,
+   "libreoffice": "36:00:00",
+   "expected": "36:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 100.25,
+   "libreoffice": "2406:00:00",
+   "expected": "2406:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 0.123456789,
+   "libreoffice": "2:57:47",
+   "expected": "2:57:47"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 1.157407e-05,
+   "libreoffice": "0:00:01",
+   "expected": "0:00:01"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 0.999994213,
+   "libreoffice": "24:00:00",
+   "expected": "24:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 0.99999999,
+   "libreoffice": "24:00:00",
+   "expected": "24:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 1.000000001,
+   "libreoffice": "24:00:00",
+   "expected": "24:00:00"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": 0.0001,
+   "libreoffice": "0:00:09",
+   "expected": "0:00:09"
+  },
+  {
+   "group": "times",
+   "code": "[h]:mm:ss",
+   "value": -0.5,
+   "libreoffice": "-12:00:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 0.5,
+   "libreoffice": "12:00",
+   "expected": "12:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 0.75,
+   "libreoffice": "18:00",
+   "expected": "18:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 1.5,
+   "libreoffice": "36:00",
+   "expected": "36:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 100.25,
+   "libreoffice": "2406:00",
+   "expected": "2406:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 0.123456789,
+   "libreoffice": "02:57",
+   "expected": "02:57"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 1.157407e-05,
+   "libreoffice": "00:00",
+   "expected": "00:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 0.999994213,
+   "libreoffice": "24:00",
+   "expected": "23:59",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 0.99999999,
+   "libreoffice": "24:00",
+   "expected": "23:59",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 1.000000001,
+   "libreoffice": "24:00",
+   "expected": "24:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": 0.0001,
+   "libreoffice": "00:00",
+   "expected": "00:00"
+  },
+  {
+   "group": "times",
+   "code": "[hh]:mm",
+   "value": -0.5,
+   "libreoffice": "-12:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 0.5,
+   "libreoffice": "720:00",
+   "expected": "720:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 0.75,
+   "libreoffice": "1080:00",
+   "expected": "1080:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 1.5,
+   "libreoffice": "2160:00",
+   "expected": "2160:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 100.25,
+   "libreoffice": "144360:00",
+   "expected": "144360:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 0.123456789,
+   "libreoffice": "177:47",
+   "expected": "177:47"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 1.157407e-05,
+   "libreoffice": "00:01",
+   "expected": "00:01"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 0.999994213,
+   "libreoffice": "1440:00",
+   "expected": "1440:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 0.99999999,
+   "libreoffice": "1440:00",
+   "expected": "1440:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 1.000000001,
+   "libreoffice": "1440:00",
+   "expected": "1440:00"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": 0.0001,
+   "libreoffice": "00:09",
+   "expected": "00:09"
+  },
+  {
+   "group": "times",
+   "code": "[mm]:ss",
+   "value": -0.5,
+   "libreoffice": "-720:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 0.5,
+   "libreoffice": "43200",
+   "expected": "43200"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 0.75,
+   "libreoffice": "64800",
+   "expected": "64800"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 1.5,
+   "libreoffice": "129600",
+   "expected": "129600"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 100.25,
+   "libreoffice": "8661600",
+   "expected": "8661600"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 0.123456789,
+   "libreoffice": "10667",
+   "expected": "10667"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 1.157407e-05,
+   "libreoffice": "01",
+   "expected": "01"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 0.999994213,
+   "libreoffice": "86400",
+   "expected": "86400"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 0.99999999,
+   "libreoffice": "86400",
+   "expected": "86400"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 1.000000001,
+   "libreoffice": "86400",
+   "expected": "86400"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": 0.0001,
+   "libreoffice": "09",
+   "expected": "09"
+  },
+  {
+   "group": "times",
+   "code": "[ss]",
+   "value": -0.5,
+   "libreoffice": "-43200",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 0.5,
+   "libreoffice": "12:00:00.000",
+   "expected": "12:00:00.000"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 0.75,
+   "libreoffice": "18:00:00.000",
+   "expected": "18:00:00.000"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 1.5,
+   "libreoffice": "12:00:00.000",
+   "expected": "12:00:00.000"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 100.25,
+   "libreoffice": "6:00:00.000",
+   "expected": "6:00:00.000"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 0.123456789,
+   "libreoffice": "2:57:46.667",
+   "expected": "2:57:46.667"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 1.157407e-05,
+   "libreoffice": "0:00:00.999",
+   "expected": "0:00:01.000",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 0.999994213,
+   "libreoffice": "23:59:59.500",
+   "expected": "23:59:59.500"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 0.99999999,
+   "libreoffice": "23:59:59.999",
+   "expected": "23:59:59.999"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 1.000000001,
+   "libreoffice": "0:00:00.000",
+   "expected": "0:00:00.000"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": 0.0001,
+   "libreoffice": "0:00:08.640",
+   "expected": "0:00:08.640"
+  },
+  {
+   "group": "times",
+   "code": "h:mm:ss.000",
+   "value": -0.5,
+   "libreoffice": "12:00:00.000",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 0.5,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 0.75,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 1.5,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 100.25,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 0.123456789,
+   "libreoffice": "57:46.7",
+   "expected": "57:46.7"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 1.157407e-05,
+   "libreoffice": "00:00.9",
+   "expected": "00:01.0",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 0.999994213,
+   "libreoffice": "59:59.5",
+   "expected": "59:59.5"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 0.99999999,
+   "libreoffice": "59:59.9",
+   "expected": "00:00.0",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 1.000000001,
+   "libreoffice": "00:00.0",
+   "expected": "00:00.0"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": 0.0001,
+   "libreoffice": "00:08.6",
+   "expected": "00:08.6"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.0",
+   "value": -0.5,
+   "libreoffice": "00:00.0",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 0.5,
+   "libreoffice": "00:00.00",
+   "expected": "00:00.00"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 0.75,
+   "libreoffice": "00:00.00",
+   "expected": "00:00.00"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 1.5,
+   "libreoffice": "00:00.00",
+   "expected": "00:00.00"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 100.25,
+   "libreoffice": "00:00.00",
+   "expected": "00:00.00"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 0.123456789,
+   "libreoffice": "57:46.67",
+   "expected": "57:46.67"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 1.157407e-05,
+   "libreoffice": "00:00.99",
+   "expected": "00:01.00",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 0.999994213,
+   "libreoffice": "59:59.50",
+   "expected": "59:59.50"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 0.99999999,
+   "libreoffice": "59:59.99",
+   "expected": "00:00.00",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 1.000000001,
+   "libreoffice": "00:00.00",
+   "expected": "00:00.00"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": 0.0001,
+   "libreoffice": "00:08.64",
+   "expected": "00:08.64"
+  },
+  {
+   "group": "times",
+   "code": "mm:ss.00",
+   "value": -0.5,
+   "libreoffice": "00:00.00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 0.5,
+   "libreoffice": "0:00",
+   "expected": "0:00"
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 0.75,
+   "libreoffice": "0:00",
+   "expected": "0:00"
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 1.5,
+   "libreoffice": "0:00",
+   "expected": "0:00"
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 100.25,
+   "libreoffice": "0:00",
+   "expected": "0:00"
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 0.123456789,
+   "libreoffice": "57:46",
+   "expected": "57:47",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 1.157407e-05,
+   "libreoffice": "0:00",
+   "expected": "0:01",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 0.999994213,
+   "libreoffice": "59:59",
+   "expected": "0:00",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 0.99999999,
+   "libreoffice": "59:59",
+   "expected": "0:00",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 1.000000001,
+   "libreoffice": "0:00",
+   "expected": "0:00"
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": 0.0001,
+   "libreoffice": "0:08",
+   "expected": "0:09",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "m:ss",
+   "value": -0.5,
+   "libreoffice": "0:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 0.5,
+   "libreoffice": "12:0",
+   "expected": "12:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 0.75,
+   "libreoffice": "18:0",
+   "expected": "18:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 1.5,
+   "libreoffice": "12:0",
+   "expected": "12:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 100.25,
+   "libreoffice": "6:0",
+   "expected": "6:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 0.123456789,
+   "libreoffice": "2:57",
+   "expected": "2:57"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 1.157407e-05,
+   "libreoffice": "0:0",
+   "expected": "0:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 0.999994213,
+   "libreoffice": "23:59",
+   "expected": "23:59"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 0.99999999,
+   "libreoffice": "23:59",
+   "expected": "23:59"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 1.000000001,
+   "libreoffice": "0:0",
+   "expected": "0:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": 0.0001,
+   "libreoffice": "0:0",
+   "expected": "0:0"
+  },
+  {
+   "group": "times",
+   "code": "h:m",
+   "value": -0.5,
+   "libreoffice": "12:0",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 0.5,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 0.75,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 1.5,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 100.25,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 0.123456789,
+   "libreoffice": "46",
+   "expected": "47",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 1.157407e-05,
+   "libreoffice": "0",
+   "expected": "1",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 0.999994213,
+   "libreoffice": "59",
+   "expected": "0",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 0.99999999,
+   "libreoffice": "59",
+   "expected": "0",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 1.000000001,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": 0.0001,
+   "libreoffice": "8",
+   "expected": "9",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "s",
+   "value": -0.5,
+   "libreoffice": "0",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 0.5,
+   "libreoffice": "12 h 00 m",
+   "expected": "12 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 0.75,
+   "libreoffice": "18 h 00 m",
+   "expected": "18 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 1.5,
+   "libreoffice": "12 h 00 m",
+   "expected": "12 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 100.25,
+   "libreoffice": "6 h 00 m",
+   "expected": "6 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 0.123456789,
+   "libreoffice": "2 h 57 m",
+   "expected": "2 h 57 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 1.157407e-05,
+   "libreoffice": "0 h 00 m",
+   "expected": "0 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 0.999994213,
+   "libreoffice": "23 h 59 m",
+   "expected": "23 h 59 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 0.99999999,
+   "libreoffice": "23 h 59 m",
+   "expected": "23 h 59 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 1.000000001,
+   "libreoffice": "0 h 00 m",
+   "expected": "0 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": 0.0001,
+   "libreoffice": "0 h 00 m",
+   "expected": "0 h 00 m"
+  },
+  {
+   "group": "times",
+   "code": "h \"h\" mm \"m\"",
+   "value": -0.5,
+   "libreoffice": "12 h 00 m",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 0.5,
+   "libreoffice": "12:00:00.00 PM",
+   "expected": "12:00:00.00 PM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 0.75,
+   "libreoffice": "06:00:00.00 PM",
+   "expected": "06:00:00.00 PM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 1.5,
+   "libreoffice": "12:00:00.00 PM",
+   "expected": "12:00:00.00 PM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 100.25,
+   "libreoffice": "06:00:00.00 AM",
+   "expected": "06:00:00.00 AM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 0.123456789,
+   "libreoffice": "02:57:46.67 AM",
+   "expected": "02:57:46.67 AM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 1.157407e-05,
+   "libreoffice": "12:00:00.99 AM",
+   "expected": "12:00:01.00 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 0.999994213,
+   "libreoffice": "11:59:59.50 PM",
+   "expected": "11:59:59.50 PM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 0.99999999,
+   "libreoffice": "11:59:59.99 PM",
+   "expected": "12:00:00.00 AM",
+   "excel": true,
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 1.000000001,
+   "libreoffice": "12:00:00.00 AM",
+   "expected": "12:00:00.00 AM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": 0.0001,
+   "libreoffice": "12:00:08.64 AM",
+   "expected": "12:00:08.64 AM"
+  },
+  {
+   "group": "times",
+   "code": "hh:mm:ss.00 AM/PM",
+   "value": -0.5,
+   "libreoffice": "12:00:00.00 PM",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 0.5,
+   "libreoffice": "30 12:00",
+   "expected": "0 12:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 0.75,
+   "libreoffice": "30 18:00",
+   "expected": "0 18:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 1.5,
+   "libreoffice": "31 12:00",
+   "expected": "1 12:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 100.25,
+   "libreoffice": "9 6:00",
+   "expected": "9 6:00"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 0.123456789,
+   "libreoffice": "30 2:57",
+   "expected": "0 2:57",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 1.157407e-05,
+   "libreoffice": "30 0:00",
+   "expected": "0 0:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 0.999994213,
+   "libreoffice": "30 23:59",
+   "expected": "0 23:59",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 0.99999999,
+   "libreoffice": "30 23:59",
+   "expected": "0 23:59",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 1.000000001,
+   "libreoffice": "31 0:00",
+   "expected": "1 0:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": 0.0001,
+   "libreoffice": "30 0:00",
+   "expected": "0 0:00",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+  },
+  {
+   "group": "times",
+   "code": "d h:mm",
+   "value": -0.5,
+   "libreoffice": "29 12:00",
+   "expected": "####",
+   "excel": true,
+   "note": "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+  },
+  {
+   "group": "system",
+   "code": "[$-F800]",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "Friday, January 2, 2026",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "system",
+   "code": "[$-F800]",
+   "value": 1,
+   "libreoffice": "1",
+   "expected": "Sunday, January 1, 1900",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "system",
+   "code": "[$-F400]",
+   "value": 46024.75,
+   "libreoffice": "46024.75",
+   "expected": "6:00:00 PM",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "system",
+   "code": "[$-F400]",
+   "value": 0.5,
+   "libreoffice": "0.5",
+   "expected": "12:00:00 PM",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "system",
+   "code": "[$-F800]dddd, mmmm dd, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Friday, January 2, 2026",
+   "expected": "Friday, January 02, 2026",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "system",
+   "code": "[$-F400]h:mm:ss AM/PM",
+   "value": 0.75,
+   "libreoffice": "06:00:00 PM",
+   "expected": "6:00:00 PM",
+   "excel": true,
+   "note": "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 0.3333333333333333,
+   "libreoffice": "0.333333333333333",
+   "expected": "0.333333333",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": -0.3333333333333333,
+   "libreoffice": "-0.333333333333333",
+   "expected": "-0.33333333",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 3.141592653589793,
+   "libreoffice": "3.14159265358979",
+   "expected": "3.141592654",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 123456789012,
+   "libreoffice": "123456789012",
+   "expected": "1.23457E+11",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 1e-05,
+   "libreoffice": "0.00001",
+   "expected": "1E-05",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 1.5e-05,
+   "libreoffice": "0.000015",
+   "expected": "1.5E-05",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 0.000123456789,
+   "libreoffice": "0.000123456789",
+   "expected": "0.000123457",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": -12345678901,
+   "libreoffice": "-12345678901",
+   "expected": "-1.2346E+10",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 1e+20,
+   "libreoffice": "1E+020",
+   "expected": "1E+20",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 123456.7890123,
+   "libreoffice": "123456.7890123",
+   "expected": "123456.789",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 99999999999.9,
+   "libreoffice": "99999999999.9",
+   "expected": "1E+11",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 100000000000,
+   "libreoffice": "100000000000",
+   "expected": "1E+11",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 1234567890123456,
+   "libreoffice": "1234567890123456",
+   "expected": "1.23457E+15",
+   "excel": true,
+   "note": "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 0.30000000000000004,
+   "libreoffice": "0.3",
+   "expected": "0.3"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 12345678901,
+   "libreoffice": "12345678901",
+   "expected": "12345678901"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 0.0001,
+   "libreoffice": "0.0001",
+   "expected": "0.0001"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 0,
+   "libreoffice": "0",
+   "expected": "0"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 100,
+   "libreoffice": "100",
+   "expected": "100"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": -0.256,
+   "libreoffice": "-0.256",
+   "expected": "-0.256"
+  },
+  {
+   "group": "general",
+   "code": "General",
+   "value": 1234.5678,
+   "libreoffice": "1234.5678",
+   "expected": "1234.5678"
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd",
+   "value": 0,
+   "libreoffice": "1904-01-01",
+   "expected": "1904-01-01",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd",
+   "value": 1,
+   "libreoffice": "1904-01-02",
+   "expected": "1904-01-02",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd",
+   "value": 1462,
+   "libreoffice": "1908-01-02",
+   "expected": "1908-01-02",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd",
+   "value": 44562,
+   "libreoffice": "2026-01-02",
+   "expected": "2026-01-02",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd",
+   "value": 46024.75,
+   "libreoffice": "2030-01-03",
+   "expected": "2030-01-03",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "dddd",
+   "value": 0,
+   "libreoffice": "Friday",
+   "expected": "Friday",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "dddd",
+   "value": 1,
+   "libreoffice": "Saturday",
+   "expected": "Saturday",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "dddd",
+   "value": 1462,
+   "libreoffice": "Thursday",
+   "expected": "Thursday",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "dddd",
+   "value": 44562,
+   "libreoffice": "Friday",
+   "expected": "Friday",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "dddd",
+   "value": 46024.75,
+   "libreoffice": "Thursday",
+   "expected": "Thursday",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "mmm d, yyyy",
+   "value": 0,
+   "libreoffice": "Jan 1, 1904",
+   "expected": "Jan 1, 1904",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "mmm d, yyyy",
+   "value": 1,
+   "libreoffice": "Jan 2, 1904",
+   "expected": "Jan 2, 1904",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "mmm d, yyyy",
+   "value": 1462,
+   "libreoffice": "Jan 2, 1908",
+   "expected": "Jan 2, 1908",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "mmm d, yyyy",
+   "value": 44562,
+   "libreoffice": "Jan 2, 2026",
+   "expected": "Jan 2, 2026",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "mmm d, yyyy",
+   "value": 46024.75,
+   "libreoffice": "Jan 3, 2030",
+   "expected": "Jan 3, 2030",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 0,
+   "libreoffice": "1904-01-01 00:00",
+   "expected": "1904-01-01 00:00",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 1,
+   "libreoffice": "1904-01-02 00:00",
+   "expected": "1904-01-02 00:00",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 1462,
+   "libreoffice": "1908-01-02 00:00",
+   "expected": "1908-01-02 00:00",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 44562,
+   "libreoffice": "2026-01-02 00:00",
+   "expected": "2026-01-02 00:00",
+   "dateSystem": 1904
+  },
+  {
+   "group": "date1904",
+   "code": "yyyy-mm-dd hh:mm",
+   "value": 46024.75,
+   "libreoffice": "2030-01-03 18:00",
+   "expected": "2030-01-03 18:00",
+   "dateSystem": 1904
+  }
+ ]
+}

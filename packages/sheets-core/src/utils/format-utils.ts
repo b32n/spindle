@@ -1,5 +1,7 @@
 // Format utilities for advanced cell formatting
 import type { CellFormat, FormatType } from '../types';
+import { formatDisplay, formatGeneral } from '../number-format';
+import { toExcelNumberFormatCode } from '../export/xlsx-number-format';
 
 /**
  * Clamp a format's decimalPlaces to the range JS number formatters accept
@@ -18,9 +20,8 @@ function safeDecimals(decimalPlaces: number | undefined, fallback = 2): number {
  * Main number formatter that delegates to specific format handlers
  */
 export function formatNumber(value: number, format: CellFormat): string {
-  if (!format.type || format.type === 'text') {
-    return String(value);
-  }
+  if (!format.type) return formatGeneral(value);
+  if (format.type === 'text') return String(value);
 
   switch (format.type) {
     case 'number':
@@ -44,10 +45,15 @@ export function formatNumber(value: number, format: CellFormat): string {
     case 'duration':
       return formatDuration(value, format);
     case 'custom':
-      return format.pattern ? formatCustomPattern(value, format.pattern) : String(value);
+      return format.pattern ? formatCustomPattern(value, format.pattern) : formatGeneral(value);
     default:
       return String(value);
   }
+}
+
+/** Scientific, fraction, date, time and duration formats are Excel codes under the hood; the engine renders them. */
+function viaEngine(value: number, format: CellFormat): string {
+  return formatDisplay(value, toExcelNumberFormatCode(format));
 }
 
 /**
@@ -174,167 +180,49 @@ export function formatPercentage(value: number, format: CellFormat): string {
  * Format scientific notation
  */
 export function formatScientific(value: number, format: CellFormat): string {
-  const decimalPlaces = safeDecimals(format.decimalPlaces);
-  return value.toExponential(decimalPlaces);
+  return viaEngine(value, { ...format, type: 'scientific', decimalPlaces: safeDecimals(format.decimalPlaces) });
 }
 
 /**
  * Format fraction values
  */
 export function formatFraction(value: number, format: CellFormat): string {
-  const fractionType = format.fractionType || 'upToOne';
-
-  // Convert decimal to fraction based on type
-  switch (fractionType) {
-    case 'upToOne':
-      return formatToFraction(value, 9); // Allow single-digit denominators (1-9)
-    case 'upToTwo':
-      return formatToFraction(value, 99); // Allow two-digit denominators (1-99)
-    case 'upToThree':
-      return formatToFraction(value, 999); // Allow three-digit denominators (1-999)
-    case 'asHalves':
-      return formatToFraction(value, 2, true);
-    case 'asQuarters':
-      return formatToFraction(value, 4, true);
-    case 'asEighths':
-      return formatToFraction(value, 8, true);
-    case 'asSixteenths':
-      return formatToFraction(value, 16, true);
-    case 'asTenths':
-      return formatToFraction(value, 10, true);
-    case 'asHundredths':
-      return formatToFraction(value, 100, true);
-    default:
-      return formatToFraction(value, 9);
-  }
-}
-
-/**
- * Helper to convert decimal to fraction
- */
-function formatToFraction(value: number, maxDenominator: number, exact: boolean = false): string {
-  const whole = Math.floor(value);
-  const fractional = value - whole;
-
-  if (fractional === 0) {
-    return whole.toString();
-  }
-
-  const fraction = exact ? toFraction(fractional, maxDenominator) : toSimpleFraction(fractional, maxDenominator);
-
-  if (fraction.denominator === 1) {
-    return `${whole + fraction.numerator}`;
-  }
-
-  return whole > 0 ? `${whole} ${fraction.numerator}/${fraction.denominator}` : `${fraction.numerator}/${fraction.denominator}`;
-}
-
-/**
- * Convert decimal to exact fraction with given denominator
- */
-function toFraction(decimal: number, denominator: number): { numerator: number; denominator: number } {
-  const numerator = Math.round(decimal * denominator);
-  return { numerator, denominator };
-}
-
-/**
- * Convert decimal to simple fraction
- */
-function toSimpleFraction(decimal: number, maxDenominator: number): { numerator: number; denominator: number } {
-  let bestNumerator = 1;
-  let bestDenominator = 1;
-  let bestError = Math.abs(decimal - 1);
-
-  for (let denominator = 1; denominator <= maxDenominator; denominator++) {
-    const numerator = Math.round(decimal * denominator);
-    const error = Math.abs(decimal - numerator / denominator);
-    if (error < bestError) {
-      bestNumerator = numerator;
-      bestDenominator = denominator;
-      bestError = error;
-    }
-  }
-
-  // Simplify fraction
-  const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
-  const divisor = gcd(bestNumerator, bestDenominator);
-  return {
-    numerator: bestNumerator / divisor,
-    denominator: bestDenominator / divisor
-  };
+  return viaEngine(value, { ...format, type: 'fraction' });
 }
 
 /**
  * Format date values from Excel date serial
  */
 export function formatDate(value: number, format: CellFormat): string {
-  const dateFormat = format.dateFormat || 'MM/DD/YYYY';
-  const jsDate = excelDateToJS(value);
-
-  return formatJSDate(jsDate, dateFormat);
+  return viaEngine(value, { ...format, type: 'date', dateFormat: format.dateFormat || 'MM/DD/YYYY' });
 }
 
 /**
  * Format time values
  */
 export function formatTime(value: number, format: CellFormat): string {
-  const timeFormat = format.timeFormat || 'HH:mm:ss';
-  const jsDate = excelDateToJS(value);
-
-  return formatJSTime(jsDate, timeFormat);
+  return viaEngine(value, { ...format, type: 'time', timeFormat: format.timeFormat || 'HH:mm:ss' });
 }
 
 /**
  * Format combined date and time
  */
 export function formatDateTime(value: number, format: CellFormat): string {
-  const dateFormat = format.dateFormat || 'MM/DD/YYYY';
-  const timeFormat = format.timeFormat || 'HH:mm:ss';
-  const jsDate = excelDateToJS(value);
-
-  const datePart = formatJSDate(jsDate, dateFormat);
-  const timePart = formatJSTime(jsDate, timeFormat);
-
-  return `${datePart} ${timePart}`;
+  return viaEngine(value, { ...format, type: 'datetime', dateFormat: format.dateFormat || 'MM/DD/YYYY', timeFormat: format.timeFormat || 'HH:mm:ss' });
 }
 
 /**
- * Format duration values
+ * Format duration values (the value is a number of days, as in a spreadsheet: 1.5 is 36 hours)
  */
 export function formatDuration(value: number, format: CellFormat): string {
-  const durationType = format.durationFormat || 'hours';
-
-  switch (durationType) {
-    case 'hours':
-      return `${value}h`;
-    case 'minutes':
-      return `${value}m`;
-    case 'seconds':
-      return `${value}s`;
-    case 'milliseconds':
-      return `${value}ms`;
-    default:
-      return `${value}`;
-  }
+  return viaEngine(value, { ...format, type: 'duration' });
 }
 
 /**
- * Format custom pattern
+ * Format with an Excel number-format code (sections, conditions, dates, fractions ...); see ../number-format.
  */
 export function formatCustomPattern(value: number, pattern: string): string {
-  // Basic implementation - handle common patterns
-  if (pattern.includes('#,##0.00')) {
-    return formatPlainNumber(value, { decimalPlaces: 2, useThousandsSeparator: true });
-  }
-  if (pattern.includes('0.0%')) {
-    return formatPercentage(value / 100, { decimalPlaces: 1 }); // Assume value is stored as decimal
-  }
-  if (pattern.includes('MM/DD/YYYY')) {
-    return formatDate(value, { dateFormat: 'MM/DD/YYYY' });
-  }
-
-  // Fallback to pattern as-is with value substituted
-  return pattern.replace(/0/g, value.toString());
+  return formatDisplay(value, pattern);
 }
 
 /**
@@ -453,30 +341,6 @@ export function formatJSDate(date: Date, pattern: string): string {
     }
     default:
       return date.toLocaleDateString();
-  }
-}
-
-/**
- * Format JavaScript Date time according to pattern
- */
-function formatJSTime(date: Date, pattern: string): string {
-  // UTC components, matching formatJSDate (see comment there).
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  const seconds = date.getUTCSeconds();
-
-  switch (pattern) {
-    case 'HH:mm:ss':
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    case 'h:mm AM/PM': {
-      const hour12 = hours % 12 || 12;
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-    }
-    case 'HH:mm':
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    default:
-      return date.toLocaleTimeString();
   }
 }
 

@@ -2,63 +2,25 @@
 
 import type { EagerFn } from './helpers';
 import { flatten, toText, toNum, toBoolean, wildcardSearch } from './helpers';
+import { compileFormat, formatValue, isValidFormatCode } from '../../number-format';
+import { parseDateString } from '../../utils/format-utils';
 
-/**
- * Render a number with a subset of the spreadsheet number-format language:
- * decimal places, thousands grouping, percent, scientific notation and a
- * leading currency symbol. Date format codes are not yet supported.
- */
-function applyNumberFormat(num: number, format: string): string {
-  if (format === '' || format.toLowerCase() === 'general') return String(num);
+const DECIMAL = /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i;
+const GROUPED = /^[+-]?\d{1,3}(,\d{3})+(\.\d*)?$/;
 
-  // Format sections: positive;negative;zero (Excel). A negative or zero section
-  // formats the magnitude and owns the sign, so no automatic minus is added.
-  const sections = format.split(';');
-  if (sections.length >= 2 && num < 0) {
-    return formatMagnitude(Math.abs(num), sections[1]);
+/** What Excel's TEXT reads as a number from text: a decimal, with `$`, thousands commas or `%`, or a date. */
+function numberFromText(text: string): number | undefined {
+  const bracketed = /^\(([^()+-][^()]*)\)$/.exec(text.trim()); // Excel reads (5) as -5, not (-5)
+  if (bracketed) {
+    const inner = numberFromText(bracketed[1]);
+    return inner === undefined ? undefined : -inner;
   }
-  if (sections.length >= 3 && num === 0) {
-    return formatMagnitude(0, sections[2]);
-  }
-  // Single section (or the positive section): keep the sign explicitly, but
-  // take it from the *rounded* result — a value that rounds to zero (e.g.
-  // TEXT(-0.4,"0")) must not render as "-0". If no non-zero digit survives the
-  // formatting, the magnitude is zero and the minus is dropped.
-  const body = formatMagnitude(Math.abs(num), sections[0]);
-  const sign = num < 0 && /[1-9]/.test(body) ? '-' : '';
-  return sign + body;
-}
-
-/** Format a non-negative number with one format section (no sign handling). */
-function formatMagnitude(num: number, format: string): string {
-  if (format === '') return '';
-  if (format.toLowerCase() === 'general') return String(num);
-
-  // Scientific notation, e.g. "0.00E+00".
-  if (/[eE]\+?0+/.test(format)) {
-    const decimals = (format.match(/\.(0+)[eE]/)?.[1] ?? '').length;
-    const [mantissa, exp] = num.toExponential(decimals).split('e');
-    const expNum = Number(exp);
-    const expStr = (expNum < 0 ? '-' : '+') + String(Math.abs(expNum)).padStart(2, '0');
-    return mantissa + 'E' + expStr;
-  }
-
-  const isPercent = format.includes('%');
-  const working = isPercent ? num * 100 : num;
-  const decimals = (format.split('.')[1]?.match(/[0#]/g) ?? []).length;
-  const grouped = /[#0],[#0]/.test(format);
-  const currency = format.trimStart().startsWith('$') ? '$' : '';
-
-  let [rawInt] = working.toFixed(decimals).split('.');
-  const fracPart = working.toFixed(decimals).split('.')[1];
-  // Left-pad the integer part to the count of '0' placeholders before the
-  // decimal point, so "00000" formats 5 as "00005" (zip/fixed-width IDs).
-  const minIntDigits = (format.split('.')[0].match(/0/g) ?? []).length;
-  if (rawInt.length < minIntDigits) rawInt = rawInt.padStart(minIntDigits, '0');
-  const intPart = grouped ? rawInt.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : rawInt;
-  let result = currency + intPart + (fracPart ? '.' + fracPart : '');
-  if (isPercent) result += '%';
-  return result;
+  let t = text.trim().replace(/^([+-]?)\$/, '$1');
+  const percent = t.endsWith('%');
+  if (percent) t = t.slice(0, -1);
+  if (GROUPED.test(t)) t = t.replace(/,/g, '');
+  if (DECIMAL.test(t)) return Number(t) / (percent ? 100 : 1);
+  return percent ? undefined : (parseDateString(text) ?? undefined);
 }
 
 export const textFunctions: Record<string, EagerFn> = {
@@ -155,11 +117,20 @@ export const textFunctions: Record<string, EagerFn> = {
 
   TRIM: (args) => toText(args[0]).replace(/ +/g, ' ').trim(),
 
+  // TEXT(value, code): the Excel number-format engine. An empty code gives "", an invalid one #VALUE!; text that
+  // reads as a number is formatted as that number, other text and booleans pass through (text only via an @ section).
   TEXT: (args) => {
+    const code = toText(args[1]);
+    if (code === '') return '';
+    if (!isValidFormatCode(code)) throw new Error('#VALUE!');
     const value = args[0];
-    const num = typeof value === 'number' ? value : Number(toText(value));
-    if (isNaN(num)) return toText(value);
-    return applyNumberFormat(num, toText(args[1]));
+    const text = toText(value); // an error value propagates
+    const options = { fullGeneral: true }; // no column to fit: General gives the 15 significant digits
+    if (value === null || value === undefined) return formatValue(0, code, options).text;
+    // text is read as a number only when the code has a number, date or General section (not for `@` alone)
+    const numeric = compileFormat(code).sections.some((s) => s.kind !== 'text' && s.kind !== 'literal');
+    const number = typeof value === 'string' && numeric ? numberFromText(text) : undefined;
+    return formatValue(number ?? value, code, options).text;
   },
 
   VALUE: (args) => {

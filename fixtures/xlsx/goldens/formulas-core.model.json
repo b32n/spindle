@@ -1058,7 +1058,7 @@
           },
           "I59": {
             "formula": "=TEXT(DATE(2026,1,2),\"yyyy-mm-dd\")",
-            "value": "46024"
+            "value": "2026-01-02"
           },
           "I6": {
             "formula": "=ROUND(A1/3,2)",
@@ -1066,7 +1066,7 @@
           },
           "I60": {
             "formula": "=TEXT(DATE(2026,1,2),\"dddd\")",
-            "value": "46024"
+            "value": "Friday"
           },
           "I61": {
             "formula": "=TEXT(0.256,\"0.0%\")",
