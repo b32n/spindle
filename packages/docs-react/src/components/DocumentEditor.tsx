@@ -13,7 +13,7 @@
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, collectRevisions, createCommands, docsSchema, revisionAuthors } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, collectRevisions, createCommands, docsSchema, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
@@ -287,9 +287,9 @@ export const DocumentEditor = memo(function DocumentEditor({
   const updateAuthors = useCallback((state: EditorState) => {
     if (authorsDoc.current === state.doc) return;
     authorsDoc.current = state.doc;
-    const next = revisionAuthors(collectRevisions(state.doc));
+    const next = revisionAuthors(collectRevisions(state.doc, false));
     // Keep the old list (and skip a render) when nothing in it changed.
-    setAuthors((prev) => (prev.length === next.length && prev.every((a, i) => a.name === next[i].name && a.count === next[i].count) ? prev : next));
+    setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
   }, []);
 
   const handleSelectionChange = useCallback((state: EditorState) => {

@@ -20,8 +20,8 @@ import {
   ImageBlock,
   isRunContainingBlock,
   noteKeyString,
-  DEFAULT_REVISION_COLOR,
 } from './flow-blocks';
+import { addTitle, revisionDecoration } from './revision-decoration';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
 import { DocumentLayout, PageLayout, PageFragment, PageConfig, findPageAtY, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
@@ -1651,28 +1651,15 @@ export class DomPainter {
     el.style.cursor = 'pointer';
   }
 
-  /**
-   * Show a tracked change the way Word's "All Markup" does: inserted text underlined, deleted text struck through,
-   * both in the colour of the author who made the change (the last one to change it when it was inserted and deleted).
-   */
+  /** Show a tracked change the way Word's "All Markup" does (see `revisionDecoration`). */
   private applyRevisionDecoration(el: HTMLElement, run: Run): void {
-    if ((run.kind !== 'text' && run.kind !== 'link') || !run.revision) return;
-    const { insertion, deletion } = run.revision;
-    const author = (deletion ?? insertion)?.author;
-    if (author === undefined) return;
-    const lines = new Set<string>();
-    if (run.kind === 'link' ? !run.plain : run.underline) lines.add('underline');
-    if (run.kind === 'text' && run.strikethrough) lines.add('line-through');
-    if (insertion) lines.add('underline');
-    if (deletion) lines.add('line-through');
-    const color = safeCssColor((deletion ?? insertion)?.color) || DEFAULT_REVISION_COLOR;
-    el.style.color = color;
-    el.style.textDecoration = [...lines].join(' ');
-    el.style.textDecorationColor = color;
-    if (insertion) el.dataset.revisionInsertion = insertion.id;
-    if (deletion) el.dataset.revisionDeletion = deletion.id;
-    el.dataset.revisionAuthor = author;
-    el.title = [insertion && `Inserted by ${insertion.author}`, deletion && `Deleted by ${deletion.author}`].filter(Boolean).join('; ');
+    const decoration = revisionDecoration(run);
+    if (!decoration) return;
+    el.style.color = decoration.color;
+    el.style.textDecoration = decoration.textDecoration;
+    el.style.textDecorationColor = decoration.color;
+    Object.assign(el.dataset, decoration.data);
+    addTitle(el, decoration.title);
   }
 
   /**
@@ -1688,7 +1675,7 @@ export class DomPainter {
     if ((run.kind !== 'text' && run.kind !== 'link') || !run.control) return;
     const { control } = run;
     el.dataset.contentControl = control.title;
-    el.title = control.title;
+    addTitle(el, control.title);
     if (!el.style.backgroundColor) el.style.backgroundColor = 'rgba(66, 133, 244, 0.08)';
     if (control.placeholder && !el.style.color) el.style.color = '#80868b';
     if (control.checkbox) {

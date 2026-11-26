@@ -358,6 +358,11 @@ function inlineStyleOf(item: TextStyle): TextStyle {
  * represents as a `hard_break` node (PM text nodes cannot contain it).
  */
 function textWithBreaks(text: string, marks: PmMarkJSON[]): PmNodeJSON[] {
+  // A break inside a tracked run stays in the text node: the Y binding keeps
+  // marks on text only, so a marked `hard_break` would lose its change.
+  if (text.includes('\n') && marks.some((m) => m.type === 'insertion' || m.type === 'deletion')) {
+    return [{ type: 'text', text, marks }];
+  }
   const out: PmNodeJSON[] = [];
   text.split('\n').forEach((part, i) => {
     if (i > 0) out.push({ type: 'hard_break' });
@@ -861,7 +866,10 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
     // run when possible so a paragraph with soft breaks stays compact.
     if (child.type.name === 'hard_break') {
       const prev = content[content.length - 1];
-      if (prev && prev.type === 'text' && !prev.styleId && !hasRunFormatting(prev)) {
+      const breakRevision = revisionOf(child.marks);
+      if (breakRevision) {
+        content.push({ type: 'text', text: '\n', revision: breakRevision });
+      } else if (prev && prev.type === 'text' && !prev.styleId && !hasRunFormatting(prev)) {
         prev.text += '\n';
       } else {
         content.push({ type: 'text', text: '\n' });

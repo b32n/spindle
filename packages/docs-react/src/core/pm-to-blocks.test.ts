@@ -497,4 +497,12 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
     const doc = j([{ type: 'paragraph', content: [text('go', [{ type: 'link', attrs: { href: 'https://example.com/' } }, insertion])] }]);
     expect((proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs[0]).toMatchObject({ kind: 'link', revision: { insertion: { id: '1', author: 'Ada', color: expect.any(String) } } });
   });
+
+  it('breaks the line at a line break inside a tracked run, and keeps the change on the text around it', () => {
+    const doc = j([{ type: 'paragraph', content: [text('a\nb', [deletion]), text('\n', [insertion])] }]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs;
+    expect(runs.map((r) => (r.kind === 'text' ? r.text : r.kind))).toEqual(['a', 'lineBreak', 'b', 'lineBreak']);
+    expect(runs[0]).toMatchObject({ revision: { deletion: { id: '2' } } });
+    expect(runs[2]).toMatchObject({ revision: { deletion: { id: '2' } } });
+  });
 });

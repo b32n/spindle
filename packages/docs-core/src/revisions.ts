@@ -75,8 +75,11 @@ export interface RevisionAuthor {
   count: number;
 }
 
-/** The tracked changes of the document in order, runs of one change (same kind and id) joined. */
-export function collectRevisions(doc: PmNode): RevisionSummary[] {
+/**
+ * The tracked changes of the document in order, runs of one change (same kind and id) joined. With `withText` false the
+ * `text` of each is left empty, which spares building the strings when only the authors and counts are wanted.
+ */
+export function collectRevisions(doc: PmNode, withText = true): RevisionSummary[] {
   const found: RevisionSummary[] = [];
   const open = new Map<string, RevisionSummary>();
   doc.descendants((node, pos) => {
@@ -87,7 +90,7 @@ export function collectRevisions(doc: PmNode): RevisionSummary[] {
       const id = String(mark.attrs.revisionId);
       const key = `${kind}:${id}`;
       const last = open.get(key);
-      const text = node.text ?? '';
+      const text = withText ? (node.text ?? '') : '';
       if (last && last.to === pos) {
         last.text += text;
         last.to = pos + node.nodeSize;
@@ -113,4 +116,9 @@ export function revisionAuthors(revisions: readonly RevisionSummary[]): Revision
     byName.set(r.author, entry);
   }
   return [...byName.values()];
+}
+
+/** True when two lists of authors show the same names and counts, so a list in state can be kept (and a render skipped). */
+export function sameRevisionAuthors(a: readonly RevisionAuthor[], b: readonly RevisionAuthor[]): boolean {
+  return a.length === b.length && a.every((author, i) => author.name === b[i].name && author.count === b[i].count && author.color === b[i].color);
 }

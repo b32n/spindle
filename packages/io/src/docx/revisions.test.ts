@@ -130,6 +130,71 @@ describe('reading tracked changes', () => {
   });
 });
 
+describe('tracked changes the importer does not keep as changes', () => {
+  const FIELD_BEGIN = r('<w:fldChar w:fldCharType="begin"/>') + r('<w:instrText> REF a </w:instrText>') + r('<w:fldChar w:fldCharType="separate"/>');
+  const FIELD_END = r('<w:fldChar w:fldCharType="end"/>');
+
+  it('numbers changes without an id across paragraphs, so no two changes share an id', async () => {
+    const { result } = await importBody(`<w:p ${W}><w:ins>${r(t('a'))}</w:ins></w:p><w:p ${W}><w:ins>${r(t('b'))}</w:ins><w:del>${delRun('c')}</w:del></w:p>`);
+    const ids = result.sections[0].blocks.flatMap((b) => (b as Paragraph).content).map((i) => Object.values((i as unknown as { revision: Record<string, { id: string }> }).revision)[0].id);
+    expect(ids).toEqual(['r1', 'r2', 'r3']);
+  });
+
+  it('numbers anonymous changes per import, so two imports at once do not share a counter', async () => {
+    const body = (text: string) => `<w:p ${W}><w:ins>${r(t(text))}</w:ins></w:p>`;
+    const [a, b] = await Promise.all([importBody(body('a')), importBody(body('b'))]);
+    for (const { result } of [a, b]) expect((result.sections[0].blocks[0] as Paragraph).content).toMatchObject([{ revision: { insertion: { id: 'r1' } } }]);
+  });
+
+  it('puts the text of a field result without its change, and drops deleted text inside a field result', async () => {
+    const inside = await importBody(`<w:p ${W}>${ins('5', 'Ada', FIELD_BEGIN + r(t('3')) + FIELD_END)}</w:p>`);
+    expect((inside.result.sections[0].blocks[0] as Paragraph).content).toMatchObject([{ type: 'field', result: '3' }]);
+    expect(JSON.stringify((inside.result.sections[0].blocks[0] as Paragraph).content)).not.toContain('revision');
+    expect(inside.result.warnings.some((w) => /insertion around the field "REF a"/.test(w))).toBe(true);
+    // A run that starts the field and holds its result text.
+    const sameRun = await importBody(`<w:p ${W}>${ins('5', 'Ada', r('<w:fldChar w:fldCharType="begin"/><w:instrText> REF a </w:instrText><w:fldChar w:fldCharType="separate"/>' + t('3')) + FIELD_END)}</w:p>`);
+    expect(JSON.stringify((sameRun.result.sections[0].blocks[0] as Paragraph).content)).not.toContain('revision');
+    // Deleted text in the result of a field begun outside the change.
+    const deleted = await importBody(`<w:p ${W}>${FIELD_BEGIN}${r(t('3'))}${del('6', 'Bo', delRun('4'))}${FIELD_END}</w:p>`);
+    expect(JSON.stringify((deleted.result.sections[0].blocks[0] as Paragraph).content)).not.toContain('"4"');
+    expect(deleted.result.warnings.some((w) => /deleted text inside the field "REF a"/.test(w))).toBe(true);
+  });
+
+  it('warns about an inserted image and keeps it as ordinary content', async () => {
+    const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==';
+    const exported = await exportDocx({ title: 'T', sections: [{ ...BASE, blocks: [{ type: 'paragraph', content: [{ type: 'image', src: png, width: 10, height: 10 }] }] }] });
+    const zip = await JSZip.loadAsync(exported.bytes);
+    const xml = await zip.file('word/document.xml')!.async('string');
+    zip.file('word/document.xml', xml.replace(/<w:r>(?:(?!<\/w:r>)[\s\S])*<w:drawing[\s\S]*?<\/w:r>/, (run) => ins('1', 'Ada', run)));
+    const result = await importDocx(await zip.generateAsync({ type: 'uint8array' }));
+    expect(result.sections[0].blocks).toMatchObject([{ type: 'image' }]);
+    expect(JSON.stringify(result.sections[0].blocks[0])).not.toContain('revision');
+    expect(result.warnings.some((w) => /insertion of an image was not kept/.test(w))).toBe(true);
+  });
+
+  async function importFooter(footerParagraph: string) {
+    const exported = await exportDocx({
+      title: 'T',
+      sections: [{ ...BASE, blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }], footer: { paragraphs: [{ content: [{ type: 'text', text: 'F' }] }] } }],
+    });
+    const zip = await JSZip.loadAsync(exported.bytes);
+    const name = Object.keys(zip.files).find((n) => /^word\/footer\d*\.xml$/.test(n))!;
+    const xml = await zip.file(name)!.async('string');
+    zip.file(name, xml.replace(/<w:p>[\s\S]*?<\/w:p>|<w:p [^>]*>[\s\S]*?<\/w:p>/, `<w:p>${footerParagraph}</w:p>`));
+    const bytes = await zip.generateAsync({ type: 'uint8array' });
+    return { result: await importDocx(bytes), bytes };
+  }
+
+  it('drops deleted text in a footer, keeps inserted text as ordinary text and says so', async () => {
+    const { result, bytes } = await importFooter(r(t('keep ')) + ins('1', 'Ada', r(t('new '))) + del('2', 'Bo', delRun('old ')) + r(t('end')));
+    const footer = result.sections[0].footer!.paragraphs[0].content;
+    expect(footer.map((c) => (c as { text: string }).text).join('')).toBe('keep new end');
+    expect(JSON.stringify(footer)).not.toContain('revision');
+    expect(result.warnings).toEqual(expect.arrayContaining([expect.stringMatching(/deleted text in a header or footer/), expect.stringMatching(/insertion in a header or footer/)]));
+    expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedHeaderFooterChanges')).toMatchObject({ count: 2 });
+  });
+});
+
 describe('writing tracked changes', () => {
   const content: DocInline[] = [
     { type: 'text', text: 'keep ' },
@@ -204,6 +269,22 @@ describe('writing tracked changes', () => {
   });
 });
 
+describe('writing the author and date of a change', () => {
+  it('leaves out what XML cannot carry and drops a date that is not a date', async () => {
+    const { xml } = await exportXml([
+      { type: 'text', text: 'a', revision: { insertion: { id: '1', author: 'Ann\u0000\u0008 Lee\uD800', date: 'yesterday' } } },
+      { type: 'text', text: 'b', revision: { insertion: { id: '2', author: '\u0001', date: '2024-01-02T03:04:05.678+02:00' } } },
+    ]);
+    expect(xml).toContain('w:author="Ann Lee"');
+    expect(xml).toContain('w:author="Unknown"');
+    expect(xml).not.toContain('yesterday');
+    expect(xml).toContain('w:date="2024-01-02T03:04:05.678+02:00"');
+    expect(() => parseXml(xml)).not.toThrow();
+    // eslint-disable-next-line no-control-regex
+    expect(xml).not.toMatch(/[\u0000-\u0008]/);
+  });
+});
+
 describe('loss report', () => {
   it('no longer counts changes around runs, only those on a paragraph mark or table row', async () => {
     const { bytes } = await importBody(
@@ -227,5 +308,15 @@ describe('loss report', () => {
         `<w:pPr><w:pPrChange w:id="5" w:author="A"><w:pPr><w:rPr><w:del w:id="6" w:author="A"/></w:rPr></w:pPr></w:pPrChange></w:pPr></w:p>`
     );
     expect((await detectDocxLoss(bytes)).items.filter((i) => i.id === 'docx.trackedInsertions' || i.id === 'docx.trackedDeletions')).toEqual([]);
+  });
+});
+
+describe('loss report for changes around whole blocks', () => {
+  it('counts a change around a paragraph or table of the body or of a cell', async () => {
+    const { bytes } = await importBody(
+      `<w:ins ${W} w:id="1" w:author="A"><w:p>${r(t('x'))}</w:p></w:ins><w:del ${W} w:id="2" w:author="A"><w:p>${delRun('y')}</w:p></w:del>` +
+        `<w:tbl ${W}><w:tr><w:tc><w:ins w:id="3" w:author="A"><w:p/></w:ins><w:p/></w:tc></w:tr></w:tbl>`
+    );
+    expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedBlockChanges')).toMatchObject({ count: 3 });
   });
 });

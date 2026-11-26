@@ -79,6 +79,8 @@ interface PartContext {
   controls?: boolean;
   /** The text of the notes the body refers to (absent in notes, headers and footers, where a note reference is not kept). */
   notes?: NoteLookup;
+  /** Numbers the tracked changes that have no id of their own, across the body and the notes of one import (absent in headers and footers, which keep no changes). */
+  anonymousRevisions?: { next: number };
 }
 
 /**
@@ -140,7 +142,7 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
   });
 }
 
-/** The tracked change a `w:ins` / `w:del` element records. A change without an id gets the next number of its paragraph's reader. */
+/** The tracked change a `w:ins` / `w:del` element records. A change without an id gets the next number of its import. */
 function revisionMeta(node: XmlNode, fallbackId: () => string): DocRevisionMeta {
   const attrs = attrsOf(node);
   const date = attrs['@_w:date'];
@@ -173,7 +175,6 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   ctx.comments?.paragraphStart();
   /** Tracked changes (`w:ins`, `w:del`) the content being read is inside of. */
   let revision: DocRevision | undefined;
-  let revisionsSeen = 0;
   const deleted = () => revision?.deletion !== undefined;
   const fields: OpenField[] = []; // begin/.../end sequences in progress, outermost first
   const top = (): OpenField | undefined => fields[fields.length - 1];
@@ -182,8 +183,10 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   /** An image goes into the cached result of the field it is in, else into the paragraph. */
   const place = (image: DocInline) => {
     const open = top();
-    if (!open) out.push(image);
-    else if (open.phase === 'result' && image.type === 'image') open.result.push(image);
+    if (!open) {
+      if (revision?.insertion) warnings.push('A tracked insertion of an image was not kept as a change.');
+      out.push(image);
+    } else if (open.phase === 'result' && image.type === 'image') open.result.push(image);
   };
 
   /** A bookmark is kept as a point where it starts; none inside a field (the field keeps only its result). */
@@ -226,8 +229,16 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       const commentThreadId = ctx.comments?.anchorText(text);
       const open = top();
       if (open) {
-        // Inside a field the text is its cached result (nothing inside an instruction is displayed).
-        if (open.phase === 'result') open.result.push({ type: 'text', text, ...props });
+        // Inside a field the text is its cached result (nothing inside an instruction is displayed). A change does not
+        // reach into a result: deleted text is dropped, inserted text stays as plain result text.
+        if (open.phase === 'result') {
+          if (deleted()) {
+            warnings.push(`Tracked deleted text inside the field "${open.instruction.trim()}" was not kept; it was dropped.`);
+          } else {
+            const { revision: _revision, ...plain } = props;
+            open.result.push({ type: 'text', text, ...plain });
+          }
+        }
         text = '';
         return;
       }
@@ -269,6 +280,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         } else if (!top() && id !== undefined) {
           const note = ctx.notes(kind, id);
           if (note) {
+            if (revision?.insertion) warnings.push(`A tracked insertion of a ${kind} reference was not kept as a change.`);
             const ref: Extract<DocInline, { type: 'noteRef' }> = { type: 'noteRef', kind, id: note.id, content: JSON.parse(JSON.stringify(note.content)) as DocInline[] };
             out.push(ref);
             const follows = attrsOf(piece)['@_w:customMarkFollows'];
@@ -331,7 +343,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       const tag = tagOf(child);
       if (tag === 'w:ins' || tag === 'w:del') {
         const outer = revision;
-        const meta = revisionMeta(child, () => `r${++revisionsSeen}`);
+        const meta = revisionMeta(child, () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`);
         revision = { ...outer, ...(tag === 'w:ins' ? { insertion: meta } : { deletion: meta }) };
         consumeRuns(childrenOf(child), target);
         revision = outer;
@@ -1175,12 +1187,28 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
       const alignment = ctx.styles.paragraph(paragraphStyleId(p), parsePPr(pPr)).alignment;
       // A header or footer shows one value on every page, so a cached field result (STYLEREF, DATE...) would be wrong
       // on most of them: only the page-number fields are kept there.
-      const content = paragraphInlineContent(p, ctx, warnings).filter((item) => {
-        if (item.type === 'bookmark') return false; // headers and footers keep no bookmarks
-        if (item.type !== 'field') return true;
-        warnings.push(`Unsupported field code "${item.instruction}" — its cached value was dropped.`);
-        return false;
-      });
+      let dropped = 0;
+      let flattened = 0;
+      const content = paragraphInlineContent(p, ctx, warnings)
+        .filter((item) => {
+          if (item.type === 'bookmark') return false; // headers and footers keep no bookmarks
+          if (item.type !== 'field') return true;
+          warnings.push(`Unsupported field code "${item.instruction}" — its cached value was dropped.`);
+          return false;
+        })
+        .flatMap((item): DocInline[] => {
+          // Headers and footers keep no tracked changes: deleted text is dropped, inserted text stays as ordinary text.
+          if ((item.type !== 'text' && item.type !== 'link') || !item.revision) return [item];
+          if (item.revision.deletion) {
+            dropped++;
+            return [];
+          }
+          flattened++;
+          const { revision: _revision, ...plain } = item;
+          return [plain];
+        });
+      if (dropped > 0) warnings.push('Tracked deleted text in a header or footer was not kept; it was dropped.');
+      if (flattened > 0) warnings.push('A tracked insertion in a header or footer was not kept as a change.');
       paragraphs.push({ content, ...(alignment && alignment !== 'justify' ? { alignment } : {}) });
     }
   }
@@ -1233,8 +1261,9 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const theme = parseTheme(themeXml);
   const styles = new StyleSheet(stylesXml, theme);
   const numbering = parseNumbering(numberingXml);
-  const ctx: PartContext = { rels, media, styles, theme, lists: new ListCounter(numbering), comments, controls: true };
-  ctx.notes = await createNoteLookup(zip, rels, media, styles, theme, warnings);
+  const anonymousRevisions = { next: 0 };
+  const ctx: PartContext = { rels, media, styles, theme, lists: new ListCounter(numbering), comments, controls: true, anonymousRevisions };
+  ctx.notes = await createNoteLookup(zip, rels, media, styles, theme, warnings, anonymousRevisions);
 
   const root = parseXml(documentXml);
   const documentEl = find(root, 'w:document');
@@ -1395,7 +1424,8 @@ async function createNoteLookup(
   docMedia: Map<string, string>,
   styles: StyleSheet,
   theme: Theme | undefined,
-  warnings: string[]
+  warnings: string[],
+  anonymousRevisions: { next: number }
 ): Promise<NoteLookup> {
   const kinds: NoteKind[] = ['footnote', 'endnote'];
   const parts = new Map<NoteKind, { notes: Map<string, XmlNode[]>; ctx: PartContext }>();
@@ -1405,7 +1435,7 @@ async function createNoteLookup(
     if (notes.size === 0) continue;
     const rels = parseRels(await readZipText(zip, `word/_rels/${kind}s.xml.rels`));
     const media = await buildMediaMap(zip, rels);
-    parts.set(kind, { notes, ctx: { rels: new Map([...docRels, ...rels]), media: new Map([...docMedia, ...media]), styles, theme } });
+    parts.set(kind, { notes, ctx: { rels: new Map([...docRels, ...rels]), media: new Map([...docMedia, ...media]), styles, theme, anonymousRevisions } });
   }
   const cache = new Map<string, DocInline[]>();
   const counts: Record<NoteKind, number> = { footnote: 0, endnote: 0 };

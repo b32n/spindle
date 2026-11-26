@@ -533,7 +533,16 @@ function collectRuns(node: PmNode, runs: Run[], control?: RunControl): void {
     if (child.isText) {
       const textRun = createTextRunFromNode(child);
       if (control) textRun.control = control;
-      runs.push(textRun);
+      // A line break inside a tracked run is kept in the text (the break node cannot carry the change through
+      // the Y binding); it still breaks the line.
+      if (child.text && child.text.includes('\n')) {
+        child.text.split('\n').forEach((part, i) => {
+          if (i > 0) runs.push({ kind: 'lineBreak' });
+          if (part) runs.push({ ...textRun, text: part });
+        });
+      } else {
+        runs.push(textRun);
+      }
     } else if (child.type.name === 'hard_break') {
       runs.push({ kind: 'lineBreak' });
     } else if (child.type.name === 'dynamic_field') {

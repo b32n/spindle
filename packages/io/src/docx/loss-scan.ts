@@ -247,6 +247,30 @@ function trackedChanges(root: XmlNode[]): Item[] {
   ];
 }
 
+/**
+ * Tracked changes the importer does not keep because of where they are: around whole paragraphs or tables (a direct child of
+ * the body or a table cell, whose content is not imported), and in headers and footers (deleted text is dropped, inserted
+ * text is kept as ordinary text).
+ */
+function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item[] {
+  let blocks = 0;
+  walk(root, (_n, tag, path) => {
+    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:body' || parent === 'w:tc') blocks++;
+  });
+  let headers = 0;
+  for (const xml of headerFooters) {
+    walk(parseXml(xml), (_n, tag, path) => {
+      if ((tag === 'w:ins' || tag === 'w:del') && !inRevisionProps(path)) headers++;
+    });
+  }
+  return [
+    ...item('docx.trackedBlockChanges', 'tracked change(s) around whole paragraphs or tables', blocks, 'the paragraphs or tables inside are not imported'),
+    ...item('docx.trackedHeaderFooterChanges', 'tracked change(s) in headers and footers', headers, 'deleted text is dropped and inserted text is kept as ordinary text; the change is not recorded'),
+  ];
+}
+
 function trackedMoves(root: XmlNode[]): Item[] {
   let total = 0;
   walk(root, (_n, tag) => {
@@ -401,10 +425,11 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
     ...safe(() => trackedChanges(root)),
+    ...safe(() => trackedChangesElsewhere(root, input.headerFooters)),
     ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),

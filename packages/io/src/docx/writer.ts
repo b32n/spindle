@@ -223,6 +223,12 @@ function withoutNoteRefs(content: DocInline[]): DocInline[] {
 }
 
 /** True when the run is part of a tracked insertion or deletion. */
+/** The author and date of a change can come from a collaborator: keep characters XML cannot carry out of the file. */
+// eslint-disable-next-line no-control-regex
+const XML_INVALID = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
+const xmlText = (text: string): string => text.replace(XML_INVALID, '').trim();
+const isIsoDate = (date: string | undefined): date is string => !!date && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/.test(date);
+
 function hasRevision(revision: DocRevision | undefined): revision is DocRevision {
   return !!revision && (!!revision.insertion || !!revision.deletion);
 }
@@ -322,8 +328,8 @@ class DocxBuilder {
         name,
         attributes: {
           id: { key: 'w:id', value: String(this.revisionId(name === 'w:ins' ? 'ins' : 'del', meta)) },
-          author: { key: 'w:author', value: meta.author },
-          ...(meta.date && { date: { key: 'w:date', value: meta.date } }),
+          author: { key: 'w:author', value: xmlText(meta.author) || 'Unknown' },
+          ...(isIsoDate(meta.date) && { date: { key: 'w:date', value: meta.date } }),
         },
         children: children as BuilderElement[],
       });

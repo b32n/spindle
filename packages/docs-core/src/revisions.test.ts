@@ -11,7 +11,7 @@ import { DocumentImpl } from './document';
 import { getCollabBlockers } from './collab/blockers';
 import { hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
 import { exportToDocx, importFromDocx } from './export/docx';
-import { REVISION_COLORS, assignAuthorColors, authorColor, collectRevisions, documentRevisionAuthors, revisionAuthors } from './revisions';
+import { REVISION_COLORS, assignAuthorColors, authorColor, collectRevisions, documentRevisionAuthors, revisionAuthors, sameRevisionAuthors } from './revisions';
 import { DEFAULT_PAGE_CONFIG } from './types';
 import type { Block, DocumentData, InlineContent, ParagraphBlock } from './types';
 
@@ -84,6 +84,46 @@ describe('tracked changes in the ProseMirror document', () => {
   it('are not inherited by text typed next to them', () => {
     expect(docsSchema.marks.insertion.spec.inclusive).toBe(false);
     expect(docsSchema.marks.deletion.spec.inclusive).toBe(false);
+  });
+});
+
+describe('line breaks inside tracked runs', () => {
+  const BREAKS: [string, InlineContent][] = [
+    ['insertion', { type: 'text', text: 'a\nb', revision: { insertion: ADA } }],
+    ['deletion', { type: 'text', text: 'a\nb', revision: { deletion: BO } }],
+    ['both', { type: 'text', text: 'a\nb', revision: { insertion: ADA, deletion: BO } }],
+    ['a lone break', { type: 'text', text: '\n', revision: { deletion: BO } }],
+    ['a link', { type: 'link', text: 'a\nb', href: 'https://example.com/', revision: { insertion: ADA } }],
+  ];
+  it.each(BREAKS)('keep their change on %s, through the editor model, Y and DOCX', async (_name, run) => {
+    const paragraph: ParagraphBlock = { id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'x' }, run, { type: 'text', text: 'y' }] };
+    const expected = strip([paragraph]);
+    expect(strip(viaPm([paragraph]))).toEqual(expected);
+    expect(strip(viaYjs([paragraph]))).toEqual(expected);
+    const doc = new DocumentImpl('doc', 'Doc');
+    doc.setData(dataWith([paragraph]));
+    const { bytes } = await exportToDocx(doc);
+    const reopened = new DocumentImpl('doc2', 'Doc2');
+    await importFromDocx(bytes, reopened);
+    expect(strip(reopened.getSections()[0].blocks)[0].content).toMatchObject(expected[0].content);
+  });
+
+  it('are written as a break inside the change', async () => {
+    const doc = new DocumentImpl('doc', 'Doc');
+    doc.setData(dataWith([{ id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'a\nb', revision: { deletion: BO } }] }]));
+    const xml = await (await JSZip.loadAsync((await exportToDocx(doc)).bytes)).file('word/document.xml')!.async('string');
+    expect(xml).toMatch(/<w:del [^>]*>.*<w:delText[^>]*>a<\/w:delText>.*<w:br\/>.*<w:delText[^>]*>b<\/w:delText>/s);
+  });
+
+  it('are kept when the break node carries the change itself', () => {
+    const { nodes, marks } = docsSchema;
+    const mark = marks.deletion.create({ revisionId: '2', author: 'Bo' });
+    const pm = docsSchema.node('doc', null, [nodes.paragraph.create(null, [docsSchema.text('a'), nodes.hard_break.create(null, null, [mark]), docsSchema.text('b')])]);
+    expect(strip(proseMirrorToDocument(pm, dataWith([]) as never).sections[0].blocks)[0].content).toEqual([
+      { type: 'text', text: 'a' },
+      { type: 'text', text: '\n', revision: { deletion: BO } },
+      { type: 'text', text: 'b' },
+    ]);
   });
 });
 
@@ -161,6 +201,23 @@ describe('author colours and the list of changes', () => {
       ['Bo', 1, true],
       ['Cy', 1, true],
     ]);
+  });
+});
+
+describe('the authors list in state', () => {
+  const pm = blocksToPmDoc([{ id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'ab', revision: { insertion: ADA } }, { type: 'text', text: 'c', revision: { deletion: BO } }] }]);
+
+  it('is the same list, by names, counts and colours', () => {
+    const authors = revisionAuthors(collectRevisions(pm, false));
+    expect(sameRevisionAuthors(authors, revisionAuthors(collectRevisions(pm)))).toBe(true);
+    expect(sameRevisionAuthors(authors, authors.slice(1))).toBe(false);
+    expect(sameRevisionAuthors(authors, [{ ...authors[0], count: 9 }, authors[1]])).toBe(false);
+    expect(sameRevisionAuthors(authors, [{ ...authors[0], color: '#000000' }, authors[1]])).toBe(false);
+    expect(sameRevisionAuthors([], [])).toBe(true);
+  });
+
+  it('can be collected without the text of each change', () => {
+    expect(collectRevisions(pm, false).map((c) => [c.author, c.text, c.to - c.from])).toEqual([['Ada', '', 2], ['Bo', '', 1]]);
   });
 });
 

@@ -323,7 +323,13 @@ lockstep.
 - **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
   `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
   deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted
-  one is dropped, with a warning), as are a deleted image and a deleted note reference (dropped, with a warning).
+  one is dropped, with a warning), as are a deleted image and a deleted note reference (dropped, with a warning); an inserted
+  image or note reference stays as ordinary content, with a warning. Headers and footers keep no tracked changes: deleted text is
+  dropped, inserted text stays as ordinary text (warnings, and `docx.trackedHeaderFooterChanges` in the loss report). Changes
+  around whole paragraphs or tables are counted as `docx.trackedBlockChanges` (their content is not imported). A change without
+  an id gets a number that is unique in the import. A line break inside changed text keeps the change (it stays in the text node
+  in the editor, because the collaboration binding keeps marks on text only), and the export drops characters XML cannot carry
+  from an author and a date that is not a date.
 - **DOCX loss report: `docx.trackedInsertions` and `docx.trackedDeletions` count only what is still lost**: a change on a
   paragraph mark (`w:pPr/w:rPr`) or on a table row (`w:trPr`), whose paragraph or row is imported as ordinary content. Changes
   around runs are kept and no longer counted (32 and 22 occurrences in the corpus before).

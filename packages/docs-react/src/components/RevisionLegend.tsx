@@ -14,7 +14,7 @@ export const RevisionLegend = memo(function RevisionLegend({ authors }: Revision
   return (
     <div
       data-testid="revision-legend"
-      role="list"
+      role="group"
       aria-label="Authors of tracked changes"
       style={{
         display: 'flex',
@@ -29,13 +29,15 @@ export const RevisionLegend = memo(function RevisionLegend({ authors }: Revision
       }}
     >
       <span style={{ fontWeight: 600 }}>Tracked changes</span>
-      {authors.map((author) => (
-        <span key={author.name} role="listitem" data-revision-author={author.name} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <span aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 2, background: author.color, display: 'inline-block' }} />
-          <span>{author.name}</span>
-          <span style={{ color: '#80868b' }}>({author.count})</span>
-        </span>
-      ))}
+      <div role="list" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+        {authors.map((author) => (
+          <span key={author.name} role="listitem" data-revision-author={author.name} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <span aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 2, background: author.color, display: 'inline-block' }} />
+            <span>{author.name}</span>
+            <span style={{ color: '#80868b' }}>({author.count})</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 });
