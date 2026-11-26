@@ -32,7 +32,7 @@ describe('pasting tracked HTML', () => {
   const rulesOf = (name: string) => docsSchema.marks[name].spec.parseDOM ?? [];
   const textStyleRule = rulesOf('textStyle').find((rule) => rule.tag === 'span')!;
 
-  it.each(['insertion', 'deletion'])('parses a %s span before the plain span rule of the text style', (name) => {
+  it.each(['insertion', 'deletion', 'formatChange'])('parses a %s span before the plain span rule of the text style', (name) => {
     expect(textStyleRule).toBeDefined();
     const [rule] = rulesOf(name);
     expect(rule.priority ?? 50).toBeGreaterThan(textStyleRule.priority ?? 50);

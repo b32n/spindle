@@ -100,6 +100,26 @@ describe('reading formatting changes', () => {
     expect((blocks[0] as Paragraph).content[0]).toMatchObject({ revision: { insertion: { id: '1' }, formatChange: { id: '2', previous: {} } } });
   });
 
+  it('says so when a formatting change is on a run that has no text left (a field result, an image)', async () => {
+    const change = `<w:rPrChange ${who('2')}><w:rPr><w:b/></w:rPr></w:rPrChange>`;
+    const fieldResult =
+      r('<w:fldChar w:fldCharType="begin"/>') +
+      r('<w:instrText> REF a </w:instrText>') +
+      r('<w:fldChar w:fldCharType="separate"/>') +
+      r(t('3'), `<w:i/>${change}`) +
+      r('<w:fldChar w:fldCharType="end"/>');
+    const inField = await importBody(paragraph(fieldResult));
+    const lost = /formatting change of a run without text of its own/;
+    expect(inField.warnings.filter((w) => lost.test(w))).toHaveLength(1);
+    expect(JSON.stringify(inField.sections[0].blocks)).not.toContain('formatChange');
+    const image = await importBody(paragraph(r('<w:drawing/>', change)));
+    expect(image.warnings.filter((w) => lost.test(w))).toHaveLength(1);
+    // A run with text keeps its change and does not warn.
+    const plain = await importBody(paragraph(r(t('x'), change)));
+    expect(plain.warnings.filter((w) => lost.test(w))).toHaveLength(0);
+    expect(JSON.stringify(plain.sections[0].blocks)).toContain('formatChange');
+  });
+
   it('reads the change of a paragraph with its old formatting, including the heading it was', async () => {
     const blocks = await blocksOf(
       paragraph(r(t('centred')), `<w:jc w:val="center"/><w:pPrChange ${who('9')}><w:pPr><w:ind w:left="720"/></w:pPr></w:pPrChange>`) +

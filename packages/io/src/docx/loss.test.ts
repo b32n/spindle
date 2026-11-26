@@ -309,6 +309,21 @@ describe('detectDocxLoss: long-tail detectors', () => {
     expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({ count: 2, where: ['tcPrChange ×1', 'trPrChange ×1'] });
   });
 
+  it('docx.formattingRevisions counts a paragraph change of numbering, tab stops, borders or shading, whose old value is not kept', async () => {
+    const bytes = await docx(
+      // Bullet switched on: the old paragraph had no numbering.
+      '<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:pPrChange w:id="1"><w:pPr/></w:pPrChange></w:pPr></w:p>' +
+        // Bullet switched off, and shading added.
+        '<w:p><w:pPr><w:shd w:val="clear" w:fill="FFFF00"/><w:pPrChange w:id="2"><w:pPr><w:numPr><w:numId w:val="1"/></w:numPr></w:pPr></w:pPrChange></w:pPr></w:p>' +
+        // Same numbering before and after: nothing lost; an alignment change is kept.
+        '<w:p><w:pPr><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="center"/><w:pPrChange w:id="3"><w:pPr><w:numPr><w:numId w:val="1"/></w:numPr></w:pPr></w:pPrChange></w:pPr></w:p>'
+    );
+    expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({
+      count: 2,
+      where: ['pPrChange (numbering, tabs, borders or shading) ×2'],
+    });
+  });
+
   it('reports no paragraph-mark change as lost, in the body, in a table cell of one paragraph or of several, or on a row', async () => {
     const mark = (tag: string) => `<w:p><w:pPr><w:rPr><${tag} w:id="1" w:author="A"/></w:rPr></w:pPr></w:p>`;
     const bytes = await docx(

@@ -269,6 +269,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     const runRevision: DocRevision | undefined = change ? { ...revision, formatChange: { ...revisionMeta(change, anonymousRevisionId(ctx)), previous: previousRunFormat(change, pStyleId, ctx) } } : revision;
     const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(runRevision && !top() && { revision: runRevision }) };
     let text = '';
+    /** Set once the run's formatting change is on text that stays in the document. */
+    let formatChangeKept = false;
     /** A reference followed by its custom mark (`w:customMarkFollows`): the text after it in the run is that mark. */
     let markOf: Extract<DocInline, { type: 'noteRef' }> | undefined;
     const flush = () => {
@@ -291,6 +293,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         return;
       }
       const runProps = commentThreadId ? { ...props, commentThreadId } : props;
+      if (props.revision?.formatChange) formatChangeKept = true;
       if (target) out.push({ type: 'link', text, href: target, ...runProps });
       else out.push({ type: 'text', text, ...runProps });
       text = '';
@@ -367,6 +370,11 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       }
     }
     flush();
+    // A formatting change travels on text (a mark): one on a run that has none left (a field result, an image, a note
+    // reference) is not kept, and says so.
+    if (change && !formatChangeKept) {
+      warnings.push('A tracked formatting change of a run without text of its own (a field result, image or note reference) was not kept; the current formatting is imported.');
+    }
     // A note with a custom mark starts with that mark as text (not with the reference mark): it is not part of the note's text.
     if (markOf?.customMark) dropCustomMark(markOf.content, markOf.customMark);
   };

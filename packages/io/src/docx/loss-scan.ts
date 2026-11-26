@@ -241,12 +241,25 @@ interface RevisionLosses {
  * formatting changes of a paragraph mark's own formatting, and changes of tables, table rows and cells, and sections.
  * Text boxes are reported as such and not counted here.
  */
+/** Paragraph properties a paragraph change does not carry the old value of. */
+const PPR_NOT_PREVIOUS = ['w:numPr', 'w:tabs', 'w:pBdr', 'w:shd'];
+
 function revisionLosses(root: XmlNode[]): RevisionLosses {
   const out: RevisionLosses = { formatting: new Map() };
-  walk(root, (_node, tag, path) => {
+  walk(root, (node, tag, path) => {
     if (path.includes('w:txbxContent')) return;
     if (tag === 'w:tblPrChange' || tag === 'w:sectPrChange' || tag === 'w:trPrChange' || tag === 'w:tcPrChange') {
       bump(out.formatting, tag.slice(2));
+      return;
+    }
+    // `previous` of a paragraph change carries alignment, spacing, indents and keep flags; a change of numbering, tab stops,
+    // borders or shading is not in it, so it cannot be restored by rejecting the change.
+    if (tag === 'w:pPr' && !inRevisionProps(path)) {
+      const change = find(childrenOf(node), 'w:pPrChange');
+      const before = change ? find(childrenOf(change), 'w:pPr') : undefined;
+      if (change && PPR_NOT_PREVIOUS.some((name) => JSON.stringify(find(childrenOf(node), name)) !== JSON.stringify(before && find(childrenOf(before), name)))) {
+        bump(out.formatting, 'pPrChange (numbering, tabs, borders or shading)');
+      }
       return;
     }
     const inParagraphMark = path[path.length - 1] === 'w:rPr' && path[path.length - 2] === 'w:pPr' && !inRevisionProps(path);

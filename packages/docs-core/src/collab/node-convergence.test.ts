@@ -647,7 +647,7 @@ describe('concurrent suggestions on one paragraph mark or table row', () => {
     for (const client of [a, b, c]) expect(revisionOfBlock(client)).toEqual({ insertion: ADA, deletion: BO, formatChange: CY });
   });
 
-  it('keep both when one splits the paragraph (inserting a mark) while the other marks the old mark deleted', () => {
+  it('both survive a split and a deletion of the mark, but Bo\u2019s record lands on the first half (documented residual limit)', () => {
     const [a, b] = pair([para('p', [text('hello world')])]);
     // Ada: Enter in the middle; the new mark (end of the first half) is her insertion.
     a.edit((tr) => {

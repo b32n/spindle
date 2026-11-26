@@ -337,7 +337,7 @@ lockstep.
   `RunFormat`, `PreviousParagraphFormat`, `BlockRevision`, `RunRevision.formatChange`, `ParagraphFormat.revision` and
   `TableRow.revision` in docs-core. `docsSchema` gains the `formatChange` mark (attributes `revisionId`, `author`, `date`,
   `previous`; the formatting read back from pasted HTML is limited to known fields), a `moveId` attribute on the `insertion` and
-  `deletion` marks, and the attributes `revisionInsertion`, `revisionDeletion` and `revisionFormat` on paragraphs, headings and table rows (one per kind of change, so two people suggesting different things on the same paragraph mark or row at once both keep theirs; the same kind from two people is last-writer-wins; after a concurrent split a record made on the whole paragraph stays with the first half); all are plain ProseMirror content that
+  `deletion` marks, and the attributes `revisionInsertion`, `revisionDeletion` and `revisionFormat` on paragraphs, headings and table rows (one per kind of change, so two people suggesting different things on the same paragraph mark or row at once both keep theirs; the same kind from two people is last-writer-wins; after a concurrent split a record made on the whole paragraph stays with the first half, next to the insertion the split recorded there, not on the half that holds the original mark); all are plain ProseMirror content that
   syncs over Yjs; the collaboration `schemaVersion` is now 7 (a client at 6 would drop the `formatChange` mark and the new attributes, so it refuses to join such a room). The editor draws the two ends of a move with a
   double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
   paragraph with a change, and a tint on the cells of an inserted or deleted row. `documentRevisionAuthors` also lists the authors of changes recorded on paragraphs and rows and of formatting changes, so they share out the palette like the others.
@@ -347,8 +347,9 @@ lockstep.
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
   counts only what is still lost**: insertions, deletions and moves of text, of paragraph marks (also in a table cell of one
   paragraph, which keeps its block when its paragraph has a change, like the export does) and of table rows are kept. What
-  is left: the formatting change of a paragraph mark's own formatting and changes of tables, table rows, cells and sections (`w:tblPrChange`,
-  `w:trPrChange`, `w:tcPrChange`, `w:sectPrChange`), and `docx.trackedBlockChanges` / `docx.trackedHeaderFooterChanges`. A change inside a field result is not kept (and not counted).
+  is left: the formatting change of a paragraph mark's own formatting, a paragraph change of numbering, tab stops, borders or
+  shading (the old value is not kept, so rejecting cannot restore it) and changes of tables, table rows, cells and sections (`w:tblPrChange`,
+  `w:trPrChange`, `w:tcPrChange`, `w:sectPrChange`), and `docx.trackedBlockChanges` / `docx.trackedHeaderFooterChanges`. A change inside a field result is not kept, and neither is a formatting change on a run with no text of its own (a field result, an image, a note reference); each adds a warning.
 - **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
   `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
   deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted

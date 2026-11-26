@@ -65,7 +65,9 @@ Verified absent in code.
       from a file, shown (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
       rejecting, a Suggesting mode, changes of cells, tables and sections, and a change around a field, image or note
       reference (those are not kept as changes). Moves, formatting changes and paragraph-mark and table-row changes are
-      kept and shown. The library has no plain-text, HTML or Markdown export, word count or search of its own;
+      kept and shown. The margin bar is drawn beside top-level paragraphs, headings and list items only, not inside table
+      cells, text boxes or tables of contents (those paragraphs carry the change, without a visible bar). Two move ranges of
+      one direction open in one paragraph at once are read as one (the later name wins). The library has no plain-text, HTML or Markdown export, word count or search of its own;
       `getPlainText` / `getPmPlainText` and the clipboard text leave deleted text out, the clipboard HTML keeps it (so a
       paste keeps the change). A host that counts or searches text takes the final text from those helpers.
 - [ ] **Spell-check** — browser spellcheck is deliberately disabled
