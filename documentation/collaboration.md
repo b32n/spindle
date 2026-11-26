@@ -312,7 +312,7 @@ edits, and the inverse operations broadcast to peers like any other edit.
   Shift+Enter in tracked text, and the DOCX reader makes the same.
 - **Suggesting mode** records the local user's own edits only: changes that arrive from a collaborator, and undo and redo, are
   never turned into suggestions. A collaborator's suggestions are ordinary marks and attributes that sync as such. The author on a
-  suggestion is the editor's `currentUser`; colours and the identity from the collaboration presence are not tied together yet.
+  suggestion is the editor's `currentUser`; colours and the identity from the collaboration presence are not tied together yet. In a room, people who suggest need distinct `currentUser.name` values: a change is attributed by the author's name, so two people who both use the default name ("You") are one author to each other, and one's Backspace over the other's insertion removes the text outright.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
   1, the layout without section breaks; 2 adds section breaks; 3 adds content
   controls; 4 adds footnote and endnote references; 5 adds the table of contents; 6 adds tracked insertions and deletions; 7 adds formatting changes, moves, and changes of paragraph marks and table rows). A client that finds a newer version

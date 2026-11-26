@@ -721,7 +721,7 @@ export const DocumentEditor = memo(function DocumentEditor({
           collabHandle={docModel.getCollabHandle()}
           revisionView={revisionView}
           suggesting={mode === 'suggesting' && !readOnly}
-          suggestAuthor={currentUser.name}
+          suggestAuthor={currentUser.name || 'Unknown'}
           onSuggestionNotice={handleSuggestionNotice}
         />
 

@@ -172,13 +172,13 @@ function replaceStep(ctx: Context, step: ReplaceStep, docBefore: PmNode, after: 
     // A paragraph mark this author inserted and now deletes is simply gone (Enter, then Backspace).
     const lone = deleted.content.childCount === 2 && deleted.openStart === 1 && deleted.openEnd === 1 && deleted.size === 2 && deleted.content.child(0).childCount === 0 && deleted.content.child(1).childCount === 0;
     const firstParent = docBefore.resolve(from).parent;
-    const own = readBlockRevision(firstParent.attrs, false)?.insertion;
+    const own = readBlockRevision(firstParent.attrs)?.insertion;
     if (lone && own && own.author === ctx.author && TEXTBLOCKS.has(firstParent.type.name)) {
       // The join keeps the first paragraph's attributes, but the paragraph that results ends with the second one's mark: it takes
       // that mark's records (inserted, deleted) and keeps the first one's formatting change, as accepting a deleted mark does.
       const secondParent = docBefore.resolve(to).parent;
-      const first = readBlockRevision(firstParent.attrs, false) ?? {};
-      const second = readBlockRevision(secondParent.attrs, false) ?? {};
+      const first = readBlockRevision(firstParent.attrs) ?? {};
+      const second = readBlockRevision(secondParent.attrs) ?? {};
       const merged = out.doc.resolve(start);
       ctx.out.setNodeMarkup(
         merged.before(),
@@ -270,7 +270,7 @@ function sameFormat(a: unknown, b: unknown): boolean {
 }
 
 /** What a change to the type or attributes of a node that is not a paragraph or heading says (made directly). */
-const ATTRIBUTE_NOTICE = 'A change to the properties of a list, table, image or form control cannot be suggested and was made directly.';
+const ATTRIBUTE_NOTICE = 'A change to the properties of a list, table, image, form control or other structure cannot be suggested and was made directly.';
 
 /**
  * A paragraph whose formatting or type was changed records the formatting it had. Nothing is recorded, on purpose and
@@ -280,13 +280,29 @@ const ATTRIBUTE_NOTICE = 'A change to the properties of a list, table, image or 
 function paragraphChanged(ctx: Context, before: PmNode, pos: number): void {
   const node = ctx.out.doc.nodeAt(pos);
   if (!node || !TEXTBLOCKS.has(node.type.name) || !TEXTBLOCKS.has(before.type.name)) return;
-  const revision = readBlockRevision(node.attrs, false) ?? {};
-  if (revision.formatChange || revision.insertion?.author === ctx.author) return;
+  const revision = readBlockRevision(node.attrs) ?? {};
+  if (revision.insertion?.author === ctx.author) return;
   const previous = paragraphFormatOf(before);
   const current = paragraphFormatOf(node);
-  if (JSON.stringify(previous) === JSON.stringify(current)) return;
+  const same = JSON.stringify(previous) === JSON.stringify(current);
+  // An attribute a record cannot carry (the indent level of Increase / Decrease indent) was changed: say it was made directly.
+  if (changedAttributes(before, node)) ctx.notices.add(UNRECORDED_NOTICE);
+  if (revision.formatChange || same) return;
   setMarkRecord(ctx, pos, 'formatChange', { ...freshMeta(ctx), previous });
 }
+
+/** True when an attribute of a paragraph that neither the change records nor the formatting a record carries differs between two versions of it. */
+function changedAttributes(before: PmNode, after: PmNode): boolean {
+  const covered = new Set(Object.keys(paragraphFormatOf(before)).concat(Object.keys(paragraphFormatOf(after)), ['level']));
+  for (const key of new Set([...Object.keys(before.attrs), ...Object.keys(after.attrs)])) {
+    if (key.startsWith('revision') || covered.has(key)) continue;
+    if (JSON.stringify(before.attrs[key] ?? null) !== JSON.stringify(after.attrs[key] ?? null)) return true;
+  }
+  return false;
+}
+
+/** A change of a paragraph attribute that a formatting change does not record. */
+const UNRECORDED_NOTICE = "A change of a paragraph's indent cannot be suggested and was made directly.";
 
 /**
  * Tell the host what was done directly. The plugin runs inside `state.apply`, where a host must not set its own state, and

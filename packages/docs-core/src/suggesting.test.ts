@@ -12,6 +12,7 @@ import { readBlockRevision } from './prosemirror/block-revision';
 import { changeUnits, listChanges, resolveAll } from './prosemirror/review';
 import { suggestingPlugin, type SuggestingOptions } from './prosemirror/suggesting';
 import { createPlugins } from './prosemirror/plugins';
+import { decreaseIndent, increaseIndent } from './prosemirror/commands';
 import type { Block, InlineContent } from './types';
 
 const T0 = '2024-06-01T10:00:00Z';
@@ -824,7 +825,7 @@ describe('paragraph marks with changes of other people', () => {
 
 describe('a change to the type or properties of a node that is not a paragraph', () => {
   const item = { type: 'list_item', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'item' }] }] };
-  const NOTICE = /properties of a list, table, image or form control cannot be suggested/;
+  const NOTICE = /properties of a list, table, image, form control or other structure cannot be suggested/;
   const stateOfNode = (json: object) =>
     EditorState.create({ doc: docsSchema.nodes.doc.create(null, [docsSchema.nodeFromJSON(json)]), plugins: [suggestingPlugin(options)] });
 
@@ -872,6 +873,56 @@ describe('a change to the type or properties of a node that is not a paragraph',
   });
 });
 
+describe('Increase and Decrease indent', () => {
+  const NOTICE = /indent cannot be suggested and was made directly/;
+
+  it('are made directly, with a notice, since a record cannot carry the indent level', async () => {
+    const state = stateOf([para(run('abc'))], 2);
+    const more = doCommand(state, increaseIndent(docsSchema));
+    expect(more.doc.child(0).attrs.indent).toBe(1);
+    expect(changeUnits(more.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+
+    setup.notices = [];
+    const less = doCommand(more, decreaseIndent(docsSchema));
+    expect(less.doc.child(0).attrs.indent).toBe(0);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+  });
+
+  it('say so for a paragraph that already carries a formatting change of this author, and record no second one', async () => {
+    const state = stateOf([para(run('abc'))], 2);
+    const centred = state.apply(state.tr.setNodeMarkup(0, undefined, { ...state.doc.child(0).attrs, alignment: 'center' }));
+    expect(listChanges(centred.doc).map((c) => c.kind)).toEqual(['paragraphFormat']);
+    setup.notices = [];
+    const next = doCommand(centred, increaseIndent(docsSchema));
+    expect(listChanges(next.doc)).toHaveLength(1);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+  });
+
+  it('are not announced on the author’s own inserted paragraph, nor when the mode is off', async () => {
+    const own = stateOf([{ id: 'p', type: 'paragraph', content: [run('abc')], revision: { insertion: { id: '1', author: 'Ada' } } } as Block], 2);
+    doCommand(own, increaseIndent(docsSchema));
+    await flush();
+    expect(setup.notices).toEqual([]);
+    setup.active = false;
+    doCommand(stateOf([para(run('abc'))], 2), increaseIndent(docsSchema));
+    await flush();
+    expect(setup.notices).toEqual([]);
+  });
+
+  it('do not disturb a recorded paragraph format change when the alignment changes in the same step as the indent', async () => {
+    const state = stateOf([para(run('abc'))], 2);
+    const both = apply(state, state.tr.setNodeMarkup(0, undefined, { ...state.doc.child(0).attrs, alignment: 'right', indent: 2 }));
+    expect(listChanges(both.doc).map((c) => c.kind)).toEqual(['paragraphFormat']);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+    expect(readBlockRevision(both.doc.child(0).attrs)?.formatChange?.previous.alignment ?? 'left').toBe('left');
+  });
+});
+
 describe('edits that are made directly', () => {
   it('a change to the properties of a list, an image or a form control is made directly, with a notice', async () => {
     const list = docsSchema.nodeFromJSON({
@@ -884,7 +935,7 @@ describe('edits that are made directly', () => {
     expect(next.doc.child(0).attrs.start).toBe(3);
     expect(changeUnits(next.doc)).toEqual([]);
     await flush();
-    expect(setup.notices.flat().join(' ')).toMatch(/properties of a list, table, image or form control cannot be suggested/);
+    expect(setup.notices.flat().join(' ')).toMatch(/properties of a list, table, image, form control or other structure cannot be suggested/);
     // Outside Suggesting mode there is nothing to tell.
     setup.notices = [];
     setup.active = false;
