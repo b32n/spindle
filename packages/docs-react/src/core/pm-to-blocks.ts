@@ -777,12 +777,11 @@ function revisionInfo(mark: Mark): RevisionInfo {
   };
 }
 
-type BlockRevisionAttr = { insertion?: { id?: string; author?: string }; deletion?: { id?: string; author?: string }; formatChange?: { id?: string; author?: string } } | null | undefined;
+type BlockRevisionAttr = ReturnType<typeof readBlockRevision>;
 
 /** The bar for a paragraph with a tracked change: in the colour of the author of the last of them (deletion, insertion, formatting). */
-function changeBarOf(revision: unknown): ChangeBar | undefined {
-  const r = revision as BlockRevisionAttr;
-  if (!r || typeof r !== 'object') return undefined;
+function changeBarOf(r: BlockRevisionAttr): ChangeBar | undefined {
+  if (!r) return undefined;
   const kinds: ChangeBar['kinds'] = [];
   if (r.insertion) kinds.push('insertion');
   if (r.deletion) kinds.push('deletion');
@@ -793,9 +792,8 @@ function changeBarOf(revision: unknown): ChangeBar | undefined {
 }
 
 /** The `revision` of a flow table row for a row's `revision` attr (nothing when it has none). */
-function rowRevision(revision: unknown): { revision?: NonNullable<TableRow['revision']> } {
-  const r = revision as BlockRevisionAttr;
-  if (!r || typeof r !== 'object') return {};
+function rowRevision(r: BlockRevisionAttr): { revision?: NonNullable<TableRow['revision']> } {
+  if (!r) return {};
   const info = (meta: { id?: string; author?: string } | undefined): RevisionInfo | undefined =>
     meta ? { id: String(meta.id ?? ''), author: String(meta.author ?? ''), color: authorColorOf(String(meta.author ?? '')) } : undefined;
   const insertion = info(r.insertion);

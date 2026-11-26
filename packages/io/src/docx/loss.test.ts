@@ -309,6 +309,13 @@ describe('detectDocxLoss: long-tail detectors', () => {
     expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({ count: 2, where: ['tcPrChange ×1', 'trPrChange ×1'] });
   });
 
+  it('docx.formattingRevisions also counts an inserted, deleted or merged table cell, which is imported as an ordinary cell', async () => {
+    const bytes = await docx(
+      '<w:tbl><w:tr><w:tc><w:tcPr><w:cellIns w:id="1" w:author="A"/></w:tcPr><w:p/></w:tc><w:tc><w:tcPr><w:cellDel w:id="2" w:author="A"/></w:tcPr><w:p/></w:tc><w:tc><w:tcPr><w:cellMerge w:id="3" w:author="A" w:vMerge="rest"/></w:tcPr><w:p/></w:tc></w:tr></w:tbl>'
+    );
+    expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({ count: 3, where: ['cellDel ×1', 'cellIns ×1', 'cellMerge ×1'] });
+  });
+
   it('docx.formattingRevisions counts a paragraph change of numbering, tab stops, borders or shading, whose old value is not kept', async () => {
     const bytes = await docx(
       // Bullet switched on: the old paragraph had no numbering.

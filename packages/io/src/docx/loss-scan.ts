@@ -235,6 +235,9 @@ interface RevisionLosses {
   formatting: Map<string, number>;
 }
 
+/** Revision elements of tables, rows, cells and sections: none is kept (an inserted, deleted or merged cell is imported as an ordinary cell). */
+const CELL_AND_TABLE_REVISIONS = ['w:tblPrChange', 'w:sectPrChange', 'w:trPrChange', 'w:tcPrChange', 'w:cellIns', 'w:cellDel', 'w:cellMerge'];
+
 /** Paragraph properties a paragraph change does not carry the old value of. */
 const PPR_NOT_PREVIOUS = ['w:numPr', 'w:tabs', 'w:pBdr', 'w:shd'];
 
@@ -249,7 +252,7 @@ function revisionLosses(root: XmlNode[]): RevisionLosses {
   const out: RevisionLosses = { formatting: new Map() };
   walk(root, (node, tag, path) => {
     if (path.includes('w:txbxContent')) return;
-    if (tag === 'w:tblPrChange' || tag === 'w:sectPrChange' || tag === 'w:trPrChange' || tag === 'w:tcPrChange') {
+    if (CELL_AND_TABLE_REVISIONS.includes(tag)) {
       bump(out.formatting, tag.slice(2));
       return;
     }
@@ -271,6 +274,10 @@ function revisionLosses(root: XmlNode[]): RevisionLosses {
 
 const CHANGE_NOT_KEPT_RUN_CONTENT = ['w:fldChar', 'w:fldSimple', 'w:drawing', 'mc:AlternateContent', 'w:footnoteReference', 'w:endnoteReference'];
 
+/** The elements that wrap runs in a tracked change; a move is an insertion (`moveTo`) or a deletion (`moveFrom`) as far as the content goes. */
+const RUN_CHANGE_TAGS = ['w:ins', 'w:del', 'w:moveFrom', 'w:moveTo'];
+const DELETING_TAGS = ['w:del', 'w:moveFrom'];
+
 /**
  * Tracked changes around runs that the importer cannot keep as a change: a change around a field (a deleted field is dropped),
  * a deleted image or note reference (dropped), an inserted image, field or note reference (kept as ordinary content), and
@@ -289,16 +296,16 @@ function trackedChangesNotKept(root: XmlNode[]): Item[] {
       else if (type === 'end') fields.pop();
       return;
     }
-    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    if (!RUN_CHANGE_TAGS.includes(tag) || inRevisionProps(path) || path.includes('w:txbxContent')) return;
     const parent = path[path.length - 1];
     if (parent === 'w:rPr' || parent === 'w:trPr' || parent === 'w:body' || parent === 'w:tc') return;
     // A change inside another one (the writer nests a deletion in an insertion) is one change with its outer element.
-    const nested = path.includes('w:ins') || path.includes('w:del');
+    const nested = path.some((t) => RUN_CHANGE_TAGS.includes(t));
     const found = nested ? undefined : CHANGE_NOT_KEPT_RUN_CONTENT.find((t) => findDeep(node, t));
     if (found) {
       count++;
       bump(kinds, found === 'w:fldChar' || found === 'w:fldSimple' ? 'field' : found === 'w:footnoteReference' || found === 'w:endnoteReference' ? 'note reference' : 'image');
-    } else if (tag === 'w:del' && !path.includes('w:del') && fields.some(Boolean) && findDeep(node, 'w:delText')) {
+    } else if (DELETING_TAGS.includes(tag) && !path.some((t) => DELETING_TAGS.includes(t)) && fields.some(Boolean) && findDeep(node, 'w:delText')) {
       count++;
       bump(kinds, 'text in a field result');
     }

@@ -363,7 +363,7 @@ class DocxBuilder {
 
   /** A change in the form the `docx` library takes (`w:id`, `w:author`, `w:date`); a change without a date is written without one. */
   private change(kind: string, meta: DocRevisionMeta) {
-    return { id: this.revisionId(kind, meta), author: xmlText(meta.author) || 'Unknown', date: wordDate(meta.date) as string };
+    return { id: this.revisionId(kind, meta), author: xmlText(meta.author) || 'Unknown', date: wordDate(meta.date) as string }; // `docx` leaves out an undefined date; its type does not say so
   }
 
   /** An element `name` with the attributes of a tracked change (and any `extra`), around `children`. */

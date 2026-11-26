@@ -238,6 +238,7 @@ const NODE_SAMPLES: Record<string, Json[]> = {
     // Tracked changes of a paragraph: its mark inserted, and its formatting changed (with the formatting before).
     p([t('marked')], {
       revisionInsertion: { id: '3', author: 'Ada', date: '2024-05-06T07:08:09Z' },
+      revisionDeletion: { id: '5', author: 'Cy', date: '2024-02-02T00:00:00Z' },
       revisionFormat: { id: '4', author: 'Bo', previous: { alignment: 'right', leftIndent: 24, headingLevel: 2 } },
     }),
     // A named paragraph style (DOCX pStyle).
@@ -459,17 +460,16 @@ describe('the revision attributes of the samples are real attributes', () => {
   // schema-wide checks pass without ever exercising it.
   it.each(['paragraph', 'table_row'] as const)('a %s sample with all three kinds keeps them through the model and the Y document', (name) => {
     const original = docOf(NODE_SAMPLES[name]);
-    const kept: Record<string, unknown>[] = [];
+    const full: Record<string, unknown>[] = [];
     original.descendants((n) => {
-      if (n.type.name === name && n.attrs.revisionInsertion && n.attrs.revisionDeletion !== undefined) kept.push(n.attrs);
+      if (n.type.name === name && n.attrs.revisionInsertion && n.attrs.revisionDeletion && n.attrs.revisionFormat) full.push(n.attrs);
     });
-    const full = kept.filter((a) => a.revisionInsertion && a.revisionFormat);
     expect(full.length).toBeGreaterThan(0);
     const [a] = pair([]);
     a.edit((tr) => tr.replaceWith(0, tr.doc.content.size, original.content));
     const back: Record<string, unknown>[] = [];
     sectionsToPmDoc(a.data().sections).descendants((n) => {
-      if (n.type.name === name && n.attrs.revisionInsertion && n.attrs.revisionFormat) back.push(n.attrs);
+      if (n.type.name === name && n.attrs.revisionInsertion && n.attrs.revisionDeletion && n.attrs.revisionFormat) back.push(n.attrs);
     });
     expect(back).toEqual(full);
   });

@@ -401,6 +401,19 @@ describe('loss report for changes the importer cannot keep around runs', () => {
     expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedChangesNotKept')?.where).toEqual(['image ×2', 'field ×1', 'note reference ×1', 'text in a field result ×1']);
   });
 
+  it('counts a move around a field, an image, a note reference and deleted text in a field result (moveFrom is a deletion, moveTo an insertion)', async () => {
+    const from = (id: string, inner: string) => `<w:moveFrom w:id="${id}" w:author="A">${inner}</w:moveFrom>`;
+    const to = (id: string, inner: string) => `<w:moveTo w:id="${id}" w:author="A">${inner}</w:moveTo>`;
+    const { bytes, result } = await importBody(
+      `<w:p ${W}>${from('1', r(drawing))}${from('2', r('<w:footnoteReference w:id="1"/>'))}${from('3', begin + r(t('3')) + end)}${to('4', r(drawing))}` +
+        `${begin}${from('5', delRun('old'))}${end}${from('6', delRun('outside'))}${to('7', r(t('plain')))}</w:p>`
+    );
+    expect(result.warnings.some((w) => /deleted image was not kept/.test(w))).toBe(true); // the reader drops the moved image too
+    const found = (await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedChangesNotKept');
+    expect(found).toMatchObject({ count: 5 });
+    expect(found?.where).toEqual(['image ×2', 'field ×1', 'note reference ×1', 'text in a field result ×1']);
+  });
+
   it('counts an insertion that wraps a deletion once (the shape the writer makes)', async () => {
     const { bytes } = await importBody(`<w:p ${W}>${ins('1', 'A', del('2', 'B', r(drawing)))}${ins('3', 'A', del('4', 'B', delRun('x')))}</w:p>`);
     const found = (await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedChangesNotKept');

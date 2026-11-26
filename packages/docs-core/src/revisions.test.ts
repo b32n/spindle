@@ -397,6 +397,26 @@ describe('moves, formatting changes, paragraph marks and rows', () => {
     expect(pm.child(0).attrs.revisionInsertion.author).toBe('Ada');
   });
 
+  it('are copied, not shared, into the interchange format of an export (also the formatting change of a text run)', async () => {
+    let captured: { sections: { blocks: { content: { revision?: { formatChange?: { previous: { fontSize?: number } }; insertion?: { author: string } } }[] }[] }[] } | undefined;
+    await jest.isolateModulesAsync(async () => {
+      jest.doMock('@b32nio/spindle-io/docx', () => ({ exportDocx: async (input: typeof captured) => ((captured = input), { bytes: new Uint8Array(), warnings: [] }) }));
+      const { exportToDocx: exportWithMock } = await import('./export/docx');
+      const { DocumentImpl: Impl } = await import('./document');
+      const doc = new Impl('doc', 'Doc');
+      doc.setData(dataWith(KINDS));
+      await exportWithMock(doc);
+    });
+    jest.dontMock('@b32nio/spindle-io/docx');
+    const run = captured!.sections[0].blocks[0].content.find((c) => c.revision?.formatChange)!;
+    const source = (KINDS[0] as ParagraphBlock).content.find((c) => c.type === 'text' && c.revision?.formatChange)!;
+    expect(run.revision).toEqual((source as { revision: object }).revision);
+    expect(run.revision).not.toBe((source as { revision: object }).revision);
+    expect(run.revision!.formatChange!.previous).not.toBe((source as { revision: { formatChange: { previous: object } } }).revision.formatChange.previous);
+    run.revision!.formatChange!.previous.fontSize = 99;
+    expect((source as { revision: { formatChange: { previous: { fontSize?: number } } } }).revision.formatChange.previous.fontSize).toBe(14);
+  });
+
   it('survive a DOCX export and import through the editor model', async () => {
     const doc = new DocumentImpl('doc', 'Doc');
     doc.setData(dataWith(KINDS));
