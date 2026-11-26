@@ -18,6 +18,7 @@
 
 import { syntaxError, tokenize, type CellToken, type Token } from './tokenizer';
 import { MAX_SHEET_COLS, MAX_SHEET_ROWS } from './types';
+import { omittableArgFunctions } from './functions/omittable';
 import type { CellReference, ParsedFormulaNode } from './types';
 
 const MAX_NESTING = 256;
@@ -330,11 +331,15 @@ class SyntaxParser {
     this.expectOp('(');
     this.enter();
     const args: ParsedFormulaNode[] = [];
+    // An empty argument (`F(1,,2)`) is skipped, as the engine always has, except for the functions where Excel gives
+    // an omitted argument its default and the position matters (`NUMBERVALUE(a,,",")`): they get a placeholder that
+    // evaluates to `undefined`, the same as an argument left off the end.
+    const keepEmpty = omittableArgFunctions.has(name.toUpperCase().replace(/^_XLFN\./, ''));
     if (this.peekOp() !== ')') {
       for (;;) {
-        // An empty argument (`F(1,,2)`) is skipped, as the engine always has.
         const op = this.peekOp();
         if (op !== ',' && op !== ')') args.push(this.parseComparison());
+        else if (keepEmpty) args.push({ type: 'number', value: undefined });
         const sep = this.next();
         if (sep.kind === 'op' && sep.text === ')') break;
         if (sep.kind !== 'op' || sep.text !== ',') throw this.unexpected(sep, 'expected "," or ")"');

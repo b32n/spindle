@@ -141,6 +141,17 @@ const textDocs: FunctionDoc[] = [
   { name: 'CHAR', category: 'text', args: [req('number')], description: 'Returns the character for a character code.' },
   { name: 'CODE', category: 'text', args: [req('text')], description: 'Returns the character code of the first character.' },
   { name: 'EXACT', category: 'text', args: [req('text1'), req('text2')], description: 'Returns TRUE if two text values are exactly equal.' },
+  { name: 'CLEAN', category: 'text', args: [req('text')], description: 'Removes the non-printing characters (codes 0-31) from text.' },
+  { name: 'NUMBERVALUE', category: 'text', args: [req('text'), opt('decimal_separator'), opt('group_separator')], description: 'Converts text to a number with the separators you give, whatever the locale.' },
+  { name: 'UNICHAR', category: 'text', args: [req('number')], description: 'Returns the character for a Unicode code point.' },
+  { name: 'UNICODE', category: 'text', args: [req('text')], description: 'Returns the Unicode code point of the first character.' },
+  { name: 'T', category: 'text', args: [req('value')], description: 'Returns the text of a value, or empty text for anything else.' },
+  { name: 'FIXED', category: 'text', args: [req('number'), opt('decimals'), opt('no_commas')], description: 'Rounds a number and returns it as text, with thousands commas.' },
+  { name: 'DOLLAR', category: 'text', args: [req('number'), opt('decimals')], description: 'Rounds a number and returns it as dollar-formatted text.' },
+  { name: 'BASE', category: 'text', args: [req('number'), req('radix'), opt('min_length')], description: 'Writes a number as text in another base (2 to 36).' },
+  { name: 'DECIMAL', category: 'text', args: [req('text'), req('radix')], description: 'Converts text in another base (2 to 36) to a number.' },
+  { name: 'ROMAN', category: 'text', args: [req('number'), opt('form')], description: 'Writes a number as a Roman numeral (1 to 3999).' },
+  { name: 'ARABIC', category: 'text', args: [req('text')], description: 'Converts a Roman numeral to a number.' },
 ];
 
 const lookupDocs: FunctionDoc[] = [
@@ -149,7 +160,7 @@ const lookupDocs: FunctionDoc[] = [
   { name: 'XLOOKUP', category: 'lookup', args: [req('lookup_value'), req('lookup_array'), req('return_array'), opt('if_not_found'), opt('match_mode'), opt('search_mode')], description: 'Searches a range and returns the matching item from another range.' },
   { name: 'MATCH', category: 'lookup', args: [req('lookup_value'), req('lookup_array'), opt('match_type')], description: 'Returns the position of a value within a range.' },
   { name: 'XMATCH', category: 'lookup', args: [req('lookup_value'), req('lookup_array'), opt('match_mode'), opt('search_mode')], description: 'Returns the position of a value within a range.' },
-  { name: 'INDEX', category: 'lookup', args: [req('array'), opt('row'), opt('column')], description: 'Returns the value at a position in a range.' },
+  { name: 'INDEX', category: 'lookup', args: [req('array'), opt('row'), opt('column')], description: 'Returns the value at a position in a range, or a whole row or column when an index is 0.' },
   { name: 'LOOKUP', category: 'lookup', args: [req('lookup_value'), req('lookup_vector'), opt('result_vector')], description: 'Looks up a value in a vector and returns a corresponding result.' },
   { name: 'CHOOSE', category: 'lookup', args: [req('index'), req('value1'), rest('value2')], description: 'Returns one of a list of values, chosen by index.' },
   { name: 'ROWS', category: 'lookup', args: [req('range')], description: 'Returns the number of rows in a range.' },
@@ -210,6 +221,12 @@ const dateDocs: FunctionDoc[] = [
   { name: 'WORKDAY', category: 'date', args: [req('start_date'), req('days'), opt('holidays')], description: 'Returns a date a number of working days away.' },
   { name: 'DATEVALUE', category: 'date', args: [req('date_text')], description: 'Converts a date written as text to a date.' },
   { name: 'TIMEVALUE', category: 'date', args: [req('time_text')], description: 'Converts a time written as text to a time.' },
+  { name: 'DAYS', category: 'date', args: [req('end_date'), req('start_date')], description: 'Returns the number of days between two dates.' },
+  { name: 'DAYS360', category: 'date', args: [req('start_date'), req('end_date'), opt('method')], description: 'Returns the days between two dates on a 360-day year (US or European method).' },
+  { name: 'YEARFRAC', category: 'date', args: [req('start_date'), req('end_date'), opt('basis')], description: 'Returns the fraction of a year between two dates.' },
+  { name: 'ISOWEEKNUM', category: 'date', args: [req('date')], description: 'Returns the ISO 8601 week number of a date.' },
+  { name: 'WORKDAY.INTL', category: 'date', args: [req('start_date'), req('days'), opt('weekend'), opt('holidays')], description: 'Returns a date a number of working days away, with a custom weekend.' },
+  { name: 'NETWORKDAYS.INTL', category: 'date', args: [req('start_date'), req('end_date'), opt('weekend'), opt('holidays')], description: 'Counts the working days between two dates, with a custom weekend.' },
 ];
 
 const informationDocs: FunctionDoc[] = [
@@ -224,6 +241,7 @@ const informationDocs: FunctionDoc[] = [
   { name: 'ERROR.TYPE', category: 'information', args: [req('value')], description: 'Returns a number identifying an error value.' },
   { name: 'NA', category: 'information', args: [], description: 'Returns the #N/A error value.' },
   { name: 'N', category: 'information', args: [req('value')], description: 'Converts a value to a number.' },
+  { name: 'ISNONTEXT', category: 'information', args: [req('value')], description: 'Returns TRUE if the value is not text.' },
 ];
 
 const financialDocs: FunctionDoc[] = [

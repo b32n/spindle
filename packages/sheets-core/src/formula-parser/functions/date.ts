@@ -6,22 +6,34 @@
 
 import type { EagerFn } from './helpers';
 import { flatten, toNum, toText, isErrorValue } from './helpers';
+import { dateToSerial, serialToDate } from '../../number-format/dates';
 
 const EPOCH = Date.UTC(1899, 11, 30);
 const MS_PER_DAY = 86_400_000;
 
-/** Serial number for a year/month/day (month/day overflow rolls over). */
-function ymdToSerial(year: number, month: number, day: number): number {
-  return (Date.UTC(year, month - 1, day) - EPOCH) / MS_PER_DAY;
+/**
+ * Serial number for a year/month/day (month and day overflow roll over). Follows Excel's calendar, which has a
+ * 29 February 1900 (serial 60): 1900-01-01 is 1, `DATE(1900,2,30)` is 61 and `DATE(1900,3,0)` is 60. A date it
+ * cannot place (before 1900, after 9999) falls back to the plain calendar.
+ */
+export function ymdToSerial(year: number, month: number, day: number): number {
+  const m0 = month - 1;
+  const y = year + Math.floor(m0 / 12);
+  const m = (((m0 % 12) + 12) % 12) + 1;
+  // the serial of the first of the month, then the days on from it (this is what makes the overflow follow Excel's 1900)
+  const first = y === 1900 && m < 3 ? (m === 1 ? 1 : 32) : dateToSerial(y, m, 1);
+  return first === null ? (Date.UTC(year, month - 1, day) - EPOCH) / MS_PER_DAY : first + day - 1;
 }
 
-/** Calendar parts of the whole-day portion of a serial. */
-function dateParts(serial: number): {
+/** Calendar parts of the whole-day portion of a serial (Excel's 1900 calendar: serial 60 is 1900-02-29, 0 is 1900-01-00). */
+export function dateParts(serial: number): {
   year: number;
   month: number;
   day: number;
   weekday: number;
 } {
+  const excel = serialToDate(serial);
+  if (excel) return excel;
   const d = new Date(EPOCH + Math.floor(serial) * MS_PER_DAY);
   return {
     year: d.getUTCFullYear(),
@@ -89,7 +101,7 @@ function parseTimeString(text: string): number | null {
 }
 
 /** Coerce a value to a date serial, parsing date/time strings when needed. */
-function toSerial(v: unknown): number {
+export function toSerial(v: unknown): number {
   if (typeof v === 'number') return v;
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (v == null || v === '') return 0;
@@ -103,6 +115,11 @@ function toSerial(v: unknown): number {
     if (asTime !== null) return asTime;
   }
   throw new Error('#VALUE!');
+}
+
+/** Days in a month of Excel's calendar (February 1900 has 29). */
+function daysInMonth(year: number, month: number): number {
+  return ymdToSerial(year, month + 1, 1) - ymdToSerial(year, month, 1);
 }
 
 /** Number of weekday positions to shift for a WEEKNUM start-day type. */
@@ -173,8 +190,7 @@ export const dateFunctions: Record<string, EagerFn> = {
     const total = year * 12 + (month - 1) + Math.trunc(toNum(args[1]));
     const targetYear = Math.floor(total / 12);
     const targetMonth = total % 12;
-    const lastDay = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
-    return ymdToSerial(targetYear, targetMonth + 1, Math.min(day, lastDay));
+    return ymdToSerial(targetYear, targetMonth + 1, Math.min(day, daysInMonth(targetYear, targetMonth + 1)));
   },
 
   EOMONTH: (args) => {
@@ -208,7 +224,7 @@ export const dateFunctions: Record<string, EagerFn> = {
       }
       case 'MD': {
         let days = e.day - s.day;
-        if (days < 0) days += new Date(Date.UTC(e.year, e.month - 1, 0)).getUTCDate();
+        if (days < 0) days += e.month === 1 ? 31 : daysInMonth(e.year, e.month - 1); // the month before the end date
         return days;
       }
       case 'YM': {
@@ -217,10 +233,9 @@ export const dateFunctions: Record<string, EagerFn> = {
         return ((months % 12) + 12) % 12;
       }
       case 'YD': {
-        const startMs = Date.UTC(s.year, s.month - 1, s.day);
-        let anchor = Date.UTC(s.year, e.month - 1, e.day);
-        if (anchor < startMs) anchor = Date.UTC(s.year + 1, e.month - 1, e.day);
-        return Math.round((anchor - startMs) / MS_PER_DAY);
+        let anchor = ymdToSerial(s.year, e.month, e.day);
+        if (anchor < start) anchor = ymdToSerial(s.year + 1, e.month, e.day);
+        return anchor - start;
       }
       default:
         throw new Error('#NUM!');

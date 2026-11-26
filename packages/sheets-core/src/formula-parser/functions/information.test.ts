@@ -18,6 +18,18 @@ const boom = (msg: string) => () => {
   throw new Error(msg);
 };
 
+describe('ISNONTEXT', () => {
+  it('is TRUE for everything but text, errors and blanks included', () => {
+    expect(callLazy('ISNONTEXT', [() => 'x'])).toBe(false);
+    expect(callLazy('ISNONTEXT', [() => ''])).toBe(false);
+    expect(callLazy('ISNONTEXT', [() => 1])).toBe(true);
+    expect(callLazy('ISNONTEXT', [() => null])).toBe(true);
+    expect(callLazy('ISNONTEXT', [() => true])).toBe(true);
+    expect(callLazy('ISNONTEXT', [() => '#N/A'])).toBe(true);
+    expect(callLazy('ISNONTEXT', [boom('#DIV/0!')])).toBe(true);
+  });
+});
+
 describe('type predicates', () => {
   it('ISBLANK / ISNUMBER / ISTEXT / ISLOGICAL', () => {
     expect(callLazy('ISBLANK', [() => null])).toBe(true);

@@ -378,8 +378,8 @@ describe('ranges built from reference-returning functions', () => {
   it('indexes arrays and rejects bad INDEX positions', () => {
     expect(run('=INDEX(SEQUENCE(5),4)', { sheets })).toBe(4);
     expect(() => run('=INDEX(A1:A5,6)', { sheets })).toThrow('#REF!');
-    expect(() => run('=INDEX(A1:A5,0)', { sheets })).toThrow('#REF!');
-    expect(() => run('=INDEX(A1:C5,2)', { sheets })).toThrow('#REF!'); // 2-D range needs a column
+    expect(() => run('=INDEX(A1:A5,-1)', { sheets })).toThrow('#VALUE!');
+    expect(() => run('=INDEX(A1:C5)', { sheets })).toThrow('#REF!'); // a table needs an index
     expect(run('=INDEX(B1:B3,2)', { sheets })).toBe(20);
     expect(run('=INDEX(A1:C1,3)', { sheets })).toBe(null);
     expect(run('=INDEX(A1:A5)', { sheets })).toBe(1);

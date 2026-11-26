@@ -12,8 +12,8 @@
 import { MAX_SHEET_COLS, MAX_SHEET_ROWS } from '../types';
 import type { CellReference, EvaluationContext, ParsedFormulaNode, RangeReference } from '../types';
 import type { RefFn, RefFnContext } from './helpers';
-import { toNum, toText, flatten } from './helpers';
-import { lookupFunctions } from './lookup';
+import { checkArity, toNum, toText, flatten } from './helpers';
+import { indexWindow, lookupFunctions } from './lookup';
 import { parseCellReference, parseRangeReference, columnIndexToLabel } from '../cell-reference';
 
 /** Row count of an evaluated array value (fallback when the arg isn't a range). */
@@ -220,26 +220,15 @@ function offsetTarget(args: ParsedFormulaNode[], env: RefEnv): ResolvedRef {
 function indexTarget(args: ParsedFormulaNode[], env: RefEnv): ResolvedRef | undefined {
   const base = args[0] && resolveReference(args[0], env);
   if (!base) return undefined;
-  const rows = base.r2 - base.r1 + 1;
-  const cols = base.c2 - base.c1 + 1;
-  let r = args[1] !== undefined ? toNum(env.evaluate(args[1])) : 1;
-  let c = args[2] !== undefined ? toNum(env.evaluate(args[2])) : 1;
-
-  // Single-axis form: INDEX(row_vector, n) or INDEX(col_vector, n).
-  if (args[2] === undefined) {
-    if (rows === 1) {
-      c = r;
-      r = 1;
-    } else if (cols === 1) {
-      c = 1;
-    } else {
-      throw new Error('#REF!');
-    }
-  }
-  if (r < 1 || c < 1 || r > rows || c > cols) throw new Error('#REF!');
-  const row = base.r1 + Math.trunc(r) - 1;
-  const col = base.c1 + Math.trunc(c) - 1;
-  return { sheetName: base.sheetName, r1: row, c1: col, r2: row, c2: col };
+  const values = args.map((a, i) => (i === 0 ? undefined : env.evaluate(a)));
+  const w = indexWindow(base.r2 - base.r1 + 1, base.c2 - base.c1 + 1, values);
+  return {
+    sheetName: base.sheetName,
+    r1: base.r1 + w.rowStart,
+    c1: base.c1 + w.colStart,
+    r2: base.r1 + w.rowEnd - 1,
+    c2: base.c1 + w.colEnd - 1,
+  };
 }
 
 /** The reference an INDIRECT text names (A1 style, optionally sheet-qualified, whole columns/rows included). */
@@ -320,8 +309,9 @@ export const referenceFunctions: Record<string, RefFn> = {
   // (`A1:INDEX(A1:A5,3)`) and so `INDEX(A:A,5)` indexes the nominal column rather
   // than its used-range clamp. Over a computed array it is the ordinary INDEX.
   INDEX: (rc) => {
+    checkArity(rc.args, 1, 4);
     const target = indexTarget(rc.args, rc);
-    if (target) return rc.ctx.getCellValue(target.r1, target.c1, undefined, target.sheetName);
+    if (target) return readReference(target, rc.ctx); // a cell, or the whole row or column of `INDEX(a,0,2)`
     return lookupFunctions.INDEX(
       rc.args.map((a) => rc.evaluate(a)),
       rc.ctx

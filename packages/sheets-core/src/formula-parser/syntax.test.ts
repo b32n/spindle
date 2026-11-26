@@ -115,6 +115,17 @@ describe('function calls', () => {
     expect(parse('SUM(,)')).toMatchObject({ args: [] });
   });
 
+  it('keeps an empty argument in place for the functions where position matters', () => {
+    const blank = { type: 'number', value: undefined };
+    expect(parse('NUMBERVALUE(A1,,",")')).toMatchObject({ args: [{ type: 'cell' }, blank, { type: 'string', value: ',' }] });
+    expect(parse('workday.intl(1,2,,3)')).toMatchObject({ args: [{}, {}, blank, {}] });
+    expect(parse('INDEX(A1:C3,,2)')).toMatchObject({ args: [{ type: 'range' }, blank, num(2)] });
+    expect(parse('INDEX(A1:C3,2,)')).toMatchObject({ args: [{ type: 'range' }, num(2), blank] });
+    expect(parse('FIXED(1,,)')).toMatchObject({ args: [num(1), blank, blank] });
+    expect(parse('_xlfn.INDEX(A1:C3,,2)')).toMatchObject({ args: [{ type: 'range' }, blank, num(2)] }); // Excel's file spelling
+    expect(parse('IF(1,,2)')).toMatchObject({ args: [num(1), num(2)] }); // every other function still skips it
+  });
+
   it('nests calls', () => {
     expect(shape(parse('IF(A1>1,SUM(1,2),MAX(3))'))).toBe('IF((cell>1),SUM(1,2),MAX(3))');
   });

@@ -84,6 +84,49 @@ describe('MATCH / INDEX / LOOKUP', () => {
     expect(() => call('INDEX', [matrix, 9, 1])).toThrow('#REF!');
   });
 
+  it('INDEX with a row or column of 0, or one left blank, returns the whole column or row', () => {
+    const m = [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
+    ];
+    expect(call('INDEX', [m, 0, 2])).toEqual([[2], [5], [8]]);
+    expect(call('INDEX', [m, undefined, 3])).toEqual([[3], [6], [9]]);
+    expect(call('INDEX', [m, 2, 0])).toEqual([[4, 5, 6]]);
+    expect(call('INDEX', [m, 3, undefined])).toEqual([[7, 8, 9]]);
+    expect(call('INDEX', [m, 0, 0])).toEqual(m);
+    expect(call('INDEX', [m, undefined, undefined])).toEqual(m);
+    expect(call('INDEX', [m, 2])).toEqual([[4, 5, 6]]); // one index into a table is a whole row
+    expect(call('INDEX', [m, undefined])).toEqual(m);
+    expect(call('INDEX', [m, 2.9, 1.9])).toBe(4);
+    expect(call('INDEX', [m, 2, 2, 1])).toBe(5);
+    expect(call('INDEX', [m, 2, 2, undefined])).toBe(5); // an omitted area is the first
+    expect(call('INDEX', [[[1, 2, 3]], 0])).toEqual([[1, 2, 3]]);
+    expect(call('INDEX', [[[1], [2]], 0])).toEqual([[1], [2]]);
+    expect(call('INDEX', [[[1, 2, 3]], 0, 2])).toBe(2);
+    expect(call('INDEX', [[[1, 2, 3]]])).toBe(1);
+    expect(call('INDEX', [[[1], [2]]])).toBe(1);
+    expect(call('INDEX', [7, 1, 1])).toBe(7);
+    expect(call('INDEX', [5, 1])).toBe(5);
+  });
+
+  it('INDEX rejects positions outside the array, negative ones and a missing index', () => {
+    const m = [
+      [1, 2],
+      [3, 4],
+    ];
+    expect(() => call('INDEX', [m, 3, 0])).toThrow('#REF!');
+    expect(() => call('INDEX', [m, 0, 3])).toThrow('#REF!');
+    expect(() => call('INDEX', [m, 3])).toThrow('#REF!');
+    expect(() => call('INDEX', [m, -1, 1])).toThrow('#VALUE!');
+    expect(() => call('INDEX', [m, 1, -1])).toThrow('#VALUE!');
+    expect(() => call('INDEX', [m])).toThrow('#REF!');
+    expect(() => call('INDEX', [m, 1, 1, 2])).toThrow('#REF!'); // there is only one area
+    expect(() => call('INDEX', [])).toThrow('#VALUE!');
+    expect(() => call('INDEX', [m, 1, 1, 1, 1])).toThrow('#VALUE!');
+    expect(() => call('INDEX', [m, 'x', 1])).toThrow('#VALUE!');
+  });
+
   it('LOOKUP finds the value in the result vector', () => {
     expect(call('LOOKUP', [4, [[1], [3], [5]], [['a'], ['b'], ['c']]])).toBe('b');
   });
