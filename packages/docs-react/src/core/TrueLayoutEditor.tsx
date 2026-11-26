@@ -26,12 +26,12 @@ import {
 import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
-import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
+import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, findNoteRef, insertNoteReference, noteOrdinalAt, noteTextFragment, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
 import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
 
-import { FlowBlock, noteKeyString } from './flow-blocks';
+import { FlowBlock, NoteKey, noteKeyString } from './flow-blocks';
 import { proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
 import { DomMeasurer, Measure } from './measurer';
 import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
@@ -44,6 +44,7 @@ import { RemoteCursorOverlay } from './remote-cursor-overlay';
 import { TableInteractionManager, createTableInteractionManager } from './table-interactions';
 import { ImageInteractionManager, createImageInteractionManager } from './image-interactions';
 import { HeaderFooterEditor } from '../components/HeaderFooterEditor';
+import { NoteEditor } from '../components/NoteEditor';
 
 // ============================================================================
 // Types
@@ -163,6 +164,8 @@ export interface TrueLayoutEditorHandle {
   reflow: () => void;
   /** Get the scroll container element (for syncing vertical ruler) */
   getScrollContainer: () => HTMLElement | null;
+  /** Insert a footnote or endnote reference at the caret and start editing the new note's text. False when it cannot go there. */
+  insertNote: (kind: 'footnote' | 'endnote') => boolean;
 }
 
 // ============================================================================
@@ -232,12 +235,16 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const containerRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const pagesContainerRef = useRef<HTMLDivElement>(null);
+    const pagesWrapperRef = useRef<HTMLDivElement>(null);
     const hiddenEditorRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
     
     // State
     const [editorView, setEditorView] = useState<EditorView | null>(null);
     const [layout, setLayout] = useState<DocumentLayout | null>(null);
+    /** The note whose text is being edited in place, and where its editor goes (in the pages wrapper). */
+    const [noteEdit, setNoteEdit] = useState<NoteKey | null>(null);
+    const [noteEditPos, setNoteEditPos] = useState<{ top: number; left: number; width: number; minHeight: number } | null>(null);
     const layoutRef = useRef<DocumentLayout | null>(null);
     const activePageIndexRef = useRef<number>(0);
     
@@ -688,12 +695,18 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       };
       const onClick = (e: MouseEvent) => {
         const target = e.target as Element | null;
-        // A click in the notes area (on a note's number or text) goes to the reference; one on a reference's number goes to the note.
+        // A click on a note's number in the notes area goes to its reference, one on its text edits it (read-only: goes to the
+        // reference too); a click on a reference's number goes to the note.
         const entry = target?.closest?.<HTMLElement>('[data-note-target]');
         const ref = entry ? undefined : target?.closest?.<HTMLElement>('[data-note-ref]');
         const key = entry ? entry.dataset.noteTarget : ref?.dataset.noteRef;
         if (!key) return;
         e.preventDefault();
+        if (entry && editable && !target?.closest?.('[data-note-ref]')) {
+          const [kind, ordinal] = key.split(':');
+          setNoteEdit({ kind: kind === 'endnote' ? 'endnote' : 'footnote', ordinal: Number(ordinal) });
+          return;
+        }
         if (ref) {
           // From the reference to its note.
           const block = blocksRef.current.find((b) => b.kind === 'paragraph' && !!b.noteTarget && noteKeyString(b.noteTarget) === key);
@@ -706,18 +719,9 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         }
         // From the note to its reference: the nth reference of its kind in the document.
         const [kind, ordinal] = key.split(':');
-        let seen = 0;
-        let pos: number | null = null;
-        editorView.state.doc.descendants((node, at) => {
-          if (pos !== null) return false;
-          if (node.type.name === 'note_ref') {
-            if (node.attrs.kind === kind && ++seen === Number(ordinal)) pos = at;
-            return false;
-          }
-          return true;
-        });
-        if (pos === null) return;
-        const at = pos;
+        const found = findNoteRef(editorView.state.doc, kind === 'endnote' ? 'endnote' : 'footnote', Number(ordinal));
+        if (!found) return;
+        const at = found.pos;
         editorView.dispatch(editorView.state.tr.setSelection(TextSelection.near(editorView.state.doc.resolve(at))));
         reveal(
           (id) => {
@@ -729,7 +733,41 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       };
       container.addEventListener('click', onClick);
       return () => container.removeEventListener('click', onClick);
-    }, [editorView]);
+    }, [editorView, editable]);
+
+    // Where the editor of the note being edited goes: over its entry in the notes area, once that is painted.
+    useEffect(() => {
+      if (!noteEdit) {
+        setNoteEditPos(null);
+        return;
+      }
+      const container = pagesContainerRef.current;
+      const viewport = viewportRef.current;
+      if (!container || !viewport) return;
+      const key = noteKeyString(noteEdit);
+      const block = blocksRef.current.find((b) => b.kind === 'paragraph' && !!b.noteTarget && noteKeyString(b.noteTarget) === key);
+      const current = layoutRef.current;
+      const page = block && current ? current.pages.findIndex((p) => p.fragments.some((f) => f.blockId === block.id)) : -1;
+      if (page >= 0 && current) viewport.scrollTop = getPageY(current, page);
+      let cancelled = false;
+      let tries = 0;
+      const place = () => {
+        if (cancelled) return;
+        const entry = container.querySelector<HTMLElement>(`[data-note-target="${key}"]`);
+        const wrapper = pagesWrapperRef.current;
+        if (entry && wrapper) {
+          const at = entry.getBoundingClientRect();
+          const origin = wrapper.getBoundingClientRect();
+          setNoteEditPos({ top: at.top - origin.top, left: at.left - origin.left, width: at.width, minHeight: at.height });
+        } else if (++tries < 30) {
+          requestAnimationFrame(place);
+        }
+      };
+      requestAnimationFrame(place);
+      return () => {
+        cancelled = true;
+      };
+    }, [noteEdit, layout]);
 
     // Clicking the glyph of a check box content control toggles it.
     useEffect(() => {
@@ -1063,8 +1101,16 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         }
       },
       getScrollContainer: () => viewportRef.current,
+      insertNote: (kind) => {
+        if (!editorView || !editable) return false;
+        if (!insertNoteReference(kind)(editorView.state, editorView.dispatch)) return false;
+        // The caret is just after the new reference (an empty note takes two positions).
+        const placed = noteOrdinalAt(editorView.state.doc, editorView.state.selection.from - 2);
+        if (placed) setNoteEdit(placed);
+        return true;
+      },
        
-    }), [editorView, layout]);
+    }), [editorView, layout, editable]);
     
     // Calculate total height
     const totalHeight = layout?.totalHeight ?? pageHeight;
@@ -1132,6 +1178,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         >
           {/* Pages wrapper - contains both painted pages and overlay */}
           <div
+            ref={pagesWrapperRef}
             className="true-layout-pages-wrapper"
             style={{
               position: 'relative',
@@ -1172,6 +1219,28 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
                 zIndex: 100,
               }}
             />
+
+            {/* Editor of the note being edited, over its entry in the notes area */}
+            {noteEdit && noteEditPos && editorView && findNoteRef(editorView.state.doc, noteEdit.kind, noteEdit.ordinal) && (
+              <NoteEditor
+                key={noteKeyString(noteEdit)}
+                note={findNoteRef(editorView.state.doc, noteEdit.kind, noteEdit.ordinal)!.node}
+                position={noteEditPos}
+                scale={zoom}
+                onClose={(noteDoc) => {
+                  // The text goes back into the note's reference in one step (undoable like any edit).
+                  const found = findNoteRef(editorView.state.doc, noteEdit.kind, noteEdit.ordinal);
+                  if (found) {
+                    const text = noteTextFragment(docsSchema, noteDoc);
+                    if (!found.node.content.eq(text)) {
+                      editorView.dispatch(editorView.state.tr.replaceWith(found.pos + 1, found.pos + found.node.nodeSize - 1, text));
+                    }
+                  }
+                  setNoteEdit(null);
+                  inputBridgeRef.current?.focus();
+                }}
+              />
+            )}
           </div>
         </div>
         
@@ -1222,6 +1291,17 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
           
           .true-layout-pages:focus {
             outline: none;
+          }
+
+          .note-editor .ProseMirror {
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 1.5em;
+          }
+
+          .note-editor .ProseMirror p {
+            margin: 0 !important;
           }
           
           .true-layout-pages .page {

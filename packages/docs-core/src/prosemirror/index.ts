@@ -53,3 +53,13 @@ export {
   isDocEmpty,
 } from './sync';
 
+
+// Footnote and endnote references
+export {
+  findNoteRef,
+  noteOrdinalAt,
+  nextNoteId,
+  insertNoteReference,
+  noteTextFragment,
+  type NoteKind,
+} from './notes';

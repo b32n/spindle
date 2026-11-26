@@ -206,6 +206,11 @@ export const DocumentEditor = memo(function DocumentEditor({
     editorRef.current?.focus();
   }, [readOnly, editorView]);
 
+  const handleInsertNote = useCallback((kind: 'footnote' | 'endnote') => {
+    if (readOnly) return;
+    editorRef.current?.insertNote(kind);
+  }, [readOnly]);
+
   const handleRemoveSectionBreak = useCallback(() => {
     if (readOnly || !editorView) return;
     createCommands(docsSchema).removeSectionBreak()(editorView.state, editorView.dispatch);
@@ -500,6 +505,7 @@ export const DocumentEditor = memo(function DocumentEditor({
             activeMarks={activeMarks}
             selectedCell={selectedCell}
             onAddComment={startComment}
+            onInsertNote={handleInsertNote}
             onInsertSectionBreak={handleInsertSectionBreak}
             onRemoveSectionBreak={handleRemoveSectionBreak}
             canRemoveSectionBreak={sections.length > 1}

@@ -10,6 +10,8 @@ import { COLLAB_SCHEMA_VERSION, hydrateYDocFromData, serializeYDocToData } from 
 import { exportToDocx, importFromDocx } from './export/docx';
 import { getPlainText } from './blocks/utils';
 import { getBlockTextLength, findRunAtOffset, runOffsetToBlockOffset } from './selection';
+import { EditorState, TextSelection } from 'prosemirror-state';
+import { findNoteRef, insertNoteReference, nextNoteId, noteOrdinalAt, noteTextFragment } from './prosemirror/notes';
 import { DEFAULT_PAGE_CONFIG } from './types';
 import type { Block, DocumentData, InlineContent, InlineNoteRef, ParagraphBlock } from './types';
 
@@ -149,5 +151,76 @@ describe('note references through DOCX', () => {
     const reopened = new DocumentImpl('doc2', 'Doc2');
     await importFromDocx(bytes, reopened);
     expect(reopened.getSections()[0].header?.blocks[0].content).toEqual([expect.objectContaining({ text: 'Head' })]);
+  });
+});
+
+describe('finding, inserting and rewriting note references', () => {
+  const { doc: docType, paragraph, note_ref: refType, content_control_inline: control } = docsSchema.nodes;
+  const ref = (kind: string, id: string, ...inner: ReturnType<typeof docsSchema.text>[]) => refType.create({ kind, noteId: id }, inner);
+  const sample = () =>
+    docType.create(null, [
+      paragraph.create(null, [docsSchema.text('a'), ref('footnote', '4', docsSchema.text('x')), ref('endnote', '9'), ref('footnote', '2')]),
+      paragraph.create(null, [ref('footnote', '7'), docsSchema.text('b')]),
+    ]);
+
+  it('finds the nth reference of a kind in document order, and says which one stands at a position', () => {
+    const doc = sample();
+    expect(findNoteRef(doc, 'footnote', 1)?.node.attrs.noteId).toBe('4');
+    expect(findNoteRef(doc, 'footnote', 2)?.node.attrs.noteId).toBe('2');
+    expect(findNoteRef(doc, 'footnote', 3)?.node.attrs.noteId).toBe('7');
+    expect(findNoteRef(doc, 'endnote', 1)?.node.attrs.noteId).toBe('9');
+    expect(findNoteRef(doc, 'footnote', 4)).toBeNull();
+    expect(findNoteRef(doc, 'endnote', 2)).toBeNull();
+    for (const [kind, ordinal] of [['footnote', 1], ['endnote', 1], ['footnote', 2], ['footnote', 3]] as const) {
+      expect(noteOrdinalAt(doc, findNoteRef(doc, kind, ordinal)!.pos)).toEqual({ kind, ordinal });
+    }
+    expect(noteOrdinalAt(doc, 0)).toBeNull();
+    expect(noteOrdinalAt(doc, 1)).toBeNull();
+    expect(noteOrdinalAt(doc, 999)).toBeNull();
+  });
+
+  it('gives a new note an id one above the largest numeric id of its kind', () => {
+    const doc = sample();
+    expect(nextNoteId(doc, 'footnote')).toBe('8');
+    expect(nextNoteId(doc, 'endnote')).toBe('10');
+    expect(nextNoteId(docType.create(null, [paragraph.create()]), 'footnote')).toBe('1');
+    expect(nextNoteId(docType.create(null, [paragraph.create(null, [ref('footnote', 'abc')])]), 'footnote')).toBe('1');
+  });
+
+  it('inserts an empty reference at the end of the selection and puts the caret after it', () => {
+    const state = EditorState.create({ doc: docType.create(null, [paragraph.create(null, [docsSchema.text('hello')])]) });
+    const inside = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 3)));
+    let next = inside;
+    expect(insertNoteReference('footnote')(inside, (tr) => (next = inside.apply(tr)))).toBe(true);
+    expect(next.doc.firstChild!.toString()).toBe('paragraph("he", note_ref, "llo")');
+    expect(next.doc.nodeAt(3)!.attrs).toMatchObject({ kind: 'footnote', noteId: '1' });
+    expect(next.selection.from).toBe(3 + next.doc.nodeAt(3)!.nodeSize);
+    // A second one before it gets the next id, and a range selection inserts after the range.
+    const range = next.apply(next.tr.setSelection(TextSelection.create(next.doc, 1, 2)));
+    let third = range;
+    insertNoteReference('endnote')(range, (tr) => (third = range.apply(tr)));
+    expect(third.doc.nodeAt(2)!.attrs).toMatchObject({ kind: 'endnote', noteId: '1' });
+  });
+
+  it('is only applicable where inline content can go, and does nothing without a dispatch', () => {
+    const state = EditorState.create({ doc: docType.create(null, [paragraph.create()]) });
+    expect(insertNoteReference('footnote')(state)).toBe(true);
+    expect(state.doc.firstChild!.childCount).toBe(0);
+    const noteless = EditorState.create({ doc: docType.create(null, [docsSchema.nodes.horizontal_rule.create()]), selection: undefined });
+    expect(insertNoteReference('endnote')(noteless)).toBe(false);
+  });
+
+  it('makes a note text from the note editor document: paragraphs joined by line breaks, only inline content a note holds', () => {
+    const doc = docType.create(null, [
+      paragraph.create(null, [docsSchema.text('one ', [docsSchema.marks.bold.create()]), ref('footnote', '1', docsSchema.text('nested')), control.create({ controlType: 'text' }, [docsSchema.text('ctl')])]),
+      paragraph.create(null, [docsSchema.text('two')]),
+      docsSchema.nodes.horizontal_rule.create(),
+    ]);
+    const fragment = noteTextFragment(docsSchema, doc);
+    expect(fragment.toString()).toBe('<bold("one "), "nestedctl", hard_break, "two">');
+    expect(fragment.firstChild!.marks.map((m) => m.type.name)).toEqual(['bold']);
+    expect(noteTextFragment(docsSchema, docType.create(null, [paragraph.create()])).childCount).toBe(0);
+    const inList = docType.create(null, [docsSchema.nodes.bullet_list.create(null, [docsSchema.nodes.list_item.create(null, [paragraph.create(null, [docsSchema.text('item')])])])]);
+    expect(noteTextFragment(docsSchema, inList).toString()).toBe('<"item">');
   });
 });

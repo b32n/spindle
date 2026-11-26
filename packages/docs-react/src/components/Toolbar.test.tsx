@@ -59,3 +59,20 @@ describe('docs Toolbar section break control', () => {
     expect(render({ onInsertSectionBreak: () => {} })).toContain('Section break');
   });
 });
+
+describe('docs Toolbar footnote control', () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('is hidden unless a handler is given', () => {
+    expect(render({})).not.toContain('Footnote');
+  });
+
+  it('is shown when onInsertNote is given', () => {
+    expect(render({ onInsertNote: () => {} })).toContain('Footnote');
+  });
+});
