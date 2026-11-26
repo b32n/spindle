@@ -34,7 +34,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FMC-02 | Number category: decimal places apply to the cell and the preview shows them | covered |  |  | `e2e/sheets/depth.spec.ts` |
 | S-FMC-03 | Date/Time category: a date pattern is stored on the cell | covered |  |  | `e2e/sheets/depth.spec.ts` |
 | S-FMC-04 | Custom category: a supported pattern is stored and previewed | covered |  |  | `e2e/sheets/depth.spec.ts` |
-| S-FMC-04b | Custom category: a pattern with a literal suffix renders 7.00 pts | fixme + bug |  | Custom number formats are a stub: only #,##0.00, 0.0% and MM/DD/YYYY are recognised, any other pattern prints the pattern with every 0 replaced by the value, e.g. 7.77" pts" (https://github.com/b32n/spindle/issues/83). | `e2e/sheets/depth.spec.ts` |
+| S-FMC-04b | Custom category: a pattern with a literal suffix renders 7.00 pts | covered |  |  | `e2e/sheets/depth.spec.ts` |
 | S-FMC-05 | Format Cells applies to the whole selected range, and undo reverts it | covered |  |  | `e2e/sheets/depth.spec.ts` |
 | S-CLR-01 | fill colour and text colour are stored on the whole selection | covered |  |  | `e2e/sheets/depth.spec.ts` |
 | S-BRD-01 | border menu: all / bottom / none set and clear the cell borders | covered |  |  | `e2e/sheets/depth.spec.ts` |
@@ -148,6 +148,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-KBD-05 | Format Cells is reachable from the keyboard via the context menu | fixme + bug |  | the context menu items are not focusable and Format Cells does not take focus. https://github.com/b32n/spindle/issues/87 | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-06 | focus is not lost after closing a dialog | fixme + bug |  | closing a dialog leaves focus on <body>. https://github.com/b32n/spindle/issues/88 | `e2e/sheets/keyboard.spec.ts` |
 | S-BIG-01 | a 10,000-row CSV opens, scrolls to the bottom and an edit near the end reflects within budget | covered |  |  | `e2e/sheets/large-data.spec.ts` |
+| S-FMC-06 | imported currency, date, time, elapsed, scaled and conditional formats show as Excel shows them, and the Custom tab edits a code live | covered |  |  | `e2e/sheets/number-formats.spec.ts` |
 | S-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/sheets/resilience.spec.ts` |
 | S-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/sheets/resilience.spec.ts` |
 | S-RES-02b | concurrent first edits to different cells of the same empty row both survive | fixme + bug |  | Rows are created lazily with a random id per peer, so two peers that first touch the same empty row concurrently each create their own row id at that index; the order merge keeps only one of them and the other peer's cell silently vanishes (https://github.com/b32n/spindle/issues/79). | `e2e/sheets/resilience.spec.ts` |
@@ -465,7 +466,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 399
-- fixme + bug: 8
+- covered: 401
+- fixme + bug: 7
 - not covered: 8
 - n/a: 6

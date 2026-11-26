@@ -40,6 +40,12 @@ statistical, date/time, information, financial, reference and array categories
       option matrix (absent from the catalog).
 - [ ] **`ARRAYFORMULA`** — not implemented at all (no catalog entry, zero
       references); needs full elementwise scalar broadcast.
+- [ ] **Custom date codes in the formula bar and editor** — an imported date whose code has no structured type (`d-mmm-yy`, `dddd, mmmm d, yyyy`) is a
+      `custom` format; the formula bar and cell editor show its serial number and no date picker opens (the `date` type shows a date and a picker).
+      Autofill already treats it as a date.
+- [ ] **Number formats: locale and the reader's limits** — month and day names are English whatever `[$-LCID]` says, separators are `.` and `,`,
+      `*x` fill is not repeated to the cell width, non-Gregorian calendars and `[DBNum1]` are invalid. The XLSX reader library drops the backslashes
+      of a code and returns no code for some built-in ids (see `documentation/sheets/core/number-formats.md`); both go away with plan S2.
 - [x] **`TEXT()` date format codes** — `TEXT()` uses the Excel number-format
       engine (`number-format/`): date and time codes, sections, conditions,
       scaling commas, fractions. Remaining gaps are listed in

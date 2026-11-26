@@ -1,4 +1,10 @@
-import { fromExcelNumberFormatCode, toExcelNumberFormatCode } from './xlsx-number-format';
+import {
+  BUILTIN_NUMBER_FORMAT_CODES,
+  fromExcelNumberFormatCode,
+  normalizeExcelNumberFormatCode,
+  toExcelNumberFormatCode,
+} from './xlsx-number-format';
+import { isValidFormatCode } from '../number-format';
 
 describe('toExcelNumberFormatCode', () => {
   it('formats a plain number with and without a thousands separator', () => {
@@ -68,6 +74,12 @@ describe('toExcelNumberFormatCode', () => {
     expect(toExcelNumberFormatCode({ type: 'custom' })).toBe('General');
   });
 
+  it('defaults to two decimals when none is set', () => {
+    expect(toExcelNumberFormatCode({ type: 'number' })).toBe('0.00');
+    expect(toExcelNumberFormatCode({ type: 'scientific' })).toBe('0.00E+00');
+    expect(toExcelNumberFormatCode({ type: 'accounting' })).toContain('#,##0.00');
+  });
+
   it('uses General for text and unset types', () => {
     expect(toExcelNumberFormatCode({ type: 'text' })).toBe('General');
     expect(toExcelNumberFormatCode({})).toBe('General');
@@ -99,9 +111,61 @@ describe('fromExcelNumberFormatCode', () => {
     expect(fromExcelNumberFormatCode(dtCode)).toEqual({ type: 'datetime', dateFormat: 'YYYY-MM-DD', timeFormat: 'HH:mm' });
   });
 
-  it('sniffs a date/time pattern from a real spreadsheet app we did not author', () => {
-    expect(fromExcelNumberFormatCode('dd/mm/yy')).toMatchObject({ type: 'date' });
-    expect(fromExcelNumberFormatCode('h:mm:ss AM/PM')).toMatchObject({ type: 'time' });
+  it('keeps a date or time code the editor has no structured type for verbatim, instead of guessing a date format', () => {
+    expect(fromExcelNumberFormatCode('dd/mm/yy')).toEqual({ type: 'custom', pattern: 'dd/mm/yy' });
+    expect(fromExcelNumberFormatCode('h:mm:ss AM/PM')).toEqual({ type: 'custom', pattern: 'h:mm:ss AM/PM' });
+    expect(fromExcelNumberFormatCode('d-mmm-yy')).toEqual({ type: 'custom', pattern: 'd-mmm-yy' });
+    expect(fromExcelNumberFormatCode('[$-409]mmmm d, yyyy')).toEqual({ type: 'custom', pattern: '[$-409]mmmm d, yyyy' });
+    expect(fromExcelNumberFormatCode('dddd')).toEqual({ type: 'custom', pattern: 'dddd' });
+  });
+
+  it('maps a code to a structured type only when that type writes the very same code back', () => {
+    for (const code of ['0.00', '#,##0', '0%', '0.0%', '0.00E+00', '# ?/?', '# ?/8', '[hh]:mm:ss', '[ss].000', '"$"#,##0.00', '0.00"€"', 'yyyy-mm-dd', 'hh:mm', 'dd-mm-yyyy hh:mm', '#,##0;[Red]-#,##0', '0;(0)']) {
+      const format = fromExcelNumberFormatCode(code);
+      expect(format.type).not.toBe('custom');
+      expect(toExcelNumberFormatCode(format)).toBe(code);
+    }
+    for (const code of [
+      '#,##0.00%', '##0.0E+0', '$#,##0.00', '#,##0.00 "kg"', '0.0,,"M"', '#,##0.0,"K"', '"$"#,##0.00_);[Red]("$"#,##0.00)', '0.00_);(0.00)', '[>100]"big";"small"',
+      '000-00', '0.0 "kg"', '@', '[$€-407] #,##0.00', '# ?/?;-# ?/?', '_(* #,##0_);_(* (#,##0);_(* "-"_);_(@_)', 'GENERAL', ' 0',
+    ]) {
+      expect(fromExcelNumberFormatCode(code)).toEqual({ type: 'custom', pattern: code });
+    }
+  });
+
+  it('keeps the whole code, spaces included', () => {
+    expect(fromExcelNumberFormatCode('0.00 ')).toEqual({ type: 'custom', pattern: '0.00 ' });
+    expect(toExcelNumberFormatCode(fromExcelNumberFormatCode('0.00 '))).toBe('0.00 ');
+  });
+
+  it('maps fraction and duration codes back to their structured types', () => {
+    expect(fromExcelNumberFormatCode('# ?/?')).toEqual({ type: 'fraction', fractionType: 'upToOne' });
+    expect(fromExcelNumberFormatCode('# ?/16')).toEqual({ type: 'fraction', fractionType: 'asSixteenths' });
+    expect(fromExcelNumberFormatCode('[mm]:ss')).toEqual({ type: 'duration', durationFormat: 'minutes' });
+  });
+
+  it('replaces the spelling the importer library gives built-in ids 14 and 22', () => {
+    expect(normalizeExcelNumberFormatCode('mm-dd-yy')).toBe('m/d/yyyy');
+    expect(normalizeExcelNumberFormatCode('m/d/yy "h":mm')).toBe('m/d/yyyy h:mm');
+    expect(normalizeExcelNumberFormatCode('mm/dd/yy')).toBe('mm/dd/yy');
+    expect(fromExcelNumberFormatCode('mm-dd-yy')).toEqual({ type: 'custom', pattern: 'm/d/yyyy' });
+    expect(fromExcelNumberFormatCode('m/d/yy "h":mm')).toEqual({ type: 'custom', pattern: 'm/d/yyyy h:mm' });
+  });
+
+  it('knows the built-in format ids as en-US codes, and every one is a code the engine reads', () => {
+    expect(BUILTIN_NUMBER_FORMAT_CODES[0]).toBe('General');
+    expect(BUILTIN_NUMBER_FORMAT_CODES[14]).toBe('m/d/yyyy');
+    expect(BUILTIN_NUMBER_FORMAT_CODES[22]).toBe('m/d/yyyy h:mm');
+    expect(BUILTIN_NUMBER_FORMAT_CODES[44]).toContain('"-"??');
+    expect(BUILTIN_NUMBER_FORMAT_CODES[49]).toBe('@');
+    expect(BUILTIN_NUMBER_FORMAT_CODES[23]).toBeUndefined();
+    const ids = Object.keys(BUILTIN_NUMBER_FORMAT_CODES).map(Number);
+    expect(ids).toHaveLength(55); // 0-22, 27-49 and 50-58 (23-26 are reserved; 59 and up are Thai)
+    for (const id of ids) expect(isValidFormatCode(BUILTIN_NUMBER_FORMAT_CODES[id])).toBe(true);
+    // the locale-dependent ranges map to en-US short date, long date and times
+    for (const id of [27, 30, 36, 50, 57]) expect(BUILTIN_NUMBER_FORMAT_CODES[id]).toBe('m/d/yyyy');
+    for (const id of [28, 29, 31, 51, 54, 58]) expect(BUILTIN_NUMBER_FORMAT_CODES[id]).toBe('mmmm d, yyyy');
+    for (const id of [32, 33, 34, 35, 52, 53, 55, 56]) expect(BUILTIN_NUMBER_FORMAT_CODES[id]).toMatch(/^h:mm/);
   });
 
   it('recovers a percentage with its decimal precision', () => {

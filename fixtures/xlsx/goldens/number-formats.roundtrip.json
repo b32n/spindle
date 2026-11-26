@@ -1,9 +1,9 @@
 {
   "diff": {
-    "added": 65,
+    "added": 61,
     "after": {
       "cells": 305,
-      "formats": 34,
+      "formats": 59,
       "formulas": 0,
       "merges": 0,
       "sheets": 1,
@@ -11,38 +11,17 @@
     },
     "before": {
       "cells": 305,
-      "formats": 34,
+      "formats": 59,
       "formulas": 0,
       "merges": 0,
       "sheets": 1,
       "styles": 1
     },
     "byField": {
-      "added sheets[].cells.*.format.currencyCode": 4,
       "added sheets[].config.rowHeights.*": 61
     },
     "changed": 0,
     "entries": [
-      {
-        "after": "\"USD\"",
-        "kind": "added",
-        "path": "sheets[0].cells.B40.format.currencyCode"
-      },
-      {
-        "after": "\"USD\"",
-        "kind": "added",
-        "path": "sheets[0].cells.C40.format.currencyCode"
-      },
-      {
-        "after": "\"USD\"",
-        "kind": "added",
-        "path": "sheets[0].cells.D40.format.currencyCode"
-      },
-      {
-        "after": "\"USD\"",
-        "kind": "added",
-        "path": "sheets[0].cells.E40.format.currencyCode"
-      },
       {
         "after": "20",
         "kind": "added",
@@ -222,10 +201,30 @@
         "after": "20",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.41"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.42"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.43"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.44"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.45"
       }
     ],
     "removed": 0,
-    "total": 65,
+    "total": 61,
     "truncated": true
   },
   "exportWarnings": [],

@@ -130,6 +130,41 @@ function invert(map: Record<string, string>): Record<string, string> {
 const REVERSE_DATE_CODES = invert(DATE_CODES); // e.g. 'mm/dd/yyyy' -> 'MM/DD/YYYY'
 const REVERSE_TIME_CODES = invert(TIME_CODES);
 
+const REVERSE_FRACTION_CODES = invert(Object.fromEntries(Object.entries(FRACTION_DENOMINATORS).map(([k, v]) => [k, `# ${v}`])));
+const REVERSE_DURATION_CODES: Record<string, NonNullable<CellFormat['durationFormat']>> = {
+  '[hh]:mm:ss': 'hours', '[mm]:ss': 'minutes', '[ss]': 'seconds', '[ss].000': 'milliseconds',
+};
+
+/**
+ * The code each built-in number format id stands for (ECMA-376 18.8.30, Part 1). Ids 14 to 22, 27 to 36 and 50 to 58
+ * depend on the system locale in Excel; they are given as their en-US forms (the CJK era formats of 27 to 36 and
+ * 50 to 58 as the en-US short date, long date or time they correspond to).
+ */
+export const BUILTIN_NUMBER_FORMAT_CODES: Readonly<Record<number, string>> = {
+  0: 'General', 1: '0', 2: '0.00', 3: '#,##0', 4: '#,##0.00',
+  5: '"$"#,##0_);\\("$"#,##0\\)', 6: '"$"#,##0_);[Red]\\("$"#,##0\\)', 7: '"$"#,##0.00_);\\("$"#,##0.00\\)', 8: '"$"#,##0.00_);[Red]\\("$"#,##0.00\\)',
+  9: '0%', 10: '0.00%', 11: '0.00E+00', 12: '# ?/?', 13: '# ??/??',
+  14: 'm/d/yyyy', 15: 'd-mmm-yy', 16: 'd-mmm', 17: 'mmm-yy', 18: 'h:mm AM/PM', 19: 'h:mm:ss AM/PM', 20: 'h:mm', 21: 'h:mm:ss', 22: 'm/d/yyyy h:mm',
+  27: 'm/d/yyyy', 28: 'mmmm d, yyyy', 29: 'mmmm d, yyyy', 30: 'm/d/yyyy', 31: 'mmmm d, yyyy', 32: 'h:mm', 33: 'h:mm:ss', 34: 'h:mm AM/PM', 35: 'h:mm:ss AM/PM', 36: 'm/d/yyyy',
+  37: '#,##0_);(#,##0)', 38: '#,##0_);[Red](#,##0)', 39: '#,##0.00_);(#,##0.00)', 40: '#,##0.00_);[Red](#,##0.00)',
+  41: '_(* #,##0_);_(* \\(#,##0\\);_(* "-"_);_(@_)', 42: '_("$"* #,##0_);_("$"* \\(#,##0\\);_("$"* "-"_);_(@_)',
+  43: '_(* #,##0.00_);_(* \\(#,##0.00\\);_(* "-"??_);_(@_)', 44: '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)',
+  45: 'mm:ss', 46: '[h]:mm:ss', 47: 'mm:ss.0', 48: '##0.0E+0', 49: '@',
+  50: 'm/d/yyyy', 51: 'mmmm d, yyyy', 52: 'h:mm AM/PM', 53: 'h:mm:ss AM/PM', 54: 'mmmm d, yyyy', 55: 'h:mm AM/PM', 56: 'h:mm:ss AM/PM', 57: 'm/d/yyyy', 58: 'mmmm d, yyyy',
+};
+
+// exceljs resolves built-in ids itself and reports the ECMA table's spelling of ids 14 and 22 ("mm-dd-yy" and
+// 'm/d/yy "h":mm'); Excel shows both in the system date format, which is m/d/yyyy [h:mm] in en-US.
+const EXCELJS_SPELLING: Record<string, string> = {
+  'mm-dd-yy': BUILTIN_NUMBER_FORMAT_CODES[14],
+  'm/d/yy "h":mm': BUILTIN_NUMBER_FORMAT_CODES[22],
+};
+
+/** The code as the editor stores it: the spelling the importer library gives a built-in id is replaced by what the id means. */
+export function normalizeExcelNumberFormatCode(code: string): string {
+  return EXCELJS_SPELLING[code] ?? code;
+}
+
 const CURRENCY_CODE_FOR_SYMBOL: Record<string, string> = {
   '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY', '₹': 'INR', '₩': 'KRW',
 };
@@ -140,85 +175,59 @@ function countDecimalZeros(code: string): number {
 }
 
 function findCurrencySymbol(code: string): string | undefined {
-  // Only a symbol we actually recognize counts — an arbitrary quoted label
-  // (e.g. custom pattern `0 "units"`) isn't a currency and must fall through
-  // to the other checks instead of being misread as one.
   const quoted = code.match(/"([^"]+)"/);
   if (quoted && CURRENCY_CODE_FOR_SYMBOL[quoted[1]]) return quoted[1];
   const bare = code.match(/[$€£¥₹₩]/);
   return bare?.[0];
 }
 
-/**
- * Translate an Excel-syntax number format code back into a CellFormat.
- * Best-effort: exactly reverses whatever toExcelNumberFormatCode produces
- * (so our own round-trip is exact), and does reasonable pattern-sniffing
- * for codes from real spreadsheet apps we didn't generate ourselves —
- * genuinely exotic custom codes fall back to `type: 'custom'`, which
- * preserves the raw code (if imperfectly, since our own custom-pattern
- * renderer is a simple one) rather than losing it.
- */
-export function fromExcelNumberFormatCode(code: string): CellFormat {
-  const trimmed = code.trim();
-  if (!trimmed || trimmed === 'General') return {};
+/** The structured format a code most likely means; only used when it writes the same code back (see below). */
+function structuredCandidate(code: string): CellFormat | undefined {
+  if (REVERSE_DATE_CODES[code]) return { type: 'date', dateFormat: REVERSE_DATE_CODES[code] };
+  if (REVERSE_TIME_CODES[code]) return { type: 'time', timeFormat: REVERSE_TIME_CODES[code] };
+  if (REVERSE_FRACTION_CODES[code]) return { type: 'fraction', fractionType: REVERSE_FRACTION_CODES[code] as CellFormat['fractionType'] };
+  if (REVERSE_DURATION_CODES[code]) return { type: 'duration', durationFormat: REVERSE_DURATION_CODES[code] };
 
-  if (REVERSE_DATE_CODES[trimmed]) return { type: 'date', dateFormat: REVERSE_DATE_CODES[trimmed] };
-  if (REVERSE_TIME_CODES[trimmed]) return { type: 'time', timeFormat: REVERSE_TIME_CODES[trimmed] };
-
-  const [datePart, timePart] = trimmed.split(' ');
+  const [datePart, timePart] = code.split(' ');
   if (timePart && REVERSE_DATE_CODES[datePart] && REVERSE_TIME_CODES[timePart]) {
     return { type: 'datetime', dateFormat: REVERSE_DATE_CODES[datePart], timeFormat: REVERSE_TIME_CODES[timePart] };
   }
+  if (code.endsWith('%')) return { type: 'percentage', decimalPlaces: countDecimalZeros(code) };
+  if (/E\+0+$/i.test(code)) return { type: 'scientific', decimalPlaces: countDecimalZeros(code) };
 
-  // Generic date/time sniffing for codes we didn't author (real Excel files).
-  // No exact source pattern to recover, so these fall back to our defaults.
-  // Time first: 'm' alone is ambiguous (month vs. minute in Excel's own
-  // syntax), so check for the unambiguous time markers (AM/PM, a colon with
-  // h/s) before treating a bare 'm' as a date's month.
-  if (/am\/pm/i.test(trimmed) || (trimmed.includes(':') && /[hs]/i.test(trimmed))) {
-    return { type: 'time', timeFormat: 'h:mm AM/PM' };
-  }
-  if (!/[#0]/.test(trimmed) && /[ymd].*[ymd]/i.test(trimmed)) {
-    return { type: 'date', dateFormat: 'MM/DD/YYYY' };
+  if (code.startsWith('_(')) {
+    const symbol = findCurrencySymbol(code);
+    return { type: 'accounting', currencyCode: symbol ? CURRENCY_CODE_FOR_SYMBOL[symbol] : undefined, decimalPlaces: countDecimalZeros(code) };
   }
 
-  if (trimmed.endsWith('%')) {
-    return { type: 'percentage', decimalPlaces: countDecimalZeros(trimmed) };
-  }
-
-  if (/E\+0+$/i.test(trimmed)) {
-    return { type: 'scientific', decimalPlaces: countDecimalZeros(trimmed) };
-  }
-
-  if (trimmed.startsWith('_(')) {
-    const symbol = findCurrencySymbol(trimmed);
-    return {
-      type: 'accounting',
-      currencyCode: symbol ? CURRENCY_CODE_FOR_SYMBOL[symbol] : undefined,
-      decimalPlaces: countDecimalZeros(trimmed),
-    };
-  }
-
-  const currencySymbol = findCurrencySymbol(trimmed);
+  const negativeFormat = code.includes('(') ? 'parentheses' : /\[red\]/i.test(code) ? 'red' : 'minus';
+  const currencySymbol = findCurrencySymbol(code);
   if (currencySymbol) {
     return {
       type: 'currency',
       currencyCode: CURRENCY_CODE_FOR_SYMBOL[currencySymbol],
-      currencySymbolPosition: trimmed.trim().startsWith('"') || trimmed.trim().startsWith(currencySymbol) ? 'prefix' : 'suffix',
-      decimalPlaces: countDecimalZeros(trimmed),
-      useThousandsSeparator: trimmed.includes(',0') || trimmed.includes('#,##0'),
-      negativeFormat: trimmed.includes('(') ? 'parentheses' : /\[red\]/i.test(trimmed) ? 'red' : 'minus',
+      currencySymbolPosition: code.startsWith('"') || code.startsWith(currencySymbol) ? 'prefix' : 'suffix',
+      decimalPlaces: countDecimalZeros(code),
+      useThousandsSeparator: code.includes(',0') || code.includes('#,##0'),
+      negativeFormat,
     };
   }
-
-  if (/^[#0]/.test(trimmed)) {
-    return {
-      type: 'number',
-      decimalPlaces: countDecimalZeros(trimmed),
-      useThousandsSeparator: trimmed.includes(','),
-      negativeFormat: trimmed.includes('(') ? 'parentheses' : /\[red\]/i.test(trimmed) ? 'red' : 'minus',
-    };
+  if (/^[#0]/.test(code)) {
+    return { type: 'number', decimalPlaces: countDecimalZeros(code), useThousandsSeparator: code.includes(','), negativeFormat };
   }
+  return undefined;
+}
 
-  return { type: 'custom', pattern: code };
+/**
+ * Translate an Excel number format code into a CellFormat. A code that maps exactly onto a structured type (the
+ * structured format writes the very same code back) keeps that type; every other code is stored verbatim as `custom`,
+ * so the code survives import and export unchanged and the number-format engine decides how it looks. The spelling
+ * exceljs gives built-in ids 14 and 22 is first replaced by the en-US code the id means.
+ */
+export function fromExcelNumberFormatCode(code: string): CellFormat {
+  const normalized = normalizeExcelNumberFormatCode(code);
+  if (normalized === '' || normalized === 'General') return {};
+  const candidate = structuredCandidate(normalized);
+  if (candidate && toExcelNumberFormatCode(candidate) === normalized) return candidate;
+  return { type: 'custom', pattern: normalized };
 }

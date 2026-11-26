@@ -13,53 +13,44 @@
         "useThousandsSeparator": false
       },
       "f10": {
-        "dateFormat": "MM/DD/YYYY",
-        "type": "date"
+        "fractionType": "upToOne",
+        "type": "fraction"
       },
       "f11": {
+        "pattern": "# ??/??",
+        "type": "custom"
+      },
+      "f12": {
+        "dateFormat": "YYYY-MM-DD",
+        "type": "date"
+      },
+      "f13": {
+        "pattern": "m/d/yyyy",
+        "type": "custom"
+      },
+      "f14": {
+        "pattern": "d-mmm-yy",
+        "type": "custom"
+      },
+      "f15": {
+        "pattern": "dd/mm/yyyy",
+        "type": "custom"
+      },
+      "f16": {
+        "pattern": "mmm d, yyyy",
+        "type": "custom"
+      },
+      "f17": {
+        "pattern": "dddd",
+        "type": "custom"
+      },
+      "f18": {
         "timeFormat": "h:mm AM/PM",
         "type": "time"
       },
-      "f12": {
+      "f19": {
         "timeFormat": "HH:mm:ss",
         "type": "time"
-      },
-      "f13": {
-        "dateFormat": "YYYY-MM-DD",
-        "timeFormat": "HH:mm",
-        "type": "datetime"
-      },
-      "f14": {
-        "decimalPlaces": 0,
-        "negativeFormat": "red",
-        "type": "number",
-        "useThousandsSeparator": true
-      },
-      "f15": {
-        "decimalPlaces": 0,
-        "negativeFormat": "parentheses",
-        "type": "number",
-        "useThousandsSeparator": true
-      },
-      "f16": {
-        "decimalPlaces": 1,
-        "negativeFormat": "minus",
-        "type": "number",
-        "useThousandsSeparator": true
-      },
-      "f17": {
-        "decimalPlaces": 2,
-        "negativeFormat": "parentheses",
-        "type": "number",
-        "useThousandsSeparator": true
-      },
-      "f18": {
-        "pattern": "[>100]\"big\";\"small\"",
-        "type": "custom"
-      },
-      "f19": {
-        "pattern": "@",
-        "type": "custom"
       },
       "f2": {
         "decimalPlaces": 2,
@@ -68,29 +59,71 @@
         "useThousandsSeparator": false
       },
       "f20": {
-        "decimalPlaces": 1,
-        "negativeFormat": "minus",
-        "type": "number",
-        "useThousandsSeparator": false
+        "dateFormat": "YYYY-MM-DD",
+        "timeFormat": "HH:mm",
+        "type": "datetime"
       },
       "f21": {
-        "currencyCode": "USD",
-        "decimalPlaces": 2,
-        "type": "accounting"
+        "pattern": "[h]:mm:ss",
+        "type": "custom"
       },
       "f22": {
-        "currencyCode": "USD",
-        "currencySymbolPosition": "suffix",
-        "decimalPlaces": 2,
-        "negativeFormat": "minus",
-        "type": "currency",
+        "decimalPlaces": 0,
+        "negativeFormat": "red",
+        "type": "number",
         "useThousandsSeparator": true
+      },
+      "f23": {
+        "decimalPlaces": 0,
+        "negativeFormat": "parentheses",
+        "type": "number",
+        "useThousandsSeparator": true
+      },
+      "f24": {
+        "pattern": "0.0,,\"M\"",
+        "type": "custom"
+      },
+      "f25": {
+        "pattern": "#,##0.00_);(#,##0.00)",
+        "type": "custom"
+      },
+      "f26": {
+        "pattern": "[>100]\"big\";\"small\"",
+        "type": "custom"
+      },
+      "f27": {
+        "pattern": "000-00",
+        "type": "custom"
+      },
+      "f28": {
+        "pattern": "@",
+        "type": "custom"
+      },
+      "f29": {
+        "pattern": "0.0 \"kg\"",
+        "type": "custom"
       },
       "f3": {
         "decimalPlaces": 0,
         "negativeFormat": "minus",
         "type": "number",
         "useThousandsSeparator": true
+      },
+      "f30": {
+        "pattern": "#,##0.0,\"K\"",
+        "type": "custom"
+      },
+      "f31": {
+        "pattern": "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)",
+        "type": "custom"
+      },
+      "f32": {
+        "pattern": "[$€-407] #,##0.00",
+        "type": "custom"
+      },
+      "f33": {
+        "pattern": "mmmm yyyy",
+        "type": "custom"
       },
       "f4": {
         "decimalPlaces": 2,
@@ -99,6 +132,10 @@
         "useThousandsSeparator": true
       },
       "f5": {
+        "pattern": "$#,##0.00",
+        "type": "custom"
+      },
+      "f6": {
         "currencyCode": "USD",
         "currencySymbolPosition": "prefix",
         "decimalPlaces": 2,
@@ -106,21 +143,17 @@
         "type": "currency",
         "useThousandsSeparator": true
       },
-      "f6": {
-        "decimalPlaces": 0,
-        "type": "percentage"
-      },
       "f7": {
-        "decimalPlaces": 2,
+        "decimalPlaces": 0,
         "type": "percentage"
       },
       "f8": {
         "decimalPlaces": 2,
-        "type": "scientific"
+        "type": "percentage"
       },
       "f9": {
-        "dateFormat": "YYYY-MM-DD",
-        "type": "date"
+        "decimalPlaces": 2,
+        "type": "scientific"
       }
     },
     "sheets": [
@@ -231,52 +264,52 @@
             "value": 1234.5678
           },
           "B10": {
-            "format": "f1",
+            "format": "f10",
             "style": "s1",
             "value": 1234.5678
           },
           "B11": {
-            "format": "f1",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B12": {
-            "format": "f9",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B13": {
-            "format": "f10",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B14": {
-            "format": "f10",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B15": {
-            "format": "f10",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B16": {
-            "format": "f10",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B17": {
-            "format": "f10",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B18": {
             "format": "f11",
             "style": "s1",
             "value": 1234.5678
           },
-          "B19": {
+          "B12": {
             "format": "f12",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B13": {
+            "format": "f13",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B14": {
+            "format": "f14",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B15": {
+            "format": "f15",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B16": {
+            "format": "f16",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B17": {
+            "format": "f17",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B18": {
+            "format": "f18",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B19": {
+            "format": "f19",
             "style": "s1",
             "value": 1234.5678
           },
@@ -286,52 +319,52 @@
             "value": 1234.5678
           },
           "B20": {
-            "format": "f13",
+            "format": "f20",
             "style": "s1",
             "value": 1234.5678
           },
           "B21": {
-            "format": "f11",
+            "format": "f21",
             "style": "s1",
             "value": 1234.5678
           },
           "B22": {
-            "format": "f14",
+            "format": "f22",
             "style": "s1",
             "value": 1234.5678
           },
           "B23": {
-            "format": "f15",
+            "format": "f23",
             "style": "s1",
             "value": 1234.5678
           },
           "B24": {
-            "format": "f16",
+            "format": "f24",
             "style": "s1",
             "value": 1234.5678
           },
           "B25": {
-            "format": "f17",
+            "format": "f25",
             "style": "s1",
             "value": 1234.5678
           },
           "B26": {
-            "format": "f18",
+            "format": "f26",
             "style": "s1",
             "value": 1234.5678
           },
           "B27": {
-            "format": "f1",
+            "format": "f27",
             "style": "s1",
             "value": 1234.5678
           },
           "B28": {
-            "format": "f19",
+            "format": "f28",
             "style": "s1",
             "value": 1234.5678
           },
           "B29": {
-            "format": "f20",
+            "format": "f29",
             "style": "s1",
             "value": 1234.5678
           },
@@ -341,22 +374,22 @@
             "value": 1234.5678
           },
           "B30": {
-            "format": "f16",
+            "format": "f30",
             "style": "s1",
             "value": 1234.5678
           },
           "B31": {
-            "format": "f21",
+            "format": "f31",
             "style": "s1",
             "value": 1234.5678
           },
           "B32": {
-            "format": "f22",
+            "format": "f32",
             "style": "s1",
             "value": 1234.5678
           },
           "B33": {
-            "format": "f10",
+            "format": "f33",
             "style": "s1",
             "value": 1234.5678
           },
@@ -371,22 +404,22 @@
             "value": 1234.5678
           },
           "B6": {
-            "format": "f5",
-            "style": "s1",
-            "value": 1234.5678
-          },
-          "B7": {
             "format": "f6",
             "style": "s1",
             "value": 1234.5678
           },
-          "B8": {
+          "B7": {
             "format": "f7",
             "style": "s1",
             "value": 1234.5678
           },
-          "B9": {
+          "B8": {
             "format": "f8",
+            "style": "s1",
+            "value": 1234.5678
+          },
+          "B9": {
+            "format": "f9",
             "style": "s1",
             "value": 1234.5678
           },
@@ -396,52 +429,52 @@
             "value": -0.256
           },
           "C10": {
-            "format": "f1",
+            "format": "f10",
             "style": "s1",
             "value": -0.256
           },
           "C11": {
-            "format": "f1",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C12": {
-            "format": "f9",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C13": {
-            "format": "f10",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C14": {
-            "format": "f10",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C15": {
-            "format": "f10",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C16": {
-            "format": "f10",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C17": {
-            "format": "f10",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C18": {
             "format": "f11",
             "style": "s1",
             "value": -0.256
           },
-          "C19": {
+          "C12": {
             "format": "f12",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C13": {
+            "format": "f13",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C14": {
+            "format": "f14",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C15": {
+            "format": "f15",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C16": {
+            "format": "f16",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C17": {
+            "format": "f17",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C18": {
+            "format": "f18",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C19": {
+            "format": "f19",
             "style": "s1",
             "value": -0.256
           },
@@ -451,52 +484,52 @@
             "value": -0.256
           },
           "C20": {
-            "format": "f13",
+            "format": "f20",
             "style": "s1",
             "value": -0.256
           },
           "C21": {
-            "format": "f11",
+            "format": "f21",
             "style": "s1",
             "value": -0.256
           },
           "C22": {
-            "format": "f14",
+            "format": "f22",
             "style": "s1",
             "value": -0.256
           },
           "C23": {
-            "format": "f15",
+            "format": "f23",
             "style": "s1",
             "value": -0.256
           },
           "C24": {
-            "format": "f16",
+            "format": "f24",
             "style": "s1",
             "value": -0.256
           },
           "C25": {
-            "format": "f17",
+            "format": "f25",
             "style": "s1",
             "value": -0.256
           },
           "C26": {
-            "format": "f18",
+            "format": "f26",
             "style": "s1",
             "value": -0.256
           },
           "C27": {
-            "format": "f1",
+            "format": "f27",
             "style": "s1",
             "value": -0.256
           },
           "C28": {
-            "format": "f19",
+            "format": "f28",
             "style": "s1",
             "value": -0.256
           },
           "C29": {
-            "format": "f20",
+            "format": "f29",
             "style": "s1",
             "value": -0.256
           },
@@ -506,22 +539,22 @@
             "value": -0.256
           },
           "C30": {
-            "format": "f16",
+            "format": "f30",
             "style": "s1",
             "value": -0.256
           },
           "C31": {
-            "format": "f21",
+            "format": "f31",
             "style": "s1",
             "value": -0.256
           },
           "C32": {
-            "format": "f22",
+            "format": "f32",
             "style": "s1",
             "value": -0.256
           },
           "C33": {
-            "format": "f10",
+            "format": "f33",
             "style": "s1",
             "value": -0.256
           },
@@ -536,22 +569,22 @@
             "value": -0.256
           },
           "C6": {
-            "format": "f5",
-            "style": "s1",
-            "value": -0.256
-          },
-          "C7": {
             "format": "f6",
             "style": "s1",
             "value": -0.256
           },
-          "C8": {
+          "C7": {
             "format": "f7",
             "style": "s1",
             "value": -0.256
           },
-          "C9": {
+          "C8": {
             "format": "f8",
+            "style": "s1",
+            "value": -0.256
+          },
+          "C9": {
+            "format": "f9",
             "style": "s1",
             "value": -0.256
           },
@@ -561,52 +594,52 @@
             "value": 46024.75
           },
           "D10": {
-            "format": "f1",
+            "format": "f10",
             "style": "s1",
             "value": 46024.75
           },
           "D11": {
-            "format": "f1",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D12": {
-            "format": "f9",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D13": {
-            "format": "f10",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D14": {
-            "format": "f10",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D15": {
-            "format": "f10",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D16": {
-            "format": "f10",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D17": {
-            "format": "f10",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D18": {
             "format": "f11",
             "style": "s1",
             "value": 46024.75
           },
-          "D19": {
+          "D12": {
             "format": "f12",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D13": {
+            "format": "f13",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D14": {
+            "format": "f14",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D15": {
+            "format": "f15",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D16": {
+            "format": "f16",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D17": {
+            "format": "f17",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D18": {
+            "format": "f18",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D19": {
+            "format": "f19",
             "style": "s1",
             "value": 46024.75
           },
@@ -616,52 +649,52 @@
             "value": 46024.75
           },
           "D20": {
-            "format": "f13",
+            "format": "f20",
             "style": "s1",
             "value": 46024.75
           },
           "D21": {
-            "format": "f11",
+            "format": "f21",
             "style": "s1",
             "value": 46024.75
           },
           "D22": {
-            "format": "f14",
+            "format": "f22",
             "style": "s1",
             "value": 46024.75
           },
           "D23": {
-            "format": "f15",
+            "format": "f23",
             "style": "s1",
             "value": 46024.75
           },
           "D24": {
-            "format": "f16",
+            "format": "f24",
             "style": "s1",
             "value": 46024.75
           },
           "D25": {
-            "format": "f17",
+            "format": "f25",
             "style": "s1",
             "value": 46024.75
           },
           "D26": {
-            "format": "f18",
+            "format": "f26",
             "style": "s1",
             "value": 46024.75
           },
           "D27": {
-            "format": "f1",
+            "format": "f27",
             "style": "s1",
             "value": 46024.75
           },
           "D28": {
-            "format": "f19",
+            "format": "f28",
             "style": "s1",
             "value": 46024.75
           },
           "D29": {
-            "format": "f20",
+            "format": "f29",
             "style": "s1",
             "value": 46024.75
           },
@@ -671,22 +704,22 @@
             "value": 46024.75
           },
           "D30": {
-            "format": "f16",
+            "format": "f30",
             "style": "s1",
             "value": 46024.75
           },
           "D31": {
-            "format": "f21",
+            "format": "f31",
             "style": "s1",
             "value": 46024.75
           },
           "D32": {
-            "format": "f22",
+            "format": "f32",
             "style": "s1",
             "value": 46024.75
           },
           "D33": {
-            "format": "f10",
+            "format": "f33",
             "style": "s1",
             "value": 46024.75
           },
@@ -701,22 +734,22 @@
             "value": 46024.75
           },
           "D6": {
-            "format": "f5",
-            "style": "s1",
-            "value": 46024.75
-          },
-          "D7": {
             "format": "f6",
             "style": "s1",
             "value": 46024.75
           },
-          "D8": {
+          "D7": {
             "format": "f7",
             "style": "s1",
             "value": 46024.75
           },
-          "D9": {
+          "D8": {
             "format": "f8",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "D9": {
+            "format": "f9",
             "style": "s1",
             "value": 46024.75
           }

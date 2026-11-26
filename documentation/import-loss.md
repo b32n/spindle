@@ -45,8 +45,12 @@ Summary ids (dialog): `xlsx.conditionalFormatting`, `.dataValidation`, `.autoFil
 `.hiddenSheets`, `.definedNames`, `.charts`, `.images` (pictures, sheet backgrounds and pictures in cells), `.comments` (sheets with notes or threads),
 `.tables`, `.pivotTables`, `.macros`, `.externalLinks`, `.slicers`, `.richText`, and three new ones: `xlsx.formulas.unsupported` (`where` = function names;
 a function counts as supported when the editor's formula catalog has it after the `_xlfn.`/`_xlws.` prefix is removed; only reported when the caller passes
-`knownFunctions`, as `inspectXlsx` does), `xlsx.formulas.structuredRefs` and `xlsx.numberFormats.approximated` (`where` = the codes; a code counts as exact when
-it maps to a structured format and the export writes the same code back; only reported when the caller passes `isNumberFormatExact`, as `inspectXlsx` does).
+`knownFunctions`, as `inspectXlsx` does), `xlsx.formulas.structuredRefs` and `xlsx.numberFormats.approximated` (`where` = the codes; only reported when the caller passes `isNumberFormatExact`, as
+`inspectXlsx` does, which since plan S3 means: the number-format engine reads the code and shows it as Excel does. Every code is kept verbatim, as a structured
+format when that writes the very same code back and as `custom` otherwise, so a save never changes it; what is still reported is a code the engine cannot read
+(not valid in Excel, a non-Gregorian calendar, `[DBNum1]`), a date or time tagged with another language (`[$-407]dddd`: month and day names would be English),
+and a built-in id with no code, such as the era dates 27 to 36 of the Asian locales. Before S3 the check was "maps to a structured format", which flagged
+every date, time, fraction, elapsed, scaling and literal code: 66 occurrences in 3 of the 43 corpus files, now 0).
 `xlsx.formulas.cachedOnly` is not reported yet: it needs the cached-value fallback of the formula work (plan S4).
 `xlsx.formulas.wholeColumn` (whole-column and whole-row references, `A:A`, `1:1`) is no longer reported: the engine evaluates them (plan S5), so they are not a
 loss. A formula using one still appears under `xlsx.formulas.unsupported` if it calls a function the engine lacks.

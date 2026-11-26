@@ -1,6 +1,6 @@
 // Format utilities for advanced cell formatting
 import type { CellFormat, FormatType } from '../types';
-import { formatDisplay, formatGeneral } from '../number-format';
+import { formatDisplay, formatGeneral, isDateTimeFormatCode } from '../number-format';
 import { toExcelNumberFormatCode } from '../export/xlsx-number-format';
 
 /**
@@ -57,6 +57,13 @@ function viaEngine(value: number, format: CellFormat): string {
 }
 
 /**
+ * A negative number that rounds to zero shows no sign in the plain "minus" style (Excel shows 0.00, not -0.00);
+ * the parentheses and red styles are a section of their own in Excel's code and keep it, as (0.00) and -0.00.
+ */
+const dropsSign = (text: string, format: CellFormat): boolean =>
+  !/[1-9]/.test(text) && (!format.negativeFormat || format.negativeFormat === 'minus');
+
+/**
  * Format plain numbers with decimal places and thousands separator
  */
 export function formatPlainNumber(value: number, format: CellFormat): string {
@@ -83,6 +90,7 @@ export function formatPlainNumber(value: number, format: CellFormat): string {
   }
 
   // Apply negative format
+  if (value < 0 && dropsSign(formatted, format)) return formatted.replace('-', '');
   if (value < 0) {
     switch (format.negativeFormat) {
       case 'parentheses':
@@ -116,7 +124,7 @@ export function formatCurrency(value: number, format: CellFormat): string {
     const formatted = formatter.format(Math.abs(value));
 
     // Apply negative format
-    if (value < 0) {
+    if (value < 0 && !dropsSign(formatted, format)) {
       switch (format.negativeFormat) {
         case 'parentheses':
           return `(${formatted})`;
@@ -173,7 +181,7 @@ export function formatPercentage(value: number, format: CellFormat): string {
     formatted = formatted.includes('.') ? formatted.replace(/\.?0+$/, '') : formatted;
   }
 
-  return `${formatted}%`;
+  return `${dropsSign(formatted, {}) ? formatted.replace('-', '') : formatted}%`;
 }
 
 /**
@@ -216,6 +224,11 @@ export function formatDateTime(value: number, format: CellFormat): string {
  */
 export function formatDuration(value: number, format: CellFormat): string {
   return viaEngine(value, { ...format, type: 'duration' });
+}
+
+/** True for the date and datetime types and for a custom code that shows dates (an imported `d-mmm-yy`): month and year autofill series apply. */
+export function isDateFormat(format: CellFormat | undefined): boolean {
+  return format?.type === 'date' || format?.type === 'datetime' || (format?.type === 'custom' && !!format.pattern && isDateTimeFormatCode(format.pattern));
 }
 
 /**

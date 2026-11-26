@@ -1,4 +1,4 @@
-import { compileFormat, dateToSerial, formatDisplay, formatGeneral, formatValue, isDateTimeFormatCode, isValidFormatCode, serialToDate } from './index';
+import { compileFormat, dateToSerial, formatDisplay, formatGeneral, formatValue, isDateTimeFormatCode, isFaithfulFormatCode, isValidFormatCode, serialToDate } from './index';
 import { generalDigits, roundToPlaces, toDecimal } from './digits';
 import { selectSection } from './render';
 
@@ -456,5 +456,16 @@ describe('digit helpers', () => {
   it('generalDigits', () => {
     expect(generalDigits(0, false)).toBe('0');
     expect(generalDigits(5.5, true)).toBe('5.5');
+  });
+});
+
+describe('isFaithfulFormatCode', () => {
+  it('accepts valid codes, English and system locale tags, and tags on number sections', () => {
+    for (const code of ['0.00', 'yyyy-mm-dd', '[$-409]mmmm d, yyyy', '[$-809]mmm', '[$-2010409]d', '[$-F800]', '[$-F400]', '[$€-407] #,##0.00', '[$-407]0.00']) {
+      expect(isFaithfulFormatCode(code)).toBe(true);
+    }
+  });
+  it('rejects invalid codes and date sections tagged with another language', () => {
+    for (const code of ['[$-407]dddd', '[$-411]yyyy', '0 abc', '[$-404]e/m/d', '0.00;[$-407]mmm']) expect(isFaithfulFormatCode(code)).toBe(false);
   });
 });
