@@ -43,6 +43,26 @@ describe('ReviewPanel', () => {
     expect(html).toContain('<option value="Bo">Bo</option>');
   });
 
+  it('offers a change without an author as "Unknown", a choice of its own, and labels the author choice for each panel', () => {
+    const html = render({ changes: [change({ id: 'a', author: '' }), change({ id: 'b', author: 'Ada' })] });
+    expect(html).toContain('<option value="">Unknown</option>');
+    expect(html).toContain('All authors');
+    // The label points at the select of this panel: two panels on one page do not share an id.
+    const ids = (markup: string) => [markup.match(/<label for="([^"]+)"/)?.[1], markup.match(/<select id="([^"]+)"/)?.[1]];
+    const [labelFor, selectId] = ids(html);
+    expect(labelFor).toBeTruthy();
+    expect(labelFor).toBe(selectId);
+    const both = renderToStaticMarkup(
+      <>
+        <ReviewPanel changes={[]} view="markup" onViewChange={() => {}} onGoTo={() => {}} onClose={() => {}} />
+        <ReviewPanel changes={[]} view="markup" onViewChange={() => {}} onGoTo={() => {}} onClose={() => {}} />
+      </>
+    );
+    const selects = [...both.matchAll(/<select id="([^"]+)"/g)].map((m) => m[1]);
+    expect(selects).toHaveLength(2);
+    expect(new Set(selects).size).toBe(2);
+  });
+
   it('draws an author in the colour the page gives them when the palette lists every author of the document', () => {
     // Bo and Di share a first colour; Bo is only in the other end of a move, so no change of Bo's is in the list.
     const changes = [change({ id: 'a', author: 'Ada' }), change({ id: 'b', author: 'Di' })];

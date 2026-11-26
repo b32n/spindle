@@ -307,7 +307,7 @@ edits, and the inverse operations broadcast to peers like any other edit.
   last-writer-wins on that attribute: one stays, the same on every client. Residual limit: when one person splits a paragraph
   while another marks its mark, Yjs keeps the original element for the first half, so the other person's record lands on the
   first half (next to the insertion that the split recorded there), not on the second half that holds the original mark;
-  accepted together the two cancel (the paragraphs are joined again), and each can still be rejected alone. Pressing Enter in a paragraph that carries a record copies the record to both halves (ProseMirror copies a node's attributes on a split): both halves then show the same change, which is accepted or rejected as one. A line break inside tracked text is a newline character in
+  accepted together the two cancel (the paragraphs are joined again), and each can still be rejected alone: rejecting the split joins the paragraphs and moves the other person's deletion record to the joined mark (the original one), where it is still open. Pressing Enter in a paragraph that carries a record copies the record to both halves (ProseMirror copies a node's attributes on a split): both halves then show the same change, which is accepted or rejected as one. A line break inside tracked text is a newline character in
   the text (a marked `hard_break` node would lose its change, because marks sync on text only); the editor inserts that for
   Shift+Enter in tracked text, and the DOCX reader makes the same.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means

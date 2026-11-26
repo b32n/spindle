@@ -701,12 +701,15 @@ describe('concurrent suggestions on one paragraph mark or table row', () => {
       expect(revisionOfBlock(c)).toBeUndefined();
       expect(paragraphTexts(c)).toEqual(['hello ', 'world']);
     }
-    // Ada's record is rejected (the split goes): the joined paragraph has no record. Bo's deletion record sat on the mark that
-    // the join removes, so it goes with it (a known limit: rejecting a split silently drops a concurrent record on that mark).
+    // Ada's record is rejected (the split goes): the paragraphs are joined, and Bo's deletion record, which sat on the half that
+    // held Ada's mark, moves on to the joined mark (the original one it was meant for), where Bo can still settle it.
     [a, b] = make();
     settleBy(a, 'Ada', 'reject');
     sync(a, b);
     for (const c of [a, b]) expect(paragraphTexts(c)).toEqual(['hello world']);
+    for (const c of [a, b]) expect(revisionOfBlock(c)).toEqual({ deletion: BO });
+    settleBy(b, 'Bo', 'reject');
+    sync(a, b);
     for (const c of [a, b]) expect(revisionOfBlock(c)).toBeUndefined();
     // Accepting Bo's deletion: the mark (inserted by Ada, deleted by Bo) is gone and the paragraphs are joined; nothing is left of Ada's record.
     [a, b] = make();

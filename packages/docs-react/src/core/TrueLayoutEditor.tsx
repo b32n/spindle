@@ -711,7 +711,10 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       const container = pagesContainerRef.current;
       const viewport = viewportRef.current;
       if (!editorView || !container || !viewport) return;
+      let frame = 0;
       goToRef.current = (target) => {
+        // A newer go-to takes over from the retries of an older one.
+        cancelAnimationFrame(frame);
         const { state } = editorView;
         const pos = Math.max(0, Math.min(target, state.doc.content.size));
         const current = layoutRef.current;
@@ -727,11 +730,12 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         const reveal = () => {
           const el = findElementAtPos(container, pos);
           if (el) el.scrollIntoView({ block: 'center' });
-          else if (++tries < 10) requestAnimationFrame(reveal);
+          else if (++tries < 10) frame = requestAnimationFrame(reveal);
         };
-        requestAnimationFrame(reveal);
+        frame = requestAnimationFrame(reveal);
       };
       return () => {
+        cancelAnimationFrame(frame);
         goToRef.current = null;
       };
     }, [editorView]);

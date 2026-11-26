@@ -207,7 +207,9 @@ function joinWithNext(tr: Transaction, pos: number): void {
   const second = readBlockRevision(next.attrs, false) ?? {};
   const revision: BlockRevision = {
     ...(second.insertion && { insertion: second.insertion }),
-    ...(second.deletion && { deletion: second.deletion }),
+    // A deletion the first mark still has was made by somebody else (the one being settled is cleared before the join): after
+    // a concurrent split it is meant for the original mark, which is the second one, so it moves on to the joined mark.
+    ...((second.deletion ?? first.deletion) && { deletion: (second.deletion ?? first.deletion)! }),
     ...(first.formatChange && { formatChange: first.formatChange }),
   };
   tr.join(end);
@@ -366,18 +368,17 @@ export const resolveAll =
       action
     );
 
-/** Accept or reject the changes the selection touches (a caret touches the change it is in or at the edge of). */
+/**
+ * Accept or reject the changes the selection touches. A range touches the changes it overlaps (one that only ends where a
+ * change starts, or starts where one ends, does not); a caret touches the change it is in or at the edge of.
+ */
 export const resolveSelection =
   (action: 'accept' | 'reject'): Command =>
   (state, dispatch) => {
     const { from, to } = state.selection;
-    const touched = new Set(
-      listChanges(state.doc)
-        .filter((c) => c.units.some((u) => u.from <= to && u.to >= from && (u.to > from || u.from < to || from === to)))
-        .map((c) => c.id)
-    );
+    const touches = (u: ChangeUnit) => (from === to ? u.from <= from && u.to >= from : u.from < to && u.to > from);
     const units = listChanges(state.doc)
-      .filter((c) => touched.has(c.id))
+      .filter((c) => c.units.some(touches))
       .flatMap((c) => c.units);
     return run(state, dispatch, units, action);
   };

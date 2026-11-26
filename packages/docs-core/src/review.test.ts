@@ -81,6 +81,28 @@ describe('accepting and rejecting changes to text', () => {
     expect(texts(apply(caret, resolveSelection('reject')).doc)).toEqual(['keep old end']);
   });
 
+  it('a selection that exactly covers one change leaves the changes next to it alone', () => {
+    const state = stateOf(blocks); // "keep " 1-6, "new" 6-9 (insertion), "old" 9-12 (deletion), " end"
+    const covering = (from: number, to: number) => state.apply(state.tr.setSelection(TextSelection.create(state.doc, from, to)));
+    expect(marks(apply(covering(6, 9), resolveSelection('accept')).doc)).toEqual(['keep new:', 'old:deletion', ' end:']);
+    expect(marks(apply(covering(9, 12), resolveSelection('accept')).doc)).toEqual(['keep :', 'new:insertion', ' end:']);
+    // A range that only reaches the edge of a change from outside does not touch it.
+    expect(resolveSelection('accept')(covering(1, 6))).toBe(false);
+    expect(resolveSelection('accept')(covering(12, 15))).toBe(false);
+    // A range that overlaps two changes settles both; a caret at the edge between two settles both (it is at the edge of each).
+    expect(texts(apply(covering(8, 10), resolveSelection('accept')).doc)).toEqual(['keep new end']);
+    expect(texts(apply(covering(9, 9), resolveSelection('accept')).doc)).toEqual(['keep new end']);
+  });
+
+  it('a selection that ends where a paragraph starts does not settle the change of that paragraph mark', () => {
+    const state = stateOf([para([run('one')]), para([run('two')], { revision: { insertion: ADA } })]); // "one" 0-5, "two" 5-10
+    const selecting = (from: number, to: number) => state.apply(state.tr.setSelection(TextSelection.create(state.doc, from, to)));
+    expect(listChanges(state.doc).map((c) => c.kind)).toEqual(['paragraphInserted']);
+    expect(resolveSelection('accept')(selecting(1, 5))).toBe(false);
+    const inside = apply(selecting(1, 7), resolveSelection('accept'));
+    expect(readBlockRevision(inside.doc.child(1).attrs)).toBeUndefined();
+  });
+
   it('does nothing, and says so, when there is nothing to settle', () => {
     const plain = stateOf([para([run('plain')])]);
     expect(resolveAll('accept')(plain, () => undefined)).toBe(false);

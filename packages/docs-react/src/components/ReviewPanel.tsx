@@ -4,7 +4,7 @@
  * one author's.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useId, useMemo, useState } from 'react';
 import { X, Check, ChevronUp, ChevronDown } from 'lucide-react';
 import { assignAuthorColors, type ReviewChange } from '@b32nio/spindle-docs-core';
 import type { RevisionView } from '../core';
@@ -21,6 +21,9 @@ export interface ReviewPanelProps {
   /** Every author of the document, whose colours are shared out (default: the authors of `changes`). */
   palette?: readonly string[];
 }
+
+/** The value of the author choice that stands for every author (an author's own name can be any text, also empty). */
+const ALL_AUTHORS = '\u0000all';
 
 const FONT = '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif';
 
@@ -75,7 +78,9 @@ export function neighbourChange(changes: readonly ReviewChange[], from: number |
 }
 
 export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChange, onResolve, onGoTo, onClose, palette }: ReviewPanelProps) {
-  const [author, setAuthor] = useState<string>('');
+  // The author whose changes are shown; null: all of them (an empty author name is an author like another).
+  const [author, setAuthor] = useState<string | null>(null);
+  const authorSelectId = useId();
   const [currentId, setCurrentId] = useState<string | null>(null);
   // Where the last change gone to was: next and previous go on from here even after the document changed.
   const [currentFrom, setCurrentFrom] = useState<number | null>(null);
@@ -84,9 +89,9 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
   const colors = useMemo(() => assignAuthorColors(palette ?? authors), [palette, authors]);
   // A filter on an author who has no changes left shows everybody again.
   useEffect(() => {
-    if (author && !authors.includes(author)) setAuthor('');
+    if (author !== null && !authors.includes(author)) setAuthor(null);
   }, [author, authors]);
-  const shown = useMemo(() => (author ? changes.filter((c) => c.author === author) : changes), [changes, author]);
+  const shown = useMemo(() => (author !== null ? changes.filter((c) => c.author === author) : changes), [changes, author]);
 
   const go = (change: ReviewChange | undefined) => {
     if (!change) return;
@@ -125,14 +130,14 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <label htmlFor="review-author" style={{ color: '#5f6368' }}>
+          <label htmlFor={authorSelectId} style={{ color: '#5f6368' }}>
             Author
           </label>
-          <select id="review-author" value={author} onChange={(e) => setAuthor(e.target.value)} style={{ ...button, flex: 1 }}>
-            <option value="">All authors</option>
+          <select id={authorSelectId} value={author ?? ALL_AUTHORS} onChange={(e) => setAuthor(e.target.value === ALL_AUTHORS ? null : e.target.value)} style={{ ...button, flex: 1 }}>
+            <option value={ALL_AUTHORS}>All authors</option>
             {authors.map((a) => (
               <option key={a} value={a}>
-                {a}
+                {a || 'Unknown'}
               </option>
             ))}
           </select>
@@ -145,11 +150,11 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
         </div>
         {onResolve && (
           <div style={{ display: 'flex', gap: 6 }}>
-            <button type="button" disabled={shown.length === 0} onClick={() => onResolve('accept', { author: author || undefined })} style={button}>
-              {author ? `Accept all by ${author}` : 'Accept all'}
+            <button type="button" disabled={shown.length === 0} onClick={() => onResolve('accept', { author: author ?? undefined })} style={button}>
+              {author !== null ? `Accept all by ${author || 'Unknown'}` : 'Accept all'}
             </button>
-            <button type="button" disabled={shown.length === 0} onClick={() => onResolve('reject', { author: author || undefined })} style={button}>
-              {author ? `Reject all by ${author}` : 'Reject all'}
+            <button type="button" disabled={shown.length === 0} onClick={() => onResolve('reject', { author: author ?? undefined })} style={button}>
+              {author !== null ? `Reject all by ${author || 'Unknown'}` : 'Reject all'}
             </button>
           </div>
         )}

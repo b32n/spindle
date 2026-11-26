@@ -103,6 +103,8 @@ export type {
   DynamicFieldRun,
   DynamicFieldType,
   DynamicFieldContext,
+  // Which view of the tracked changes the editor shows
+  RevisionView,
 } from './core';
 
 // ProseMirror components (for direct access if needed)
