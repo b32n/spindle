@@ -26,7 +26,7 @@ import {
 import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
-import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, findNoteRef, insertNoteReference, noteOrdinalAt, noteTextFragment, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
+import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, findNoteRef, insertNoteReference, noteOrdinalAt, noteTextFragment, insertTableOfContents, updateTableOfContents, removeTableOfContents, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
 import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
@@ -37,7 +37,7 @@ import { applyPageNotes, createFootnoteHooks, footnoteRefs, type FootnotePlan } 
 import { DomMeasurer, Measure } from './measurer';
 import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
 import { computeTrueLayout, DocumentLayout, PageConfig, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
-import { computeSectionedLayout, matchSectionsToBreaks, resolveInheritedContent, type LayoutSection, type LayoutSectionBreak } from './section-layout';
+import { computeSectionedLayout, formatPageNumber, matchSectionsToBreaks, resolveInheritedContent, type LayoutSection, type LayoutSectionBreak } from './section-layout';
 import { DomPainter, HeaderFooterContent } from './dom-painter';
 import { InputBridge, createInputBridge, CellSelection } from './input-bridge';
 import { SelectionOverlayManager, getSelectionOverlayStyles } from './selection-overlay';
@@ -172,6 +172,11 @@ export interface TrueLayoutEditorHandle {
   getScrollContainer: () => HTMLElement | null;
   /** Insert a footnote or endnote reference at the caret and start editing the new note's text. False when it cannot go there. */
   insertNote: (kind: 'footnote' | 'endnote') => boolean;
+  /**
+   * Insert a table of contents after the block the caret is in, update every table of contents from the headings (and the
+   * pages they are on), or remove the one at the caret. False when there is nothing to do or it cannot be done there.
+   */
+  tableOfContents: (action: 'insert' | 'update' | 'remove') => boolean;
 }
 
 // ============================================================================
@@ -253,6 +258,8 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const [noteEdit, setNoteEdit] = useState<NoteKey | null>(null);
     const [noteEditPos, setNoteEditPos] = useState<{ top: number; left: number; width: number; minHeight: number } | null>(null);
     const layoutRef = useRef<DocumentLayout | null>(null);
+    /** Set after a table of contents was written: the layout it caused may move headings to other pages, so it is updated once more when laid out. */
+    const tocRefreshRef = useRef(false);
     const activePageIndexRef = useRef<number>(0);
     
     // Header/footer editing state
@@ -791,6 +798,46 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       return () => container.removeEventListener('click', onClick);
     }, [editorView]);
 
+    /** The page number (as shown) of the page a position of the document is on, from the last layout. */
+    const pageLabelAtPos = (): ((pos: number) => string | undefined) => {
+      const current = layoutRef.current;
+      const ranges: Array<{ start: number; end: number; page: number }> = [];
+      current?.pages.forEach((page, index) => {
+        for (const fragment of page.fragments) {
+          const info = blockPositionMapRef.current.get(fragment.blockId);
+          if (info) ranges.push({ ...info, page: index });
+        }
+      });
+      return (pos) => {
+        const hit = ranges.find((r) => pos >= r.start && pos < r.end);
+        const page = hit && current ? current.pages[hit.page] : undefined;
+        return page ? formatPageNumber(page.pageNumber ?? page.pageIndex + 1, page.pageNumberFormat) : undefined;
+      };
+    };
+
+    /**
+     * Insert, update or remove tables of contents (see `TrueLayoutEditorHandle.tableOfContents`). `refresh`: write the tables
+     * again once the layout they cause is known (their page numbers can change what is on which page).
+     */
+    const runTableOfContents = (view: EditorView, action: 'insert' | 'update' | 'remove', refresh = true): boolean => {
+      const labels = pageLabelAtPos();
+      const command =
+        action === 'insert' ? insertTableOfContents(labels) : action === 'update' ? updateTableOfContents(labels) : removeTableOfContents;
+      let changed = false;
+      const done = command(view.state, (tr) => {
+        // An update that changes nothing is not a step in the history.
+        if (action !== 'update' || !tr.doc.eq(view.state.doc)) {
+          view.dispatch(tr);
+          changed = true;
+        }
+      });
+      if (changed && refresh && action !== 'remove') tocRefreshRef.current = true;
+      return done;
+    };
+
+    const runTableOfContentsRef = useRef<typeof runTableOfContents | null>(null);
+    runTableOfContentsRef.current = runTableOfContents;
+
     // Perform layout calculation
     const performLayout = useCallback((doc: PmNode, view: EditorView) => {
       // Removed logging for production
@@ -870,6 +917,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         if (notesPlan) newLayout = applyPageNotes(newLayout, notesPlan);
       }
       measuresRef.current = measures;
+      layoutRef.current = newLayout;
       
       setLayout(newLayout);
       
@@ -893,6 +941,12 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       // 8. Refresh remote-cursor overlay so peer carets/selections re-place on
       //    the freshly painted pages.
       remoteCursorOverlayRef.current?.refresh();
+
+      // 9. A table of contents written since the last layout is brought in line with where the headings are now.
+      if (tocRefreshRef.current) {
+        tocRefreshRef.current = false;
+        runTableOfContentsRef.current?.(view, 'update', false);
+      }
     }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, measureContentWidth]);
     
     // Keep performLayoutRef in sync to avoid stale closures
@@ -1134,6 +1188,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         }
       },
       getScrollContainer: () => viewportRef.current,
+      tableOfContents: (action) => (editorView && editable ? runTableOfContentsRef.current?.(editorView, action) ?? false : false),
       insertNote: (kind) => {
         if (!editorView || !editable) return false;
         if (!insertNoteReference(kind)(editorView.state, editorView.dispatch)) return false;

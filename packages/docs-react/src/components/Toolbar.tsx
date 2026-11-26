@@ -46,6 +46,7 @@ import {
   SeparatorHorizontal,
   SplitSquareVertical,
   Asterisk,
+  BookOpen,
   FileDown,
   MessageSquarePlus,
   Type,
@@ -289,6 +290,8 @@ export interface ToolbarProps {
   canRemoveSectionBreak?: boolean;
   /** Insert a footnote or endnote reference at the caret and edit its text; providing this shows the Footnote menu. */
   onInsertNote?: (kind: 'footnote' | 'endnote') => void;
+  /** Insert, update or remove a table of contents; providing this shows the Table of contents menu. */
+  onTableOfContents?: (action: 'insert' | 'update' | 'remove') => void;
 }
 
 interface ToolbarButtonProps {
@@ -491,6 +494,7 @@ export const Toolbar = memo(function Toolbar({
   onRemoveSectionBreak,
   canRemoveSectionBreak = true,
   onInsertNote,
+  onTableOfContents,
   editorView,
   activeMarks,
   selectedCell,
@@ -852,6 +856,19 @@ export const Toolbar = memo(function Toolbar({
       <ToolbarButton onClick={() => runCommand(commands.insertPageBreak())} tooltip="Page break">
         <FileDown size={18} strokeWidth={2} />
       </ToolbarButton>
+      {onTableOfContents && (
+        <OverflowDropdown triggerIcon={<BookOpen size={18} strokeWidth={2} />} menuLabel="Table of contents" width={230}>
+          <DropdownItemStandalone onClick={() => onTableOfContents('insert')} style={{ justifyContent: 'flex-start' }}>
+            Insert table of contents
+          </DropdownItemStandalone>
+          <DropdownItemStandalone onClick={() => onTableOfContents('update')} style={{ justifyContent: 'flex-start' }}>
+            Update table of contents
+          </DropdownItemStandalone>
+          <DropdownItemStandalone onClick={() => onTableOfContents('remove')} style={{ justifyContent: 'flex-start' }}>
+            Remove table of contents
+          </DropdownItemStandalone>
+        </OverflowDropdown>
+      )}
       {onInsertNote && (
         <OverflowDropdown triggerIcon={<Asterisk size={18} strokeWidth={2} />} menuLabel="Footnote" width={200}>
           <DropdownItemStandalone onClick={() => onInsertNote('footnote')} style={{ justifyContent: 'flex-start' }}>

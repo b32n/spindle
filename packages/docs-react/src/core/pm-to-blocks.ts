@@ -234,6 +234,9 @@ function nodeToFlowBlock(node: PmNode): FlowBlock | FlowBlock[] | null {
 
     case 'content_control':
       return convertContentControl(node);
+
+    case 'toc':
+      return convertToc(node);
     
     default:
       // Unknown node type - try to extract text content as paragraph
@@ -274,6 +277,22 @@ function convertContentControl(node: PmNode): FlowBlock[] {
     else if (block) blocks.push(block);
   });
   if (blocks.length > 0) blocks[0].controlChips = [controlTitle(node.attrs), ...(blocks[0].controlChips ?? [])];
+  return blocks;
+}
+
+/**
+ * A table of contents flows as its entries: paragraphs whose links look like the text around them and whose tab is a dotted
+ * leader up to the page number at the right.
+ */
+function convertToc(node: PmNode): FlowBlock[] {
+  const blocks: FlowBlock[] = [];
+  node.forEach((child) => {
+    if (child.type.name !== 'paragraph') return;
+    const entry = convertParagraph(child);
+    entry.attrs = { ...entry.attrs, tabLeader: 'dot' };
+    entry.runs = entry.runs.map((run) => (run.kind === 'link' ? { ...run, plain: true } : run));
+    blocks.push(entry);
+  });
   return blocks;
 }
 
@@ -734,7 +753,7 @@ export function createBlockPositionMap(
     if (node.type.name === 'section_break') return;
     // The notes area closing a section has no node: the next node's blocks come after it.
     while (blockIndex < blocks.length && (blocks[blockIndex] as { synthetic?: boolean }).synthetic) blockIndex++;
-    if (node.type.name === 'content_control') {
+    if (node.type.name === 'content_control' || node.type.name === 'toc') {
       node.forEach((child, childOffset) => visit(child, nodeStart + 1 + childOffset));
       return;
     }

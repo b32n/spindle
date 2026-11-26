@@ -444,3 +444,37 @@ describe('footnotes at the bottom of the page', () => {
     expect(out.blocks.some((b) => (b as ParagraphBlock).noteTarget)).toBe(true);
   });
 });
+
+describe('a table of contents', () => {
+  const entry = (...content: unknown[]) => ({ type: 'paragraph', attrs: { namedStyleId: 'TOC1' }, content });
+  const toc = (...entries: unknown[]) => ({ type: 'toc', attrs: { instruction: 'TOC \\o "1-3" \\h' }, content: entries });
+  const heading = (t: string) => ({ type: 'heading', attrs: { level: 1 }, content: [text(t)] });
+
+  it('flows as its entries, which draw their tab as a dotted leader and their links like the text around them', () => {
+    const doc = j([heading('H'), toc(entry(text('Intro', [{ type: 'link', attrs: { href: '#_Toc1' } }]), text('\t'), text('1')), entry(text('Plain'))), { type: 'paragraph' }]);
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    expect(blocks.map((b) => b.kind)).toEqual(['heading', 'paragraph', 'paragraph', 'paragraph']);
+    const first = blocks[1] as ParagraphBlock;
+    expect(first.attrs).toMatchObject({ tabLeader: 'dot' });
+    expect(first.runs[0]).toMatchObject({ kind: 'link', href: '#_Toc1', plain: true });
+    expect(first.runs.map((r) => (r.kind === 'text' || r.kind === 'link' ? r.text : ''))).toEqual(['Intro', '\t1']);
+    expect((blocks[3] as ParagraphBlock).attrs?.tabLeader).toBeUndefined();
+  });
+
+  it('maps each entry to its own position in the document', () => {
+    const doc = j([heading('H'), toc(entry(text('One')), entry(text('Two'))), { type: 'paragraph', content: [text('after')] }]);
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    const map = createBlockPositionMap(doc, blocks);
+    const textOf = (i: number) => doc.textBetween(map.get(blocks[i].id)!.start, map.get(blocks[i].id)!.end, ' ');
+    expect([1, 2, 3].map(textOf)).toEqual(['One', 'Two', 'after']);
+  });
+
+  it('splits sections after its entries, and a table without entries flows as nothing', () => {
+    const doc = j([toc(), { type: 'section_break', attrs: { sectionId: 'a' } }, toc(entry(text('E'))), { type: 'paragraph' }]);
+    const out = proseMirrorToSectionedFlowBlocks(doc);
+    expect(out.sections).toEqual([
+      { sectionId: 'a', blockStart: 0, blockEnd: 0 },
+      { sectionId: null, blockStart: 0, blockEnd: 2 },
+    ]);
+  });
+});

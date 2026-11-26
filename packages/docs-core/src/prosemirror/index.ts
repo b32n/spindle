@@ -63,3 +63,14 @@ export {
   noteTextFragment,
   type NoteKind,
 } from './notes';
+
+// Table of contents
+export {
+  DEFAULT_TOC_INSTRUCTION,
+  EMPTY_TOC_TEXT,
+  parseTocInstruction,
+  insertTableOfContents,
+  updateTableOfContents,
+  removeTableOfContents,
+  type TocSettings,
+} from './toc';

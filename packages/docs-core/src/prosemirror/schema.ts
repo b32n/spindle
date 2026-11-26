@@ -111,7 +111,7 @@ const nodes: Record<string, NodeSpec> = {
   doc: {
     // A section break only ends a section of the body, so it is allowed here and not inside cells or list items.
     // A content control wraps blocks; like a section break it is outside the `block` group so lists and quotes cannot hold one.
-    content: '(block | content_control | section_break)+',
+    content: '(block | content_control | toc | section_break)+',
   },
 
   paragraph: {
@@ -385,11 +385,34 @@ const nodes: Record<string, NodeSpec> = {
   // A content control (a Word structured document tag) around blocks. It only sits at the top level of the document, in
   // table cells and in other controls. Its properties are attrs; `checked` is the state of a checkbox control.
   content_control: {
-    content: '(block | content_control)+',
+    content: '(block | content_control | toc)+',
     defining: true,
     attrs: CONTENT_CONTROL_ATTRS,
     parseDOM: [{ tag: 'div[data-content-control]', getAttrs: contentControlAttrsFromDom }],
     toDOM: (node) => contentControlDom(node.attrs, 'div'),
+  },
+
+  // A table of contents: its entries (a paragraph each) as they were when it was last updated, and the instruction it is
+  // generated from. An atom: the caret never enters it, its entries are changed only by updating the table. Like the
+  // content control it sits at the top level of the document and in content controls, not in cells or list items.
+  toc: {
+    content: 'paragraph*',
+    atom: true,
+    selectable: true,
+    isolating: true,
+    attrs: { instruction: { default: 'TOC \\o "1-3" \\h \\z \\u' } },
+    parseDOM: [
+      {
+        tag: 'div[data-toc]',
+        getAttrs(dom: HTMLElement) {
+          const instruction = dom.getAttribute('data-toc') || '';
+          return { instruction: instruction.length > 0 && instruction.length <= 500 ? instruction : 'TOC \\o "1-3" \\h \\z \\u' };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      return ['div', { class: 'toc', 'data-toc': String(node.attrs.instruction) }, 0];
+    },
   },
 
   // A content control inside a paragraph, around inline content.
