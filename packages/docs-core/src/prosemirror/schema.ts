@@ -4,6 +4,7 @@ import {
   sanitizeImageSrc,
   safeCssColor,
   safeFontFamily,
+  safeFontName,
   safeCssKeyword,
   safeCssNumber,
 } from './sanitize';
@@ -614,7 +615,7 @@ export function sanitizeRunFormat(raw: unknown): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const flag of RUN_FORMAT_FLAGS) if (typeof r[flag] === 'boolean') out[flag] = r[flag];
   for (const key of ['fontFamily', 'fontFamilyEastAsia', 'fontFamilyComplex'] as const) {
-    const v = typeof r[key] === 'string' ? safeFontFamily(r[key]) : undefined;
+    const v = typeof r[key] === 'string' ? safeFontName(r[key]) : undefined;
     if (v) out[key] = v;
   }
   for (const key of ['color', 'backgroundColor'] as const) {

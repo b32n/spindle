@@ -96,6 +96,23 @@ export function safeFontFamily(value: string | null | undefined): string | undef
   return SAFE_FONT_FAMILY.test(v) ? v : undefined;
 }
 
+// A font NAME kept as data (the formatting before a tracked change), never put into CSS: any Unicode letter, digit or
+// space and a few punctuation marks (so CJK names pass), none of the characters that could break out of a declaration.
+const SAFE_FONT_NAME = /^[\p{L}\p{N}\p{M}\s.,'"&_-]+$/u;
+const MAX_FONT_NAME = 100;
+
+/**
+ * Return `value` if it is usable as a stored font name, otherwise undefined. Unlike `safeFontFamily` it accepts non-ASCII
+ * names, so a tracked formatting change keeps the font it came from; only turn the result into CSS through `safeFontFamily`.
+ */
+export function safeFontName(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  const v = String(value).trim();
+  if (v === '' || v.length > MAX_FONT_NAME) return undefined;
+  if (/url\(/i.test(v)) return undefined;
+  return SAFE_FONT_NAME.test(v) ? v : undefined;
+}
+
 // The only keywords ever emitted for `text-align`.
 const ALIGN_KEYWORDS = new Set(['left', 'right', 'center', 'justify', 'start', 'end']);
 

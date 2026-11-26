@@ -275,6 +275,16 @@ describe('a line break typed inside tracked text', () => {
     expect(markIds(next.doc as never, 'insertion')).toEqual(['1']); // one text node: the break is inside the run
   });
 
+  it('is also a newline in text that only has a formatting change (marks sync on text only)', () => {
+    const change = docsSchema.marks.formatChange.create({ revisionId: '3', author: 'Cy', previous: { bold: true } });
+    const state = at(stateOf(docOf(docsSchema.text('ab', [change]))), 2);
+    let tr;
+    expect(insertTrackedLineBreak(state, (t) => (tr = t))).toBe(true);
+    const next = state.apply(tr!);
+    expect(next.doc.textContent).toBe('a\nb');
+    expect(next.doc.firstChild!.childCount).toBe(1);
+  });
+
   it('inside a deletion the break is live; elsewhere the command passes', () => {
     const state = at(stateOf(), 9);
     let tr;

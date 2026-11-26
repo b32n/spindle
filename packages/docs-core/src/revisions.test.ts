@@ -446,12 +446,21 @@ describe('moves, formatting changes, paragraph marks and rows', () => {
       previous: { bold: true, fontSize: 12, color: '#112233', fontFamily: 'Arial', namedStyleId: 'S' },
     });
     expect(Object.keys((read('{"bold":true,"evil":1,"italic":"yes","backgroundColor":"url(x)","fontSize":-3}') as { previous: object }).previous)).toEqual(['bold']);
+    expect(read('{"fontFamilyEastAsia":"宋体","fontFamily":"游ゴシック","fontFamilyComplex":"Arial; x:y"}')).toMatchObject({ previous: { fontFamilyEastAsia: '宋体', fontFamily: '游ゴシック' } });
+    expect((read('{"fontFamilyComplex":"Arial; x:y"}') as { previous: object }).previous).toEqual({});
     expect(read('not json')).toMatchObject({ previous: {} });
     expect(read('[1]')).toMatchObject({ previous: {} });
     expect(read('null')).toMatchObject({ previous: {} });
     const mark = formatChange.create({ revisionId: '1', author: 'A', previous: { bold: true } });
     expect(formatChange.spec.toDOM!(mark, true)).toEqual(['span', expect.objectContaining({ 'data-format-change': '1', 'data-format-previous': '{"bold":true}', class: 'revision-format-change' }), 0]);
     expect((formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => unknown)({ getAttribute: () => null })).toBe(false);
+  });
+
+  it('keep a non-ASCII font of the formatting before a change through a save', () => {
+    const previous = { bold: true, fontFamily: '游ゴシック', fontFamilyEastAsia: '宋体', fontFamilyComplex: 'Arial Narrow' };
+    const paragraph: ParagraphBlock = { id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'x', italic: true, revision: { formatChange: { id: '5', author: 'Cy', previous } } }] };
+    const saved = viaPm([paragraph])[0] as ParagraphBlock;
+    expect(saved.content[0]).toMatchObject({ revision: { formatChange: { previous } } });
   });
 
   it('keep a tracked paragraph mark in a table cell of one paragraph when the document is saved', () => {
