@@ -416,6 +416,20 @@ lockstep.
   Effect texts start with `lost:`, `approximated:` or `kept:`. The detector never expands XML entities, skips parts
   over a size limit (reported as `xlsx.package.sizeLimit`) and never throws. The XLSX fidelity loss goldens and the
   package-ledger rules are regenerated.
+- **PPTX fidelity corpus, first part (`fixtures/pptx/`).** 22 committed files made by a stdlib `zipfile`
+  PresentationML builder (fixed timestamps, normalised core properties, no third-party content): basic and rich text
+  (levels, bullets, numbering, links, spacing, tab stops, columns, vertical text, `normAutofit` with `fontScale`),
+  two masters with every placeholder type, themes with colour maps, font schemes and effect styles, all 187
+  `ST_ShapeType` presets (generated from the list), custom geometry, fills (gradient, pattern, picture, alpha),
+  lines (dashes, arrowheads, caps, joins, compound), effects (shadow, glow, reflection, soft edge, blur, 3-D), five
+  slide sizes, and nine edge files (truncated zip, no `presentation.xml`, missing slide part, relationships to missing
+  parts, malformed slide XML, 60 nested groups, relationship cycles, encrypted and legacy `.ppt` OLE stubs); a
+  1000-slide deck is generated at run time and never committed. A manifest records producer, licence and claimed
+  constructs; `scripts/pptx-fidelity/` holds the 83-construct registry and its probes on the generic
+  `scripts/fidelity-core` modules; the Jest suite in `packages/slides-core/src/fidelity/` verifies every claim
+  against the package XML, the structure of each deck and the byte-for-byte rebuild of the generated files
+  (`npm run test:fidelity:coverage -w @b32nio/spindle-slides-core` reports coverage of the scripts). No importer or
+  runtime behaviour changes; there is no PPTX importer yet, so goldens come with the PPTX loss detector and runner.
 
 ## [0.4.0] - 2026-10-26
 
