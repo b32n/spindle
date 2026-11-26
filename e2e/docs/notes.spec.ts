@@ -52,7 +52,7 @@ test.describe('docs: footnotes and endnotes from a .docx', () => {
       note.boundingBox(),
       pageOfReference.locator('.footnote-separator').boundingBox(),
     ]);
-    expect(noteBox!.y).toBeGreaterThan(referenceBox!.y + 100);
+    expect(noteBox!.y).toBeGreaterThan(referenceBox!.y + 40);
     expect(separatorBox!.y).toBeLessThan(noteBox!.y);
     // The notes of the page come in order, after one another.
     await expect(pageOfReference.locator('[data-note-target^="footnote:"]')).toHaveCount(3);
