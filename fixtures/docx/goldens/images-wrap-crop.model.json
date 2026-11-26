@@ -490,6 +490,46 @@
               {
                 "cells": [
                   {
+                    "blocks": [
+                      {
+                        "alignment": "center",
+                        "content": [
+                          {
+                            "alt": "crop (0, 0, 0, 0)",
+                            "height": 160,
+                            "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                            "type": "image",
+                            "width": 160
+                          }
+                        ],
+                        "id": "block-14",
+                        "lineSpacing": {
+                          "type": "multiple",
+                          "value": 1.079
+                        },
+                        "spaceAfter": 10.666666666666666,
+                        "type": "paragraph"
+                      },
+                      {
+                        "content": [
+                          {
+                            "color": "#44546a",
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 9,
+                            "italic": true,
+                            "text": "uncropped",
+                            "type": "text"
+                          }
+                        ],
+                        "id": "block-15",
+                        "lineSpacing": {
+                          "type": "single"
+                        },
+                        "namedStyleId": "Caption",
+                        "spaceAfter": 13.333333333333334,
+                        "type": "paragraph"
+                      }
+                    ],
                     "colwidth": [
                       153.33
                     ],
@@ -505,6 +545,46 @@
                     "id": "cell-1"
                   },
                   {
+                    "blocks": [
+                      {
+                        "alignment": "center",
+                        "content": [
+                          {
+                            "alt": "crop (25000, 0, 0, 0)",
+                            "height": 160,
+                            "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                            "type": "image",
+                            "width": 160
+                          }
+                        ],
+                        "id": "block-16",
+                        "lineSpacing": {
+                          "type": "multiple",
+                          "value": 1.079
+                        },
+                        "spaceAfter": 10.666666666666666,
+                        "type": "paragraph"
+                      },
+                      {
+                        "content": [
+                          {
+                            "color": "#44546a",
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 9,
+                            "italic": true,
+                            "text": "srcRect (25000, 0, 0, 0)",
+                            "type": "text"
+                          }
+                        ],
+                        "id": "block-17",
+                        "lineSpacing": {
+                          "type": "single"
+                        },
+                        "namedStyleId": "Caption",
+                        "spaceAfter": 13.333333333333334,
+                        "type": "paragraph"
+                      }
+                    ],
                     "colwidth": [
                       153.33
                     ],
@@ -520,6 +600,46 @@
                     "id": "cell-2"
                   },
                   {
+                    "blocks": [
+                      {
+                        "alignment": "center",
+                        "content": [
+                          {
+                            "alt": "crop (0, 30000, 30000, 0)",
+                            "height": 160,
+                            "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                            "type": "image",
+                            "width": 160
+                          }
+                        ],
+                        "id": "block-18",
+                        "lineSpacing": {
+                          "type": "multiple",
+                          "value": 1.079
+                        },
+                        "spaceAfter": 10.666666666666666,
+                        "type": "paragraph"
+                      },
+                      {
+                        "content": [
+                          {
+                            "color": "#44546a",
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 9,
+                            "italic": true,
+                            "text": "srcRect (0, 30000, 30000, 0)",
+                            "type": "text"
+                          }
+                        ],
+                        "id": "block-19",
+                        "lineSpacing": {
+                          "type": "single"
+                        },
+                        "namedStyleId": "Caption",
+                        "spaceAfter": 13.333333333333334,
+                        "type": "paragraph"
+                      }
+                    ],
                     "colwidth": [
                       153.33
                     ],
@@ -535,6 +655,46 @@
                     "id": "cell-3"
                   },
                   {
+                    "blocks": [
+                      {
+                        "alignment": "center",
+                        "content": [
+                          {
+                            "alt": "crop (10000, 10000, 40000, 40000)",
+                            "height": 160,
+                            "src": "data:image/png;sha256=5a0824317a8520d2;chars=616",
+                            "type": "image",
+                            "width": 160
+                          }
+                        ],
+                        "id": "block-20",
+                        "lineSpacing": {
+                          "type": "multiple",
+                          "value": 1.079
+                        },
+                        "spaceAfter": 10.666666666666666,
+                        "type": "paragraph"
+                      },
+                      {
+                        "content": [
+                          {
+                            "color": "#44546a",
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 9,
+                            "italic": true,
+                            "text": "srcRect (10000, 10000, 40000, 40000)",
+                            "type": "text"
+                          }
+                        ],
+                        "id": "block-21",
+                        "lineSpacing": {
+                          "type": "single"
+                        },
+                        "namedStyleId": "Caption",
+                        "spaceAfter": 13.333333333333334,
+                        "type": "paragraph"
+                      }
+                    ],
                     "colwidth": [
                       153.33
                     ],
@@ -572,7 +732,7 @@
                 "width": 40
               }
             ],
-            "id": "block-14",
+            "id": "block-22",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15

@@ -416,6 +416,37 @@ describe('importFromDocx', () => {
     expect(data.namedStyles?.Banded).toMatchObject({ kind: 'table', table: { conditions: { firstRow: { backgroundColor: '#336699', text: { bold: true } } } } });
   });
 
+  it('round-trips cells of several paragraphs, nested tables and the text direction through DOCX', async () => {
+    const text = (id: string, t: string) => ({ id, type: 'paragraph' as const, content: [{ type: 'text' as const, text: t }] });
+    const inner = { id: 'in', type: 'table' as const, rows: [{ id: 'ir', cells: [{ id: 'ic', content: [{ type: 'text' as const, text: 'inner' }] }] }] };
+    const source = docWith({
+      sections: [
+        {
+          id: 'sec1',
+          pageConfig: PAGE_CONFIG,
+          blocks: [
+            {
+              id: 'b1',
+              type: 'table',
+              rows: [{ id: 'r1', cells: [{ id: 'c1', content: [{ type: 'text', text: 'one' }], blocks: [text('p1', 'one'), text('p2', 'two'), inner, text('p3', '')], textDirection: 'tbRl' }] }],
+            },
+          ],
+        },
+      ],
+    });
+    const { result: exported } = await exportAndUnzip(source);
+    const target = docWith({});
+    await importFromDocx(exported.bytes, target);
+    const block = target.getData().sections[0].blocks[0];
+    if (block.type !== 'table') throw new Error('expected a table');
+    const cell = block.rows[0].cells[0];
+    expect(cell.textDirection).toBe('tbRl');
+    expect(cell.blocks?.map((b) => b.type)).toEqual(['paragraph', 'paragraph', 'table', 'paragraph']);
+    const nested = cell.blocks?.[2];
+    if (nested?.type !== 'table') throw new Error('expected a nested table');
+    expect(nested.rows[0].cells[0].content).toEqual([expect.objectContaining({ text: 'inner' })]);
+  });
+
   it('round-trips a hyperlink via the text style pool when it carries formatting', async () => {
     const source = docWith({
       textStylePool: { style_1: { bold: true } },

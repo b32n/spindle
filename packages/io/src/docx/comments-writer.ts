@@ -45,7 +45,12 @@ function runsOf(content: DocInline[], visit: (threadId: string) => void): void {
 
 function blockRuns(block: DocBlock, visit: (threadId: string) => void): void {
   if (block.type === 'table') {
-    for (const row of block.rows) for (const cell of row.cells) runsOf(cell.content, visit);
+    for (const row of block.rows) {
+      for (const cell of row.cells) {
+        if (cell.blocks) cell.blocks.forEach((b) => blockRuns(b, visit));
+        else runsOf(cell.content, visit);
+      }
+    }
   } else if ('content' in block) {
     runsOf(block.content, visit);
   }

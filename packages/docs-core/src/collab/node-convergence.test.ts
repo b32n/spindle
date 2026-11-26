@@ -319,7 +319,27 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       content: [
         {
           type: 'table_row',
-          content: [{ type: 'table_cell', attrs: { colspan: 1, rowspan: 2, backgroundColor: '#112233' }, content: [p([t('cell')])] }],
+          content: [{ type: 'table_cell', attrs: { colspan: 1, rowspan: 2, backgroundColor: '#112233', textDirection: 'btLr' }, content: [p([t('cell')])] }],
+        },
+      ],
+    },
+    {
+      // several blocks, a list and a nested table in one cell
+      type: 'table',
+      content: [
+        {
+          type: 'table_row',
+          content: [
+            {
+              type: 'table_cell',
+              content: [
+                p([t('first')]),
+                { type: 'bullet_list', content: [{ type: 'list_item', attrs: { level: 0 }, content: [p([t('item')])] }] },
+                { type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [p([t('nested')])] }] }] },
+                p([]),
+              ],
+            },
+          ],
         },
       ],
     },

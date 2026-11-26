@@ -94,21 +94,14 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.tableStructure', () => {
-    it('counts nested tables and cells with several non-empty paragraphs', async () => {
+  describe('table structure', () => {
+    it('is no longer reported: nested tables and cells of several paragraphs are imported', async () => {
       const bytes = await docx(
         `<w:tbl><w:tr>` +
           `<w:tc>${p('one')}${p('two')}${p('')}</w:tc>` +
-          `<w:tc>${p('solo')}<w:tbl><w:tr><w:tc>${p('inner')}</w:tc></w:tr></w:tbl></w:tc>` +
+          `<w:tc>${p('solo')}<w:tbl><w:tr><w:tc>${p('inner')}</w:tc></w:tr></w:tbl>${p('')}</w:tc>` +
           `</w:tr></w:tbl>`
       );
-      expect(await item(bytes, 'docx.tableStructure')).toMatchObject({
-        count: 2,
-        where: ['multi-paragraph cells ×1', 'nested tables ×1'],
-      });
-    });
-    it('ignores empty trailing paragraphs in a cell', async () => {
-      const bytes = await docx(`<w:tbl><w:tr><w:tc>${p('one')}<w:p/><w:p/></w:tc></w:tr></w:tbl>`);
       expect(await item(bytes, 'docx.tableStructure')).toBeUndefined();
     });
   });
