@@ -9,6 +9,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
+import JSZip from 'jszip';
 import path from 'node:path';
 import { unverifiedClaims } from '../../../../scripts/fidelity-core/claims';
 import { CONSTRUCTS } from '../../../../scripts/pptx-fidelity/constructs';
@@ -38,9 +39,14 @@ const notAPackage = (claims: string[]) =>
 const count = (p: Awaited<ReturnType<typeof parts>>, id: string) =>
   CONSTRUCTS.find((c) => c.id === id)?.count(p);
 
+let kitchen: Awaited<ReturnType<typeof parts>>;
+beforeAll(async () => {
+  kitchen = await parts('kitchen-sink.pptx');
+});
+
 describe('PPTX corpus', () => {
   it('has the planned shape', () => {
-    expect(committed.length).toBeGreaterThanOrEqual(21);
+    expect(committed.length).toBeGreaterThanOrEqual(38);
     expect(runtime.map((f) => f.id)).toEqual(['edge-1000-slides']);
     for (const id of [
       'edge-truncated-zip',
@@ -65,6 +71,23 @@ describe('PPTX corpus', () => {
       'sizes-a4',
       'sizes-custom',
       'sizes-portrait',
+      'images',
+      'media',
+      'tables',
+      'groups-connectors',
+      'charts',
+      'smartart',
+      'wordart-ink-ole-equations',
+      'transitions-animations',
+      'notes',
+      'comments-legacy',
+      'comments-modern',
+      'hidden-sections',
+      'rtl-cjk',
+      'python-pptx-deck',
+      'libreoffice-deck',
+      'kitchen-sink',
+      'macro-enabled',
     ]) {
       expect(committed.map((f) => f.id)).toContain(id);
     }
@@ -167,11 +190,15 @@ describe('PPTX corpus', () => {
       const masterIds = [...pres.matchAll(/<p:sldMasterId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
       const shared = [...layoutIds, ...masterIds];
       expect(new Set(shared).size).toBe(shared.length);
-      // every slide shape id is unique within its slide
+      // every slide shape id is unique within its slide (an mc:Fallback repeats the id of its mc:Choice by design)
       for (const [name, xml] of Object.entries(p.xml).filter(([n]) =>
         /^ppt\/slides\/slide\d+\.xml$/.test(n)
       )) {
-        const ids = [...xml.matchAll(/<p:cNvPr\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+        const ids = [
+          ...xml
+            .replace(/<mc:Fallback>[\s\S]*?<\/mc:Fallback>/g, '')
+            .matchAll(/<p:cNvPr\b[^>]*\bid="(\d+)"/g),
+        ].map((m) => m[1]);
         expect({ name, unique: new Set(ids).size === ids.length }).toEqual({ name, unique: true });
       }
     }
@@ -203,6 +230,73 @@ describe('PPTX corpus', () => {
       );
       expect({ file, sizes }).toEqual({ file, sizes: [id] });
     }
+  });
+
+  const binary = async (file: string, name: string) => {
+    const zip = await JSZip.loadAsync(readFileSync(path.join(PPTX_FIXTURES_DIR, file)));
+    return (await zip.file(name)?.async('nodebuffer')) as Buffer;
+  };
+
+  it('keeps opaque payloads inert: the macro and OLE parts are readable text, the media are tiny stubs', async () => {
+    for (const [file, name] of [
+      ['macro-enabled.pptm', 'ppt/vbaProject.bin'],
+      ['wordart-ink-ole-equations.pptx', 'ppt/embeddings/oleObject1.bin'],
+    ] as const) {
+      const bytes = await binary(file, name);
+      expect(bytes.toString('utf8')).toContain('not a real object or macro');
+      expect(bytes.subarray(0, 4).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0]))).toBe(false);
+    }
+    expect((await binary('media.pptx', 'ppt/media/clip.mp4')).length).toBeLessThan(64);
+    expect((await binary('media.pptx', 'ppt/media/sound.wav')).length).toBeLessThan(256);
+    const pptm = await parts('macro-enabled.pptm');
+    expect(pptm.xml['[Content_Types].xml']).toContain(
+      'application/vnd.ms-powerpoint.presentation.macroEnabled.main+xml'
+    );
+    expect(pptm.xml['[Content_Types].xml']).toContain('application/vnd.ms-office.vbaProject');
+  });
+
+  it('records the real producer of the library-written decks and normalises what they embed', async () => {
+    for (const [id, app] of [
+      ['python-pptx-deck', /<Application>python-pptx<\/Application>/],
+      ['libreoffice-deck', /<Application>LibreOffice\//],
+    ] as const) {
+      const entry = committed.find((f) => f.id === id);
+      expect(entry?.source.version).toMatch(/\d+\.\d+/);
+      expect((await parts(entry?.filename as string)).xml['docProps/app.xml']).toMatch(app);
+    }
+    const zip = await JSZip.loadAsync(
+      readFileSync(path.join(PPTX_FIXTURES_DIR, 'python-pptx-deck.pptx'))
+    );
+    const names = Object.keys(zip.files).filter((n) => /^ppt\/embeddings\/.*\.xlsx$/.test(n));
+    expect(names).toHaveLength(1);
+    const inner = await JSZip.loadAsync(
+      await (zip.file(names[0]) as JSZip.JSZipObject).async('nodebuffer')
+    );
+    const core = await (inner.file('docProps/core.xml') as JSZip.JSZipObject).async('string');
+    expect(core).toContain('2026-01-15T09:00:00Z');
+    expect(core).not.toMatch(/<dcterms:(?:created|modified)\b[^>]*>(?!2026-01-15T09:00:00Z)/);
+  });
+
+  it('keeps the flow fixtures consistent: custom shows name existing slides, sections cover the slide ids', async () => {
+    const p = await parts('hidden-sections.pptx');
+    const pres = p.xml['ppt/presentation.xml'];
+    const rids = new Set(
+      relationshipTargets(
+        'ppt/_rels/presentation.xml.rels',
+        p.xml['ppt/_rels/presentation.xml.rels']
+      ).map((r) => r.id)
+    );
+    const shown = [...pres.matchAll(/<p:sld r:id="([^"]+)"\/>/g)].map((m) => m[1]);
+    expect(shown.length).toBeGreaterThan(0);
+    for (const id of shown) expect(rids.has(id)).toBe(true);
+    const listed = [...pres.matchAll(/<p:sldId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+    const sectioned = [...pres.matchAll(/<p14:sldId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+    expect(sectioned).toEqual(listed);
+  });
+
+  it('keeps the kitchen sink broad: at least 45 distinct constructs', async () => {
+    const found = CONSTRUCTS.filter((c) => c.count(kitchen) > 0);
+    expect(found.length).toBeGreaterThanOrEqual(45);
   });
 
   it('keeps the README coverage matrix in sync (PPTX_FIDELITY_UPDATE=1 rewrites it)', () => {

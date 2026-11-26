@@ -39,6 +39,17 @@ const masterTheme = (n: number, theme: number): Xml =>
     rel('rId1', 'theme', `../theme/theme${theme}.xml`)
   );
 const size = (attrs: string) => mk(pres(`<p:sldSz ${attrs}/>`));
+const chart = (body: string): Xml => ({
+  'ppt/charts/chart1.xml': `<c:chartSpace>${body}</c:chartSpace>`,
+});
+const notesPart = (body: string): Xml => ({
+  'ppt/notesSlides/notesSlide1.xml': `<p:notes>${body}</p:notes>`,
+});
+const twoSlides = (a: string, b: string): Xml => ({ ...slide(a, 1), ...slide(b, 2) });
+const cxn = (...blocks: string[]) =>
+  mk(slide(blocks.map((b) => `<p:cxnSp>${b}</p:cxnSp>`).join('')));
+const GROUP_XFRM = (ext: string, chExt: string) =>
+  `<p:grpSpPr><a:xfrm>${ext}${chExt}</a:xfrm></p:grpSpPr>`;
 const clrMap = (attrs: string, n: number) => master(`<p:clrMap ${attrs}/>`, n);
 
 /** One minimal package per construct, with the count the probe must return. */
@@ -276,6 +287,307 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
     2,
   ],
   ['shapes.textBox', mk(slide('<p:cNvSpPr txBox="1"/><p:cNvSpPr/><p:cNvSpPr txBox="0"/>')), 1],
+  [
+    'images.png',
+    names('ppt/media/a.png', 'ppt/media/b.PNG', 'ppt/media/c.png.bak', 'ppt/other/d.png'),
+    2,
+  ],
+  ['images.jpeg', names('ppt/media/a.jpg', 'ppt/media/b.jpeg', 'ppt/media/c.jpgx'), 2],
+  ['images.gif', names('ppt/media/a.gif'), 1],
+  ['images.svg', names('ppt/media/a.svg', 'ppt/media/a.png'), 1],
+  ['images.emf', names('ppt/media/a.emf'), 1],
+  ['images.wmf', names('ppt/media/a.wmf'), 1],
+  [
+    'images.crop',
+    mk(slide('<a:srcRect l="25000" t="0"/><a:srcRect/><a:srcRect b="-5000"/><a:srcRect r="0"/>')),
+    2,
+  ],
+  [
+    'images.transform',
+    mk(
+      slide(
+        '<p:pic><a:xfrm rot="5400000"/></p:pic><p:pic><a:xfrm flipH="1"/></p:pic><p:pic><a:xfrm rot="0"/></p:pic><a:xfrm rot="5400000"/>'
+      )
+    ),
+    2,
+  ],
+  ['images.linked', mk(slide('<a:blip r:link="rId1"/><a:blip r:embed="rId2"/>')), 1],
+  [
+    'images.altText',
+    mk(
+      slide(
+        '<p:pic><p:cNvPr id="1" descr="x"/></p:pic><p:pic><p:cNvPr id="2" descr=""/></p:pic><p:pic><p:cNvPr id="3"/></p:pic><p:sp><p:cNvPr descr="y"/></p:sp>'
+      )
+    ),
+    1,
+  ],
+  [
+    'images.recolor',
+    mk(
+      slide(
+        '<a:duotone/><a:grayscl/><a:lum bright="1"/><a:lumMod val="1"/><a:clrChange/><a:biLevel/>'
+      )
+    ),
+    5,
+  ],
+  ['tables.basic', mk(slide('<a:tbl><a:tblPr/></a:tbl>')), 1],
+  [
+    'tables.merge',
+    mk(
+      slide(
+        '<a:tc gridSpan="2"/><a:tc rowSpan="3"/><a:tc hMerge="1"/><a:tc vMerge="true"/><a:tc gridSpan="1"/><a:tc/>'
+      )
+    ),
+    4,
+  ],
+  [
+    'tables.banding',
+    mk(slide('<a:tblPr bandRow="1"/><a:tblPr firstRow="1" bandCol="true"/><a:tblPr bandRow="0"/>')),
+    2,
+  ],
+  [
+    'tables.headerRow',
+    mk(slide('<a:tblPr firstRow="1"/><a:tblPr lastCol="1"/><a:tblPr bandRow="1"/>')),
+    2,
+  ],
+  ['tables.styleRef', mk(slide('<a:tableStyleId>{5C22544A}</a:tableStyleId>')), 1],
+  [
+    'tables.customStyles',
+    mk({
+      'ppt/tableStyles.xml':
+        '<a:tblStyleLst def="x"><a:tblStyle styleId="1"/><a:tblStyle styleId="2"/></a:tblStyleLst>',
+    }),
+    2,
+  ],
+  [
+    'tables.borders',
+    mk(slide('<a:lnL/><a:lnR/><a:lnT/><a:lnB/><a:lnTlToBr/><a:lnBlToTr/><a:ln/>')),
+    6,
+  ],
+  [
+    'tables.cellFill',
+    mk(
+      slide(
+        '<a:tcPr anchor="ctr"><a:solidFill/></a:tcPr><a:tcPr><a:lnL/></a:tcPr><a:tcPr/><a:tcPr><a:noFill/></a:tcPr>'
+      )
+    ),
+    1,
+  ],
+  ['groups.basic', mk(slide('<p:grpSp><p:grpSpPr/></p:grpSp><p:grpSp>')), 2],
+  [
+    'groups.nested',
+    mk(
+      twoSlides('<p:grpSp><p:grpSp></p:grpSp></p:grpSp>', '<p:grpSp></p:grpSp><p:grpSp></p:grpSp>')
+    ),
+    1,
+  ],
+  [
+    'groups.scaled',
+    mk(
+      slide(
+        [
+          GROUP_XFRM('<a:ext cx="0" cy="0"/>', '<a:chExt cx="0" cy="0"/>'),
+          GROUP_XFRM('<a:ext cx="10" cy="10"/>', '<a:chExt cx="20" cy="20"/>'),
+          GROUP_XFRM('<a:ext cx="10" cy="10"/>', '<a:chExt cx="10" cy="20"/>'),
+          GROUP_XFRM('<a:ext cx="10" cy="10"/>', ''),
+          '<p:grpSpPr/>',
+          GROUP_XFRM('', '<a:chExt cx="1" cy="1"/>'),
+        ].join('')
+      )
+    ),
+    2,
+  ],
+  [
+    'connectors.straight',
+    cxn(
+      '<a:prstGeom prst="straightConnector1"/>',
+      '<a:prstGeom prst="line"/>',
+      '<a:prstGeom prst="bentConnector3"/>'
+    ),
+    2,
+  ],
+  [
+    'connectors.elbow',
+    cxn(
+      '<a:prstGeom prst="bentConnector3"/>',
+      '<a:prstGeom prst="bentConnector2"/>',
+      '<a:prstGeom prst="curvedConnector3"/>'
+    ),
+    2,
+  ],
+  [
+    'connectors.curved',
+    cxn(
+      '<a:prstGeom prst="curvedConnector3"/>',
+      '<a:prstGeom prst="curvedConnector5"/>',
+      '<a:prstGeom prst="bentConnector3"/>'
+    ),
+    2,
+  ],
+  [
+    'connectors.connected',
+    cxn('<a:stCxn id="1" idx="0"/>', '<a:endCxn id="2" idx="1"/>', '<a:prstGeom prst="line"/>'),
+    2,
+  ],
+  ['charts.bar', mk(chart('<c:barChart><c:ser/></c:barChart><c:barChart/>')), 2],
+  ['charts.line', mk(chart('<c:lineChart/>')), 1],
+  ['charts.pie', mk(chart('<c:pieChart/>')), 1],
+  ['charts.scatter', mk(chart('<c:scatterChart/>')), 1],
+  ['charts.cache', mk(chart('<c:numCache><c:pt/></c:numCache><c:numRef/>')), 1],
+  [
+    'charts.embeddedWorkbook',
+    mk({
+      ...rels(
+        'ppt/charts/_rels/chart1.xml.rels',
+        rel('rId1', 'package', '../embeddings/a.xlsx'),
+        rel('rId2', 'themeOverride', '../theme/themeOverride1.xml')
+      ),
+      ...rels('ppt/slides/_rels/slide1.xml.rels', rel('rId1', 'package', '../embeddings/b.xlsx')),
+    }),
+    1,
+  ],
+  ['smartart.diagram', mk(slide('<dgm:relIds r:dm="rId1" r:lo="rId2"/>')), 1],
+  ['smartart.drawing', names('ppt/diagrams/drawing1.xml', 'ppt/diagrams/data1.xml'), 1],
+  ['media.audio', mk(slide('<a:audioFile r:link="rId1"/>')), 1],
+  ['media.video', mk(slide('<a:videoFile r:link="rId1"/>')), 1],
+  [
+    'transitions.basic',
+    mk(slide('<p:transition spd="med"/><mc:Choice Requires="p14"><p:transition/></mc:Choice>')),
+    2,
+  ],
+  [
+    'transitions.timed',
+    mk(slide('<p:transition advTm="5000"/><p:transition advClick="0"/><p:transition spd="med"/>')),
+    2,
+  ],
+  [
+    'transitions.extended',
+    mk(
+      slide(
+        '<mc:Choice xmlns:p14="x" Requires="p14"><p:transition/></mc:Choice><mc:Choice Requires="p14" xmlns:p14="x">\n<p:transition spd="slow"/></mc:Choice><mc:Choice Requires="a14"><p:transition/></mc:Choice>'
+      )
+    ),
+    2,
+  ],
+  ['animations.timing', mk(slide('<p:timing><p:tnLst/></p:timing>')), 1],
+  [
+    'animations.entrance',
+    mk(slide('<p:cTn id="1" presetClass="entr"/><p:cTn presetClass="exit"/>')),
+    1,
+  ],
+  [
+    'animations.exit',
+    mk(slide('<p:cTn id="1" presetClass="entr"/><p:cTn presetClass="exit"/>')),
+    1,
+  ],
+  [
+    'animations.emphasis',
+    mk(slide('<p:cTn presetClass="emph" id="2"/><p:cTn presetClass="path"/>')),
+    1,
+  ],
+  ['animations.motionPath', mk(slide('<p:animMotion origin="layout"/>')), 1],
+  [
+    'animations.build',
+    mk(
+      slide(
+        '<p:bldP spid="3" build="p"/><p:bldP spid="4" build="whole"/><p:bldP spid="5" grpId="0"/>'
+      )
+    ),
+    1,
+  ],
+  [
+    'notes.slides',
+    names(
+      'ppt/notesSlides/notesSlide1.xml',
+      'ppt/notesSlides/_rels/notesSlide1.xml.rels',
+      'ppt/notesSlides/notesSlide2.xml'
+    ),
+    2,
+  ],
+  ['notes.master', names('ppt/notesMasters/notesMaster1.xml'), 1],
+  [
+    'notes.rich',
+    mk(notesPart('<a:rPr b="1"/><a:rPr lang="x"/><a:buChar char="x"/><a:buAutoNum type="a"/>')),
+    3,
+  ],
+  [
+    'comments.legacy',
+    mk({
+      'ppt/comments/comment1.xml': '<p:cmLst><p:cm authorId="0"/><p:cm authorId="1"/></p:cmLst>',
+    }),
+    2,
+  ],
+  [
+    'comments.modern',
+    mk({
+      'ppt/comments/modernComment_1.xml':
+        '<p188:cmLst><p188:cm id="1"><p188:replyLst/></p188:cm></p188:cmLst>',
+    }),
+    1,
+  ],
+  [
+    'comments.replies',
+    mk({
+      'ppt/comments/modernComment_1.xml':
+        '<p188:cm><p188:reply id="1"/><p188:reply id="2"/><p188:replyLst/></p188:cm>',
+    }),
+    2,
+  ],
+  [
+    'comments.authors',
+    names('ppt/commentAuthors.xml', 'ppt/authors.xml', 'ppt/other/authors.xml'),
+    2,
+  ],
+  [
+    'slides.hidden',
+    mk({
+      'ppt/slides/slide1.xml': '<p:sld show="0"/>',
+      'ppt/slides/slide2.xml': '<p:sld showMasterSp="0" show="false"/>',
+      'ppt/slides/slide3.xml': '<p:sld show="1"/>',
+      'ppt/slides/slide4.xml': '<p:sld/>',
+    }),
+    2,
+  ],
+  ['sections.list', mk(pres('<p14:section name="a"/><p14:section name="b"/><p14:sectionLst/>')), 2],
+  [
+    'sections.customShows',
+    mk(pres('<p:custShowLst><p:custShow name="a"/><p:custShow name="b"/></p:custShowLst>')),
+    2,
+  ],
+  ['text.rtl', mk(slide('<a:pPr rtl="1"/><a:pPr rtl="0"/><a:pPr algn="r" rtl="true"/>')), 2],
+  ['text.cjk', mk(slide('<a:t>日本語 abc</a:t>')), 3],
+  [
+    'text.lang',
+    mk(slide('<a:rPr lang="he-IL"/><a:rPr lang="en-US"/><a:rPr dirty="0" lang="ja-JP"/><a:rPr/>')),
+    2,
+  ],
+  [
+    'objects.wordArt',
+    mk(slide('<a:prstTxWarp prst="textArchUp"/><a:prstTxWarp prst="textNoShape"/>')),
+    1,
+  ],
+  ['objects.ink', names('ppt/ink/ink1.xml', 'ppt/ink/_rels/ink1.xml.rels'), 1],
+  ['objects.ole', mk(slide('<p:oleObj name="Worksheet"/>')), 1],
+  ['objects.equations', mk(slide('<a14:m><m:oMathPara/></a14:m>')), 1],
+  [
+    'objects.actions',
+    mk(
+      slide(
+        '<a:hlinkClick r:id="" action="ppaction://hlinkshowjump?jump=nextslide"/><a:hlinkClick r:id="rId1"/><a:hlinkClick action="ppaction://macro?name=M"/>'
+      )
+    ),
+    2,
+  ],
+  [
+    'objects.macroActions',
+    mk(
+      slide(
+        '<a:hlinkClick action="ppaction://macro?name=M"/><a:hlinkClick action="ppaction://hlinksldjump"/>'
+      )
+    ),
+    1,
+  ],
+  ['macros.vba', names('ppt/vbaProject.bin'), 1],
   ['sizes.4x3', size('cx="9144000" cy="6858000" type="screen4x3"'), 1],
   ['sizes.16x9', size('type="x" cy="6858000" cx="12192000"'), 1],
   ['sizes.a4', size('cx="10692000" cy="7560000" type="A4"'), 1],
@@ -383,6 +695,30 @@ describe('PPTX construct probes', () => {
     const none = (id: string, p: OoxmlParts) =>
       expect({ id, n: findConstruct(id)?.count(p) }).toEqual({ id, n: 0 });
     none('slides.multiple', mk(slide('')));
+    none('images.crop', mk(slide('<a:srcRect/><a:srcRect l="0" t="0"/>')));
+    none('images.recolor', mk(slide('<a:lumMod val="1"/><a:lumOff val="1"/>')));
+    none(
+      'tables.cellFill',
+      mk(slide('<a:tcPr/><a:tcPr><a:lnL/></a:tcPr><a:tcPr><a:noFill/></a:tcPr>'))
+    );
+    none('tables.customStyles', mk({ 'ppt/tableStyles.xml': '<a:tblStyleLst def="x"/>' }));
+    none('groups.nested', mk(slide('<p:grpSp><p:grpSpPr/></p:grpSp>')));
+    none('connectors.connected', cxn('<a:prstGeom prst="line"/>'));
+    none(
+      'charts.embeddedWorkbook',
+      mk(
+        rels(
+          'ppt/charts/_rels/chart1.xml.rels',
+          rel('rId1', 'themeOverride', '../theme/themeOverride1.xml')
+        )
+      )
+    );
+    none('transitions.extended', mk(slide('<mc:Choice Requires="p14"><p:fade/></mc:Choice>')));
+    none('notes.rich', mk(notesPart('<a:rPr lang="x" b="0" u="none"/>')));
+    none('slides.hidden', mk(slide('<p:sldId show="0"/>')));
+    none('text.cjk', mk(slide('<a:t>ASCII only</a:t>')));
+    none('animations.build', mk(slide('<p:bldP spid="4" build="whole"/>')));
+    none('objects.actions', mk(slide('<a:hlinkClick r:id="rId1"/>')));
     none('masters.multiple', mk(master('')));
     none('masters.shapes', mk(master('<p:ph type="title"/>')));
     none('theme.multiple', mk({ ...masterTheme(1, 1), ...masterTheme(2, 1) }));
