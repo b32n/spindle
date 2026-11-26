@@ -46,6 +46,7 @@ import { TableInteractionManager, createTableInteractionManager } from './table-
 import { ImageInteractionManager, createImageInteractionManager } from './image-interactions';
 import { HeaderFooterEditor } from '../components/HeaderFooterEditor';
 import { NoteEditor } from '../components/NoteEditor';
+import { authorColorsKey as authorColorsKeyOf } from './collab-authors';
 
 // ============================================================================
 // Types
@@ -920,7 +921,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     runTableOfContentsRef.current = runTableOfContents;
 
     // The colours as a string, so a new map with the same colours does not lay the document out again.
-    const authorColorsKey = authorColors ? JSON.stringify([...authorColors.entries()].sort()) : '';
+    const authorColorsKey = authorColorsKeyOf(authorColors);
 
     // Perform layout calculation
     const performLayout = useCallback((doc: PmNode, view: EditorView) => {

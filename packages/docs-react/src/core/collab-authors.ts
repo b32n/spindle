@@ -10,8 +10,8 @@ type Presence = Parameters<typeof collabAuthorColors>[0];
 
 /** The author of a suggestion: the name the user joined the room under, else the current user's name. */
 export function suggestionAuthor(handle: { identity: { displayName?: string } } | null | undefined, fallback: string): string {
-  // A blank display name would write suggestions with no author.
-  return handle?.identity.displayName?.trim() || fallback;
+  // A blank display name would write suggestions with no author (`w:author=""`, which the next blank author would share).
+  return handle?.identity.displayName?.trim() || fallback.trim() || 'Unknown';
 }
 
 /**
@@ -27,6 +27,11 @@ export function authorsWithColors<T extends { name: string; color: string }>(cou
 /** True when two maps of author colours are the same. */
 export function sameAuthorColors(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, string>): boolean {
   return a.size === b.size && [...b].every(([name, color]) => a.get(name) === color);
+}
+
+/** The colours as one string that does not depend on the order the map was built in, so a new map with the same colours is the same key. */
+export function authorColorsKey(colors: ReadonlyMap<string, string> | undefined): string {
+  return colors ? JSON.stringify([...colors.entries()].sort()) : '';
 }
 
 /**

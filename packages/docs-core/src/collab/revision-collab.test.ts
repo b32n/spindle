@@ -17,7 +17,7 @@ import type { Block, DocumentData } from '../types';
 
 /**
  * A model of the editor, not the real y-sync binding: every edit is pushed with a fresh `updateYFragment` mapping, so item
- * identity under concurrent edits can differ from the browser's. The E2E scenarios D-COL-10..13 (two or three real
+ * identity under concurrent edits can differ from the browser's. The E2E scenarios D-COL-10..14 (two or three real
  * browser contexts) cover the real binding.
  */
 class Client {
@@ -207,6 +207,23 @@ describe('settling at the same time', () => {
     same([a, b, c, d]);
     expect(a.text()).toEqual(['one two three']);
     expect(changesOf(a)).toEqual([]);
+  });
+
+  it('one accepting and the other rejecting the same deletion leave one state that everybody shares, whichever client does which', () => {
+    // Accepting a deletion removes the text, rejecting it removes the mark: the two do not cancel, so the winner depends on
+    // the order of the edits. It is not claimed here (only that all clients agree, with the text kept or removed whole).
+    for (const [accepting, rejecting] of [[2, 3], [3, 2]]) {
+      const clients = room(['Ada', 'Bo', 'Cy', 'Di'], [para('one two three')]);
+      clients[0].suggest((tr) => tr.delete(5, 8)); // Ada: "two"
+      sync(...clients);
+      clients[accepting].review('accept');
+      clients[rejecting].review('reject');
+      sync(...clients);
+      same(clients);
+      expect(['one two three', 'one  three']).toContain(clients[0].text()[0]);
+      // Nothing of the change is left behind, whichever way it went.
+      expect(changesOf(clients[0])).toEqual([]);
+    }
   });
 
   it('settling a change while its author types next to it converges', () => {

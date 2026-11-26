@@ -1,6 +1,6 @@
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { authorsWithColors, sameAuthorColors, suggestionAuthor, watchAuthorColors } from './collab-authors';
+import { authorColorsKey, authorsWithColors, sameAuthorColors, suggestionAuthor, watchAuthorColors } from './collab-authors';
 import { assignAuthorColors } from '@b32nio/spindle-docs-core';
 
 describe('suggestionAuthor', () => {
@@ -13,6 +13,23 @@ describe('suggestionAuthor', () => {
     expect(suggestionAuthor({ identity: { displayName: '' } } as never, 'Alice')).toBe('Alice');
     expect(suggestionAuthor({ identity: { displayName: '   ' } } as never, 'Alice')).toBe('Alice');
     expect(suggestionAuthor({ identity: { displayName: ' Ada ' } } as never, 'Alice')).toBe('Ada');
+  });
+});
+
+describe('authorColorsKey', () => {
+  it('ignores the order the map was built in', () => {
+    expect(authorColorsKey(new Map([['Ada', '#111111'], ['Bo', '#222222']]))).toBe(authorColorsKey(new Map([['Bo', '#222222'], ['Ada', '#111111']])));
+  });
+
+  it('differs when a colour or a name differs', () => {
+    const base = authorColorsKey(new Map([['Ada', '#111111']]));
+    expect(authorColorsKey(new Map([['Ada', '#111112']]))).not.toBe(base);
+    expect(authorColorsKey(new Map([['Ade', '#111111']]))).not.toBe(base);
+    expect(authorColorsKey(new Map([['Ada', '#111111'], ['Bo', '#222222']]))).not.toBe(base);
+  });
+
+  it('is empty for no map', () => {
+    expect(authorColorsKey(undefined)).toBe('');
   });
 });
 

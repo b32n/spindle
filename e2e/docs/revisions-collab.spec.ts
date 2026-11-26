@@ -223,6 +223,9 @@ test.describe('docs: tracked changes between collaborators', () => {
   test('D-COL-14 an author’s changes are drawn in their cursor colour while they are in the room, and in the page’s own colour once they have left', async ({
     browser,
   }, info) => {
+    // Bob's cursor state leaves the room's awareness after y-protocols' outdated timeout (30 s) once his page is closed, so the test
+    // waits about that long: it is slow by nature, not by accident.
+    test.slow();
     test.setTimeout(100_000);
     const room = roomName('docs', info.testId);
     const alice = await peer(browser, room, 'Alice', '#d93025');
