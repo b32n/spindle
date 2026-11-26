@@ -59,6 +59,18 @@ jobs:
           path: xlsx-fidelity-report.json
           if-no-files-found: ignore
           retention-days: 14
+      # PPTX fidelity corpus against the built packages (goldens in fixtures/pptx/goldens): same contract as the
+      # XLSX step above. No PPTX importer exists yet, so the model and round-trip goldens record "no importer".
+      - name: PPTX fidelity corpus
+        run: npm run slides:pptx-fidelity -- --report md --report-out "$GITHUB_STEP_SUMMARY" --report json --report-out pptx-fidelity-report.json
+      - name: Upload PPTX fidelity report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pptx-fidelity-report-node${{ matrix.node }}
+          path: pptx-fidelity-report.json
+          if-no-files-found: ignore
+          retention-days: 14
       - run: npm run lint
       # Library source must not fetch anything or hard-code third-party hosts (docs/testing: privacy).
       - run: npm run check:network

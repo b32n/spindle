@@ -1,0 +1,29 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported; actions are never run, macros included",
+      "id": "pptx.actions",
+      "label": "action hyperlink(s) (jump to slide, run macro, open file)",
+      "where": [
+        "macro"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: macros are never run or kept (and no PPTX importer exists yet)",
+      "id": "pptx.macros",
+      "label": "macro project"
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1"
+      ]
+    }
+  ]
+}

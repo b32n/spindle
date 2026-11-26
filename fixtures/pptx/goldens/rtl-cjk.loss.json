@@ -1,0 +1,58 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today); text in these fonts will show in a substitute unless the host provides them",
+      "id": "pptx.fonts.unavailable",
+      "label": "font(s) the editor may not have",
+      "where": [
+        "MS Gothic",
+        "Malgun Gothic",
+        "PMingLiU",
+        "SimSun"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 9,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.lang",
+      "label": "run(s) tagged with a language other than en-US",
+      "where": [
+        "he-IL",
+        "ar-SA",
+        "zh-CN",
+        "ja-JP",
+        "ko-KR"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.rtl",
+      "label": "right-to-left paragraph(s)",
+      "where": [
+        "Slide 1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.vertical",
+      "label": "text box(es) or cell(s) with vertical text",
+      "where": [
+        "Slide 2"
+      ]
+    }
+  ]
+}

@@ -18,7 +18,10 @@ Not in the current scope; verified absent in code.
 - [ ] **PPTX import / export** — the schema deliberately keeps `layoutRef`,
       placeholder `{type, idx}`, symbolic theme colors, and flat text bodies so
       this stays honest, but no reader/writer exists yet. A corpus of test decks with a
-      construct manifest (`fixtures/pptx/`) now defines what the importer has to cover.
+      construct manifest (`fixtures/pptx/`) now defines what the importer has to cover. A loss detector
+      (`detectPptxLoss` in `@b32nio/spindle-io/pptx`, loss ids in `documentation/import-loss.md`) and a golden runner
+      (`npm run slides:pptx-fidelity`) already report what every corpus deck holds; both say "not imported" until the
+      importer lands. Nothing opens a `.pptx` yet.
 - [ ] **Charts** as a first-class element type (bar / line / pie, …). No chart
       element or renderer exists.
 - [ ] **Video / audio** elements — absent from the `SlideElement` union.

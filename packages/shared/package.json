@@ -39,6 +39,11 @@
       "import": "./dist/export/docx/index.esm.js",
       "require": "./dist/export/docx/index.js",
       "types": "./dist/export/docx/index.d.ts"
+    },
+    "./export/pptx": {
+      "import": "./dist/export/pptx/index.esm.js",
+      "require": "./dist/export/pptx/index.js",
+      "types": "./dist/export/pptx/index.d.ts"
     }
   },
   "files": [

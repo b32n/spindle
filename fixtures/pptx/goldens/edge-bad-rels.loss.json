@@ -1,0 +1,24 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported; links are stored as written when the importer lands and never fetched",
+      "id": "pptx.externalLinks",
+      "label": "external link target(s) (web pages, files, linked media)",
+      "where": [
+        "https"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2"
+      ]
+    }
+  ]
+}

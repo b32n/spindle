@@ -9,6 +9,7 @@ import { defineConfig } from 'rollup';
 //   ./export/csv   → CSV read/write (no dependencies).
 //   ./export/xlsx  → types + deprecated async shims that lazy-load the optional
 //   ./export/docx    @b32nio/spindle-io peer, where the implementations moved.
+//   ./export/pptx  → types only (no PPTX reader/writer exists yet).
 
 const tsMain = typescript({
   tsconfig: './tsconfig.json',
@@ -39,6 +40,13 @@ const tsExportXlsx = typescript({
   outputToFilesystem: true,
 });
 const tsExportDocx = typescript({
+  tsconfig: './tsconfig.json',
+  declaration: true,
+  declarationDir: './dist',
+  rootDir: './src',
+  outputToFilesystem: true,
+});
+const tsExportPptx = typescript({
   tsconfig: './tsconfig.json',
   declaration: true,
   declarationDir: './dist',
@@ -92,5 +100,14 @@ export default defineConfig([
     ],
     external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx'],
     plugins: [tsExportDocx],
+  },
+  {
+    input: 'src/export/pptx/index.ts',
+    output: [
+      { file: 'dist/export/pptx/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
+      { file: 'dist/export/pptx/index.esm.js', format: 'esm', sourcemap: true },
+    ],
+    external: [],
+    plugins: [tsExportPptx],
   },
 ]);

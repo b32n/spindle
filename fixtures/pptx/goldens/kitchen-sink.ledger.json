@@ -1,0 +1,294 @@
+{
+  "importError": true,
+  "package": "zip",
+  "parts": [
+    {
+      "name": "[Content_Types].xml",
+      "rule": "package.contentTypes",
+      "status": "unaccounted"
+    },
+    {
+      "name": "_rels/.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/app.xml",
+      "rule": "docProps",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/core.xml",
+      "rule": "docProps",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/_rels/presentation.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/charts/_rels/chart1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "loss": [
+        "pptx.charts"
+      ],
+      "name": "ppt/charts/chart1.xml",
+      "rule": "chart",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "pptx.comments"
+      ],
+      "name": "ppt/commentAuthors.xml",
+      "rule": "comments",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "pptx.comments"
+      ],
+      "name": "ppt/comments/comment1.xml",
+      "rule": "comments",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "pptx.charts"
+      ],
+      "name": "ppt/embeddings/Microsoft_Excel_Sheet1.xlsx",
+      "rule": "embedding",
+      "status": "dropped"
+    },
+    {
+      "name": "ppt/handoutMasters/_rels/handoutMaster1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "loss": [
+        "pptx.masters.handoutMaster"
+      ],
+      "name": "ppt/handoutMasters/handoutMaster1.xml",
+      "rule": "handoutMaster",
+      "status": "dropped"
+    },
+    {
+      "name": "ppt/media/picture.png",
+      "rule": "picture",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/notesMasters/_rels/notesMaster1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "loss": [
+        "pptx.masters.notesMaster"
+      ],
+      "name": "ppt/notesMasters/notesMaster1.xml",
+      "rule": "notesMaster",
+      "status": "dropped"
+    },
+    {
+      "name": "ppt/notesSlides/_rels/notesSlide1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "loss": [
+        "pptx.notes"
+      ],
+      "name": "ppt/notesSlides/notesSlide1.xml",
+      "rule": "notesSlide",
+      "status": "dropped"
+    },
+    {
+      "name": "ppt/presProps.xml",
+      "rule": "presProps",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/presentation.xml",
+      "rule": "presentation",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/_rels/slideLayout1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/_rels/slideLayout2.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/_rels/slideLayout3.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/_rels/slideLayout4.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/_rels/slideLayout5.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/slideLayout1.xml",
+      "rule": "layout",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/slideLayout2.xml",
+      "rule": "layout",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/slideLayout3.xml",
+      "rule": "layout",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/slideLayout4.xml",
+      "rule": "layout",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideLayouts/slideLayout5.xml",
+      "rule": "layout",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideMasters/_rels/slideMaster1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slideMasters/slideMaster1.xml",
+      "rule": "master",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide2.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide3.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide4.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide5.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide6.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide7.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/_rels/slide8.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide1.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide2.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide3.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide4.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide5.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide6.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide7.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/slides/slide8.xml",
+      "rule": "slide",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/tableStyles.xml",
+      "rule": "tableStyles",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/theme/theme1.xml",
+      "rule": "theme",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/theme/theme2.xml",
+      "rule": "theme",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/theme/theme3.xml",
+      "rule": "theme",
+      "status": "unaccounted"
+    },
+    {
+      "name": "ppt/viewProps.xml",
+      "rule": "presProps",
+      "status": "unaccounted"
+    }
+  ],
+  "totals": {
+    "dropped": 7,
+    "mapped": 0,
+    "opaque": 0,
+    "total": 52,
+    "unaccounted": 45
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.images.crop",
+      "label": "cropped picture(s)",
+      "where": [
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.images.linked",
+      "label": "linked (not embedded) picture(s)",
+      "where": [
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.images.recolor",
+      "label": "recoloured picture(s)",
+      "where": [
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.images.svg",
+      "label": "SVG picture(s)",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.images.unsupportedFormat",
+      "label": "picture(s) in a format browsers cannot show (EMF, WMF)",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4"
+      ]
+    }
+  ]
+}

@@ -439,6 +439,25 @@ lockstep.
   its LibreOffice conversion (tool and version recorded, normalised so that they rebuild byte for byte), a
   kitchen-sink deck and an `.pptm` with an inert placeholder macro part. The construct registry grows from 83 to
   148 probes.
+- **PPTX loss detector and fidelity runner (`@b32nio/spindle-io/pptx`, `scripts/pptx-fidelity`).** New subpath
+  `@b32nio/spindle-io/pptx` (also re-exported from the package root) with `detectPptxLoss(bytes, { detail })`: an
+  XML-based, never-throwing scan of a `.pptx` with the same safety measures as the XLSX detector (no entity
+  expansion, DOCTYPE cut out, nesting capped, per-part and total limits counted on the bytes that actually inflate,
+  a limit on package entries) that returns 16 summary ids (`pptx.charts`, `smartArt`, `media`, `embeddedObjects`,
+  `transitions`, `animations`, `comments`, `macros`, `hiddenSlides`, `notes`, `fonts.unavailable`,
+  `shapes.unsupportedGeometry`, `images.unsupportedFormat`, `encrypted`, `legacyBinary`, `sizeLimit`) and 43 finer
+  ones at `detail: 'full'` (masters, theme, text, shapes, images, tables, sections, zoom, ink, equations,
+  signatures, links, actions, unaccounted parts; see `documentation/import-loss.md`). Counts are of objects, not
+  parts. **There is no PPTX importer yet**: every effect says `lost: not imported` and that no `.pptx` can be opened
+  today. `@b32nio/spindle-shared` gains the `'pptx'` member of `ImportLossFormat` (additive at runtime; a host with an
+  exhaustive `switch` over it needs a new case) and a `./export/pptx` subpath with the `DetectPptxLossOptions`
+  type. `npm run slides:pptx-fidelity[:update]` runs the 39 committed decks against the built package and records
+  four goldens each in `fixtures/pptx/goldens/` (`model` and `roundtrip` record `importError: "no importer"` and a
+  skipped round trip until the importer lands; `loss` and `ledger` are real, today 1,113 of 1,156 parts
+  unaccounted because nothing is mapped), `npm run fidelity` now runs DOCX, XLSX and PPTX, and CI gains a "PPTX
+  fidelity corpus" step in the `packages` job (job summary plus a `pptx-fidelity-report-node<version>` artifact).
+  The Jest suite in `packages/slides-core/src/fidelity/` also checks the detector against the manifest claims. No
+  runtime behaviour of any editor changes.
 - **Formula engine: whole-column and whole-row references, `%`, array constants, 3D references, range operators
   over computed references, union, intersection, `@`, `#` and `#NULL!` (`@b32nio/spindle-sheets-core`).** The
   formula parser is now a tokenizer plus a precedence-climbing parser (`formula-parser/tokenizer.ts`,

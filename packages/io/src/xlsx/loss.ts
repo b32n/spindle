@@ -95,8 +95,11 @@ interface Stream {
   resume(): Stream;
 }
 
-/** Inflate a zip entry, giving up (`'limit'`) as soon as more than `limit` bytes have come out. `undefined` when it cannot be read. */
-function inflate(file: JSZip.JSZipObject, limit: number): Promise<Uint8Array | 'limit' | undefined> {
+/**
+ * Inflate a zip entry, giving up (`'limit'`) as soon as more than `limit` bytes have come out. `value` is `undefined` when it
+ * cannot be read; `used` is how many bytes were inflated either way, so the caller can charge them to the total budget.
+ */
+function inflate(file: JSZip.JSZipObject, limit: number): Promise<{ value: Uint8Array | 'limit' | undefined; used: number }> {
   return new Promise((resolve) => {
     const chunks: Uint8Array[] = [];
     let total = 0;
@@ -104,7 +107,7 @@ function inflate(file: JSZip.JSZipObject, limit: number): Promise<Uint8Array | '
     const finish = (value: Uint8Array | 'limit' | undefined) => {
       if (done) return;
       done = true;
-      resolve(value);
+      resolve({ value, used: total });
     };
     const stream = (file as unknown as { internalStream(type: 'uint8array'): Stream }).internalStream('uint8array');
     stream
@@ -152,10 +155,11 @@ class Package {
       this.skipped.push(name);
       return undefined;
     }
-    const bytes = await inflate(file, limit);
+    const { value: bytes, used } = await inflate(file, limit);
+    // charge every inflated byte, also those of a part that hit the limit: forged sizes on many parts must exhaust the budget
+    this.read += used;
     if (bytes === 'limit') this.skipped.push(name);
     if (typeof bytes === 'string' || bytes === undefined) return undefined;
-    this.read += bytes.length;
     return new TextDecoder().decode(bytes);
   }
 

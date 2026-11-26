@@ -1,0 +1,11 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: cannot be opened; remove the password and save the file again",
+      "id": "pptx.encrypted",
+      "label": "password-protected presentation (encrypted package)"
+    }
+  ]
+}

@@ -1146,6 +1146,43 @@ describe('package level', () => {
     }
   });
 
+  it('charges the bytes of parts that hit the limit to the total budget, so forged sizes on many sheets stop the scan', async () => {
+    const saved = { ...LIMITS };
+    LIMITS.partBytes = 50_000;
+    LIMITS.totalBytes = 160_000;
+    try {
+      const names = Array.from({ length: 12 }, (_, i) => `S${i + 1}`);
+      const raw = `<worksheet ${MAIN}><!--${' '.repeat(2_000_000)}--></worksheet>`;
+      const bytes = await build({ sheets: names.map((name) => ({ name, raw })) });
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      for (let i = 0; i + 30 < bytes.length; i++) {
+        const sig = view.getUint32(i, true);
+        if (sig === 0x02014b50 && view.getUint32(i + 24, true) > 1_000_000) view.setUint32(i + 24, 1000, true);
+        if (sig === 0x04034b50 && view.getUint32(i + 22, true) > 1_000_000) view.setUint32(i + 22, 1000, true);
+      }
+      const proto = Object.getPrototypeOf(await JSZip.loadAsync(bytes).then((z) => z.file('xl/workbook.xml')));
+      const real = proto.internalStream;
+      let inflated = 0;
+      proto.internalStream = function (this: unknown, ...args: unknown[]) {
+        inflated++;
+        return real.apply(this, args);
+      };
+      let report;
+      try {
+        report = await full(bytes);
+      } finally {
+        proto.internalStream = real;
+      }
+      // the sheets after the budget is spent are refused on their declared size, without being inflated
+      expect(inflated).toBeLessThan(8);
+      // without the charge every one of the 12 sheets inflates up to the part limit; with it the later ones are refused
+      // as soon as the budget is spent, and every skipped sheet is named
+      expect(item(report, 'xlsx.package.sizeLimit')?.count).toBe(12);
+    } finally {
+      Object.assign(LIMITS, saved);
+    }
+  });
+
   it('reads and counts a part shared by several sheets once', async () => {
     const saved = LIMITS.totalBytes;
     const pic = '<xdr:oneCellAnchor><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="P"/></xdr:nvPicPr></xdr:pic></xdr:oneCellAnchor>';

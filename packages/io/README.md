@@ -20,6 +20,7 @@ import { exportDocx, importDocx, detectDocxLoss } from '@b32nio/spindle-io/docx'
 
 - `@b32nio/spindle-io/xlsx` — `exportXlsx`, `importXlsx`, `detectXlsxLoss` (needs `exceljs`)
 - `@b32nio/spindle-io/docx` — `exportDocx`, `importDocx`, `detectDocxLoss` (needs `docx`, `jszip`, `fast-xml-parser`)
+- `@b32nio/spindle-io/pptx` — `detectPptxLoss` (needs `jszip`, `fast-xml-parser`); there is no PPTX reader or writer yet
 - `@b32nio/spindle-io` — both, plus the CSV helpers and `ImportLossReport` utilities re-exported from `@b32nio/spindle-shared`
 
 Prefer the subpaths so a consumer that needs one format never loads the other's libraries.
