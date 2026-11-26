@@ -17,6 +17,8 @@ export interface XlsxEditorApi {
   ): Promise<{ warnings: string[]; loss: LossSnapshot }>;
   exportToXlsx(workbook: WorkbookLike): Promise<Uint8Array>;
   inspectXlsx(bytes: Uint8Array): Promise<LossSnapshot>;
+  /** Whether the formula engine can parse this formula text. */
+  parsesFormula(formula: string): boolean;
 }
 
 /** The parts of `@b32nio/spindle-sheets-core` the API is built from. */
@@ -28,15 +30,18 @@ export interface SheetsCoreModule {
   ): Promise<{ warnings: string[]; loss: LossSnapshot }>;
   exportToXlsx(workbook: never): Promise<Uint8Array>;
   inspectXlsx(bytes: Uint8Array, options?: { detail: 'full' }): Promise<LossSnapshot>;
+  FormulaParser: new () => { parse(formula: string): { error?: string } };
 }
 
 /** Bind the harness to a sheets-core module. `inspectXlsx` is asked for the `full` detail level (every loss id, not only the dialog's). */
 export function createApi(core: SheetsCoreModule): XlsxEditorApi {
+  const parser = new core.FormulaParser();
   return {
     createWorkbook: () => new core.WorkbookImpl('fixture', 'Untitled'),
     importFromXlsx: (bytes, workbook) => core.importFromXlsx(bytes, workbook as never),
     exportToXlsx: (workbook) => core.exportToXlsx(workbook as never),
     inspectXlsx: (bytes) => core.inspectXlsx(bytes, { detail: 'full' }),
+    parsesFormula: (formula) => parser.parse(formula).error === undefined,
   };
 }
 

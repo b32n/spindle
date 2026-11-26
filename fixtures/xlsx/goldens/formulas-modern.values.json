@@ -1,5 +1,5 @@
 {
-  "compared": 15,
+  "compared": 14,
   "firstMismatches": [
     {
       "actual": "\"#NAME? Function _XLFN.IFS not found\"",
@@ -51,12 +51,13 @@
     }
   ],
   "formulaCells": 15,
-  "matched": 7,
+  "matched": 6,
   "mismatchClasses": {
     "number -> error": 5,
     "text -> error": 3
   },
   "mismatched": 8,
+  "passthrough": 1,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

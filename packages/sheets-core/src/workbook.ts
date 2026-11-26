@@ -35,6 +35,9 @@ import {
   WHOLE_AXIS_ID,
 } from './formula-parser/stable-ast';
 
+/** A whole-column/row range spanning more rows or columns than this is trimmed to the used range on its bounded axis too. */
+const WHOLE_AXIS_TRIM_SPAN = 1024;
+
 // Snapshot for undo/redo
 interface WorkbookSnapshot {
   sheets: Map<string, SheetSnapshot>;
@@ -528,10 +531,12 @@ export class WorkbookImpl implements Workbook {
       if (!stableAst) {
         const parsed = this.formulaParser.parse(cell.formula, row, col);
         if (parsed.error) {
+          // An imported formula the engine cannot parse keeps the value the file saved
+          // for it (and its text); a formula typed in already holds its error as its value.
           this.evaluatingCells.delete(cellKey);
-          this.formulaGraph.markClean(cellKey, parsed.error as CellValue);
-          this.setCell(sheetId, row, col, { value: parsed.error as CellValue });
-          return parsed.error;
+          const kept = cell.value as CellValue;
+          this.formulaGraph.markClean(cellKey, kept);
+          return kept;
         }
         stableAst = toStableAst(parsed.ast, resolver, sheet, row, col);
         // Persist the upgraded AST so future evaluations skip the re-parse.
@@ -656,11 +661,14 @@ export class WorkbookImpl implements Workbook {
   }
 
   /**
-   * Values of a whole-column (`A:C`) or whole-row (`1:3`) range, bounded to the
-   * used range on its unbounded axis (the last row/column inside the bounds that
-   * holds a value, a formula or a spilled value); the bounded axis keeps its
-   * nominal size. One pass over the stored cells fills the grid, so a column of a
-   * million rows costs one scan rather than a million lookups.
+   * Values of a whole-column (`A:C`) or whole-row (`1:3`) range. The unbounded
+   * axis is bounded to the sheet's used range (the last row, or column, holding a
+   * value, a formula or a spilled value anywhere on the sheet), so two whole
+   * columns on one sheet always have the same height and `A:A*B:B` lines up. The
+   * bounded axis keeps its nominal size, except that a span of more than
+   * WHOLE_AXIS_TRIM_SPAN rows or columns (`A:XFD`, `1:1048576`) is trimmed to the
+   * used range as well, so such a range costs what the data costs, not the
+   * sheet's size. One pass over the stored cells fills the grid.
    */
   private getWholeRangeValues(
     sheetId: string | undefined,
@@ -671,26 +679,24 @@ export class WorkbookImpl implements Workbook {
     maxCol: number
   ): unknown[][] {
     const hits: Array<[number, number, Cell]> = [];
-    let usedRow = minRow; // an empty range still has its first row/column
-    let usedCol = minCol;
+    let usedRow = 0; // sheet-wide used extent
+    let usedCol = 0;
     for (const [r, c, cell] of this.getSheet(sheetId).entries()) {
-      if (r < minRow || r > maxRow || c < minCol || c > maxCol) continue;
       if (cell.value == null && !cell.formula) continue;
-      hits.push([r, c, cell]);
       if (r > usedRow) usedRow = r;
       if (c > usedCol) usedCol = c;
+      if (r >= minRow && r <= maxRow && c >= minCol && c <= maxCol) hits.push([r, c, cell]);
     }
     const spills: SpillRegion[] = [];
     for (const region of this.getSpillIndex(sheetId).regions()) {
-      const bottom = Math.min(maxRow, region.anchorRow + region.rows - 1);
-      const right = Math.min(maxCol, region.anchorCol + region.cols - 1);
-      if (region.anchorRow > maxRow || region.anchorCol > maxCol || bottom < minRow || right < minCol) continue;
+      usedRow = Math.max(usedRow, region.anchorRow + region.rows - 1);
+      usedCol = Math.max(usedCol, region.anchorCol + region.cols - 1);
       spills.push(region);
-      usedRow = Math.max(usedRow, bottom);
-      usedCol = Math.max(usedCol, right);
     }
-    const lastRow = whole === 'column' ? usedRow : maxRow;
-    const lastCol = whole === 'row' ? usedCol : maxCol;
+    const trim = (min: number, max: number, used: number): number =>
+      max - min + 1 > WHOLE_AXIS_TRIM_SPAN ? Math.max(min, Math.min(max, used)) : max;
+    const lastRow = whole === 'column' ? Math.max(minRow, Math.min(maxRow, usedRow)) : trim(minRow, maxRow, usedRow);
+    const lastCol = whole === 'row' ? Math.max(minCol, Math.min(maxCol, usedCol)) : trim(minCol, maxCol, usedCol);
     const grid: unknown[][] = [];
     for (let r = minRow; r <= lastRow; r++) grid.push(new Array<unknown>(lastCol - minCol + 1).fill(null));
     for (const [r, c, cell] of hits) {

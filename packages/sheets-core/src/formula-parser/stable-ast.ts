@@ -275,13 +275,13 @@ const OPERATOR_PRECEDENCE: Record<string, number> = {
   ' ': 8, ':': 9,
 };
 
-const ERROR_LITERAL = /^#(?:NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|SPILL!|CALC!)$/;
 
 const quoteString = (text: string): string => `"${text.replace(/"/g, '""')}"`;
 
 /** An array-constant element: errors print bare, text quoted, booleans as TRUE/FALSE. */
 function renderArrayElement(value: unknown): string {
-  if (typeof value === 'string') return ERROR_LITERAL.test(value) ? value : quoteString(value);
+  if (typeof value === 'object' && value !== null) return (value as { error: string }).error;
+  if (typeof value === 'string') return quoteString(value);
   if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
   return String(value);
 }

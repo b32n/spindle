@@ -129,7 +129,7 @@ export async function runXlsxFixture(api: XlsxEditorApi, bytes: Uint8Array): Pro
     ledger: buildLedger({ parts, lossIds: loss.items.map((i) => i.id), importFailed }),
     values:
       parts.kind === 'zip'
-        ? compareValues(readFileFormulas(parts), model.workbook, importFailed)
+        ? compareValues(readFileFormulas(parts), model.workbook, importFailed, (f) => api.parsesFormula(f))
         : unreadableValues(),
   };
 }

@@ -26,6 +26,7 @@
     "number -> error": 3
   },
   "mismatched": 3,
+  "passthrough": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

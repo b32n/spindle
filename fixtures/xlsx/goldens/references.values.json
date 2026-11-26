@@ -1,5 +1,5 @@
 {
-  "compared": 6,
+  "compared": 5,
   "firstMismatches": [
     {
       "actual": "\"#VALUE!\"",
@@ -9,11 +9,12 @@
     }
   ],
   "formulaCells": 6,
-  "matched": 5,
+  "matched": 4,
   "mismatchClasses": {
     "number -> error": 1
   },
   "mismatched": 1,
+  "passthrough": 1,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

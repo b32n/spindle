@@ -116,6 +116,21 @@ Reference and literal forms:
 | Error literal | `#NULL!` `#DIV/0!` `#VALUE!` `#REF!` `#NAME?` `#NUM!` `#N/A` `#SPILL!` `#CALC!` | Evaluates to that error; `ISERROR`, `IFERROR`, `ISNA`, `ERROR.TYPE` see it as one |
 | Defined name | `Quarter1` | Not resolved yet: evaluates to `#NAME?` (the text is kept as typed, so a save does not corrupt it) |
 
+An unquoted sheet name is read as words of letters, digits, `_` and `.` joined by
+single spaces (`Q1 Data!A1`, `My Sheet!A1`, `2024!A1`), as earlier versions did, but
+only where an operand starts (not after an operand, `:` or a sheet prefix) and never
+inside a span; Excel itself always quotes these names, and the engine prints them
+quoted (`'Q1 Data'!A1`). `A1 Sheet2!B2` at the start of an operand is therefore the
+sheet "A1 Sheet2", and a span of such sheets needs quotes (`'Q1 Data:Q2 Data'!A1`).
+Array-constant errors are tagged in the AST, so `{#N/A}` (an error) and `{"#N/A"}`
+(text) stay different through printing.
+
+A formula the engine cannot parse (an imported `Sales[Q1]`) keeps the value the file
+saved and its text through recalculation and edits elsewhere; on export that value is
+written back, and the `#ERROR! ...` of a formula typed in that does not parse is never
+written as a result. A formula whose tree is deeper than 500 levels (a flat chain of
+thousands of `+`, `%` or spaces) is rejected as `#ERROR! Formula is too complex`.
+
 Malformed input is rejected with a message, never read as text: `A:` (a
 half-open range), `1:A`, `Sheet1:!A1`, `{1,2;3}` (ragged array), `{}`,
 `{A1}` (an array constant holds no references), `SUM(1`, `1+`, `(A1,2)` (a union
@@ -127,10 +142,15 @@ needs references), `2 A1` (an intersection needs references), `Sales[Q1]`
 `A:A`, `A:C`, `1:1` and `1:3` are stored **unbounded** in the AST: a
 whole-column range holds the ids of its columns and the sentinel id `*` for the
 row axis, a whole-row range the ids of its rows and `*` for the column axis. For
-evaluation the unbounded axis is **bounded to the used range**: the last row (or
-column) inside the referenced columns (rows) that holds a value, a formula or a
-spilled value. `SUM(A:A)` therefore reads only the used part of column A, and an
-empty column gives an empty range, not an error. Shape functions use the
+evaluation the unbounded axis is **bounded to the sheet's used range**: the last
+row (or column) anywhere on the sheet that holds a value, a formula or a spilled
+value. Every whole column on a sheet therefore has the same height, so
+`SUMPRODUCT(A:A*B:B)` and `SUM(A:A+B:B)` line up whatever the columns hold, and an
+empty column gives blanks, not an error. The bounded axis keeps its nominal size
+(`A:C` is three columns), except that a span of more than 1,024 columns or rows
+(`A:XFD`, `1:1048576`) is trimmed to the used range as well, so such a range costs
+what the data costs. One known difference from Excel: `COUNTIF(A:A,"")` counts the
+blanks inside the used range only (Excel counts the whole column). Shape functions use the
 nominal size: `ROWS(A:A)` is 1,048,576, `COLUMNS(1:1)` is 16,384, `COUNTBLANK`
 counts blanks out of the nominal size, and `INDEX(A:A,500)` indexes the full
 column (a blank, not `#REF!`, past the data).

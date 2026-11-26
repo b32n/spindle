@@ -82,6 +82,13 @@ function toSpreadsheetCell(
   formatPool: ReturnType<WorkbookImpl['getFormatPool']>
 ): SpreadsheetCell {
   const out: SpreadsheetCell = { value: cell.value };
+  // A formula's saved result must be a value Excel knows. An engine message such as
+  // "#NAME? Function X not found" is reduced to its error code, and the "#ERROR! ..." of a
+  // formula that does not parse is not written at all (the formula has no result).
+  if (cell.formula && typeof cell.value === 'string' && cell.value.startsWith('#')) {
+    if (cell.value.startsWith('#ERROR!')) out.value = null;
+    else if (cell.value.includes(' ')) out.value = cell.value.split(' ')[0];
+  }
   if (cell.formula) out.formula = cell.formula.startsWith('=') ? cell.formula.slice(1) : cell.formula;
   if (cell.hyperlink) out.hyperlink = cell.hyperlink;
   if (cell.styleId) {

@@ -1,5 +1,6 @@
 import { exportToXlsx, importFromXlsx, inspectXlsx } from '../export/xlsx';
 import { WorkbookImpl } from '../workbook';
+import { FormulaParser } from '../formula-parser/parser';
 import {
   createApi,
   type SheetsCoreModule,
@@ -12,4 +13,5 @@ export const sourceApi: XlsxEditorApi = createApi({
   importFromXlsx,
   exportToXlsx,
   inspectXlsx,
+  FormulaParser,
 } as unknown as SheetsCoreModule);

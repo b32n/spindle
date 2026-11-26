@@ -108,6 +108,20 @@ describe('tokenize', () => {
     ]);
   });
 
+  it('accepts unquoted sheet names of words and digits, but not a cell-like start or a spaced span', () => {
+    expect(kinds('Q1 Data!A1')[0]).toEqual({ kind: 'sheet', start: 'Q1 Data', end: undefined });
+    expect(kinds('My Sheet!A1')[0]).toEqual({ kind: 'sheet', start: 'My Sheet', end: undefined });
+    expect(kinds('2024!A1')[0]).toEqual({ kind: 'sheet', start: '2024', end: undefined });
+    expect(kinds('1st Quarter!B2')[0]).toEqual({ kind: 'sheet', start: '1st Quarter', end: undefined });
+    expect(kinds('A1 Sheet2!B2')[0]).toEqual({ kind: 'sheet', start: 'A1 Sheet2', end: undefined }); // an operand start: a sheet name
+    expect(kinds('Sheet1!A1 Sheet2!B2').map((t) => t.kind)).toEqual(['sheet', 'cell', 'sheet', 'cell']); // an intersection
+    expect(kinds('Sheet1!A1 My Sheet!B2').map((t) => t.kind)).toEqual(['sheet', 'cell', 'ident', 'sheet', 'cell']);
+    expect(kinds('SUM(1,Q1 Data!A1)').map((t) => t.kind)).toContain('sheet');
+    expect(kinds('A:D Sheet2!B2').map((t) => t.kind)).toEqual(['colrange', 'sheet', 'cell']);
+    expect(kinds('Sheet1:My Sheet!A1')[0].kind).not.toBe('sheet'); // a span with a space needs quotes
+    expect(kinds('1.5')[0]).toEqual({ kind: 'num', value: 1.5 });
+  });
+
   it('accepts unicode sheet names and rejects an empty half of a quoted span', () => {
     expect(kinds('Übersicht!A1')[0]).toEqual({ kind: 'sheet', start: 'Übersicht', end: undefined });
     expect(() => tokenize("'Sheet1:'!A1")).toThrow('#ERROR! Empty sheet name at position 0');

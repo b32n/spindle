@@ -21,6 +21,7 @@ import { MAX_SHEET_COLS, MAX_SHEET_ROWS } from './types';
 import type { CellReference, ParsedFormulaNode } from './types';
 
 const MAX_NESTING = 256;
+const MAX_TREE_DEPTH = 500;
 const COMPARISON = new Set(['=', '<>', '<', '>', '<=', '>=']);
 
 /** True for a node that can denote a reference (so it may be an operand of `:`, ` ` and `,`). */
@@ -450,7 +451,7 @@ class SyntaxParser {
       case 'str':
         return t.value;
       case 'err':
-        return t.value;
+        return { error: t.value }; // tagged, so `{#N/A}` stays an error and `{"#N/A"}` stays text
       case 'ident': {
         const upper = t.text.toUpperCase();
         if (upper === 'TRUE') return true;
@@ -465,5 +466,13 @@ class SyntaxParser {
 
 /** Parse formula text (without the leading `=`). Throws an `#ERROR! ...` Error on a syntax error. */
 export function parseFormulaSyntax(text: string, currentRow: number, currentCol: number): ParsedFormulaNode {
-  return new SyntaxParser(text, currentRow, currentCol).parse();
+  const ast = new SyntaxParser(text, currentRow, currentCol).parse();
+  // A long flat chain (`1+1+1+...`, `A1 A1 A1 ...`, `1%%%...`) is a deep tree that every later walk recurses into.
+  const stack: Array<[ParsedFormulaNode, number]> = [[ast, 1]];
+  while (stack.length > 0) {
+    const [node, depth] = stack.pop() as [ParsedFormulaNode, number];
+    if (depth > MAX_TREE_DEPTH) throw syntaxError('Formula is too complex');
+    for (const child of [node.left, node.right, ...(node.args ?? [])]) if (child) stack.push([child, depth + 1]);
+  }
+  return ast;
 }

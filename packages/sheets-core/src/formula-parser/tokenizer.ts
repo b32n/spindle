@@ -42,11 +42,31 @@ export function syntaxError(message: string): Error {
   return new Error(`#ERROR! ${message}`);
 }
 
-// Unquoted sheet names: letters, digits, `_` and `.`, not starting with a digit.
-const NAME = String.raw`[\p{L}_\\][\p{L}\p{N}_.]*`;
-const SHEET_PREFIX = new RegExp(`^(${NAME})(?::(${NAME}))?!`, 'u');
+// An unquoted sheet name: words of letters, digits, `_` and `.` separated by single spaces
+// (`Sheet1`, `Q1 Data`, `2024`). Excel itself writes quotes around anything but a plain
+// identifier; the looser form is accepted because earlier versions of the engine did.
+const NAME_RUN = String.raw`[\p{L}\p{N}_.\\]+(?: [\p{L}\p{N}_.\\]+)*`;
+const SHEET_PREFIX = new RegExp(`^(${NAME_RUN})(?::(${NAME_RUN}))?!`, 'u');
 const CELL = /^(\$?)([A-Za-z]{1,3})(\$?)(\d+)(?![\w.])/;
 const CELL_ADDRESS = /^[A-Za-z]{1,3}\d+$/;
+
+/**
+ * The sheet prefix (`Sheet1!`, `Q1 Data!`, `Sheet1:Sheet3!`) at the start of `rest`, if there is one.
+ * `A1:Sheet2!B2` is a range from A1 to a cell on Sheet2, so a span of sheets named like cell addresses
+ * must be quoted. (At the start of an operand `A1 Sheet2!B2` reads as the sheet "A1 Sheet2".)
+ */
+function sheetPrefixAt(rest: string, prev: Token | undefined): RegExpExecArray | null {
+  const m = SHEET_PREFIX.exec(rest);
+  if (!m) return null;
+  const names = m[2] === undefined ? [m[1]] : [m[1], m[2]];
+  // A name of several words can only start where an operand starts: after `Sheet1!A1 ` the words are the
+  // next operand of an intersection (`Sheet1!A1 Sheet1!B1`), and after `Sheet1!` a reference.
+  const operandStarts = prev === undefined || (prev.kind === 'op' && !')%#}:'.includes(prev.text));
+  if (!operandStarts && names.some((n) => n.includes(' '))) return null;
+  // A span of sheets is `Sheet1:Sheet3!`: no spaces inside it (quote it for that), and no cell addresses.
+  if (m[2] !== undefined && names.some((n) => CELL_ADDRESS.test(n) || n.includes(' '))) return null;
+  return m;
+}
 const COL_RANGE = /^(\$?)([A-Za-z]{1,3}):(\$?)([A-Za-z]{1,3})(?![\w.(])/;
 const ROW_RANGE = /^(\$?)(\d+):(\$?)(\d+)(?![\w.])/;
 const NUMBER = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/;
@@ -145,6 +165,12 @@ export function tokenize(text: string): Token[] {
     }
 
     if (/[\d.]/.test(ch)) {
+      const sheet = sheetPrefixAt(rest, prev); // a sheet named with digits: 2024!A1
+      if (sheet) {
+        tokens.push({ kind: 'sheet', start: sheet[1], end: sheet[2], pos, space });
+        i += sheet[0].length;
+        continue;
+      }
       const m = NUMBER.exec(rest);
       if (!m) throw syntaxError(`Unexpected "${ch}" at position ${pos}`);
       const value = Number(m[0]);
@@ -155,10 +181,8 @@ export function tokenize(text: string): Token[] {
     }
 
     if (ch === '$' || /[\p{L}_\\]/u.test(ch)) {
-      const sp = SHEET_PREFIX.exec(rest);
-      // `A1:Sheet2!B2` is a range from A1 to a cell on Sheet2, not a span of sheets "A1" to "Sheet2":
-      // a sheet named like a cell address must be quoted.
-      if (sp && !(sp[2] !== undefined && (CELL_ADDRESS.test(sp[1]) || CELL_ADDRESS.test(sp[2])))) {
+      const sp = sheetPrefixAt(rest, prev);
+      if (sp) {
         tokens.push({ kind: 'sheet', start: sp[1], end: sp[2], pos, space });
         i += sp[0].length;
         continue;

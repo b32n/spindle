@@ -4,10 +4,12 @@
 
 Each row of the formula-syntax probe (probe_data.SYNTAX, plan 2.2 item 4) is recalculated by LibreOffice headless
 (a throwaway profile with OOXMLRecalcMode = 0, "always recalculate on load") and the table records, per formula:
-the formula as the file stores it, the same formula in editor syntax, the value the file caches (what Excel
-computes), and the value LibreOffice computed. `expected` is LibreOffice's value; where this LibreOffice build has
-no such function (`_xlfn.SINGLE`, `_xlfn.ANCHORARRAY` -> `@` and the spill operator) it falls back to the
-file's cached value and says so in `source`.
+the formula as the file stores it, the same formula in editor syntax, the value the file caches (written by hand in
+probe_data.SYNTAX as the value Excel is expected to show; not computed by Excel here), and the value LibreOffice
+computed. `expected` is LibreOffice's value. Only the two rows whose function this LibreOffice build lacks
+(`_xlfn.SINGLE` and `_xlfn.ANCHORARRAY`, the file spellings of `@` and the spill operator) may differ: they fall back
+to the file's cached value and say so in `source`. Any other disagreement, or any other LibreOffice error, stops
+the script.
 
 LibreOffice and openpyxl are authoring tools only: the output is committed, nothing here runs in CI.
 """
@@ -34,6 +36,10 @@ PROFILE = """<?xml version="1.0" encoding="UTF-8"?>
 <item oor:path="/org.openoffice.Office.Calc/Formula/Load"><prop oor:name="OOXMLRecalcMode" oor:op="fuse"><value>0</value></prop></item>
 </oor:items>
 """
+
+
+# The only rows allowed to fall back to the file's cached value: LibreOffice 25.2 has no such function.
+NO_LIBREOFFICE_FUNCTION = ("_xlfn.SINGLE(", "_xlfn.ANCHORARRAY(")
 
 
 def editor_syntax(formula):
@@ -63,17 +69,20 @@ def main():
     rows = []
     for (formula, cached, note), value in zip(SYNTAX, computed):
         is_error = isinstance(value, str) and value.startswith("#")
+        fallback = is_error and any(name in formula for name in NO_LIBREOFFICE_FUNCTION)
+        if is_error and not fallback:
+            raise SystemExit(f"{formula}: LibreOffice gives the error {value!r}")
+        if not fallback and value != cached:
+            raise SystemExit(f"{formula}: LibreOffice says {value!r}, the file caches {cached!r}")
         rows.append({
             "fileFormula": formula,
             "editorFormula": editor_syntax(formula),
             "note": note,
             "cached": cached,
             "libreoffice": value,
-            "expected": cached if is_error else value,
-            "source": "file cached value (LibreOffice has no such function)" if is_error else "LibreOffice",
+            "expected": cached if fallback else value,
+            "source": "file cached value (LibreOffice has no such function)" if fallback else "LibreOffice",
         })
-        if not is_error and value != cached:
-            raise SystemExit(f"{formula}: LibreOffice says {value!r}, the file caches {cached!r}")
     table = {"generator": "fixtures/xlsx/generators/build_syntax_oracle.py", "libreoffice": lo, "rows": rows}
     with open(OUT, "w") as f:
         json.dump(table, f, indent=2, ensure_ascii=False)

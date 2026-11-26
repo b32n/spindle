@@ -194,6 +194,11 @@ export interface ValuesSnapshot extends ValuesTotals {
   /** Formulas without a cached value, and formulas with a volatile function: not compared. */
   uncached: number;
   volatile: number;
+  /**
+   * Formulas the engine cannot parse: the cell keeps the value the file saved for it, so a match there says nothing
+   * about the engine. They are counted here and are not part of `compared`, `matched` or `mismatched`.
+   */
+  passthrough: number;
   /** Sheets of the file whose part could not be read. */
   unreadableSheets: number;
   /** Mismatches counted by what was expected and what the engine produced (`number -> error`). */
@@ -215,6 +220,7 @@ const emptyValues = (
   mismatched: 0,
   uncached: 0,
   volatile: 0,
+  passthrough: 0,
   unreadableSheets: 0,
   mismatchClasses: {},
   firstMismatches: [],
@@ -225,7 +231,9 @@ const emptyValues = (
 export function compareValues(
   file: FileFormulas,
   model: Json | null,
-  importFailed: boolean
+  importFailed: boolean,
+  /** Whether the engine can parse a formula (its text, with the leading `=`); without it every formula counts as parsed. */
+  parses: (formula: string) => boolean = () => true
 ): ValuesSnapshot {
   if (importFailed || model === null)
     return emptyValues('skipped-import-error', file.cells.length, {
@@ -245,6 +253,10 @@ export function compareValues(
     const sheet = modelSheets.filter((s) => isObj(s) && s.name === cell.sheet)[cell.occurrence];
     const mc = isObj(sheet) && isObj(sheet.cells) ? sheet.cells[cell.address] : undefined;
     const actual = (isObj(mc) && mc.value !== undefined ? mc.value : null) as Scalar;
+    if (isObj(mc) && typeof mc.formula === 'string' && !parses(mc.formula)) {
+      out.passthrough++;
+      continue;
+    }
     out.compared++;
     if (sameValue(cell.expected, actual)) {
       out.matched++;

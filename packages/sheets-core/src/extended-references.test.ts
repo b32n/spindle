@@ -910,3 +910,104 @@ describe('collaboration: the new AST kinds travel as plain JSON', () => {
     }
   });
 });
+
+describe('whole ranges on one sheet line up (review fixes)', () => {
+  it('gives two whole columns of different lengths the same height', () => {
+    const b = new Book().fill('A', [1, 2, 3]).fill('B', [10, 20, 30, 40, 50]);
+    b.f('D1', '=SUMPRODUCT(A:A*B:B)').f('D2', '=SUM(A:A+B:B)').f('D3', '=SUMPRODUCT(A:A,B:B)').f('D4', '=SUMPRODUCT((A:A>1)*(B:B))');
+    expect(b.v('D1')).toBe(10 + 40 + 90);
+    expect(b.v('D2')).toBe(6 + 150);
+    expect(b.v('D3')).toBe(140);
+    expect(b.v('D4')).toBe(20 + 30 + 0 + 0 + 0 + 0 + 0); // rows 4-5 have no A: blank > 1 is false
+  });
+
+  it('gives two whole rows of different widths the same width', () => {
+    const b = new Book().fill('A', [1, 2]).set('B1', 2).set('C1', 3).set('B2', 5);
+    b.f('A10', '=SUMPRODUCT(1:1*2:2)');
+    expect(b.v('A10')).toBe(1 * 2 + 2 * 5 + 0);
+  });
+
+  it('trims a very wide or very tall span to the used range instead of allocating it', () => {
+    const b = new Book(['Sheet1', 'Sheet2']);
+    for (let r = 0; r < 200; r++) b.wb.setCellValue(undefined, r, r % 5, 1);
+    b.f('A1', '=SUM(Sheet1!A:XFD)', 'Sheet2').f('A2', '=COUNTA(Sheet1!1:1048576)', 'Sheet2');
+    b.f('A3', '=COLUMNS(Sheet1!A:XFD)', 'Sheet2').f('A4', '=ROWS(Sheet1!1:1048576)', 'Sheet2');
+    const t = Date.now();
+    expect([b.v('A1', 'Sheet2'), b.v('A2', 'Sheet2')]).toEqual([200, 200]);
+    expect(Date.now() - t).toBeLessThan(5000);
+    expect([b.v('A3', 'Sheet2'), b.v('A4', 'Sheet2')]).toEqual([16384, 1048576]);
+    // An empty sheet still has one cell.
+    const empty = new Book(['Sheet1', 'Sheet2']);
+    empty.f('A1', '=COUNTA(Sheet1!B:XFD)', 'Sheet2').f('A2', '=COUNTA(Sheet1!5:1048576)', 'Sheet2');
+    expect([empty.v('A1', 'Sheet2'), empty.v('A2', 'Sheet2')]).toEqual([0, 0]);
+  });
+
+  it('keeps a modest span at its nominal width, so VLOOKUP into a sparse A:C still works', () => {
+    const b = new Book().set('A1', 'k').set('A2', 'j');
+    b.f('E1', '=IFERROR(VLOOKUP("k",A:C,3,FALSE),"none")');
+    expect(b.v('E1')).toBe(0); // the blank C1: column 3 exists
+  });
+});
+
+describe('formulas the engine cannot parse keep their saved value (review fixes)', () => {
+  function importedBook(): Book {
+    const b = new Book(['Sheet1']);
+    const data = b.wb.getData();
+    delete data.sheets[0].rowOrder;
+    delete data.sheets[0].colOrder;
+    data.sheets[0].cells = [
+      { key: '0:0', cell: { value: 23, formula: '=SUM(Sales[Q1])' } },
+      { key: '1:0', cell: { value: 5 } },
+    ] as never;
+    b.wb.setData(data);
+    return b;
+  }
+
+  it('keeps the value and the text through a full recalculation and an unrelated edit', () => {
+    const b = importedBook();
+    b.set('A2', 6);
+    b.wb.renameSheet(b.id() as string, 'Renamed');
+    expect(b.shown('A1', 'Renamed')).toBe(23);
+    expect(b.v('A1', 'Renamed')).toBe(23);
+    expect(b.text('A1', 'Renamed')).toBe('=SUM(Sales[Q1])');
+    b.f('B1', '=A1+1', 'Renamed');
+    expect(b.v('B1', 'Renamed')).toBe(24);
+  });
+
+  it('writes the saved value back on export, never an error string', async () => {
+    const b = importedBook();
+    b.set('A2', 6);
+    b.f('C1', '=SUM(');
+    b.f('C2', '=Undefined1');
+    const { exportToXlsx } = await import('./export/xlsx');
+    const ExcelJS = (await import('exceljs')).default;
+    const bytes = await exportToXlsx(b.wb);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(bytes as unknown as ArrayBuffer);
+    const ws = wb.worksheets[0];
+    expect((ws.getCell('A1').value as { result?: unknown }).result).toBe(23);
+    expect(JSON.stringify(ws.getCell('C1').value)).not.toContain('ERROR');
+    expect((ws.getCell('C2').value as { result?: unknown }).result).toBe('#NAME?');
+  });
+});
+
+describe('array-constant errors are tagged (review fixes)', () => {
+  it('keeps {#N/A} an error and {"#N/A"} text through printing', () => {
+    const b = new Book();
+    b.f('A1', '={#N/A,"#N/A","x"}').f('A2', '={"#N/A"}');
+    expect(b.text('A1')).toBe('={#N/A,"#N/A","x"}');
+    expect(b.text('A2')).toBe('={"#N/A"}');
+    expect(b.wb.getCell(undefined, 0, 0)?.formulaAst?.value).toEqual([[{ error: '#N/A' }, '#N/A', 'x']]);
+    expect([b.v('A1'), b.v('B1'), b.v('C1')]).toEqual(['#N/A', '#N/A', 'x']);
+  });
+});
+
+describe('unquoted sheet names that earlier versions accepted', () => {
+  it('still read, and print back quoted', () => {
+    const b = new Book(['Sheet1', 'My Sheet', 'Q1 Data', '2024']);
+    b.set('A1', 7, 'My Sheet').set('A1', 9, 'Q1 Data').set('A1', 8, '2024');
+    b.f('C1', '=My Sheet!A1+Q1 Data!A1+2024!A1');
+    expect(b.v('C1')).toBe(24);
+    expect(b.text('C1')).toBe("='My Sheet'!A1+'Q1 Data'!A1+'2024'!A1");
+  });
+});

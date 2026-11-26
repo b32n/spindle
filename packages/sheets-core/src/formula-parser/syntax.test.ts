@@ -338,7 +338,7 @@ describe('array constants', () => {
   it('holds numbers, signed numbers, text, booleans and errors', () => {
     expect(parse('{-1,+2,"a""b",TRUE,false,#N/A,#DIV/0!,1.5e1}')).toEqual({
       type: 'array',
-      value: [[-1, 2, 'a"b', true, false, '#N/A', '#DIV/0!', 15]],
+      value: [[-1, 2, 'a"b', true, false, { error: '#N/A' }, { error: '#DIV/0!' }, 15]],
     });
   });
 
@@ -393,12 +393,20 @@ describe('syntax errors', () => {
   it('describes every kind of offending token', () => {
     expect(() => parse('1 "s"')).toThrow('Unexpected "s" at position 2');
     expect(() => parse('1 #N/A')).toThrow('The intersection operator needs references');
-    expect(() => parse('1 Sheet1!A1')).toThrow('The intersection operator needs references');
+    expect(() => parse('"s" Sheet1!A1')).toThrow('The intersection operator needs references');
     expect(() => parse('1 1:1')).toThrow('The intersection operator needs references');
     expect(() => parse('1 A:B')).toThrow('The intersection operator needs references');
     expect(() => parse('A1 1')).toThrow('Unexpected "1" at position 3');
     expect(() => parse('1 foo')).toThrow('intersection');
     expect(shape(parse('A1 foo bar'))).toBe('((cell variable) variable)'); // names may denote references
+  });
+
+  it('limits the depth of a long flat chain', () => {
+    expect(parse('1' + '+1'.repeat(400)).type).toBe('operator');
+    for (const chain of ['1' + '%'.repeat(9000), '1' + '+1'.repeat(4900), '1' + '^1'.repeat(4900), 'A1' + ' A1'.repeat(3000), '(A1' + ',A1'.repeat(3000) + ')']) {
+      expect(() => parse(chain)).toThrow('#ERROR! Formula is too complex');
+    }
+    expect(() => parse('SUM(' + '1,'.repeat(100) + '1)')).not.toThrow(); // wide is fine
   });
 
   it('limits nesting', () => {

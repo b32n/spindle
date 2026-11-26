@@ -12,6 +12,9 @@ import type { EagerFn, LazyFn, RefFn } from './functions';
 import { compareValues, excelEqual, toText } from './functions/helpers';
 import { readReference, resolveReference, type RefEnv } from './functions/reference';
 
+/** An error element of an array constant, tagged in the AST so it stays distinct from text. */
+const isTaggedError = (v: unknown): v is { error: string } => typeof v === 'object' && v !== null && 'error' in v;
+
 /** Ranges larger than this are not expanded into the best-effort `dependencies` set. */
 const MAX_RANGE_DEP_CELLS = 100_000;
 
@@ -218,7 +221,7 @@ export class FormulaParser {
         return node.value;
       case 'array':
         // A copy, so a function that edits its argument cannot change the formula.
-        return (node.value as unknown[][]).map((row) => row.slice());
+        return (node.value as unknown[][]).map((row) => row.map((v) => (isTaggedError(v) ? v.error : v)));
       case 'cell': {
         const ref = node.cellRef as CellReference;
         const row = ref.rowAbsolute ? ref.row : currentRow + ref.row;

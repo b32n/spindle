@@ -33,6 +33,7 @@
     "number -> number": 1
   },
   "mismatched": 4,
+  "passthrough": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

@@ -443,7 +443,8 @@ lockstep.
   over computed references, union, intersection, `@`, `#` and `#NULL!` (`@b32nio/spindle-sheets-core`).** The
   formula parser is now a tokenizer plus a precedence-climbing parser (`formula-parser/tokenizer.ts`,
   `syntax.ts`) with Excel's operator order, replacing the text-splitting one. New forms: `A:A`, `A:C`, `1:1`, `1:3`
-  (stored unbounded in the AST, bounded to the used range when evaluated, one dependency rectangle instead of a
+  (stored unbounded in the AST, bounded to the sheet's used range when evaluated so that `A:A*B:B` lines up and a
+  span of over 1,024 columns or rows is trimmed too, one dependency rectangle instead of a
   cell per row, so `SUM(A:A)` over a million rows takes about two seconds and an edit recomputes only the formulas
   of that column), postfix `%` (`50%`, `A1+50%`, `10%^2`), array constants (`{1,2;3,4}`, `,` across and `;` down, a
   ragged array is a parse error), 3D references (`Sheet1:Sheet3!A1`, `!A1:B2`, `!A:A`; sheet order from the workbook;
@@ -454,7 +455,10 @@ lockstep.
   `documentation/sheets/core/formulas.md`: insert/delete rows never touch a whole-column reference, a whole-row
   reference follows its row and is `#REF!` once the row is deleted, a 3D reference is positional, follows renames
   and the sheet order, and shrinks inward when an end sheet is deleted. A formula that does not parse now shows
-  `#ERROR! <what and where>` (and stops being the previous formula) instead of being read as text; a bare name is
+  `#ERROR! <what and where>` (and stops being the previous formula) instead of being read as text (a chain deeper than 500 levels is `#ERROR! Formula is too complex`); an imported
+  formula the engine cannot parse keeps its saved value and text through recalculation and export never writes an
+  error message as a result; unquoted sheet names of words or digits (`Q1 Data!A1`, `2024!A1`) are still read and
+  printed quoted; array-constant errors are tagged (`{#N/A}` is not `{"#N/A"}`); a bare name is
   `#NAME?` but keeps its text; a deleted reference prints as `#REF!` and parses back. `MAX`, `MIN`, `SUBTOTAL(4|5)`
   and every range function no longer overflow the stack on a column of hundreds of thousands of values. Public
   types are widened, additively: `ParsedFormulaNode.type`/`StableFormulaNode.type` gain `error`, `array`,
@@ -463,9 +467,9 @@ lockstep.
   `EvaluationContext` gains the optional `getSheetNames` and `getSpillRegion`, and `MAX_SHEET_ROWS`,
   `MAX_SHEET_COLS`, `WHOLE_AXIS_ID`, `WorkbookImpl.getSheetNames()` are exported. The XLSX loss id
   `xlsx.formulas.wholeColumn` is gone (the engine now calculates these), the 23-form formula-syntax probe goes from
-  11 to 20 matching values, and the XLSX `values` goldens from 134 to 158 of 225 matching; the 4 left in that probe
-  are the `_xlfn.` prefixed forms (`SINGLE`, `ANCHORARRAY`, `SEQUENCE`) that wait for the prefix mapping. Formulas the
-  engine cannot parse (`Sales[Q1]`) keep the file's saved value on import until the cell is recalculated.
+  11 to 20 matching values, and the XLSX `values` goldens from 134 to 147 of 214 engine-evaluated values matching (the harness now counts
+  the 11 formulas the engine cannot parse, which keep the file's value, separately as `passthrough`); the 4 left in that probe
+  are the `_xlfn.` prefixed forms (`SINGLE`, `ANCHORARRAY`, `SEQUENCE`) that wait for the prefix mapping.
 
 ## [0.4.0] - 2026-10-26
 
