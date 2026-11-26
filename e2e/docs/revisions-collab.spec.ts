@@ -187,4 +187,36 @@ test.describe('docs: tracked changes between collaborators', () => {
     await bob.context.close();
     await proxy.stop();
   });
+  test('D-COL-13 a collaborator’s edit lays the page out again in the view the reader chose, not in All markup', async ({
+    browser,
+  }, info) => {
+    const room = roomName('docs', info.testId);
+    const alice = await peer(browser, room, 'Alice', '#d93025');
+    await waitForRoomSeed(room);
+    const bob = await peer(browser, room, 'Bob', '#1a73e8');
+    await suggesting(alice);
+    await alice.doc.clickLine('Welcome to Spindle Docs');
+    await alice.doc.press('End');
+    await alice.doc.typeText(' one');
+    await expect.poll(() => insertionsOf(bob).count()).toBeGreaterThan(0);
+
+    // Bob looks at the final text: no markup.
+    await bob.doc.toolbar('Review changes').click();
+    await bob.page
+      .getByTestId('review-panel')
+      .getByRole('group', { name: 'Show changes as' })
+      .getByRole('button', { name: 'Final' })
+      .click();
+    await expect(insertionsOf(bob)).toHaveCount(0);
+
+    // Alice keeps typing; the page Bob sees is laid out again for her edit and is still the final text.
+    await alice.doc.typeText(' two');
+    await expect
+      .poll(() => bob.doc.pages.first().textContent())
+      .toContain('Welcome to Spindle Docs one two');
+    await expect(insertionsOf(bob)).toHaveCount(0);
+    await expect(insertionsOf(alice).first()).toBeVisible();
+    await alice.context.close();
+    await bob.context.close();
+  });
 });

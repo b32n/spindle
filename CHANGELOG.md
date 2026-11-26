@@ -395,10 +395,12 @@ lockstep.
   tracked-change marks and attributes): a client from before them refuses to join such a room. Suggestions, and accepting and
   rejecting them, are ordinary edits of marks and attributes, so they merge, converge and survive being made offline like other
   edits (tests with three and four clients, concurrent accepts and rejects of one change, and a person who was never part of
-  the suggestions settling them all). Limits: a paragraph mark or a table row keeps one record of its change, so when two people
-  suggest something on the same paragraph mark at once, one of the two stays (the same everywhere); text a person adds to a
-  change while someone else settles it is settled with it; two people with one display name are one author, in the smallest
-  of their cursor colours. Comments still carry the provider's `currentUser`, not the name the user joined under.
+  the suggestions settling them all; two people splitting and deleting the mark of one paragraph at once keep both suggestions
+  and settle them one by one, also in the browser, with the two offline). Limits: two people suggesting the *same* kind of change on one
+  paragraph mark or row at once leave one of the two (the same everywhere), and when one splits a paragraph while another marks
+  its mark, the other's record lands on the first half; text a person adds to a change while someone else settles it is settled
+  with it; two people with one display name are one author, in the smallest of their cursor colours (and a blank joined name falls
+  back to the current user). Comments still carry the provider's `currentUser`, not the name the user joined under.
 
 ### Changed
 
