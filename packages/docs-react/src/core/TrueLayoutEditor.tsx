@@ -128,6 +128,8 @@ export interface TrueLayoutEditorProps {
    * (`final`) or rejected (`original`). The document itself is not changed.
    */
   revisionView?: RevisionView;
+  /** Colours some authors of tracked changes are drawn in (in a shared document, the colours of their cursors); the others share out the palette. */
+  authorColors?: ReadonlyMap<string, string>;
   /**
    * Suggesting mode: what the user does is recorded as tracked changes by `suggestAuthor` instead of being done (text typed
    * is an insertion, text deleted a deletion, formatting a formatting change).
@@ -228,6 +230,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       minLinesAtBreak = 2,
       footnotesAtPageBottom = true,
       revisionView = 'markup',
+      authorColors,
       suggesting = false,
       suggestAuthor = 'Unknown',
       onSuggestionNotice,
@@ -547,7 +550,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
           if (transaction.docChanged) {
             // Trigger re-layout - this will also update selection overlay
             requestAnimationFrame(() => {
-              if (view) performLayout(newState.doc, view);
+              if (view) performLayoutRef.current?.(newState.doc, view);
             });
             
             // Notify parent of doc change (use ref to avoid stale closure)
@@ -649,7 +652,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       
       // Initial layout
       requestAnimationFrame(() => {
-        performLayout(view.state.doc, view);
+        performLayoutRef.current?.(view.state.doc, view);
       });
       
       return () => {
@@ -916,6 +919,9 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const runTableOfContentsRef = useRef<typeof runTableOfContents | null>(null);
     runTableOfContentsRef.current = runTableOfContents;
 
+    // The colours as a string, so a new map with the same colours does not lay the document out again.
+    const authorColorsKey = authorColors ? JSON.stringify([...authorColors.entries()].sort()) : '';
+
     // Perform layout calculation
     const performLayout = useCallback((doc: PmNode, view: EditorView) => {
       // Removed logging for production
@@ -924,7 +930,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       // 1. Convert ProseMirror doc to FlowBlocks (and find where each section's blocks are). Footnotes at the bottom of their
       //    pages come back separately; the blocks that draw them follow the body's blocks in the arrays given to the layout.
       const known = sectionsRef.current;
-      const sectioned = proseMirrorToSectionedFlowBlocks(doc, { resetIds: true, footnotesAtPageBottom, revisionView });
+      const sectioned = proseMirrorToSectionedFlowBlocks(doc, { resetIds: true, footnotesAtPageBottom, revisionView, authorColors });
       const bodyBlocks = sectioned.blocks;
       const noteBlocks = sectioned.footnotes.map((f) => f.block);
       const blocks: FlowBlock[] = [...bodyBlocks, ...noteBlocks];
@@ -1025,7 +1031,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         tocRefreshRef.current = false;
         runTableOfContentsRef.current?.(view, 'update', false);
       }
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, revisionView, measureContentWidth]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, revisionView, authorColors, measureContentWidth]);
     
     // Keep performLayoutRef in sync to avoid stale closures
     performLayoutRef.current = performLayout;
@@ -1040,7 +1046,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       }
       // Note: We use performLayoutRef to avoid adding performLayout to deps
       // which would cause infinite loops. The ref is always up-to-date.
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, revisionView, editorView, header, footer, sectionsKey]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, revisionView, authorColorsKey, editorView, header, footer, sectionsKey]);
     
     // Initialize table interaction manager
     useEffect(() => {

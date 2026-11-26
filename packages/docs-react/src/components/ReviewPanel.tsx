@@ -20,6 +20,8 @@ export interface ReviewPanelProps {
   onClose: () => void;
   /** Every author of the document, whose colours are shared out (default: the authors of `changes`). */
   palette?: readonly string[];
+  /** Colours some authors are shown in (as the markup is); the others share out the palette. */
+  authorColors?: ReadonlyMap<string, string>;
 }
 
 /** The value of the author choice that stands for every author (an author's own name can be any text, also empty). */
@@ -86,7 +88,7 @@ export function neighbourChange(
   return (from === null ? undefined : [...changes].reverse().find((c) => c.from < from)) ?? changes[changes.length - 1];
 }
 
-export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChange, onResolve, onGoTo, onClose, palette }: ReviewPanelProps) {
+export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChange, onResolve, onGoTo, onClose, palette, authorColors }: ReviewPanelProps) {
   // The author whose changes are shown; null: all of them (an empty author name is an author like another).
   const [author, setAuthor] = useState<string | null>(null);
   const authorSelectId = useId();
@@ -95,7 +97,7 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
   const [currentFrom, setCurrentFrom] = useState<number | null>(null);
   const authors = useMemo(() => [...new Set(changes.map((c) => c.author))], [changes]);
   // The colours are shared out among all authors of the document (a move's other end can have another author), as on the page.
-  const colors = useMemo(() => assignAuthorColors(palette ?? authors), [palette, authors]);
+  const colors = useMemo(() => assignAuthorColors(palette ?? authors, authorColors), [palette, authors, authorColors]);
   // A filter on an author who has no changes left shows everybody again.
   useEffect(() => {
     if (author !== null && !authors.includes(author)) setAuthor(null);

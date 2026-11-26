@@ -57,6 +57,8 @@ export interface ConversionOptions {
    * every position of the document stays one position on the page.
    */
   revisionView?: RevisionView;
+  /** Colours some authors of tracked changes are drawn in (in a shared document, the colours of their cursors); the others share out the palette. */
+  authorColors?: ReadonlyMap<string, string>;
 }
 
 /** How tracked changes are shown (see `ConversionOptions.revisionView`). */
@@ -81,15 +83,17 @@ const noteCounts = { footnote: 0, endnote: 0 };
 let convertedDoc: PmNode | null = null;
 let authorColors: Map<string, string> | null = null;
 let convertedView: RevisionView = 'markup';
+let preferredColors: ReadonlyMap<string, string> | undefined;
 
 function authorColorOf(author: string): string {
-  authorColors ??= convertedDoc ? assignAuthorColors(documentRevisionAuthors(convertedDoc)) : new Map();
+  authorColors ??= convertedDoc ? assignAuthorColors(documentRevisionAuthors(convertedDoc), preferredColors) : new Map();
   return authorColors.get(author) ?? authorColor(author);
 }
 
-function resetNotes(doc: PmNode, view: RevisionView = 'markup'): void {
+function resetNotes(doc: PmNode, view: RevisionView = 'markup', colors?: ReadonlyMap<string, string>): void {
   convertedDoc = doc;
   convertedView = view;
+  preferredColors = colors;
   authorColors = null;
   noteEntries = [];
   noteCounts.footnote = 0;
@@ -157,7 +161,7 @@ export function proseMirrorToFlowBlocks(
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes(doc, options.revisionView);
+  resetNotes(doc, options.revisionView, options.authorColors);
   
   const blocks: FlowBlock[] = [];
   
@@ -196,7 +200,7 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes(doc, options.revisionView);
+  resetNotes(doc, options.revisionView, options.authorColors);
   const blocks: FlowBlock[] = [];
   const sections: SectionedFlowBlocks['sections'] = [];
   const footnotes: SectionedFlowBlocks['footnotes'] = [];

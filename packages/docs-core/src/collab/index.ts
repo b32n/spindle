@@ -17,4 +17,5 @@ export {
   type AttachCollabOptions,
 } from './binding';
 
+export { collabAuthorColors } from './presence';
 export { getCollabBlockers, CollabBlockedError, type CollabBlocker } from './blockers';

@@ -386,6 +386,17 @@ lockstep.
   a comment added inside someone's change is not recorded; text composed with an IME is recorded like typing but has not been tried with a real input method), and a change is continued by the same author name, with no time limit, so two people with one display name
   share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses). Formatting text that carries another person's formatting change is applied directly, with a notice (rejecting their change brings back the formatting from before it). The mode switch group is labelled "Editor mode", and the notice is announced through a live region that is always present.
 
+- **Tracked changes between collaborators.** In a shared document the author of a suggestion is the name the user joined under
+  (`CollabIdentity.displayName`, before the provider's `currentUser`), and people who are in the room are drawn in the colour of
+  their cursor: new `collabAuthorColors(handle)` (docs-core, also from `@b32nio/spindle-docs-core/collab`) reads it from the
+  presence (awareness), `assignAuthorColors`, `revisionAuthors` take a `preferred` map of such colours (the others share out the
+  palette, never a taken colour), `ConversionOptions.authorColors`, `TrueLayoutEditor.authorColors` and `ReviewPanel.authorColors`
+  carry it, and the legend, the panel and the markup agree. The collaboration `schemaVersion` stays 6 (it was raised for the
+  tracked-change marks): a client from before them refuses to join such a room. Suggestions, and accepting and rejecting them, are
+  ordinary edits of marks and attributes, so they merge, converge and survive being made offline like other edits (tests with
+  three and four clients, concurrent accepts and rejects of one change, and a person who was never part of the suggestions
+  settling them all).
+
 ### Changed
 
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
@@ -423,6 +434,9 @@ lockstep.
 
 ### Fixed
 
+- **Editing no longer lays the document out with the settings the editor first rendered with.** After a keystroke the editor used
+  the layout function from its first render, so later changes of `footnotesAtPageBottom`, `revisionView` or `authorColors` were
+  undone as soon as the user typed (the Final view showed its markup again). It uses the current one now.
 - **Switching an editor to read-only and back no longer resets the document.** `TrueLayoutEditor` rebuilt its ProseMirror view (and
   seeded it again from the initial content) whenever `editable` changed, so the edits made before the switch were lost on screen.
   It now reads `editable` live. (Needed by the Viewing mode.)

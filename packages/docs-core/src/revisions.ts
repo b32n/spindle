@@ -24,12 +24,22 @@ export function authorColor(author: string): string {
  * The colours of a document's authors: each author is drawn in the colour `authorColor` gives them, unless another
  * author already has it, then in the next free colour of the palette. It follows from the set of authors alone (not from
  * the order they appear in), so every client shows the same colours; with more authors than colours they are reused.
+ * `preferred` gives some authors a colour of their own (`collabAuthorColors`: the colour of their cursor in a shared document).
  */
-export function assignAuthorColors(authors: Iterable<string>): Map<string, string> {
+export function assignAuthorColors(authors: Iterable<string>, preferred?: ReadonlyMap<string, string>): Map<string, string> {
   const names = [...new Set(authors)].sort();
   const colors = new Map<string, string>();
   const taken = new Set<string>();
+  // Authors with a colour of their own (the colour of their cursor while they are in the room) keep it, and nobody else takes it.
   for (const name of names) {
+    const color = preferred?.get(name);
+    if (color && /^#[0-9a-f]{6}$/i.test(color) && !taken.has(color.toLowerCase())) {
+      colors.set(name, color.toLowerCase());
+      taken.add(color.toLowerCase());
+    }
+  }
+  for (const name of names) {
+    if (colors.has(name)) continue;
     const start = REVISION_COLORS.indexOf(authorColor(name));
     let color = REVISION_COLORS[start];
     for (let i = 0; i < REVISION_COLORS.length; i++) {
@@ -125,10 +135,10 @@ export function collectRevisions(doc: PmNode, withText = true): RevisionSummary[
 /**
  * The authors of the given changes, in order of first appearance, each with the colour `assignAuthorColors` gives them.
  * `palette` is every author of the document, when that is more than the authors of these changes (the colours are shared
- * out among all of them, so they match the page).
+ * out among all of them, so they match the page). `preferred` are colours some authors are shown in already (cursor colours).
  */
-export function revisionAuthors(revisions: ReadonlyArray<{ author: string }>, palette?: Iterable<string>): RevisionAuthor[] {
-  const colors = assignAuthorColors(palette ?? revisions.map((r) => r.author));
+export function revisionAuthors(revisions: ReadonlyArray<{ author: string }>, palette?: Iterable<string>, preferred?: ReadonlyMap<string, string>): RevisionAuthor[] {
+  const colors = assignAuthorColors(palette ?? revisions.map((r) => r.author), preferred);
   const byName = new Map<string, RevisionAuthor>();
   for (const r of revisions) {
     const entry = byName.get(r.author) ?? { name: r.author, color: colors.get(r.author) as string, count: 0 };
