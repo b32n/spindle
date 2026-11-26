@@ -78,7 +78,7 @@ export function changeUnits(doc: PmNode): ChangeUnit[] {
       }
       return false;
     }
-    const revision = isTextblock(node) || node.type.name === 'table_row' ? readBlockRevision(node.attrs, false) : undefined;
+    const revision = isTextblock(node) || node.type.name === 'table_row' ? readBlockRevision(node.attrs) : undefined;
     if (revision) {
       const add = (kind: ChangeUnitKind, meta: { id?: string; author?: string; date?: string; moveId?: string } | undefined) => {
         if (!meta) return;
@@ -141,6 +141,8 @@ export function listChanges(doc: PmNode): ReviewChange[] {
   const changes: ReviewChange[] = [];
   const open = new Map<string, ReviewChange>();
   const moves = new Map<string, ReviewChange>();
+  // The moves whose text is that of an insertion end already (a move can have several, one per moved paragraph).
+  const moveHasInsertion = new Set<ReviewChange>();
   for (const unit of changeUnits(doc)) {
     if (BLOCK_KINDS[unit.kind]) {
       changes.push({ id: `${unit.key}@${unit.from}`, kind: BLOCK_KINDS[unit.kind], author: unit.author, ...(unit.date && { date: unit.date }), text: unit.text, from: unit.from, to: unit.to, units: [unit] });
@@ -160,11 +162,19 @@ export function listChanges(doc: PmNode): ReviewChange[] {
       move.units.push(unit);
       move.id = `${move.units.map((u) => u.key).join('+')}@${move.units[0].from}`;
       if (unit.kind === 'insertion') {
-        move.text = unit.text;
-        move.from = unit.from;
-        move.to = unit.to;
-        move.author = unit.author;
-        if (unit.date) move.date = unit.date;
+        if (moveHasInsertion.has(move)) {
+          // Another end where the text went to: the change covers all of them.
+          move.text += unit.text;
+          move.from = Math.min(move.from, unit.from);
+          move.to = Math.max(move.to, unit.to);
+        } else {
+          move.text = unit.text;
+          move.from = unit.from;
+          move.to = unit.to;
+          move.author = unit.author;
+          if (unit.date) move.date = unit.date;
+          moveHasInsertion.add(move);
+        }
       }
       open.set(unit.key, move);
       continue;
@@ -181,9 +191,12 @@ export function listChanges(doc: PmNode): ReviewChange[] {
     };
     open.set(unit.key, change);
     if (moveKey) moves.set(moveKey, change);
+    if (moveKey && unit.kind === 'insertion') moveHasInsertion.add(change);
     changes.push(change);
   }
-  return changes;
+  // In document order by where each change is shown (a move is listed where its text went to), a stable sort so changes at
+  // one position keep the order they were found in.
+  return changes.map((change, index) => ({ change, index })).sort((a, b) => a.change.from - b.change.from || a.index - b.index).map(({ change }) => change);
 }
 
 // ---------------------------------------------------------------------------
@@ -203,8 +216,8 @@ function joinWithNext(tr: Transaction, pos: number): void {
   const end = pos + node.nodeSize;
   const next = tr.doc.resolve(end).nodeAfter;
   if (!next || !isTextblock(node) || !isTextblock(next)) return;
-  const first = readBlockRevision(node.attrs, false) ?? {};
-  const second = readBlockRevision(next.attrs, false) ?? {};
+  const first = readBlockRevision(node.attrs) ?? {};
+  const second = readBlockRevision(next.attrs) ?? {};
   const revision: BlockRevision = {
     ...(second.insertion && { insertion: second.insertion }),
     // A deletion the first mark still has was made by somebody else (the one being settled is cleared before the join): after
@@ -266,7 +279,7 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
     case 'paragraphFormat': {
       const node = tr.doc.nodeAt(unit.from);
       if (!node) return;
-      const revision = readBlockRevision(node.attrs, false) ?? {};
+      const revision = readBlockRevision(node.attrs) ?? {};
       if (accept || !revision.formatChange) {
         tr.setNodeMarkup(unit.from, undefined, withBlockRevisionKind(node.attrs, 'formatChange', null));
         return;
@@ -326,7 +339,7 @@ function rank(unit: ChangeUnit, action: 'accept' | 'reject'): number {
 }
 
 /**
- * A transaction that accepts or rejects `units`, or null when there are none. Units are settled from the end of the
+ * A transaction that accepts or rejects `units`, or null when there are none or nothing changes. Units are settled from the end of the
  * document to its start, so what one does never moves what another still has to do.
  */
 export function settle(state: EditorState, units: readonly ChangeUnit[], action: 'accept' | 'reject'): Transaction | null {
@@ -334,7 +347,8 @@ export function settle(state: EditorState, units: readonly ChangeUnit[], action:
   const tr = state.tr;
   const ordered = [...units].sort((a, b) => anchorOf(b) - anchorOf(a) || rank(a, action) - rank(b, action));
   for (const unit of ordered) settleUnit(tr, unit, action);
-  return tr.docChanged ? tr.scrollIntoView() : tr;
+  // Nothing changed (a unit whose node is gone): no empty step on the undo history, and the command reports no success.
+  return tr.docChanged ? tr.scrollIntoView() : null;
 }
 
 /** All units that belong to the same change as `unit`: its other runs and the other end of a move. */

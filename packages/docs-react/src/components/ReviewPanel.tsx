@@ -68,11 +68,20 @@ function when(iso: string | undefined): string {
 }
 
 /**
- * The change after (or before) a position, wrapping around; the first (last) one when there is no position yet. Changes are
- * found by position, not by id, because an id carries the position and so changes with every edit above it.
+ * The change after (or before) the current one, wrapping around; the first (last) one when there is no current change yet.
+ * `changes` are in document order. The current change is found by its id when it is still listed (so changes that start at
+ * one position are visited one after the other); otherwise, after an edit changed the ids, by position: the first change
+ * after (before) `from`.
  */
-export function neighbourChange(changes: readonly ReviewChange[], from: number | null, direction: 'next' | 'previous'): ReviewChange | undefined {
+export function neighbourChange(
+  changes: readonly ReviewChange[],
+  from: number | null,
+  direction: 'next' | 'previous',
+  currentId: string | null = null
+): ReviewChange | undefined {
   if (changes.length === 0) return undefined;
+  const at = currentId === null ? -1 : changes.findIndex((c) => c.id === currentId);
+  if (at >= 0) return changes[(at + (direction === 'next' ? 1 : changes.length - 1)) % changes.length];
   if (direction === 'next') return (from === null ? undefined : changes.find((c) => c.from > from)) ?? changes[0];
   return (from === null ? undefined : [...changes].reverse().find((c) => c.from < from)) ?? changes[changes.length - 1];
 }
@@ -99,8 +108,8 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
     setCurrentFrom(change.from);
     onGoTo(change);
   };
-  const next = () => go(neighbourChange(shown, currentFrom, 'next'));
-  const previous = () => go(neighbourChange(shown, currentFrom, 'previous'));
+  const next = () => go(neighbourChange(shown, currentFrom, 'next', currentId));
+  const previous = () => go(neighbourChange(shown, currentFrom, 'previous', currentId));
 
   return (
     <aside

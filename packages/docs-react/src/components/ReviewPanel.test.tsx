@@ -123,6 +123,21 @@ describe('neighbourChange', () => {
     expect(id(neighbourChange([change({ id: 'x', from: 6 }), change({ id: 'y', from: 22 })], 10, 'next'))).toBe('y');
   });
 
+  it('visits changes that start at one position one after the other, in both directions', () => {
+    const same = [change({ id: 'a', from: 5 }), change({ id: 'b', from: 5 }), change({ id: 'c', from: 5 }), change({ id: 'd', from: 30 })];
+    expect(id(neighbourChange(same, 5, 'next', 'a'))).toBe('b');
+    expect(id(neighbourChange(same, 5, 'next', 'b'))).toBe('c');
+    expect(id(neighbourChange(same, 5, 'next', 'c'))).toBe('d');
+    expect(id(neighbourChange(same, 30, 'next', 'd'))).toBe('a');
+    expect(id(neighbourChange(same, 5, 'previous', 'c'))).toBe('b');
+    expect(id(neighbourChange(same, 5, 'previous', 'a'))).toBe('d');
+  });
+
+  it('falls back to the position when the current id is not listed any more', () => {
+    expect(id(neighbourChange(list, 20, 'next', 'gone'))).toBe('c');
+    expect(id(neighbourChange(list, 20, 'previous', 'gone'))).toBe('a');
+  });
+
   it('is nothing without changes', () => {
     expect(neighbourChange([], 3, 'next')).toBeUndefined();
     expect(neighbourChange([], null, 'previous')).toBeUndefined();

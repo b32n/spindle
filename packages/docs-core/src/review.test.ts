@@ -144,6 +144,58 @@ describe('moves', () => {
   });
 });
 
+describe('the order of the list of changes', () => {
+  const move = (id: string, moveId = 'm1') => ({ id, author: 'Cy', moveId });
+
+  it('is document order, with a move where its text went to (an old place above the new one does not put it early)', () => {
+    const state = stateOf([
+      para([run('A', { insertion: ADA })]),
+      para([run('moved', { deletion: move('5') })]),
+      para([run('B', { insertion: { id: '3', author: 'Bo' } })]),
+      para([run('x', { insertion: move('6') })]),
+    ]);
+    const changes = listChanges(state.doc);
+    expect(changes.map((c) => c.text)).toEqual(['A', 'B', 'x']);
+    expect(changes.map((c) => c.from)).toEqual([...changes.map((c) => c.from)].sort((a, b) => a - b));
+  });
+
+  it('keeps changes that start at one position in the order they were found', () => {
+    const state = stateOf([para([run('x', { insertion: ADA, deletion: BO })])]);
+    const changes = listChanges(state.doc);
+    expect(changes).toHaveLength(2);
+    expect(changes[0].from).toBe(changes[1].from);
+    expect(changes.map((c) => c.kind).sort()).toEqual(['deletion', 'insertion']);
+  });
+
+  it('covers every end of a move that has several (one per moved paragraph), text and range', () => {
+    const state = stateOf([
+      para([run('one', { deletion: move('5') })]),
+      para([run('two', { deletion: move('6') })]),
+      para([run('un', { insertion: move('7') })]),
+      para([run('deux', { insertion: move('8') })]),
+    ]);
+    const changes = listChanges(state.doc);
+    expect(changes).toHaveLength(1);
+    expect(changes[0].kind).toBe('move');
+    expect(changes[0].text).toBe('undeux');
+    expect(changes[0].units).toHaveLength(4);
+    expect(changes[0].from).toBe(state.doc.child(0).nodeSize + state.doc.child(1).nodeSize + 1);
+    expect(changes[0].to).toBe(state.doc.content.size - 1);
+    expect(texts(apply(state, resolveChange(changes[0].id, 'reject')).doc)).toEqual(['one', 'two', '', '']);
+    expect(texts(apply(state, resolveChange(changes[0].id, 'accept')).doc)).toEqual(['', '', 'un', 'deux']);
+  });
+});
+
+describe('settling nothing', () => {
+  it('gives no transaction when a unit no longer has its node, so no empty step reaches the undo history', () => {
+    const state = stateOf([para([run('a')], { revision: { insertion: ADA } })]);
+    const unit = changeUnits(state.doc).find((u) => u.kind === 'markInsertion')!;
+    expect(unit).toBeDefined();
+    expect(settle(state, [{ ...unit, from: state.doc.content.size }], 'accept')).toBeNull();
+    expect(resolveAll('accept')(state, undefined)).toBe(true);
+  });
+});
+
 describe('formatting changes of text', () => {
   const blocks = [para([run('now', { formatChange: { id: '7', author: 'Di', previous: { italic: true, fontSize: 14, color: '#c00000' } } }, { bold: true, color: '#00ff00' })])];
   const markNames = (state: EditorState) => state.doc.firstChild!.firstChild!.marks.map((m) => m.type.name).sort();

@@ -66,7 +66,7 @@ Verified absent in code.
       a review panel accepts and rejects changes (one, all, one author's) and shows All markup / Final / Original. Not done:
       Suggesting mode (typing as tracked changes); changes of cells, tables and sections, and a change around a field, image or
       note reference (those are not kept as changes); the Final and Original views (read-only, with a banner to switch back)
-      do not remove deleted rows or show the old paragraph formatting, a paragraph whose text is hidden stays as an empty line,
+      do not remove deleted rows or show the old paragraph formatting, a paragraph whose text is hidden stays as an empty line, paragraph breaks are not hidden (a deleted mark still splits paragraphs in Final, an inserted one in Original), accepting the deletion of the mark of an empty paragraph keeps the first paragraph's type (a heading after it becomes a paragraph),
       and the zero-width placeholders can change where a long hidden run wraps; accepting a change in a shared document is not
       coordinated between collaborators yet. The margin bar is drawn beside top-level paragraphs, headings and list items only, not
       inside table cells, text boxes or tables of contents (those paragraphs carry the change, without a visible bar). Two move
