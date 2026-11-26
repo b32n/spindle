@@ -299,6 +299,411 @@
       "generator": "generators/build_layouts.py"
     },
     {
+      "id": "images",
+      "filename": "images.pptx",
+      "title": "Images",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "text.basic",
+        "images.png",
+        "images.jpeg",
+        "images.gif",
+        "images.svg",
+        "images.emf",
+        "images.wmf",
+        "images.crop",
+        "images.transform",
+        "images.linked",
+        "images.altText",
+        "images.recolor",
+        "shapes.flip",
+        "shapes.rotation"
+      ],
+      "notes": "PNG, JPEG and GIF pictures, an SVG picture with a PNG fallback (the asvg:svgBlip extension), an empty EMF and an empty WMF, a cropped picture, a rotated one, horizontal and vertical flips, a bordered rounded one, duotone, brightness and contrast, greyscale, colour change and transparency, alternative text on every picture, and a linked picture whose target is a local path that does not exist (stored, never fetched).",
+      "generator": "generators/build_images.py"
+    },
+    {
+      "id": "media",
+      "filename": "media.pptx",
+      "title": "Audio and video",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "media.audio",
+        "media.video",
+        "images.png",
+        "images.altText"
+      ],
+      "notes": "An inert MP4 stub (file-type box and an empty media-data box) and a 100-sample silent WAV, each with a poster picture and the PowerPoint 2010 p14:media extension. Neither file is playable.",
+      "generator": "generators/build_images.py"
+    },
+    {
+      "id": "tables",
+      "filename": "tables.pptx",
+      "title": "Tables",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "tables.basic",
+        "tables.merge",
+        "tables.banding",
+        "tables.headerRow",
+        "tables.styleRef",
+        "tables.customStyles",
+        "tables.borders",
+        "tables.cellFill",
+        "fills.colorTransforms"
+      ],
+      "notes": "A table that references a custom table style defined in tableStyles.xml (header row, first column, banded rows), an unstyled table, merged cells (across, down and both, with hMerge and vMerge continuation cells), per-side cell borders with colours, widths and dashes, a diagonal border, and solid, gradient, themed and empty cell fills.",
+      "generator": "generators/build_tables.py"
+    },
+    {
+      "id": "groups-connectors",
+      "filename": "groups-connectors.pptx",
+      "title": "Groups and connectors",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "groups.basic",
+        "groups.nested",
+        "groups.scaled",
+        "connectors.straight",
+        "connectors.elbow",
+        "connectors.curved",
+        "connectors.connected",
+        "lines.arrowheads",
+        "shapes.presets",
+        "shapes.flip"
+      ],
+      "notes": "A simple group, a group whose child space is twice its size, three nested groups, a group holding a text box and a line, then straight, elbow and curved connectors attached to shapes through their connection sites (one flipped), and unattached elbow, curved and straight connectors with end styles.",
+      "generator": "generators/build_tables.py"
+    },
+    {
+      "id": "charts",
+      "filename": "charts.pptx",
+      "title": "Charts",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "charts.bar",
+        "charts.line",
+        "charts.pie",
+        "charts.scatter",
+        "charts.cache",
+        "charts.embeddedWorkbook"
+      ],
+      "notes": "A clustered column, a line, a pie and a scatter chart, each with cached data and an embedded workbook (a minimal stdlib-built xlsx).",
+      "generator": "generators/build_charts.py"
+    },
+    {
+      "id": "smartart",
+      "filename": "smartart.pptx",
+      "title": "SmartArt",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "smartart.diagram",
+        "smartart.drawing"
+      ],
+      "notes": "A basic block list: the diagram data, layout, quick style and colours parts plus the cached drawing that applications show when they cannot lay the diagram out.",
+      "generator": "generators/build_charts.py"
+    },
+    {
+      "id": "wordart-ink-ole-equations",
+      "filename": "wordart-ink-ole-equations.pptx",
+      "title": "WordArt, ink, an OLE object, an equation and actions",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "text.runs",
+        "objects.wordArt",
+        "objects.ink",
+        "objects.ole",
+        "objects.equations",
+        "objects.actions",
+        "objects.macroActions"
+      ],
+      "notes": "Two WordArt shapes (arched and wave text warp), an ink part (InkML) placed through a content part, an equation in an mc:AlternateContent with a text fallback, an embedded OLE object with a preview picture (the payload is an inert text placeholder), a button with a slide-jump action and a button with a macro action (the macro does not exist and is never run).",
+      "generator": "generators/build_charts.py"
+    },
+    {
+      "id": "transitions-animations",
+      "filename": "transitions-animations.pptx",
+      "title": "Transitions and animations",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "transitions.basic",
+        "transitions.timed",
+        "transitions.extended",
+        "animations.timing",
+        "animations.entrance",
+        "animations.exit",
+        "animations.emphasis",
+        "animations.motionPath",
+        "animations.build"
+      ],
+      "notes": "Fade, push (with automatic advance after 5 seconds and no click advance) and wipe transitions, a PowerPoint 2010 vortex transition with a fade fallback, one slide with entrance, exit, emphasis and motion-path effects, and a list that builds paragraph by paragraph.",
+      "generator": "generators/build_flow.py"
+    },
+    {
+      "id": "notes",
+      "filename": "notes.pptx",
+      "title": "Notes",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "notes.slides",
+        "notes.master",
+        "notes.rich"
+      ],
+      "notes": "A notes master and notes pages: plain notes, rich notes (bold, italic, underline, colour, bullets, numbering, nested level, spacing) and a slide without notes.",
+      "generator": "generators/build_flow.py"
+    },
+    {
+      "id": "comments-legacy",
+      "filename": "comments-legacy.pptx",
+      "title": "Comments (legacy format)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "comments.legacy",
+        "comments.authors"
+      ],
+      "notes": "Two authors (invented names) and three comments in the pre-2018 format: a commentAuthors part and one comments part per slide.",
+      "generator": "generators/build_flow.py"
+    },
+    {
+      "id": "comments-modern",
+      "filename": "comments-modern.pptx",
+      "title": "Comments (modern format)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "comments.modern",
+        "comments.replies",
+        "comments.authors"
+      ],
+      "notes": "The PowerPoint 365 format: an authors part, a modern comment part with one comment and one reply, anchored to a slide by its id (author names are invented).",
+      "generator": "generators/build_flow.py"
+    },
+    {
+      "id": "hidden-sections",
+      "filename": "hidden-sections.pptx",
+      "title": "Hidden slides, sections and custom shows",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "slides.hidden",
+        "sections.list",
+        "sections.customShows"
+      ],
+      "notes": "Five slides, the second hidden, three sections (Intro, Body, Wrap-up) in the p14:sectionLst extension, and two custom shows that name slides by relationship id.",
+      "generator": "generators/build_flow.py"
+    },
+    {
+      "id": "rtl-cjk",
+      "filename": "rtl-cjk.pptx",
+      "title": "Right-to-left and CJK text",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "text.rtl",
+        "text.cjk",
+        "text.lang",
+        "text.vertical",
+        "text.alignment"
+      ],
+      "notes": "Hebrew, Arabic and mixed-direction paragraphs (rtl and right alignment), Chinese (simplified and traditional), Japanese and Korean text with East Asian fonts and language tags, and a vertical Japanese text box.",
+      "generator": "generators/build_flow.py"
+    },
+    {
+      "id": "python-pptx-deck",
+      "filename": "python-pptx-deck.pptx",
+      "title": "Made with python-pptx",
+      "source": {
+        "tool": "python-pptx (Python), written by the library",
+        "version": "1.0.2",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "text.basic",
+        "text.levels",
+        "tables.basic",
+        "tables.merge",
+        "images.png",
+        "charts.bar",
+        "charts.embeddedWorkbook",
+        "charts.cache",
+        "notes.slides",
+        "notes.master",
+        "shapes.presets",
+        "sizes.4x3",
+        "layouts.placeholders"
+      ],
+      "notes": "A deck written by python-pptx 1.0.2 from its own default template: title and bullet slides with levels, a table with a merged cell, a picture, auto shapes, a text box, notes, and a column chart with an embedded workbook. Package properties are normalised and the embedded workbook's dates are fixed; the template (MIT) supplies the master, layouts and theme.",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "libreoffice-deck",
+      "filename": "libreoffice-deck.pptx",
+      "title": "Converted by LibreOffice",
+      "source": {
+        "tool": "python-pptx deck converted by LibreOffice headless (soffice --convert-to pptx)",
+        "version": "LibreOffice 25.2.3.2, python-pptx 1.0.2",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "text.basic",
+        "text.levels",
+        "tables.basic",
+        "tables.merge",
+        "images.png",
+        "charts.bar",
+        "notes.slides",
+        "notes.master",
+        "shapes.presets",
+        "sizes.4x3",
+        "layouts.background",
+        "fills.gradient"
+      ],
+      "notes": "The python-pptx deck above converted with soffice --headless --convert-to pptx, so LibreOffice wrote the package (its relationship names, id schemes, master and layouts). Random field GUIDs and chart axis ids are renumbered so that rebuilding gives the same bytes.",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "kitchen-sink",
+      "filename": "kitchen-sink.pptx",
+      "title": "Kitchen sink",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "slides.multiple",
+        "text.basic",
+        "text.runs",
+        "text.levels",
+        "text.bullets",
+        "text.numbering",
+        "text.hyperlinks",
+        "text.tabStops",
+        "text.rtl",
+        "text.cjk",
+        "text.lang",
+        "masters.handoutMaster",
+        "theme.fontScheme",
+        "theme.fontsEastAsian",
+        "theme.effectScheme",
+        "fills.gradient",
+        "fills.colorTransforms",
+        "lines.dash",
+        "effects.shadow",
+        "shapes.custGeom",
+        "shapes.rotation",
+        "shapes.flip",
+        "images.png",
+        "images.crop",
+        "images.altText",
+        "tables.basic",
+        "tables.merge",
+        "tables.styleRef",
+        "tables.customStyles",
+        "tables.borders",
+        "tables.cellFill",
+        "groups.basic",
+        "connectors.elbow",
+        "connectors.connected",
+        "charts.bar",
+        "charts.embeddedWorkbook",
+        "transitions.basic",
+        "transitions.timed",
+        "animations.timing",
+        "animations.entrance",
+        "notes.slides",
+        "notes.master",
+        "notes.rich",
+        "comments.legacy",
+        "comments.authors",
+        "slides.hidden",
+        "sections.list"
+      ],
+      "notes": "One eight-slide deck that combines the constructs of the others: a custom theme with East Asian fonts and effect styles, a handout master, text with levels, numbering, links and tab stops, gradient, shadowed, rotated and custom shapes, a styled table with merges, a cropped picture, a chart with a workbook, a group and an attached elbow connector, a hidden slide with a transition and an animation, Hebrew and Japanese text, rich notes, a legacy comment and two sections.",
+      "generator": "generators/build_misc.py"
+    },
+    {
+      "id": "macro-enabled",
+      "filename": "macro-enabled.pptm",
+      "title": "Macro-enabled presentation",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/pptx/generators/pptxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "macros.vba",
+        "objects.actions",
+        "objects.macroActions"
+      ],
+      "notes": "A .pptm whose package holds an inert placeholder vbaProject.bin (readable text, never a real macro) and a shape with a macro action that does not resolve to anything runnable.",
+      "generator": "generators/build_misc.py"
+    },
+    {
       "id": "edge-truncated-zip",
       "filename": "edge-truncated-zip.pptx",
       "title": "Edge: truncated zip",

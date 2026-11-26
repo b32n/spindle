@@ -4,6 +4,7 @@ Everything in the hand-authored corpus is written here or in the build_*.py scri
 no third-party content. Output is deterministic: fixed zip timestamps, fixed core-properties dates, no author names,
 no randomness. `Deck` assembles masters, layouts, slides, notes and every relationship and content-type entry.
 """
+import io
 import re
 import struct
 import zipfile
@@ -95,14 +96,25 @@ def read_zip(path):
         return {n: z.read(n) for n in z.namelist()}
 
 
-def normalise(path):
-    """Producer-variety files: replace docProps with the fixed ones (keeping the producer's Application name) and re-zip deterministically."""
+def normalise(path, application=None):
+    """Producer-variety files: replace docProps with the fixed ones (keeping the producer's Application name unless `application` is given),
+    fix the dates inside embedded workbooks and re-zip deterministically."""
     parts = read_zip(path)
     if "docProps/core.xml" in parts:
         parts["docProps/core.xml"] = core_xml("Fixture").encode()
     if "docProps/app.xml" in parts:
         m = re.search(rb"<Application>([^<]*)</Application>", parts["docProps/app.xml"])
-        parts["docProps/app.xml"] = app_xml(_unesc(m.group(1).decode()) if m else "Spindle fixture generator").encode()
+        parts["docProps/app.xml"] = app_xml(application or (_unesc(m.group(1).decode()) if m else "Spindle fixture generator")).encode()
+    for name in [n for n in parts if re.search(r"^ppt/embeddings/.*\.xlsx$", n)]:
+        inner = {}
+        with zipfile.ZipFile(io.BytesIO(parts[name])) as z:
+            inner = {n: z.read(n) for n in z.namelist()}
+        for n, data in inner.items():
+            if n == "docProps/core.xml":
+                inner[n] = re.sub(rb"(<dcterms:(?:created|modified)\b[^>]*>)[^<]*", rb"\g<1>" + ISO.encode(), data)
+        buf = io.BytesIO()
+        write_zip(buf, inner)
+        parts[name] = buf.getvalue()
     write_zip(path, parts)
 
 
@@ -394,7 +406,7 @@ class Deck:
                 notes_rid = rid
             else:
                 handout_rid = rid
-        sld_ids, notes_no = "", 0
+        sld_ids, notes_no, slide_rids, last_idx = "", 0, [], {}  # last_idx: highest comment index used per author
         for si, s in enumerate(self.slides, 1):
             srels = Rels()
             srels.items = list(s.rels.items)  # media, links and parts added first keep their rIds
@@ -415,11 +427,15 @@ class Deck:
                 ct[f"ppt/notesSlides/notesSlide{notes_no}.xml"] = CT["notes"]
             if si - 1 in self.slide_comments:
                 srels.add("comments", f"../comments/comment{si}.xml")
-                body = "".join(f'<p:cm authorId="{a}" dt="{ISO[:-1]}.000" idx="{n}"><p:pos x="{x}" y="{y}"/><p:text>{esc(t)}</p:text></p:cm>' for n, (a, x, y, t) in enumerate(self.slide_comments[si - 1], 1))
+                body = ""
+                for a, x, y, t in self.slide_comments[si - 1]:
+                    last_idx[a] = last_idx.get(a, 0) + 1
+                    body += f'<p:cm authorId="{a}" dt="{ISO[:-1]}.000" idx="{last_idx[a]}"><p:pos x="{x}" y="{y}"/><p:text>{esc(t)}</p:text></p:cm>'
                 P_[f"ppt/comments/comment{si}.xml"] = f'{HEAD}<p:cmLst {NS}>{body}</p:cmLst>'.encode()
                 ct[f"ppt/comments/comment{si}.xml"] = CT["comments"]
             P_[f"ppt/slides/_rels/slide{si}.xml.rels"] = srels.xml().encode()
             sid = pres_rels.add("slide", f"slides/slide{si}.xml")
+            slide_rids.append(sid)
             sld_ids += f'<p:sldId id="{255 + si}" r:id="{sid}"/>'
         for name, data in self.media.items():
             P_[f"ppt/media/{name}"] = data
@@ -429,7 +445,7 @@ class Deck:
                 ct[name] = c
         if self.comment_authors:
             pres_rels.add("commentAuthors", "commentAuthors.xml")
-            au = "".join(f'<p:cmAuthor id="{i}" name="{esc(n)}" initials="{esc(ini)}" lastIdx="1" clrIdx="{i}"/>' for i, n, ini in self.comment_authors)
+            au = "".join(f'<p:cmAuthor id="{i}" name="{esc(n)}" initials="{esc(ini)}" lastIdx="{last_idx.get(i, 0)}" clrIdx="{i}"/>' for i, n, ini in self.comment_authors)
             P_["ppt/commentAuthors.xml"] = f'{HEAD}<p:cmAuthorLst {NS}>{au}</p:cmAuthorLst>'.encode()
             ct["ppt/commentAuthors.xml"] = CT["commentAuthors"]
         for typ, target in self.pres_rels_extra:
@@ -442,6 +458,7 @@ class Deck:
             ct[f"ppt/{name}.xml"] = CT[c]
         pres_rels.add("theme", "theme/theme1.xml")
         pe = self.pres_extra
+        cust = re.sub(r"@slide:(\d+)@", lambda m: slide_rids[int(m.group(1)) - 1], pe["custShows"])  # custom shows name slides by rId
         nm = f'<p:notesMasterIdLst><p:notesMasterId r:id="{notes_rid}"/></p:notesMasterIdLst>' if notes_rid else ""
         hm = f'<p:handoutMasterIdLst><p:handoutMasterId r:id="{handout_rid}"/></p:handoutMasterIdLst>' if handout_rid else ""
         typ = f' type="{self.size_type}"' if self.size_type else ""
@@ -450,7 +467,7 @@ class Deck:
             for n in range(1, 10)) + "</p:defaultTextStyle>") if pe["defaultTextStyle"] else ""
         slst = f"<p:sldIdLst>{sld_ids}</p:sldIdLst>" if self.slides else ""
         P_["ppt/presentation.xml"] = (f'{HEAD}<p:presentation {NS} saveSubsetFonts="1"><p:sldMasterIdLst>{sld_master_lst}</p:sldMasterIdLst>{nm}{hm}{slst}'
-                                      f'<p:sldSz cx="{cx}" cy="{cy}"{typ}/><p:notesSz cx="6858000" cy="9144000"/>{pe["custShows"]}{dts}{pe["ext"]}</p:presentation>').encode()
+                                      f'<p:sldSz cx="{cx}" cy="{cy}"{typ}/><p:notesSz cx="6858000" cy="9144000"/>{cust}{dts}{pe["ext"]}</p:presentation>').encode()
         ct["ppt/presentation.xml"] = CT["macro" if self.macro else "presentation"]
         P_["ppt/_rels/presentation.xml.rels"] = pres_rels.xml().encode()
         self.root_rels.add("officeDocument", "ppt/presentation.xml")

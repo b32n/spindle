@@ -2,10 +2,12 @@ import { isWellFormed } from '../fidelity-core/ooxml-package';
 import type { OoxmlParts } from '../fidelity-core/ooxml-package';
 import type { Construct } from '../fidelity-core/types';
 import {
+  OPEN,
   maxGroupDepth,
   missingSlideParts,
   relationshipCycles,
   relationshipEdges,
+  scaledGroups,
   slideSize,
 } from './structure';
 
@@ -17,6 +19,9 @@ const SLIDE = /^ppt\/slides\/slide\d+\.xml$/;
 const LAYOUT = /^ppt\/slideLayouts\/slideLayout\d+\.xml$/;
 const MASTER = /^ppt\/slideMasters\/slideMaster\d+\.xml$/;
 const THEME = /^ppt\/theme\/theme\d+\.xml$/;
+const NOTES = /^ppt\/notesSlides\/notesSlide\d+\.xml$/;
+const CHART = /^ppt\/charts\/chart\d+\.xml$/;
+const COMMENTS = /^ppt\/comments\/[^/]+\.xml$/;
 const partsOf = (p: OoxmlParts, names: RegExp) =>
   Object.entries(p.xml)
     .filter(([n]) => names.test(n))
@@ -29,12 +34,12 @@ const countNames = (p: OoxmlParts, re: RegExp) => p.names.filter((n) => re.test(
 /** Opening tag of `tag` carrying every attribute pattern, in any order (each pattern is a regex source such as `lvl="[1-8]"`). */
 const el = (tag: string, ...attrs: string[]) =>
   new RegExp(`<${tag}\\b${attrs.map((a) => `(?=[^>]*\\b(?:${a}))`).join('')}[^>]*>`, 'g');
-/** The rest of an opening tag that is not self-closing: attributes, then `>` (a `/>` never matches). */
-const OPEN = '(?:[^>/]|/(?!>))*>';
 const tagRe = (...names: string[]) => new RegExp(`<a:(?:${names.join('|')})\\b`, 'g');
 
 const PROPS = new RegExp(`<p:spPr\\b${OPEN}([\\s\\S]*?)</p:spPr>`, 'g');
 const OUTLINE = new RegExp(`<a:ln\\b${OPEN}[\\s\\S]*?</a:ln>`, 'g');
+const CELL_PROPS = new RegExp(`<a:tcPr\\b${OPEN}[\\s\\S]*?</a:tcPr>`, 'g');
+const CELL_BORDER = new RegExp(`<a:(ln[LRTB]|lnTlToBr|lnBlToTr)\\b${OPEN}[\\s\\S]*?</a:\\1>`, 'g');
 const RUN_PROPS = `<a:rPr\\b${OPEN}(?:(?!</a:rPr>)[\\s\\S])*?`;
 
 /** Shape property blocks of the slides, with the outline removed (fills) and the outlines apart. */
@@ -53,6 +58,18 @@ const inFills = (p: OoxmlParts, re: RegExp) =>
   shapeProps(p).fills.reduce((sum, x) => sum + count(x, re), 0);
 const inLines = (p: OoxmlParts, re: RegExp) =>
   shapeProps(p).lines.reduce((sum, x) => sum + count(x, re), 0);
+
+const blocks = (p: OoxmlParts, tag: string) =>
+  partsOf(p, SLIDE).flatMap((x) => x.match(new RegExp(`<${tag}\\b[\\s\\S]*?</${tag}>`, 'g')) ?? []);
+const pictures = (p: OoxmlParts) => blocks(p, 'p:pic');
+const connectors = (p: OoxmlParts, test: RegExp) =>
+  blocks(p, 'p:cxnSp').filter((b) => test.test(b)).length;
+const media = (ext: string) => (p: OoxmlParts) =>
+  countNames(p, new RegExp(`^ppt/media/[^/]+\\.(?:${ext})$`, 'i'));
+const chart = (tag: string) => (p: OoxmlParts) =>
+  inParts(p, CHART, new RegExp(`<c:${tag}\\b`, 'g'));
+const effectClass = (cls: string) => (p: OoxmlParts) =>
+  inSlides(p, el('p:cTn', `presetClass="${cls}"`));
 
 const presetNames = (p: OoxmlParts) =>
   partsOf(p, SLIDE).flatMap((x) =>
@@ -382,6 +399,263 @@ export const CONSTRUCTS: PptxConstruct[] = [
     id: 'shapes.textBox',
     label: 'Text boxes',
     count: (p) => inSlides(p, el('p:cNvSpPr', 'txBox="(?:1|true)"')),
+  },
+  { id: 'images.png', label: 'PNG pictures', count: media('png') },
+  { id: 'images.jpeg', label: 'JPEG pictures', count: media('jpe?g') },
+  { id: 'images.gif', label: 'GIF pictures', count: media('gif') },
+  { id: 'images.svg', label: 'SVG pictures', count: media('svg') },
+  { id: 'images.emf', label: 'EMF pictures', count: media('emf') },
+  { id: 'images.wmf', label: 'WMF pictures', count: media('wmf') },
+  {
+    id: 'images.crop',
+    label: 'Cropped pictures',
+    count: (p) => inSlides(p, el('a:srcRect', '[ltrb]="-?[1-9]')),
+  },
+  {
+    id: 'images.transform',
+    label: 'Rotated or flipped pictures',
+    count: (p) =>
+      pictures(p).reduce(
+        (sum, b) => sum + count(b, el('a:xfrm', 'rot="-?[1-9]|flip[HV]="(?:1|true)"')),
+        0
+      ),
+  },
+  {
+    id: 'images.linked',
+    label: 'Linked (not embedded) pictures',
+    count: (p) => inSlides(p, el('a:blip', 'r:link="')),
+  },
+  {
+    id: 'images.altText',
+    label: 'Pictures with alternative text',
+    count: (p) => pictures(p).filter((b) => /<p:cNvPr\b[^>]*\bdescr="[^"]/.test(b)).length,
+  },
+  {
+    id: 'images.recolor',
+    label: 'Picture recolouring (duotone, greyscale, brightness, colour change)',
+    count: (p) => inSlides(p, tagRe('duotone', 'grayscl', 'lum', 'clrChange', 'biLevel')),
+  },
+  { id: 'tables.basic', label: 'Tables', count: (p) => inSlides(p, /<a:tbl>/g) },
+  {
+    id: 'tables.merge',
+    label: 'Merged table cells',
+    count: (p) =>
+      inSlides(p, el('a:tc', '(?:gridSpan|rowSpan)="[2-9]|(?:hMerge|vMerge)="(?:1|true)"')),
+  },
+  {
+    id: 'tables.banding',
+    label: 'Banded rows or columns',
+    count: (p) => inSlides(p, el('a:tblPr', '(?:bandRow|bandCol)="(?:1|true)"')),
+  },
+  {
+    id: 'tables.headerRow',
+    label: 'Header, first-column, total or last-column formatting',
+    count: (p) => inSlides(p, el('a:tblPr', '(?:firstRow|firstCol|lastRow|lastCol)="(?:1|true)"')),
+  },
+  {
+    id: 'tables.styleRef',
+    label: 'Tables that reference a table style',
+    count: (p) => inSlides(p, tagRe('tableStyleId')),
+  },
+  {
+    id: 'tables.customStyles',
+    label: 'Table styles defined in the package',
+    count: (p) => inParts(p, /^ppt\/tableStyles\.xml$/, tagRe('tblStyle')),
+  },
+  {
+    id: 'tables.borders',
+    label: 'Cell borders',
+    count: (p) => inSlides(p, tagRe('lnL', 'lnR', 'lnT', 'lnB', 'lnTlToBr', 'lnBlToTr')),
+  },
+  {
+    id: 'tables.cellFill',
+    label: 'Cell fills (borders excluded)',
+    count: (p) =>
+      partsOf(p, SLIDE)
+        .flatMap((x) => x.match(CELL_PROPS) ?? [])
+        .reduce(
+          (sum, b) =>
+            sum +
+            count(b.replace(CELL_BORDER, ''), /<a:(?:solidFill|gradFill|pattFill|blipFill)\b/g),
+          0
+        ),
+  },
+  { id: 'groups.basic', label: 'Groups', count: (p) => inSlides(p, /<p:grpSp\b/g) },
+  {
+    id: 'groups.nested',
+    label: 'Slides with groups inside groups',
+    count: (p) => partsOf(p, SLIDE).filter((x) => maxGroupDepth(x) >= 2).length,
+  },
+  {
+    id: 'groups.scaled',
+    label: 'Groups whose children are scaled (chExt differs from ext)',
+    count: (p) => partsOf(p, SLIDE).reduce((sum, x) => sum + scaledGroups(x), 0),
+  },
+  {
+    id: 'connectors.straight',
+    label: 'Straight connectors',
+    count: (p) => connectors(p, /<a:prstGeom\b[^>]*\bprst="(?:straightConnector1|line)"/),
+  },
+  {
+    id: 'connectors.elbow',
+    label: 'Elbow connectors',
+    count: (p) => connectors(p, /\bprst="bentConnector\d"/),
+  },
+  {
+    id: 'connectors.curved',
+    label: 'Curved connectors',
+    count: (p) => connectors(p, /\bprst="curvedConnector\d"/),
+  },
+  {
+    id: 'connectors.connected',
+    label: 'Connectors attached to shapes (connection sites)',
+    count: (p) => connectors(p, /<a:(?:stCxn|endCxn)\b/),
+  },
+  { id: 'charts.bar', label: 'Bar and column charts', count: chart('barChart') },
+  { id: 'charts.line', label: 'Line charts', count: chart('lineChart') },
+  { id: 'charts.pie', label: 'Pie charts', count: chart('pieChart') },
+  { id: 'charts.scatter', label: 'Scatter charts', count: chart('scatterChart') },
+  {
+    id: 'charts.cache',
+    label: 'Chart data caches',
+    count: (p) => inParts(p, CHART, /<c:numCache>/g),
+  },
+  {
+    id: 'charts.embeddedWorkbook',
+    label: 'Charts with an embedded workbook',
+    count: (p) =>
+      relationshipEdges(p).filter((e) => CHART.test(e.from) && e.type.endsWith('/package')).length,
+  },
+  {
+    id: 'smartart.diagram',
+    label: 'SmartArt diagrams',
+    count: (p) => inSlides(p, /<dgm:relIds\b/g),
+  },
+  {
+    id: 'smartart.drawing',
+    label: 'SmartArt cached drawings',
+    count: (p) => countNames(p, /^ppt\/diagrams\/drawing\d+\.xml$/),
+  },
+  { id: 'media.audio', label: 'Audio', count: (p) => inSlides(p, tagRe('audioFile')) },
+  { id: 'media.video', label: 'Video', count: (p) => inSlides(p, tagRe('videoFile')) },
+  {
+    id: 'transitions.basic',
+    label: 'Transition elements (a PowerPoint 2010 transition counts twice: choice and fallback)',
+    count: (p) => inSlides(p, /<p:transition\b/g),
+  },
+  {
+    id: 'transitions.timed',
+    label: 'Transitions with automatic advance or click control',
+    count: (p) => inSlides(p, el('p:transition', '(?:advTm|advClick)="')),
+  },
+  {
+    id: 'transitions.extended',
+    label: 'PowerPoint 2010 transitions (with fallback)',
+    count: (p) => inSlides(p, /<mc:Choice\b(?=[^>]*\bRequires="p14")[^>]*>\s*<p:transition\b/g),
+  },
+  {
+    id: 'animations.timing',
+    label: 'Animation timing trees',
+    count: (p) => inSlides(p, /<p:timing\b/g),
+  },
+  { id: 'animations.entrance', label: 'Entrance effects', count: effectClass('entr') },
+  { id: 'animations.exit', label: 'Exit effects', count: effectClass('exit') },
+  { id: 'animations.emphasis', label: 'Emphasis effects', count: effectClass('emph') },
+  {
+    id: 'animations.motionPath',
+    label: 'Motion paths',
+    count: (p) => inSlides(p, /<p:animMotion\b/g),
+  },
+  {
+    id: 'animations.build',
+    label: 'Builds by paragraph',
+    count: (p) => inSlides(p, el('p:bldP', 'build="(?!whole")')),
+  },
+  { id: 'notes.slides', label: 'Notes pages', count: (p) => countNames(p, NOTES) },
+  {
+    id: 'notes.master',
+    label: 'Notes master',
+    count: (p) => countNames(p, /^ppt\/notesMasters\/notesMaster\d+\.xml$/),
+  },
+  {
+    id: 'notes.rich',
+    label: 'Formatted or bulleted notes',
+    count: (p) =>
+      inParts(p, NOTES, el('a:rPr', '(?:b|i)="(?:1|true)"|u="(?!none")')) +
+      inParts(p, NOTES, tagRe('buChar', 'buAutoNum')),
+  },
+  {
+    id: 'comments.legacy',
+    label: 'Comments (legacy format)',
+    count: (p) => inParts(p, COMMENTS, /<p:cm\b/g),
+  },
+  {
+    id: 'comments.modern',
+    label: 'Modern comments',
+    count: (p) => inParts(p, COMMENTS, /<p188:cm\b/g),
+  },
+  {
+    id: 'comments.replies',
+    label: 'Comment replies',
+    count: (p) => inParts(p, COMMENTS, /<p188:reply\b/g),
+  },
+  {
+    id: 'comments.authors',
+    label: 'Comment author lists',
+    count: (p) => countNames(p, /^ppt\/(?:commentAuthors|authors)\.xml$/),
+  },
+  {
+    id: 'slides.hidden',
+    label: 'Hidden slides',
+    count: (p) => inSlides(p, el('p:sld', 'show="(?:0|false)"')),
+  },
+  {
+    id: 'sections.list',
+    label: 'Sections',
+    count: (p) => inParts(p, /^ppt\/presentation\.xml$/, /<p14:section\b/g),
+  },
+  {
+    id: 'sections.customShows',
+    label: 'Custom shows',
+    count: (p) => inParts(p, /^ppt\/presentation\.xml$/, /<p:custShow\b/g),
+  },
+  {
+    id: 'text.rtl',
+    label: 'Right-to-left paragraphs',
+    count: (p) => inSlides(p, el('a:pPr', 'rtl="(?:1|true)"')),
+  },
+  {
+    id: 'text.cjk',
+    label: 'Chinese, Japanese and Korean characters',
+    count: (p) => inSlides(p, /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g),
+  },
+  {
+    id: 'text.lang',
+    label: 'Runs with a language other than en-US',
+    count: (p) => inSlides(p, el('a:rPr', 'lang="(?!en-US")[^"]+"')),
+  },
+  {
+    id: 'objects.wordArt',
+    label: 'WordArt (text warp)',
+    count: (p) => inSlides(p, el('a:prstTxWarp', 'prst="(?!textNoShape")')),
+  },
+  { id: 'objects.ink', label: 'Ink', count: (p) => countNames(p, /^ppt\/ink\/[^/]+\.xml$/) },
+  { id: 'objects.ole', label: 'Embedded OLE objects', count: (p) => inSlides(p, /<p:oleObj\b/g) },
+  { id: 'objects.equations', label: 'Equations', count: (p) => inSlides(p, /<a14:m\b/g) },
+  {
+    id: 'objects.actions',
+    label: 'Action hyperlinks',
+    count: (p) => inSlides(p, el('a:hlinkClick', 'action="ppaction:')),
+  },
+  {
+    id: 'objects.macroActions',
+    label: 'Macro actions (never run)',
+    count: (p) => inSlides(p, el('a:hlinkClick', 'action="ppaction://macro')),
+  },
+  {
+    id: 'macros.vba',
+    label: 'Macro project (vbaProject.bin)',
+    count: (p) => countNames(p, /^ppt\/vbaProject\.bin$/),
   },
   { id: 'sizes.4x3', label: 'Slide size 4:3', count: sizeIs('4x3') },
   { id: 'sizes.16x9', label: 'Slide size 16:9', count: sizeIs('16x9') },

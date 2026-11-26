@@ -3,6 +3,9 @@ import type { OoxmlParts } from '../fidelity-core/ooxml-package';
 
 /** Package-structure helpers for the PPTX probes: nesting depth, the relationship graph and the slide size. */
 
+/** The rest of an opening tag that is not self-closing: attributes, then `>` (a `/>` never matches). */
+export const OPEN = '(?:[^>/]|/(?!>))*>';
+
 const attr = (tag: string, name: string) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
 
 /** Deepest nesting of `<p:grpSp>` in one slide part. */
@@ -15,6 +18,20 @@ export function maxGroupDepth(xml: string): number {
     max = Math.max(max, depth);
   }
   return max;
+}
+
+/** Groups whose child coordinate space (`chExt`) differs from their size (`ext`), so that the children are scaled. */
+export function scaledGroups(xml: string): number {
+  let scaled = 0;
+  for (const m of xml.matchAll(
+    new RegExp(`<p:grpSpPr\\b${OPEN}\\s*<a:xfrm\\b${OPEN}([\\s\\S]*?)</a:xfrm>`, 'g')
+  )) {
+    const ext = /<a:ext\b[^>]*>/.exec(m[1])?.[0];
+    const child = /<a:chExt\b[^>]*>/.exec(m[1])?.[0];
+    if (ext === undefined || child === undefined) continue;
+    if (attr(ext, 'cx') !== attr(child, 'cx') || attr(ext, 'cy') !== attr(child, 'cy')) scaled++;
+  }
+  return scaled;
 }
 
 export type SizeClass = 'a4' | 'portrait' | '4x3' | '16x9' | 'custom';

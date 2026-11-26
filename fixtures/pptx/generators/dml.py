@@ -110,12 +110,13 @@ def xfrm(x, y, cx, cy, rot=0, flipH=False, flipV=False, tag="a:xfrm"):
     return f'<{tag}{attrs}><a:off x="{x}" y="{y}"/><a:ext cx="{cx}" cy="{cy}"/></{tag}>'
 
 
-def sp(sid, name, x, y, cx, cy, prst="rect", fill=None, ln=None, paras="", bpr=None, rot=0, flipH=False, flipV=False, txbox=False, adj=None, effects="", custom=None, descr="", style=""):
+def sp(sid, name, x, y, cx, cy, prst="rect", fill=None, ln=None, paras="", bpr=None, rot=0, flipH=False, flipV=False, txbox=False, adj=None, effects="", custom=None, descr="", style="", hlink=""):
     """A p:sp with its own position. `fill` / `ln` are fill XML (or None for none given); `custom` replaces the preset geometry."""
     sppr = xfrm(x, y, cx, cy, rot, flipH, flipV) + (custom if custom else geom(prst, adj)) + (fill or "") + (ln or "") + effects
     d = f' descr="{esc(descr)}"' if descr else ""
     tx = tx_body(paras, bpr) if (paras or txbox) else ""
-    return (f'<p:sp><p:nvSpPr><p:cNvPr id="{sid}" name="{esc(name)}"{d}/><p:cNvSpPr{" txBox=" + chr(34) + "1" + chr(34) if txbox else ""}/><p:nvPr/></p:nvSpPr>'
+    cnv = f'<p:cNvPr id="{sid}" name="{esc(name)}"{d}>{hlink}</p:cNvPr>' if hlink else f'<p:cNvPr id="{sid}" name="{esc(name)}"{d}/>'
+    return (f'<p:sp><p:nvSpPr>{cnv}<p:cNvSpPr{" txBox=" + chr(34) + "1" + chr(34) if txbox else ""}/><p:nvPr/></p:nvSpPr>'
             f"<p:spPr>{sppr}</p:spPr>{style}{tx}</p:sp>")
 
 
@@ -124,11 +125,12 @@ def textbox(sid, name, x, y, cx, cy, paras, bpr=None, **kw):
     return sp(sid, name, x, y, cx, cy, paras=paras, bpr=bpr or body_pr(wrap="square", rtlCol="0", kids="<a:noAutofit/>"), txbox=True, **kw)
 
 
-def pic(sid, name, rid, x, y, cx, cy, crop="", rot=0, flipH=False, flipV=False, descr="", ln="", extra_blip="", link_rid=None):
+def pic(sid, name, rid, x, y, cx, cy, crop="", rot=0, flipH=False, flipV=False, descr="", ln="", blip_children="", link_rid=None, nvpr="", geometry=None):
     d = f' descr="{esc(descr)}"' if descr else ""
-    blip = f'<a:blip r:embed="{rid}"/>' if not link_rid else f'<a:blip r:link="{link_rid}"/>'
-    return (f'<p:pic><p:nvPicPr><p:cNvPr id="{sid}" name="{esc(name)}"{d}/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>'
-            f"<p:blipFill>{blip}{extra_blip}{crop}<a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>{xfrm(x, y, cx, cy, rot, flipH, flipV)}{geom()}{ln}</p:spPr></p:pic>")
+    ref = f'r:embed="{rid}"' if not link_rid else f'r:link="{link_rid}"'
+    blip = f"<a:blip {ref}>{blip_children}</a:blip>" if blip_children else f"<a:blip {ref}/>"
+    return (f'<p:pic><p:nvPicPr><p:cNvPr id="{sid}" name="{esc(name)}"{d}/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr>{nvpr}</p:nvPr></p:nvPicPr>'
+            f"<p:blipFill>{blip}{crop}<a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr>{xfrm(x, y, cx, cy, rot, flipH, flipV)}{geometry or geom()}{ln}</p:spPr></p:pic>")
 
 
 def grp(sid, name, x, y, cx, cy, children, ch=None):

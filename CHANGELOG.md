@@ -430,6 +430,15 @@ lockstep.
   against the package XML, the structure of each deck and the byte-for-byte rebuild of the generated files
   (`npm run test:fidelity:coverage -w @b32nio/spindle-slides-core` reports coverage of the scripts). No importer or
   runtime behaviour changes; there is no PPTX importer yet, so goldens come with the PPTX loss detector and runner.
+- **PPTX fidelity corpus, second part.** 17 more files complete the planned construct list: images (PNG, JPEG,
+  GIF, SVG with a PNG fallback, EMF, WMF, crops, flips, recolouring, a linked picture), audio and video stubs, tables
+  (merges, banding, borders, a custom table style), groups and connectors (nested, scaled, attached through
+  connection sites), charts with embedded workbooks, SmartArt, transitions and animations (including the PowerPoint
+  2010 forms and builds), notes, comments (legacy and modern with a reply), hidden slides, sections and custom shows,
+  right-to-left and CJK text, WordArt, ink, an OLE object, an equation and action hyperlinks, a python-pptx deck and
+  its LibreOffice conversion (tool and version recorded, normalised so that they rebuild byte for byte), a
+  kitchen-sink deck and an `.pptm` with an inert placeholder macro part. The construct registry grows from 83 to
+  148 probes.
 
 ## [0.4.0] - 2026-10-26
 
