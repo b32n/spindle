@@ -21,10 +21,12 @@ const workbook = (p: OoxmlParts) => part(p, 'xl/workbook.xml');
 const styles = (p: OoxmlParts) => part(p, 'xl/styles.xml');
 const block = (xml: string, tag: string) =>
   new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?</${tag}>`).exec(xml)?.[0] ?? '';
+const drawings = /^xl\/drawings\/drawing\d*\.xml$/;
 const charts = /^xl\/charts\/chart\d*\.xml$/;
 const textParts = (p: OoxmlParts) => [part(p, 'xl/sharedStrings.xml'), ...sheetXml(p)].join('\n');
 
 interface Formula {
+  cell: string;
   cellAttrs: string;
   attrs: string;
   text: string;
@@ -34,6 +36,7 @@ function formulas(p: OoxmlParts): Formula[] {
   for (const x of sheetXml(p)) {
     for (const m of x.matchAll(/<c\b([^>]*)>\s*<f\b([^>]*?)(?:\/>|>([\s\S]*?)<\/f>)/g)) {
       out.push({
+        cell: /\br="([A-Z]+\d+)"/.exec(m[1])?.[1] ?? '',
         cellAttrs: m[1],
         attrs: m[2],
         text: (m[3] ?? '')
@@ -104,6 +107,18 @@ const chart = (tag: string) => (p: OoxmlParts) =>
   inParts(p, charts, new RegExp(`<(?:c:)?${tag}\\b`, 'g'));
 const media = (ext: string) => (p: OoxmlParts) =>
   countNames(p, new RegExp(`^xl/media/[^/]+\\.(?:${ext})$`, 'i'));
+const anchor = (tag: string) => (p: OoxmlParts) =>
+  inParts(p, drawings, new RegExp(`<xdr:${tag}\\b(?:(?!</xdr:${tag}>)[\\s\\S])*?<xdr:pic\\b`, 'g'));
+const relTargets = (p: OoxmlParts, re: RegExp) =>
+  Object.entries(p.xml).reduce(
+    (sum, [n, x]) => sum + (/^xl\/worksheets\/_rels\//.test(n) ? count(x, re) : 0),
+    0
+  );
+const linkRel = (target: string) =>
+  new RegExp(
+    `<Relationship\\b[^>]*\\bTarget="${target}[^"]*"[^>]*TargetMode="External"|<Relationship\\b[^>]*TargetMode="External"[^>]*\\bTarget="${target}`,
+    'gi'
+  );
 const nameBody = /<definedName\b([^>]*)>([^<]*)<\/definedName>/g;
 
 export const CONSTRUCTS: XlsxConstruct[] = [
@@ -152,6 +167,11 @@ export const CONSTRUCTS: XlsxConstruct[] = [
     count: (p) => count(workbook(p), /<calcPr\b/g),
   },
   {
+    id: 'workbook.externalLinks',
+    label: 'External workbook links',
+    count: (p) => countNames(p, /^xl\/externalLinks\/externalLink\d+\.xml$/),
+  },
+  {
     id: 'styles.basic',
     label: 'Cell formats beyond the default',
     count: (p) => Math.max(0, count(block(styles(p), 'cellXfs'), /<xf\b/g) - 1),
@@ -167,9 +187,30 @@ export const CONSTRUCTS: XlsxConstruct[] = [
     count: (p) => count(styles(p), /<numFmt\b/g),
   },
   {
+    id: 'styles.themeColors',
+    label: 'Theme colours',
+    count: (p) => count(styles(p), /<(?:color|fgColor|bgColor)\b[^>]*\btheme="/g),
+  },
+  {
     id: 'styles.indexedColors',
     label: 'Indexed colours (other than the default pen 64)',
     count: (p) => count(styles(p), /<(?:color|fgColor|bgColor)\b[^>]*\bindexed="(?!64")/g),
+  },
+  { id: 'styles.tint', label: 'Colour tints', count: (p) => count(styles(p), /\btint="/g) },
+  {
+    id: 'styles.namedStyles',
+    label: 'Named cell styles',
+    count: (p) => count(styles(p), /<cellStyle\b(?![^>]*\bname="Normal")/g),
+  },
+  {
+    id: 'styles.patternFill',
+    label: 'Pattern fills (other than solid)',
+    count: (p) => count(styles(p), /<patternFill\b[^>]*\bpatternType="(?!none"|solid"|gray125")/g),
+  },
+  {
+    id: 'styles.gradientFill',
+    label: 'Gradient fills',
+    count: (p) => count(styles(p), /<gradientFill\b/g),
   },
   {
     id: 'styles.borderStyles',
@@ -183,11 +224,21 @@ export const CONSTRUCTS: XlsxConstruct[] = [
         ].map((m) => m[1])
       ).size,
   },
+  {
+    id: 'styles.diagonalBorder',
+    label: 'Diagonal borders',
+    count: (p) => count(styles(p), /<diagonal\b[^>]*\bstyle=/g),
+  },
   { id: 'formulas.basic', label: 'Formulas', count: (p) => formulas(p).length },
   {
     id: 'formulas.cachedValues',
     label: 'Formulas with a cached value',
     count: (p) => inSheets(p, /<f\b[^>]*(?:\/>|>[^<]*<\/f>)\s*<v>/g),
+  },
+  {
+    id: 'formulas.shared',
+    label: 'Shared formulas',
+    count: (p) => formulas(p).filter((f) => /\bt="shared"/.test(f.attrs)).length,
   },
   {
     id: 'formulas.array',
@@ -226,6 +277,26 @@ export const CONSTRUCTS: XlsxConstruct[] = [
     id: 'formulas.threeD',
     label: '3D references (Sheet1:Sheet3!A1)',
     count: (p) => withText(p, /'[^']+:[^']+'!|[A-Za-z0-9_.]+:[A-Za-z0-9_.]+!/),
+  },
+  {
+    id: 'formulas.structuredRef',
+    label: 'Structured table references',
+    count: (p) => withText(p, /[A-Za-z_]\w*\[/),
+  },
+  {
+    id: 'formulas.externalRef',
+    label: 'External workbook references ([1]Sheet!A1)',
+    count: (p) => withText(p, /\[\d+\]/),
+  },
+  {
+    id: 'formulas.circular',
+    label: 'Self-referencing formulas',
+    count: (p) =>
+      formulas(p).filter(
+        (f) =>
+          f.cell !== '' &&
+          new RegExp(`(?<![A-Z$])\\$?${f.cell.replace(/(\d+)/, '\\$?$1')}(?!\\d)`).test(f.text)
+      ).length,
   },
   {
     id: 'names.defined',
@@ -356,6 +427,11 @@ export const CONSTRUCTS: XlsxConstruct[] = [
     label: 'Conditional formatting: stop if true',
     count: (p) => inSheets(p, /<(?:x14:)?cfRule\b[^>]*\bstopIfTrue="1"/g),
   },
+  {
+    id: 'cf.x14',
+    label: 'Conditional formatting: x14 extensions',
+    count: (p) => inSheets(p, /<x14:conditionalFormatting\b/g),
+  },
   { id: 'dv.list', label: 'Validation: list', count: dv('list') },
   { id: 'dv.whole', label: 'Validation: whole number', count: dv('whole') },
   { id: 'dv.decimal', label: 'Validation: decimal', count: dv('decimal') },
@@ -373,18 +449,138 @@ export const CONSTRUCTS: XlsxConstruct[] = [
     label: 'Comments (notes)',
     count: (p) => inParts(p, /^xl\/comments(?:\/[^/]+|\d*)\.xml$/, /<comment\b/g),
   },
+  {
+    id: 'comments.threaded',
+    label: 'Threaded comments',
+    count: (p) => inParts(p, /^xl\/threadedComments\/[^/]+\.xml$/, /<threadedComment\b/g),
+  },
+  {
+    id: 'links.external',
+    label: 'External hyperlinks (http, https)',
+    count: (p) => relTargets(p, linkRel('https?:')),
+  },
+  {
+    id: 'links.mailto',
+    label: 'mailto hyperlinks',
+    count: (p) => relTargets(p, linkRel('mailto:')),
+  },
+  {
+    id: 'links.internal',
+    label: 'Internal hyperlinks (location)',
+    count: (p) => inSheets(p, /<hyperlink\b[^>]*\blocation=/g),
+  },
+  {
+    id: 'links.unsafeScheme',
+    label: 'Hyperlinks with a script scheme',
+    count: (p) => relTargets(p, linkRel('(?:javascript|vbscript|data|file):')),
+  },
   { id: 'images.png', label: 'Images: PNG', count: media('png') },
+  { id: 'images.jpeg', label: 'Images: JPEG', count: media('jpe?g') },
+  { id: 'images.gif', label: 'Images: GIF', count: media('gif') },
+  { id: 'images.svg', label: 'Images: SVG', count: media('svg') },
+  { id: 'images.emf', label: 'Images: EMF', count: media('emf') },
+  { id: 'images.oneCell', label: 'Images: one-cell anchor', count: anchor('oneCellAnchor') },
+  { id: 'images.twoCell', label: 'Images: two-cell anchor', count: anchor('twoCellAnchor') },
+  { id: 'images.absolute', label: 'Images: absolute anchor', count: anchor('absoluteAnchor') },
+  {
+    id: 'images.crop',
+    label: 'Cropped images',
+    count: (p) => inParts(p, drawings, /<a:srcRect\b[^>]*\b[ltrb]="[1-9]/g),
+  },
   { id: 'charts.bar', label: 'Charts: bar / column', count: chart('barChart') },
   { id: 'charts.line', label: 'Charts: line', count: chart('lineChart') },
+  { id: 'charts.pie', label: 'Charts: pie', count: chart('pieChart') },
+  { id: 'charts.scatter', label: 'Charts: scatter', count: chart('scatterChart') },
+  {
+    id: 'charts.combo',
+    label: 'Charts: combination (several plot types)',
+    count: (p) =>
+      Object.entries(p.xml).filter(
+        ([n, x]) =>
+          charts.test(n) &&
+          new Set(
+            x
+              .match(/<(?:c:)?(?:bar|line|pie|scatter|area)Chart\b/g)
+              ?.map((t) => t.replace(/^<(?:c:)?/, ''))
+          ).size > 1
+      ).length,
+  },
   {
     id: 'tables.listObjects',
     label: 'Tables (list objects)',
     count: (p) => countNames(p, /^xl\/tables\/table\d+\.xml$/),
   },
   {
+    id: 'tables.totals',
+    label: 'Tables with a totals row',
+    count: (p) => inParts(p, /^xl\/tables\/table\d+\.xml$/, /\btotalsRowCount="[1-9]/g),
+  },
+  { id: 'filters.autoFilter', label: 'Auto-filters', count: (p) => inSheets(p, /<autoFilter\b/g) },
+  {
+    id: 'filters.criteria',
+    label: 'Filter criteria',
+    count: (p) => inSheets(p, /<filterColumn\b/g),
+  },
+  {
+    id: 'filters.sort',
+    label: 'Sort state',
+    count: (p) => inParts(p, /^xl\/(?:worksheets|tables)\/[^/]+\.xml$/, /<sortState\b/g),
+  },
+  {
+    id: 'pivots.tables',
+    label: 'Pivot tables',
+    count: (p) => countNames(p, /^xl\/pivotTables\/pivotTable\d+\.xml$/),
+  },
+  {
+    id: 'pivots.slicers',
+    label: 'Slicers',
+    count: (p) => countNames(p, /^xl\/slicers\/slicer\d+\.xml$/),
+  },
+  { id: 'sparklines', label: 'Sparklines', count: (p) => inSheets(p, /<x14:sparkline>/g) },
+  {
+    id: 'protection.sheet',
+    label: 'Sheet protection',
+    count: (p) => inSheets(p, /<sheetProtection\b/g),
+  },
+  {
+    id: 'protection.password',
+    label: 'Sheet protection with a password hash',
+    count: (p) => inSheets(p, /<sheetProtection\b[^>]*\b(?:password|hashValue)="/g),
+  },
+  {
+    id: 'protection.noPassword',
+    label: 'Sheet protection without a password',
+    count: (p) => inSheets(p, /<sheetProtection\b(?![^>]*\b(?:password|hashValue)=)[^>]*>/g),
+  },
+  {
+    id: 'protection.workbook',
+    label: 'Workbook structure protection',
+    count: (p) => count(workbook(p), /<workbookProtection\b/g),
+  },
+  {
     id: 'print.pageSetup',
     label: 'Page setup (orientation, paper, scale)',
     count: (p) => inSheets(p, /<pageSetup\b[^>]*\b(?:orientation|paperSize|scale|fitToWidth)=/g),
+  },
+  {
+    id: 'print.fitToPage',
+    label: 'Fit to page',
+    count: (p) => inSheets(p, /<pageSetUpPr\b[^>]*\bfitToPage="(?:1|true)"/g),
+  },
+  {
+    id: 'print.headerFooter',
+    label: 'Print headers and footers',
+    count: (p) => inSheets(p, /<headerFooter\b/g),
+  },
+  {
+    id: 'print.breaks',
+    label: 'Manual page breaks',
+    count: (p) => inSheets(p, /<(?:row|col)Breaks\b/g),
+  },
+  {
+    id: 'macros.vba',
+    label: 'Macro project (vbaProject.bin)',
+    count: (p) => countNames(p, /^xl\/vbaProject\.bin$/),
   },
   {
     id: 'edge.truncatedZip',

@@ -382,6 +382,14 @@ lockstep.
   holds the construct probes and manifest checks; the Jest suite in `packages/sheets-core/src/fidelity/`
   verifies every claim against the package XML. No importer or runtime behaviour changes; goldens come with
   the XLSX runner.
+- **XLSX fidelity corpus, second part.** 17 more files complete the planned construct list: theme colours, named
+  styles, gradient and pattern fills and all 13 border styles; 60 number formats; modern formulas (`_xlfn`,
+  LET and LAMBDA, dynamic and legacy arrays, shared formulas); references (whole row and column, 3D, circular,
+  external link); comments (notes and threads); links (including a `javascript:` target); images (PNG, JPEG, GIF,
+  SVG with fallback, EMF, three anchor kinds, crop); charts (bar, line, pie, scatter, combo); tables; filters and
+  sort; a pivot table with a slicer; sparklines; x14 conditional formatting; sheet and workbook protection with
+  password hashes; print setup; rich-text cells; and an `.xlsm` with an inert dummy macro part. The construct
+  registry grows from 85 to 128 probes.
 
 ## [0.4.0] - 2026-10-26
 

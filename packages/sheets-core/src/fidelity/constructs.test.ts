@@ -25,6 +25,9 @@ const ole = (name: string) =>
 const rels = (name: string, ...items: string[]): Xml => ({
   [name]: `<Relationships>${items.join('')}</Relationships>`,
 });
+const draw = (inner: string): Xml => ({
+  'xl/drawings/drawing1.xml': `<xdr:wsDr>${inner}</xdr:wsDr>`,
+});
 const chartPart = (inner: string): Xml => ({
   'xl/charts/chart1.xml': `<c:chartSpace>${inner}</c:chartSpace>`,
 });
@@ -74,6 +77,11 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
   ],
   ['workbook.date1904', mk(wb('<workbookPr date1904="1"/>')), 1],
   ['workbook.calcSettings', mk(wb('<calcPr calcId="1"/>')), 1],
+  [
+    'workbook.externalLinks',
+    names('xl/externalLinks/externalLink1.xml', 'xl/externalLinks/_rels/externalLink1.xml.rels'),
+    1,
+  ],
   ['styles.basic', mk(styles('<cellXfs count="3"><xf/><xf/><xf/></cellXfs>')), 2],
   ['styles.alignment', mk(styles('<cellXfs><xf><alignment wrapText="1"/></xf></cellXfs>')), 1],
   [
@@ -81,7 +89,32 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
     mk(styles('<numFmts><numFmt numFmtId="164" formatCode="0.0"/></numFmts>')),
     1,
   ],
+  [
+    'styles.themeColors',
+    mk(
+      styles(
+        '<fonts><font><color theme="1"/></font></fonts><fills><fill><patternFill><fgColor theme="4"/></patternFill></fill></fills>'
+      )
+    ),
+    2,
+  ],
   ['styles.indexedColors', mk(styles('<fonts><font><color indexed="10"/></font></fonts>')), 1],
+  ['styles.tint', mk(styles('<fonts><font><color theme="1" tint="0.5"/></font></fonts>')), 1],
+  [
+    'styles.namedStyles',
+    mk(styles('<cellStyles><cellStyle name="Normal"/><cellStyle name="Good"/></cellStyles>')),
+    1,
+  ],
+  [
+    'styles.patternFill',
+    mk(
+      styles(
+        '<fills><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="solid"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="darkGrid"/></fill></fills>'
+      )
+    ),
+    1,
+  ],
+  ['styles.gradientFill', mk(styles('<fills><fill><gradientFill degree="90"/></fill></fills>')), 1],
   [
     'styles.borderStyles',
     mk(
@@ -91,12 +124,26 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
     ),
     3,
   ],
+  [
+    'styles.diagonalBorder',
+    mk(styles('<borders><border><diagonal style="thin"/></border></borders>')),
+    1,
+  ],
   ['formulas.basic', mk(f('A2+1')), 1],
   [
     'formulas.cachedValues',
     mk(
       cells(
         '<c r="A1"><f>1+1</f><v>2</v></c><c r="B1"><f t="shared" si="0"/><v>2</v></c><c r="C1"><f>3</f></c>'
+      )
+    ),
+    2,
+  ],
+  [
+    'formulas.shared',
+    mk(
+      cells(
+        '<c r="A1"><f t="shared" ref="A1:A2" si="0">B1</f></c><c r="A2"><f t="shared" si="0"/></c>'
       )
     ),
     2,
@@ -113,6 +160,17 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
   ['formulas.wholeRow', mk(f('SUM(2:2)+SUM($3:$4)')), 1],
   ['formulas.crossSheet', mk(f('Other!A1')), 1],
   ['formulas.threeD', mk(f("SUM(Sheet1:Sheet3!A1)+SUM('A b:C d'!A1)")), 1],
+  ['formulas.structuredRef', mk(f('SUM(Sales[Q1])')), 1],
+  ['formulas.externalRef', mk(f('[1]Remote!$A$1')), 1],
+  [
+    'formulas.circular',
+    mk({
+      ...f('A1+1', 'A1'),
+      'xl/worksheets/sheet2.xml':
+        '<worksheet><sheetData><row><c r="B2"><f>$B$2*2</f></c><c r="C3"><f>C30+B1</f></c></row></sheetData></worksheet>',
+    }),
+    2,
+  ],
   [
     'names.defined',
     mk(wb('<definedNames><definedName name="A">B!$A$1</definedName></definedNames>')),
@@ -205,6 +263,7 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
   ['cf.dataBar', mk(cf('dataBar')), 1],
   ['cf.iconSet', mk(cf('iconSet')), 1],
   ['cf.stopIfTrue', mk(sheet('<cfRule type="expression" stopIfTrue="1"/>')), 1],
+  ['cf.x14', mk(sheet('<x14:conditionalFormatting><x14:cfRule/></x14:conditionalFormatting>')), 1],
   ['dv.list', mk(dv('list')), 1],
   ['dv.whole', mk(dv('whole')), 1],
   ['dv.decimal', mk(dv('decimal')), 1],
@@ -225,11 +284,124 @@ const POSITIVE: Array<[string, OoxmlParts, number]> = [
     }),
     2,
   ],
+  [
+    'comments.threaded',
+    mk({
+      'xl/threadedComments/threadedComment1.xml':
+        '<ThreadedComments><threadedComment ref="A1"/></ThreadedComments>',
+    }),
+    1,
+  ],
+  [
+    'links.external',
+    mk(
+      rels(
+        'xl/worksheets/_rels/sheet1.xml.rels',
+        '<Relationship Id="r1" Type="hyperlink" Target="https://e.com" TargetMode="External"/>',
+        '<Relationship Id="r2" TargetMode="External" Target="http://e.com" Type="hyperlink"/>',
+        '<Relationship Id="r3" Target="https://e.com"/>'
+      )
+    ),
+    2,
+  ],
+  [
+    'links.mailto',
+    mk(
+      rels(
+        'xl/worksheets/_rels/sheet1.xml.rels',
+        '<Relationship Id="r1" Target="mailto:a@b.c" TargetMode="External"/>'
+      )
+    ),
+    1,
+  ],
+  [
+    'links.internal',
+    mk(sheet('<hyperlinks><hyperlink ref="A1" location="Sheet1!A1"/></hyperlinks>')),
+    1,
+  ],
+  [
+    'links.unsafeScheme',
+    mk(
+      rels(
+        'xl/worksheets/_rels/sheet1.xml.rels',
+        '<Relationship Id="r1" Target="JavaScript:alert(1)" TargetMode="External"/>',
+        '<Relationship Id="r2" Target="file:///etc/passwd" TargetMode="External"/>'
+      )
+    ),
+    2,
+  ],
   ['images.png', names('xl/media/image1.png', 'xl/media/image2.PNG'), 2],
+  ['images.jpeg', names('xl/media/image1.jpg', 'xl/media/image2.jpeg'), 2],
+  ['images.gif', names('xl/media/image1.gif'), 1],
+  ['images.svg', names('xl/media/image1.svg'), 1],
+  ['images.emf', names('xl/media/image1.emf'), 1],
+  [
+    'images.oneCell',
+    mk(
+      draw(
+        '<xdr:oneCellAnchor><xdr:from/><xdr:pic><xdr:x/></xdr:pic></xdr:oneCellAnchor><xdr:oneCellAnchor><xdr:sp/></xdr:oneCellAnchor>'
+      )
+    ),
+    1,
+  ],
+  ['images.twoCell', mk(draw('<xdr:twoCellAnchor><xdr:pic/></xdr:twoCellAnchor>')), 1],
+  ['images.absolute', mk(draw('<xdr:absoluteAnchor><xdr:pic/></xdr:absoluteAnchor>')), 1],
+  ['images.crop', mk(draw('<a:srcRect l="1000"/><a:srcRect l="0"/>')), 1],
   ['charts.bar', mk(chartPart('<c:barChart/><barChart/>')), 2],
   ['charts.line', mk(chartPart('<c:lineChart/>')), 1],
+  ['charts.pie', mk(chartPart('<c:pieChart/>')), 1],
+  ['charts.scatter', mk(chartPart('<c:scatterChart/>')), 1],
+  [
+    'charts.combo',
+    mk({
+      ...chartPart('<c:barChart/><c:lineChart/>'),
+      'xl/charts/chart2.xml': '<c:chartSpace><c:barChart/><c:barChart/></c:chartSpace>',
+    }),
+    1,
+  ],
   ['tables.listObjects', names('xl/tables/table1.xml', 'xl/tables/table2.xml'), 2],
+  [
+    'tables.totals',
+    mk({
+      'xl/tables/table1.xml': '<table totalsRowCount="1"/>',
+      'xl/tables/table2.xml': '<table totalsRowShown="0"/>',
+    }),
+    1,
+  ],
+  ['filters.autoFilter', mk(sheet('<autoFilter ref="A1:B2"/>')), 1],
+  ['filters.criteria', mk(sheet('<autoFilter><filterColumn colId="0"/></autoFilter>')), 1],
+  [
+    'filters.sort',
+    mk({
+      ...sheet('<sortState ref="A1"/>'),
+      'xl/tables/table1.xml': '<table><sortState ref="A1"/></table>',
+    }),
+    2,
+  ],
+  ['pivots.tables', names('xl/pivotTables/pivotTable1.xml'), 1],
+  ['pivots.slicers', names('xl/slicers/slicer1.xml'), 1],
+  ['sparklines', mk(sheet('<x14:sparkline><xm:f>A1</xm:f></x14:sparkline>')), 1],
+  ['protection.sheet', mk(sheet('<sheetProtection sheet="1"/>')), 1],
+  [
+    'protection.password',
+    mk(
+      sheet(
+        '<sheetProtection password="CBEB" sheet="1"/><sheetProtection hashValue="x"/><sheetProtection sheet="1"/>'
+      )
+    ),
+    2,
+  ],
+  [
+    'protection.noPassword',
+    mk(sheet('<sheetProtection password="CBEB"/><sheetProtection sheet="1"/>')),
+    1,
+  ],
+  ['protection.workbook', mk(wb('<workbookProtection lockStructure="1"/>')), 1],
   ['print.pageSetup', mk(sheet('<pageSetup orientation="landscape"/><pageSetup r:id="rId1"/>')), 1],
+  ['print.fitToPage', mk(sheet('<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>')), 1],
+  ['print.headerFooter', mk(sheet('<headerFooter/>')), 1],
+  ['print.breaks', mk(sheet('<rowBreaks count="1"/><colBreaks count="1"/>')), 2],
+  ['macros.vba', names('xl/vbaProject.bin'), 1],
   [
     'edge.truncatedZip',
     mk({}, { kind: 'unreadable', raw: new Uint8Array([0x50, 0x4b, 0x03, 0x04, 1, 2]) }),
@@ -316,10 +488,17 @@ describe('XLSX construct probes', () => {
     none('formulas.wholeColumn', mk(f('SUM(A1:B2)+SUM(Data!A1:B2)+LOG10(2)+A1:A9')));
     none('formulas.wholeRow', mk(f('ROW(A1)+LOG10(2)')));
     none('formulas.threeD', mk(f('SUM(A1:B2)+Other!A1')));
+    none('formulas.structuredRef', mk(f('SUM(A1:B2)')));
+    none('formulas.externalRef', mk(f('SUM(A1)')));
+    none('formulas.circular', mk(f('B1+A10+XA1+$A$11', 'A1')));
     none('formulas.dynamicArray', mk(f('1', 'A1', ' cm="1"')));
     none('formulas.dynamicArray', mk(f('1', 'A1', '', ' t="array"')));
     none('names.constants', mk(wb('<definedName name="R">Data!$A$1</definedName>')));
     none('cells.numbers', mk(cells('<c r="A1" t="str"><v>x</v></c>')));
+    none(
+      'styles.namedStyles',
+      mk(styles('<cellStyles><cellStyle name="Normal" xfId="0"/></cellStyles>'))
+    );
     none('sheets.multiple', mk(wb('<sheets><sheet name="A"/></sheets>')));
     none(
       'edge.noWorkbook',
@@ -381,10 +560,11 @@ describe('XLSX construct probes', () => {
     ).toBe(1);
   });
 
-  it('counts self-closing formulas (shared-formula followers)', () => {
-    expect(
-      findConstruct('formulas.basic')?.count(mk(cells('<c r="A2"><f t="shared" si="0"/></c>')))
-    ).toBe(1);
+  it('copes with a formula cell that has no reference', () => {
+    expect(findConstruct('formulas.circular')?.count(mk(cells('<c><f>A1</f></c>')))).toBe(0);
+    expect(findConstruct('formulas.basic')?.count(mk(cells('<c><f t="shared" si="0"/></c>')))).toBe(
+      1
+    );
   });
 
   it('decodes escaped formula text before matching', () => {

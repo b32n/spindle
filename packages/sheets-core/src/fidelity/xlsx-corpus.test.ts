@@ -37,7 +37,7 @@ const notAPackage = (claims: string[]) =>
 
 describe('XLSX corpus', () => {
   it('has the planned shape', () => {
-    expect(committed.length).toBeGreaterThanOrEqual(26);
+    expect(committed.length).toBeGreaterThanOrEqual(40);
     expect(runtime.map((f) => f.id).sort()).toEqual([
       'edge-huge-dimension',
       'edge-zip-bomb',
@@ -63,6 +63,7 @@ describe('XLSX corpus', () => {
       'formulas-core',
       'number-format-probe',
       'formula-syntax',
+      'macro-enabled',
     ]) {
       expect(committed.map((f) => f.id)).toContain(id);
     }
