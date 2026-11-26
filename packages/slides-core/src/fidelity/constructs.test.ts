@@ -372,6 +372,9 @@ describe('PPTX construct probes', () => {
     (_id, c) => {
       expect(c.count(mk())).toBe(0);
       expect(c.count(mk({}, { kind: 'unreadable' }))).toBe(0);
+      expect(
+        c.count(mk({}, { oversized: ['ppt/slides/slide1.xml', 'ppt/presentation.xml'] }))
+      ).toBe(0);
       expect(c.count(mk({}, { kind: 'ole' }))).toBe(0);
     }
   );

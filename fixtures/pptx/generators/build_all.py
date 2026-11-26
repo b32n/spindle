@@ -35,6 +35,7 @@ BUILDERS = {
 }
 
 
+# tool_versions() and the python-pptx / LibreOffice manifest entries are unused until the producer-variety decks arrive (X2b).
 def tool_versions():
     import pptx
 

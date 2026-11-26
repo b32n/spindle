@@ -2,7 +2,7 @@
 
     python3 build_runtime.py --out DIR [edge-1000-slides ...]
 
-edge-1000-slides   a package with 1000 slides (each one placeholder with a line of text), about 700 KB
+edge-1000-slides   a package with 1000 slides (each one placeholder with a line of text), about 900 KB
 """
 import argparse
 import os

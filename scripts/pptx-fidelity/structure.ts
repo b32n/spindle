@@ -30,6 +30,7 @@ export function slideSize(p: OoxmlParts): { cx: number; cy: number; kind: SizeCl
   const near = (target: number) => Math.abs(ratio - target) < 0.01;
   let kind: SizeClass = 'custom';
   if (cy > cx) kind = 'portrait';
+  // Only the declared type counts as A4: a deck with A4 dimensions and no type attribute is deliberately 'custom'.
   else if (attr(tag, 'type') === 'A4') kind = 'a4';
   else if (near(4 / 3)) kind = '4x3';
   else if (near(16 / 9)) kind = '16x9';

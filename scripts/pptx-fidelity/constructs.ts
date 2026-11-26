@@ -263,7 +263,8 @@ export const CONSTRUCTS: PptxConstruct[] = [
   {
     id: 'theme.fontScheme',
     label: 'Theme with its own font scheme',
-    count: (p) => inParts(p, THEME, /<a:(?:major|minor)Font>\s*<a:latin typeface="(?!Calibri)/g),
+    count: (p) =>
+      inParts(p, THEME, /<a:(?:major|minor)Font>\s*<a:latin typeface="(?!Calibri)[^"]/g),
   },
   {
     id: 'theme.fontsEastAsian',
