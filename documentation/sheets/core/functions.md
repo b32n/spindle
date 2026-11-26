@@ -18,7 +18,7 @@ Notes that apply to the whole list:
 
 - Dotted names (`STDEV.S`, `WORKDAY.INTL`) are registered as written; the `_xlfn.` spellings Excel stores in files are mapped on import (plan S4).
 - An omitted argument in the middle of a call (`INDEX(A1:C3,,2)`, `NUMBERVALUE(A1,,",")`) keeps its position for the functions that
-  take one (`INDEX`, `NUMBERVALUE`, `FIXED`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`); every other function still skips it.
+  take one (`INDEX`, `NUMBERVALUE`, `FIXED`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`, `XIRR`); every other function still skips it.
 - Functions that return arrays spill into the cells below and to the right (see [Dynamic arrays](formulas.md#dynamic-arrays-spill)).
 - The regular-expression functions (`REGEXMATCH`, `REGEXEXTRACT`, `REGEXREPLACE`) are Google Sheets only: they are not Excel functions and are
   outside the Excel parity set.
