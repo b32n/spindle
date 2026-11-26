@@ -38,12 +38,6 @@
       "label": "embedded object(s)"
     },
     {
-      "count": 6,
-      "effect": "not imported",
-      "id": "docx.endnotes",
-      "label": "endnote(s)"
-    },
-    {
       "count": 10,
       "effect": "not imported",
       "id": "docx.equations",
@@ -63,12 +57,6 @@
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
       "label": "floating image(s)"
-    },
-    {
-      "count": 12,
-      "effect": "not imported",
-      "id": "docx.footnotes",
-      "label": "footnote(s)"
     },
     {
       "count": 1,

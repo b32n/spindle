@@ -57,6 +57,7 @@ import type {
 } from '@b32nio/spindle-shared/export/docx';
 
 import { addNamedStyles, usableNamedStyles } from './styles-writer';
+import { addNoteParts, type WrittenNotes } from './notes-writer';
 import { addCommentParts, buildCommentParts, planComments, type CommentPlan, type CommentPlanThread } from './comments-writer';
 
 // docx's own unit conventions: twips (1/1440in) for most measurements, but
@@ -192,8 +193,18 @@ function endsWithTable(block: DocBlock | undefined): boolean {
 const CHECKED_GLYPH = '2612';
 const UNCHECKED_GLYPH = '2610';
 
+/** The inline content with note references taken out (a note holds no notes). */
+function withoutNoteRefs(content: DocInline[]): DocInline[] {
+  return content.flatMap((item): DocInline[] => {
+    if (item.type === 'noteRef') return [];
+    return item.type === 'contentControl' ? [{ ...item, content: withoutNoteRefs(item.content) }] : [item];
+  });
+}
+
 class DocxBuilder {
   readonly warnings: string[] = [];
+  /** The notes referenced so far, in document order (a note's id in the file is its position + 1). */
+  readonly notes: WrittenNotes = { footnote: [], endnote: [] };
   /** `w:id` of the next content control. */
   private nextControlId = 1000001;
   /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
@@ -301,9 +312,25 @@ class DocxBuilder {
         return this.buildField(inline);
       case 'contentControl':
         return [this.buildControl(inline.control, this.buildRuns(inline.content))];
+      case 'noteRef':
+        return [this.buildNoteReference(inline)];
       default:
         return [];
     }
+  }
+
+  /** A superscript run holding the reference to a note; the note itself is written to the notes part afterwards. */
+  private buildNoteReference(ref: Extract<DocInline, { type: 'noteRef' }>): ParagraphChild {
+    const list = this.notes[ref.kind];
+    list.push({ content: withoutNoteRefs(ref.content), ...(ref.customMark && { customMark: ref.customMark }) });
+    const reference = new BuilderElement({
+      name: ref.kind === 'footnote' ? 'w:footnoteReference' : 'w:endnoteReference',
+      attributes: {
+        id: { key: 'w:id', value: String(list.length) },
+        ...(ref.customMark && { follows: { key: 'w:customMarkFollows', value: '1' } }),
+      },
+    });
+    return new TextRun({ superScript: true, children: ref.customMark ? [reference, ref.customMark] : [reference] });
   }
 
   /** A `w:sdt` (run-level or block-level) with the properties of `control` around already built `content`. */
@@ -705,6 +732,12 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   const buffer = await Packer.toArrayBuffer(doc);
   let bytes: Uint8Array = new Uint8Array(buffer);
   bytes = await addNamedStyles(bytes, namedStyles);
+  if (builder.notes.footnote.length > 0 || builder.notes.endnote.length > 0) {
+    bytes = await addNoteParts(bytes, builder.notes, async (bodies) => {
+      const blocks: DocBlock[] = bodies.map((content) => ({ type: 'paragraph', content }));
+      return (await exportDocx({ title: '', sections: [{ ...input.sections[0], blocks, header: undefined, footer: undefined, columns: undefined }], namedStyles: input.namedStyles })).bytes;
+    });
+  }
   if (comments.threads.size > 0) {
     const unplaced = builder.unplaced();
     const lost = unplaced.reduce((n, t) => n + t.ids.length, 0);

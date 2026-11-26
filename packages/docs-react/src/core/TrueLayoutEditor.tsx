@@ -31,7 +31,7 @@ import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
 
-import { FlowBlock } from './flow-blocks';
+import { FlowBlock, noteKeyString } from './flow-blocks';
 import { proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
 import { DomMeasurer, Measure } from './measurer';
 import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
@@ -662,6 +662,70 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
           else if (++tries < 10) requestAnimationFrame(reveal);
         };
         requestAnimationFrame(reveal);
+      };
+      container.addEventListener('click', onClick);
+      return () => container.removeEventListener('click', onClick);
+    }, [editorView]);
+
+    // Clicking the number of a note reference scrolls to the note in the notes area; clicking a note there (its number or
+    // its text) goes back to the reference.
+    useEffect(() => {
+      const container = pagesContainerRef.current;
+      const viewport = viewportRef.current;
+      if (!editorView || !container || !viewport) return;
+      /** Scroll to the page a block is laid out on (pages outside the window are not painted), then bring `find`'s element into view once painted. */
+      const reveal = (pageOf: (fragmentBlockId: string) => boolean, find: () => Element | null) => {
+        const current = layoutRef.current;
+        const page = current?.pages.findIndex((p) => p.fragments.some((f) => pageOf(f.blockId)));
+        if (page !== undefined && page >= 0 && current) viewport.scrollTop = getPageY(current, page);
+        let tries = 0;
+        const scroll = () => {
+          const el = find();
+          if (el) el.scrollIntoView({ block: 'center' });
+          else if (++tries < 10) requestAnimationFrame(scroll);
+        };
+        requestAnimationFrame(scroll);
+      };
+      const onClick = (e: MouseEvent) => {
+        const target = e.target as Element | null;
+        // A click in the notes area (on a note's number or text) goes to the reference; one on a reference's number goes to the note.
+        const entry = target?.closest?.<HTMLElement>('[data-note-target]');
+        const ref = entry ? undefined : target?.closest?.<HTMLElement>('[data-note-ref]');
+        const key = entry ? entry.dataset.noteTarget : ref?.dataset.noteRef;
+        if (!key) return;
+        e.preventDefault();
+        if (ref) {
+          // From the reference to its note.
+          const block = blocksRef.current.find((b) => b.kind === 'paragraph' && !!b.noteTarget && noteKeyString(b.noteTarget) === key);
+          if (!block) return;
+          reveal(
+            (id) => id === block.id,
+            () => container.querySelector(`[data-note-target="${key}"]`)
+          );
+          return;
+        }
+        // From the note to its reference: the nth reference of its kind in the document.
+        const [kind, ordinal] = key.split(':');
+        let seen = 0;
+        let pos: number | null = null;
+        editorView.state.doc.descendants((node, at) => {
+          if (pos !== null) return false;
+          if (node.type.name === 'note_ref') {
+            if (node.attrs.kind === kind && ++seen === Number(ordinal)) pos = at;
+            return false;
+          }
+          return true;
+        });
+        if (pos === null) return;
+        const at = pos;
+        editorView.dispatch(editorView.state.tr.setSelection(TextSelection.near(editorView.state.doc.resolve(at))));
+        reveal(
+          (id) => {
+            const info = blockPositionMapRef.current.get(id);
+            return !!info && at >= info.start && at <= info.end;
+          },
+          () => container.querySelector(`[data-note-ref="${key}"]:not([data-note-target] *)`)
+        );
       };
       container.addEventListener('click', onClick);
       return () => container.removeEventListener('click', onClick);

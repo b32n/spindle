@@ -26,6 +26,11 @@ Verified absent in code.
       on import, tables of contents keep no field, legacy form fields keep their text only, and content controls that wrap table rows or cells, repeating sections and data-bound controls keep only their content (other fields are kept with their cached result, never recalculated). `inspectDocx(bytes, { detail: 'full' })` and the
       fixture goldens in `fixtures/docx/` list what else is flattened or ignored (sections…). DOCX table formatting (borders, shading, header rows, widths, table styles), table structure (cells of several blocks, nested tables) and
       comments round-trip with replies, resolved state and anchors.
+- [ ] **Footnotes and endnotes: remaining gaps** — notes are imported, shown as a numbered reference with the
+      notes in an area at the end of each section, and written back. Not done: inserting and editing a note in the
+      editor, laying footnotes out at the bottom of their page, notes of several paragraphs (they become one
+      paragraph with line breaks), the numbering format and restart settings of the file, and references in
+      headers and footers.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Sections: remaining gaps** — the editor shows and edits every section

@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { parseComments } from './comments';
+import { parseNotes, referencedNoteIds } from './notes';
 import { scanDocx } from './loss-scan';
 import { countMatches, createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
 
@@ -35,11 +36,17 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
   add('docx.trackedInsertions', 'tracked insertion(s)', countMatches(doc, /<w:ins[\s>/]/g), 'imported as ordinary text, as if accepted; author and date are lost');
   add('docx.trackedDeletions', 'tracked deletion(s)', countMatches(doc, /<w:del[\s>/]/g), 'applied (the deleted text is gone)');
 
-  const footnotes = await text('word/footnotes.xml');
-  const endnotes = await text('word/endnotes.xml');
-  const notes = (xml: string) => countMatches(xml, /<w:(?:footnote|endnote)\b(?![^>]*w:type="(?:separator|continuationSeparator|continuationNotice)")[^>]*>/g);
-  add('docx.footnotes', 'footnote(s)', notes(footnotes), 'not imported');
-  add('docx.endnotes', 'endnote(s)', notes(endnotes), 'not imported');
+  // A note the body refers to is imported (with its text); one nothing in the body refers to, and any in a damaged part, is not.
+  const noteLoss = async (kind: 'footnote' | 'endnote') => {
+    const xml = await text(`word/${kind}s.xml`);
+    const all = countMatches(xml, new RegExp(`<w:${kind}\\b(?![^>]*w:type="(?:separator|continuationSeparator|continuationNotice)")[^>]*>`, 'g'));
+    // A reference inside a text box is not imported with the text box.
+    const referenced = referencedNoteIds(doc.replace(/<w:txbxContent[\s\S]*?<\/w:txbxContent>/g, ''), kind);
+    const imported = [...parseNotes(xml, kind).keys()].filter((id) => referenced.has(id)).length;
+    return Math.max(0, all - imported);
+  };
+  add('docx.footnotes', 'footnote(s)', await noteLoss('footnote'), 'not imported (no reference to it in the body, or the part is damaged)');
+  add('docx.endnotes', 'endnote(s)', await noteLoss('endnote'), 'not imported (no reference to it in the body, or the part is damaged)');
 
   // Comments are imported with their replies and anchors; only those in a damaged part are lost.
   const commentsXml = await text('word/comments.xml');

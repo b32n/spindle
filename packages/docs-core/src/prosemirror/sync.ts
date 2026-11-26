@@ -442,6 +442,14 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       };
     }
 
+    if (item.type === 'noteRef') {
+      return {
+        type: 'note_ref',
+        attrs: { kind: item.kind, noteId: item.id, customMark: item.customMark ?? null },
+        content: inlineContentToPm(item.content.filter((c) => c.type !== 'noteRef' && c.type !== 'contentControl'), stylePool),
+      };
+    }
+
     if (item.type === 'contentControl') {
       return {
         type: 'content_control_inline',
@@ -801,6 +809,17 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
         kind: child.attrs.kind as string,
         result: child.attrs.result as InlineField['result'],
         ...(child.attrs.dirty ? { dirty: true } : {}),
+      });
+      return;
+    }
+
+    if (child.type.name === 'note_ref') {
+      content.push({
+        type: 'noteRef',
+        kind: child.attrs.kind === 'endnote' ? 'endnote' : 'footnote',
+        id: String(child.attrs.noteId ?? ''),
+        content: pmContentToInline(child, stylePool),
+        ...(typeof child.attrs.customMark === 'string' && child.attrs.customMark ? { customMark: child.attrs.customMark } : {}),
       });
       return;
     }

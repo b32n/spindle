@@ -21,6 +21,7 @@ import type {
 
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { isKeptBlockControl, parseSdt, sdtContent } from './content-controls';
+import { parseNotes, type NoteKind } from './notes';
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './numbering';
 import { parsePPr, StyleSheet, toDocParagraphStyle } from './styles';
@@ -73,7 +74,15 @@ interface PartContext {
   comments?: CommentTracker;
   /** Content controls are kept as wrappers (the body); headers and footers read them as their content only. */
   controls?: boolean;
+  /** The text of the notes the body refers to (absent in notes, headers and footers, where a note reference is not kept). */
+  notes?: NoteLookup;
 }
+
+/**
+ * The note a reference points at (by its id in the file), read on first use: its text, and the id it gets in the
+ * model, which counts the references of its kind in document order. Undefined when the document has no such note.
+ */
+type NoteLookup = (kind: NoteKind, id: string) => { id: string; content: DocInline[] } | undefined;
 
 const MEDIA_EXT_TO_MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp' };
 
@@ -191,6 +200,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
     const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }) };
     let text = '';
+    /** A reference followed by its custom mark (`w:customMarkFollows`): the text after it in the run is that mark. */
+    let markOf: Extract<DocInline, { type: 'noteRef' }> | undefined;
     const flush = () => {
       if (!text) return;
       const commentThreadId = ctx.comments?.anchorText(text);
@@ -225,7 +236,26 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         const open = top();
         if (open?.phase === 'instruction') open.instruction += textOf(piece);
       } else if (pieceTag === 'w:t') {
-        if (!inInstruction()) text += textOf(piece);
+        if (markOf) markOf.customMark = (markOf.customMark ?? '') + textOf(piece);
+        else if (!inInstruction()) text += textOf(piece);
+      } else if (pieceTag === 'w:footnoteReference' || pieceTag === 'w:endnoteReference') {
+        flush();
+        const kind: NoteKind = pieceTag === 'w:footnoteReference' ? 'footnote' : 'endnote';
+        const id = attrsOf(piece)['@_w:id'];
+        // A reference in a field's result, in a header or footer, or inside a note is not kept.
+        if (!ctx.notes) {
+          warnings.push(`A ${kind} reference in a header, footer or note was not imported.`);
+        } else if (!top() && id !== undefined) {
+          const note = ctx.notes(kind, id);
+          if (note) {
+            const ref: Extract<DocInline, { type: 'noteRef' }> = { type: 'noteRef', kind, id: note.id, content: JSON.parse(JSON.stringify(note.content)) as DocInline[] };
+            out.push(ref);
+            const follows = attrsOf(piece)['@_w:customMarkFollows'];
+            if (follows === '1' || follows === 'true') markOf = ref;
+          } else {
+            warnings.push(`A ${kind} reference points to a ${kind} that does not exist.`);
+          }
+        }
       } else if (pieceTag === 'w:tab' || pieceTag === 'w:ptab') {
         if (!inInstruction()) text += '\t';
       } else if (pieceTag === 'w:br') {
@@ -254,6 +284,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       }
     }
     flush();
+    // A note with a custom mark starts with that mark as text (not with the reference mark): it is not part of the note's text.
+    if (markOf?.customMark) dropCustomMark(markOf.content, markOf.customMark);
   };
 
   /** A run-level content control wraps what it contains; one inside a field's result, or in a header or footer, is read as its content only. */
@@ -1104,6 +1136,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const styles = new StyleSheet(stylesXml, theme);
   const numbering = parseNumbering(numberingXml);
   const ctx: PartContext = { rels, media, styles, theme, lists: new ListCounter(numbering), comments, controls: true };
+  ctx.notes = await createNoteLookup(zip, rels, media, styles, theme, warnings);
 
   const root = parseXml(documentXml);
   const documentEl = find(root, 'w:document');
@@ -1207,13 +1240,93 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   };
 }
 
+/** Take the custom mark, and the space after it, off the start of a note's text. */
+function dropCustomMark(content: DocInline[], mark: string): void {
+  const first = content[0];
+  if (!first || first.type !== 'text' || !first.text.startsWith(mark)) return;
+  first.text = first.text.slice(mark.length);
+  if (first.text === '') content.shift();
+  const next = content[0];
+  if (next && next.type === 'text' && next.text.startsWith(' ')) {
+    next.text = next.text.slice(1);
+    if (next.text === '') content.shift();
+  }
+}
+
+/** The paragraphs of a note: each one's inline content, joined by line breaks, without the leading space Word writes after the reference mark. */
+function noteContent(blocks: XmlNode[], ctx: PartContext, warnings: string[]): DocInline[] {
+  const content: DocInline[] = [];
+  let tables = 0;
+  for (const block of flattenBlocks(blocks)) {
+    const tag = tagOf(block);
+    if (tag === 'w:p') {
+      if (content.length > 0) {
+        // The line break joins the paragraphs; it takes the formatting of the text before it.
+        const last = content[content.length - 1];
+        if (last.type === 'text') last.text += '\n';
+        else content.push({ type: 'text', text: '\n' });
+      }
+      content.push(...paragraphInlineContent(block, ctx, warnings));
+    } else if (tag === 'w:tbl') {
+      tables++;
+    }
+  }
+  if (tables > 0) warnings.push('A table in a note was not imported.');
+  // The mark is followed by a space, in a run of its own or at the start of the text.
+  const first = content[0];
+  if (first && first.type === 'text' && first.text.startsWith(' ')) {
+    first.text = first.text.slice(1);
+    if (first.text === '') content.shift();
+  }
+  return content;
+}
+
+/**
+ * The text of the notes a body refers to, read when first asked for (a note nobody refers to is not read: the loss
+ * detector reports it). A note's links and pictures are resolved through its own part's relationships, then the
+ * document's.
+ */
+async function createNoteLookup(
+  zip: JSZip,
+  docRels: Map<string, string>,
+  docMedia: Map<string, string>,
+  styles: StyleSheet,
+  theme: Theme | undefined,
+  warnings: string[]
+): Promise<NoteLookup> {
+  const kinds: NoteKind[] = ['footnote', 'endnote'];
+  const parts = new Map<NoteKind, { notes: Map<string, XmlNode[]>; ctx: PartContext }>();
+  for (const kind of kinds) {
+    const file = `word/${kind}s.xml`;
+    const notes = parseNotes(await readZipText(zip, file), kind);
+    if (notes.size === 0) continue;
+    const rels = parseRels(await readZipText(zip, `word/_rels/${kind}s.xml.rels`));
+    const media = await buildMediaMap(zip, rels);
+    parts.set(kind, { notes, ctx: { rels: new Map([...docRels, ...rels]), media: new Map([...docMedia, ...media]), styles, theme } });
+  }
+  const cache = new Map<string, DocInline[]>();
+  const counts: Record<NoteKind, number> = { footnote: 0, endnote: 0 };
+  return (kind, id) => {
+    const part = parts.get(kind);
+    const blocks = part?.notes.get(id);
+    if (!part || !blocks) return undefined;
+    const key = `${kind}:${id}`;
+    let content = cache.get(key);
+    if (!content) {
+      content = noteContent(blocks, part.ctx, warnings);
+      cache.set(key, content);
+    }
+    return { id: String(++counts[kind]), content };
+  };
+}
+
 /** Every named style id the imported blocks and runs refer to. */
 function usedStyleIds(sections: DocSection[]): Set<string> {
   const used = new Set<string>();
   const inlines = (content: DocInline[]) => {
     for (const inline of content) {
       if ((inline.type === 'text' || inline.type === 'link') && inline.namedStyleId) used.add(inline.namedStyleId);
-      else if (inline.type === 'contentControl') inlines(inline.content);
+      else if (inline.type === 'contentControl' || inline.type === 'noteRef') inlines(inline.content);
     }
   };
   const hf = (part: DocHeaderFooter | undefined) => {

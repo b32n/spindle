@@ -107,6 +107,17 @@
               {
                 "text": "A footnote whose part is corrupt.",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "text": "Broken &bogus; ",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-1",
+                "kind": "footnote",
+                "type": "noteRef"
               }
             ],
             "id": "block-7",

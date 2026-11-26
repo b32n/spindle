@@ -12,6 +12,17 @@
 // Text Runs - Inline content within blocks
 // ============================================================================
 
+/** Which note: its kind and its number among the notes of that kind, in document order (1-based). */
+export interface NoteKey {
+  kind: 'footnote' | 'endnote';
+  ordinal: number;
+}
+
+/** The text a note is found by in the page (`data-note-ref`, `data-note-target`). */
+export function noteKeyString(key: NoteKey): string {
+  return `${key.kind}:${key.ordinal}`;
+}
+
 /**
  * The content control (a Word structured document tag) a run is inside, innermost one. A control takes two editor
  * positions around its content, which the converter draws as zero-width runs so offsets and positions stay in step.
@@ -33,6 +44,8 @@ export interface TextRun {
   text: string;
   /** The content control the run is in, if any. */
   control?: RunControl;
+  /** The run is the number of a note reference (or the number that starts a note in the notes area): clicking it goes to the other end. */
+  noteRef?: NoteKey;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -128,6 +141,10 @@ export interface ParagraphBlock {
   /** ProseMirror position of the paragraph node (set for blocks inside table cells) */
   pmStart?: number;
   pmEnd?: number;
+  /** A block of the notes area: it has no node in the document, and clicking it goes to the note's reference. */
+  noteTarget?: NoteKey;
+  /** The block is drawn from other content (the notes area), not from a node of its own. */
+  synthetic?: boolean;
 }
 
 /**

@@ -17,6 +17,7 @@ function fieldResultText(result: unknown): string {
 }
 import {
   FlowBlock,
+  NoteKey,
   Run,
   RunControl,
   TextRun,
@@ -44,6 +45,70 @@ export interface ConversionOptions {
   resetIds?: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// Notes. A note reference is drawn as its number; the text of the notes is collected in an area at the end of the
+// section the references are in (footnotes first, then endnotes), after the blocks the conversion made from the nodes.
+// ---------------------------------------------------------------------------
+
+interface NoteEntry {
+  key: NoteKey;
+  label: string;
+  node: PmNode;
+}
+
+/** The references met so far by the conversion in progress, in document order, and how many there are of each kind. */
+let noteEntries: NoteEntry[] = [];
+const noteCounts = { footnote: 0, endnote: 0 };
+
+function resetNotes(): void {
+  noteEntries = [];
+  noteCounts.footnote = 0;
+  noteCounts.endnote = 0;
+}
+
+const ROMAN: Array<[number, string]> = [[1000, 'm'], [900, 'cm'], [500, 'd'], [400, 'cd'], [100, 'c'], [90, 'xc'], [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i']];
+
+/** The number a note is shown with: footnotes in digits, endnotes in lower-case roman numerals (Word's defaults). */
+export function noteLabel(key: NoteKey): string {
+  if (key.kind === 'footnote') return String(key.ordinal);
+  let n = key.ordinal;
+  let out = '';
+  for (const [value, numeral] of ROMAN) {
+    while (n >= value) {
+      out += numeral;
+      n -= value;
+    }
+  }
+  return out;
+}
+
+/** Heading and entries of the notes area for the references found since `from`, or nothing when there are none. */
+function notesArea(from: number): FlowBlock[] {
+  const blocks: FlowBlock[] = [];
+  for (const [kind, title] of [['footnote', 'Footnotes'], ['endnote', 'Endnotes']] as const) {
+    const entries = noteEntries.slice(from).filter((e) => e.key.kind === kind);
+    if (entries.length === 0) continue;
+    blocks.push({
+      kind: 'paragraph',
+      id: generateBlockId(),
+      synthetic: true,
+      runs: [{ kind: 'text', text: title, bold: true, fontSize: 11, color: '#5f6368' }],
+      attrs: { spaceBefore: 18, spaceAfter: 4 },
+    });
+    for (const entry of entries) {
+      const runs: Run[] = [{ kind: 'text', text: entry.label, superscript: true, color: '#1a73e8', noteRef: entry.key }, { kind: 'text', text: ' ' }];
+      const body: Run[] = [];
+      collectRuns(entry.node, body);
+      for (const run of body) {
+        if (run.kind === 'text' || run.kind === 'link') runs.push({ ...run, fontSize: (run as TextRun).fontSize ?? 10 } as Run);
+        else runs.push(run);
+      }
+      blocks.push({ kind: 'paragraph', id: generateBlockId(), synthetic: true, noteTarget: entry.key, runs, attrs: { spaceAfter: 2 } });
+    }
+  }
+  return blocks;
+}
+
 /**
  * Convert a ProseMirror document to FlowBlocks
  * 
@@ -58,6 +123,7 @@ export function proseMirrorToFlowBlocks(
   if (options.resetIds) {
     resetBlockIdCounter();
   }
+  resetNotes();
   
   const blocks: FlowBlock[] = [];
   
@@ -71,6 +137,7 @@ export function proseMirrorToFlowBlocks(
       }
     }
   });
+  blocks.push(...notesArea(0));
   
   return blocks;
 }
@@ -93,20 +160,28 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
   if (options.resetIds) {
     resetBlockIdCounter();
   }
+  resetNotes();
   const blocks: FlowBlock[] = [];
   const sections: SectionedFlowBlocks['sections'] = [];
   let blockStart = 0;
+  let notesFrom = 0;
+  /** Close the section being read: the notes of its references follow its blocks. */
+  const endSection = (sectionId: string | null) => {
+    blocks.push(...notesArea(notesFrom));
+    notesFrom = noteEntries.length;
+    sections.push({ sectionId, blockStart, blockEnd: blocks.length });
+    blockStart = blocks.length;
+  };
   doc.forEach((node) => {
     if (node.type.name === 'section_break') {
-      sections.push({ sectionId: String(node.attrs.sectionId ?? ''), blockStart, blockEnd: blocks.length });
-      blockStart = blocks.length;
+      endSection(String(node.attrs.sectionId ?? ''));
       return;
     }
     const block = nodeToFlowBlock(node);
     if (Array.isArray(block)) blocks.push(...block);
     else if (block) blocks.push(block);
   });
-  sections.push({ sectionId: null, blockStart, blockEnd: blocks.length });
+  endSection(null);
   return { blocks, sections };
 }
 
@@ -420,6 +495,16 @@ function collectRuns(node: PmNode, runs: Run[], control?: RunControl): void {
       // Zero width on the page, but one editor position: a zero-width space keeps the
       // layout offsets and ProseMirror positions in step, and marks where to scroll to.
       runs.push({ kind: 'text', text: '\u200B', ...(control && { control }) });
+    } else if (child.type.name === 'note_ref') {
+      // The reference shows its number. It is one unit of the document that takes as many positions as the note's text
+      // plus its two tokens, so the number is padded with zero-width spaces to keep layout offsets and positions in step.
+      const kind = child.attrs.kind === 'endnote' ? 'endnote' : 'footnote';
+      const key: NoteKey = { kind, ordinal: ++noteCounts[kind] };
+      const custom = typeof child.attrs.customMark === 'string' && child.attrs.customMark ? child.attrs.customMark : '';
+      const label = custom || noteLabel(key);
+      noteEntries.push({ key, label, node: child });
+      runs.push({ kind: 'text', text: label, superscript: true, color: '#1a73e8', noteRef: key, ...(control && { control }) });
+      if (child.nodeSize > label.length) runs.push({ kind: 'text', text: '\u200B'.repeat(child.nodeSize - label.length), ...(control && { control }) });
     } else if (child.type.name === 'content_control_inline') {
       // The control's opening and closing tokens are two editor positions around its content, so each is a
       // zero-width space too; the content between them is tagged with the control.
@@ -629,6 +714,8 @@ export function createBlockPositionMap(
   const visit = (node: PmNode, nodeStart: number): void => {
     // A section break draws nothing: it has no FlowBlock to map.
     if (node.type.name === 'section_break') return;
+    // The notes area closing a section has no node: the next node's blocks come after it.
+    while (blockIndex < blocks.length && (blocks[blockIndex] as { synthetic?: boolean }).synthetic) blockIndex++;
     if (node.type.name === 'content_control') {
       node.forEach((child, childOffset) => visit(child, nodeStart + 1 + childOffset));
       return;

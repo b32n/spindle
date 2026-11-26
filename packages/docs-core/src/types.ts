@@ -282,7 +282,23 @@ export interface InlineContentControl {
   content: InlineContent[];
 }
 
-export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField | InlineBookmark | InlineContentControl;
+/**
+ * A reference to a footnote or endnote, with the note's text. The reference is a single unit in the editor; its number is
+ * not stored but follows from where it stands (notes are numbered per kind, in document order). Only inline content that
+ * a note can hold goes in `content` (no other note reference, no content control). A note of several paragraphs holds them
+ * joined by line breaks.
+ */
+export interface InlineNoteRef {
+  type: 'noteRef';
+  kind: 'footnote' | 'endnote';
+  /** Identifies the note among those of its kind. */
+  id: string;
+  content: InlineContent[];
+  /** The mark that replaces the automatic number (DOCX `w:customMarkFollows`). */
+  customMark?: string;
+}
+
+export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField | InlineBookmark | InlineContentControl | InlineNoteRef;
 
 // ============================================================================
 // Block Types

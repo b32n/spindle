@@ -1,11 +1,4 @@
 {
   "format": "docx",
-  "items": [
-    {
-      "count": 1,
-      "effect": "not imported",
-      "id": "docx.footnotes",
-      "label": "footnote(s)"
-    }
-  ]
+  "items": []
 }

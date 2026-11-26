@@ -1,5 +1,5 @@
 import { Schema, Node as PmNode } from 'prosemirror-model';
-import { createBlockPositionMap, proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks } from './pm-to-blocks';
+import { createBlockPositionMap, noteLabel, proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks } from './pm-to-blocks';
 import type { ParagraphBlock, LinkRun } from './flow-blocks';
 
 // Minimal schema: enough to build a paragraph containing a linked text run.
@@ -325,5 +325,84 @@ describe('content controls', () => {
       { sectionId: 'x', blockStart: 0, blockEnd: 2 },
       { sectionId: null, blockStart: 2, blockEnd: 3 },
     ]);
+  });
+});
+
+describe('notes', () => {
+  const para = (...content: unknown[]) => ({ type: 'paragraph', content });
+  const note = (kind: 'footnote' | 'endnote', body: unknown[], attrs: object = {}) => ({ type: 'note_ref', attrs: { kind, noteId: '1', ...attrs }, content: body });
+  const labelOf = (run: unknown) => (run as TextRun).text;
+
+  it('numbers footnotes and endnotes separately, in document order, across paragraphs, tables and lists', () => {
+    const cell = { type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [para(note('footnote', [text('c')]))] }] }] };
+    const item = { type: 'list_item', attrs: { level: 0 }, content: [para(note('endnote', [text('l')]))] };
+    const doc = j([para(note('footnote', [text('a')]), note('endnote', [text('b')])), cell, { type: 'bullet_list', content: [item] }, para(note('footnote', [text('d')]))]);
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    const refs = (blocks.filter((b) => b.kind === 'paragraph' && !b.synthetic)[0] as ParagraphBlock).runs.filter((r): r is TextRun => r.kind === 'text' && !!r.noteRef);
+    expect(refs.map((r) => [r.noteRef?.kind, r.noteRef?.ordinal, r.text])).toEqual([
+      ['footnote', 1, '1'],
+      ['endnote', 1, 'i'],
+    ]);
+    const entries = blocks.filter((b): b is ParagraphBlock => b.kind === 'paragraph' && !!b.noteTarget);
+    expect(entries.map((b) => `${b.noteTarget!.kind}:${b.noteTarget!.ordinal}`)).toEqual(['footnote:1', 'footnote:2', 'footnote:3', 'endnote:1', 'endnote:2']);
+    expect(entries.map((b) => labelOf(b.runs[0]))).toEqual(['1', '2', '3', 'i', 'ii']);
+  });
+
+  it('draws a reference as a superscript number padded to the positions it takes, so offsets stay in step', () => {
+    const body = [text('abcdef')];
+    const doc = j([para(text('x'), note('footnote', body), text('y'))]);
+    const first = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
+    const runs = first.runs as TextRun[];
+    expect(runs.map((r) => r.text)).toEqual(['x', '1', '​'.repeat(7), 'y']);
+    expect(runs[1]).toMatchObject({ superscript: true, noteRef: { kind: 'footnote', ordinal: 1 } });
+    // The paragraph holds 1 + (2 + 6) + 1 positions.
+    expect(runs.reduce((n, r) => n + r.text.length, 0)).toBe(doc.firstChild!.content.size);
+  });
+
+  it('shows a custom mark instead of the number, and does not pad when the mark is as long as the positions', () => {
+    const doc = j([para(note('footnote', [], { customMark: '*' }))]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs as TextRun[];
+    expect(runs.map((r) => r.text)).toEqual(['*', '​']);
+    const long = j([para(note('footnote', [], { customMark: '***' }))]);
+    expect((proseMirrorToFlowBlocks(long)[0] as ParagraphBlock).runs.map(labelOf)).toEqual(['***']);
+  });
+
+  it('collects the notes in an area after the last block: a heading per kind, then each note, numbered, in a smaller size', () => {
+    const doc = j([para(text('a'), note('footnote', [text('first '), text('bold', [{ type: 'bold' }])])), para(note('endnote', [text('last')]))]);
+    const blocks = proseMirrorToFlowBlocks(doc);
+    expect(blocks.map((b) => (b as ParagraphBlock).synthetic ?? false)).toEqual([false, false, true, true, true, true]);
+    const area = blocks.slice(2) as ParagraphBlock[];
+    expect(area.map((b) => b.runs.map(labelOf).join(''))).toEqual(['Footnotes', '1 first bold', 'Endnotes', 'i last']);
+    expect(area[1].runs.slice(2).map((r) => (r as TextRun).fontSize)).toEqual([10, 10]);
+    expect(area[1].noteTarget).toEqual({ kind: 'footnote', ordinal: 1 });
+    expect(area[0].noteTarget).toBeUndefined();
+  });
+
+  it('has no area when there are no notes, and lists no note of another section', () => {
+    expect(proseMirrorToFlowBlocks(j([para(text('x'))])).some((b) => (b as ParagraphBlock).synthetic)).toBe(false);
+    const doc = j([para(note('footnote', [text('one')])), { type: 'section_break', attrs: { sectionId: 'a' } }, para(text('two')), { type: 'section_break', attrs: { sectionId: 'b' } }, para(note('footnote', [text('three')]))]);
+    const out = proseMirrorToSectionedFlowBlocks(doc);
+    expect(out.sections).toEqual([
+      { sectionId: 'a', blockStart: 0, blockEnd: 3 },
+      { sectionId: 'b', blockStart: 3, blockEnd: 4 },
+      { sectionId: null, blockStart: 4, blockEnd: 7 },
+    ]);
+    const area = (range: { blockStart: number; blockEnd: number }) => out.blocks.slice(range.blockStart, range.blockEnd).map((b) => (b as ParagraphBlock).runs.map(labelOf).join('').replace(/\u200B/g, ''));
+    expect(area(out.sections[0])).toEqual(['1', 'Footnotes', '1 one']);
+    expect(area(out.sections[2])).toEqual(['2', 'Footnotes', '2 three']);
+  });
+
+  it('maps the blocks of the document to their positions, skipping the notes area', () => {
+    const doc = j([para(note('footnote', [text('n')])), { type: 'section_break', attrs: { sectionId: 'a' } }, para(text('after')), para(text('last'))]);
+    const { blocks } = proseMirrorToSectionedFlowBlocks(doc);
+    const map = createBlockPositionMap(doc, blocks);
+    const real = blocks.filter((b) => !(b as ParagraphBlock).synthetic);
+    expect(real.map((b) => doc.textBetween(map.get(b.id)!.start, map.get(b.id)!.end, ' ')).join('|')).toBe('n|after|last');
+    expect(blocks.filter((b) => (b as ParagraphBlock).synthetic).every((b) => !map.has(b.id))).toBe(true);
+  });
+
+  it('writes endnote numbers in roman numerals', () => {
+    expect([1, 4, 9, 14, 40, 90, 400, 1994, 3999].map((ordinal) => noteLabel({ kind: 'endnote', ordinal }))).toEqual(['i', 'iv', 'ix', 'xiv', 'xl', 'xc', 'cd', 'mcmxciv', 'mmmcmxcix']);
+    expect(noteLabel({ kind: 'footnote', ordinal: 12 })).toBe('12');
   });
 });

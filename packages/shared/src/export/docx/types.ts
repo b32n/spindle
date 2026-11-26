@@ -135,6 +135,23 @@ export interface DocContentControlRun {
   content: DocInline[];
 }
 
+/**
+ * A reference to a footnote or endnote, with the note's text. The reference takes no text of its own: where it is shown
+ * and how it is numbered is up to the application (Word numbers notes in document order and writes the number itself).
+ * Only the first paragraph of a note is a paragraph of its own; further ones are joined to it with a line break
+ * (`\n`), and a table, list or image in a note is not kept.
+ */
+export interface DocNoteRefRun {
+  type: 'noteRef';
+  kind: 'footnote' | 'endnote';
+  /** The note's id in the source file (`w:id`); unique per kind. The export renumbers notes in document order. */
+  id: string;
+  /** The text of the note, without the reference mark Word puts at its start. */
+  content: DocInline[];
+  /** The mark that replaces the automatic number (`w:customMarkFollows`). */
+  customMark?: string;
+}
+
 export type DocInline =
   | DocTextRun
   | DocLinkRun
@@ -143,7 +160,8 @@ export type DocInline =
   | DocTotalPagesRun
   | DocFieldRun
   | DocBookmarkRun
-  | DocContentControlRun;
+  | DocContentControlRun
+  | DocNoteRefRun;
 
 export interface DocParagraphStyle {
   alignment?: 'left' | 'center' | 'right' | 'justify';

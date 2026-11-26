@@ -8,12 +8,6 @@
       "label": "multi-column section(s)"
     },
     {
-      "count": 6,
-      "effect": "not imported",
-      "id": "docx.endnotes",
-      "label": "endnote(s)"
-    },
-    {
       "count": 1,
       "effect": "tables of contents and indexes are kept as static text",
       "id": "docx.fields",
@@ -27,12 +21,6 @@
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
       "label": "floating image(s)"
-    },
-    {
-      "count": 10,
-      "effect": "not imported",
-      "id": "docx.footnotes",
-      "label": "footnote(s)"
     },
     {
       "count": 1,
