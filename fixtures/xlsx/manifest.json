@@ -1,0 +1,557 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "cell-types",
+      "filename": "cell-types.xlsx",
+      "title": "Cell types",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "cells.numbers",
+        "cells.sharedStrings",
+        "cells.inlineStrings",
+        "cells.booleans",
+        "cells.errors",
+        "cells.dates",
+        "cells.unicode",
+        "cells.rtl",
+        "formulas.cachedValues",
+        "workbook.calcSettings"
+      ],
+      "notes": "Integers, decimals, extreme magnitudes, text (spaces, line break, numeric-looking), booleans, all seven error values, 1900-system dates and times (including serial 60, the non-existent 1900-02-29), an inline string, Unicode (Greek, CJK, Korean, emoji, a combining accent) and Hebrew / Arabic text, and one formula with its cached value.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "dates-1904",
+      "filename": "dates-1904.xlsx",
+      "title": "1904 date system",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "workbook.date1904",
+        "cells.dates"
+      ],
+      "notes": "A workbook with date1904 set: the same serials as in the 1900 system denote dates 1462 days earlier.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "styles-basic",
+      "filename": "styles-basic.xlsx",
+      "title": "Basic styles",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "styles.basic",
+        "styles.alignment",
+        "styles.customNumFmts",
+        "styles.indexedColors",
+        "styles.borderStyles",
+        "layout.columnStyles",
+        "layout.rowHeights",
+        "layout.colWidths"
+      ],
+      "notes": "Bold white-on-blue header, struck italic Times, thin / thick / double borders, centred wrapped text, 45 degree rotation with indent, shrink to fit, currency / percent / scientific / red-negative number formats, a column default style and a tall row.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "number-format-probe",
+      "filename": "number-format-probe.xlsx",
+      "title": "Number format probe (33 codes x 3 values)",
+      "source": {
+        "tool": "xlsxwriter (Python), written by the library",
+        "version": "3.3.4",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "styles.customNumFmts",
+        "cells.dates"
+      ],
+      "notes": "Plan 2.2 item 5: 33 common Excel codes, each applied to 1234.5678, -0.256 and 46024.75, written by xlsxwriter. Expected display strings come from recalculating in LibreOffice (X3).",
+      "generator": "generators/build_probes.py"
+    },
+    {
+      "id": "formulas-core",
+      "filename": "formulas-core.xlsx",
+      "title": "Formulas core: the 159 probe formulas",
+      "source": {
+        "tool": "xlsxwriter (Python), written by the library",
+        "version": "3.3.4",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "formulas.basic",
+        "formulas.cachedValues",
+        "formulas.xlfn",
+        "formulas.array",
+        "formulas.dynamicArray",
+        "formulas.crossSheet"
+      ],
+      "notes": "Plan 2.2 item 3: 159 common formulas (math, lookup, text, date, statistics, financial, information, dynamic-array, operators) over a small data block, written by xlsxwriter with future-function prefixes. Cached values are xlsxwriter's default 0; expected values come from a LibreOffice recalculation (X3).",
+      "generator": "generators/build_probes.py"
+    },
+    {
+      "id": "formula-syntax",
+      "filename": "formula-syntax.xlsx",
+      "title": "Formula syntax probe (23 forms)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "formulas.wholeColumn",
+        "formulas.wholeRow",
+        "formulas.threeD",
+        "formulas.crossSheet",
+        "formulas.array",
+        "formulas.dynamicArray",
+        "formulas.xlfn",
+        "cells.booleans",
+        "formulas.cachedValues"
+      ],
+      "notes": "Plan 2.2 item 4: whole-column and whole-row references, percent literal, 3D reference, array constants, range ending in INDEX, implicit intersection, spill operator, intersection and union operators, operator precedence, quoted sheet names. Each cached value is what Excel computes.",
+      "generator": "generators/build_probes.py"
+    },
+    {
+      "id": "layout",
+      "filename": "layout.xlsx",
+      "title": "Layout",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "layout.colWidths",
+        "layout.rowHeights",
+        "layout.defaultSizes",
+        "layout.hidden",
+        "layout.outline",
+        "layout.frozenPanes",
+        "layout.merges",
+        "layout.zoom",
+        "layout.noGridlines",
+        "layout.rtl",
+        "sheets.multiple",
+        "cells.rtl"
+      ],
+      "notes": "Custom column widths and row heights, default sizes, a hidden column and row, column and row outline groups, frozen first row and column, merged cells (across and down), zoom 130%, gridlines off, and a second, right-to-left sheet.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "sheet-properties",
+      "filename": "sheet-properties.xlsx",
+      "title": "Sheet properties",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "sheets.multiple",
+        "sheets.hidden",
+        "sheets.veryHidden",
+        "sheets.tabColor",
+        "sheets.activeTab"
+      ],
+      "notes": "Five sheets: two with tab colours, one hidden, one very hidden, and the third one active.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "names",
+      "filename": "names.xlsx",
+      "title": "Defined names",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "names.defined",
+        "names.sheetScoped",
+        "names.printArea",
+        "names.printTitles",
+        "names.constants",
+        "formulas.basic",
+        "sheets.multiple"
+      ],
+      "notes": "Workbook-scoped and sheet-scoped names, print area and print titles, constant names (number, string, array) and a hidden name, used by two formulas.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "cf-basic",
+      "filename": "cf-basic.xlsx",
+      "title": "Conditional formatting",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "cf.cellIs",
+        "cf.expression",
+        "cf.top10",
+        "cf.aboveAverage",
+        "cf.duplicates",
+        "cf.text",
+        "cf.dates",
+        "cf.colorScale",
+        "cf.dataBar",
+        "cf.iconSet",
+        "cf.stopIfTrue"
+      ],
+      "notes": "Every classic rule type: cell value, formula (stop if true), top / bottom, above average, duplicate and unique values, text rules, dates occurring, 3-colour scale, data bar and icon set.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "data-validation",
+      "filename": "data-validation.xlsx",
+      "title": "Data validation",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "dv.list",
+        "dv.whole",
+        "dv.decimal",
+        "dv.date",
+        "dv.time",
+        "dv.textLength",
+        "dv.custom",
+        "dv.messages"
+      ],
+      "notes": "One rule per type (list inline and from a range, whole, decimal, date, time, text length, custom formula) and a rule with a prompt, an error title and a warning style.",
+      "generator": "generators/build_core.py"
+    },
+    {
+      "id": "openpyxl-image",
+      "filename": "openpyxl-image.xlsx",
+      "title": "openpyxl: workbook with an image",
+      "source": {
+        "tool": "openpyxl (Python), written by the library",
+        "version": "3.1.5",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "images.png",
+        "formulas.basic"
+      ],
+      "notes": "Written by openpyxl with one PNG. Absolute relationship targets; the importer at the time of writing throws a TypeError on it (plan 2.2 item 1).",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "openpyxl-chart",
+      "filename": "openpyxl-chart.xlsx",
+      "title": "openpyxl: workbook with charts",
+      "source": {
+        "tool": "openpyxl (Python), written by the library",
+        "version": "3.1.5",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "charts.bar",
+        "charts.line",
+        "formulas.basic"
+      ],
+      "notes": "Written by openpyxl with a bar and a line chart. The importer at the time of writing throws a TypeError on it (plan 2.2 item 1).",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "openpyxl-comment",
+      "filename": "openpyxl-comment.xlsx",
+      "title": "openpyxl: workbook with a cell comment",
+      "source": {
+        "tool": "openpyxl (Python), written by the library",
+        "version": "3.1.5",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "comments.notes",
+        "formulas.basic"
+      ],
+      "notes": "Written by openpyxl with one cell comment (legacy note). The importer at the time of writing throws a TypeError on it (plan 2.2 item 1).",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "xlsxwriter-rich",
+      "filename": "xlsxwriter-rich.xlsx",
+      "title": "xlsxwriter: many features",
+      "source": {
+        "tool": "xlsxwriter (Python), written by the library",
+        "version": "3.3.4",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "images.png",
+        "charts.bar",
+        "comments.notes",
+        "cf.cellIs",
+        "dv.list",
+        "formulas.xlfn",
+        "formulas.lambda",
+        "formulas.dynamicArray",
+        "cells.richText",
+        "names.defined",
+        "layout.frozenPanes",
+        "layout.merges"
+      ],
+      "notes": "Written by xlsxwriter (an Excel-conformant writer): a note, an image, a column chart, conditional formatting, validation, future functions, LET, a dynamic-array SORT, a defined name, frozen panes, a merge and a rich string.",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "libreoffice-rich",
+      "filename": "libreoffice-rich.xlsx",
+      "title": "LibreOffice: many features",
+      "source": {
+        "tool": "openpyxl workbook converted by LibreOffice headless (soffice --convert-to xlsx)",
+        "version": "LibreOffice 25.2.3.2, openpyxl 3.1.5",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "cf.cellIs",
+        "cf.colorScale",
+        "dv.list",
+        "comments.notes",
+        "charts.bar",
+        "tables.listObjects",
+        "sheets.hidden",
+        "sheets.tabColor",
+        "names.defined",
+        "layout.frozenPanes",
+        "layout.merges",
+        "print.pageSetup"
+      ],
+      "notes": "An openpyxl workbook with conditional formatting, validation, a note, a table, a chart, a hidden sheet, a name, a merge, a tab colour and landscape orientation, converted by LibreOffice headless so that LibreOffice wrote the package (plan 2.2 item 2).",
+      "generator": "generators/build_producers.py"
+    },
+    {
+      "id": "edge-truncated-zip",
+      "filename": "edge-truncated-zip.xlsx",
+      "title": "Edge: truncated zip",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.truncatedZip"
+      ],
+      "notes": "A workbook cut at 60% of its length (the central directory is missing). The importer must report a corrupt file, not crash.",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
+    },
+    {
+      "id": "edge-no-workbook",
+      "filename": "edge-no-workbook.xlsx",
+      "title": "Edge: no workbook part",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.noWorkbook",
+        "edge.brokenRels"
+      ],
+      "notes": "A valid zip with content types and a root relationship to xl/workbook.xml, but no workbook part.",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
+    },
+    {
+      "id": "edge-bad-rels",
+      "filename": "edge-bad-rels.xlsx",
+      "title": "Edge: relationships that point nowhere",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.brokenRels",
+        "sheets.multiple"
+      ],
+      "notes": "Workbook relationships to a missing worksheet, a missing theme and a part outside the package, and a sheet entry whose r:id has no relationship. One real sheet remains.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-xml-entities",
+      "filename": "edge-xml-entities.xlsx",
+      "title": "Edge: XML entity declarations",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.xmlEntities",
+        "cells.inlineStrings"
+      ],
+      "notes": "A worksheet with a DOCTYPE declaring nested internal entities (1000x expansion) and an external file entity, referenced from two inline strings. Importers must not expand or resolve them.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-invalid-xml",
+      "filename": "edge-invalid-xml.xlsx",
+      "title": "Edge: malformed worksheet XML",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.invalidXml"
+      ],
+      "notes": "A worksheet part with an unclosed element and a stray closing tag.",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
+    },
+    {
+      "id": "edge-encrypted",
+      "filename": "edge-encrypted.xlsx",
+      "title": "Edge: encrypted workbook (OLE stub)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.encrypted"
+      ],
+      "notes": "An OLE compound-file header and a directory naming EncryptionInfo and EncryptedPackage streams: the shape of a password-protected xlsx, with no content (a stub, not a usable file).",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
+    },
+    {
+      "id": "edge-legacy-xls",
+      "filename": "edge-legacy-xls.xls",
+      "title": "Edge: legacy .xls (OLE stub)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.legacyBinary"
+      ],
+      "notes": "An OLE compound-file header and a directory naming a Workbook stream: the shape of a legacy .xls, with no content (a stub, not a usable file).",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
+    },
+    {
+      "id": "edge-duplicate-sheet-names",
+      "filename": "edge-duplicate-sheet-names.xlsx",
+      "title": "Edge: duplicate sheet names",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.duplicateSheetNames",
+        "sheets.multiple"
+      ],
+      "notes": "Three sheets named Data, Data and DATA (sheet names are case-insensitive, so all three clash).",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-index-out-of-range",
+      "filename": "edge-index-out-of-range.xlsx",
+      "title": "Edge: indexes out of range",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.indexOutOfRange"
+      ],
+      "notes": "A shared-string cell pointing past the end of the string table (twice) and a cell using a style index that does not exist.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-empty-workbook",
+      "filename": "edge-empty-workbook.xlsx",
+      "title": "Edge: empty workbook",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.emptyWorkbook"
+      ],
+      "notes": "A minimal package (no styles, no shared strings, no views) with one sheet that holds no cells.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-zip-bomb",
+      "filename": "edge-zip-bomb.xlsx",
+      "title": "Edge: zip bomb (generated at run time)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.zipBomb"
+      ],
+      "notes": "About 300 KB on disk; the sheet part inflates to 300 MB of XML comment (ratio about 1000:1). Never committed: python3 generators/build_runtime.py --out DIR edge-zip-bomb.",
+      "generator": "generators/build_runtime.py",
+      "generatedAtRuntime": true,
+      "expectImportError": true
+    },
+    {
+      "id": "edge-huge-dimension",
+      "filename": "edge-huge-dimension.xlsx",
+      "title": "Edge: huge dimension (generated at run time)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.hugeDimension"
+      ],
+      "notes": "A tiny package whose sheet declares the dimension A1:XFD1048576 (17 billion cells). Never committed: python3 generators/build_runtime.py --out DIR edge-huge-dimension.",
+      "generator": "generators/build_runtime.py",
+      "generatedAtRuntime": true
+    },
+    {
+      "id": "perf-100k-x-10",
+      "filename": "perf-100k-x-10.xlsx",
+      "title": "Performance: 100,000 rows x 10 columns (generated at run time)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "perf.largeSheet",
+        "cells.numbers",
+        "cells.inlineStrings"
+      ],
+      "notes": "One million cells (about 5 MB). Never committed: python3 generators/build_runtime.py --out DIR perf-100k-x-10.",
+      "generator": "generators/build_runtime.py",
+      "generatedAtRuntime": true
+    }
+  ]
+}
