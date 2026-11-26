@@ -1,0 +1,23 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.smartArt",
+      "label": "SmartArt diagram(s)",
+      "where": [
+        "Slide 1"
+      ]
+    }
+  ]
+}

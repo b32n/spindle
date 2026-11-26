@@ -1,0 +1,40 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 7,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.animations",
+      "label": "animation effect(s)",
+      "where": [
+        "Slide 5",
+        "Slide 6"
+      ]
+    },
+    {
+      "count": 7,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4",
+        "Slide 5"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.transitions",
+      "label": "slide(s) with a transition",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4"
+      ]
+    }
+  ]
+}

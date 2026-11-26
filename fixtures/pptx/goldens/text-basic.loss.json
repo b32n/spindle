@@ -1,0 +1,46 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "lost: not imported; links are stored as written when the importer lands and never fetched",
+      "id": "pptx.externalLinks",
+      "label": "external link target(s) (web pages, files, linked media)",
+      "where": [
+        "https",
+        "mailto"
+      ]
+    },
+    {
+      "count": 9,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.bullets.custom",
+      "label": "paragraph(s) with custom bullets or numbering",
+      "where": [
+        "Slide 2",
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.fields",
+      "label": "field(s) (slide number, date)",
+      "where": [
+        "Slide 4"
+      ]
+    }
+  ]
+}

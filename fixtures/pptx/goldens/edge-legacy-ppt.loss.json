@@ -1,0 +1,11 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not supported; save it as .pptx first",
+      "id": "pptx.legacyBinary",
+      "label": "legacy binary presentation (.ppt)"
+    }
+  ]
+}

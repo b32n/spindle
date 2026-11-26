@@ -1,0 +1,39 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.customShows",
+      "label": "custom show(s)"
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.hiddenSlides",
+      "label": "hidden slide(s)",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 5,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4",
+        "Slide 5"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.sections",
+      "label": "section(s)"
+    }
+  ]
+}

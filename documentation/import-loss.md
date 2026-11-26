@@ -1,6 +1,6 @@
 # Import loss report
 
-Spindle models a subset of Excel and Word. Instead of dropping the rest silently, every importer can tell you **what it cannot preserve**
+Spindle models a subset of Excel, Word and PowerPoint. Instead of dropping the rest silently, every importer can tell you **what it cannot preserve**
 before the open document is replaced.
 
 ```ts
@@ -16,7 +16,8 @@ const { warnings, loss } = await importWorkbookFile(workbook, file); // `loss` i
 
 Docs: `inspectDocumentFile(file)` / `importDocumentFile(doc, file)` from `@b32nio/spindle-docs-react`. Core (no React):
 `inspectXlsx(bytes)`, `inspectCsv(text)` in sheets-core, `inspectDocx(bytes)` in docs-core, or `detectXlsxLoss` / `detectDocxLoss` / `detectCsvLoss`
-from `@b32nio/spindle-io/{xlsx,docx}` (XLSX/DOCX) and `@b32nio/spindle-shared/export/csv`.
+from `@b32nio/spindle-io/{xlsx,docx}` (XLSX/DOCX) and `@b32nio/spindle-shared/export/csv`. PPTX: `detectPptxLoss(bytes, { detail })` from
+`@b32nio/spindle-io/pptx` (slides has no importer yet, so there is no `inspectPptx` or dialog flow; see the PPTX table below).
 
 `ImportLossReport` is `{ format, items: ImportLossItem[] }`; an item is `{ id, label, count, where?, effect }` with a stable `id` such as
 `xlsx.conditionalFormatting`. An empty `items` list means nothing detectable is lost. The scan is a cheap pre-pass over the zip (no workbook
@@ -29,6 +30,7 @@ model is built) and never throws on a malformed file; the import itself reports 
 |---|---|
 | XLSX | conditional formatting, data validation, filters, protected sheets / workbook protection, grouped rows/columns, sparklines, hidden sheets (become visible), named ranges, charts, images, comments/notes, tables, pivot tables, macros, external links, slicers, rich text inside cells, formulas that use functions the editor does not have (`xlsx.formulas.unsupported`), formulas with table (structured) references (`xlsx.formulas.structuredRefs`), number formats the editor cannot reproduce exactly (`xlsx.numberFormats.approximated`) |
 | DOCX | tracked insertions (text kept as if accepted, author/date lost) and deletions (applied), content controls that cannot be kept (repeating sections, data-bound, group, row- or cell-level controls: their content is kept, the control lost), footnotes and endnotes that nothing in the body refers to, floating images, text boxes/shapes, equations, embedded objects, charts/diagrams, multi-column sections (kept for export, laid out as one column), tables of contents that cannot be read as a block and indexes (text kept, field lost), legacy form fields (text kept as plain text) |
+| PPTX | **nothing imports yet**: there is no PPTX importer, so no `.pptx` can be opened today and every id below is `lost: not imported`. Detected: charts, SmartArt, audio and video, embedded objects, transitions, animations, comments, macros, hidden slides, speaker notes, fonts the editor may not have, shapes with a geometry outside its 18 presets or custom geometry, EMF/WMF pictures, encrypted and legacy `.ppt` files, size limits (detector only; the full level adds 43 finer ids) |
 | CSV | semicolon- or tab-separated files (they import into one column) |
 
 ### XLSX loss ids
@@ -87,6 +89,59 @@ Table structure is kept: a cell's paragraphs, lists, headings, images and nested
 Headers, footers and section properties are kept in the model and written back, so `docx.headerFooterVariants` is no longer reported and `docx.sectionProperties` only counts chapter numbers in page numbers: each section's default, first-page (`w:titlePg`) and even-page header and footer (by `w:type`, with the document's even/odd setting) are imported, as are the page number restart and format (`w:pgNumType`), vertical alignment (`w:vAlign`) and text columns (`w:cols`: count, spacing, separator, unequal widths). A first-page or even-page variant that is switched on without a part of its own stays empty and is not written; a section with no header or footer reference has none (Word would repeat the previous section's, and does so again when the file is written back). The editor draws the first-page header and footer only: even-page headers and footers, page number restarts and formats, vertical alignment and columns are stored and exported but not shown (`docx.columns` keeps counting multi-column sections: they are laid out as one column). Header and footer fields other than page numbers are still dropped with a warning, and tables in headers and footers are not imported.
 
 Bookmarks and internal links are kept: a `w:bookmarkStart` becomes a named position in the text (including `_Toc` and `_Ref` bookmarks; Word's `_GoBack` cursor marker is dropped), a `w:hyperlink` with an anchor becomes a link to `#name` (`url#name` when it has a target as well), and clicking such a link in the editor scrolls to the bookmark. A bookmark that covers text is kept as a point at its start, so its range is not preserved: a `REF` field the application that opens the exported file recalculates would then show nothing, though its cached text is kept and `PAGEREF` is unaffected. A bookmark that starts between paragraphs moves to the start of the next paragraph, and bookmarks in headers and footers are dropped. A link around a field (a table-of-contents page number) keeps the field but not the link. There is no `docx.bookmarks` id any more.
+
+### PPTX loss ids
+
+`detectPptxLoss(bytes, { detail })` (`@b32nio/spindle-io/pptx`) parses the package XML with the same safety measures as the XLSX detector (entities are
+never expanded and a DOCTYPE is cut out, nesting is capped at 100 levels, a part is read only up to 64 MB and the whole read up to 256 MB, counted on
+the bytes that actually come out of the zip so a forged header cannot make a bomb inflate, a package of more than 50,000 entries is not scanned, nothing
+throws). **There is no PPTX importer yet** (plan K9 to K15): today no presentation can be opened at all, so every effect says
+`lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)` (a few say more: macros are never run or kept, an encrypted package
+cannot be opened). The ids are stable; as importer PRs land, only counts, effect texts and states change. The default `detail: 'summary'` returns the
+16 summary ids; `'full'` adds the finer ids and is what `npm run slides:pptx-fidelity` records. `where` lists slides as `Slide n` (their place in the
+presentation; a slide part the presentation does not list is named by its file), or the fonts, geometries, languages, link schemes or action kinds
+named in the id's row below, capped at five entries.
+
+Counts are of objects, not of package parts, and are taken from the **slides** (nothing on a layout or master is counted; those carry only the
+masters, theme, colour map and font ids): a chart is one chart however many parts it has, an `mc:Choice`/`mc:Fallback` pair is read once (the
+fallback is skipped), a slide with a transition counts once however the transition is written.
+
+Summary ids (dialog):
+
+| Id | What is counted |
+|---|---|
+| `pptx.charts` | chart frames (`c:chart`, and the Office 2016 `cx` chart form) on slides; if no slide shows one, the chart parts |
+| `pptx.smartArt` | SmartArt diagram frames on slides; if none, the diagram data parts |
+| `pptx.media` | audio and video pictures (`a:audioFile`, `a:videoFile`, `a:quickTimeFile`) |
+| `pptx.embeddedObjects` | OLE objects (`p:oleObj`) and ActiveX controls (`p:control`) |
+| `pptx.transitions` | slides with a transition |
+| `pptx.animations` | animation effects (`p:cTn` with a `presetClass`); a slide whose timing tree has none counts one |
+| `pptx.comments` | comment threads, legacy (`p:cm`) and modern (`p188:cm`; replies are not counted separately) |
+| `pptx.macros` | the macro project (`ppt/vbaProject.bin`), at most one |
+| `pptx.hiddenSlides` | slides with `show="0"` |
+| `pptx.notes` | slides whose notes page has text (the slide number, date, header, footer and slide-image placeholders do not count) |
+| `pptx.fonts.unavailable` | distinct font families (case-insensitive) used by runs, by the layouts and masters, or by the theme of a master, outside a short list (below); `where` = the names. Theme references (`+mj-lt`, `+mn-ea`) never count |
+| `pptx.shapes.unsupportedGeometry` | shapes with custom geometry, or with a preset outside the 18 of slides-core (`rect`, `roundRect`, `ellipse`, `triangle`, `rightTriangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star5`, `arrowRight`, `arrowLeft`, `chevron`, `parallelogram`, `trapezoid`, `plus`, `heart`, `cloud`) and the two line geometries (`line`, `straightConnector1`); `where` = the preset names (`custGeom` for custom geometry). Connectors with an elbow or curved geometry are not counted here (see `pptx.shapes.connectors.elbowCurved`); a picture's crop-to-shape geometry is not counted |
+| `pptx.images.unsupportedFormat` | pictures whose image file is EMF, WMF, EMZ or WMZ (browsers cannot show them) |
+| `pptx.encrypted`, `pptx.legacyBinary` | an OLE container with an `EncryptedPackage`/`EncryptionInfo` stream (password-protected), or any other OLE container (a legacy `.ppt`); these two end the scan |
+| `pptx.sizeLimit` | parts not read because of the size limits (named), or one item for a package with too many entries |
+
+`pptx.fonts.unavailable` means "the deck may not look the same here", not that anything is lost. A font is **available** when it is one of: Arial,
+Helvetica, Times New Roman, Times, Courier New, Courier, Georgia, Verdana, Tahoma, Trebuchet MS (web-safe), Calibri, Calibri Light, Cambria and their
+metric-compatible substitutes Carlito and Caladea, Liberation Sans, Serif and Mono, Noto Sans and Serif, DejaVu Sans, or the generic families
+`sans-serif`, `serif`, `monospace` and `system-ui`. The list is deliberately short and conservative; fonts outside it (including the East Asian fonts of
+CJK decks) are reported. Bullet fonts (`a:buFont`) and symbol fonts (`a:sym`) are not scanned.
+
+Full-only ids:
+
+| Group | Ids (what is counted) |
+|---|---|
+| Masters and theme | `pptx.masters.multiple` (the number of slide masters, when there is more than one), `.handoutMaster`, `.notesMaster`, `.layoutInheritance` (slide placeholders with no frame of their own: position and size come from the layout and are flattened on import); `pptx.theme.colorMap` (a master colour map that is not the default for background and text, and slide or layout `overrideClrMapping`), `.fontScheme` (a theme used by a slide master whose major or minor Latin font is not Calibri or Calibri Light; `where` = the fonts), `.effectScheme` (a master's theme with an effect style that has a shadow, glow, reflection, soft edge or blur) |
+| Text | `pptx.text.autofit` (`normAutofit` that applies a `fontScale` or `lnSpcReduction`, and `spAutoFit`; plain `normAutofit` and `noAutofit` do not count), `.bullets.custom` (paragraphs with a bullet colour or size, a bullet character other than `•`, or numbering with a start value or in a scheme other than `arabicPeriod`; the bullet font is not counted because PowerPoint writes Arial on every plain bullet), `.bullets.picture`, `.tabStops` (paragraphs with tab stops), `.columns` (text bodies with two or more columns), `.vertical` (text bodies and table cells with vertical text), `.fields` (slide number, date), `.wordArt` (text with a warp), `.rtl` (paragraphs), `.spacing` (runs with character spacing or small/all caps), `.baseline` (runs raised or lowered), `.lang` (runs tagged with a language other than en-US; `where` = the language tags) |
+| Shapes | `pptx.shapes.custGeom`, `.effects` (shape, group or run effect lists with a shadow, glow, reflection, soft edge or blur, and effect DAGs), `.gradientFill` and `.patternFill` (on shapes, groups, backgrounds and table cells, not on outlines), `.connectors.elbowCurved` (connectors, and shapes, with a `bentConnector` or `curvedConnector` geometry), `.groups.nested` (groups inside a group; the inner ones count), `.scene3d` (shapes or text bodies with a 3-D scene or shape) |
+| Images and tables | `pptx.images.crop` (a non-zero crop edge), `.recolor` (duotone, grayscale, black and white, brightness/contrast, colour change, tint, HSL), `.linked` (a picture linked rather than embedded), `.svg` (an SVG with a PNG fallback); `pptx.tables.merge` (the anchor cell of each merged region), `.styles` (tables with a table style or header, total, first- or last-column formatting), `.banding` (banded rows or columns) |
+| Presentation | `pptx.sections`, `.customShows`, `.slideSize` (a slide size that is not 16:9; `where` = the size in points), `.zoom` (slide and section zoom objects), `.ink` (ink content parts; if none, the ink parts), `.equations` (`a14:m`), `.signatures` (signature parts in `_xmlsignatures/`), `.externalLinks` (external relationships other than pictures: web pages, mail, files, linked media; counted per relationship; `where` = the URL schemes, never the URLs), `.actions` (action hyperlinks such as jump to slide or run macro; `where` = the kinds; a macro name is never recorded and macros are never run) |
+| Package | `pptx.package.unaccountedParts` (parts that are neither plumbing, nor a part an importer will read, nor covered by an id above: custom XML, tags, embedded fonts, files in unexpected folders; only for a package that has `ppt/presentation.xml`) |
 
 Content controls are kept: a `w:sdt` of type rich text, plain text, drop-down list, combo box, date, check box, picture or building block is imported as a wrapper (`content-control` block, or `contentControl` inline content) around its content, with its title (`w:alias`), tag, lock, placeholder, list items, date format and value, and check box state, nested to any depth, and written back as a `w:sdt`. `docx.contentControls` now counts only what is still lost, with the reason in `where`: repeating sections and their items, data-bound controls (custom XML parts are not read), equation, citation, bibliography and group controls, controls around table rows or cells, and a control around a section break; all of these import as their content only. Known limits: the editor shows a title chip and a tooltip and toggles check boxes, but has no date, list or picture pickers, and the lock is kept and exported but not enforced; the placeholder text lives in the file's glossary part, which is not kept, so a control showing its placeholder keeps the text it displays; a control inside a field's result, in a header or footer, or around a section break is read as its content; custom check box glyphs (`w14:checkedState`) are written back as Word's default ones; `w:id`, `w:temporary` and other properties are not kept (ids are renumbered). Legacy form fields keep the text they display as plain text, and are still reported as `docx.legacyForms`.
 

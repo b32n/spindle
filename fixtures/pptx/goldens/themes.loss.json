@@ -1,0 +1,69 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today); text in these fonts will show in a substitute unless the host provides them",
+      "id": "pptx.fonts.unavailable",
+      "label": "font(s) the editor may not have",
+      "where": [
+        "MS Gothic",
+        "MS Mincho"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.multiple",
+      "label": "slide master(s) in a deck with more than one"
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.lang",
+      "label": "run(s) tagged with a language other than en-US",
+      "where": [
+        "ja-JP"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.theme.colorMap",
+      "label": "colour map(s) that are not the default",
+      "where": [
+        "Slide 2",
+        "slideMaster2.xml"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.theme.effectScheme",
+      "label": "theme effect scheme(s) with shadows, glow or reflection",
+      "where": [
+        "theme2.xml"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.theme.fontScheme",
+      "label": "theme font scheme(s) other than Office default",
+      "where": [
+        "Georgia / Verdana"
+      ]
+    }
+  ]
+}

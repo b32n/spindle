@@ -1,0 +1,33 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.connectors.elbowCurved",
+      "label": "elbow or curved connector(s)",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.groups.nested",
+      "label": "group(s) inside another group",
+      "where": [
+        "Slide 1"
+      ]
+    }
+  ]
+}

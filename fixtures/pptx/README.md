@@ -1,9 +1,12 @@
 # PPTX fidelity corpus
 
 A set of `.pptx` / `.pptm` / `.ppt` files that exercise what real presentations contain, plus a manifest that says
-exactly which constructs each file holds. There is no PPTX importer yet, so there are no goldens: the runner and the
-goldens arrive with the loss detector (plan K16) and the importer (K9 onwards). Until then the corpus is verified
-against its own claims by the construct probes in `scripts/pptx-fidelity/constructs.ts`.
+exactly which constructs each file holds, plus the goldens that record what the PPTX tooling does with each file
+today. There is no PPTX importer yet, so the goldens describe the loss detector (`loss`, `ledger`) and record
+`importError: "no importer"` for the importer kinds (`model`, `roundtrip`); they describe **current behaviour, not
+correctness**, and the importer PRs (plan K9 onwards) show up as golden diffs to review. The construct probes in
+`scripts/pptx-fidelity/constructs.ts` verify the manifest against its own files, and the detector is checked against
+those claims.
 
 ## What is here
 
@@ -20,7 +23,8 @@ against its own claims by the construct probes in `scripts/pptx-fidelity/constru
   missing parts, malformed slide XML, 60 nested groups, relationship cycles, an encrypted-presentation OLE stub and
   a legacy `.ppt` OLE stub. The OLE stubs hold only a header and a directory, no content.
 - **Never committed** (`generatedAtRuntime` in the manifest): `edge-1000-slides` (a deck of 1000 slides, about
-  900 KB). Write it with `python3 fixtures/pptx/generators/build_runtime.py --out DIR [name ...]`.
+  900 KB). Write it with `python3 fixtures/pptx/generators/build_runtime.py --out DIR [name ...]`; the opt-in
+  `npm run slides:pptx-fidelity -- --runtime` does that and scans it (no golden: timings are not reproducible).
 
 Every file is original content made by the scripts in [`generators/`](./generators). The hand-authored and edge
 files use a stdlib `zipfile` builder (`pptxbuilder.py`: fixed timestamps, no randomness, one theme, master, layouts,
@@ -54,21 +58,77 @@ The Jest suite in `packages/slides-core/src/fidelity/` (part of `npm test`) veri
 - structure: readable zip with content types, well-formed parts, relationships that resolve and have unique ids,
   every part typed, unique slide, master and layout ids (damaged-on-purpose files are exempt);
 - the generated 1000-slide deck holds its claims;
+- the four goldens of every file match the runner's output, with no orphans (`pptx-fidelity.test.ts`), and the loss
+  detector agrees with the manifest claims for every loss id that has one (`loss-claims.test.ts`; the six deliberate
+  differences are listed in that file with their reasons);
 - the stdlib-built files rebuild byte for byte, the opaque payloads are inert, the library-written decks record their
   producer and have normalised embedded workbooks, custom shows and sections agree with the slide list, and the
   kitchen sink holds at least 45 constructs;
 - the coverage matrix below is in sync with the manifest.
 
 ```bash
-npm test -w @b32nio/spindle-slides-core -- fidelity            # run the checks
+npm test -w @b32nio/spindle-slides-core -- fidelity            # run the checks and compare the goldens
 PPTX_FIDELITY_UPDATE=1 npm test -w @b32nio/spindle-slides-core -- fidelity   # also rewrite the matrix below
-npm run test:fidelity:coverage -w @b32nio/spindle-slides-core  # the same suite with coverage of scripts/pptx-fidelity
+npm run test:fidelity:coverage -w @b32nio/spindle-slides-core  # the same suite with coverage of scripts/pptx-fidelity (100%)
 python3 fixtures/pptx/generators/build_all.py                  # regenerate every file and manifest.json (needs python-pptx and soffice)
 python3 fixtures/pptx/generators/build_all.py --out DIR --stdlib   # only the stdlib-built files, into DIR
 ```
 
 Fixtures are checked in LibreOffice 25.2 as a second opinion (`soffice --headless --convert-to pdf` succeeds for every
 file that is not an edge file); that check is run by hand and is not part of CI.
+
+## Goldens
+
+`goldens/<id>.<kind>.json` holds four snapshots per committed file, written by the runner and compared on every run
+(CI fails on any difference). They contain no timestamps, no absolute paths and no random ids, so a run is
+byte-identical on Node 22 and 24. The harness catches everything: a detector or importer that throws is recorded.
+
+| Kind | What it records today |
+|---|---|
+| `model` | `importError: "no importer"`, empty `warnings`, `presentation: null`. The file exists so orphan detection works from the first PR; when the importer lands it holds the normalised model (`scripts/pptx-fidelity/normalize.ts`). |
+| `loss` | `detectPptxLoss(bytes, { detail: 'full' })` sorted by id: the 16 summary ids the import dialog will show (`pptx.charts`, `smartArt`, `media`, `embeddedObjects`, `transitions`, `animations`, `comments`, `macros`, `hiddenSlides`, `notes`, `fonts.unavailable`, `shapes.unsupportedGeometry`, `images.unsupportedFormat`, `encrypted`, `legacyBinary`, `sizeLimit`) plus the finer ids of the PPTX table in `documentation/import-loss.md`. Every effect starts with `lost:` and says that no `.pptx` can be opened today. |
+| `roundtrip` | `status: "skipped-import-error"` for every file until the importer and exporter exist, then the structured difference between the first and the second import. |
+| `ledger` | Every part of the input package with a status, see below. |
+
+### Package ledger rules
+
+Every part (zip entry) of the input gets exactly one status, decided by the first matching rule in
+`scripts/pptx-fidelity/ledger.ts` (the rule id is recorded next to the part):
+
+- `mapped`: the part is something the importer will read (presentation, slides, layouts, masters, themes, pictures) or
+  package plumbing the export rebuilds (`[Content_Types].xml`, every `.rels`, `docProps/`, presentation and view
+  properties, the table style list, printer settings). **Nothing is mapped today**: with no importer the import
+  "failed", so a `mapped` rule turns into `unaccounted`. The first importer PR flips these.
+- `opaque`: kept byte for byte and written back on export. Always zero until the opaque part store (plan X5) exists.
+- `dropped`: not imported, and the loss report covers it. A rule only applies when the file's loss report contains one
+  of the rule's ids (`pptx.notes`, `pptx.masters.notesMaster`, `pptx.masters.handoutMaster`, `pptx.charts`,
+  `pptx.smartArt`, `pptx.media` for audio and video, `pptx.images.unsupportedFormat` for EMF and WMF,
+  `pptx.embeddedObjects`, `pptx.comments`, `pptx.ink`, `pptx.macros`, `pptx.signatures`); the covering id is listed. A
+  part no rule names (custom XML, tags, embedded fonts) is covered by the detector's catch-all
+  `pptx.package.unaccountedParts`, which lists it.
+- `unaccounted`: nothing accounts for the part (launch-bar row L13 wants 0; the plan's K9 to K15 take it there). Today
+  that is every part an importer will read, plus any covered part whose loss id the detector did not report (for
+  example a notes page with no text).
+
+A package that cannot be read at all (truncated zip) has an empty ledger and `package` set to `unreadable`; an OLE
+stub (encrypted or legacy `.ppt`) has `package: "ole"`.
+
+### Running and updating
+
+```bash
+npm run build                                   # the CLI runs against the built @b32nio/spindle-io/pptx
+npm run slides:pptx-fidelity                    # compare every file with its goldens (exit 1 on drift)
+npm run slides:pptx-fidelity:update             # rewrite the goldens and the coverage matrix, then review the diff
+npm run slides:pptx-fidelity -- --only kitchen-sink,media        # a subset
+npm run slides:pptx-fidelity -- --report md --report-out summary.md --report json --report-out report.json
+npm run slides:pptx-fidelity -- --matrix        # verify the claims and print the coverage matrix
+npm run slides:pptx-fidelity -- --runtime       # also scan the 1000-slide deck (written to a temporary directory); no goldens
+npm run fidelity                                # DOCX, then XLSX, then PPTX
+PPTX_FIDELITY_UPDATE=1 npm test -w @b32nio/spindle-slides-core -- fidelity   # same update, bound to the source
+```
+
+The report ends with the launch-bar scoreboard (plan 7.3): L11, L12 and L14 say "not measurable yet" until the importer
+exists, L13 shows the ledger (today 1,113 of 1,156 parts unaccounted).
 
 ## Coverage matrix
 

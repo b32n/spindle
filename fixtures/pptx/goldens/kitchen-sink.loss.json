@@ -1,0 +1,247 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.animations",
+      "label": "animation effect(s)",
+      "where": [
+        "Slide 7"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.charts",
+      "label": "chart(s)",
+      "where": [
+        "Slide 5"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.comments",
+      "label": "comment(s)",
+      "where": [
+        "Slide 1"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported; links are stored as written when the importer lands and never fetched",
+      "id": "pptx.externalLinks",
+      "label": "external link target(s) (web pages, files, linked media)",
+      "where": [
+        "https"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today); text in these fonts will show in a substitute unless the host provides them",
+      "id": "pptx.fonts.unavailable",
+      "label": "font(s) the editor may not have",
+      "where": [
+        "MS Gothic",
+        "MS Mincho"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.hiddenSlides",
+      "label": "hidden slide(s)",
+      "where": [
+        "Slide 7"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.images.crop",
+      "label": "cropped picture(s)",
+      "where": [
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.handoutMaster",
+      "label": "handout master(s)"
+    },
+    {
+      "count": 10,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4",
+        "Slide 5"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.notesMaster",
+      "label": "notes master(s)"
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.notes",
+      "label": "slide(s) with speaker notes",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.sections",
+      "label": "section(s)"
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.connectors.elbowCurved",
+      "label": "elbow or curved connector(s)",
+      "where": [
+        "Slide 6"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.custGeom",
+      "label": "shape(s) with custom geometry",
+      "where": [
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.effects",
+      "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges",
+      "where": [
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.gradientFill",
+      "label": "gradient fill(s)",
+      "where": [
+        "Slide 3"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.unsupportedGeometry",
+      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its 18)",
+      "where": [
+        "rightArrow",
+        "custGeom"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.tables.banding",
+      "label": "table(s) with banded rows or columns",
+      "where": [
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.tables.merge",
+      "label": "merged table cell(s)",
+      "where": [
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.tables.styles",
+      "label": "table(s) with a table style",
+      "where": [
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.bullets.custom",
+      "label": "paragraph(s) with custom bullets or numbering",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.lang",
+      "label": "run(s) tagged with a language other than en-US",
+      "where": [
+        "he-IL",
+        "ja-JP"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.rtl",
+      "label": "right-to-left paragraph(s)",
+      "where": [
+        "Slide 8"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.tabStops",
+      "label": "paragraph(s) with tab stops",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.theme.effectScheme",
+      "label": "theme effect scheme(s) with shadows, glow or reflection",
+      "where": [
+        "theme1.xml"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.theme.fontScheme",
+      "label": "theme font scheme(s) other than Office default",
+      "where": [
+        "Georgia / Verdana"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.transitions",
+      "label": "slide(s) with a transition",
+      "where": [
+        "Slide 1",
+        "Slide 7"
+      ]
+    }
+  ]
+}

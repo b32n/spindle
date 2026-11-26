@@ -1,0 +1,39 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.handoutMaster",
+      "label": "handout master(s)"
+    },
+    {
+      "count": 11,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.multiple",
+      "label": "slide master(s) in a deck with more than one"
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.fields",
+      "label": "field(s) (slide number, date)",
+      "where": [
+        "Slide 2",
+        "Slide 3"
+      ]
+    }
+  ]
+}

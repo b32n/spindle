@@ -1,0 +1,34 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 9,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.effects",
+      "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges",
+      "where": [
+        "Slide 1",
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.scene3d",
+      "label": "3-D shape(s) or text",
+      "where": [
+        "Slide 2"
+      ]
+    }
+  ]
+}

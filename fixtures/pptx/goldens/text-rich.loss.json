@@ -1,0 +1,87 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.autofit",
+      "label": "text box(es) that shrink or resize to fit their text",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.baseline",
+      "label": "run(s) raised or lowered (superscript, subscript)",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 3,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.bullets.custom",
+      "label": "paragraph(s) with custom bullets or numbering",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.bullets.picture",
+      "label": "paragraph(s) with picture bullets",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.columns",
+      "label": "text box(es) with several columns",
+      "where": [
+        "Slide 1"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.spacing",
+      "label": "run(s) with character spacing or capitalisation",
+      "where": [
+        "Slide 2"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.tabStops",
+      "label": "paragraph(s) with tab stops",
+      "where": [
+        "Slide 1"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.text.vertical",
+      "label": "text box(es) or cell(s) with vertical text",
+      "where": [
+        "Slide 1"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "format": "pptx",
+  "items": [
+    {
+      "count": 9,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.masters.layoutInheritance",
+      "label": "placeholder(s) that take their position from the layout (flattened on import)",
+      "where": [
+        "Slide 1",
+        "Slide 2",
+        "Slide 3",
+        "Slide 4",
+        "Slide 5"
+      ]
+    },
+    {
+      "count": 8,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.connectors.elbowCurved",
+      "label": "elbow or curved connector(s)",
+      "where": [
+        "Slide 5"
+      ]
+    },
+    {
+      "count": 168,
+      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "id": "pptx.shapes.unsupportedGeometry",
+      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its 18)",
+      "where": [
+        "lineInv",
+        "rtTriangle",
+        "nonIsoscelesTrapezoid",
+        "heptagon",
+        "decagon"
+      ]
+    }
+  ]
+}
