@@ -4,6 +4,7 @@
 
 export * from './xlsx';
 export * from './docx';
+export * from './pptx';
 export { exportCsv, importCsv, detectCsvLoss } from '@b32nio/spindle-shared/export/csv';
 export type { CsvCellValue, CsvExportInput, CsvImportResult } from '@b32nio/spindle-shared/export/csv';
 export {

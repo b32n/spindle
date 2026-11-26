@@ -1,7 +1,7 @@
 {
   "name": "@b32nio/spindle-io",
   "version": "0.4.1",
-  "description": "Optional XLSX and DOCX import/export for Spindle (exceljs, docx, jszip, fast-xml-parser)",
+  "description": "Optional XLSX and DOCX import/export, and the PPTX loss detector, for Spindle (exceljs, docx, jszip, fast-xml-parser)",
   "repository": {
     "type": "git",
     "url": "https://github.com/b32n/spindle.git",
@@ -29,6 +29,11 @@
       "import": "./dist/docx/index.esm.js",
       "require": "./dist/docx/index.js",
       "types": "./dist/docx/index.d.ts"
+    },
+    "./pptx": {
+      "import": "./dist/pptx/index.esm.js",
+      "require": "./dist/pptx/index.js",
+      "types": "./dist/pptx/index.d.ts"
     }
   },
   "files": [

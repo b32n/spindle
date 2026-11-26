@@ -5,6 +5,7 @@ import { defineConfig } from 'rollup';
 //   .        → everything (xlsx + docx + csv re-exports)
 //   ./xlsx   → XLSX only (needs exceljs)
 //   ./docx   → DOCX only (needs docx, jszip, fast-xml-parser)
+//   ./pptx   → PPTX loss detector only (needs jszip, fast-xml-parser; no importer yet)
 // Every bare import (exceljs, docx, @b32nio/spindle-shared, …) stays external;
 // only our own source is bundled. Hosts and core packages import the subpaths
 // so a consumer that needs one format never loads the other format's libraries.
@@ -34,4 +35,5 @@ export default defineConfig([
   entry('src/index.ts', ''),
   entry('src/xlsx/index.ts', 'xlsx/'),
   entry('src/docx/index.ts', 'docx/'),
+  entry('src/pptx/index.ts', 'pptx/'),
 ]);

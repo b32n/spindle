@@ -4,7 +4,7 @@
  * pre-scan of the file returns an ImportLossReport so the host (or the
  * ImportConfirmDialog) can ask before replacing the open document.
  */
-export type ImportLossFormat = 'xlsx' | 'docx' | 'csv';
+export type ImportLossFormat = 'xlsx' | 'docx' | 'pptx' | 'csv';
 
 export interface ImportLossItem {
   /** Stable identifier, e.g. `xlsx.conditionalFormatting`. */
