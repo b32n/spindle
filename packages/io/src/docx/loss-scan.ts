@@ -1,5 +1,6 @@
 import type { ImportLossItem } from '@b32nio/spindle-shared';
 import { unsupportedControls } from './content-controls';
+import { findTocRanges, tocLists } from './toc-field';
 import { drawingKind } from './drawing-kind';
 import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
 
@@ -186,8 +187,8 @@ export function fieldInstructions(root: XmlNode[]): string[] {
 }
 
 /**
- * Fields whose displayed value is not kept as a field: a table of contents or index keeps its text but not the field
- * (it is static). Legacy form fields keep their text too and are reported as `docx.legacyForms`. Every other field keeps its instruction and cached result.
+ * Fields whose displayed value is not kept as a field: an index keeps its text but not the field (it is static), as does a
+ * table of contents that is not read as a block (see `findTocRanges`). Legacy form fields keep their text too and are reported as `docx.legacyForms`. Every other field keeps its instruction and cached result.
  * A complex field is counted once even when its instruction is split over several instrText runs.
  */
 const STATIC_FIELD_KINDS = new Set(['TOC', 'TOA', 'INDEX']);
@@ -195,17 +196,27 @@ const STATIC_FIELD_KINDS = new Set(['TOC', 'TOA', 'INDEX']);
 function fields(root: XmlNode[]): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
+  let tocs = 0;
   for (const raw of fieldInstructions(root)) {
     const kind = raw.trim().toUpperCase().split(/[\s\\"]/)[0];
+    if (kind === 'TOC') tocs++;
     if (!STATIC_FIELD_KINDS.has(kind)) continue;
     total++;
     bump(kinds, kind);
   }
+  // A table of contents the importer reads as a block (its field spans paragraphs of the body or of a content control) is kept.
+  const document = find(root, 'w:document');
+  const body = document ? find(childrenOf(document), 'w:body') : undefined;
+  const kept = body ? tocLists(childrenOf(body)).reduce((n, list) => n + findTocRanges(list).length, 0) : 0;
+  const unread = Math.max(0, tocs - kept);
+  total -= tocs - unread;
+  if (unread > 0) kinds.set('TOC', unread);
+  else kinds.delete('TOC');
   return item(
     'docx.fields',
-    'field(s) (table of contents, index)',
+    'field(s) (table of contents not read as one, index)',
     total,
-    'tables of contents and indexes are kept as static text',
+    'a table of contents that could not be read as a block and an index are kept as static text',
     kinds,
     20
   );

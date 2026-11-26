@@ -1,9 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import { DocsPage } from '../support/docs';
-import { collectPageErrors, openViaChooser } from '../support/file-io';
+import { collectPageErrors, openDocxConfirmingLoss } from '../support/file-io';
 
-const OPEN = 'Open file (.docx)';
 /** The DOCX fidelity corpus: a document with footnotes and endnotes, one with a link and one in a table. */
 const NOTES_DOCX = path.resolve(__dirname, '..', '..', 'fixtures', 'docx', 'notes-toc-fields.docx');
 
@@ -21,12 +20,7 @@ test.describe('docs: footnotes and endnotes from a .docx', () => {
   });
 
   async function openNotes(page: Page) {
-    await openViaChooser(page, OPEN, NOTES_DOCX);
-    // The file has fields and more that cannot be imported, so the import is confirmed first.
-    await page
-      .getByRole('dialog', { name: /Import/ })
-      .getByRole('button', { name: 'Import anyway' })
-      .click();
+    await openDocxConfirmingLoss(page, NOTES_DOCX);
   }
 
   test("D-NOT-01 a .docx with footnotes and endnotes shows numbered references, with each footnote at the bottom of its reference's page @smoke", async ({

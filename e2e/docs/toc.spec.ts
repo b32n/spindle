@@ -1,7 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import JSZip from 'jszip';
 import { DocsPage } from '../support/docs';
-import { captureDownload, collectPageErrors } from '../support/file-io';
+import path from 'node:path';
+import { captureDownload, collectPageErrors, openDocxConfirmingLoss } from '../support/file-io';
+
+const NOTES_DOCX = path.resolve(__dirname, '..', '..', 'fixtures', 'docx', 'notes-toc-fields.docx');
 
 test.describe('docs: table of contents', () => {
   let doc: DocsPage;
@@ -94,7 +97,7 @@ test.describe('docs: table of contents', () => {
     await expect(heading).toBeInViewport();
   });
 
-  test('D-TOC-04 the table of contents downloads as a Word table of contents block, with bookmarks on the headings', async ({
+  test('D-TOC-04 the table of contents downloads as a TOC field Word can refresh, with PAGEREF fields and bookmarks on the headings', async ({
     page,
   }) => {
     await threeHeadings(page);
@@ -105,7 +108,8 @@ test.describe('docs: table of contents', () => {
     );
     const xml =
       (await (await JSZip.loadAsync(file.bytes)).file('word/document.xml')?.async('string')) ?? '';
-    expect(xml).toContain('<w:docPartGallery w:val="Table of Contents"/>');
+    expect(xml).toMatch(/<w:instrText[^>]*> TOC \\o &quot;1-3&quot; \\h \\z \\u <\/w:instrText>/);
+    expect(xml.match(/<w:instrText[^>]*> PAGEREF _Toc\d{9} \\h <\/w:instrText>/g)).toHaveLength(3);
     expect(xml.match(/<w:bookmarkStart [^>]*w:name="_Toc\d{9}"/g)).toHaveLength(3);
     expect(xml.match(/<w:hyperlink [^>]*w:anchor="_Toc\d{9}"/g)).toHaveLength(3);
   });
@@ -119,5 +123,43 @@ test.describe('docs: table of contents', () => {
     await expect(
       doc.pages.locator('.line').filter({ hasText: /^\u200BChapter one$/ })
     ).toBeVisible();
+  });
+
+  async function openNotesDocx(page: Page) {
+    await openDocxConfirmingLoss(page, NOTES_DOCX);
+    await expect(doc.pages.first()).toBeVisible();
+  }
+
+  test('D-TOC-06 a table of contents in a .docx shows its entries with the numbers it was saved with, and opening does not change them @smoke', async ({
+    page,
+  }) => {
+    await openNotesDocx(page);
+    // Entries with a dotted leader; the file's cached numbers (the file was paginated to four pages, the editor's layout has fewer).
+    await expect(entry('Overview')).toHaveText('Overview1');
+    await expect(entry('Method')).toHaveText('Method2');
+    await expect(entry('Recommendations')).toHaveText('Recommendations4');
+    await expect(doc.pages.locator('.tab-leader').first()).toBeVisible();
+  });
+
+  test('D-TOC-07 Update rewrites the numbers of an imported table of contents from the editor’s pages, and the download has the field Word can refresh', async ({
+    page,
+  }) => {
+    await openNotesDocx(page);
+    await expect(entry('Recommendations')).toHaveText('Recommendations4');
+    await menuItem(page, /Update table of contents/);
+    await expect(entry('Recommendations')).not.toHaveText('Recommendations4');
+    await expect(entry('Overview')).toHaveText(/^Overview[123]$/);
+
+    const file = await captureDownload(page, () =>
+      page.getByRole('button', { name: 'Download as Microsoft Word (.docx)' }).click()
+    );
+    const xml =
+      (await (await JSZip.loadAsync(file.bytes)).file('word/document.xml')?.async('string')) ?? '';
+    expect(xml).toMatch(/<w:instrText[^>]*> TOC \\o &quot;1-3&quot; \\h \\z \\u <\/w:instrText>/);
+    expect(
+      xml.match(/<w:instrText[^>]*> PAGEREF _Toc\d+ \\h <\/w:instrText>/g)!.length
+    ).toBeGreaterThanOrEqual(7);
+    expect(xml).toMatch(/<w:bookmarkStart [^>]*w:name="_Toc9000"/);
+    expect(xml).not.toContain('updateFields');
   });
 });

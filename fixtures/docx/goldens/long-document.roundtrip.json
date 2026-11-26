@@ -6,22 +6,24 @@
         "heading": 85,
         "image": 12,
         "list-item": 120,
-        "paragraph": 574,
-        "table": 12
+        "paragraph": 490,
+        "table": 12,
+        "toc": 1
       },
       "sections": 15,
-      "textChars": 238716
+      "textChars": 238722
     },
     "before": {
       "blocks": {
         "heading": 85,
         "image": 12,
         "list-item": 120,
-        "paragraph": 574,
-        "table": 12
+        "paragraph": 490,
+        "table": 12,
+        "toc": 1
       },
       "sections": 15,
-      "textChars": 238716
+      "textChars": 238722
     },
     "byField": {},
     "changed": 0,

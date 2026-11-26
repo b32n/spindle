@@ -32,6 +32,8 @@ import {
   WidthType,
   NumberFormat,
   SectionType,
+  TabStopType,
+  LeaderType,
   VerticalAlignSection,
   type IBorderOptions,
   type IRunOptions,
@@ -193,6 +195,23 @@ function endsWithTable(block: DocBlock | undefined): boolean {
 const CHECKED_GLYPH = '2612';
 const UNCHECKED_GLYPH = '2610';
 
+/**
+ * The entry of a table of contents made in the editor is a link to a heading, a tab and the page number as text. Word's
+ * tables give the page number as a `PAGEREF` field of the heading's bookmark, which it can refresh: the number after the last tab
+ * becomes one (an entry that already has fields, or no link to a bookmark, is left as it is).
+ */
+function withPageReferences(content: DocInline[]): DocInline[] {
+  if (content.some((c) => c.type === 'field')) return content;
+  const anchor = content.find((c): c is Extract<DocInline, { type: 'link' }> => c.type === 'link' && c.href.startsWith('#') && c.href.length > 1)?.href.slice(1);
+  const last = content.length - 1;
+  const tail = content[last];
+  const tab = tail && tail.type === 'text' ? tail.text.lastIndexOf('\t') : -1;
+  if (!anchor || !tail || tail.type !== 'text' || tab < 0 || tab === tail.text.length - 1) return content;
+  const { text, ...run } = tail;
+  const before = text.slice(0, tab + 1);
+  return [...content.slice(0, last), { ...run, type: 'text', text: before }, { type: 'field', instruction: `PAGEREF ${anchor} \\h`, kind: 'PAGEREF', result: text.slice(tab + 1) }];
+}
+
 /** The inline content with note references taken out (a note holds no notes). */
 function withoutNoteRefs(content: DocInline[]): DocInline[] {
   return content.flatMap((item): DocInline[] => {
@@ -207,6 +226,8 @@ class DocxBuilder {
   readonly notes: WrittenNotes = { footnote: [], endnote: [] };
   /** `w:id` of the next content control. */
   private nextControlId = 1000001;
+  /** Width of the content area of the section being built, in twips: where the right tab of a table of contents entry goes. */
+  private contentWidthTwips = 9360;
   /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
   private pendingOrphans: CommentPlanThread[];
   private inNumberedRun = false;
@@ -394,37 +415,44 @@ class DocxBuilder {
   /** A block-level control wraps its blocks; it must hold at least one paragraph. */
   private buildControlBlock(block: Extract<DocBlock, { type: 'contentControl' }>): Paragraph {
     this.inNumberedRun = false;
-    const children: unknown[] = block.blocks.map((b) => this.buildBlock(b));
+    const children: unknown[] = this.buildBlocks(block.blocks);
     if (children.length === 0) children.push(this.buildParagraph({}, []));
     this.inNumberedRun = false;
     // The writer's block builders return docx paragraphs and tables, which the section and cell take as children; the wrapper is another XML element of the same kind.
     return this.buildControl(block.control, children) as unknown as Paragraph;
   }
 
-  /** A complex field: begin, instruction, separate, the cached result runs, end, so Word can refresh it. */
-  private buildField(field: DocFieldRun): ParagraphChild[] {
-    const fldChar = (type: 'begin' | 'separate' | 'end') =>
-      new TextRun({
-        children: [
-          new BuilderElement({
-            name: 'w:fldChar',
-            attributes: {
-              type: { key: 'w:fldCharType', value: type },
-              ...(type === 'begin' && field.dirty && { dirty: { key: 'w:dirty', value: 'true' } }),
-            },
-          }),
-        ],
-      });
-    const instruction = new TextRun({
+  /** A field character run (`begin`, `separate` or `end`); `dirty` asks the application that opens the file to recompute the field. */
+  private fieldChar(type: 'begin' | 'separate' | 'end', dirty = false): TextRun {
+    return new TextRun({
+      children: [
+        new BuilderElement({
+          name: 'w:fldChar',
+          attributes: {
+            type: { key: 'w:fldCharType', value: type },
+            ...(type === 'begin' && dirty && { dirty: { key: 'w:dirty', value: 'true' } }),
+          },
+        }),
+      ],
+    });
+  }
+
+  /** The run that holds a field's instruction. */
+  private instructionRun(instruction: string): TextRun {
+    return new TextRun({
       children: [
         new BuilderElement({
           name: 'w:instrText',
           attributes: { space: { key: 'xml:space', value: 'preserve' } },
           // The xml formatter writes string children as the element's text.
-          children: [` ${field.instruction} `] as unknown as BuilderElement[],
+          children: [` ${instruction} `] as unknown as BuilderElement[],
         }),
       ],
     });
+  }
+
+  /** A complex field: begin, instruction, separate, the cached result runs, end, so Word can refresh it. */
+  private buildField(field: DocFieldRun): ParagraphChild[] {
     const result: ParagraphChild[] =
       typeof field.result === 'string'
         ? field.result
@@ -433,7 +461,7 @@ class DocxBuilder {
         : field.result.flatMap((r) =>
             r.type === 'text' ? this.textRuns(r, r.text) : [this.buildImage(r.src, r.width, r.height, r.alt)].filter((c): c is ParagraphChild => c != null)
           );
-    return [fldChar('begin'), instruction, fldChar('separate'), ...result, fldChar('end')];
+    return [this.fieldChar('begin', field.dirty), this.instructionRun(field.instruction), this.fieldChar('separate'), ...result, this.fieldChar('end')];
   }
 
   private runOptions(base: DocRunBase, extra: Partial<IRunOptions>): IRunOptions {
@@ -522,7 +550,26 @@ class DocxBuilder {
     return { ...this.numberedRun, level };
   }
 
-  buildBlock(block: DocBlock): Paragraph | Table {
+  /** The blocks as docx elements. A table of contents is a run of paragraphs (the field spans them). */
+  buildBlocks(blocks: DocBlock[]): Array<Paragraph | Table> {
+    return blocks.flatMap((b) => (b.type === 'toc' ? this.tocParagraphs(b) : [this.buildBlock(b)]));
+  }
+
+  /** The paragraphs of a table of contents: its entries, with the field starting in the first and ending in a paragraph of its own. */
+  private tocParagraphs(block: Extract<DocBlock, { type: 'toc' }>): Paragraph[] {
+    const entries = block.blocks.filter((b): b is Extract<DocBlock, { type: 'paragraph' }> => b.type === 'paragraph');
+    const start = [this.fieldChar('begin'), this.instructionRun(block.instruction), this.fieldChar('separate')];
+    // The page numbers are right-aligned under a dotted leader, as in Word's own tables of contents.
+    const tabs = { tabStops: [{ type: TabStopType.RIGHT, position: this.contentWidthTwips, leader: LeaderType.DOT }] };
+    const paragraphs = entries.map((entry, i) =>
+      this.buildParagraph(entry, [...(i === 0 ? start : []), ...this.buildRuns(withPageReferences(entry.content))], tabs)
+    );
+    if (entries.length === 0) paragraphs.push(this.buildParagraph({}, start));
+    paragraphs.push(new Paragraph({ children: [this.fieldChar('end')] }));
+    return paragraphs;
+  }
+
+  buildBlock(block: Exclude<DocBlock, { type: 'toc' }>): Paragraph | Table {
     if (!(block.type === 'listItem' && block.listType === 'numbered')) this.inNumberedRun = false;
     switch (block.type) {
       case 'paragraph':
@@ -563,7 +610,7 @@ class DocxBuilder {
   private buildCellChildren(cell: Extract<DocBlock, { type: 'table' }>['rows'][number]['cells'][number]): (Paragraph | Table)[] {
     if (!cell.blocks || cell.blocks.length === 0) return [this.buildParagraph({}, this.buildRuns(cell.content))];
     this.inNumberedRun = false;
-    const children = cell.blocks.map((b) => this.buildBlock(b));
+    const children = this.buildBlocks(cell.blocks);
     this.inNumberedRun = false;
     if (endsWithTable(cell.blocks[cell.blocks.length - 1])) children.push(new Paragraph({}));
     return children;
@@ -643,6 +690,7 @@ class DocxBuilder {
     // `docx` swaps width/height itself when the orientation is landscape, so it
     // is handed the portrait pair; the file then carries the on-page dimensions.
     const landscape = section.orientation === 'landscape';
+    this.contentWidthTwips = Math.max(1, pxToTwips(section.pageWidthPx - section.marginLeftPx - section.marginRightPx));
     const width = pxToTwips(landscape ? section.pageHeightPx : section.pageWidthPx);
     const height = pxToTwips(landscape ? section.pageWidthPx : section.pageHeightPx);
     this.inNumberedRun = false;
@@ -685,7 +733,7 @@ class DocxBuilder {
       },
       headers: header,
       footers: footer,
-      children: section.blocks.map((b) => this.buildBlock(b)),
+      children: this.buildBlocks(section.blocks),
     };
   }
 }

@@ -56,3 +56,21 @@ export async function captureDownload(
 export function asUpload(d: Downloaded, mimeType: string) {
   return { name: d.fileName, mimeType, buffer: d.bytes };
 }
+
+/**
+ * Open a .docx through the toolbar's Open button; when the file has something the import cannot keep the confirmation
+ * dialog asks first, so confirm it (a file with nothing to report opens at once).
+ */
+export async function openDocxConfirmingLoss(page: Page, file: string): Promise<void> {
+  await openViaChooser(page, 'Open file (.docx)', file);
+  const confirm = page
+    .getByRole('dialog', { name: /Import/ })
+    .getByRole('button', { name: 'Import anyway' });
+  if (
+    await confirm.waitFor({ state: 'visible', timeout: 2000 }).then(
+      () => true,
+      () => false
+    )
+  )
+    await confirm.click();
+}

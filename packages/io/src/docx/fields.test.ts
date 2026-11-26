@@ -111,15 +111,20 @@ describe('fields', () => {
     expect(content).toEqual([{ type: 'link', text: 'Intro', href: '#_Toc1' }]);
   });
 
-  it('keeps the text of a table of contents as static paragraphs, and fields inside it', async () => {
+  it('reads a table of contents as a block of its entries, with the fields inside them kept', async () => {
     const { sections, warnings } = await importBody(
       para(chr('begin') + instr(' TOC \\o "1-3" ') + chr('separate') + r(t('Intro')) + r('<w:tab/>')) +
         para(r(t('Chapter')) + complex(' PAGEREF _Toc2 ', r(t('4')))) +
         para(chr('end'))
     );
-    const blocks = sections[0].blocks as Array<Extract<DocBlock, { type: 'paragraph' }>>;
-    expect(blocks[0].content).toEqual([{ type: 'text', text: 'Intro' }, { type: 'text', text: '\t' }]);
-    expect(blocks[1].content).toMatchObject([{ type: 'text', text: 'Chapter' }, { type: 'field', kind: 'PAGEREF', result: '4' }]);
+    expect(sections[0].blocks).toHaveLength(1);
+    const toc = sections[0].blocks[0] as Extract<DocBlock, { type: 'toc' }>;
+    expect(toc.type).toBe('toc');
+    expect(toc.instruction).toBe('TOC \\o "1-3"');
+    // The paragraph that only held the end of the field is not an entry.
+    expect(toc.blocks).toHaveLength(2);
+    expect((toc.blocks[0] as Extract<DocBlock, { type: 'paragraph' }>).content).toEqual([{ type: 'text', text: 'Intro' }, { type: 'text', text: '\t' }]);
+    expect((toc.blocks[1] as Extract<DocBlock, { type: 'paragraph' }>).content).toMatchObject([{ type: 'text', text: 'Chapter' }, { type: 'field', kind: 'PAGEREF', result: '4' }]);
     expect(warnings.filter((w) => w.includes('Unsupported field'))).toEqual([]);
   });
 

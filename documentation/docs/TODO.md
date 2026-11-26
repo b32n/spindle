@@ -32,10 +32,11 @@ Verified absent in code.
       restart settings of the file, the endnote position setting (end of document versus end of section), a
       continuation notice on a note that continues, notes in table cells that split across pages (tables are not
       split), and references in headers and footers.
-- [ ] **Table of contents: remaining gaps** — a table of contents can be inserted, updated and removed in the editor
-      and is written as a building block control with its entries; reading one from a file as a table of contents and
-      writing it back as a field Word can refresh is the next step. Not done: `\t` custom styles, paragraphs with an
-      outline level as sources, levels 7 to 9, and updating on its own when headings change.
+- [ ] **Table of contents: remaining gaps** — a table of contents can be inserted, updated and removed in the editor,
+      read from a file as a block with its cached entries and written back as a field Word can refresh. Not done:
+      `\t` custom styles, paragraphs with an outline level as sources, levels 7 to 9, updating on its own when
+      headings change, the tab stops of the entries (a leader at the margin is used), a table of contents in a table
+      cell or header, and indexes and tables of authorities (static text).
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Sections: remaining gaps** — the editor shows and edits every section

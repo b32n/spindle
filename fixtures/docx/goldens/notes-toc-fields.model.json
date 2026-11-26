@@ -326,269 +326,267 @@
             "type": "paragraph"
           },
           {
-            "content": [
+            "blocks": [
               {
-                "color": "#0563c1",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Overview",
-                "type": "text",
-                "underline": true
+                "content": [
+                  {
+                    "href": "#_Toc9000",
+                    "styleId": "text-style-1",
+                    "text": "Overview",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9000 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "1",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-5",
+                "leftIndent": 0,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC1",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "\t",
-                "type": "text"
+                "content": [
+                  {
+                    "href": "#_Toc9001",
+                    "styleId": "text-style-1",
+                    "text": "Scope of the survey",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9001 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "1",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-6",
+                "leftIndent": 14.666666666666666,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC2",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "1",
-                "type": "text"
+                "content": [
+                  {
+                    "href": "#_Toc9002",
+                    "styleId": "text-style-1",
+                    "text": "Method",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9002 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "2",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-7",
+                "leftIndent": 14.666666666666666,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC2",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "href": "#_Toc9003",
+                    "styleId": "text-style-1",
+                    "text": "Findings",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9003 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "2",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-8",
+                "leftIndent": 0,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC1",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "href": "#_Toc9004",
+                    "styleId": "text-style-1",
+                    "text": "Tonnage",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9004 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "3",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-9",
+                "leftIndent": 14.666666666666666,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC2",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "href": "#_Toc9005",
+                    "styleId": "text-style-1",
+                    "text": "Seasonal variation",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9005 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "3",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-10",
+                "leftIndent": 29.333333333333332,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC3",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "href": "#_Toc9006",
+                    "styleId": "text-style-1",
+                    "text": "Recommendations",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\t",
+                    "type": "text"
+                  },
+                  {
+                    "instruction": "PAGEREF _Toc9006 \\h",
+                    "kind": "PAGEREF",
+                    "result": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "text": "4",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "field"
+                  }
+                ],
+                "id": "block-11",
+                "leftIndent": 0,
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "TOC1",
+                "spaceAfter": 6.666666666666667,
+                "type": "paragraph"
               }
             ],
             "id": "block-4",
-            "leftIndent": 0,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC1",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "href": "#_Toc9001",
-                "styleId": "text-style-1",
-                "text": "Scope of the survey",
-                "type": "link"
-              },
-              {
-                "href": "#_Toc9001",
-                "styleId": "text-style-2",
-                "text": "\t",
-                "type": "link"
-              },
-              {
-                "instruction": "PAGEREF _Toc9001 \\h",
-                "kind": "PAGEREF",
-                "result": [
-                  {
-                    "fontFamily": "Liberation Sans",
-                    "fontSize": 11,
-                    "text": "1",
-                    "type": "text"
-                  }
-                ],
-                "type": "field"
-              }
-            ],
-            "id": "block-5",
-            "leftIndent": 14.666666666666666,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC2",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "href": "#_Toc9002",
-                "styleId": "text-style-1",
-                "text": "Method",
-                "type": "link"
-              },
-              {
-                "href": "#_Toc9002",
-                "styleId": "text-style-2",
-                "text": "\t",
-                "type": "link"
-              },
-              {
-                "instruction": "PAGEREF _Toc9002 \\h",
-                "kind": "PAGEREF",
-                "result": [
-                  {
-                    "fontFamily": "Liberation Sans",
-                    "fontSize": 11,
-                    "text": "2",
-                    "type": "text"
-                  }
-                ],
-                "type": "field"
-              }
-            ],
-            "id": "block-6",
-            "leftIndent": 14.666666666666666,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC2",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "href": "#_Toc9003",
-                "styleId": "text-style-1",
-                "text": "Findings",
-                "type": "link"
-              },
-              {
-                "href": "#_Toc9003",
-                "styleId": "text-style-2",
-                "text": "\t",
-                "type": "link"
-              },
-              {
-                "instruction": "PAGEREF _Toc9003 \\h",
-                "kind": "PAGEREF",
-                "result": [
-                  {
-                    "fontFamily": "Liberation Sans",
-                    "fontSize": 11,
-                    "text": "2",
-                    "type": "text"
-                  }
-                ],
-                "type": "field"
-              }
-            ],
-            "id": "block-7",
-            "leftIndent": 0,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC1",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "href": "#_Toc9004",
-                "styleId": "text-style-1",
-                "text": "Tonnage",
-                "type": "link"
-              },
-              {
-                "href": "#_Toc9004",
-                "styleId": "text-style-2",
-                "text": "\t",
-                "type": "link"
-              },
-              {
-                "instruction": "PAGEREF _Toc9004 \\h",
-                "kind": "PAGEREF",
-                "result": [
-                  {
-                    "fontFamily": "Liberation Sans",
-                    "fontSize": 11,
-                    "text": "3",
-                    "type": "text"
-                  }
-                ],
-                "type": "field"
-              }
-            ],
-            "id": "block-8",
-            "leftIndent": 14.666666666666666,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC2",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "href": "#_Toc9005",
-                "styleId": "text-style-1",
-                "text": "Seasonal variation",
-                "type": "link"
-              },
-              {
-                "href": "#_Toc9005",
-                "styleId": "text-style-2",
-                "text": "\t",
-                "type": "link"
-              },
-              {
-                "instruction": "PAGEREF _Toc9005 \\h",
-                "kind": "PAGEREF",
-                "result": [
-                  {
-                    "fontFamily": "Liberation Sans",
-                    "fontSize": 11,
-                    "text": "3",
-                    "type": "text"
-                  }
-                ],
-                "type": "field"
-              }
-            ],
-            "id": "block-9",
-            "leftIndent": 29.333333333333332,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC3",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "href": "#_Toc9006",
-                "styleId": "text-style-1",
-                "text": "Recommendations",
-                "type": "link"
-              },
-              {
-                "href": "#_Toc9006",
-                "styleId": "text-style-2",
-                "text": "\t",
-                "type": "link"
-              },
-              {
-                "instruction": "PAGEREF _Toc9006 \\h",
-                "kind": "PAGEREF",
-                "result": [
-                  {
-                    "fontFamily": "Liberation Sans",
-                    "fontSize": 11,
-                    "text": "4",
-                    "type": "text"
-                  }
-                ],
-                "type": "field"
-              }
-            ],
-            "id": "block-10",
-            "leftIndent": 0,
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "TOC1",
-            "spaceAfter": 6.666666666666667,
-            "type": "paragraph"
+            "instruction": "TOC \\o \"1-3\" \\h \\z \\u",
+            "type": "toc"
           },
           {
             "content": [],
-            "id": "block-11",
+            "id": "block-12",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -611,7 +609,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-12",
+            "id": "block-13",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -634,7 +632,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-13",
+            "id": "block-14",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -658,7 +656,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-14",
+            "id": "block-15",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -681,7 +679,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-15",
+            "id": "block-16",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -705,7 +703,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-16",
+            "id": "block-17",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -728,7 +726,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-17",
+            "id": "block-18",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -752,7 +750,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-18",
+            "id": "block-19",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -775,7 +773,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-19",
+            "id": "block-20",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -799,7 +797,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-20",
+            "id": "block-21",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -822,7 +820,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-21",
+            "id": "block-22",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -846,7 +844,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-22",
+            "id": "block-23",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 3,
@@ -869,7 +867,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-23",
+            "id": "block-24",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -893,7 +891,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-24",
+            "id": "block-25",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -916,7 +914,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-25",
+            "id": "block-26",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -940,7 +938,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-26",
+            "id": "block-27",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -967,7 +965,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-27",
+            "id": "block-28",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1024,7 +1022,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-28",
+            "id": "block-29",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1113,7 +1111,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-29",
+            "id": "block-30",
             "lineSpacing": {
               "type": "single"
             },
@@ -1207,7 +1205,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-30",
+            "id": "block-31",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1284,7 +1282,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-31",
+            "id": "block-32",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1341,7 +1339,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-32",
+            "id": "block-33",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1384,7 +1382,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-33",
+            "id": "block-34",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1439,7 +1437,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-34",
+            "id": "block-35",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1471,7 +1469,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-35",
+            "id": "block-36",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1513,7 +1511,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-36",
+            "id": "block-37",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1533,7 +1531,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-37",
+            "id": "block-38",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -1613,7 +1611,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-38",
+            "id": "block-39",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1661,7 +1659,7 @@
                   },
                   {
                     "href": "https://example.org/ledger",
-                    "styleId": "text-style-3",
+                    "styleId": "text-style-2",
                     "text": "example.org/ledger",
                     "type": "link"
                   },
@@ -1713,7 +1711,7 @@
                 "type": "noteRef"
               }
             ],
-            "id": "block-39",
+            "id": "block-40",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1747,7 +1745,7 @@
               266.67,
               266.67
             ],
-            "id": "block-40",
+            "id": "block-41",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -1809,7 +1807,7 @@
           },
           {
             "content": [],
-            "id": "block-41",
+            "id": "block-42",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -1859,7 +1857,7 @@
                 "type": "noteRef"
               }
             ],
-            "id": "block-42",
+            "id": "block-43",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1897,7 +1895,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-43",
+            "id": "block-44",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1948,7 +1946,7 @@
                 "type": "noteRef"
               }
             ],
-            "id": "block-44",
+            "id": "block-45",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1986,7 +1984,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-45",
+            "id": "block-46",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2037,7 +2035,7 @@
                 "type": "noteRef"
               }
             ],
-            "id": "block-46",
+            "id": "block-47",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2075,7 +2073,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-47",
+            "id": "block-48",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2109,10 +2107,6 @@
         "underline": true
       },
       "text-style-2": {
-        "fontFamily": "Liberation Sans",
-        "fontSize": 11
-      },
-      "text-style-3": {
         "color": "#0563c1",
         "fontFamily": "Liberation Sans",
         "fontSize": 10,

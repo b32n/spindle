@@ -6,15 +6,6 @@
       "effect": "kept for export; laid out as a single column",
       "id": "docx.columns",
       "label": "multi-column section(s)"
-    },
-    {
-      "count": 1,
-      "effect": "tables of contents and indexes are kept as static text",
-      "id": "docx.fields",
-      "label": "field(s) (table of contents, index)",
-      "where": [
-        "TOC ×1"
-      ]
     }
   ]
 }
