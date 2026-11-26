@@ -347,8 +347,8 @@ lockstep.
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
   counts only what is still lost**: insertions, deletions and moves of text, of paragraph marks (also in a table cell of one
   paragraph, which keeps its block when its paragraph has a change, like the export does) and of table rows are kept. What
-  is left: the formatting change of a paragraph mark's own formatting and changes of tables and sections (`w:tblPrChange`,
-  `w:sectPrChange`), and `docx.trackedBlockChanges` / `docx.trackedHeaderFooterChanges`. A change inside a field result is not kept (and not counted).
+  is left: the formatting change of a paragraph mark's own formatting and changes of tables, table rows, cells and sections (`w:tblPrChange`,
+  `w:trPrChange`, `w:tcPrChange`, `w:sectPrChange`), and `docx.trackedBlockChanges` / `docx.trackedHeaderFooterChanges`. A change inside a field result is not kept (and not counted).
 - **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
   `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
   deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted
