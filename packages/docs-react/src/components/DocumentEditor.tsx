@@ -35,6 +35,9 @@ import {
   type DocsExportFormat,
 } from '../file-io';
 
+/** How long typing pauses before the authors of the tracked changes are collected again. */
+const AUTHORS_DELAY_MS = 150;
+
 interface DocumentEditorProps {
   width?: number;
   height?: number;
@@ -284,12 +287,18 @@ export const DocumentEditor = memo(function DocumentEditor({
   
   // Handle selection changes from the editor
   const authorsDoc = useRef<EditorState['doc'] | null>(null);
+  const authorsTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(authorsTimer.current), []);
   const updateAuthors = useCallback((state: EditorState) => {
     if (authorsDoc.current === state.doc) return;
     authorsDoc.current = state.doc;
-    const next = revisionAuthors(collectRevisions(state.doc, false));
-    // Keep the old list (and skip a render) when nothing in it changed.
-    setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
+    // The walk over the whole document waits until typing pauses, so a long document is not scanned on every key.
+    clearTimeout(authorsTimer.current);
+    authorsTimer.current = setTimeout(() => {
+      const next = revisionAuthors(collectRevisions(state.doc, false));
+      // Keep the old list (and skip a render) when nothing in it changed.
+      setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
+    }, AUTHORS_DELAY_MS);
   }, []);
 
   const handleSelectionChange = useCallback((state: EditorState) => {

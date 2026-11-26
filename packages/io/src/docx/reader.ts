@@ -233,7 +233,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         // reach into a result: deleted text is dropped, inserted text stays as plain result text.
         if (open.phase === 'result') {
           if (deleted()) {
-            warnings.push(`Tracked deleted text inside the field "${open.instruction.trim()}" was not kept; it was dropped.`);
+            if (!open.warnedDeleted) warnings.push(`Tracked deleted text inside the field "${open.instruction.trim()}" was not kept; it was dropped.`);
+            open.warnedDeleted = true;
           } else {
             const { revision: _revision, ...plain } = props;
             open.result.push({ type: 'text', text, ...plain });
@@ -433,6 +434,8 @@ interface OpenField {
   dirty: boolean;
   /** The tracked changes the field began inside of. */
   revision?: DocRevision;
+  /** Set once deleted text in its result has been warned about, so a result of several runs warns once. */
+  warnedDeleted?: boolean;
 }
 
 /** Fields whose result is block content (a table of contents, an index): the text stays, the field does not. */

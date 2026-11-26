@@ -241,8 +241,12 @@ function xmlText(text: string): string {
   }
   return out.trim();
 }
-const isIsoDate = (date: string | undefined): date is string =>
-  !!date && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$/.test(date);
+const ISO_DATE = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(:\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$/;
+/** `w:date` is an xsd:dateTime, which needs the seconds: a date without them gets `:00`; anything else is dropped. */
+const wordDate = (date: string | undefined): string | undefined => {
+  const match = date ? ISO_DATE.exec(date) : null;
+  return match ? `${match[1]}${match[2] ?? ':00'}${match[3] ?? ''}` : undefined;
+};
 
 /** True when the run is part of a tracked insertion or deletion. */
 function hasRevision(revision: DocRevision | undefined): revision is DocRevision {
@@ -339,16 +343,18 @@ class DocxBuilder {
 
   /** `runs` inside the tracked changes of `revision`: a deletion directly around the runs, an insertion around that. */
   private wrapRevision(revision: DocRevision, runs: ParagraphChild[]): ParagraphChild[] {
-    const element = (name: 'w:ins' | 'w:del', meta: DocRevisionMeta, children: unknown[]) =>
-      new BuilderElement({
+    const element = (name: 'w:ins' | 'w:del', meta: DocRevisionMeta, children: unknown[]) => {
+      const date = wordDate(meta.date);
+      return new BuilderElement({
         name,
         attributes: {
           id: { key: 'w:id', value: String(this.revisionId(name === 'w:ins' ? 'ins' : 'del', meta)) },
           author: { key: 'w:author', value: xmlText(meta.author) || 'Unknown' },
-          ...(isIsoDate(meta.date) && { date: { key: 'w:date', value: meta.date } }),
+          ...(date !== undefined && { date: { key: 'w:date', value: date } }),
         },
         children: children as BuilderElement[],
       });
+    };
     let wrapped: unknown[] = runs;
     if (revision.deletion) wrapped = [element('w:del', revision.deletion, wrapped)];
     if (revision.insertion) wrapped = [element('w:ins', revision.insertion, wrapped)];

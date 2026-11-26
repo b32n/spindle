@@ -158,6 +158,9 @@ describe('tracked changes the importer does not keep as changes', () => {
     const deleted = await importBody(`<w:p ${W}>${FIELD_BEGIN}${r(t('3'))}${del('6', 'Bo', delRun('4'))}${FIELD_END}</w:p>`);
     expect(JSON.stringify((deleted.result.sections[0].blocks[0] as Paragraph).content)).not.toContain('"4"');
     expect(deleted.result.warnings.some((w) => /deleted text inside the field "REF a"/.test(w))).toBe(true);
+    // A result of several deleted runs warns once.
+    const several = await importBody(`<w:p ${W}>${FIELD_BEGIN}${del('6', 'Bo', delRun('4') + delRun('5') + delRun('6'))}${FIELD_END}</w:p>`);
+    expect(several.result.warnings.filter((w) => /deleted text inside the field "REF a"/.test(w))).toHaveLength(1);
   });
 
   it('warns about an inserted image and keeps it as ordinary content', async () => {
@@ -308,12 +311,13 @@ describe('writing the author and date of a change', () => {
 });
 
 describe('writing the author and date of a change: edge cases', () => {
-  it('keeps a valid surrogate pair, drops an unpaired low surrogate and accepts a date without seconds', async () => {
+  it('keeps a valid surrogate pair, drops an unpaired low surrogate and writes a date without seconds as a valid dateTime', async () => {
     const { xml } = await exportXml([
       { type: 'text', text: 'a', revision: { insertion: { id: '1', author: 'Ann \u{1F600}\uDC00 Lee', date: '2024-01-05T10:00Z' } } },
     ]);
     expect(xml).toContain('w:author="Ann \u{1F600} Lee"');
-    expect(xml).toContain('w:date="2024-01-05T10:00Z"');
+    expect(xml).toContain('w:date="2024-01-05T10:00:00Z"');
+    expect(xml).not.toContain('w:date="2024-01-05T10:00Z"');
     expect(() => parseXml(xml)).not.toThrow();
   });
 });

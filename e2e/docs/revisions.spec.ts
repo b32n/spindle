@@ -109,7 +109,7 @@ test.describe('docs: tracked changes in a .docx', () => {
       return { all, distinct: new Set(all).size };
     };
     const before = await ids();
-    // Select the deleted "2024" and the inserted "2025" after it, copy, and paste at the start of the document.
+    // Select the deleted "2024" and the inserted "2025" after it, copy, and paste at the start of that line.
     const deleted = doc.pages.locator('[data-revision-deletion]', { hasText: '2024' }).first();
     const box = (await deleted.boundingBox())!;
     await page.mouse.click(box.x + 1, box.y + box.height / 2);
@@ -118,14 +118,17 @@ test.describe('docs: tracked changes in a .docx', () => {
     for (let i = 0; i < 8; i++) await page.keyboard.press('Shift+ArrowRight');
     await doc.settle();
     await page.keyboard.press(`${MOD}+c`);
-    await page.keyboard.press(`${MOD}+Home`);
+    // The caret to the start of the line (Left collapses the selection to its start), so the paste adds to the document.
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Home');
     await doc.settle();
     await page.keyboard.press(`${MOD}+v`);
     await doc.settle();
     const after = await ids();
-    // The pasted text has landed, and every tracked element it added (the clipboard may carry only its text) has an id of
-    // its own: none repeats the id of the change it was copied from.
+    // The pasted text has landed with its tracked changes (the clipboard carried the markup, not only the text), and every
+    // tracked element it added has an id of its own: none repeats the id of the change it was copied from.
     await expect(doc.pages.first()).toContainText('20242025');
+    expect(after.all.length).toBeGreaterThan(before.all.length);
     expect(after.distinct - before.distinct).toBe(after.all.length - before.all.length);
   });
 });

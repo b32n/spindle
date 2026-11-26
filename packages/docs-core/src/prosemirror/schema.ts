@@ -601,6 +601,9 @@ const nodes: Record<string, NodeSpec> = {
 /**
  * Mark specifications for inline formatting
  */
+/** Above the default (50) of the `span` rule of `textStyle`, so a pasted change is parsed as a change. */
+export const REVISION_PARSE_PRIORITY = 60;
+
 function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): MarkSpec {
   return {
     attrs: { revisionId: {}, author: {}, date: { default: null } },
@@ -608,6 +611,8 @@ function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): Mar
     parseDOM: [
       {
         tag: `span[${dataAttr}]`,
+        // Before the plain `span` rule of `textStyle`, which would otherwise take the element and drop the change.
+        priority: REVISION_PARSE_PRIORITY,
         getAttrs(dom: HTMLElement) {
           const revisionId = dom.getAttribute(dataAttr);
           const author = dom.getAttribute('data-revision-author');

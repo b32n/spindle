@@ -321,8 +321,9 @@ lockstep.
   (author and date stay), so accepting or rejecting one place never touches the other (`freshRevisionIds`); text typed in the
   middle of a deleted run is live text, not part of the deletion (also through the editor's own input path; IME composition is not covered, and typing over a selection that lies wholly inside a deletion replaces the struck-through text, as any edit in Editing mode that is not recorded); a line break typed in tracked
   text (Shift+Enter) is a newline in the text, so its change survives collaboration. The DOCX writer no longer uses a regular
-  expression look-behind (older Safari cannot parse one), accepts a `w:date` without seconds and a deleted run counts as content
-  when a page break follows it.
+  expression look-behind (older Safari cannot parse one), writes a `w:date` without seconds with `:00` added (the file format requires the seconds) and a deleted run counts as content
+  when a page break follows it. Copied tracked text now keeps its changes when pasted in the browser (the clipboard HTML was parsed as plain text style before: the parse rules of the change marks have a priority of their own). Updating a table of contents lists the final text of a heading (words in a tracked
+  deletion are left out). The authors of the changes are collected when typing pauses, not on every key.
 
 ### Changed
 

@@ -25,6 +25,19 @@ const markIds = (doc: ReturnType<typeof docOf>, kind: 'insertion' | 'deletion') 
   return out;
 };
 
+describe('pasting tracked HTML', () => {
+  // The text style rule matches every `span`; a rule of the same priority listed after it never sees the pasted change
+  // (the marks of copied tracked text were lost in the browser before the rules had a priority of their own).
+  const rulesOf = (name: string) => docsSchema.marks[name].spec.parseDOM ?? [];
+  const textStyleRule = rulesOf('textStyle').find((rule) => rule.tag === 'span')!;
+
+  it.each(['insertion', 'deletion'])('parses a %s span before the plain span rule of the text style', (name) => {
+    expect(textStyleRule).toBeDefined();
+    const [rule] = rulesOf(name);
+    expect(rule.priority ?? 50).toBeGreaterThan(textStyleRule.priority ?? 50);
+  });
+});
+
 describe('freshRevisionIds', () => {
   const sliceOf = (...children: ReturnType<typeof text>[]) => new Slice(Fragment.from(paragraph(...children)), 1, 1);
 
@@ -115,6 +128,20 @@ describe('typing inside a deletion', () => {
     expect(typeOutsideDeletion(state, 1, 1, 'x')).toBeNull();
     expect(typeOutsideDeletion(state, 6, 6, 'x')).toBeNull(); // before the deletion
     expect(typeOutsideDeletion(state, 15, 15, 'x')).toBeNull(); // after the deletion, before the insertion
+  });
+
+  it('follows the stored marks over the marks around the caret', () => {
+    const state = stateOf();
+    // Stored marks carrying a deletion at a plain spot: the text is still live, and the stored marks lose the deletion.
+    const stored = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 3)).setStoredMarks([deletion.create(BO), docsSchema.marks.bold.create()]));
+    const tr = typeOutsideDeletion(stored, 3, 3, 'q')!;
+    expect(tr).not.toBeNull();
+    const next = stored.apply(tr);
+    expect(next.doc.nodeAt(3)!.marks.map((m) => m.type.name)).not.toContain('deletion');
+    expect(next.storedMarks!.map((m) => m.type.name)).toEqual(['bold']);
+    // Stored marks without it inside a deletion: nothing to do, the default insertion is already live text.
+    const plain = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 9)).setStoredMarks([]));
+    expect(typeOutsideDeletion(plain, 9, 9, 'q')).toBeNull();
   });
 
   it('keeps text typed inside an insertion as part of it', () => {
