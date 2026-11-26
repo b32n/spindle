@@ -20,8 +20,10 @@ sys.path.insert(0, HERE)
 
 import build_core as C  # noqa: E402
 import build_edge as E  # noqa: E402
+import build_objects as O  # noqa: E402
 import build_probes as P  # noqa: E402
 import build_producers as PR  # noqa: E402
+import build_styles_formulas as SF  # noqa: E402
 from catalog import CATALOG, LICENSE, OS, RUNTIME  # noqa: E402
 
 BUILDERS = {
@@ -33,6 +35,10 @@ BUILDERS = {
     "edge-truncated-zip": E.truncated_zip, "edge-no-workbook": E.no_workbook, "edge-bad-rels": E.bad_rels, "edge-xml-entities": E.xml_entities,
     "edge-encrypted": E.encrypted, "edge-legacy-xls": E.legacy_xls, "edge-duplicate-sheet-names": E.duplicate_sheet_names,
     "edge-index-out-of-range": E.index_out_of_range, "edge-invalid-xml": E.invalid_xml, "edge-empty-workbook": E.empty_workbook,
+    "styles-theme": SF.styles_theme, "number-formats": SF.number_formats, "formulas-modern": SF.formulas_modern, "references": SF.references,
+    "images": O.images, "charts": O.charts, "comments": O.comments, "links": O.links, "tables": O.tables, "filters-sort": O.filters_sort,
+    "pivots-slicers": O.pivots_slicers, "sparklines": O.sparklines, "cf-x14": O.x14_cf, "protection": O.protection, "print-setup": O.print_setup,
+    "rich-text": O.rich_text, "macro-enabled": O.macro_enabled,
 }
 
 
