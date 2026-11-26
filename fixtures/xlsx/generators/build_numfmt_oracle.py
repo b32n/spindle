@@ -100,7 +100,9 @@ def excel_datetime(code, value, system=1900):
         return "####"
     tokens = [t for t in TOKEN.findall(code)]
     digits = max([len(t.split(".")[1]) for t in tokens if re.fullmatch(r"s+\.0+", t, re.I)] + [0])
-    unit = 10 ** digits
+    has_seconds = any(re.fullmatch(r"s+(\.0+)?|\[s+\]", t, re.I) for t in tokens)
+    # rounded to the displayed second (or fraction), otherwise cut to the displayed field after float noise at a millisecond
+    unit = 10 ** digits if has_seconds else 1000
     day, frac = int(value // 1), value - int(value // 1)
     units = int(float(f"{frac * 86400 * unit:.15g}") + 0.5)
     if units >= 86400 * unit:
@@ -165,22 +167,26 @@ def excel_datetime(code, value, system=1900):
 def excel_expected(code, value, lo, system=1900):
     """(expected, note) where Excel is known to differ from LibreOffice, else None."""
     if (code, value) in C.SYSTEM:
-        return C.SYSTEM[(code, value)], "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted"
+        return C.SYSTEM[(code, value)], "Excel expands the system long date/time token (en-US); LibreOffice leaves the number unformatted", False
+    if isinstance(value, (int, float)) and value < 0 and ";" not in code and not is_datetime(code) and "[" not in code.replace("[$", "") and not re.search(r"[@]|General", code):
+        digits_shown = re.sub(r"[^0-9]", "", lo)
+        if digits_shown and not re.search("[1-9]", digits_shown) and not lo.startswith("-"):
+            return "-" + lo, "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it", False
     if (code, value) in C.POINT:
-        return C.POINT[(code, value)], "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it"
+        return C.POINT[(code, value)], "Excel always writes the decimal point of a format that has one, even when no digit follows; LibreOffice drops it", False
     if code == "General" and value in C.GENERAL_EXCEL:
-        return C.GENERAL_EXCEL[value], "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits"
+        return C.GENERAL_EXCEL[value], "Excel's General fits the value into 11 characters (a default-width column); LibreOffice keeps 15 significant digits", False
     if isinstance(value, (int, float)) and is_datetime(code):
         mine = excel_datetime(code, value, system)
         if mine is not None and mine != lo:
             if value < 0:
-                return mine, "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time"
+                return mine, "Excel shows #### for a negative date or time; LibreOffice shows a date before 1899-12-30 or an absolute time", False
             if mine.lower() == lo.lower():
-                return mine, "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+                return mine, "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own", True
             if system == 1900 and value < 61 and has_date_part(code):
-                return mine, "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
+                return mine, "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's", False
             if re.search(r"[hms]", code, re.I) and value % 1:
-                return mine, "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+                return mine, "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates", True
             raise SystemExit(f"{code!r} {value!r}: LibreOffice says {lo!r}, the Excel renderer says {mine!r} and no known reason applies")
     return None
 
@@ -194,7 +200,7 @@ def main():
                 groups.append((group, code, v))
 
     add("probe", [(c, None) for c in NUMBER_FORMATS], C.PROBE_VALUES)
-    add("corpus", [(c, None) for c in CODES60 if c not in NUMBER_FORMATS or True], C.CORPUS_VALUES)
+    add("corpus", [(c, None) for c in CODES60], C.CORPUS_VALUES)
     add("builtin", [(c, None) for c in C.BUILTIN_SPELLING.values()], C.CORPUS_VALUES)
     for name, pairs in (("ecma", C.ECMA), ("conditions", C.CONDITIONS), ("text", C.TEXT), ("literals", C.LITERALS), ("numbers", C.NUMBERS), ("dates", C.DATES), ("times", C.TIMES)):
         add(name, pairs)
@@ -214,6 +220,10 @@ def main():
         fix = excel_expected(code, value, lo)
         if fix:
             row.update(expected=fix[0], excel=True, note=fix[1])
+            if fix[2]:
+                row["unverified"] = True
+        elif group == "conditions" and isinstance(value, (int, float)) and value < 0 and re.search(r"\[(<>|>=|>|=|<=?[^0\]])", code):
+            row.update(unverified=True, note="the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same")
         rows.append(row)
     dates1904 = [(c, v) for c, vs in C.DATE1904 for v in vs]
     for (code, value), lo in zip(dates1904, libreoffice(dates1904, date1904=True)):

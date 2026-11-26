@@ -16,6 +16,8 @@ export interface FormatResult {
 
 export interface FormatOptions {
   dateSystem?: DateSystem;
+  /** General (also in `@` and text-only sections) shows 15 significant digits instead of fitting 11 characters: what `TEXT()` wants. */
+  fullGeneral?: boolean;
 }
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -98,7 +100,6 @@ function placeFraction(tokens: Token[], idx: number[], frac: string, out: Out): 
 
 interface Body {
   text: string;
-  zero: boolean;
   fill?: { index: number; char: string };
 }
 
@@ -122,7 +123,7 @@ function numberBody(s: Section, abs: number): Body {
   const { int, frac } = roundToPlaces(toDecimal(scaled(s, abs)), s.fracDigits.length);
   placeInt(s.tokens, s.int, int, s.grouping, Math.max(anchor, 0), out);
   placeFraction(s.tokens, s.fracDigits, frac, out);
-  return { ...compose(s.tokens, out), zero: int === '' && !/[1-9]/.test(frac) };
+  return { ...compose(s.tokens, out) };
 }
 
 function exponentBody(s: Section, abs: number): Body {
@@ -142,28 +143,37 @@ function exponentBody(s: Section, abs: number): Body {
   const digits = String(Math.abs(exp)).padStart(s.exp!.digits.length, '0');
   out.set(s.exp!.idx, (out.get(s.exp!.idx) ?? '') + (e.lower ? 'e' : 'E') + (exp < 0 ? '-' : e.plus ? '+' : ''));
   s.exp!.digits.forEach((i, k) => out.set(i, k === 0 ? digits : ''));
-  return { ...compose(s.tokens, out), zero: abs === 0 };
+  return { ...compose(s.tokens, out) };
 }
 
-/** Best p/q for `frac` with q up to `max`: the smallest denominator among the closest. */
-function nearest(frac: number, max: number): [number, number] {
-  let best: [number, number] = [0, 1];
-  let error = Infinity;
-  for (let q = 1; q <= max; q++) {
-    const p = Math.round(frac * q);
-    const e = Math.abs(frac - p / q);
-    if (e < error - 1e-13) {
-      best = [p, q];
-      error = e;
+/**
+ * The fraction p/q closest to `x` with q up to `max` (the smallest q among equally close ones), from the continued
+ * fraction of x: its convergents and the best semiconvergent, so the work is O(digits), not O(max).
+ */
+export function nearest(x: number, max: number): [number, number] {
+  let [p0, q0, p1, q1] = [0, 1, 1, 0];
+  let y = x;
+  for (let step = 0; step < 64; step++) {
+    const a = Math.floor(y);
+    const [p2, q2] = [a * p1 + p0, a * q1 + q0];
+    if (q2 > max) {
+      const t = Math.floor((max - q0) / q1);
+      const [ps, qs] = [t * p1 + p0, t * q1 + q0];
+      return Math.abs(x - ps / qs) < Math.abs(x - p1 / q1) ? [ps, qs] : [p1, q1]; // a tie keeps the convergent
     }
+    [p0, q0, p1, q1] = [p1, q1, p2, q2];
+    const rest = y - a;
+    if (rest < 1e-12) break;
+    y = 1 / rest;
   }
-  return best;
+  return [p1, q1];
 }
 
-function fractionBody(s: Section, abs: number): Body {
+function fractionBody(s: Section, abs: number): Body | null {
   const out: Out = new Map();
   const f = s.fraction!;
   const v = scaled(s, abs);
+  if (v >= 1e15) return null;
   const hasWhole = f.whole.length > 0;
   let whole = hasWhole ? Math.floor(v) : 0;
   const rest = v - whole;
@@ -173,7 +183,6 @@ function fractionBody(s: Section, abs: number): Body {
     whole += 1;
     num = 0;
   }
-  const zero = whole === 0 && num === 0;
   const anchor = f.whole[0] ?? f.num[0];
   placeInt(s.tokens, f.whole, whole === 0 && num > 0 ? '' : String(whole), s.grouping, anchor, out);
   const blank = hasWhole && num === 0 && !f.num.some((i) => (s.tokens[i] as { c: string }).c === '0');
@@ -184,14 +193,16 @@ function fractionBody(s: Section, abs: number): Body {
     if (f.fixed) for (let i = f.slash + 1; i < f.denEnd; i++) out.set(i, i === f.slash + 1 ? String(f.fixed) : '');
     else f.den.forEach((i, k) => out.set(i, k < String(den).length ? String(den)[k] : digitChar(s.tokens[i])));
   }
-  return { ...compose(s.tokens, out), zero };
+  return { ...compose(s.tokens, out) };
 }
 
 const pad2 = (n: number): string => String(n).padStart(2, '0');
 
 /** Date and time tokens; null when Excel shows #### (a date before 1900 or after 9999). */
 function dateBody(s: Section, abs: number, system: DateSystem): Body | null {
-  const unit = 10 ** s.subDigits;
+  // The time is rounded to the displayed second (or fraction of a second); a format without seconds cuts the time of
+  // day to the displayed field, after the float noise has been rounded off at a millisecond.
+  const unit = s.hasSeconds ? 10 ** s.subDigits : 1000;
   const dayUnits = 86_400 * unit;
   let days = Math.floor(abs);
   let units = Math.round(Number(((abs - days) * dayUnits).toPrecision(15)));
@@ -202,6 +213,7 @@ function dateBody(s: Section, abs: number, system: DateSystem): Body | null {
   const date = serialToDate(days, system);
   if (s.needsDate && !date) return null;
   const total = days * dayUnits + units;
+  if (!Number.isSafeInteger(total)) return null;
   const hour = Math.floor(units / (3600 * unit));
   const out: Out = new Map();
   s.tokens.forEach((t, i) => {
@@ -209,7 +221,7 @@ function dateBody(s: Section, abs: number, system: DateSystem): Body | null {
     else if (t.t === 'sub') out.set(i, '.' + String(units % unit).padStart(s.subDigits, '0').slice(0, t.n));
     else if (t.t === 'dt') out.set(i, dateToken(t, { date, hour, units, total, unit, twelve: s.twelveHour }));
   });
-  return { ...compose(s.tokens, out), zero: false };
+  return { ...compose(s.tokens, out) };
 }
 
 interface Clock {
@@ -247,27 +259,27 @@ function dateToken(t: Extract<Token, { t: 'dt' }>, c: Clock): string {
   }
 }
 
-function generalBody(s: Section, abs: number, negative: boolean): Body {
+function generalBody(s: Section, abs: number, negative: boolean, full: boolean | undefined): Body {
   const out: Out = new Map();
   s.tokens.forEach((t, i) => {
-    if (t.t === 'general') out.set(i, generalDigits(abs, negative));
+    if (t.t === 'general') out.set(i, generalDigits(abs, negative, full));
   });
-  return { ...compose(s.tokens, out), zero: abs === 0 };
+  return { ...compose(s.tokens, out) };
 }
 
 /** The text of a number in one section, or null for ####. `minus` says the sign is still to be written. */
-export function renderNumber(s: Section, value: number, minus: boolean, system: DateSystem): { text: string; fill?: Body['fill'] } | null {
+export function renderNumber(s: Section, value: number, minus: boolean, options: FormatOptions): { text: string; fill?: Body['fill'] } | null {
   const abs = Math.abs(value);
   let body: Body | null;
   switch (s.kind) {
-    case 'date': body = minus ? null : dateBody(s, abs, system); break;
-    case 'general': body = generalBody(s, abs, minus); break;
-    case 'text': body = { text: generalDigits(abs, minus), zero: abs === 0 }; break;
-    case 'literal': body = { ...compose(s.tokens, new Map()), zero: false }; break;
+    case 'date': body = minus ? null : dateBody(s, abs, options.dateSystem ?? 1900); break;
+    case 'general': body = generalBody(s, abs, minus, options.fullGeneral); break;
+    case 'text': body = { text: generalDigits(abs, minus, options.fullGeneral) }; break;
+    case 'literal': body = { ...compose(s.tokens, new Map()) }; break;
     default: body = s.exp ? exponentBody(s, abs) : s.fraction ? fractionBody(s, abs) : numberBody(s, abs);
   }
   if (!body) return null;
-  const sign = minus && !body.zero ? '-' : '';
+  const sign = minus ? '-' : '';
   return { text: sign + body.text, fill: body.fill && { index: body.fill.index + sign.length, char: body.fill.char } };
 }
 

@@ -45,11 +45,12 @@ describe('digit placeholders', () => {
     expect(show(1e22, '0')).toBe('10000000000000000000000');
     expect(show(1.2345678901234568e17, '0')).toBe('123456789012346000');
   });
-  it('suppresses the minus sign of a negative that rounds to zero', () => {
-    expect(show(-0.001, '0.00')).toBe('0.00');
-    expect(show(-0.4, '0')).toBe('0');
+  it('keeps the minus sign of a negative that rounds to zero (Excel shows -0 and -0.00)', () => {
+    expect(show(-0.001, '0.00')).toBe('-0.00');
+    expect(show(-0.4, '0')).toBe('-0');
     expect(show(-0.6, '0')).toBe('-1');
-    expect(show(-0.001, '$#,##0.00')).toBe('$0.00');
+    expect(show(-0.001, '$#,##0.00')).toBe('-$0.00');
+    expect(show(-0.001, '0.00;(0.00)')).toBe('(0.00)');
   });
   it('percent multiplies by 100 per sign', () => {
     expect(show(0.256, '0.0%')).toBe('25.6%');
@@ -101,7 +102,7 @@ describe('fractions', () => {
     expect(show(0, '# ?/?')).toBe('0    ');
     expect(show(7.9999, '# ?/?')).toBe('8    ');
     expect(show(0, '# #/#')).toBe('0  ');
-    expect(show(-0.001, '# ?/?')).toBe('0    ');
+    expect(show(-0.001, '# ?/?')).toBe('-0    ');
   });
 });
 
@@ -295,6 +296,8 @@ describe('dates and times', () => {
     expect(show(46024.75, 'mmmmm')).toBe('J');
     expect(show(46024.75, 'yyyyyy')).toBe('2026');
     expect(show(46024.75, 'dddddd')).toBe('Friday');
+    expect(show(46024.75, '[$-x-sysdate]')).toBe('Friday, January 2, 2026');
+    expect(show(0.75, '[$-x-systime]')).toBe('6:00:00 PM');
     expect(show(46024.75, 'yyyy 1')).toBe('2026 1');
   });
   it('tells minutes from months by the neighbouring tokens', () => {
@@ -332,6 +335,8 @@ describe('dates and times', () => {
     expect(show(0.0001, 'mm:ss.0')).toBe('00:08.6');
     expect(show(0.123456789, 'h:mm:ss')).toBe('2:57:47');
     expect(show(0.99999999, 'h:mm:ss')).toBe('0:00:00');
+    expect(show(0.999994213, 'h:mm')).toBe('23:59'); // no seconds shown: the time is cut, not rounded up
+    expect(show(0.9999999, 'yyyy-mm-dd')).toBe('1900-01-00'); // a date-only code does not roll the date forward
     expect(show(0.99999999, 'h:mm:ss.000')).toBe('23:59:59.999');
     expect(show(1.999999999, 'yyyy-mm-dd h:mm:ss')).toBe('1900-01-02 0:00:00');
     expect(show(0.5, 'ss.0')).toBe('00.0');
@@ -398,7 +403,7 @@ describe('serial <-> calendar date', () => {
 describe('invalid codes', () => {
   const invalid = [
     '"unterminated', '[Red', '0;0;0;0;0', 'abc', '0 x', '[xyz]0', '[Red][Blue]0', '[>1][>2]0', 'yyyy 0', '[DBNum1]0', '0E', '\\', '0_', '0*', '[color57]0',
-    '[color0]0', '0.0E+', 'h:mm 0', 'e', 'Generalx', 'General0', 'mm/dd/yy hh:mm:ss.0 E+0', '#,##0.00 [Red', 'ammm', '0 `', '0\t', '@ 0 a',
+    '[color0]0', '[Color 1]0', '0.0E+', 'h:mm 0', 'e', 'Generalx', 'General0', 'mm/dd/yy hh:mm:ss.0 E+0', '#,##0.00 [Red', 'ammm', '0 `', '0\t', '@ 0 a',
     'yyyy General', 'hh E+0', '0.0E+', '0E+x',
   ];
   it.each(invalid)('%j is invalid: numbers show as General, the code is reported', (code) => {

@@ -54,8 +54,9 @@ export function roundToPlaces(dec: Decimal, places: number): { int: string; frac
  * 11 characters including the sign: whole numbers up to 11 digits, otherwise as many decimals as fit, and E+nn
  * when the number is 1e11 or more or below 1e-4. Trailing zeros are dropped.
  */
-export function generalDigits(abs: number, negative: boolean): string {
+export function generalDigits(abs: number, negative: boolean, full = false): string {
   if (abs === 0) return '0';
+  if (full) return fullDigits(abs);
   const width = negative ? 10 : 11;
   const dec = toDecimal(abs);
   if (dec.exp >= -4 && dec.exp < width) {
@@ -79,4 +80,18 @@ function scientific(dec: Decimal, width: number): string {
   }
   const trimmed = frac.replace(/0+$/, '');
   return `${int}${trimmed ? '.' + trimmed : ''}E${exp < 0 ? '-' : '+'}${String(Math.abs(exp)).padStart(2, '0')}`;
+}
+
+/**
+ * General without a column to fit (what `TEXT(x,"General")` and string building give): the 15 significant digits,
+ * written out the way `String(number)` does, as `E+nn` from 1e21 and below 1e-6.
+ */
+function fullDigits(abs: number): string {
+  const dec = toDecimal(abs);
+  if (dec.exp >= 21 || dec.exp < -6) {
+    const frac = dec.digits.slice(1);
+    return `${dec.digits[0]}${frac ? '.' + frac : ''}E${dec.exp < 0 ? '-' : '+'}${String(Math.abs(dec.exp)).padStart(2, '0')}`;
+  }
+  const { int, frac } = roundToPlaces(dec, Math.max(0, dec.digits.length - dec.exp - 1));
+  return (int || '0') + (frac ? '.' + frac : '');
 }

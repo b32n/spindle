@@ -13,6 +13,7 @@ interface Row {
   libreoffice: string;
   expected: string;
   excel?: boolean;
+  unverified?: boolean;
   note?: string;
   dateSystem?: 1900 | 1904;
 }
@@ -41,6 +42,7 @@ describe('number-format conformance table', () => {
       } else {
         expect(r.expected).toBe(r.libreoffice);
       }
+      if (r.unverified) expect(r.note).toBeTruthy();
     }
   });
 
@@ -52,7 +54,17 @@ describe('number-format conformance table', () => {
     expect(wrong).toEqual([]);
   });
 
-  it('agrees with LibreOffice on every row except the documented Excel differences (L6 match rate)', () => {
+  it('tags the rows whose Excel behaviour is only assumed as unverified (pending real Excel files, plan D8)', () => {
+    const unverified = table.rows.filter((r) => r.unverified);
+    expect(unverified.length).toBeGreaterThan(0);
+    // time rounding, the case of AM/PM and the sign of explicit-condition sections
+    expect(unverified.some((r) => /round a time/.test(r.note!))).toBe(true);
+    expect(unverified.some((r) => /AM\/PM/.test(r.note!))).toBe(true);
+    expect(unverified.some((r) => r.group === 'conditions')).toBe(true);
+    for (const r of table.rows.filter((x) => x.excel && /Excel keeps the minus sign/.test(x.note!))) expect(r.unverified).toBeUndefined();
+  });
+
+  it('strict LibreOffice-only agreement is the headline; the rows with self-authored Excel corrections are counted separately', () => {
     const agree = (rows: Row[]) => rows.filter((r) => show(r) === r.libreoffice).length;
     const probe = table.rows.filter((r) => r.group === 'probe');
     const corpus = table.rows.filter((r) => r.group === 'corpus');

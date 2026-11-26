@@ -60,6 +60,7 @@ export interface Section {
   fraction?: FractionInfo;
   twelveHour: boolean;
   subDigits: number; // fractional-second digits shown (0 when none)
+  hasSeconds: boolean; // shows seconds (so the time is rounded to the displayed second, otherwise it is cut)
   needsDate: boolean; // shows year, month or day (so a value Excel cannot turn into a date shows ####)
 }
 
@@ -69,6 +70,9 @@ export interface CompiledFormat {
   error?: string;
   sections: Section[];
 }
+
+/** Excel's limit on the length of a number-format code. */
+export const MAX_CODE_LENGTH = 255;
 
 class FormatSyntaxError extends Error {}
 
@@ -122,7 +126,7 @@ function readBracket(body: string, out: Pending): void {
   const lower = body.toLowerCase();
   const condition = parseCondition(body);
   const elapsed = /^(h+|m+|s+)$/.exec(lower);
-  const color = /^color\s*(\d+)$/.exec(lower);
+  const color = /^color(\d+)$/.exec(lower);
   if (COLORS.has(lower) || (color && +color[1] >= 1 && +color[1] <= 56)) {
     if (out.color) fail('two colours');
     out.color = color ? `Color${+color[1]}` : body[0].toUpperCase() + lower.slice(1);
@@ -132,6 +136,11 @@ function readBracket(body: string, out: Pending): void {
   } else if (elapsed) {
     out.tokens.push({ t: 'dt', unit: ({ h: 'h', m: 'mi', s: 's' } as const)[elapsed[1][0] as 'h' | 'm' | 's'], n: elapsed[1].length, elapsed: true });
   } else if (body[0] === '$') {
+    const system = /^\$-x-sys(date|time)$/i.exec(body); // newer Excel and LibreOffice spell F800 and F400 this way
+    if (system) {
+      out.locale = system[1].toLowerCase() === 'date' ? 'F800' : 'F400';
+      return;
+    }
     const m = /^(.*)-([0-9a-f]{1,8})$/i.exec(body.slice(1));
     const symbol = m ? m[1] : body.slice(1);
     if (m) out.locale = m[2].toUpperCase();
@@ -181,6 +190,7 @@ function tokenize(source: string): Pending {
       tokens.push({ t: 'exp', plus: m[0][1] === '+', lower: m[0][0] === 'e' });
       i += 2;
     } else if (c === '.' && (m = /^\.(0+)/.exec(rest)) && isSeconds(tokens[tokens.length - 1])) {
+      if (m[1].length > 3) fail('more than three fractional-second digits');
       tokens.push({ t: 'sub', n: m[1].length });
       i += m[0].length;
     } else {
@@ -226,7 +236,7 @@ function section(source: string): Section {
   const date = tokens.some((t) => t.t === 'dt' || t.t === 'ampm');
   const s: Section = {
     tokens, kind: 'literal', cond: pending.cond, color: pending.color, locale: pending.locale, hasText: false, percent: 0, scale: 0,
-    grouping: false, point: false, int: [], fracDigits: [], twelveHour: false, subDigits: 0, needsDate: false,
+    grouping: false, point: false, int: [], fracDigits: [], twelveHour: false, subDigits: 0, hasSeconds: false, needsDate: false,
   };
   s.hasText = tokens.some((t) => t.t === 'text');
   if (date) return dateSection(s);
@@ -269,6 +279,7 @@ function dateSection(s: Section): Section {
   });
   s.twelveHour = s.tokens.some((t) => t.t === 'ampm');
   s.subDigits = Math.max(0, ...s.tokens.map((t) => (t.t === 'sub' ? t.n : 0)));
+  s.hasSeconds = s.tokens.some((t) => (t.t === 'dt' && t.unit === 's') || t.t === 'sub');
   s.needsDate = s.tokens.some((t) => t.t === 'dt' && !t.elapsed && (t.unit === 'y' || t.unit === 'mo' || t.unit === 'd'));
   return s;
 }
@@ -282,12 +293,19 @@ function numberSection(s: Section): Section {
     if (t.t === 'point' && i !== pointAt) tokens[i] = { t: 'lit', s: '.' };
     if (t.t === 'percent') s.percent++;
   });
-  // A comma between digit placeholders groups thousands; with no digit after it, it divides by 1000.
+  // A comma between digit placeholders groups thousands; with no digit after it, it divides by 1000. One pass:
+  // `digitAfter[i]` is whether the first token after i that is not a comma is a digit placeholder.
+  const digitAfter: boolean[] = new Array(tokens.length).fill(false);
+  for (let i = tokens.length - 2, next = tokens[tokens.length - 1]; i >= 0; i--) {
+    digitAfter[i] = isDigit(next);
+    if (tokens[i].t !== 'thousands') next = tokens[i];
+  }
+  let seenDigit = false;
   tokens.forEach((t, i) => {
+    if (isDigit(t)) seenDigit = true;
     if (t.t !== 'thousands') return;
-    const next = tokens.slice(i + 1).find((x) => x.t !== 'thousands');
-    if (!tokens.slice(0, i).some(isDigit)) tokens[i] = { t: 'lit', s: ',' };
-    else if (isDigit(next)) s.grouping = true;
+    if (!seenDigit) tokens[i] = { t: 'lit', s: ',' };
+    else if (digitAfter[i]) s.grouping = true;
     else {
       s.scale++;
       tokens[i] = { t: 'scale' };
@@ -326,6 +344,7 @@ function fractionInfo(s: Section, slash: number): FractionInfo {
     else if (t.t === 'digit' && fixed) fixed += '0'; // 0/10, 0/100: the zero belongs to the denominator
     else den.push(i);
   }
+  if (fixed.length > 5 || (!fixed && den.length > 5)) fail('more than five denominator digits');
   const num = s.int.filter((i) => i >= numStart && i < slash);
   const whole = s.int.filter((i) => i < numStart);
   s.int = whole;
@@ -336,6 +355,7 @@ function fractionInfo(s: Section, slash: number): FractionInfo {
 /** Parse a code. Never throws; an invalid code gives `ok: false` with one placeholder General section. */
 export function parseFormat(code: string): CompiledFormat {
   try {
+    if (code.length > MAX_CODE_LENGTH) fail(`longer than ${MAX_CODE_LENGTH} characters`);
     const sources = code === '' ? ['General'] : splitSections(code);
     return { code, ok: true, sections: sources.map(section) };
   } catch (e) {

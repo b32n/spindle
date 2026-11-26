@@ -3,6 +3,20 @@
 import type { EagerFn } from './helpers';
 import { flatten, toText, toNum, toBoolean, wildcardSearch } from './helpers';
 import { formatValue, isValidFormatCode } from '../../number-format';
+import { parseDateString } from '../../utils/format-utils';
+
+const DECIMAL = /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i;
+const GROUPED = /^[+-]?\d{1,3}(,\d{3})+(\.\d*)?$/;
+
+/** What Excel's TEXT reads as a number from text: a decimal, with `$`, thousands commas or `%`, or a date. */
+function numberFromText(text: string): number | undefined {
+  let t = text.trim().replace(/^([+-]?)\$/, '$1');
+  const percent = t.endsWith('%');
+  if (percent) t = t.slice(0, -1);
+  if (GROUPED.test(t)) t = t.replace(/,/g, '');
+  if (DECIMAL.test(t)) return Number(t) / (percent ? 100 : 1);
+  return percent ? undefined : (parseDateString(text) ?? undefined);
+}
 
 export const textFunctions: Record<string, EagerFn> = {
   CONCAT: (args) => flatten(args).map(toText).join(''),
@@ -106,9 +120,10 @@ export const textFunctions: Record<string, EagerFn> = {
     if (!isValidFormatCode(code)) throw new Error('#VALUE!');
     const value = args[0];
     const text = toText(value); // an error value propagates
-    if (value === null || value === undefined) return formatValue(0, code).text;
-    const number = typeof value === 'string' && text.trim() !== '' ? Number(text) : value;
-    return formatValue(typeof number === 'number' && Number.isNaN(number) ? value : number, code).text;
+    const options = { fullGeneral: true }; // no column to fit: General gives the 15 significant digits
+    if (value === null || value === undefined) return formatValue(0, code, options).text;
+    const number = typeof value === 'string' ? numberFromText(text) : undefined;
+    return formatValue(number ?? value, code, options).text;
   },
 
   VALUE: (args) => {

@@ -38,9 +38,9 @@ export function isDateTimeFormatCode(code: string): boolean {
 const ERROR_TEXT = /^#(NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|SPILL!|CALC!|ERROR!)/;
 
 /** The text of a number in General format (also what text-only sections show for a number). */
-export function formatGeneral(value: number): string {
+export function formatGeneral(value: number, full = false): string {
   if (!Number.isFinite(value)) return '#NUM!';
-  return (value < 0 ? '-' : '') + generalDigits(Math.abs(value), value < 0);
+  return (value < 0 ? '-' : '') + generalDigits(Math.abs(value), value < 0, full);
 }
 
 /**
@@ -56,9 +56,9 @@ export function formatValue(value: unknown, code: string, options: FormatOptions
   if (typeof value !== 'number' || !Number.isFinite(value)) return { text: typeof value === 'number' ? '#NUM!' : String(value) };
   const sections = compiled.sections;
   const { index, minus } = selectSection(sections, value);
-  if (index < 0) return { text: formatGeneral(value), ...invalid };
+  if (index < 0) return { text: formatGeneral(value, options.fullGeneral), ...invalid };
   const section = sections[index];
-  const rendered = renderNumber(section, value, minus, options.dateSystem ?? 1900);
+  const rendered = renderNumber(section, value, minus, options);
   const result: FormatResult = { text: rendered ? rendered.text : OVERFLOW, ...invalid };
   if (section.color) result.color = section.color;
   if (rendered?.fill) result.fill = rendered.fill;

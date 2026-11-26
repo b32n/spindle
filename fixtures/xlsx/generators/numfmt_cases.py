@@ -17,7 +17,7 @@ POINT = {("0.#", 5): "5.", ("#.", 1234.5678): "1235.", ("#.", -7.5): "-8.", ("#.
 # Codes the corpus file writes as built-in ids 14 and 22; the importer maps the ids to these en-US codes (ECMA-376 18.8.30).
 BUILTIN_SPELLING = {"mm-dd-yy": "m/d/yyyy", "m/d/yy h:mm": "m/d/yyyy h:mm"}
 
-ECMA = [  # examples from ECMA-376 18.8.31 and Microsoft's number-format help
+ECMA = [  # examples in the style of ECMA-376 18.8.31 and Microsoft's number-format help (modelled on them, not copied)
     ("#.000", [8.9, 0.631, -2]), ("0.#", [0.631, 1.3, 5]), ("#.0#", [1234.568, 1.5, 0.049]), ("???.???", [44.398, 102.65, 2.8]),
     ("#,##0", [0, 999.5, 1234567.891]), ("#,###", [0, 5, 1234567]), ("0.0,", [12200000, 999999]), ("0,", [1500, 499]),
     ("# ?/?", [1.75, 0.5, 3]), ("# ??/??", [3.14159, 0.333]), ("?/?", [1.5, 0.25]), ("# ?/8", [2.3, 0.5, 4]), ("# ?/16", [0.3, 1.5]), ("0/16", [0.3, 2]),

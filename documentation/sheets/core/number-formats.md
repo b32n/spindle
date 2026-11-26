@@ -37,10 +37,23 @@ Codes are compiled once and cached (500 entries). `compileFormat(code)` returns 
 | Values | numbers; text (text section); booleans show `TRUE`/`FALSE`; error strings (`#N/A`...) pass through; `null` is empty; `NaN` and infinities are `#NUM!` |
 
 Rounding is half away from zero on the 15 significant digits of the number (so 1.005 with `0.00` is `1.01`).
-A negative number that rounds to zero shows no minus sign. A time of day is rounded to the nearest displayed second
-(or fraction of a second) before the fields are cut out, so 23:59:59.5 with `h:mm` is `0:00`. Dates before 1900-01-01
-(a negative serial) and after 9999-12-31 show `####`, unless a section for negative numbers handles them
-(`[h]:mm;-[h]:mm`).
+A negative number that rounds to zero keeps its sign, as in Excel: `-0.4` with `0` is `-0`, `-0.001` with `0.00` is `-0.00`
+(a negative section such as `0.00;(0.00)` shows `(0.00)`). A format with seconds rounds the time of day to the displayed second (or
+fraction of a second); a format without seconds cuts it to the displayed field (float noise is first rounded off at a millisecond), so
+23:59:59.5 is `23:59` with `h:mm` and `0:00:00` with `h:mm:ss`; a date-only code never rolls the date forward. These time rules are
+an assumption (unverified, see below). Dates before 1900-01-01 (a negative serial) and after 9999-12-31, and numbers too large for a
+time, date or fraction field, show `####` (never an exponent), unless a section for negative numbers handles them (`[h]:mm;-[h]:mm`).
+
+`General` fits 11 characters by default (the canvas). `formatValue(x, code, { fullGeneral: true })`, which `TEXT()` uses, has no column:
+15 significant digits, `E+nn` from 1e21 and below 1e-6 (`TEXT(1/3,"General")` is `0.333333333333333`); `@` and text-only sections follow.
+`TEXT()` reads text as Excel does: a decimal, `$5`, `1,234`, `50%` or a date (`"2024-01-15"`); other text passes through unchanged.
+
+## Limits
+
+Excel's own: a code is at most 255 characters, a fraction denominator at most five digits (variable `?????` or fixed `99999`), fractional
+seconds at most three digits; anything beyond is an invalid code. The nearest fraction comes from the continued fraction of the value
+(O(digits)), the comma handling is one pass, so a format costs the same however it is written; `limits.test.ts` formats adversarial
+255-character codes within a time budget.
 
 ## Invalid codes
 
@@ -58,9 +71,13 @@ LibreOffice's string and the string the engine must produce. Rows where Excel is
 `excel: true` and the reason; those Excel strings come from Excel's documented behaviour and an independent Python
 renderer in the generator, not from running Excel (real Excel files come later, plan decision D8).
 
-- Negative dates and times, serials 0 to 60 of the 1900 system, the system date tokens, `0.#` keeping its decimal
-  point, `am/pm` keeping the case of the code, rounding of times, and General's 11-character width follow Excel.
-- Unspecified section-selection cases follow LibreOffice (see the conditions row above).
+- **How to read the table**: `libreoffice` is the oracle. Rows with `excel: true` replace LibreOffice's string by the one Excel is believed to
+  show; the Excel string is computed by the generator's own small renderer (same author, so it is not independent evidence). Of those rows,
+  the ones tagged `unverified` are assumptions pending real Excel files (plan D8): the time rounding rules, the case of `am/pm`, and the sign of
+  explicit-condition sections (LibreOffice drops the minus sign in any section after the first; Excel may not). The other corrections are documented
+  Excel behaviour: negative dates and times `####`, serials 0 to 60 of the 1900 system, the system date tokens, `0.#` keeping its decimal point,
+  General's 11-character width, and the sign of a negative that rounds to zero.
+- The headline match rate is the strict LibreOffice-only one: 802 of 1,023 rows (the rest are the corrections above, listed separately).
 - `[$-409]`-style language ids only record the locale; month and day names are English. Separators are `.` and `,`.
   Calendars other than Gregorian (`[$-...]` calendar bits, `B1`/`B2`, `e`, `g`) are invalid.
 - A format with only literal text and an `@` shows a number in General (LibreOffice does the same).

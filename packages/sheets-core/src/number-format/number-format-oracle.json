@@ -18,7 +18,9 @@
    "code": "0",
    "value": -0.256,
    "libreoffice": "0",
-   "expected": "0"
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "probe",
@@ -60,7 +62,9 @@
    "code": "#,##0",
    "value": -0.256,
    "libreoffice": "0",
-   "expected": "0"
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "probe",
@@ -405,7 +409,8 @@
    "libreoffice": "13:37:37",
    "expected": "13:37:38",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "probe",
@@ -523,7 +528,9 @@
    "code": "0.0,,\"M\"",
    "value": -0.256,
    "libreoffice": "0.0M",
-   "expected": "0.0M"
+   "expected": "-0.0M",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "probe",
@@ -586,7 +593,9 @@
    "code": "000-00",
    "value": -0.256,
    "libreoffice": "000-00",
-   "expected": "000-00"
+   "expected": "-000-00",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "probe",
@@ -649,7 +658,9 @@
    "code": "#,##0.0,\"K\"",
    "value": -0.256,
    "libreoffice": "0.0K",
-   "expected": "0.0K"
+   "expected": "-0.0K",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "probe",
@@ -763,7 +774,9 @@
    "code": "0",
    "value": -0.256,
    "libreoffice": "0",
-   "expected": "0"
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -819,7 +832,9 @@
    "code": "#,##0",
    "value": -0.256,
    "libreoffice": "0",
-   "expected": "0"
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -1224,7 +1239,8 @@
    "libreoffice": "1:37:37 PM",
    "expected": "1:37:38 PM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "corpus",
@@ -1286,7 +1302,8 @@
    "libreoffice": "13:37:37",
    "expected": "13:37:38",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "corpus",
@@ -1540,7 +1557,8 @@
    "libreoffice": "1903-05-18 13:37:37",
    "expected": "1903-05-18 13:37:38",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "corpus",
@@ -1669,7 +1687,9 @@
    "code": "$#,##0",
    "value": -0.256,
    "libreoffice": "$0",
-   "expected": "$0"
+   "expected": "-$0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -1893,7 +1913,9 @@
    "code": "0.0,,\"M\"",
    "value": -0.256,
    "libreoffice": "0.0M",
-   "expected": "0.0M"
+   "expected": "-0.0M",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -1921,7 +1943,9 @@
    "code": "#,##0.0,\"K\"",
    "value": -0.256,
    "libreoffice": "0.0K",
-   "expected": "0.0K"
+   "expected": "-0.0K",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -1977,7 +2001,9 @@
    "code": "\"Total: \"0",
    "value": -0.256,
    "libreoffice": "Total: 0",
-   "expected": "Total: 0"
+   "expected": "-Total: 0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -2005,7 +2031,9 @@
    "code": "000-00",
    "value": -0.256,
    "libreoffice": "000-00",
-   "expected": "000-00"
+   "expected": "-000-00",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -2033,7 +2061,9 @@
    "code": "00000",
    "value": -0.256,
    "libreoffice": "00000",
-   "expected": "00000"
+   "expected": "-00000",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -2061,7 +2091,9 @@
    "code": "(000) 000-0000",
    "value": -0.256,
    "libreoffice": "(000) 000-0000",
-   "expected": "(000) 000-0000"
+   "expected": "-(000) 000-0000",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -2285,7 +2317,9 @@
    "code": "[$¥-411] #,##0",
    "value": -0.256,
    "libreoffice": "¥ 0",
-   "expected": "¥ 0"
+   "expected": "-¥ 0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -2435,7 +2469,9 @@
    "code": "* 0",
    "value": -0.256,
    "libreoffice": "0",
-   "expected": "0"
+   "expected": "-0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -2463,7 +2499,9 @@
    "code": "0_)",
    "value": -0.256,
    "libreoffice": "0 ",
-   "expected": "0 "
+   "expected": "-0 ",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "corpus",
@@ -3117,7 +3155,9 @@
    "code": "[>100]\"big\";\"small\"",
    "value": -5,
    "libreoffice": "small",
-   "expected": "small"
+   "expected": "small",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3145,7 +3185,9 @@
    "code": "[>100]0\"big\";0\"small\"",
    "value": -5,
    "libreoffice": "5small",
-   "expected": "5small"
+   "expected": "5small",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3166,7 +3208,9 @@
    "code": "[>100]\"a\";[<0]\"b\";\"c\"",
    "value": -5,
    "libreoffice": "b",
-   "expected": "b"
+   "expected": "b",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3194,7 +3238,9 @@
    "code": "[>100]\"a\";\"b\";\"c\"",
    "value": -5,
    "libreoffice": "b",
-   "expected": "b"
+   "expected": "b",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3229,7 +3275,9 @@
    "code": "[<=5]0.0;0.00",
    "value": -5,
    "libreoffice": "-5.0",
-   "expected": "-5.0"
+   "expected": "-5.0",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3271,7 +3319,9 @@
    "code": "[=0]\"zero\";0",
    "value": -5,
    "libreoffice": "5",
-   "expected": "5"
+   "expected": "5",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3299,14 +3349,18 @@
    "code": "[<10]0.0;[>=100]0.00;0",
    "value": -5,
    "libreoffice": "-5.0",
-   "expected": "-5.0"
+   "expected": "-5.0",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
    "code": "[<=0]\"n\"0;0",
    "value": -5,
    "libreoffice": "n5",
-   "expected": "n5"
+   "expected": "n5",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3355,7 +3409,9 @@
    "code": "0;[>3]0\"x\";0\"y\"",
    "value": -2,
    "libreoffice": "-2",
-   "expected": "-2"
+   "expected": "-2",
+   "unverified": true,
+   "note": "the sign rule for an explicit condition follows LibreOffice (the minus sign is dropped in the second and later sections); Excel is not known to do the same"
   },
   {
    "group": "conditions",
@@ -3978,7 +4034,9 @@
    "code": "0.0,,,",
    "value": -7.5,
    "libreoffice": "0.0",
-   "expected": "0.0"
+   "expected": "-0.0",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "literals",
@@ -3999,7 +4057,9 @@
    "code": "0.00,,",
    "value": -7.5,
    "libreoffice": "0.00",
-   "expected": "0.00"
+   "expected": "-0.00",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "literals",
@@ -4020,7 +4080,9 @@
    "code": "#,##0.0,\"K\"",
    "value": -7.5,
    "libreoffice": "0.0K",
-   "expected": "0.0K"
+   "expected": "-0.0K",
+   "excel": true,
+   "note": "Excel keeps the minus sign of a negative number that rounds to zero (-0, -0.00); LibreOffice drops it"
   },
   {
    "group": "literals",
@@ -5627,7 +5689,8 @@
    "libreoffice": "2:57:46",
    "expected": "2:57:47",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5636,7 +5699,8 @@
    "libreoffice": "0:00:00",
    "expected": "0:00:01",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5645,7 +5709,8 @@
    "libreoffice": "23:59:59",
    "expected": "0:00:00",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5654,7 +5719,8 @@
    "libreoffice": "23:59:59",
    "expected": "0:00:00",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5670,7 +5736,8 @@
    "libreoffice": "0:00:08",
    "expected": "0:00:09",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5728,18 +5795,14 @@
    "code": "hh:mm",
    "value": 0.999994213,
    "libreoffice": "23:59",
-   "expected": "00:00",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "23:59"
   },
   {
    "group": "times",
    "code": "hh:mm",
    "value": 0.99999999,
    "libreoffice": "23:59",
-   "expected": "00:00",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "23:59"
   },
   {
    "group": "times",
@@ -5811,18 +5874,14 @@
    "code": "h:mm AM/PM",
    "value": 0.999994213,
    "libreoffice": "11:59 PM",
-   "expected": "12:00 AM",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "11:59 PM"
   },
   {
    "group": "times",
    "code": "h:mm AM/PM",
    "value": 0.99999999,
    "libreoffice": "11:59 PM",
-   "expected": "12:00 AM",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "11:59 PM"
   },
   {
    "group": "times",
@@ -5882,7 +5941,8 @@
    "libreoffice": "2:57:46 AM",
    "expected": "2:57:47 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5891,7 +5951,8 @@
    "libreoffice": "12:00:00 AM",
    "expected": "12:00:01 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5900,7 +5961,8 @@
    "libreoffice": "11:59:59 PM",
    "expected": "12:00:00 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5909,7 +5971,8 @@
    "libreoffice": "11:59:59 PM",
    "expected": "12:00:00 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5925,7 +5988,8 @@
    "libreoffice": "12:00:08 AM",
    "expected": "12:00:09 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5943,7 +6007,8 @@
    "libreoffice": "12:00 PM",
    "expected": "12:00 pm",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5952,7 +6017,8 @@
    "libreoffice": "6:00 PM",
    "expected": "6:00 pm",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5961,7 +6027,8 @@
    "libreoffice": "12:00 PM",
    "expected": "12:00 pm",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5970,7 +6037,8 @@
    "libreoffice": "6:00 AM",
    "expected": "6:00 am",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5979,7 +6047,8 @@
    "libreoffice": "2:57 AM",
    "expected": "2:57 am",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -5988,25 +6057,28 @@
    "libreoffice": "12:00 AM",
    "expected": "12:00 am",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
    "code": "h:mm am/pm",
    "value": 0.999994213,
    "libreoffice": "11:59 PM",
-   "expected": "12:00 am",
+   "expected": "11:59 pm",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
    "code": "h:mm am/pm",
    "value": 0.99999999,
    "libreoffice": "11:59 PM",
-   "expected": "12:00 am",
+   "expected": "11:59 pm",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6015,7 +6087,8 @@
    "libreoffice": "12:00 AM",
    "expected": "12:00 am",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6024,7 +6097,8 @@
    "libreoffice": "12:00 AM",
    "expected": "12:00 am",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6042,7 +6116,8 @@
    "libreoffice": "12:00 p",
    "expected": "12:00 P",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6051,7 +6126,8 @@
    "libreoffice": "6:00 p",
    "expected": "6:00 P",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6060,7 +6136,8 @@
    "libreoffice": "12:00 p",
    "expected": "12:00 P",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6069,7 +6146,8 @@
    "libreoffice": "6:00 a",
    "expected": "6:00 A",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6078,7 +6156,8 @@
    "libreoffice": "2:57 a",
    "expected": "2:57 A",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6087,25 +6166,28 @@
    "libreoffice": "12:00 a",
    "expected": "12:00 A",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
    "code": "h:mm A/P",
    "value": 0.999994213,
    "libreoffice": "11:59 p",
-   "expected": "12:00 A",
+   "expected": "11:59 P",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
    "code": "h:mm A/P",
    "value": 0.99999999,
    "libreoffice": "11:59 p",
-   "expected": "12:00 A",
+   "expected": "11:59 P",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6114,7 +6196,8 @@
    "libreoffice": "12:00 a",
    "expected": "12:00 A",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6123,7 +6206,8 @@
    "libreoffice": "12:00 a",
    "expected": "12:00 A",
    "excel": true,
-   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own"
+   "note": "Excel writes AM/PM in the case the format code uses (am/pm, A/P); LibreOffice picks its own",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6260,14 +6344,18 @@
    "code": "[hh]:mm",
    "value": 0.999994213,
    "libreoffice": "24:00",
-   "expected": "24:00"
+   "expected": "23:59",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
   },
   {
    "group": "times",
    "code": "[hh]:mm",
    "value": 0.99999999,
    "libreoffice": "24:00",
-   "expected": "24:00"
+   "expected": "23:59",
+   "excel": true,
+   "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
   },
   {
    "group": "times",
@@ -6492,7 +6580,8 @@
    "libreoffice": "0:00:00.999",
    "expected": "0:00:01.000",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6573,7 +6662,8 @@
    "libreoffice": "00:00.9",
    "expected": "00:01.0",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6589,7 +6679,8 @@
    "libreoffice": "59:59.9",
    "expected": "00:00.0",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6656,7 +6747,8 @@
    "libreoffice": "00:00.99",
    "expected": "00:01.00",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6672,7 +6764,8 @@
    "libreoffice": "59:59.99",
    "expected": "00:00.00",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6732,7 +6825,8 @@
    "libreoffice": "57:46",
    "expected": "57:47",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6741,7 +6835,8 @@
    "libreoffice": "0:00",
    "expected": "0:01",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6750,7 +6845,8 @@
    "libreoffice": "59:59",
    "expected": "0:00",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6759,7 +6855,8 @@
    "libreoffice": "59:59",
    "expected": "0:00",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6775,7 +6872,8 @@
    "libreoffice": "0:08",
    "expected": "0:09",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6833,18 +6931,14 @@
    "code": "h:m",
    "value": 0.999994213,
    "libreoffice": "23:59",
-   "expected": "0:0",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "23:59"
   },
   {
    "group": "times",
    "code": "h:m",
    "value": 0.99999999,
    "libreoffice": "23:59",
-   "expected": "0:0",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "23:59"
   },
   {
    "group": "times",
@@ -6904,7 +6998,8 @@
    "libreoffice": "46",
    "expected": "47",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6913,7 +7008,8 @@
    "libreoffice": "0",
    "expected": "1",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6922,7 +7018,8 @@
    "libreoffice": "59",
    "expected": "0",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6931,7 +7028,8 @@
    "libreoffice": "59",
    "expected": "0",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -6947,7 +7045,8 @@
    "libreoffice": "8",
    "expected": "9",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -7005,18 +7104,14 @@
    "code": "h \"h\" mm \"m\"",
    "value": 0.999994213,
    "libreoffice": "23 h 59 m",
-   "expected": "0 h 00 m",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "23 h 59 m"
   },
   {
    "group": "times",
    "code": "h \"h\" mm \"m\"",
    "value": 0.99999999,
    "libreoffice": "23 h 59 m",
-   "expected": "0 h 00 m",
-   "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "expected": "23 h 59 m"
   },
   {
    "group": "times",
@@ -7083,7 +7178,8 @@
    "libreoffice": "12:00:00.99 AM",
    "expected": "12:00:01.00 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -7099,7 +7195,8 @@
    "libreoffice": "11:59:59.99 PM",
    "expected": "12:00:00.00 AM",
    "excel": true,
-   "note": "Excel rounds a time to the nearest displayed second (or fraction of a second) before showing it, so 23:59:59.5 is 00:00; LibreOffice truncates"
+   "note": "Excel is taken to round a time to the nearest displayed second (or fraction of a second) and to cut it to the displayed field when seconds are not shown; LibreOffice truncates",
+   "unverified": true
   },
   {
    "group": "times",
@@ -7181,7 +7278,7 @@
    "code": "d h:mm",
    "value": 0.999994213,
    "libreoffice": "30 23:59",
-   "expected": "1 0:00",
+   "expected": "0 23:59",
    "excel": true,
    "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
   },
@@ -7190,7 +7287,7 @@
    "code": "d h:mm",
    "value": 0.99999999,
    "libreoffice": "30 23:59",
-   "expected": "1 0:00",
+   "expected": "0 23:59",
    "excel": true,
    "note": "Excel's 1900 date system: serial 0 is 1900-01-00, serial 60 is 1900-02-29 and serials 1-59 are a day later than LibreOffice's"
   },
