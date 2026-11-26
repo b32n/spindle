@@ -7,6 +7,7 @@ import {
   safeCssKeyword,
   safeCssNumber,
 } from './sanitize';
+import { BLOCK_REVISION_ATTRS } from './block-revision';
 
 /**
  * Paragraph formatting that paragraphs and headings carry beyond alignment and spacing: indents in pixels
@@ -21,8 +22,9 @@ const PARAGRAPH_FORMAT_ATTRS = {
   pageBreakBefore: { default: null },
   // Named paragraph style (DOCX `w:pStyle`), a key of the document's `namedStyles`.
   namedStyleId: { default: null },
-  // Tracked changes of the paragraph (see `BlockRevision`): `{ insertion?, deletion?, formatChange? }` or null.
-  revision: { default: null },
+  // Tracked changes of the paragraph mark, one attribute per kind (see `BlockRevision`): `revisionInsertion`,
+  // `revisionDeletion`, `revisionFormat` (each a change record or null), so concurrent suggestions of different kinds merge.
+  ...BLOCK_REVISION_ATTRS,
 };
 
 /**
@@ -234,7 +236,7 @@ const nodes: Record<string, NodeSpec> = {
   table_row: {
     content: '(table_cell | table_header)+',
     tableRole: 'row',
-    attrs: { height: { default: null }, repeatHeader: { default: false }, cantSplit: { default: false }, revision: { default: null } },
+    attrs: { height: { default: null }, repeatHeader: { default: false }, cantSplit: { default: false }, ...BLOCK_REVISION_ATTRS },
     parseDOM: [{ tag: 'tr' }],
     toDOM(): DOMOutputSpec {
       return ['tr', 0];

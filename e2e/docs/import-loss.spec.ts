@@ -9,7 +9,7 @@ type Opened = { fileName: string; loss: { items: Array<{ id: string; count: numb
 const lastOpened = (page: Page) =>
   page.evaluate(() => (window as unknown as { __lastOpened?: Opened }).__lastOpened);
 
-/** rich-document.docx plus a tracked insertion of a paragraph mark in a table cell of one paragraph (the one tracked change that is not kept) and a footnote. */
+/** rich-document.docx plus a tracked insertion around a whole paragraph (a tracked change the importer does not keep: its content is not imported) and a footnote. */
 async function lossyDocx(): Promise<{ name: string; mimeType: string; buffer: Buffer }> {
   const zip = await JSZip.loadAsync(
     (await import('node:fs')).readFileSync(fixture('rich-document.docx'))
@@ -19,7 +19,7 @@ async function lossyDocx(): Promise<{ name: string; mimeType: string; buffer: Bu
     'word/document.xml',
     xml.replace(
       '</w:body>',
-      '<w:tbl><w:tr><w:tc><w:p><w:pPr><w:rPr><w:ins w:id="99" w:author="A"/></w:rPr></w:pPr><w:r><w:t>tracked</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body>'
+      '<w:ins w:id="99" w:author="A"><w:p><w:r><w:t>tracked</w:t></w:r></w:p></w:ins></w:body>'
     )
   );
   zip.file(
@@ -49,7 +49,7 @@ test.describe('docs: import loss report and confirmation', () => {
     await expect(dialog(page)).toBeVisible();
     const items = dialog(page).getByTestId('import-loss-list').locator('li');
     await expect(items).toHaveCount(2);
-    await expect(items.filter({ hasText: 'tracked insertion' })).toHaveCount(1);
+    await expect(items.filter({ hasText: 'tracked change' })).toHaveCount(1);
     await expect(items.filter({ hasText: 'footnote' })).toHaveCount(1);
     await expect(doc.editor.locator('h1')).not.toHaveText('Fixture Title'); // not replaced yet
   });
@@ -69,7 +69,7 @@ test.describe('docs: import loss report and confirmation', () => {
     await expect(doc.editor.locator('h1')).toHaveText('Fixture Title');
     await expect
       .poll(async () => (await lastOpened(page))?.loss.items.map((i) => i.id).sort())
-      .toEqual(['docx.footnotes', 'docx.trackedInsertions']);
+      .toEqual(['docx.footnotes', 'docx.trackedBlockChanges']);
   });
 
   test('D-FIO-09 a document that loses nothing opens without a dialog', async ({ page }) => {

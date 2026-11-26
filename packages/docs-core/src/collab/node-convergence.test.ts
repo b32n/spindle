@@ -237,10 +237,8 @@ const NODE_SAMPLES: Record<string, Json[]> = {
     p([t('exact')], { lineSpacing: { type: 'exactly', value: 20 } }),
     // Tracked changes of a paragraph: its mark inserted, and its formatting changed (with the formatting before).
     p([t('marked')], {
-      revision: {
-        insertion: { id: '3', author: 'Ada', date: '2024-05-06T07:08:09Z' },
-        formatChange: { id: '4', author: 'Bo', previous: { alignment: 'right', leftIndent: 24, headingLevel: 2 } },
-      },
+      revisionInsertion: { id: '3', author: 'Ada', date: '2024-05-06T07:08:09Z' },
+      revisionFormat: { id: '4', author: 'Bo', previous: { alignment: 'right', leftIndent: 24, headingLevel: 2 } },
     }),
     // A named paragraph style (DOCX pStyle).
     p([t('callout')], { namedStyleId: 'Callout' }),
@@ -592,5 +590,84 @@ describe('header/footer variants and section properties under collab', () => {
     expect(out).not.toHaveProperty('pageNumbering');
     expect(out).not.toHaveProperty('verticalAlign');
     expect(out).not.toHaveProperty('breakType');
+  });
+});
+
+describe('concurrent suggestions on one paragraph mark or table row', () => {
+  const ADA = { id: 'a1', author: 'Ada', date: '2024-05-06T07:08:09Z' };
+  const BO = { id: 'b1', author: 'Bo' };
+  const CY = { id: 'c1', author: 'Cy', previous: { alignment: 'right' } };
+  const revisionOfBlock = (c: Client, i = 0) => (c.blocks()[i] as ParagraphBlock).revision;
+
+  /** A client sets one attribute of the first paragraph (what suggesting does for a mark change of that kind). */
+  const markParagraph = (c: Client, attrs: Record<string, unknown>) =>
+    c.edit((tr) => tr.setNodeMarkup(0, undefined, { ...tr.doc.child(0).attrs, ...attrs }));
+
+  it('keep both when two people mark the same paragraph mark with different kinds', () => {
+    const [a, b] = pair([para('p', [text('hello world')])]);
+    markParagraph(a, { revisionInsertion: ADA });
+    markParagraph(b, { revisionDeletion: BO });
+    sync(a, b);
+    for (const c of [a, b]) expect(revisionOfBlock(c)).toEqual({ insertion: ADA, deletion: BO });
+    expect(a.pm().toJSON()).toEqual(b.pm().toJSON());
+  });
+
+  it('keep all three kinds from three people', () => {
+    const [a, b] = pair([para('p', [text('hello world')])]);
+    const c = new Client('C');
+    sync(a, c);
+    markParagraph(a, { revisionInsertion: ADA });
+    markParagraph(b, { revisionDeletion: BO });
+    markParagraph(c, { revisionFormat: CY });
+    sync(a, b);
+    sync(b, c);
+    sync(a, c);
+    sync(a, b);
+    for (const client of [a, b, c]) expect(revisionOfBlock(client)).toEqual({ insertion: ADA, deletion: BO, formatChange: CY });
+  });
+
+  it('keep both when one splits the paragraph (inserting a mark) while the other marks the old mark deleted', () => {
+    const [a, b] = pair([para('p', [text('hello world')])]);
+    // Ada: Enter in the middle; the new mark (end of the first half) is her insertion.
+    a.edit((tr) => {
+      tr.split(7);
+      tr.setNodeMarkup(0, undefined, { ...tr.doc.child(0).attrs, revisionInsertion: ADA });
+    });
+    // Bo: marks the paragraph mark deleted (joins with the next paragraph, Word's Delete at the end).
+    markParagraph(b, { revisionDeletion: BO });
+    sync(a, b);
+    expect(a.pm().toJSON()).toEqual(b.pm().toJSON());
+    const blocks = a.blocks() as ParagraphBlock[];
+    expect(blocks.map((blk) => blk.content.map((c) => (c as { text: string }).text).join(''))).toEqual(['hello ', 'world']);
+    // Both suggestions survive. Yjs keeps the element of the original paragraph for the first half, so Bo's record
+    // (made on the whole paragraph) lands there next to Ada's: the residual limit documented in collaboration.md.
+    expect(blocks[0].revision).toEqual({ insertion: ADA, deletion: BO });
+    expect(blocks[1].revision).toBeUndefined();
+  });
+
+  it('keep both kinds on a table row', () => {
+    const rows = [{ id: 'r1', cells: [{ id: 'c1', content: [{ type: 'text', text: 'x' }] }] }];
+    const [a, b] = pair([{ id: 't', type: 'table', rows } as unknown as Block]);
+    const markRow = (c: Client, attrs: Record<string, unknown>) =>
+      c.edit((tr) => {
+        let pos = -1;
+        tr.doc.descendants((n, p0) => {
+          if (n.type.name === 'table_row' && pos < 0) pos = p0;
+        });
+        tr.setNodeMarkup(pos, undefined, { ...tr.doc.nodeAt(pos)!.attrs, ...attrs });
+      });
+    markRow(a, { revisionInsertion: ADA });
+    markRow(b, { revisionDeletion: BO });
+    sync(a, b);
+    for (const c of [a, b]) expect((c.blocks()[0] as { rows: { revision?: unknown }[] }).rows[0].revision).toEqual({ insertion: ADA, deletion: BO });
+  });
+
+  it('the same kind from two people is still one winner, the same on both clients', () => {
+    const [a, b] = pair([para('p', [text('hello world')])]);
+    markParagraph(a, { revisionDeletion: ADA });
+    markParagraph(b, { revisionDeletion: BO });
+    sync(a, b);
+    expect(revisionOfBlock(a)).toEqual(revisionOfBlock(b));
+    expect([ADA, BO]).toContainEqual(revisionOfBlock(a)!.deletion);
   });
 });

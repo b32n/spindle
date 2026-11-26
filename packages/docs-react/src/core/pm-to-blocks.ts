@@ -6,7 +6,7 @@
  * presentation layer (layout engine + painter).
  */
 
-import { assignAuthorColors, authorColor, documentRevisionAuthors } from '@b32nio/spindle-docs-core';
+import { assignAuthorColors, authorColor, documentRevisionAuthors, readBlockRevision } from '@b32nio/spindle-docs-core';
 import { Node as PmNode, Mark } from 'prosemirror-model';
 import { sanitizeHref } from './sanitize';
 
@@ -460,7 +460,7 @@ function convertTable(node: PmNode): TableBlock {
         cells,
         ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
         ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
-        ...rowRevision(rowNode.attrs.revision),
+        ...rowRevision(readBlockRevision(rowNode.attrs, false)),
       });
     }
   });
@@ -759,7 +759,7 @@ function extractParagraphAttrs(node: PmNode): ParagraphAttrs {
     if (node.attrs.rightIndent !== undefined) {
       attrs.rightIndent = node.attrs.rightIndent as number;
     }
-    const changeBar = changeBarOf(node.attrs.revision);
+    const changeBar = changeBarOf(readBlockRevision(node.attrs, false));
     if (changeBar) attrs.changeBar = changeBar;
   }
   

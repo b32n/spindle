@@ -75,6 +75,29 @@ describe('freshRevisionIds', () => {
     expect(markIds(docsSchema.node('doc', null, [out.content.firstChild!]) as never, 'insertion')).toEqual(['fresh']);
   });
 
+  it('gives a pasted move one new name for both ends, and a pasted formatting change an id of its own', () => {
+    const sliceMove = sliceOf(
+      text('x', deletion.create({ ...BO, moveId: 'mv' })),
+      text('y', insertion.create({ ...ADA, revisionId: '7', moveId: 'mv' })),
+      text('z', insertion.create({ ...ADA, revisionId: '8', moveId: 'other' })),
+      text('w', docsSchema.marks.formatChange.create({ revisionId: '4', author: 'Di', previous: { bold: true } }))
+    );
+    let n = 0;
+    const out = freshRevisionIds(sliceMove, () => `f${++n}`);
+    const kids: ReturnType<typeof text>[] = [];
+    out.content.firstChild!.forEach((c) => kids.push(c as never));
+    const attrs = kids.map((c) => c.marks[0].attrs);
+    expect(attrs[0].moveId).toBe(attrs[1].moveId);
+    expect(attrs[0].moveId).not.toBe('mv');
+    expect(attrs[2].moveId).not.toBe(attrs[0].moveId);
+    expect(attrs.slice(0, 3).map((a) => a.revisionId)).toHaveLength(3);
+    expect(new Set(attrs.map((a) => a.revisionId)).size).toBe(4);
+    expect(attrs[3]).toMatchObject({ author: 'Di', previous: { bold: true } });
+    expect(attrs[3].revisionId).not.toBe('4');
+    // No move name on a change that had none.
+    expect(freshRevisionIds(sliceOf(text('p', insertion.create(ADA)))).content.firstChild!.firstChild!.marks[0].attrs.moveId).toBeNull();
+  });
+
   it('makes ids that differ from call to call', () => {
     expect(newRevisionId()).not.toBe(newRevisionId());
   });

@@ -397,6 +397,10 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         const outer = revision;
         // The two ends of a move are a deletion (from) and an insertion (to) that share the name of the move.
         const moveId = tag === 'w:moveFrom' || tag === 'w:moveTo' ? openMove[tag === 'w:moveFrom' ? 'moveFrom' : 'moveTo'] : undefined;
+        if ((tag === 'w:moveFrom' || tag === 'w:moveTo') && !moveId) {
+          const note = 'A moved run whose move range starts in another paragraph is kept as a plain deletion or insertion, without the name of the move.';
+          if (!warnings.includes(note)) warnings.push(note);
+        }
         const meta = { ...revisionMeta(child, anonymousRevisionId(ctx)), ...(moveId && { moveId }) };
         revision = { ...outer, ...(tag === 'w:ins' || tag === 'w:moveTo' ? { insertion: meta } : { deletion: meta }) };
         consumeRuns(childrenOf(child), target);
@@ -1067,7 +1071,7 @@ function parseControlBlock(
 /**
  * The content of a table cell: its paragraphs, lists and nested tables. `content` is the inline content of the first
  * paragraph that has any (what a cell of one paragraph holds); `blocks` is the whole cell, set unless the cell is one
- * plain paragraph.
+ * paragraph without a tracked change of its mark.
  */
 function parseCellContent(
   tcNode: XmlNode,
@@ -1117,7 +1121,8 @@ function parseCellContent(
   const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
   // Bookmarks of the paragraphs before the first one with content stay in front of it
   const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
-  const plain = blocks.length === 1 && blocks[0].type === 'paragraph';
+  // A paragraph with a tracked change of its mark keeps its block (like the export does), so the change is not lost.
+  const plain = blocks.length === 1 && blocks[0].type === 'paragraph' && !blocks[0].revision;
   return { content, ...(!plain && blocks.length > 0 && { blocks }) };
 }
 

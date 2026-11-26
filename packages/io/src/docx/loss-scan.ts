@@ -231,65 +231,28 @@ const isSectPrChild = (path: readonly string[]) => path[path.length - 1] === 'w:
 
 /** Tracked changes the importer does not keep, from `revisionLosses`. */
 interface RevisionLosses {
-  insertions: number;
-  deletions: number;
-  moves: number;
-  /** Formatting changes by element name (`rPrChange`, `pPrChange`, `tblPrChange`, `sectPrChange`). */
+  /** Formatting changes by element name (`rPrChange` of a paragraph mark, `tblPrChange`, `sectPrChange`). */
   formatting: Map<string, number>;
 }
 
 /**
- * The `w:p` that is the only block of its table cell: its paragraph mark and formatting changes are not kept (the cell holds
- * just its inline content). A cell whose only paragraph turns out to be a heading or a list item keeps its blocks, and so the
- * change; those are counted here all the same (the scan does not read styles and numbering to tell).
- */
-function lonelyCellParagraphs(root: XmlNode[]): Set<XmlNode> {
-  const lonely = new Set<XmlNode>();
-  walk(root, (cell, tag) => {
-    if (tag !== 'w:tc') return;
-    const blocks = childrenOf(cell).filter((k) => ['w:p', 'w:tbl', 'w:sdt', 'w:customXml'].includes(tagOf(k) ?? ''));
-    if (blocks.length === 1 && tagOf(blocks[0]) === 'w:p') lonely.add(blocks[0]);
-  });
-  return lonely;
-}
-
-/**
- * The tracked changes that are lost. Insertions, deletions and moves around runs, on paragraph marks and on table rows,
- * and formatting changes of runs and paragraphs are kept. What is left: the changes of a paragraph mark in a table cell
- * with a single paragraph, formatting changes of a paragraph mark's own formatting, and changes of tables and sections.
+ * The tracked changes that are lost. Insertions, deletions and moves around runs, on paragraph marks (also of a table
+ * cell's only paragraph) and on table rows, and formatting changes of runs and paragraphs are kept. What is left:
+ * formatting changes of a paragraph mark's own formatting, and changes of tables and sections.
  * Text boxes are reported as such and not counted here.
  */
 function revisionLosses(root: XmlNode[]): RevisionLosses {
-  const out: RevisionLosses = { insertions: 0, deletions: 0, moves: 0, formatting: new Map() };
-  const lonely = lonelyCellParagraphs(root);
-  let lonelyParagraph = false;
-  walk(root, (node, tag, path) => {
+  const out: RevisionLosses = { formatting: new Map() };
+  walk(root, (_node, tag, path) => {
     if (path.includes('w:txbxContent')) return;
-    if (tag === 'w:p') {
-      lonelyParagraph = lonely.has(node);
-      return;
-    }
     if (tag === 'w:tblPrChange' || tag === 'w:sectPrChange') {
       bump(out.formatting, tag.slice(2));
       return;
     }
     const inParagraphMark = path[path.length - 1] === 'w:rPr' && path[path.length - 2] === 'w:pPr' && !inRevisionProps(path);
     if (tag === 'w:rPrChange' && inParagraphMark) bump(out.formatting, 'rPrChange');
-    else if (tag === 'w:pPrChange' && path[path.length - 1] === 'w:pPr' && lonelyParagraph) bump(out.formatting, 'pPrChange');
-    else if (inParagraphMark && lonelyParagraph) {
-      if (tag === 'w:ins') out.insertions++;
-      else if (tag === 'w:del') out.deletions++;
-      else if (tag === 'w:moveFrom' || tag === 'w:moveTo') out.moves++;
-    }
   });
   return out;
-}
-
-function trackedChanges(losses: RevisionLosses): Item[] {
-  return [
-    ...item('docx.trackedInsertions', 'tracked insertion(s) of a paragraph mark', losses.insertions, 'the paragraph is imported as ordinary content (it is in a table cell of one paragraph, which keeps only its text); the change is not recorded'),
-    ...item('docx.trackedDeletions', 'tracked deletion(s) of a paragraph mark', losses.deletions, 'the paragraph is imported as ordinary content (it is in a table cell of one paragraph, which keeps only its text); the change is not recorded'),
-  ];
 }
 
 const CHANGE_NOT_KEPT_RUN_CONTENT = ['w:fldChar', 'w:fldSimple', 'w:drawing', 'mc:AlternateContent', 'w:footnoteReference', 'w:endnoteReference'];
@@ -351,10 +314,6 @@ function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item
     ...item('docx.trackedBlockChanges', 'tracked change(s) around whole paragraphs or tables', blocks, 'the paragraphs or tables inside are not imported'),
     ...item('docx.trackedHeaderFooterChanges', 'tracked change(s) in headers and footers', headers, 'deleted text is dropped and inserted text is kept as ordinary text; the change is not recorded'),
   ];
-}
-
-function trackedMoves(losses: RevisionLosses): Item[] {
-  return item('docx.trackedMoves', 'tracked move(s) of a paragraph mark', losses.moves, 'the paragraph is imported as ordinary content (it is in a table cell of one paragraph); the move is not recorded');
 }
 
 function formattingRevisions(losses: RevisionLosses): Item[] {
@@ -492,7 +451,7 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
       return [];
     }
   };
-  let losses: RevisionLosses = { insertions: 0, deletions: 0, moves: 0, formatting: new Map() };
+  let losses: RevisionLosses = { formatting: new Map() };
   try {
     losses = revisionLosses(root);
   } catch {
@@ -502,17 +461,14 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => trackedChanges(losses)), ...safe(() => trackedChangesNotKept(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => trackedChangesNotKept(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
-    ...safe(() => trackedChanges(losses)),
-    ...safe(() => trackedChangesNotKept(root)),
     ...safe(() => trackedChangesElsewhere(root, input.headerFooters)),
     ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),
     ...safe(() => fields(root)),
-    ...safe(() => trackedMoves(losses)),
     ...safe(() => formattingRevisions(losses)),
     ...safe(() => dropCaps(root)),
     ...safe(() => watermarks(input.headerFooters)),

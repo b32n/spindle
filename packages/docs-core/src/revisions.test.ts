@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { docsSchema } from './prosemirror/schema';
 import { blocksToPmDoc, proseMirrorToDocument, revisionOf } from './prosemirror/sync';
+import { readBlockRevision } from './prosemirror/block-revision';
 import { DocumentImpl } from './document';
 import { getCollabBlockers } from './collab/blockers';
 import { COLLAB_SCHEMA_VERSION, CollabSchemaVersionError, assertSchemaVersion, getYDocFields, hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
@@ -375,11 +376,14 @@ describe('moves, formatting changes, paragraph marks and rows', () => {
   it('are PM marks and attributes of their own', () => {
     const pm = blocksToPmDoc(KINDS);
     const para = pm.child(0);
-    expect(para.attrs.revision).toMatchObject({ insertion: { id: '8' }, formatChange: { id: '9', previous: { headingLevel: 2 } } });
+    expect(para.attrs.revisionInsertion).toMatchObject({ id: '8' });
+    expect(para.attrs.revisionDeletion).toBeNull();
+    expect(para.attrs.revisionFormat).toMatchObject({ id: '9', previous: { headingLevel: 2 } });
+    expect(readBlockRevision(para.attrs)).toMatchObject({ insertion: { id: '8' }, formatChange: { id: '9', previous: { headingLevel: 2 } } });
     expect(para.child(0).marks.map((m) => [m.type.name, m.attrs.moveId])).toEqual([['deletion', 'move-1']]);
     expect(para.child(2).marks.find((m) => m.type.name === 'formatChange')!.attrs).toMatchObject({ revisionId: '7', previous: { bold: true, fontSize: 14 } });
-    expect(pm.child(2).child(0).attrs.revision).toEqual({ insertion: { id: '11', author: 'Ada' } });
-    expect(pm.child(2).child(2).attrs.revision).toBeNull();
+    expect(pm.child(2).child(0).attrs).toMatchObject({ revisionInsertion: { id: '11', author: 'Ada' }, revisionDeletion: null, revisionFormat: null });
+    expect(pm.child(2).child(2).attrs).toMatchObject({ revisionInsertion: null, revisionDeletion: null, revisionFormat: null });
     expect(revisionOf(para.child(2).marks)).toEqual({ formatChange: { id: '7', author: 'Di', date: '2024-03-04T00:00:00Z', previous: FORMAT.previous } });
   });
 
@@ -387,7 +391,7 @@ describe('moves, formatting changes, paragraph marks and rows', () => {
     const blocks = JSON.parse(JSON.stringify(KINDS)) as Block[];
     const pm = blocksToPmDoc(blocks);
     (blocks[0] as ParagraphBlock).revision!.insertion!.author = 'changed';
-    expect(pm.child(0).attrs.revision.insertion.author).toBe('Ada');
+    expect(pm.child(0).attrs.revisionInsertion.author).toBe('Ada');
   });
 
   it('survive a DOCX export and import through the editor model', async () => {

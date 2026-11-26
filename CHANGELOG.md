@@ -337,17 +337,18 @@ lockstep.
   `RunFormat`, `PreviousParagraphFormat`, `BlockRevision`, `RunRevision.formatChange`, `ParagraphFormat.revision` and
   `TableRow.revision` in docs-core. `docsSchema` gains the `formatChange` mark (attributes `revisionId`, `author`, `date`,
   `previous`; the formatting read back from pasted HTML is limited to known fields), a `moveId` attribute on the `insertion` and
-  `deletion` marks, and a `revision` attribute on paragraphs, headings and table rows; all are plain ProseMirror content that
+  `deletion` marks, and the attributes `revisionInsertion`, `revisionDeletion` and `revisionFormat` on paragraphs, headings and table rows (one per kind of change, so two people suggesting different things on the same paragraph mark or row at once both keep theirs; the same kind from two people is last-writer-wins; after a concurrent split a record made on the whole paragraph stays with the first half); all are plain ProseMirror content that
   syncs over Yjs; the collaboration `schemaVersion` is now 7 (a client at 6 would drop the `formatChange` mark and the new attributes, so it refuses to join such a room). The editor draws the two ends of a move with a
   double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
   paragraph with a change, and a tint on the cells of an inserted or deleted row. `documentRevisionAuthors` also lists the authors of changes recorded on paragraphs and rows and of formatting changes, so they share out the palette like the others.
 
 ### Changed
 
-- **DOCX loss report: `docx.trackedMoves` and `docx.formattingRevisions` count only what is still lost, and `docx.trackedInsertions`
-  / `docx.trackedDeletions` narrow again** (see the previous entry): the changes of a paragraph mark in a table cell of one
-  paragraph (such a cell keeps only its text), the formatting change of a paragraph mark's own formatting, and changes of tables and
-  sections (`w:tblPrChange`, `w:sectPrChange`). A change inside a field result is not kept either (and not counted).
+- **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
+  counts only what is still lost**: insertions, deletions and moves of text, of paragraph marks (also in a table cell of one
+  paragraph, which keeps its block when its paragraph has a change, like the export does) and of table rows are kept. What
+  is left: the formatting change of a paragraph mark's own formatting and changes of tables and sections (`w:tblPrChange`,
+  `w:sectPrChange`), and `docx.trackedBlockChanges` / `docx.trackedHeaderFooterChanges`. A change inside a field result is not kept (and not counted).
 - **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
   `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
   deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted
@@ -359,9 +360,6 @@ lockstep.
   in the editor, because the collaboration binding keeps marks on text only), and the export drops characters XML cannot carry
   from an author and a date that is not a date (a date out of range is dropped too, and two authors' changes with the same id get two `w:id`s). The still-lost changes around a field, an
   image or a note reference, and deleted text in a field result, are counted as `docx.trackedChangesNotKept` in the loss report; a deleted image in `mc:AlternateContent` is dropped like a plain one.
-- **DOCX loss report: `docx.trackedInsertions` and `docx.trackedDeletions` count only what is still lost**: a change on a
-  paragraph mark (`w:pPr/w:rPr`) or on a table row (`w:trPr`), whose paragraph or row is imported as ordinary content. Changes
-  around runs are kept and no longer counted (32 and 22 occurrences in the corpus before).
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,
   citation, bibliography and group controls, and controls wrapping table rows or cells, whose content is kept without the
   control), by reason in `where`, in both detail levels; it counted every `w:sdt` before. `docx.fields` no longer counts the

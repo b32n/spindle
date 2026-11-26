@@ -131,8 +131,8 @@ describe('detectDocxLoss', () => {
       let xml = await zip.file('word/document.xml')!.async('string');
       xml = xml.replace(
         '</w:body>',
-        '<w:tbl><w:tr><w:tc><w:p><w:pPr><w:rPr><w:ins w:id="1"/></w:rPr></w:pPr><w:ins w:id="3"><w:r><w:t>new</w:t></w:r></w:ins></w:p></w:tc></w:tr></w:tbl>' +
-          '<w:tbl><w:tr><w:tc><w:p><w:pPr><w:rPr><w:del w:id="2"/></w:rPr></w:pPr><w:del w:id="4"><w:r><w:delText>old</w:delText></w:r></w:del></w:p></w:tc></w:tr></w:tbl>' +
+        '<w:ins w:id="1"><w:p><w:r><w:t>new</w:t></w:r></w:p></w:ins>' +
+          '<w:del w:id="2"><w:p><w:r><w:delText>old</w:delText></w:r></w:p></w:del>' +
           '<w:sdt><w:sdtPr><w15:repeatingSection/></w:sdtPr><w:sdtContent><w:p><w:r><w:t>cc</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
           '<w:sdt><w:sdtContent><w:p><w:r><w:t>kept control</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
           '<w:p><w:r><w:drawing><wp:anchor><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"/></a:graphic></wp:anchor></w:drawing></w:r></w:p>' +
@@ -149,8 +149,7 @@ describe('detectDocxLoss', () => {
     const report = await detectDocxLoss(bytes);
     const by = Object.fromEntries(report.items.map((i) => [i.id, i.count]));
     expect(by).toMatchObject({
-      'docx.trackedInsertions': 1,
-      'docx.trackedDeletions': 1,
+      'docx.trackedBlockChanges': 2, // changes around whole paragraphs; changes around runs and paragraph marks are kept
       'docx.contentControls': 1, // the repeating section; the plain control is kept
       'docx.floatingImages': 1,
       'docx.textBoxes': 1,

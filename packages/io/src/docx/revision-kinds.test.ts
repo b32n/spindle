@@ -63,6 +63,16 @@ describe('reading moves', () => {
     expect((blocks[0] as Paragraph).content[0]).toEqual({ type: 'text', text: 'x', revision: { insertion: { id: '4', author: 'Ada', date: META.date } } });
   });
 
+  it('warns once when a moved run has no range name because the range starts in another paragraph', async () => {
+    const result = await importBody(
+      paragraph(`<w:moveFromRangeStart w:id="1" w:name="move9"/>${r(t('a'))}`) +
+        paragraph(`<w:moveFrom ${who('2')}>${r('<w:delText>b</w:delText>')}</w:moveFrom><w:moveFromRangeEnd w:id="1"/>`) +
+        paragraph(`<w:moveTo ${who('3')}>${r(t('c'))}</w:moveTo>`)
+    );
+    expect(((result.sections[0].blocks[1] as Paragraph).content[0] as { revision: unknown }).revision).toEqual({ deletion: { id: '2', author: 'Ada', date: META.date } });
+    expect(result.warnings.filter((w) => w.includes('move range starts in another paragraph'))).toHaveLength(1);
+  });
+
   it('reads the mark of a moved paragraph as a deletion or an insertion of the mark', async () => {
     const blocks = await blocksOf(paragraph(r(t('a')), `<w:rPr><w:moveFrom ${who('7')}/></w:rPr>`) + paragraph(r(t('b')), `<w:rPr><w:moveTo ${who('8')}/></w:rPr>`));
     expect(blocks[0]).toMatchObject({ revision: { deletion: { id: '7' } } });

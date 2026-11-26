@@ -1,6 +1,7 @@
 // Tracked changes: how they are told apart on screen and read out of a document.
 
 import type { Node as PmNode } from 'prosemirror-model';
+import { readBlockRevision } from './prosemirror/block-revision';
 
 /** Colours the authors of tracked changes are drawn in, dark enough to read on white. */
 export const REVISION_COLORS: readonly string[] = ['#c5221f', '#1a73e8', '#188038', '#a142f4', '#e8710a', '#129eaf', '#d01884', '#7b5e00'];
@@ -55,9 +56,9 @@ export function documentRevisionAuthors(doc: PmNode): string[] {
       for (const mark of node.marks) if (mark.type.name === 'insertion' || mark.type.name === 'deletion' || mark.type.name === 'formatChange') authors.add(String(mark.attrs.author));
       return true;
     }
-    const revision = node.attrs.revision as Record<string, { author?: unknown } | undefined> | null | undefined;
-    if (revision && typeof revision === 'object') {
-      for (const kind of ['insertion', 'deletion', 'formatChange']) {
+    const revision = readBlockRevision(node.attrs, false);
+    if (revision) {
+      for (const kind of ['insertion', 'deletion', 'formatChange'] as const) {
         const author = revision[kind]?.author;
         if (typeof author === 'string') authors.add(author);
       }

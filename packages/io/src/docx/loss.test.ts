@@ -276,40 +276,41 @@ describe('detectDocxLoss: long-tail detectors', () => {
 
   const cell = (paragraphs: string) => `<w:tbl><w:tr><w:tc>${paragraphs}</w:tc></w:tr></w:tbl>`;
 
-  it('docx.trackedMoves counts only the move of a paragraph mark that is not kept, not moves of text and not the range markers', async () => {
-    const kept = await docx(
+  it('does not report a move of text or of a paragraph mark, also in a table cell of one paragraph', async () => {
+    const bytes = await docx(
       '<w:p><w:moveFromRangeStart w:id="1" w:name="m1"/><w:moveFrom w:id="2"><w:r><w:t>a</w:t></w:r></w:moveFrom><w:moveFromRangeEnd w:id="1"/>' +
-        '<w:moveTo w:id="3"><w:r><w:t>a</w:t></w:r></w:moveTo></w:p><w:p><w:pPr><w:rPr><w:moveFrom w:id="4"/></w:rPr></w:pPr></w:p>'
+        '<w:moveTo w:id="3"><w:r><w:t>a</w:t></w:r></w:moveTo></w:p><w:p><w:pPr><w:rPr><w:moveFrom w:id="4"/></w:rPr></w:pPr></w:p>' +
+        cell('<w:p><w:pPr><w:rPr><w:moveFrom w:id="5"/></w:rPr></w:pPr></w:p>')
     );
-    expect(await run(kept, 'docx.trackedMoves')).toBeUndefined();
-    const lost = await docx(cell('<w:p><w:pPr><w:rPr><w:moveFrom w:id="4"/></w:rPr></w:pPr></w:p>'));
-    expect(await run(lost, 'docx.trackedMoves')).toMatchObject({ count: 1 });
+    expect(await run(bytes, 'docx.trackedMoves')).toBeUndefined();
+    expect((await detectDocxLoss(bytes, full)).items.filter((i) => i.id.startsWith('docx.tracked'))).toEqual([]);
   });
 
-  it('docx.formattingRevisions counts what is not kept: paragraph-mark formatting, a table or section change, and a paragraph change in a one-paragraph cell', async () => {
+  it('docx.formattingRevisions counts what is not kept: paragraph-mark formatting and a table or section change (a paragraph change is kept, also in a one-paragraph cell)', async () => {
     const bytes = await docx(
       // Kept: the formatting change of a run and of a paragraph.
       '<w:p><w:pPr><w:pPrChange w:id="1"><w:pPr/></w:pPrChange></w:pPr><w:r><w:rPr><w:rPrChange w:id="2"><w:rPr/></w:rPrChange></w:rPr><w:t>a</w:t></w:r></w:p>' +
-        // Lost: the paragraph mark's own formatting change.
+        // Kept: a paragraph change of the only paragraph of a cell. Lost: the paragraph mark's own formatting change.
         '<w:p><w:pPr><w:rPr><w:rPrChange w:id="5"><w:rPr/></w:rPrChange></w:rPr></w:pPr></w:p>' +
         '<w:tbl><w:tblPr><w:tblPrChange w:id="3"><w:tblPr/></w:tblPrChange></w:tblPr></w:tbl>' +
         cell('<w:p><w:pPr><w:pPrChange w:id="6"><w:pPr/></w:pPrChange></w:pPr></w:p>') +
         '<w:sectPr><w:sectPrChange w:id="4"><w:sectPr/></w:sectPrChange></w:sectPr>'
     );
     expect(await run(bytes, 'docx.formattingRevisions')).toMatchObject({
-      count: 4,
-      where: ['pPrChange ×1', 'rPrChange ×1', 'sectPrChange ×1', 'tblPrChange ×1'],
+      count: 3,
+      where: ['rPrChange ×1', 'sectPrChange ×1', 'tblPrChange ×1'],
     });
   });
 
-  it('the paragraph-mark changes that are kept are not reported, those in a cell of one paragraph are', async () => {
+  it('reports no paragraph-mark change as lost, in the body, in a table cell of one paragraph or of several, or on a row', async () => {
     const mark = (tag: string) => `<w:p><w:pPr><w:rPr><${tag} w:id="1" w:author="A"/></w:rPr></w:pPr></w:p>`;
-    const kept = await docx(mark('w:ins') + mark('w:del') + cell(mark('w:ins') + mark('w:del')) + `<w:tbl><w:tr><w:trPr><w:ins w:id="9"/></w:trPr><w:tc><w:p/></w:tc></w:tr></w:tbl>`);
-    expect((await detectDocxLoss(kept)).items.filter((i) => i.id.startsWith('docx.tracked'))).toEqual([]);
-    const lost = await docx(cell(mark('w:ins') + mark('w:del')).replace('<w:tc><w:p>', '<w:tc><w:p>') + cell(mark('w:ins')));
-    const items = (await detectDocxLoss(lost)).items;
-    expect(items.find((i) => i.id === 'docx.trackedInsertions')).toMatchObject({ count: 1 });
-    expect(items.find((i) => i.id === 'docx.trackedDeletions')).toBeUndefined();
+    const bytes = await docx(
+      mark('w:ins') + mark('w:del') + cell(mark('w:ins')) + cell(mark('w:del')) + cell(mark('w:ins') + mark('w:del')) +
+        `<w:tbl><w:tr><w:trPr><w:ins w:id="9"/></w:trPr><w:tc><w:p/></w:tc></w:tr></w:tbl>`
+    );
+    for (const detail of [undefined, 'full' as const]) {
+      expect((await detectDocxLoss(bytes, { detail })).items.filter((i) => i.id.startsWith('docx.tracked') || i.id === 'docx.formattingRevisions')).toEqual([]);
+    }
   });
 
   it('docx.dropCaps counts drop and margin drop caps but not plain text frames', async () => {

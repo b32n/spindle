@@ -50,6 +50,7 @@ import type { DocumentImpl } from '../document';
 import { createSection } from '../document';
 import { TextStylePoolImpl } from '../style-pool';
 import { generateBlockId, generateCellId, generateRowId } from '../blocks/utils';
+import { cloneJson } from '../prosemirror/block-revision';
 
 /** A comment with no recorded date still needs a timestamp (the model requires one); the epoch marks it unknown. */
 const UNKNOWN_COMMENT_DATE = new Date(0).toISOString();
@@ -209,7 +210,7 @@ function toBlock(
         rows: block.rows.map((row) => ({
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
-          ...(row.revision && { revision: JSON.parse(JSON.stringify(row.revision)) }),
+          ...(row.revision && { revision: cloneJson(row.revision) }),
           cells: row.cells.map((cell) => ({
             content: toInlineContent(cell.content, title, textStylePool),
             ...(cell.blocks && { blocks: cell.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) }),
@@ -315,7 +316,7 @@ function toDocBlockRevision(revision: BlockRevision): DocBlockRevision {
   const { formatChange, ...marks } = revision;
   if (!formatChange) return marks;
   const { headingLevel, ...previous } = formatChange.previous;
-  const { revision: _nested, ...format } = resolveParagraphStyle(previous as ParagraphLikeBlock, {});
+  const { revision: _nested, ...format } = resolveParagraphStyle(previous, {});
   return { ...marks, formatChange: { ...formatChange, previous: { ...compact(format), ...(headingLevel && { headingLevel }) } } };
 }
 
@@ -677,7 +678,7 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
           id: generateRowId(),
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
-          ...(row.revision && { revision: JSON.parse(JSON.stringify(row.revision)) }),
+          ...(row.revision && { revision: cloneJson(row.revision) }),
           cells: row.cells.map((cell) => ({
             id: generateCellId(),
             content: toInlineContentFromDocx(cell.content, textStylePool),

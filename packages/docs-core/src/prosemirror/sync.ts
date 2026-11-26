@@ -1,11 +1,11 @@
 import { Node as PmNode, type Mark } from 'prosemirror-model';
 import { docsSchema } from './schema';
+import { blockRevisionAttrs, cloneJson, readBlockRevision } from './block-revision';
 import type {
   Document,
   Block,
   Section,
   InlineContent,
-  BlockRevision,
   RunFormat,
   RunRevision,
   TextRun,
@@ -107,13 +107,8 @@ function formatAttrs(block: ParagraphFormat): Record<string, unknown> {
     keepTogether: block.keepTogether || null,
     pageBreakBefore: block.pageBreakBefore || null,
     namedStyleId: block.namedStyleId ?? null,
-    revision: block.revision ? cloneJson(block.revision) : null,
+    ...blockRevisionAttrs(block.revision),
   };
-}
-
-/** A plain-data copy (revisions are stored in node attributes, which must not share objects with the model). */
-function cloneJson<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 /**
@@ -133,7 +128,8 @@ function readFormat(attrs: Record<string, unknown>, defaults: { spaceBefore: num
   if (attrs.keepTogether === true) out.keepTogether = true;
   if (attrs.pageBreakBefore === true) out.pageBreakBefore = true;
   if (typeof attrs.namedStyleId === 'string' && attrs.namedStyleId) out.namedStyleId = attrs.namedStyleId;
-  if (attrs.revision && typeof attrs.revision === 'object') out.revision = cloneJson(attrs.revision as BlockRevision);
+  const revision = readBlockRevision(attrs);
+  if (revision) out.revision = revision;
   return out;
 }
 
@@ -248,7 +244,7 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
         attrs: { colWidths: block.colWidths ?? null, styleId: block.styleId ?? null, borders: block.borders ?? null, look: block.look ?? null, namedStyleId: block.namedStyleId ?? null },
         content: block.rows.map(row => ({
           type: 'table_row',
-          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false, revision: row.revision ? cloneJson(row.revision) : null },
+          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false, ...blockRevisionAttrs(row.revision) },
           content: row.cells.map(cell => ({
             type: cell.isHeader ? 'table_header' : 'table_cell',
             attrs: {
@@ -692,7 +688,7 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
           ...(rowNode.attrs.height != null ? { height: rowNode.attrs.height as number } : {}),
           ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
           ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
-          ...(rowNode.attrs.revision && typeof rowNode.attrs.revision === 'object' ? { revision: cloneJson(rowNode.attrs.revision as TableRow['revision']) } : {}),
+          ...(readBlockRevision(rowNode.attrs) ? { revision: readBlockRevision(rowNode.attrs) as TableRow['revision'] } : {}),
         });
       });
 

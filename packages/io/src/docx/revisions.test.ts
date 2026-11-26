@@ -392,16 +392,44 @@ describe('a deleted run before a page break', () => {
 describe('loss report', () => {
   const cell = (paragraphs: string) => `<w:tbl ${W}><w:tr><w:tc>${paragraphs}</w:tc></w:tr></w:tbl>`;
 
-  it('counts only a paragraph-mark change in a table cell of one paragraph (the editor keeps just the text of such a cell)', async () => {
+  it('reports no paragraph-mark change, also not in a table cell of one paragraph', async () => {
     const { bytes } = await importBody(
       `<w:p ${W}><w:pPr><w:rPr><w:ins w:id="1" w:author="A"/></w:rPr></w:pPr>${ins('2', 'A', r(t('x')))}${del('3', 'A', delRun('y'))}</w:p>` +
         cell('<w:p><w:pPr><w:rPr><w:ins w:id="5" w:author="A"/></w:rPr></w:pPr></w:p>') +
         cell('<w:p><w:pPr><w:rPr><w:del w:id="6" w:author="A"/></w:rPr></w:pPr></w:p><w:p/>')
     );
-    const items = (await detectDocxLoss(bytes)).items;
-    expect(items.find((i) => i.id === 'docx.trackedInsertions')).toMatchObject({ count: 1 });
-    expect(items.find((i) => i.id === 'docx.trackedDeletions')).toBeUndefined();
-    expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedInsertions')).toMatchObject({ count: 1 });
+    for (const detail of ['summary', 'full'] as const) {
+      expect((await detectDocxLoss(bytes, { detail })).items.filter((i) => i.id.startsWith('docx.tracked'))).toEqual([]);
+    }
+  });
+
+  it('keeps a one-paragraph cell as blocks when its paragraph has a tracked change, like the export does', async () => {
+    const mark = (tag: string) => `<w:p><w:pPr><w:rPr><${tag} w:id="5" w:author="A"/></w:rPr></w:pPr><w:r><w:t>c</w:t></w:r></w:p>`;
+    const kinds: [string, string][] = [
+      ['an insertion', mark('w:ins')],
+      ['a deletion', mark('w:del')],
+      ['a move', mark('w:moveFrom')],
+      ['a formatting change', `<w:p><w:pPr><w:jc w:val="center"/><w:pPrChange w:id="5" w:author="A"><w:pPr/></w:pPrChange></w:pPr><w:r><w:t>c</w:t></w:r></w:p>`],
+    ];
+    for (const [, paragraph] of kinds) {
+      const { result } = await importBody(cell(paragraph));
+      const table = result.sections[0].blocks.find((b) => b.type === 'table') as Extract<DocBlock, { type: 'table' }>;
+      const first = table.rows[0].cells[0];
+      expect(first.content).toEqual([{ type: 'text', text: 'c' }]);
+      expect(first.blocks).toHaveLength(1);
+      expect((first.blocks![0] as Paragraph).revision).toBeDefined();
+    }
+    // A plain one-paragraph cell still keeps no blocks.
+    const { result } = await importBody(cell('<w:p><w:r><w:t>c</w:t></w:r></w:p>'));
+    const plain = (result.sections[0].blocks.find((b) => b.type === 'table') as Extract<DocBlock, { type: 'table' }>).rows[0].cells[0];
+    expect(plain.blocks).toBeUndefined();
+  });
+
+  it('writes what it read for such a cell: import then export gives the same paragraph-mark change', async () => {
+    const { result } = await importBody(cell('<w:p><w:pPr><w:rPr><w:ins w:id="5" w:author="A"/></w:rPr></w:pPr><w:r><w:t>c</w:t></w:r></w:p>'));
+    const out = await exportDocx({ title: 'T', sections: result.sections });
+    const xml = await (await JSZip.loadAsync(out.bytes)).file('word/document.xml')!.async('string');
+    expect(xml).toMatch(/<w:tc>[\s\S]*?<w:rPr><w:ins [^>]*w:author="A"/);
   });
 
   it('reports nothing for a document whose only changes are around runs', async () => {
@@ -414,7 +442,7 @@ describe('loss report', () => {
       `<w:p ${W}><w:r><w:pict><w:txbxContent><w:p><w:pPr><w:rPr><w:ins w:id="1" w:author="A"/></w:rPr></w:pPr></w:p></w:txbxContent></w:pict></w:r>` +
         `<w:pPr><w:pPrChange w:id="5" w:author="A"><w:pPr><w:rPr><w:del w:id="6" w:author="A"/></w:rPr></w:pPr></w:pPrChange></w:pPr></w:p>`
     );
-    expect((await detectDocxLoss(bytes)).items.filter((i) => i.id === 'docx.trackedInsertions' || i.id === 'docx.trackedDeletions')).toEqual([]);
+    expect((await detectDocxLoss(bytes)).items.filter((i) => i.id.startsWith('docx.tracked'))).toEqual([]);
   });
 });
 
@@ -425,5 +453,10 @@ describe('loss report for changes around whole blocks', () => {
         `<w:tbl ${W}><w:tr><w:tc><w:ins w:id="3" w:author="A"><w:p/></w:ins><w:p/></w:tc></w:tr></w:tbl>`
     );
     expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedBlockChanges')).toMatchObject({ count: 3 });
+  });
+
+  it('is a change the importer really does not keep: the paragraph inside is not imported', async () => {
+    const { result } = await importBody(`<w:ins ${W} w:id="1" w:author="A"><w:p>${r(t('wrapped text'))}</w:p></w:ins>`);
+    expect(JSON.stringify(result.sections)).not.toContain('wrapped text');
   });
 });

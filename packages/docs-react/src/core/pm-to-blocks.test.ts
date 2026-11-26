@@ -507,10 +507,10 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
 
   it('puts a bar on a paragraph with a tracked change, in the colour of its last author, also in a list item', () => {
     const doc = j([
-      { type: 'paragraph', attrs: { revision: { insertion: { id: '1', author: 'Ada' }, formatChange: { id: '2', author: 'Bo' } } }, content: [text('a')] },
-      { type: 'heading', attrs: { level: 1, revision: { deletion: { id: '3', author: 'Cy' } } }, content: [text('h')] },
+      { type: 'paragraph', attrs: { revisionInsertion: { id: '1', author: 'Ada' }, revisionFormat: { id: '2', author: 'Bo' } }, content: [text('a')] },
+      { type: 'heading', attrs: { level: 1, revisionDeletion: { id: '3', author: 'Cy' } }, content: [text('h')] },
       { type: 'paragraph', content: [text('plain')] },
-      { type: 'bullet_list', content: [{ type: 'list_item', content: [{ type: 'paragraph', attrs: { revision: { insertion: { id: '4', author: 'Ada' } } }, content: [text('li')] }] }] },
+      { type: 'bullet_list', content: [{ type: 'list_item', content: [{ type: 'paragraph', attrs: { revisionInsertion: { id: '4', author: 'Ada' } }, content: [text('li')] }] }] },
     ]);
     const blocks = proseMirrorToFlowBlocks(doc);
     const colors = assignAuthorColors(['Ada', 'Bo', 'Cy']);
@@ -526,8 +526,8 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
       {
         type: 'table',
         content: [
-          { type: 'table_row', attrs: { revision: { insertion: { id: '1', author: 'Ada' } } }, content: [cell] },
-          { type: 'table_row', attrs: { revision: { deletion: { id: '2', author: 'Bo' }, insertion: { id: '3', author: 'Ada' } } }, content: [cell] },
+          { type: 'table_row', attrs: { revisionInsertion: { id: '1', author: 'Ada' } }, content: [cell] },
+          { type: 'table_row', attrs: { revisionDeletion: { id: '2', author: 'Bo' }, revisionInsertion: { id: '3', author: 'Ada' } }, content: [cell] },
           { type: 'table_row', content: [cell] },
         ],
       },
@@ -554,8 +554,8 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
   it('gives authors who only changed a paragraph mark, a row or formatting a colour of their own, like authors of text changes', () => {
     // "Bo" and "Di" hash to the same palette colour: sharing the palette out keeps them apart, whatever kind of change they made.
     const doc = j([
-      { type: 'paragraph', attrs: { revision: { insertion: { id: '1', author: 'Bo' } } }, content: [text('a')] },
-      { type: 'paragraph', attrs: { revision: { deletion: { id: '2', author: 'Di' } } }, content: [text('b')] },
+      { type: 'paragraph', attrs: { revisionInsertion: { id: '1', author: 'Bo' } }, content: [text('a')] },
+      { type: 'paragraph', attrs: { revisionDeletion: { id: '2', author: 'Di' } }, content: [text('b')] },
     ]);
     const [first, second] = proseMirrorToFlowBlocks(doc) as ParagraphBlock[];
     const colors = assignAuthorColors(['Bo', 'Di']);

@@ -1,6 +1,6 @@
 // Editing around tracked changes: pasted tracked text gets change ids of its own, and typing inside a deleted run stays live.
 
-import { Fragment, Slice, type Node as PmNode, type Schema } from 'prosemirror-model';
+import { Fragment, Slice, type Mark, type Node as PmNode, type Schema } from 'prosemirror-model';
 import { ReplaceStep } from 'prosemirror-transform';
 import { Plugin, type EditorState, type Transaction } from 'prosemirror-state';
 
@@ -11,12 +11,13 @@ export function newRevisionId(): string {
   return `n${Date.now().toString(36)}${(counter++).toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
-const TRACKED = ['insertion', 'deletion'] as const;
+const TRACKED = ['insertion', 'deletion', 'formatChange'] as const;
 
 /**
  * The slice with a fresh change id for every distinct change in it (per kind), so pasting a copy of tracked text makes a
  * change of its own: accepting or rejecting one place never touches the other. Author and date stay as in the source.
- * The runs of one change inside the slice still share one id.
+ * The runs of one change inside the slice still share one id, and so do the two ends of a move that are both in it
+ * (they get one new move name).
  */
 export function freshRevisionIds(slice: Slice, makeId: () => string = newRevisionId): Slice {
   const ids = new Map<string, string>();
@@ -29,12 +30,26 @@ export function freshRevisionIds(slice: Slice, makeId: () => string = newRevisio
     }
     return fresh;
   };
+  const moves = new Map<string, string>();
+  const freshMove = (name: string): string => {
+    let fresh = moves.get(name);
+    if (!fresh) {
+      fresh = makeId();
+      moves.set(name, fresh);
+    }
+    return fresh;
+  };
+  const freshAttrs = (m: Mark): Record<string, unknown> => ({
+    ...m.attrs,
+    revisionId: freshId(m.type.name, String(m.attrs.revisionId)),
+    ...(typeof m.attrs.moveId === 'string' && m.attrs.moveId && { moveId: freshMove(m.attrs.moveId) }),
+  });
   const mapNode = (node: PmNode): PmNode => {
     if (node.isText) {
       if (!node.marks.some((m) => (TRACKED as readonly string[]).includes(m.type.name))) return node;
       return node.mark(
         node.marks.map((m) =>
-          (TRACKED as readonly string[]).includes(m.type.name) ? m.type.create({ ...m.attrs, revisionId: freshId(m.type.name, String(m.attrs.revisionId)) }) : m
+          (TRACKED as readonly string[]).includes(m.type.name) ? m.type.create(freshAttrs(m)) : m
         )
       );
     }
@@ -155,7 +170,7 @@ export function stripDeletionFromInput(trs: readonly Transaction[], newState: Ed
 
 /** Plugin: pasted tracked text gets fresh change ids, and typing or pasting plain text inside a deletion is not part of it. */
 export function createRevisionEditPlugin(schema: Schema): Plugin | null {
-  if (!schema.marks.insertion && !schema.marks.deletion) return null;
+  if (!schema.marks.insertion && !schema.marks.deletion && !schema.marks.formatChange) return null;
   return new Plugin({
     appendTransaction: (trs, _oldState, newState) => stripDeletionFromInput(trs, newState),
     props: {
