@@ -66,7 +66,7 @@ describe('detectXlsxLoss', () => {
   it('reports named ranges (not the built-in print ones), hidden sheets, charts, images, comments and macros', async () => {
     const bytes = await patch(await plainXlsx(), async (zip) => {
       let wb = await zip.file('xl/workbook.xml')!.async('string');
-      wb = wb.replace(/(<sheet [^>]*name="Other")/, '$1 state="hidden"');
+      wb = wb.replace(/(<sheet [^>]*name="Other"[^>]*?) state="visible"/, '$1 state="hidden"');
       wb = wb.replace('</sheets>', '</sheets><definedNames><definedName name="Rate">Data!$A$1</definedName><definedName name="_xlnm.Print_Area" localSheetId="0">Data!$A$1:$B$2</definedName></definedNames>');
       zip.file('xl/workbook.xml', wb);
       zip.file('xl/charts/chart1.xml', '<c:chartSpace/>');

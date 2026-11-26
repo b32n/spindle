@@ -14,13 +14,13 @@
     },
     {
       "name": "docProps/app.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "docProps/core.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "xl/_rels/workbook.xml.rels",
@@ -38,9 +38,12 @@
       "status": "mapped"
     },
     {
+      "loss": [
+        "xlsx.styles.themeColors"
+      ],
       "name": "xl/theme/theme1.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "theme",
+      "status": "dropped"
     },
     {
       "name": "xl/workbook.xml",
@@ -54,10 +57,10 @@
     }
   ],
   "totals": {
-    "dropped": 0,
-    "mapped": 7,
+    "dropped": 1,
+    "mapped": 9,
     "opaque": 0,
     "total": 10,
-    "unaccounted": 3
+    "unaccounted": 0
   }
 }

@@ -14,13 +14,13 @@
     },
     {
       "name": "docProps/app.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "docProps/core.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "xl/_rels/workbook.xml.rels",
@@ -61,7 +61,7 @@
         "xlsx.comments"
       ],
       "name": "xl/drawings/vmlDrawing1.vml",
-      "rule": "comments",
+      "rule": "vmlDrawing",
       "status": "dropped"
     },
     {
@@ -73,9 +73,12 @@
       "status": "dropped"
     },
     {
+      "loss": [
+        "xlsx.formulas.dynamicArray"
+      ],
       "name": "xl/metadata.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "metadata",
+      "status": "dropped"
     },
     {
       "name": "xl/sharedStrings.xml",
@@ -89,7 +92,7 @@
     },
     {
       "name": "xl/theme/theme1.xml",
-      "rule": "none",
+      "rule": "theme",
       "status": "unaccounted"
     },
     {
@@ -109,10 +112,10 @@
     }
   ],
   "totals": {
-    "dropped": 5,
-    "mapped": 9,
+    "dropped": 6,
+    "mapped": 11,
     "opaque": 0,
     "total": 18,
-    "unaccounted": 4
+    "unaccounted": 1
   }
 }

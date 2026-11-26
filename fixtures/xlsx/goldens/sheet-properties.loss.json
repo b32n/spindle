@@ -3,11 +3,30 @@
   "items": [
     {
       "count": 2,
-      "effect": "become visible",
+      "effect": "approximated: become visible",
       "id": "xlsx.hiddenSheets",
       "label": "hidden sheet(s)",
       "where": [
         "Hidden",
+        "Very hidden"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported",
+      "id": "xlsx.sheet.tabColor",
+      "label": "tab colour(s)",
+      "where": [
+        "First",
+        "Second"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "approximated: become visible",
+      "id": "xlsx.sheet.veryHidden",
+      "label": "very hidden sheet(s)",
+      "where": [
         "Very hidden"
       ]
     }

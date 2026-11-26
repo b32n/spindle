@@ -2,10 +2,37 @@
   "format": "xlsx",
   "items": [
     {
-      "count": 5,
-      "effect": "groups are flattened",
+      "count": 3,
+      "effect": "approximated: groups are flattened",
       "id": "xlsx.outline",
       "label": "grouped (outlined) row/column(s)",
+      "where": [
+        "Layout"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: gridlines are shown",
+      "id": "xlsx.sheet.gridlines",
+      "label": "sheet(s) with gridlines turned off",
+      "where": [
+        "Layout"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: shown left to right",
+      "id": "xlsx.sheet.rtl",
+      "label": "right-to-left sheet(s)",
+      "where": [
+        "RightToLeft"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: shown at 100%",
+      "id": "xlsx.sheet.zoom",
+      "label": "sheet(s) with a zoom other than 100%",
       "where": [
         "Layout"
       ]

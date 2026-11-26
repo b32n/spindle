@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "not imported; formulas using them break",
+      "effect": "lost: not imported; formulas using them break",
       "id": "xlsx.definedNames",
       "label": "named range(s)/name(s)",
       "where": [
@@ -12,13 +12,13 @@
     },
     {
       "count": 1,
-      "effect": "only the last computed values are kept",
+      "effect": "approximated: only the last computed values are kept",
       "id": "xlsx.pivotTables",
       "label": "pivot table(s)"
     },
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.slicers",
       "label": "slicer(s)"
     }

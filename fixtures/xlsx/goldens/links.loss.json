@@ -1,4 +1,23 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.links.internal",
+      "label": "internal hyperlink(s) (to a cell or a name)",
+      "where": [
+        "Links"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "kept: the target is imported as written and is never opened or run by the library",
+      "id": "xlsx.links.unsafeScheme",
+      "label": "hyperlink(s) with a script or file scheme (javascript:, vbscript:, data:, file:)",
+      "where": [
+        "Links"
+      ]
+    }
+  ]
 }

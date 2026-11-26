@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 6,
-      "effect": "not imported; formulas using them break",
+      "effect": "lost: not imported; formulas using them break",
       "id": "xlsx.definedNames",
       "label": "named range(s)/name(s)",
       "where": [
@@ -12,6 +12,24 @@
         "TaxRate",
         "Greeting",
         "Lookup"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.areas",
+      "label": "print area(s)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.titles",
+      "label": "print title row/column(s)",
+      "where": [
+        "Data"
       ]
     }
   ]

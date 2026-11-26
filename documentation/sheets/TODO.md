@@ -58,7 +58,9 @@ Gaps against Excel / Google Sheets in the non-formula feature set.
       `@b32nio/spindle-io`, where fidelity work lands)
       (`exportToXlsx` / `importFromXlsx`, plus Open/Download in the toolbar), but
       charts, conditional formatting and data validation are not carried over. A corpus of test workbooks
-      with a construct manifest (`fixtures/xlsx/`) now defines what "carried over" has to cover.
+      with a construct manifest (`fixtures/xlsx/`) now defines what "carried over" has to cover, and the full
+      loss report (`inspectXlsx(bytes, { detail: 'full' })`, ids in `documentation/import-loss.md`) lists what each
+      file holds that is still not carried over (tab colour, zoom, print setup, theme colours, array formulas...).
 - [ ] **Print / page setup** for sheets (PDF output)
 
 ### Engine ready, UI missing

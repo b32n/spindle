@@ -1,4 +1,11 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not supported; save it as .xlsx first",
+      "id": "xlsx.package.legacyBinary",
+      "label": "legacy binary workbook (.xls)"
+    }
+  ]
 }

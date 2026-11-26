@@ -5,7 +5,7 @@
  */
 import type { ImportLossReport } from '../loss';
 import { loadIoXlsx } from '../io-loader';
-import type { SpreadsheetExportInput, SpreadsheetImportResult } from './types';
+import type { DetectXlsxLossOptions, SpreadsheetExportInput, SpreadsheetImportResult } from './types';
 
 export * from './types';
 export * from '../loss';
@@ -21,6 +21,6 @@ export async function importXlsx(bytes: Uint8Array): Promise<SpreadsheetImportRe
 }
 
 /** @deprecated Use `detectXlsxLoss` from `@b32nio/spindle-io/xlsx`. */
-export async function detectXlsxLoss(bytes: Uint8Array): Promise<ImportLossReport> {
-  return (await loadIoXlsx()).detectXlsxLoss(bytes);
+export async function detectXlsxLoss(bytes: Uint8Array, options?: DetectXlsxLossOptions): Promise<ImportLossReport> {
+  return (await loadIoXlsx()).detectXlsxLoss(bytes, options);
 }

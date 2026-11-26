@@ -3,9 +3,27 @@
   "items": [
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.externalLinks",
       "label": "external workbook link(s)"
+    },
+    {
+      "count": 1,
+      "effect": "lost: external references are not evaluated",
+      "id": "xlsx.formulas.externalRef",
+      "label": "formula(s) referencing another workbook",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: calculated as empty ranges",
+      "id": "xlsx.formulas.wholeColumn",
+      "label": "formula(s) with whole-column or whole-row references",
+      "where": [
+        "Data"
+      ]
     }
   ]
 }

@@ -1,6 +1,7 @@
 export { exportXlsx } from './writer';
 export { importXlsx } from './reader';
 export { detectXlsxLoss } from './loss';
+export type { DetectXlsxLossOptions } from '@b32nio/spindle-shared/export/xlsx';
 export type {
   SpreadsheetBorder,
   SpreadsheetCell,

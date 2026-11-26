@@ -2,8 +2,26 @@
   "format": "xlsx",
   "items": [
     {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.cf.formulaRule",
+      "label": "formula-based conditional formatting rule(s)",
+      "where": [
+        "CF"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.cf.stopIfTrue",
+      "label": "conditional formatting rule(s) with stop-if-true",
+      "where": [
+        "CF"
+      ]
+    },
+    {
       "count": 10,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.conditionalFormatting",
       "label": "conditional formatting rule(s)",
       "where": [

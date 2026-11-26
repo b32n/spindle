@@ -3,19 +3,25 @@
   "items": [
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.charts",
-      "label": "chart(s)"
+      "label": "chart(s)",
+      "where": [
+        "Data"
+      ]
     },
     {
       "count": 1,
-      "effect": "comments are dropped",
+      "effect": "lost: comments are dropped",
       "id": "xlsx.comments",
-      "label": "sheet(s) with comments/notes"
+      "label": "sheet(s) with comments/notes",
+      "where": [
+        "Data"
+      ]
     },
     {
       "count": 2,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.conditionalFormatting",
       "label": "conditional formatting rule(s)",
       "where": [
@@ -24,7 +30,7 @@
     },
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.dataValidation",
       "label": "data validation rule(s) (dropdowns, limits)",
       "where": [
@@ -33,7 +39,7 @@
     },
     {
       "count": 1,
-      "effect": "not imported; formulas using them break",
+      "effect": "lost: not imported; formulas using them break",
       "id": "xlsx.definedNames",
       "label": "named range(s)/name(s)",
       "where": [
@@ -42,7 +48,7 @@
     },
     {
       "count": 1,
-      "effect": "become visible",
+      "effect": "approximated: become visible",
       "id": "xlsx.hiddenSheets",
       "label": "hidden sheet(s)",
       "where": [
@@ -50,8 +56,27 @@
       ]
     },
     {
+      "count": 2,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.setup",
+      "label": "sheet(s) with page setup (orientation, paper size, scale, margins, fit to page)",
+      "where": [
+        "Data",
+        "Hidden"
+      ]
+    },
+    {
       "count": 1,
-      "effect": "imported as plain cells (no table styling or structured references)",
+      "effect": "lost: not imported",
+      "id": "xlsx.sheet.tabColor",
+      "label": "tab colour(s)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "approximated: imported as plain cells (no table styling or structured references)",
       "id": "xlsx.tables",
       "label": "table(s)"
     }

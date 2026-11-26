@@ -1,4 +1,11 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: cannot be opened; remove the password and save the file again",
+      "id": "xlsx.package.encrypted",
+      "label": "password-protected workbook (encrypted package)"
+    }
+  ]
 }

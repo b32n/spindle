@@ -1,4 +1,39 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: diagonal borders are dropped",
+      "id": "xlsx.styles.diagonalBorder",
+      "label": "cell format(s) with a diagonal border"
+    },
+    {
+      "count": 1,
+      "effect": "lost: gradient fills are dropped",
+      "id": "xlsx.styles.gradientFill",
+      "label": "cell format(s) with a gradient fill"
+    },
+    {
+      "count": 2,
+      "effect": "approximated: formatting is kept per cell; the style names are not",
+      "id": "xlsx.styles.namedStyles",
+      "label": "named cell style(s) in use",
+      "where": [
+        "Good",
+        "Spindle Emphasis"
+      ]
+    },
+    {
+      "count": 12,
+      "effect": "lost: pattern fills are dropped (only solid fills are imported)",
+      "id": "xlsx.styles.patternFill",
+      "label": "cell format(s) with a pattern fill"
+    },
+    {
+      "count": 3,
+      "effect": "lost: the colour is dropped (only RGB colours are imported)",
+      "id": "xlsx.styles.themeColors",
+      "label": "cell format(s) using theme or indexed colours"
+    }
+  ]
 }

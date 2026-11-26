@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 2,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.sparklines",
       "label": "sparkline group(s)",
       "where": [

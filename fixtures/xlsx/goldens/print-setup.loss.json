@@ -1,4 +1,50 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.areas",
+      "label": "print area(s)",
+      "where": [
+        "Print"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.breaks",
+      "label": "manual page break(s)",
+      "where": [
+        "Print"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.headersFooters",
+      "label": "sheet(s) with header or footer text",
+      "where": [
+        "Print"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.setup",
+      "label": "sheet(s) with page setup (orientation, paper size, scale, margins, fit to page)",
+      "where": [
+        "Print"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.titles",
+      "label": "print title row/column(s)",
+      "where": [
+        "Print"
+      ]
+    }
+  ]
 }

@@ -2,10 +2,13 @@
   "format": "xlsx",
   "items": [
     {
-      "count": 6,
-      "effect": "not imported",
+      "count": 5,
+      "effect": "lost: not imported",
       "id": "xlsx.images",
-      "label": "image(s)/drawing(s)"
+      "label": "image(s)",
+      "where": [
+        "Images"
+      ]
     }
   ]
 }

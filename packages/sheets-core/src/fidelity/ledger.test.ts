@@ -12,6 +12,9 @@ describe('classifyPart', () => {
     ['xl/worksheets/sheet1.xml', 'worksheet'],
     ['xl/sharedStrings.xml', 'sharedStrings'],
     ['xl/styles.xml', 'styles'],
+    ['docProps/core.xml', 'docProps'],
+    ['docProps/app.xml', 'docProps'],
+    ['xl/calcChain.xml', 'calcChain'],
   ])('%s is mapped by rule %s', (name, rule) => {
     expect(classifyPart(name, base)).toEqual({ name, status: 'mapped', rule });
   });
@@ -25,7 +28,31 @@ describe('classifyPart', () => {
     ['xl/comments1.xml', 'comments', 'xlsx.comments'],
     ['xl/threadedComments/threadedComment1.xml', 'comments', 'xlsx.comments'],
     ['xl/persons/person.xml', 'comments', 'xlsx.comments'],
-    ['xl/drawings/vmlDrawing1.vml', 'comments', 'xlsx.comments'],
+    ['xl/comments/comment1.xml', 'comments', 'xlsx.comments'],
+    ['xl/threadedComments/threadedComment1.xml', 'comments', 'xlsx.comments.threaded'],
+    ['xl/drawings/vmlDrawing1.vml', 'vmlDrawing', 'xlsx.comments'],
+    ['xl/drawings/commentsDrawing1.vml', 'vmlDrawing', 'xlsx.comments'],
+    ['xl/drawings/vmlDrawing2.vml', 'vmlDrawing', 'xlsx.objects.formControls'],
+    ['xl/drawings/vmlDrawing3.vml', 'vmlDrawing', 'xlsx.images'],
+    ['xl/drawings/drawing1.xml', 'drawing', 'xlsx.objects.shapes'],
+    ['xl/drawings/drawing1.xml', 'drawing', 'xlsx.objects.textBoxes'],
+    ['xl/drawings/drawing1.xml', 'drawing', 'xlsx.objects.formControls'],
+    ['xl/drawings/drawing1.xml', 'drawing', 'xlsx.objects.embeddedObjects'],
+    ['xl/media/image1.png', 'media', 'xlsx.objects.cellImages'],
+    ['xl/theme/theme1.xml', 'theme', 'xlsx.styles.themeColors'],
+    ['xl/printerSettings/printerSettings1.bin', 'printerSettings', 'xlsx.print.setup'],
+    ['xl/metadata.xml', 'metadata', 'xlsx.formulas.dynamicArray'],
+    ['xl/ctrlProps/ctrlProp1.xml', 'controls', 'xlsx.objects.formControls'],
+    ['xl/activeX/activeX1.xml', 'controls', 'xlsx.objects.formControls'],
+    ['xl/embeddings/oleObject1.bin', 'embedding', 'xlsx.objects.embeddedObjects'],
+    ['xl/richData/rdrichvalue.xml', 'richData', 'xlsx.workbook.richData'],
+    ['xl/richData/rdrichvalue.xml', 'richData', 'xlsx.objects.cellImages'],
+    ['xl/cellimages.xml', 'richData', 'xlsx.images'],
+    ['xl/connections.xml', 'externalData', 'xlsx.workbook.externalData'],
+    ['xl/queryTables/queryTable1.xml', 'externalData', 'xlsx.workbook.externalData'],
+    ['xl/model/item.data', 'externalData', 'xlsx.workbook.externalData'],
+    ['customXml/item1.xml', 'unknownPart', 'xlsx.package.unaccountedParts'],
+    ['something/else.bin', 'unknownPart', 'xlsx.package.unaccountedParts'],
     ['xl/tables/table1.xml', 'table', 'xlsx.tables'],
     ['xl/pivotTables/pivotTable1.xml', 'pivot', 'xlsx.pivotTables'],
     ['xl/pivotCache/pivotCacheDefinition1.xml', 'pivot', 'xlsx.pivotTables'],
@@ -64,23 +91,27 @@ describe('classifyPart', () => {
   });
 
   it.each([
-    'docProps/core.xml',
-    'docProps/app.xml',
     'xl/theme/theme1.xml',
-    'xl/calcChain.xml',
     'xl/printerSettings/printerSettings1.bin',
+    'xl/metadata.xml',
     'customXml/item1.xml',
     'something/else.bin',
-  ])('%s has no rule, so it is unaccounted', (name) => {
-    expect(classifyPart(name, { ...base, lossIds: ['xlsx.charts'] })).toEqual({
+  ])('%s is unaccounted while the loss report does not cover it', (name) => {
+    expect(classifyPart(name, { ...base, lossIds: ['xlsx.charts'] })).toMatchObject({
       name,
       status: 'unaccounted',
-      rule: 'none',
     });
+  });
+
+  it('has no rule for an empty part name, so it is unaccounted', () => {
+    expect(classifyPart('', base)).toEqual({ name: '', status: 'unaccounted', rule: 'none' });
   });
 
   it('does not map a worksheet in a sub-folder or a drawing relationship part by the sheet rules', () => {
     expect(classifyPart('xl/worksheets/sub/sheet.xml', base).status).toBe('unaccounted');
+    expect(
+      classifyPart('xl/worksheets/sub/sheet.xml', { ...base, lossIds: ['xlsx.package.unaccountedParts'] })
+    ).toMatchObject({ status: 'dropped', rule: 'unknownPart' });
     expect(classifyPart('xl/drawings/_rels/drawing1.xml.rels', base)).toMatchObject({
       status: 'mapped',
       rule: 'package.relationships',
@@ -134,12 +165,12 @@ describe('buildLedger', () => {
     expect(ledger.importError).toBe(false);
     expect(ledger.parts.map((p) => `${p.name}=${p.status}`)).toEqual([
       '[Content_Types].xml=mapped',
-      'docProps/app.xml=unaccounted',
+      'docProps/app.xml=mapped',
       'xl/charts/c.xml=opaque',
       'xl/media/i.png=dropped',
       'xl/worksheets/sheet1.xml=mapped',
     ]);
-    expect(ledger.totals).toEqual({ mapped: 2, opaque: 1, dropped: 1, unaccounted: 1, total: 5 });
+    expect(ledger.totals).toEqual({ mapped: 3, opaque: 1, dropped: 1, unaccounted: 0, total: 5 });
   });
 
   it('is empty for packages that cannot be read', () => {

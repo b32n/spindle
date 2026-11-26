@@ -1,4 +1,4 @@
-import type { ImportLossReport } from '@b32nio/spindle-shared/export/xlsx';
+import type { DetectXlsxLossOptions, ImportLossReport } from '@b32nio/spindle-shared/export/xlsx';
 
 // The XLSX reader/writer lives in the separate @b32nio/spindle-io package; load it on first use so
 // hosts that never open or save the format don't pay for its dependencies.
@@ -17,6 +17,7 @@ import { StylePool } from '../style-pool';
 import { FormatPool } from '../format-pool';
 import { generateId } from '../utils/id';
 import { toExcelNumberFormatCode, fromExcelNumberFormatCode } from './xlsx-number-format';
+import { getRegisteredFunctionNames } from '../formula-parser/functions';
 
 export async function exportToXlsx(workbook: WorkbookImpl): Promise<Uint8Array> {
   const sheetIds = Array.from(workbook.sheets.keys());
@@ -160,7 +161,7 @@ export async function importFromXlsx(
   workbook: WorkbookImpl
 ): Promise<{ warnings: string[]; loss: ImportLossReport }> {
   const { detectXlsxLoss, importXlsx } = await loadIo();
-  const loss = await detectXlsxLoss(bytes);
+  const loss = await detectXlsxLoss(bytes, lossOptions());
   const result = await importXlsx(bytes);
   // setData() replaces the whole workbook; a file with no worksheets (e.g. a zip that isn't
   // really a workbook) would leave it with no sheets at all, so refuse it up front.
@@ -174,11 +175,27 @@ export async function importFromXlsx(
 }
 
 /**
- * What importing this .xlsx would not bring across (conditional formats, validation, names,
- * charts, comments…). Read-only: nothing is imported or modified.
+ * True when a number format code survives import and export unchanged and displays as the file intends:
+ * it maps to a structured format (not the raw `custom` fallback, whose renderer is a simple stand-in) and
+ * the structured format writes the same code back.
  */
-export function inspectXlsx(bytes: Uint8Array): Promise<ImportLossReport> {
-  return loadIo().then((io) => io.detectXlsxLoss(bytes));
+function isNumberFormatExact(code: string): boolean {
+  const format = fromExcelNumberFormatCode(code);
+  return format.type !== 'custom' && toExcelNumberFormatCode(format) === code.trim();
+}
+
+/** What the detector needs to know about this editor: its function catalog and its number-format mapping. */
+function lossOptions(detail?: DetectXlsxLossOptions['detail']): DetectXlsxLossOptions {
+  return { detail, knownFunctions: getRegisteredFunctionNames(), isNumberFormatExact };
+}
+
+/**
+ * What importing this .xlsx would not bring across (conditional formats, validation, names,
+ * charts, comments, formulas the engine cannot calculate…). Read-only: nothing is imported or modified.
+ * `detail: 'full'` (default `'summary'`, what the import dialog shows) adds the finer ids the fidelity harness records.
+ */
+export function inspectXlsx(bytes: Uint8Array, options: Pick<DetectXlsxLossOptions, 'detail'> = {}): Promise<ImportLossReport> {
+  return loadIo().then((io) => io.detectXlsxLoss(bytes, lossOptions(options.detail)));
 }
 
 function toWorkbookData(
