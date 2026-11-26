@@ -6,11 +6,11 @@ of the remaining work is **feature parity** in the non-formula feature set.
 
 ## Formula engine — shipped
 
-The engine ships **146 functions** across math, logical, text, lookup,
+The engine ships **193 functions** across math, logical, text, lookup,
 statistical, date/time, information, financial, reference and array categories
 (`packages/sheets-core/src/formula-parser/functions/`).
 
-- [x] **Standard function library** — all categories above (146 in `catalog.ts`)
+- [x] **Standard function library** — all categories above (193 in `catalog.ts`)
 - [x] **Excel-grade recalculation** — topological dirty-propagation (each cell
       computed once per pass), volatile functions, complete range-rectangle
       dependency tracking (`formula-graph.ts`, `workbook.ts`)
@@ -36,8 +36,12 @@ statistical, date/time, information, financial, reference and array categories
       shrinks the range. 3D references are positional and do not follow row or
       column edits on their sheets.
 
-- [ ] **`AGGREGATE`** — 19 sub-functions plus the ignore-hidden / ignore-errors
-      option matrix (absent from the catalog).
+- [ ] **Hidden rows and nested subtotals in `AGGREGATE` / `SUBTOTAL`** — `AGGREGATE`
+      (all 19 functions, both forms) skips errors for options 2, 3, 6 and 7, but
+      options 1, 3, 5 and 7 (ignore hidden rows, nested `SUBTOTAL`/`AGGREGATE`) and
+      `SUBTOTAL` 101-111 act like their visible-everything counterparts: the
+      evaluation context does not expose row visibility or which cells hold
+      subtotals (`functions/aggregate.ts`).
 - [ ] **`ARRAYFORMULA`** — not implemented at all (no catalog entry, zero
       references); needs full elementwise scalar broadcast.
 - [ ] **Custom date codes in the formula bar and editor** — an imported date whose code has no structured type (`d-mmm-yy`, `dddd, mmmm d, yyyy`) is a
@@ -54,12 +58,22 @@ statistical, date/time, information, financial, reference and array categories
 - [ ] **`#SPILL!` auto-recovery** — a blocked anchor does not re-spill when the
       blocking cell is cleared; the anchor isn't a dependency of the blocker, so
       it's never marked dirty. The formula must be re-entered (`workbook.ts`).
-- [ ] **Missing functions** — a handful of common functions have no catalog
-      entry yet: `TRANSPOSE` (a `transpose` *helper* exists but isn't exported as
-      a function), `YEARFRAC`, `TEXTSPLIT`, `TEXTBEFORE` / `TEXTAFTER`, `EVEN` /
-      `ODD`, and `SUMSQ`. Also `INDEX(range, 0, col)` / `INDEX(range, row, 0)`
-      (whole-column / whole-row array form) returns `#REF!` instead of the
-      column/row (`functions/lookup.ts`).
+- [ ] **Missing functions** — `TRANSPOSE` (a `transpose` *helper* exists but isn't
+      exported as a function), `YEARFRAC`, `TEXTSPLIT`, `TEXTBEFORE` / `TEXTAFTER`,
+      `CLEAN`, `NUMBERVALUE`, `DAYS`, `ISOWEEKNUM`, `XNPV`, `XIRR`, `SLN` (batch B,
+      plan S12), and `LET` / `LAMBDA` / `HSTACK` / `VSTACK` / `TAKE` (post-launch).
+      Also `INDEX(range, 0, col)` / `INDEX(range, row, 0)` (whole-column /
+      whole-row array form) returns `#REF!` instead of the column/row
+      (`functions/lookup.ts`). The unprefixed names work; the `_xlfn.` spellings
+      Excel writes into files are mapped on import (plan S4).
+- [x] **Math, trigonometry and statistics, batch A** — `SIN` to `ATANH`, `PI`,
+      `RADIANS`, `DEGREES`, `FACT`, `FACTDOUBLE`, `COMBIN`, `PERMUT`, `SUMSQ`,
+      `EVEN`, `ODD`, `ISEVEN`, `ISODD`, `CEILING.MATH`, `FLOOR.MATH`, `MAXIFS`,
+      `MINIFS`, `AGGREGATE`, the dotted statistics names (`STDEV.S`, `VAR.P`,
+      `PERCENTILE.INC` / `.EXC`, `QUARTILE.INC` / `.EXC`, `RANK.EQ`, `MODE.SNGL`),
+      `SLOPE`, `INTERCEPT`, `RSQ`, `FORECAST` / `FORECAST.LINEAR`, `GEOMEAN` and
+      `FREQUENCY` (plan S11). The conformance suite
+      (`formula-conformance-oracle.json`) checks them against LibreOffice values.
 
 ## Feature parity
 
@@ -101,5 +115,5 @@ alignment, wrap, rotation), number formats, hyperlinks, date-entry
 auto-detection, hide/show and insert/delete rows and columns, merged cells,
 multiple sheets, undo/redo, find & replace, autofill (numbers, dates,
 month/weekday name lists and text patterns), **CSV and XLSX import/export** (with Open/Download in the toolbar), the
-146-function formula engine with dynamic arrays, and formula autocomplete with
+193-function formula engine with dynamic arrays, and formula autocomplete with
 parameter help.
