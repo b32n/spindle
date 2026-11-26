@@ -272,6 +272,12 @@ export interface DocPageNumbering {
 /** Where the text sits between the top and bottom margins of the section's pages (`w:vAlign`; `top` is the default and is not kept). */
 export type DocSectionVerticalAlign = 'center' | 'bottom' | 'both';
 
+/**
+ * How a section starts relative to the previous one (`w:type` of its `w:sectPr`). The default, a new page, is not kept; the
+ * first section has no previous one, so its value is ignored.
+ */
+export type DocSectionBreakType = 'continuous' | 'evenPage' | 'oddPage';
+
 export interface DocSection {
   /** Pixels (96dpi). */
   pageWidthPx: number;
@@ -287,6 +293,7 @@ export interface DocSection {
   columns?: DocColumns;
   pageNumbering?: DocPageNumbering;
   verticalAlign?: DocSectionVerticalAlign;
+  breakType?: DocSectionBreakType;
 }
 
 /** One comment of a thread: the root comment or a reply. */

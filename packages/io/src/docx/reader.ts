@@ -13,6 +13,7 @@ import type {
   DocColumns,
   DocPageNumbering,
   DocRunBase,
+  DocSectionBreakType,
   DocSectionVerticalAlign,
   DocTableRow,
   DocumentImportResult,
@@ -870,6 +871,7 @@ interface ParsedSectPr {
   columns?: DocColumns;
   pageNumbering?: DocPageNumbering;
   verticalAlign?: DocSectionVerticalAlign;
+  breakType?: DocSectionBreakType;
 }
 
 const TWIPS_TO_PX = 96 / 1440;
@@ -911,6 +913,8 @@ function parseSectPr(sectPrNode: XmlNode): ParsedSectPr {
   const pageNumbering = parsePageNumbering(find(kids, 'w:pgNumType'));
   const vAlign = find(kids, 'w:vAlign');
   const vAlignVal = vAlign ? attrsOf(vAlign)['@_w:val'] : undefined;
+  const typeEl = find(kids, 'w:type');
+  const typeVal = typeEl ? attrsOf(typeEl)['@_w:val'] : undefined;
 
   return {
     pageWidthPx: Math.round(widthTwips * TWIPS_TO_PX),
@@ -926,6 +930,8 @@ function parseSectPr(sectPrNode: XmlNode): ParsedSectPr {
     ...(columns && { columns }),
     ...(pageNumbering && { pageNumbering }),
     ...(vAlignVal === 'center' || vAlignVal === 'bottom' || vAlignVal === 'both' ? { verticalAlign: vAlignVal } : {}),
+    // A new page (also what a column break amounts to with one column) is the default and is not kept.
+    ...(typeVal === 'continuous' || typeVal === 'evenPage' || typeVal === 'oddPage' ? { breakType: typeVal } : {}),
   };
 }
 
@@ -1063,6 +1069,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       ...(parsed.columns && { columns: parsed.columns }),
       ...(parsed.pageNumbering && { pageNumbering: parsed.pageNumbering }),
       ...(parsed.verticalAlign && { verticalAlign: parsed.verticalAlign }),
+      ...(parsed.breakType && { breakType: parsed.breakType }),
     });
     currentBlocks = [];
   };

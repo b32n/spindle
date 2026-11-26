@@ -480,6 +480,12 @@ export interface HeaderFooter {
 // Section
 // ============================================================================
 
+/**
+ * How a section starts relative to the previous one (DOCX `w:type`): on a new page (the default), on the same page,
+ * or on the next even or odd page. The first section's value has no effect.
+ */
+export type SectionBreakType = 'nextPage' | 'continuous' | 'evenPage' | 'oddPage';
+
 export interface Section {
   id: string;
   pageConfig: PageConfig;
@@ -488,6 +494,8 @@ export interface Section {
   footer?: HeaderFooterContent;
   pageNumbering?: PageNumbering;
   verticalAlign?: SectionVerticalAlign;
+  /** How the section starts; absent means on a new page. */
+  breakType?: SectionBreakType;
 }
 
 // ============================================================================
@@ -646,5 +654,7 @@ export interface SectionData {
   footer?: HeaderFooterContent;
   pageNumbering?: PageNumbering;
   verticalAlign?: SectionVerticalAlign;
+  /** How the section starts; absent means on a new page. */
+  breakType?: SectionBreakType;
 }
 

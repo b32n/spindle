@@ -97,4 +97,15 @@ describe('DocumentImpl — getData / setData round-trip', () => {
     expect(d2.getData().sections[0]).toMatchObject({ pageNumbering: { start: 3, format: 'lowerRoman' }, verticalAlign: 'bottom', header: { differentOddEven: true, evenPageBlocks: [] } });
     expect(d2.getData().sections[0].pageConfig.columns).toEqual({ count: 2, spacing: 24 });
   });
+
+  it('keeps how a section starts through getData and setData', () => {
+    const d = new DocumentImpl('doc-y', 'Break type');
+    const data = d.getData();
+    data.sections[0] = { ...data.sections[0], breakType: 'continuous' };
+    const d2 = new DocumentImpl();
+    d2.setData(data);
+    expect(d2.getData().sections[0].breakType).toBe('continuous');
+    expect(d2.getSections()[0].breakType).toBe('continuous');
+    expect(new DocumentImpl().getData().sections[0]).not.toHaveProperty('breakType');
+  });
 });

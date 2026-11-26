@@ -18,8 +18,8 @@ export type { TrueLayoutEditorProps, TrueLayoutEditorHandle, ActivePageInfo } fr
 export * from './flow-blocks';
 
 // ProseMirror to FlowBlocks converter
-export { proseMirrorToFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
-export type { ConversionOptions } from './pm-to-blocks';
+export { proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
+export type { ConversionOptions, SectionedFlowBlocks } from './pm-to-blocks';
 
 // DOM Measurer
 export { DomMeasurer, hasLineData, getLineCount, getLineRangeHeight } from './measurer';
@@ -44,14 +44,24 @@ export {
   findBlockFragments,
   getPageY,
   findPageAtY,
+  getPageConfig,
   blockPositionToPageCoords,
 } from './true-layout-engine';
+export {
+  computeSectionedLayout,
+  canContinueOnPage,
+  formatPageNumber,
+  pickHeaderFooterVariant,
+  resolveInheritedContent,
+} from './section-layout';
+export type { LayoutSection, LayoutSectionBreak, SectionedLayoutOptions } from './section-layout';
 export type {
   PageConfig,
   PageFragment,
   PageLayout,
   DocumentLayout,
   LayoutOptions,
+  HeaderFooterVariant,
 } from './true-layout-engine';
 
 // DOM Painter

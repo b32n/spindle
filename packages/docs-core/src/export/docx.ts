@@ -165,6 +165,8 @@ function toSection(
     ...(section.pageConfig.columns && { columns: toDocColumns(section.pageConfig.columns) }),
     ...(section.pageNumbering && { pageNumbering: section.pageNumbering }),
     ...(section.verticalAlign && { verticalAlign: section.verticalAlign }),
+    // A new page is the default; the first section has no previous one to start from.
+    ...(section.breakType && section.breakType !== 'nextPage' && { breakType: section.breakType }),
   };
 }
 
@@ -574,6 +576,7 @@ function toSectionData(
     footer: section.footer ? toHeaderFooterContentFromDocx(section.footer) : undefined,
     ...(section.pageNumbering && { pageNumbering: section.pageNumbering }),
     ...(section.verticalAlign && { verticalAlign: section.verticalAlign }),
+    ...(section.breakType && { breakType: section.breakType }),
   };
 }
 

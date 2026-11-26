@@ -479,6 +479,7 @@ export class DocumentImpl {
       footer: section.footer,
       ...(section.pageNumbering && { pageNumbering: section.pageNumbering }),
       ...(section.verticalAlign && { verticalAlign: section.verticalAlign }),
+      ...(section.breakType && { breakType: section.breakType }),
     }));
 
     return {
@@ -535,6 +536,7 @@ export class DocumentImpl {
         footer: s.footer,
         ...(s.pageNumbering && { pageNumbering: s.pageNumbering }),
         ...(s.verticalAlign && { verticalAlign: s.verticalAlign }),
+        ...(s.breakType && { breakType: s.breakType }),
       })),
       defaultPageConfig: data.defaultPageConfig,
       createdAt: data.createdAt,

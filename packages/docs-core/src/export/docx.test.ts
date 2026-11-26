@@ -477,6 +477,21 @@ describe('importFromDocx', () => {
     expect(section.verticalAlign).toBe('center');
   });
 
+  it('round-trips how each section starts (continuous, even and odd page); a new page is not written', async () => {
+    const section = (id: string, breakType?: 'nextPage' | 'continuous' | 'evenPage' | 'oddPage') => ({
+      id,
+      pageConfig: PAGE_CONFIG,
+      blocks: [{ id: `b_${id}`, type: 'paragraph' as const, content: [{ type: 'text' as const, text: id }] }],
+      ...(breakType && { breakType }),
+    });
+    const source = docWith({ sections: [section('a', 'continuous'), section('b', 'continuous'), section('c', 'evenPage'), section('d', 'oddPage'), section('e', 'nextPage'), section('f')] });
+    const { result: exported } = await exportAndUnzip(source);
+    const target = docWith({});
+    await importFromDocx(exported.bytes, target);
+    // The first section has no previous one, but its value is kept as written.
+    expect(target.getData().sections.map((s) => s.breakType)).toEqual(['continuous', 'continuous', 'evenPage', 'oddPage', undefined, undefined]);
+  });
+
   it('round-trips a hyperlink via the text style pool when it carries formatting', async () => {
     const source = docWith({
       textStylePool: { style_1: { bold: true } },

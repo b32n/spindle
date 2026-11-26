@@ -65,8 +65,15 @@ export interface PageFragment {
   isLastFragment: boolean;
 }
 
+/** Which header/footer content a page shows when its section has first-page and even-page variants. */
+export type HeaderFooterVariant = 'default' | 'first' | 'even';
+
 /**
  * Layout for a single page
+ *
+ * The optional fields below are set by `computeSectionedLayout` (documents with sections); a layout from
+ * `computeTrueLayout` leaves them unset and every page then uses `DocumentLayout.pageConfig`, is numbered by its index
+ * and shows the default header and footer.
  */
 export interface PageLayout {
   /** Page index (0-based) */
@@ -77,6 +84,20 @@ export interface PageLayout {
   contentHeight: number;
   /** Available content height remaining */
   remainingHeight: number;
+  /** The section whose setup the page uses: the section that starts it (a continuous section shares the page). */
+  sectionIndex?: number;
+  /** Page setup of this page (unscaled, rendered size), when it can differ from `DocumentLayout.pageConfig`. */
+  pageConfig?: PageConfig;
+  /** Distance from the top of the first page to the top of this page, scaled, gaps included. */
+  top?: number;
+  /** The number the page shows (restarts and continues per section), as opposed to its position `pageIndex + 1`. */
+  pageNumber?: number;
+  /** DOCX number format name of `pageNumber` (e.g. `lowerRoman`); absent for decimal. */
+  pageNumberFormat?: string;
+  /** Which header/footer variant of the section the page shows. */
+  headerFooterVariant?: HeaderFooterVariant;
+  /** True for a page added only so that the next section starts on an even or odd page. */
+  isBlank?: boolean;
 }
 
 /**
@@ -107,6 +128,11 @@ export interface LayoutOptions {
   pageGap?: number;
   /** Minimum number of lines to keep together at page break (widow/orphan control) */
   minLinesAtBreak?: number;
+  /**
+   * Content height (scaled) already used on the first page by earlier content, for a section that continues on the
+   * page of the previous one. The first page of the result then holds only the new fragments, placed below it.
+   */
+  initialY?: number;
 }
 
 // ============================================================================
@@ -129,7 +155,7 @@ export function computeTrueLayout(
   measures: Measure[],
   options: LayoutOptions
 ): DocumentLayout {
-  const { pageConfig, scale = 1, pageGap = 24, minLinesAtBreak = 2 } = options;
+  const { pageConfig, scale = 1, pageGap = 24, minLinesAtBreak = 2, initialY = 0 } = options;
   
   // Calculate content area dimensions (scaled)
   const contentHeight = (pageConfig.height - pageConfig.margins.top - pageConfig.margins.bottom) * scale;
@@ -137,7 +163,10 @@ export function computeTrueLayout(
   // Initialize pages
   const pages: PageLayout[] = [];
   let currentPage: PageLayout = createEmptyPage(0, contentHeight);
-  let currentY = 0;
+  let currentY = Math.min(Math.max(initialY, 0), contentHeight);
+  // A first page that continues earlier content counts as occupied even before it gets a fragment of its own.
+  const carried = currentY > 0;
+  const pageOccupied = (): boolean => currentPage.fragments.length > 0 || (carried && pages.length === 0);
   
   // Process each block
   for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
@@ -147,7 +176,7 @@ export function computeTrueLayout(
     // Handle page breaks
     if (measure.kind === 'pageBreak') {
       // Force a new page
-      if (currentPage.fragments.length > 0) {
+      if (pageOccupied()) {
         currentPage.contentHeight = currentY;
         currentPage.remainingHeight = contentHeight - currentY;
         pages.push(currentPage);
@@ -221,7 +250,7 @@ export function computeTrueLayout(
       }
     } else {
       // Block doesn't fit and can't be split - start new page
-      if (currentPage.fragments.length > 0) {
+      if (pageOccupied()) {
         currentPage.contentHeight = currentY;
         currentPage.remainingHeight = contentHeight - currentY;
         pages.push(currentPage);
@@ -258,7 +287,7 @@ export function computeTrueLayout(
   }
   
   // Don't forget the last page
-  if (currentPage.fragments.length > 0) {
+  if (pageOccupied()) {
     currentPage.contentHeight = currentY;
     currentPage.remainingHeight = contentHeight - currentY;
     pages.push(currentPage);
@@ -552,19 +581,36 @@ export function findBlockFragments(layout: DocumentLayout, blockId: string): Pag
  * Get the Y coordinate for a page (accounting for gaps)
  */
 export function getPageY(layout: DocumentLayout, pageIndex: number): number {
+  const page = layout.pages[pageIndex];
+  if (page?.top !== undefined) return page.top;
   const pageHeight = layout.pageConfig.height * layout.scale;
   return pageIndex * (pageHeight + layout.pageGap);
+}
+
+/** The page setup of a page: its own when the layout has sections, else the document's. */
+export function getPageConfig(layout: DocumentLayout, pageIndex: number): PageConfig {
+  return layout.pages[pageIndex]?.pageConfig ?? layout.pageConfig;
 }
 
 /**
  * Find which page a Y coordinate falls on
  */
 export function findPageAtY(layout: DocumentLayout, y: number): number {
+  const last = layout.pages.length - 1;
+  if (layout.pages.some((p) => p.top !== undefined)) {
+    // Pages of different heights: the last page that starts at or above y (a gap belongs to the page above it).
+    let found = 0;
+    for (let i = 0; i <= last; i++) {
+      if (getPageY(layout, i) <= y) found = i;
+      else break;
+    }
+    return found;
+  }
   const pageHeight = layout.pageConfig.height * layout.scale;
   const pageWithGap = pageHeight + layout.pageGap;
   
   const pageIndex = Math.floor(y / pageWithGap);
-  return Math.min(Math.max(0, pageIndex), layout.pages.length - 1);
+  return Math.min(Math.max(0, pageIndex), last);
 }
 
 /**
