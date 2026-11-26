@@ -674,6 +674,13 @@ lockstep.
   (LibreOffice 25.2; the rows where it differs from Excel carry Excel's documented value, tagged unverified until real Excel files confirm it). The published list is `documentation/sheets/core/functions.md`. The XLSX `values` golden for
   `formulas-core` improves from 125 to 127 of 159 matching and `xlsx.formulas.unsupported` shrinks (15 to 10 formulas there; the
   `_xlfn.`-prefixed ones wait for S4).
+- **Function batch B, finance, math and TRANSPOSE (S12b).** 18 new functions (211 to 229): `TRANSPOSE` (spilled; a blank cell that passes
+  through reads 0), `XNPV`, `XIRR` (Newton from the guess, bracketed search as the fallback: a deliberate superset of Excel), `MIRR`, `SLN`,
+  `SYD`, `DDB`, `EFFECT`, `NOMINAL`, `RRI`, `PDURATION`, `ISPMT`, `FVSCHEDULE`, `QUOTIENT`, `SQRTPI`, `SUMX2MY2`, `SUMX2PY2` and `SUMXMY2`.
+  118 new conformance rows (LibreOffice 25.2 computes them; where it reports `#VALUE!` for an argument Excel calls `#NUM!` or `#DIV/0!`, the
+  row carries Excel's documented value, tagged unverified). `LET` and `LAMBDA` stay post-launch. The XLSX `values` golden for `formulas-core`
+  improves from 127 to 130 of 159 matching and `xlsx.formulas.unsupported` shrinks again (10 to 6 formulas there); `=TRANSPOSE(A1:B2)` in that
+  fixture evaluates but its spill range is blocked by the next probe row (`#SPILL!`).
 
 ## [0.4.0] - 2026-10-26
 

@@ -1,7 +1,7 @@
 # Formula System
 
 The formula system gives `@b32nio/spindle-sheets-core` spreadsheet calculation:
-a parser, a library of **211 built-in functions** (the [published list](functions.md)), a dependency graph with
+a parser, a library of **229 built-in functions** (the [published list](functions.md)), a dependency graph with
 **topological recalculation**, **dynamic arrays (spill)**, and the metadata
 that powers **formula autocomplete**. Everything lives under
 `packages/sheets-core/src/formula-parser/` (plus `formula-graph.ts` and
@@ -16,7 +16,7 @@ Functions are organised by category, one module per category under
 | Module | Category | Count |
 |---|---|---|
 | `math.ts` | math & aggregation | 37 |
-| `math-ext.ts` | trigonometry, factorials, parity, `CEILING.MATH` / `FLOOR.MATH` (batch A) | 27 |
+| `math-ext.ts` | trigonometry, factorials, parity, `CEILING.MATH` / `FLOOR.MATH` (batch A), `QUOTIENT`, `SQRTPI`, `SUMX2MY2` family (batch B) | 32 |
 | `aggregate.ts` | `MAXIFS`, `MINIFS`, `AGGREGATE` (batch A) | 3 |
 | `logical.ts` | logical | 11 |
 | `text.ts` | text | 21 |
@@ -28,8 +28,10 @@ Functions are organised by category, one module per category under
 | `date-ext.ts` | `DAYS`, `DAYS360`, `YEARFRAC`, `ISOWEEKNUM`, `WORKDAY.INTL`, `NETWORKDAYS.INTL` (batch B) | 6 |
 | `information.ts` | information | 12 |
 | `financial.ts` | financial | 9 |
+| `financial-ext.ts` | `XNPV`, `XIRR`, `MIRR`, `SLN`, `SYD`, `DDB`, `EFFECT`, `NOMINAL`, `RRI`, `PDURATION`, `ISPMT`, `FVSCHEDULE` (batch B) | 12 |
 | `reference.ts` | reference-aware | 11 |
 | `array.ts` | dynamic arrays | 6 |
+| `array-ext.ts` | `TRANSPOSE` (batch B) | 1 |
 
 `functions/index.ts` is the registry. It exposes three maps, by how the
 evaluator must call the function:
@@ -270,7 +272,7 @@ probe rows are in `KNOWN_FAILING`. A row tagged `unverified` without `excel` kee
 ### Omitted arguments
 
 The parser skips an empty argument (`F(1,,2)`) for most functions. For the ones where Excel gives an omitted argument its default and
-the position matters (`INDEX(A1:C3,,2)`, `NUMBERVALUE(a,,",")`, `WORKDAY.INTL(a,b,,holidays)`), the names in
+the position matters (`INDEX(A1:C3,,2)`, `NUMBERVALUE(a,,",")`, `WORKDAY.INTL(a,b,,holidays)`, `XIRR(v,d,)`), the names in
 `functions/omittable.ts` keep a placeholder node (a `number` node whose value is `undefined`) so that the later arguments keep their
 places; the function sees `undefined`, as for an argument left off the end, and the stable AST writes it back as nothing. A leading `_xlfn.` is
 ignored when matching the name.
@@ -281,6 +283,19 @@ ignored when matching the name.
 an array that spills and feeds aggregates (`SUM(INDEX(A1:C3,0,2))`); a single index into a table (`INDEX(A1:C3,2)`) selects the whole row.
 `functions/lookup.ts` `indexWindow` does the arithmetic for both the value form and the reference form, so these are also range
 endpoints (`INDEX(A1:C3,0,2):INDEX(A1:C3,0,3)`). A negative index is `#VALUE!`, one past the range `#REF!`; an omitted `area_num` is 1.
+
+### Array and finance, batch B
+
+`TRANSPOSE` (`array-ext.ts`) is the one dynamic-array shaper with a LibreOffice oracle; an empty cell passing through reads 0, as in Excel. In the
+`formulas-core` fixture `=TRANSPOSE(A1:B2)` evaluates, but its spill range is blocked by the next probe row's formula (`#SPILL!`), so that cell stays a
+mismatch.
+
+`XIRR` runs Newton's method from the guess (default 10%); when that fails to converge, leaves the domain or stops on a flat tail
+(a root a hair above -100% is `#NUM!`), it scans rates `e^s - 1` from -100% to 10^10 for a sign change (compared as signs) and bisects the
+bracket nearest the guess. This is a deliberate superset of Excel, whose Newton iteration gives up with `#NUM!` (or a near-zero rate) in some
+cases where a root exists; with several roots the answer depends on the guess, as in Excel. `XNPV` and `XIRR` need dates that are not negative
+and do not precede the first one and, for `XIRR`, a positive and a negative cash flow (`#NUM!` otherwise). `DDB` uses the closed form
+`max(cost*(1-factor/life)^k, salvage)` per period, which matches Excel's period loop.
 
 ### The 1900 calendar
 

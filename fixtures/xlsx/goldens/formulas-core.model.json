@@ -626,15 +626,15 @@
           },
           "I104": {
             "formula": "=XNPV(0.1,D1:D4,E1:E4)",
-            "value": "#NAME? Function XNPV not found"
+            "value": 14.10727812227
           },
           "I105": {
             "formula": "=XIRR(D1:D4,E1:E4)",
-            "value": "#NAME? Function XIRR not found"
+            "value": 0.4178861452271
           },
           "I106": {
             "formula": "=SLN(1000,100,5)",
-            "value": "#NAME? Function SLN not found"
+            "value": 180
           },
           "I107": {
             "formula": "=NPER(0.05,-100,1000)",
@@ -722,7 +722,7 @@
           },
           "I126": {
             "formula": "=TRANSPOSE(A1:B2)",
-            "value": "#NAME? Function TRANSPOSE not found"
+            "value": "#SPILL!"
           },
           "I127": {
             "formula": "=_xlfn._xlws.FILTER(A1:A10,A1:A10>8)",
