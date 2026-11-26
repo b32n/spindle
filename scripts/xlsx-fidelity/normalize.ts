@@ -22,9 +22,10 @@ export const cellAddress = (row: number, col: number): string => `${colName(col)
 
 /**
  * Engine-computed numbers are kept to 13 significant digits (Excel stores 15). The last digits of iterative or
- * power-based results such as `PV` or `RATE` (noise reaches the 15th digit of an iterative result such as RATE, so 14 would sit on a rounding boundary) depend on the V8 build's `Math.pow` and `Math.exp` (Node 22 and 24 differ), and a
- * golden must be identical on both. Applied only to the value of a formula cell, never to literals, cached values or the
- * round-trip comparison, so a 13-digit integer or a 15-digit literal is recorded exactly.
+ * power-based results such as `PV` or `RATE` depend on the V8 build's `Math.pow` and `Math.exp` (Node 22 and 24
+ * differ, down to the 15th digit for an iterative result, so 14 digits would sit on a rounding boundary), and a
+ * golden must be identical on both. Applied only to the value of a formula cell, never to literals, cached values
+ * or the round-trip comparison, so a 13-digit integer or a 15-digit literal is recorded exactly.
  */
 export const stableNumber = (n: number): number => Number(n.toPrecision(13));
 

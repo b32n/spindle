@@ -169,18 +169,23 @@ describe('runRuntime', () => {
 
   itPy('uses the real generator by default', async () => {
     const sink = io();
-    const dirs = new Set(
-      readdirSync(tmpdir()).filter((n) => n.startsWith('xlsx-fidelity-runtime-'))
-    );
-    await runRuntime(
-      { api: sourceApi, fixturesDir: path.resolve(__dirname, '../../../../fixtures/xlsx') },
-      [entry('edge-huge-dimension', { generator: 'generators/build_runtime.py' })],
-      args,
-      sink
-    );
-    expect(sink.out[1]).toContain('edge-huge-dimension');
-    expect(
-      readdirSync(tmpdir()).filter((n) => n.startsWith('xlsx-fidelity-runtime-') && !dirs.has(n))
-    ).toEqual([]);
+    // A private TMPDIR, so a runtime directory created by a suite running in parallel cannot be mistaken for ours.
+    const previous = process.env.TMPDIR;
+    const own = mkdtempSync(path.join(tmpdir(), 'xlsx-fidelity-test-'));
+    process.env.TMPDIR = own;
+    try {
+      await runRuntime(
+        { api: sourceApi, fixturesDir: path.resolve(__dirname, '../../../../fixtures/xlsx') },
+        [entry('edge-huge-dimension', { generator: 'generators/build_runtime.py' })],
+        args,
+        sink
+      );
+      expect(sink.out[1]).toContain('edge-huge-dimension');
+      expect(readdirSync(own).filter((n) => n.startsWith('xlsx-fidelity-runtime-'))).toEqual([]);
+    } finally {
+      if (previous === undefined) delete process.env.TMPDIR;
+      else process.env.TMPDIR = previous;
+      rmSync(own, { recursive: true, force: true });
+    }
   });
 });

@@ -213,7 +213,7 @@ describe('comparing values', () => {
       'FALSE',
       '1.5',
     ]);
-    // engine values are rounded to 15 digits, cached (expected) values are shown exactly
+    // engine values are rounded to 13 digits, cached (expected) values are shown exactly
     expect(show(772.1734929184817, true)).toBe(show(772.1734929184818, true));
     expect(show(772.1734929184817)).not.toBe(show(772.1734929184818));
     expect(show(0.841470984807897)).toBe('0.841470984807897');
