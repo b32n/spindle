@@ -1,5 +1,5 @@
 import { Schema, Node as PmNode } from 'prosemirror-model';
-import { proseMirrorToFlowBlocks } from './pm-to-blocks';
+import { createBlockPositionMap, proseMirrorToFlowBlocks } from './pm-to-blocks';
 import type { ParagraphBlock, LinkRun } from './flow-blocks';
 
 // Minimal schema: enough to build a paragraph containing a linked text run.
@@ -166,5 +166,32 @@ describe('bookmark nodes', () => {
     });
     const para = proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock;
     expect(para.runs[0]).toMatchObject({ kind: 'link', href: '#_Toc1' });
+  });
+});
+
+describe('section_break nodes in the flow', () => {
+  const doc = j([
+    { type: 'paragraph', content: [text('one')] },
+    { type: 'section_break', attrs: { sectionId: 'a' } },
+    { type: 'paragraph', content: [text('two')] },
+    { type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [{ type: 'paragraph' }] }] }] },
+    { type: 'section_break', attrs: { sectionId: 'b' } },
+    { type: 'paragraph', content: [text('three')] },
+  ]);
+
+  it('draws nothing for a break and keeps the blocks in order', () => {
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    expect(blocks.map((b) => b.kind)).toEqual(['paragraph', 'paragraph', 'table', 'paragraph']);
+  });
+
+  it('maps each block to its own position, skipping the breaks', () => {
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    const map = createBlockPositionMap(doc, blocks);
+    const starts = blocks.map((b) => map.get(b.id)?.start);
+    const expected: number[] = [];
+    doc.forEach((n, offset) => {
+      if (n.type.name !== 'section_break') expected.push(offset);
+    });
+    expect(starts).toEqual(expected);
   });
 });

@@ -47,7 +47,8 @@ function indentStyle(attrs: Record<string, unknown>): string {
  */
 const nodes: Record<string, NodeSpec> = {
   doc: {
-    content: 'block+',
+    // A section break only ends a section of the body, so it is allowed here and not inside cells or list items.
+    content: '(block | section_break)+',
   },
 
   paragraph: {
@@ -302,6 +303,19 @@ const nodes: Record<string, NodeSpec> = {
     parseDOM: [{ tag: 'div.page-break' }],
     toDOM(): DOMOutputSpec {
       return ['div', { class: 'page-break' }];
+    },
+  },
+
+  // The end of a section: the content before it (back to the previous break) belongs to the section whose id it
+  // names. The last section of a document has no break. Deliberately has no `parseDOM`, so pasted or dropped HTML
+  // can never create a break with a duplicate id; commands insert breaks with a fresh id. Not in the `block` group, so
+  // it can only sit at the top level of the document.
+  section_break: {
+    atom: true,
+    selectable: true,
+    attrs: { sectionId: { default: '' } },
+    toDOM(node): DOMOutputSpec {
+      return ['div', { class: 'section-break', 'data-section-id': String(node.attrs.sectionId) }];
     },
   },
 

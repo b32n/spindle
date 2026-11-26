@@ -66,3 +66,21 @@ describe('docsSchema toDOM sanitizes untrusted block attrs', () => {
     expect(injected).not.toContain('background');
   });
 });
+
+describe('section_break', () => {
+  it('is an atom block that renders its section id and has no parseDOM, so pasted HTML cannot create one', () => {
+    const type = docsSchema.nodes.section_break;
+    expect(type.isAtom).toBe(true);
+    expect(type.isBlock).toBe(true);
+    // Allowed between the blocks of the body only, not in table cells or list items.
+    expect(docsSchema.nodes.doc.contentMatch.matchType(type)).not.toBeNull();
+    expect(docsSchema.nodes.table_cell.contentMatch.matchType(type)).toBeNull();
+    expect(docsSchema.nodes.list_item.contentMatch.matchType(type)).toBeNull();
+    expect(docsSchema.nodes.table_header.contentMatch.matchType(type)).toBeNull();
+    expect(type.spec.parseDOM).toBeUndefined();
+    const toDOM = type.spec.toDOM as (n: ReturnType<typeof type.create>) => unknown;
+    expect(toDOM(type.create({ sectionId: 'sec_1' }))).toEqual(['div', { class: 'section-break', 'data-section-id': 'sec_1' }]);
+    // A section id with markup in it is an attribute value, not markup.
+    expect(toDOM(type.create({ sectionId: '"><img src=x>' }))).toEqual(['div', { class: 'section-break', 'data-section-id': '"><img src=x>' }]);
+  });
+});

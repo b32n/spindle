@@ -26,7 +26,7 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
 import { connectAbortable, createAttachAbortError } from '@b32nio/spindle-shared';
 
-import { getYDocFields, hydrateYDocFromData } from './y-schema';
+import { assertSchemaVersion, getYDocFields, hydrateYDocFromData } from './y-schema';
 import type { DocumentData } from '../types';
 
 /**
@@ -166,10 +166,7 @@ export async function attachCollabToYDoc(
   // which prevents duplicated content in the common case. (Two peers creating
   // the *same* brand-new room within one round-trip can still both seed — that
   // needs relay-side arbitration, which an opaque relay can't provide.)
-  try {
-    await connectAbortable(provider, roomId, options.signal);
-  } catch (err) {
-    // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
+  const releaseAll = (): void => {
     ydoc.off('update', onDocUpdate);
     awareness.off('update', onAwarenessUpdate);
     unsubDoc();
@@ -178,6 +175,15 @@ export async function attachCollabToYDoc(
     provider.disconnect();
     void persistence?.destroy();
     ydoc.destroy();
+  };
+  try {
+    await connectAbortable(provider, roomId, options.signal);
+    // The room (or the state restored from persistence) may have been written by a newer client whose nodes this one
+    // would silently drop. Refuse before seeding or editing anything.
+    assertSchemaVersion(ydoc);
+  } catch (err) {
+    // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
+    releaseAll();
     throw err;
   }
 

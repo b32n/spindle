@@ -411,7 +411,9 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
                 },
                 textStylePoolRef.current  // Pass style pool for efficient style storage
               );
-              onDocChangeRef.current(docModel.sections[0].blocks);
+              // The editor shows one flow: a shared (collab) document with several sections hands over all their
+              // blocks, as before section breaks existed in the editor's document.
+              onDocChangeRef.current(docModel.sections.flatMap((section) => section.blocks));
             }
             
             // Also update active marks when doc changes (e.g., font size applied)

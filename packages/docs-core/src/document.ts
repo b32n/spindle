@@ -18,6 +18,7 @@ import { DocumentHistory } from './history';
 import { TextStylePoolImpl, ParagraphStylePoolImpl } from './style-pool';
 import { createParagraphFromText } from './blocks/paragraph';
 import { attachCollabToYDoc } from './collab/binding';
+import { CollabBlockedError, getCollabBlockers } from './collab/blockers';
 import { getYDocFields, readNamedStyles } from './collab/y-schema';
 import { DocsCommentStore, type DocsCommentEvent, type DocsCommentThread } from './comments';
 
@@ -561,8 +562,8 @@ export class DocumentImpl {
    * needed by the React editor's ySyncPlugin / yCursorPlugin. Idempotent
    * guard: throws if already attached.
    *
-   * v1 restrictions: documents must be single-section; setData is disallowed
-   * while attached; local DocumentHistory undo is shadowed by Yjs UndoManager
+   * Restrictions: a document with content the Y layout cannot hold is refused with a
+   * CollabBlockedError (see getCollabBlockers); setData is disallowed while attached; local DocumentHistory undo is shadowed by Yjs UndoManager
    * once we wire that in (phase 1.6).
    */
   async attachCollab(
@@ -576,6 +577,8 @@ export class DocumentImpl {
     if (this.pendingAttach) {
       throw new Error('Collaboration is already being attached to this document.');
     }
+    const blockers = getCollabBlockers(this.document);
+    if (blockers.length > 0) throw new CollabBlockedError(blockers);
     // detachCollab() aborts this controller, so an attach still connecting can
     // neither seed the room nor leave a live socket behind (rejects with AbortError).
     const abort = new AbortController();

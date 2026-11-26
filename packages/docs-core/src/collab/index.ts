@@ -4,6 +4,10 @@ export {
   getYDocFields,
   hydrateYDocFromData,
   serializeYDocToData,
+  COLLAB_SCHEMA_VERSION,
+  CollabSchemaVersionError,
+  readSchemaVersion,
+  assertSchemaVersion,
   type YDocFields,
 } from './y-schema';
 
@@ -12,3 +16,5 @@ export {
   type CollabHandle,
   type AttachCollabOptions,
 } from './binding';
+
+export { getCollabBlockers, CollabBlockedError, type CollabBlocker } from './blockers';

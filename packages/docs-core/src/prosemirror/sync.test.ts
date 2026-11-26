@@ -1,5 +1,6 @@
-import { blocksToPmDoc, proseMirrorToDocument } from './sync';
-import type { Block, Document, ListItemBlock, TableBlock, PageConfig } from '../types';
+import { blocksToPmDoc, documentToProseMirror, proseMirrorToDocument, sectionsToPmDoc } from './sync';
+import { docsSchema } from './schema';
+import type { Block, Document, ListItemBlock, ParagraphBlock, Section, TableBlock, PageConfig } from '../types';
 
 const emptyPageConfig = {} as PageConfig;
 
@@ -339,5 +340,107 @@ describe('collab round-trip preserves named style references', () => {
   it('does not invent a namedStyleId', () => {
     const out = roundTrip([{ id: 'p', type: 'paragraph', content: [text('p')] }]);
     expect(out[0]).not.toHaveProperty('namedStyleId');
+  });
+});
+
+describe('sections and section_break nodes', () => {
+  const pc = (w: number): PageConfig => ({ size: { w, h: 1000 }, margins: { top: 1, right: 1, bottom: 1, left: 1 }, orientation: 'portrait' });
+  const p = (id: string, t: string): ParagraphBlock => ({ id, type: 'paragraph', content: [{ type: 'text', text: t }] });
+  const sec = (id: string, w: number, ...blocks: Block[]): Section => ({ id, pageConfig: pc(w), blocks });
+  const doc = (...sections: Section[]): Document => ({ id: 'd', title: 'D', defaultPageConfig: pc(1), sections });
+  const names = (d: { forEach: (f: (n: { type: { name: string } }) => void) => void }): string[] => {
+    const out: string[] = [];
+    d.forEach((n) => out.push(n.type.name));
+    return out;
+  };
+  const texts = (s: Section): string[] => s.blocks.map((b) => (b as ParagraphBlock).content.map((c) => (c as { text: string }).text).join(''));
+
+  it('sectionsToPmDoc puts a break that names the section after every section but the last', () => {
+    const pm = sectionsToPmDoc([sec('a', 1, p('1', 'x')), sec('b', 2, p('2', 'y'), p('3', 'z')), sec('c', 3, p('4', 'w'))]);
+    expect(names(pm)).toEqual(['paragraph', 'section_break', 'paragraph', 'paragraph', 'section_break', 'paragraph']);
+    expect(pm.child(1).attrs.sectionId).toBe('a');
+    expect(pm.child(4).attrs.sectionId).toBe('b');
+  });
+
+  it('a single section gives the same document as blocksToPmDoc, and none gives one empty paragraph', () => {
+    const blocks = [p('1', 'x'), p('2', 'y')];
+    expect(sectionsToPmDoc([sec('a', 1, ...blocks)]).toJSON()).toEqual(blocksToPmDoc(blocks).toJSON());
+    expect(names(sectionsToPmDoc([]))).toEqual(['paragraph']);
+  });
+
+  it('keeps empty sections as adjacent or trailing breaks', () => {
+    const pm = sectionsToPmDoc([sec('a', 1), sec('b', 2, p('1', 'x')), sec('c', 3)]);
+    expect(names(pm)).toEqual(['section_break', 'paragraph', 'section_break']);
+  });
+
+  it('documentToProseMirror inserts the same breaks', () => {
+    const json = documentToProseMirror(doc(sec('a', 1, p('1', 'x')), sec('b', 2, p('2', 'y'))));
+    expect(json.content?.map((n) => n.type)).toEqual(['paragraph', 'section_break', 'paragraph']);
+    expect(json.content?.[1].attrs).toEqual({ sectionId: 'a' });
+    const single = documentToProseMirror(doc(sec('a', 1, p('1', 'x'))));
+    expect(single.content?.map((n) => n.type)).toEqual(['paragraph']);
+  });
+
+  it('proseMirrorToDocument splits at breaks and carries each section’s setup over by id', () => {
+    const existing = doc(sec('a', 1), sec('b', 2), sec('c', 3));
+    existing.sections[1].header = { blocks: [] };
+    const pm = sectionsToPmDoc([sec('a', 1, p('1', 'x')), sec('b', 2, p('2', 'y')), sec('c', 3, p('3', 'z'))]);
+    const out = proseMirrorToDocument(pm, existing);
+    expect(out.sections.map((s) => s.id)).toEqual(['a', 'b', 'c']);
+    expect(out.sections.map((s) => s.pageConfig.size.w)).toEqual([1, 2, 3]);
+    expect(out.sections[1].header).toEqual({ blocks: [] });
+    expect(out.sections.map(texts)).toEqual([['x'], ['y'], ['z']]);
+  });
+
+  it('a list does not run across a break, and numbering resets in the next section', () => {
+    const li = (id: string): ListItemBlock => ({ id, type: 'list-item', listType: 'numbered', level: 0, content: [{ type: 'text', text: id }] });
+    const pm = sectionsToPmDoc([sec('a', 1, li('1'), li('2')), sec('b', 2, li('3'))]);
+    expect(names(pm)).toEqual(['ordered_list', 'section_break', 'ordered_list']);
+    const out = proseMirrorToDocument(pm, doc(sec('a', 1), sec('b', 2)));
+    expect(out.sections.map((s) => s.blocks.length)).toEqual([2, 1]);
+  });
+
+  it('without a break the result is existingDoc.sections[0] with the new blocks, as before', () => {
+    const existing = doc(sec('a', 1), sec('b', 2));
+    const out = proseMirrorToDocument(blocksToPmDoc([p('1', 'x')]), existing);
+    expect(out.sections.map((s) => s.id)).toEqual(['a']);
+    expect(texts(out.sections[0])).toEqual(['x']);
+  });
+
+  it('the last section is the last existing one that no break names', () => {
+    const existing = doc(sec('a', 1), sec('gone', 2), sec('b', 3));
+    // One break (naming a): the rest is the last section, 'b' (the last existing section no break names).
+    const out = proseMirrorToDocument(sectionsToPmDoc([sec('a', 1, p('1', 'x')), sec('z', 9, p('2', 'y'))]), existing);
+    expect(out.sections.map((s) => s.id)).toEqual(['a', 'b']);
+    expect(out.sections[1].pageConfig.size.w).toBe(3);
+    expect(texts(out.sections[1])).toEqual(['y']);
+  });
+
+  it('a break that names an unknown id gets a section with the first section’s page setup', () => {
+    const out = proseMirrorToDocument(sectionsToPmDoc([sec('q', 1, p('1', 'x')), sec('r', 1, p('2', 'y'))]), doc(sec('a', 5)));
+    expect(out.sections.map((s) => s.id)).toEqual(['q', 'a']);
+    expect(out.sections[0].pageConfig.size.w).toBe(5);
+  });
+
+  it('when every existing section is named by a break, the last section is new and its id does not clash', () => {
+    const out = proseMirrorToDocument(
+      sectionsToPmDoc([sec('a', 1, p('1', 'x')), sec('b', 1, p('2', 'y')), sec('c', 1, p('3', 'z'))]),
+      doc(sec('a', 5), sec('b', 6)),
+    );
+    expect(out.sections.map((s) => s.id)).toEqual(['a', 'b', 'section_3']);
+    expect(out.sections[2].pageConfig.size.w).toBe(5);
+  });
+
+  it('is invalid-proof: ids stay unique when a break id repeats', () => {
+    const pm = docsSchema.nodeFromJSON({
+      type: 'doc',
+      content: [
+        { type: 'section_break', attrs: { sectionId: 'a' } },
+        { type: 'section_break', attrs: { sectionId: 'a' } },
+        { type: 'paragraph' },
+      ],
+    });
+    const out = proseMirrorToDocument(pm, doc(sec('a', 1)));
+    expect(out.sections.map((s) => s.id)).toEqual(['a', 'a_2', 'section_3']);
   });
 });

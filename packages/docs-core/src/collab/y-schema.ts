@@ -1,7 +1,7 @@
 // Y.Doc schema for collaborative documents.
 //
 // Layout:
-//   meta:               Y.Map<string, JSON>  — id, title, defaultPageConfig, timestamps
+//   meta:               Y.Map<string, JSON>  — id, title, defaultPageConfig, timestamps, schemaVersion
 //   content:            Y.XmlFragment        — body text (ProseMirror-compatible, bound via y-prosemirror)
 //   sectionsMeta:       Y.Array<Y.Map>       — per-section metadata (id, pageConfig (with columns), header, footer,
 //                                              pageNumbering, verticalAlign)
@@ -9,11 +9,18 @@
 //   textStylePool:      Y.Map<string, JSON>  — styleId → TextStyle
 //   paragraphStylePool: Y.Map<string, JSON>  — styleId → ParagraphStyle
 //
-// v1 supports single-section documents in collaboration mode. The blocks of
-// all sections live in a single Y.XmlFragment; sectionsMeta holds page
-// configuration and header/footer for that one section. Multi-section
-// collab will need block-level section markers in the PM schema and is
-// deferred. hydrateYDocFromData throws if asked to load a multi-section doc.
+// Sections. The blocks of all sections live in the one Y.XmlFragment; a
+// `section_break` node ends every section but the last and names it by id
+// (attrs.sectionId). sectionsMeta holds the setup of each section, looked up by
+// that id; the last section has no break, and is the last sectionsMeta entry
+// that no break names. A document with no break is a single section, so every
+// document written before sections were co-edited is still valid unchanged.
+// Entries of deleted breaks stay in sectionsMeta unused and are not read back.
+//
+// schemaVersion (meta): the version of this layout the room was written with.
+// A missing key means 1 (no section breaks). A client refuses to join a room
+// whose version is newer than COLLAB_SCHEMA_VERSION (see assertSchemaVersion),
+// because y-prosemirror drops nodes it cannot instantiate.
 
 import * as Y from 'yjs';
 import {
@@ -23,7 +30,7 @@ import {
 import { docsSchema } from '../prosemirror/schema';
 import { TextStylePoolImpl } from '../style-pool';
 import {
-  blocksToPmDoc,
+  sectionsToPmDoc,
   proseMirrorToDocument,
 } from '../prosemirror/sync';
 import type {
@@ -39,6 +46,39 @@ import type {
   TextStyle,
 } from '../types';
 import type { DocsCommentThread } from '../comments';
+
+/**
+ * The Y document layout this build reads and writes. 1 is the layout without section breaks (the key is then absent),
+ * 2 adds `section_break` nodes. Raised by any later change an older client could not read.
+ */
+export const COLLAB_SCHEMA_VERSION = 2;
+
+/** Thrown when a room was written with a newer Y document layout than this client understands. */
+export class CollabSchemaVersionError extends Error {
+  readonly roomVersion: number;
+  readonly supportedVersion: number;
+  constructor(roomVersion: number, supportedVersion: number = COLLAB_SCHEMA_VERSION) {
+    super(
+      `This collaboration room uses document schema version ${roomVersion}, but this editor only supports up to ` +
+        `version ${supportedVersion}. Update the editor to join the room.`,
+    );
+    this.name = 'CollabSchemaVersionError';
+    this.roomVersion = roomVersion;
+    this.supportedVersion = supportedVersion;
+  }
+}
+
+/** The schema version a Y.Doc was written with (1 when the key is absent or not a number). */
+export function readSchemaVersion(ydoc: Y.Doc): number {
+  const v = ydoc.getMap<unknown>('meta').get('schemaVersion');
+  return typeof v === 'number' && Number.isFinite(v) && v >= 1 ? v : 1;
+}
+
+/** Throw a CollabSchemaVersionError when the Y.Doc was written with a newer schema than this client supports. */
+export function assertSchemaVersion(ydoc: Y.Doc): void {
+  const version = readSchemaVersion(ydoc);
+  if (version > COLLAB_SCHEMA_VERSION) throw new CollabSchemaVersionError(version);
+}
 
 export interface YDocFields {
   meta: Y.Map<unknown>;
@@ -83,17 +123,11 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
   if (data.sections.length === 0) {
     throw new Error('Cannot hydrate Y.Doc from a document with no sections');
   }
-  if (data.sections.length > 1) {
-    throw new Error(
-      'Collaboration v1 supports only single-section documents; ' +
-        `received ${data.sections.length} sections`,
-    );
-  }
-
   const fields = getYDocFields(ydoc);
 
   ydoc.transact(() => {
     // Document-level meta
+    fields.meta.set('schemaVersion', COLLAB_SCHEMA_VERSION);
     fields.meta.set('id', data.id);
     fields.meta.set('title', data.title);
     fields.meta.set('defaultPageConfig', data.defaultPageConfig);
@@ -109,9 +143,8 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
       fields.paragraphStylePool.set(id, style);
     }
 
-    // Section metadata (one entry per section). Page config / header /
-    // footer are stored as plain JSON on the Y.Map; they aren't co-edited
-    // in v1.
+    // Section metadata (one entry per section, in document order). Page config /
+    // header / footer are stored as plain JSON on the Y.Map; they aren't co-edited.
     for (const section of data.sections) {
       const sectionMap = new Y.Map<unknown>();
       sectionMap.set('id', section.id);
@@ -140,10 +173,11 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
     // raw documentToProseMirror converter skips (the latter emits an
     // internal "__list_item__" sentinel meant for that grouping step).
     // Runs may reference the text style pool by id; resolve them to marks here
-    // or the formatting is silently dropped when the body is seeded.
+    // or the formatting is silently dropped when the body is seeded. Sections
+    // after the first are separated by section_break nodes.
     const textPool = new TextStylePoolImpl();
     textPool.setFromData(data.textStylePool ?? {});
-    const pmDoc = blocksToPmDoc(data.sections[0].blocks, textPool);
+    const pmDoc = sectionsToPmDoc(data.sections, textPool);
     prosemirrorToYXmlFragment(pmDoc, fields.content);
   });
 }
@@ -173,7 +207,7 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
     paragraphStylePool[k] = v as ParagraphStyle;
   }
 
-  // Reconstruct the section's blocks by routing the Y.XmlFragment through
+  // Reconstruct the sections' blocks by routing the Y.XmlFragment through
   // the existing PM → block converter. existingDoc provides the metadata
   // that proseMirrorToDocument needs to preserve.
   const pmDoc = yXmlFragmentToProseMirrorRootNode(fields.content, docsSchema);
@@ -206,23 +240,23 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
     });
   }
 
-  // Single-section v1 — drop all PM blocks into sections[0].
+  // Each section_break names the section it ends; the blocks after the last one form the last section. A body
+  // with no break is one section: the last entry of sectionsMeta (the only one in a document written before sections
+  // were co-edited).
+  let hasBreak = false;
+  pmDoc.forEach((node) => {
+    if (node.type.name === 'section_break') hasBreak = true;
+  });
   const seedDoc: Document = {
     id,
     title,
     defaultPageConfig,
-    sections: [
-      {
-        id: sections[0].id,
-        pageConfig: sections[0].pageConfig,
-        blocks: [],
-      },
-    ],
+    sections: hasBreak ? sections : [sections[sections.length - 1]],
     createdAt,
     updatedAt,
   };
   const rebuilt = proseMirrorToDocument(pmDoc, seedDoc);
-  sections[0].blocks = rebuilt.sections[0].blocks;
+  const orderedSections: SectionData[] = rebuilt.sections;
 
   const namedStyles = readNamedStyles(fields.namedStyles);
 
@@ -234,7 +268,7 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
   return {
     id,
     title,
-    sections,
+    sections: orderedSections,
     defaultPageConfig,
     textStylePool,
     paragraphStylePool,
