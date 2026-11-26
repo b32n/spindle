@@ -28,6 +28,23 @@ FORMULAS = [
     'ROUNDDOWN(2.9,0)', 'A1^2', '-2^2', 'A1:A3*2', '"a"&1', '(1+2)*3', '1=1', '"a"<"b"', '50%', 'SUM(A1:A3,10)', 'SUM(Data!A1:A3)',
 ]
 
+# Cached value of each FORMULAS entry: what LibreOffice 25.2.3.2 computes with recalculation forced on load (profile
+# setting OOXMLRecalcMode = 0). LibreOffice has no TEXTBEFORE, TEXTSPLIT, HSTACK, VSTACK or TAKE (it returns #NAME?), so
+# those five carry the value Excel gives (first cell of the spilled result), and MODE of all-distinct numbers carries Excel's
+# #N/A (LibreOffice gives #VALUE!). Numbers are LibreOffice's 15 digits.
+FORMULA_EXPECTED = [
+    55, 5.5, 20, 10, 1, 0.33, 3, 2, 8, 1.73205080756888, 0, 2, 2, 0.841470984807897, 0.54030230586814, 3.14159265358979,
+    3.14159265358979, 120, 10, 14, 4, 3, True, 9, 55, 'x', 2, 'y', 3, 'b', 'n', 'b', 'one', 'e', False, True, 25, 24, 5,
+    4, 5, 14, 7, 'x', 'x', 'bcd', 3, 'A', 'a', 'Ab Cd', 'a b', 'ab', 'x,y,x', 'ccb', 2, 2, 'aaa', '1,234.50',
+    '2026-01-02', 'Friday', '25.6%', 12, 'a', True, 1.5, 'a', 'a', 46056, 2026, 2, 3, 3, 46081, 46081, 14, 22, 46030, 31,
+    0.5, 2, 2, 46024, 5.5, 3.02765035409749, 3.02765035409749, 9.16666666666667, 9.1, 9.1, 3.25, 8, 8, 9, 2, '#N/A', 1,
+    1, 2, 1.81712059283214, 188.712336440109, 1257.78925355488, 772.173492918482, 4.81592787377911, 0.0889633946933447,
+    14.107278122268, 0.417886145227093, 180, 14.2066990828905, 0.0427749780351118, True, True, True, True, True, 1, 5, 5,
+    3, 10, 3, '$C$2', 'x', 2, 3, 3, 3, 1, 9, 3, 'x', 1, 3, 6, 1, 1, 1, 30, 0, 55, 6, 5, 2, -1, 2, 0, 2.71828182845905, 6,
+    12, 3, 2, 1, 4, '#VALUE!', 'a1', 9, True, True, 0.5, 16, 6
+]
+assert len(FORMULA_EXPECTED) == len(FORMULAS)
+
 NUMBER_FORMATS = [
     '0', '0.00', '#,##0', '#,##0.00', '$#,##0.00', '"$"#,##0.00', '0%', '0.00%', '0.00E+00', '# ?/?', '# ??/??', 'yyyy-mm-dd',
     'm/d/yyyy', 'd-mmm-yy', 'dd/mm/yyyy', 'mmm d, yyyy', 'dddd', 'h:mm AM/PM', 'hh:mm:ss', 'yyyy-mm-dd hh:mm', '[h]:mm:ss',
