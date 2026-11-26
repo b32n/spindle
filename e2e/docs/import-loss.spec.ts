@@ -9,7 +9,7 @@ type Opened = { fileName: string; loss: { items: Array<{ id: string; count: numb
 const lastOpened = (page: Page) =>
   page.evaluate(() => (window as unknown as { __lastOpened?: Opened }).__lastOpened);
 
-/** rich-document.docx plus a tracked insertion of a paragraph mark (tracked changes around text are kept) and a footnote. */
+/** rich-document.docx plus a tracked insertion of a paragraph mark in a table cell of one paragraph (the one tracked change that is not kept) and a footnote. */
 async function lossyDocx(): Promise<{ name: string; mimeType: string; buffer: Buffer }> {
   const zip = await JSZip.loadAsync(
     (await import('node:fs')).readFileSync(fixture('rich-document.docx'))
@@ -19,7 +19,7 @@ async function lossyDocx(): Promise<{ name: string; mimeType: string; buffer: Bu
     'word/document.xml',
     xml.replace(
       '</w:body>',
-      '<w:p><w:pPr><w:rPr><w:ins w:id="99" w:author="A"/></w:rPr></w:pPr><w:r><w:t>tracked</w:t></w:r></w:p></w:body>'
+      '<w:tbl><w:tr><w:tc><w:p><w:pPr><w:rPr><w:ins w:id="99" w:author="A"/></w:rPr></w:pPr><w:r><w:t>tracked</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body>'
     )
   );
   zip.file(
