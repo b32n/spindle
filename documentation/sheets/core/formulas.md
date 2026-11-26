@@ -1,7 +1,7 @@
 # Formula System
 
 The formula system gives `@b32nio/spindle-sheets-core` spreadsheet calculation:
-a parser, a library of **146 built-in functions**, a dependency graph with
+a parser, a library of **193 built-in functions**, a dependency graph with
 **topological recalculation**, **dynamic arrays (spill)**, and the metadata
 that powers **formula autocomplete**. Everything lives under
 `packages/sheets-core/src/formula-parser/` (plus `formula-graph.ts` and
@@ -242,11 +242,27 @@ references — relative references shift with the copy offset, absolute
 part. Structural edits (insert/delete/sort) need no formula rewriting: the
 stable AST already references cells by ID.
 
+## Conformance suite
+
+`packages/sheets-core/src/formula-conformance-oracle.json` holds one row per
+formula (the 159-formula probe of `fixtures/xlsx/formulas-core.xlsx` plus the
+batch-A cases of `fixtures/xlsx/generators/conformance_cases.py`) with the value
+LibreOffice 25.2 computes when it recalculates the authored workbook.
+`python3 -I fixtures/xlsx/generators/build_conformance_oracle.py` regenerates it
+(run locally; CI never runs LibreOffice). Where LibreOffice differs from Excel
+(for example it reports an invalid argument as `#VALUE!` where Excel gives
+`#NUM!`) the row carries the documented Excel value, tagged `excel: true,
+unverified: true`, with LibreOffice's value and the reason in `note`.
+`formula-conformance-oracle.test.ts` runs every row through the engine (numbers
+to a relative 1e-9, text exactly, errors by code); rows the engine cannot pass yet
+sit in an explicit `KNOWN_FAILING` list with a reason, and the suite asserts that
+they still fail, so the list shrinks as functions land.
+
 ## Function Reference
 
-All 146 built-in functions, grouped by category:
+All 193 built-in functions, grouped by category:
 
-### Math (37 functions)
+### Math (67 functions)
 
 | Function | Description |
 |---|---|
@@ -287,6 +303,36 @@ All 146 built-in functions, grouped by category:
 | `LCM(number1, [number2, ...])` | Returns the least common multiple. |
 | `RAND()` | Returns a random number between 0 and 1. |
 | `RANDBETWEEN(low, high)` | Returns a random integer between two values. |
+| `SIN(number)` | Returns the sine of an angle in radians. |
+| `COS(number)` | Returns the cosine of an angle in radians. |
+| `TAN(number)` | Returns the tangent of an angle in radians. |
+| `ASIN(number)` | Returns the arcsine of a number, in radians (-1 to 1). |
+| `ACOS(number)` | Returns the arccosine of a number, in radians (-1 to 1). |
+| `ATAN(number)` | Returns the arctangent of a number, in radians. |
+| `ATAN2(x_num, y_num)` | Returns the arctangent of the point (x, y), in radians. |
+| `SINH(number)` | Returns the hyperbolic sine of a number. |
+| `COSH(number)` | Returns the hyperbolic cosine of a number. |
+| `TANH(number)` | Returns the hyperbolic tangent of a number. |
+| `ASINH(number)` | Returns the inverse hyperbolic sine of a number. |
+| `ACOSH(number)` | Returns the inverse hyperbolic cosine of a number (at least 1). |
+| `ATANH(number)` | Returns the inverse hyperbolic tangent of a number (between -1 and 1). |
+| `PI()` | Returns the value of pi. |
+| `RADIANS(angle)` | Converts degrees to radians. |
+| `DEGREES(angle)` | Converts radians to degrees. |
+| `FACT(number)` | Returns the factorial of a number. |
+| `FACTDOUBLE(number)` | Returns the double factorial of a number. |
+| `COMBIN(number, number_chosen)` | Returns the number of combinations for a number of items. |
+| `PERMUT(number, number_chosen)` | Returns the number of permutations for a number of items. |
+| `SUMSQ(number1, [number2, ...])` | Returns the sum of the squares of the arguments. |
+| `EVEN(number)` | Rounds a number away from zero to the nearest even integer. |
+| `ODD(number)` | Rounds a number away from zero to the nearest odd integer. |
+| `ISEVEN(number)` | Returns TRUE when a number is even. |
+| `ISODD(number)` | Returns TRUE when a number is odd. |
+| `CEILING.MATH(number, [significance], [mode])` | Rounds a number up to the nearest multiple of significance. |
+| `FLOOR.MATH(number, [significance], [mode])` | Rounds a number down to the nearest multiple of significance. |
+| `MAXIFS(max_range, criteria_range1, criterion1, [criteria_range, criterion, ...])` | Returns the largest value among the cells that meet multiple criteria. |
+| `MINIFS(min_range, criteria_range1, criterion1, [criteria_range, criterion, ...])` | Returns the smallest value among the cells that meet multiple criteria. |
+| `AGGREGATE(function_num, options, ref1, [ref2 or k, ...])` | Applies one of 19 functions to a list, optionally ignoring errors. |
 
 ### Logical (11 functions)
 
@@ -347,7 +393,7 @@ All 146 built-in functions, grouped by category:
 | `ADDRESS(row, column, [abs_num], [a1], [sheet])` | Builds a cell-reference string from row and column numbers. |
 | `HYPERLINK(url, [label])` | Creates a hyperlink with optional display text. |
 
-### Statistical (13 functions)
+### Statistical (30 functions)
 
 | Function | Description |
 |---|---|
@@ -364,6 +410,23 @@ All 146 built-in functions, grouped by category:
 | `SMALL(array, k)` | Returns the k-th smallest value in a data set. |
 | `CORREL(array1, array2)` | Returns the correlation coefficient of two ranges. |
 | `COVAR(array1, array2)` | Returns the population covariance of two ranges. |
+| `STDEV.S(number1, [number2, ...])` | Estimates standard deviation from a sample. |
+| `STDEV.P(number1, [number2, ...])` | Calculates standard deviation of an entire population. |
+| `VAR.S(number1, [number2, ...])` | Estimates variance from a sample. |
+| `VAR.P(number1, [number2, ...])` | Calculates variance of an entire population. |
+| `PERCENTILE.INC(array, k)` | Returns the k-th percentile of values (k from 0 to 1, inclusive). |
+| `PERCENTILE.EXC(array, k)` | Returns the k-th percentile of values (k strictly between 0 and 1). |
+| `QUARTILE.INC(array, quart)` | Returns a quartile (0-4) of a data set, inclusive. |
+| `QUARTILE.EXC(array, quart)` | Returns a quartile (1-3) of a data set, exclusive. |
+| `RANK.EQ(number, ref, [order])` | Returns the rank of a number within a list; ties share the top rank. |
+| `MODE.SNGL(number1, [number2, ...])` | Returns the most frequently occurring value. |
+| `SLOPE(known_ys, known_xs)` | Returns the slope of the linear regression line. |
+| `INTERCEPT(known_ys, known_xs)` | Returns the intercept of the linear regression line. |
+| `RSQ(known_ys, known_xs)` | Returns the square of the Pearson correlation coefficient. |
+| `FORECAST(x, known_ys, known_xs)` | Predicts a value along a linear trend. |
+| `FORECAST.LINEAR(x, known_ys, known_xs)` | Predicts a value along a linear trend. |
+| `GEOMEAN(number1, [number2, ...])` | Returns the geometric mean of positive numbers. |
+| `FREQUENCY(data_array, bins_array)` | Counts values per interval, as a column (spills). |
 
 ### Date & Time (19 functions)
 

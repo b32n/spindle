@@ -1,14 +1,14 @@
 // Statistical functions.
 
 import type { EagerFn } from './helpers';
-import { flatten, strictNumbers, toNum } from './helpers';
+import { flatten, isErrorValue, strictNumbers, toNum } from './helpers';
 
-function mean(nums: number[]): number {
+export function mean(nums: number[]): number {
   return nums.reduce((a, b) => a + b, 0) / nums.length;
 }
 
 /** Population (sample=false) or sample (sample=true) variance. */
-function variance(nums: number[], sample: boolean): number {
+export function variance(nums: number[], sample: boolean): number {
   const n = nums.length;
   if (sample ? n < 2 : n < 1) throw new Error('#DIV/0!');
   const m = mean(nums);
@@ -16,8 +16,33 @@ function variance(nums: number[], sample: boolean): number {
   return ss / (sample ? n - 1 : n);
 }
 
+/** The middle value (mean of the two middle values for an even count); `#NUM!` when empty. */
+export function median(nums: number[]): number {
+  if (nums.length === 0) throw new Error('#NUM!');
+  const s = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/** The value occurring most often; among ties the one that appears first (as Excel does). `#N/A` when all are distinct. */
+export function modeOf(nums: number[]): number {
+  const counts = new Map<number, number>();
+  for (const n of nums) counts.set(n, (counts.get(n) ?? 0) + 1);
+  let best: number | null = null;
+  let bestCount = 1;
+  for (const n of nums) {
+    const c = counts.get(n) as number;
+    if (c > bestCount) {
+      bestCount = c;
+      best = n;
+    }
+  }
+  if (best === null) throw new Error('#N/A');
+  return best;
+}
+
 /** Linear-interpolation percentile (the inclusive variant Excel uses). */
-function percentile(sorted: number[], k: number): number {
+export function percentile(sorted: number[], k: number): number {
   const idx = k * (sorted.length - 1);
   const lo = Math.floor(idx);
   const hi = Math.ceil(idx);
@@ -32,14 +57,16 @@ function numericOf(v: unknown): number | null {
   return null;
 }
 
-/** Pair two ranges index-wise, dropping pairs where either side is non-numeric. */
-function numberPairs(a: unknown, b: unknown): [number[], number[]] {
+/** Pair two ranges index-wise, dropping pairs where either side is non-numeric (an error propagates). */
+export function numberPairs(a: unknown, b: unknown): [number[], number[]] {
   const fa = flatten([a]);
   const fb = flatten([b]);
   if (fa.length !== fb.length) throw new Error('#N/A');
   const xs: number[] = [];
   const ys: number[] = [];
   for (let i = 0; i < fa.length; i++) {
+    // An error value in either series propagates, like every other statistic.
+    for (const v of [fa[i], fb[i]]) if (typeof v === 'string' && isErrorValue(v)) throw new Error(v);
     const x = numericOf(fa[i]);
     const y = numericOf(fb[i]);
     if (x !== null && y !== null) {
@@ -51,28 +78,9 @@ function numberPairs(a: unknown, b: unknown): [number[], number[]] {
 }
 
 export const statsFunctions: Record<string, EagerFn> = {
-  MEDIAN: (args) => {
-    const nums = strictNumbers(args).sort((a, b) => a - b);
-    if (nums.length === 0) throw new Error('#NUM!');
-    const mid = Math.floor(nums.length / 2);
-    return nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-  },
+  MEDIAN: (args) => median(strictNumbers(args)),
 
-  MODE: (args) => {
-    const counts = new Map<number, number>();
-    let best: number | null = null;
-    let bestCount = 1;
-    for (const n of strictNumbers(args)) {
-      const c = (counts.get(n) ?? 0) + 1;
-      counts.set(n, c);
-      if (c > bestCount) {
-        bestCount = c;
-        best = n;
-      }
-    }
-    if (best === null) throw new Error('#N/A');
-    return best;
-  },
+  MODE: (args) => modeOf(strictNumbers(args)),
 
   VAR: (args) => variance(strictNumbers(args), true),
 

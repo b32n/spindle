@@ -73,6 +73,15 @@ export function toNum(v: unknown): number {
 }
 
 /**
+ * Like toNum, but text that is empty or only spaces is `#VALUE!` instead of 0 (Excel:
+ * `=SIN("")` and `=SIN(A1)` where A1 holds ="" fail; a truly empty cell is still 0).
+ */
+export function toStrictNum(v: unknown): number {
+  if (typeof v === 'string' && !isErrorValue(v) && v.trim() === '') throw new Error('#VALUE!');
+  return toNum(v);
+}
+
+/**
  * Coerce for SUM-style aggregation over a range: an error value propagates
  * (throws), while text and blanks count as 0 (Excel SUMPRODUCT/SUMIF semantics).
  */
@@ -80,6 +89,48 @@ export function toSumNum(v: unknown): number {
   if (typeof v === 'string' && isErrorValue(v)) throw new Error(v);
   const n = Number(v);
   return isNaN(n) ? 0 : n;
+}
+
+/** Throw `#VALUE!` unless the argument count is within [min, max] (Excel refuses such a formula). */
+export function checkArity(args: unknown[], min: number, max: number = min): void {
+  if (args.length < min || args.length > max) throw new Error('#VALUE!');
+}
+
+/**
+ * Evaluate a scalar function over its arguments, lifted over arrays: when any
+ * argument is a range or array the call runs per element (a scalar and a single
+ * row/column broadcast, positions with no counterpart are #N/A) and a failing
+ * element becomes that element's error value instead of failing the whole result.
+ */
+export function liftScalar(args: unknown[], fn: (scalars: unknown[]) => unknown): unknown {
+  if (!args.some((a) => Array.isArray(a))) return fn(args);
+  const grids = args.map((a) => toMatrix(a));
+  const widths = grids.map((g) => g.reduce((m, row) => Math.max(m, row.length), 0));
+  const rows = Math.max(...grids.map((g) => g.length));
+  const cols = Math.max(...widths);
+  const out: unknown[][] = [];
+  for (let i = 0; i < rows; i++) {
+    const row: unknown[] = [];
+    for (let j = 0; j < cols; j++) {
+      const cells = grids.map((g, k) => {
+        const r = g.length === 1 ? 0 : i;
+        const c = widths[k] === 1 ? 0 : j;
+        return r < g.length && c < g[r].length ? { v: g[r][c] } : undefined;
+      });
+      if (cells.includes(undefined)) {
+        row.push('#N/A');
+        continue;
+      }
+      try {
+        row.push(fn(cells.map((cell) => (cell as { v: unknown }).v)));
+      } catch (e) {
+        const msg = (e as Error).message;
+        row.push(msg.startsWith('#') ? msg.split(' ')[0] : '#VALUE!');
+      }
+    }
+    out.push(row);
+  }
+  return out;
 }
 
 /** Coerce a value to text. Booleans render as TRUE/FALSE; blank as ''. */

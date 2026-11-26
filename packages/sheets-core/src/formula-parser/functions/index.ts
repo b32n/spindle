@@ -2,10 +2,13 @@
 
 import type { EagerFn, LazyFn, RefFn } from './helpers';
 import { mathFunctions } from './math';
+import { mathExtFunctions } from './math-ext';
 import { logicalEagerFunctions, logicalLazyFunctions } from './logical';
 import { textFunctions } from './text';
 import { lookupFunctions } from './lookup';
 import { statsFunctions } from './stats';
+import { statsExtFunctions } from './stats-ext';
+import { aggregateFunctions } from './aggregate';
 import { dateFunctions } from './date';
 import { informationEagerFunctions, informationLazyFunctions } from './information';
 import { financialFunctions } from './financial';
@@ -17,10 +20,13 @@ export type { EagerFn, LazyFn, RefFn } from './helpers';
 /** Functions whose arguments are fully evaluated before the function runs. */
 export const eagerFunctions: Record<string, EagerFn> = {
   ...mathFunctions,
+  ...mathExtFunctions,
+  ...aggregateFunctions,
   ...logicalEagerFunctions,
   ...textFunctions,
   ...lookupFunctions,
   ...statsFunctions,
+  ...statsExtFunctions,
   ...dateFunctions,
   ...informationEagerFunctions,
   ...financialFunctions,

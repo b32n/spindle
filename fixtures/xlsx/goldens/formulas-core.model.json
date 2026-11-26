@@ -782,7 +782,7 @@
           },
           "I14": {
             "formula": "=SIN(1)",
-            "value": "#NAME? Function SIN not found"
+            "value": 0.8414709848079
           },
           "I140": {
             "formula": "=MROUND(7,5)",
@@ -826,7 +826,7 @@
           },
           "I15": {
             "formula": "=COS(1)",
-            "value": "#NAME? Function COS not found"
+            "value": 0.5403023058681
           },
           "I150": {
             "formula": "=A1^2",
@@ -870,19 +870,19 @@
           },
           "I16": {
             "formula": "=PI()",
-            "value": "#NAME? Function PI not found"
+            "value": 3.14159265359
           },
           "I17": {
             "formula": "=RADIANS(180)",
-            "value": "#NAME? Function RADIANS not found"
+            "value": 3.14159265359
           },
           "I18": {
             "formula": "=FACT(5)",
-            "value": "#NAME? Function FACT not found"
+            "value": 120
           },
           "I19": {
             "formula": "=COMBIN(5,2)",
-            "value": "#NAME? Function COMBIN not found"
+            "value": 10
           },
           "I2": {
             "formula": "=AVERAGE(A1:A10)",
@@ -890,19 +890,19 @@
           },
           "I20": {
             "formula": "=SUMSQ(A1:A3)",
-            "value": "#NAME? Function SUMSQ not found"
+            "value": 14
           },
           "I21": {
             "formula": "=EVEN(3)",
-            "value": "#NAME? Function EVEN not found"
+            "value": 4
           },
           "I22": {
             "formula": "=ODD(2)",
-            "value": "#NAME? Function ODD not found"
+            "value": 3
           },
           "I23": {
             "formula": "=ISEVEN(4)",
-            "value": "#NAME? Function ISEVEN not found"
+            "value": true
           },
           "I24": {
             "formula": "=_xlfn.MAXIFS(A1:A10,B1:B10,\"x\")",
@@ -1222,15 +1222,15 @@
           },
           "I96": {
             "formula": "=SLOPE(A1:A10,A1:A10)",
-            "value": "#NAME? Function SLOPE not found"
+            "value": 1
           },
           "I97": {
             "formula": "=FORECAST(2,A1:A10,A1:A10)",
-            "value": "#NAME? Function FORECAST not found"
+            "value": 2
           },
           "I98": {
             "formula": "=GEOMEAN(A1:A3)",
-            "value": "#NAME? Function GEOMEAN not found"
+            "value": 1.817120592832
           },
           "I99": {
             "formula": "=PMT(0.05/12,60,-10000)",
