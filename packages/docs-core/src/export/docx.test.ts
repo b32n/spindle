@@ -421,6 +421,21 @@ describe('importFromDocx', () => {
     expect(footer?.blocks[0].content).toEqual([{ type: 'dynamicField', fieldType: 'pageNumber' }]);
   });
 
+  it('round-trips bookmarks and internal links through the model', async () => {
+    const content: InlineContent[] = [
+      { type: 'bookmark', name: '_Toc1' },
+      { type: 'text', text: 'Intro ' },
+      { type: 'link', text: 'back', href: '#_Toc1' },
+    ];
+    const source = docWith({
+      sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'b1', type: 'paragraph', content }] }],
+    });
+    const { result: exported } = await exportAndUnzip(source);
+    const target = docWith({});
+    await importFromDocx(exported.bytes, target);
+    expect(target.getData().sections[0].blocks[0]).toMatchObject({ content });
+  });
+
   it('round-trips generic fields with their instruction and cached result through the model', async () => {
     const content: InlineContent[] = [
       { type: 'text', text: 'See ' },
@@ -459,21 +474,21 @@ describe('importFromDocx', () => {
 });
 
 describe('inspectDocx detail', () => {
-  async function bytesWithBookmark() {
+  async function bytesWithDropCap() {
     const exported = await exportToDocx(docWith({}));
     const zip = await JSZip.loadAsync(exported.bytes);
     const xml = await zip.file('word/document.xml')!.async('string');
-    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:bookmarkStart w:id="1" w:name="mark"/><w:r><w:t>a</w:t></w:r></w:p></w:body>'));
+    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:pPr><w:framePr w:dropCap="drop" w:lines="3"/></w:pPr><w:r><w:t>a</w:t></w:r></w:p></w:body>'));
     return zip.generateAsync({ type: 'uint8array' });
   }
 
   it('reports only confirmation-level losses by default', async () => {
-    expect((await inspectDocx(await bytesWithBookmark())).items).toEqual([]);
+    expect((await inspectDocx(await bytesWithDropCap())).items).toEqual([]);
   });
 
   it("reports formatting and structure losses with detail 'full'", async () => {
-    const report = await inspectDocx(await bytesWithBookmark(), { detail: 'full' });
-    expect(report.items.map((i) => i.id)).toEqual(['docx.bookmarks']);
+    const report = await inspectDocx(await bytesWithDropCap(), { detail: 'full' });
+    expect(report.items.map((i) => i.id)).toEqual(['docx.dropCaps']);
   });
 });
 

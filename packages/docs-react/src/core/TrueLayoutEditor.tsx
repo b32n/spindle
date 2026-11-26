@@ -22,7 +22,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from 'react';
-import { EditorState, Transaction } from 'prosemirror-state';
+import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
 import { docsSchema, createPlugins, blocksToPmDoc, proseMirrorToDocument, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
@@ -33,6 +33,7 @@ import { ensureCollabCursorStyles } from './collab-cursor-styles';
 import { FlowBlock } from './flow-blocks';
 import { proseMirrorToFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
 import { DomMeasurer, Measure } from './measurer';
+import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
 import { computeTrueLayout, DocumentLayout, PageConfig } from './true-layout-engine';
 import { DomPainter, HeaderFooterContent } from './dom-painter';
 import { InputBridge, createInputBridge, CellSelection } from './input-bridge';
@@ -526,6 +527,41 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       };
     }, [editorView, onCellSelectionChange]);
     
+    // Clicking an internal link (`#name`) scrolls to the bookmark of that name.
+    useEffect(() => {
+      const container = pagesContainerRef.current;
+      const viewport = viewportRef.current;
+      if (!editorView || !container || !viewport) return;
+      const onClick = (e: MouseEvent) => {
+        const link = (e.target as Element | null)?.closest?.('a[href^="#"]');
+        const name = internalLinkTarget(link?.getAttribute('href'));
+        if (!link || name === null) return;
+        e.preventDefault();
+        const pos = findBookmarkPos(editorView.state.doc, name);
+        if (pos === null) return;
+        // Bring the page into view (pages outside the window are not painted), then the line itself.
+        const current = layoutRef.current;
+        const page = current?.pages.findIndex((p) =>
+          p.fragments.some((f) => {
+            const info = blockPositionMapRef.current.get(f.blockId);
+            return !!info && pos >= info.start && pos <= info.end;
+          })
+        );
+        if (page !== undefined && page >= 0) viewport.scrollTop = page * (pageHeight + pageGap * zoom);
+        const { state } = editorView;
+        editorView.dispatch(state.tr.setSelection(TextSelection.near(state.doc.resolve(pos))));
+        let tries = 0;
+        const reveal = () => {
+          const el = findElementAtPos(container, pos);
+          if (el) el.scrollIntoView({ block: 'center' });
+          else if (++tries < 10) requestAnimationFrame(reveal);
+        };
+        requestAnimationFrame(reveal);
+      };
+      container.addEventListener('click', onClick);
+      return () => container.removeEventListener('click', onClick);
+    }, [editorView, pageHeight, pageGap, zoom]);
+
     // Perform layout calculation
     const performLayout = useCallback((doc: PmNode, view: EditorView) => {
       // Removed logging for production

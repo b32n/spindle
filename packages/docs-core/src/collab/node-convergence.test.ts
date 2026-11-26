@@ -150,6 +150,17 @@ describe('inline image / page-number field survive collab', () => {
     }
   });
 
+  it('bookmarks hydrate, sync and serialize back unchanged, and an edit next to one leaves it alone', () => {
+    const MARK: InlineContent = { type: 'bookmark', name: '_Toc7' };
+    const [a, b] = pair([para('p', [MARK, text('Heading'), { type: 'bookmark', name: '_Ref8' }])]);
+    for (const c of [a, b]) {
+      expect(inlineOf(c.blocks())).toEqual([MARK, text('Heading'), { type: 'bookmark', name: '_Ref8' }]);
+    }
+    b.edit((tr) => tr.insertText('!', 2));
+    sync(a, b);
+    expect(inlineOf(a.blocks()).filter((i) => i.type === 'bookmark')).toEqual([MARK, { type: 'bookmark', name: '_Ref8' }]);
+  });
+
   it('generic fields (plain and formatted results) hydrate, sync and serialize back unchanged', () => {
     const REF: InlineContent = { type: 'field', instruction: 'REF _Ref1 \\h', kind: 'REF', result: 'Figure 1' };
     const SEQ: InlineContent = {
@@ -307,6 +318,7 @@ const NODE_SAMPLES: Record<string, Json[]> = {
   hard_break: [p([t('line1'), { type: 'hard_break' }, t('line2')])],
   text: [p([t('just text')])],
   inline_image: [p([t('x'), { type: 'inline_image', attrs: { src: 'data:image/png;base64,QQ==', width: 33, height: 22, alt: 'i' } }])],
+  bookmark: [p([{ type: 'bookmark', attrs: { name: '_Toc1' } }, t('Heading'), { type: 'bookmark', attrs: { name: '_Ref2' } }])],
   field: [
     p([
       t('see '),

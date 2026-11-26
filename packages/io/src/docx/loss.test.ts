@@ -173,15 +173,15 @@ describe('detectDocxLoss: XML-based detectors', () => {
     });
   });
 
-  describe('docx.bookmarks', () => {
-    it('counts bookmarks (not _GoBack) and internal-anchor hyperlinks (not external ones)', async () => {
+  describe('bookmarks', () => {
+    it('are no longer reported: bookmarks and internal links are imported', async () => {
       const bytes = await docx(
         '<w:p><w:bookmarkStart w:id="0" w:name="_GoBack"/><w:bookmarkEnd w:id="0"/>' +
           '<w:bookmarkStart w:id="1" w:name="_Toc1"/><w:bookmarkEnd w:id="1"/>' +
           '<w:hyperlink w:anchor="_Toc1"><w:r><w:t>go</w:t></w:r></w:hyperlink>' +
           '<w:hyperlink r:id="rId5"><w:r><w:t>web</w:t></w:r></w:hyperlink></w:p>'
       );
-      expect(await item(bytes, 'docx.bookmarks')).toMatchObject({ count: 2, where: ['bookmarks ×1', 'internal links ×1'] });
+      expect(await item(bytes, 'docx.bookmarks')).toBeUndefined();
     });
   });
 

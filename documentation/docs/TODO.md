@@ -25,7 +25,7 @@ Verified absent in code.
       skipped with a warning on export), floating/anchored images are skipped
       on import, and tables of contents and legacy form fields keep no field (other fields are kept with their cached result, never recalculated). `inspectDocx(bytes, { detail: 'full' })` and the
       fixture goldens in `fixtures/docx/` list what else is flattened or ignored (table
-      formatting, sections, bookmarks…). DOCX comments round-trip with replies, resolved state and anchors.
+      formatting, sections…). DOCX comments round-trip with replies, resolved state and anchors.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
 - [ ] **Multi-section documents in the UI** — the model supports `sections[]`
@@ -44,7 +44,8 @@ Verified absent in code.
       checkbox markers or per-level marker customization beyond nesting.
 - [ ] **Table of contents** — headings exist but nothing consumes them.
 - [ ] **Footnotes / endnotes** — none.
-- [ ] **Bookmarks / cross-references** — none.
+- [ ] **Bookmarks / cross-references** — imported bookmarks and internal links are kept (a bookmark is a point, clicking a
+      `#name` link scrolls to it); there is no UI to insert bookmarks or cross-references, and `REF` fields are not recalculated.
 - [ ] **Track changes / suggestions mode** — comments exist; redline/suggestion
       editing does not.
 - [ ] **Spell-check** — browser spellcheck is deliberately disabled

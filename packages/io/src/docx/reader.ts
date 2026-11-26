@@ -147,6 +147,12 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     else if (open.phase === 'result' && image.type === 'image') open.result.push(image);
   };
 
+  /** A bookmark is kept as a point where it starts; none inside a field (the field keeps only its result). */
+  const placeBookmark = (node: XmlNode) => {
+    const name = bookmarkName(node);
+    if (name && !top()) out.push({ type: 'bookmark', name });
+  };
+
   /** A field whose end was reached: nested in another field it becomes part of that field, else it is written to the paragraph. */
   const finishField = (done: OpenField) => {
     const parent = top();
@@ -244,6 +250,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         const done = fields.pop();
         if (done) finishField(done);
       } else if (tag === 'w:r') consumeRun(child, target);
+      else if (tag === 'w:bookmarkStart') placeBookmark(child);
       else ctx.comments?.mark(child);
     }
   };
@@ -255,10 +262,12 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
       consumeRuns(childrenOf(child), target);
     } else if (tag === 'w:r' || tag === 'w:fldSimple') {
       consumeRuns([child], undefined);
+    } else if (tag === 'w:bookmarkStart') {
+      placeBookmark(child);
     } else {
       ctx.comments?.mark(child);
     }
-    // Bookmarks, proofErr, and other structural markers carry no content — skipped.
+    // proofErr and other structural markers carry no content — skipped.
   }
 
   // A field still open here continues in a later paragraph (a table of contents, for instance): what it displayed
@@ -344,7 +353,7 @@ function fieldKind(instruction: string): string {
   return instruction.trim().toUpperCase().split(/[\s\\"]/)[0];
 }
 
-/** `HYPERLINK "url" \l "anchor"`: the target of an external link field, or undefined for anything else (no URL, or an anchor only). */
+/** `HYPERLINK "url" \l "anchor"`: the target of a link field (`#anchor` when it has only an anchor), or undefined for anything else. */
 function hyperlinkFieldTarget(instruction: string): string | undefined {
   const args = [...instruction.trim().matchAll(/"([^"]*)"|(\S+)/g)].map((m) => ({ value: m[1] ?? m[2], quoted: m[1] !== undefined }));
   const rest = args.slice(1);
@@ -363,7 +372,7 @@ function hyperlinkFieldTarget(instruction: string): string | undefined {
       url = arg.value;
     }
   }
-  if (!url) return undefined;
+  if (!url) return anchor ? `#${anchor}` : undefined;
   return anchor ? `${url}#${anchor}` : url;
 }
 
@@ -418,12 +427,27 @@ function emitField(field: OpenField, out: DocInline[], warnings: string[]): void
   });
 }
 
+/** A bookmark's name, or undefined for Word's own cursor marker (`_GoBack`) and an unnamed one. */
+function bookmarkName(node: XmlNode): string | undefined {
+  const name = attrsOf(node)['@_w:name'];
+  return name && name !== '_GoBack' ? name : undefined;
+}
+
+/**
+ * Where a `w:hyperlink` points: its relationship's target (resolved through rels), `#anchor` for a link to a
+ * bookmark in the document, or the target with the anchor appended when it has both.
+ */
 function resolveHyperlinkTarget(hyperlinkNode: XmlNode, rels: Map<string, string>, warnings: string[]): string | undefined {
-  const rId = attrsOf(hyperlinkNode)['@_r:id'];
-  if (!rId) return undefined;
-  const target = rels.get(rId);
-  if (!target) warnings.push(`Hyperlink relationship "${rId}" could not be resolved.`);
-  return target;
+  const attrs = attrsOf(hyperlinkNode);
+  const rId = attrs['@_r:id'];
+  const anchor = attrs['@_w:anchor'];
+  let target: string | undefined;
+  if (rId) {
+    target = rels.get(rId);
+    if (!target) warnings.push(`Hyperlink relationship "${rId}" could not be resolved.`);
+  }
+  if (!anchor) return target;
+  return target ? `${target}#${anchor}` : `#${anchor}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -533,7 +557,8 @@ function parseParagraph(
   // An otherwise-empty paragraph carrying only a page-break run or a
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
   // to the corresponding structural block rather than an empty paragraph.
-  if (content.length === 0 && hasPageBreakRun(pNode)) {
+  const onlyBookmarks = content.every((c) => c.type === 'bookmark');
+  if (onlyBookmarks && hasPageBreakRun(pNode)) {
     return { type: 'pageBreak' };
   }
   if (content.length === 0 && hasBottomBorder(pPrKids)) {
@@ -629,16 +654,18 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
 /** A table cell's content is one or more paragraphs; flatten to the first non-empty paragraph's inline content (our own writer only ever emits one). */
 function collectCellContent(tcNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
   let result: DocInline[] | undefined;
+  const leading: DocInline[] = []; // bookmarks of paragraphs before the first one with content
   for (const child of flattenBlocks(childrenOf(tcNode))) {
     if (!result && tagOf(child) === 'w:p') {
       const content = paragraphInlineContent(child, ctx, warnings);
-      if (content.length > 0) result = content;
+      if (content.some((c) => c.type !== 'bookmark')) result = [...leading, ...content];
+      else leading.push(...content);
     } else {
       // Content that is not imported can still open or close a comment range.
       ctx.comments?.mark(child);
     }
   }
-  return result ?? [];
+  return result ?? leading;
 }
 
 // ---------------------------------------------------------------------------
@@ -711,6 +738,7 @@ function parseHeaderFooter(xml: string, ctx: PartContext, warnings: string[]): D
       // A header or footer shows one value on every page, so a cached field result (STYLEREF, DATE...) would be wrong
       // on most of them: only the page-number fields are kept there.
       const content = paragraphInlineContent(p, ctx, warnings).filter((item) => {
+        if (item.type === 'bookmark') return false; // headers and footers keep no bookmarks
         if (item.type !== 'field') return true;
         warnings.push(`Unsupported field code "${item.instruction}" — its cached value was dropped.`);
         return false;
@@ -784,9 +812,23 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
     currentBlocks = [];
   };
 
+  // A bookmark that starts between paragraphs is kept at the start of the next one.
+  const pendingBookmarks: DocInline[] = [];
+  const paragraphBlocks = (node: XmlNode): DocBlock[] => {
+    const blocks = parseParagraphBlocks(node, numbering, ctx, warnings);
+    if (pendingBookmarks.length > 0) {
+      const first = blocks.find((b) => b.type === 'paragraph' || b.type === 'heading' || b.type === 'listItem');
+      if (first && 'content' in first) first.content.unshift(...pendingBookmarks.splice(0));
+    }
+    return blocks;
+  };
+
   for (const node of bodyChildren) {
     const tag = tagOf(node);
-    if (tag === 'w:p') {
+    if (tag === 'w:bookmarkStart') {
+      const name = bookmarkName(node);
+      if (name) pendingBookmarks.push({ type: 'bookmark', name });
+    } else if (tag === 'w:p') {
       const pPr = find(childrenOf(node), 'w:pPr');
       const inlineSectPr = pPr ? find(childrenOf(pPr), 'w:sectPr') : undefined;
       if (inlineSectPr) {
@@ -794,11 +836,11 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
         // OOXML the paragraph is the section's last and keeps its content
         // (Word and docx >= 9.12 emit it this way; older docx used an empty
         // carrier paragraph).
-        currentBlocks.push(...parseParagraphBlocks(node, numbering, ctx, warnings));
+        currentBlocks.push(...paragraphBlocks(node));
         await flushSection(inlineSectPr);
         continue;
       }
-      currentBlocks.push(...parseParagraphBlocks(node, numbering, ctx, warnings));
+      currentBlocks.push(...paragraphBlocks(node));
     } else if (tag === 'w:tbl') {
       currentBlocks.push(parseTable(node, ctx, warnings));
     } else if (tag === 'w:sectPr') {
@@ -807,7 +849,7 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
     } else {
       ctx.comments?.mark(node);
     }
-    // Bookmarks and other body-level markers carry no block content — skipped.
+    // Other body-level markers carry no block content — skipped.
   }
 
   // A document with content but no trailing sectPr (malformed, but don't
