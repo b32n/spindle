@@ -57,7 +57,8 @@ Gaps against Excel / Google Sheets in the non-formula feature set.
 - [ ] **XLSX fidelity gaps** — XLSX import/export shipped in 0.4.0 (implementation now lives in
       `@b32nio/spindle-io`, where fidelity work lands)
       (`exportToXlsx` / `importFromXlsx`, plus Open/Download in the toolbar), but
-      charts, conditional formatting and data validation are not carried over.
+      charts, conditional formatting and data validation are not carried over. A corpus of test workbooks
+      with a construct manifest (`fixtures/xlsx/`) now defines what "carried over" has to cover.
 - [ ] **Print / page setup** for sheets (PDF output)
 
 ### Engine ready, UI missing

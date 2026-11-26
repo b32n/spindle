@@ -336,6 +336,20 @@ lockstep.
   or loss-report change. Anchored non-picture drawings now carry the kind-specific warning instead of the
   floating-image one.
 
+### Sheets and slides fidelity
+
+- **XLSX fidelity corpus, first part (`fixtures/xlsx/`).** 26 committed files: eight hand-authored construct
+  workbooks (cell types, 1900 and 1904 dates, basic styles, layout, sheet properties, names, conditional
+  formatting, data validation), the 159-formula, 33-code number-format and 23-form formula-syntax probe
+  workbooks, producer-variety files from openpyxl, xlsxwriter and LibreOffice (including three valid openpyxl
+  files that make the importer throw), ten edge files (truncated zip, no workbook, broken relationships, XML
+  entities, malformed XML, encrypted and legacy `.xls` OLE stubs, duplicate sheet names, indexes out of range,
+  empty workbook) and three never-committed run-time generators (zip bomb, huge dimension, 100,000 x 10 rows).
+  A manifest records the producer, licence and claimed constructs of each file; `scripts/xlsx-fidelity/`
+  holds the construct probes and manifest checks; the Jest suite in `packages/sheets-core/src/fidelity/`
+  verifies every claim against the package XML. No importer or runtime behaviour changes; goldens come with
+  the XLSX runner.
+
 ## [0.4.0] - 2026-10-26
 
 ### Added
