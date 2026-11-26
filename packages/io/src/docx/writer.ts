@@ -52,6 +52,8 @@ import type {
   DocInline,
   DocNamedStyle,
   DocParagraphStyle,
+  DocRevision,
+  DocRevisionMeta,
   DocRunBase,
   DocSection,
   DocumentExportInput,
@@ -220,12 +222,29 @@ function withoutNoteRefs(content: DocInline[]): DocInline[] {
   });
 }
 
+/** True when the run is part of a tracked insertion or deletion. */
+function hasRevision(revision: DocRevision | undefined): revision is DocRevision {
+  return !!revision && (!!revision.insertion || !!revision.deletion);
+}
+
+function sameMeta(a: DocRevisionMeta | undefined, b: DocRevisionMeta | undefined): boolean {
+  return a === b || (!!a && !!b && a.id === b.id && a.author === b.author && a.date === b.date);
+}
+
+function sameRevision(a: DocRevision, b: DocRevision): boolean {
+  return sameMeta(a.insertion, b.insertion) && sameMeta(a.deletion, b.deletion);
+}
+
 class DocxBuilder {
   readonly warnings: string[] = [];
   /** The notes referenced so far, in document order (a note's id in the file is its position + 1). */
   readonly notes: WrittenNotes = { footnote: [], endnote: [] };
   /** `w:id` of the next content control. */
   private nextControlId = 1000001;
+  /** `w:id` written for each tracked change (by kind and id in the model), the ids taken, and the next free number. */
+  private readonly revisionIds = new Map<string, number>();
+  private readonly usedRevisionIds = new Set<number>();
+  private nextRevisionId = 1;
   /** Width of the content area of the section being built, in twips: where the right tab of a table of contents entry goes. */
   private contentWidthTwips = 9360;
   /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
@@ -251,17 +270,67 @@ class DocxBuilder {
   /** `anchorComments: false` for header/footer content, which has no comment anchors. */
   buildRuns(content: DocInline[], anchorComments = true): ParagraphChild[] {
     const out: ParagraphChild[] = [];
+    // Consecutive text runs of one tracked change are written inside one w:ins / w:del.
+    let group: { revision: DocRevision; runs: ParagraphChild[] } | undefined;
+    const flushGroup = () => {
+      if (group) out.push(...this.wrapRevision(group.revision, group.runs));
+      group = undefined;
+    };
     for (const inline of content) {
       const planned =
         anchorComments && (inline.type === 'text' || inline.type === 'link') && inline.commentThreadId
           ? this.comments.threads.get(inline.commentThreadId)
           : undefined;
       // A comment's range runs from its first tagged run to its last; replies share the range of their root.
-      if (planned && planned.seen === 0) out.push(...this.rangeStarts(planned));
-      out.push(...this.buildRun(inline).filter((r): r is ParagraphChild => r != null));
-      if (planned && ++planned.seen === planned.total) out.push(...this.rangeEnds(planned));
+      if (planned && planned.seen === 0) {
+        flushGroup();
+        out.push(...this.rangeStarts(planned));
+      }
+      if (inline.type === 'text' && hasRevision(inline.revision)) {
+        if (group && !sameRevision(group.revision, inline.revision)) flushGroup();
+        group ??= { revision: inline.revision, runs: [] };
+        group.runs.push(...this.textRuns(inline, inline.text, {}, !!inline.revision.deletion));
+      } else {
+        flushGroup();
+        out.push(...this.buildRun(inline).filter((r): r is ParagraphChild => r != null));
+      }
+      if (planned && ++planned.seen === planned.total) {
+        flushGroup();
+        out.push(...this.rangeEnds(planned));
+      }
     }
+    flushGroup();
     return out;
+  }
+
+  /** The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next free number. */
+  private revisionId(kind: 'ins' | 'del', meta: DocRevisionMeta): number {
+    const key = `${kind}:${meta.id}`;
+    const known = this.revisionIds.get(key);
+    if (known !== undefined) return known;
+    let id = /^\d{1,9}$/.test(meta.id) ? Number(meta.id) : -1;
+    while (id < 0 || this.usedRevisionIds.has(id)) id = this.nextRevisionId++;
+    this.usedRevisionIds.add(id);
+    this.revisionIds.set(key, id);
+    return id;
+  }
+
+  /** `runs` inside the tracked changes of `revision`: a deletion directly around the runs, an insertion around that. */
+  private wrapRevision(revision: DocRevision, runs: ParagraphChild[]): ParagraphChild[] {
+    const element = (name: 'w:ins' | 'w:del', meta: DocRevisionMeta, children: unknown[]) =>
+      new BuilderElement({
+        name,
+        attributes: {
+          id: { key: 'w:id', value: String(this.revisionId(name === 'w:ins' ? 'ins' : 'del', meta)) },
+          author: { key: 'w:author', value: meta.author },
+          ...(meta.date && { date: { key: 'w:date', value: meta.date } }),
+        },
+        children: children as BuilderElement[],
+      });
+    let wrapped: unknown[] = runs;
+    if (revision.deletion) wrapped = [element('w:del', revision.deletion, wrapped)];
+    if (revision.insertion) wrapped = [element('w:ins', revision.insertion, wrapped)];
+    return wrapped as ParagraphChild[];
   }
 
   private rangeStarts(planned: CommentPlanThread): ParagraphChild[] {
@@ -289,21 +358,29 @@ class DocxBuilder {
    * A text run's text with '\t' written as w:tab and '\n' as w:br, all inside one run so the formatting
    * is shared. Text with neither stays a plain `text` run.
    */
-  private textRuns(base: DocRunBase, text: string, extra: Partial<IRunOptions> = {}): TextRun[] {
-    if (!/[\t\n]/.test(text)) return [new TextRun(this.runOptions(base, { ...extra, text }))];
+  private textRuns(base: DocRunBase, text: string, extra: Partial<IRunOptions> = {}, deleted = false): TextRun[] {
+    if (!deleted && !/[\t\n]/.test(text)) return [new TextRun(this.runOptions(base, { ...extra, text }))];
     const children: (string | Tab | BuilderElement)[] = [];
     for (const part of text.split(/(\t|\n)/)) {
       if (part === '\t') children.push(new Tab());
       else if (part === '\n') children.push(new BuilderElement({ name: 'w:br' }));
+      // Inside a tracked deletion the text of a run is w:delText.
+      else if (part && deleted) children.push(new BuilderElement({ name: 'w:delText', attributes: { space: { key: 'xml:space', value: 'preserve' } }, children: [part] as unknown as BuilderElement[] }));
       else if (part) children.push(part);
     }
     return [new TextRun(this.runOptions(base, { ...extra, children }))];
   }
 
+  /** The runs inside a hyperlink; its tracked changes go inside the link (a w:ins cannot hold a w:hyperlink). */
+  private linkRuns(link: Extract<DocInline, { type: 'link' }>, extra: Partial<IRunOptions> = {}): ParagraphChild[] {
+    const runs = this.textRuns(link, link.text, extra, !!link.revision?.deletion);
+    return hasRevision(link.revision) ? this.wrapRevision(link.revision, runs) : runs;
+  }
+
   private buildRun(inline: DocInline): (ParagraphChild | null)[] {
     switch (inline.type) {
       case 'text':
-        return this.textRuns(inline, inline.text);
+        return hasRevision(inline.revision) ? this.wrapRevision(inline.revision, this.textRuns(inline, inline.text, {}, !!inline.revision.deletion)) : this.textRuns(inline, inline.text);
       case 'bookmark':
         return inline.name ? [new Bookmark({ id: inline.name, children: [] })] : [];
       case 'link':
@@ -313,14 +390,14 @@ class DocxBuilder {
             new InternalHyperlink({
               anchor: inline.href.slice(1),
               // No Hyperlink character style: Word's own internal links (tables of contents) look like their text.
-              children: this.textRuns(inline, inline.text),
+              children: this.linkRuns(inline),
             }),
           ];
         }
         return [
           new ExternalHyperlink({
             link: inline.href,
-            children: this.textRuns(inline, inline.text, { style: 'Hyperlink' }),
+            children: this.linkRuns(inline, { style: 'Hyperlink' }),
           }),
         ];
       case 'image':

@@ -61,8 +61,10 @@ Verified absent in code.
 - [ ] **Footnotes / endnotes** — none.
 - [ ] **Bookmarks / cross-references** — imported bookmarks and internal links are kept (a bookmark is a point, clicking a
       `#name` link scrolls to it); there is no UI to insert bookmarks or cross-references, and `REF` fields are not recalculated.
-- [ ] **Track changes / suggestions mode** — comments exist; redline/suggestion
-      editing does not.
+- [ ] **Track changes / suggestions mode** — tracked insertions and deletions around runs are read from a file, shown
+      (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
+      rejecting, a Suggesting mode, moves, formatting changes, paragraph-mark and table-row changes, and a change around a
+      field, image or note reference (those are not kept as changes).
 - [ ] **Spell-check** — browser spellcheck is deliberately disabled
       (`input-bridge.ts`); no custom engine.
 - [ ] **Equation editor, drawing / shapes / canvas** — none.

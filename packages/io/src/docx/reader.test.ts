@@ -415,11 +415,18 @@ describe('importDocx', () => {
       });
     });
 
-    it('keeps tracked insertions as ordinary text but still applies tracked deletions', async () => {
+    it('keeps tracked insertions and deletions as marked text', async () => {
       const block = await firstText(
-        para(r(t('kept ')) + `<w:ins w:id="1" w:author="A">${r(t('inserted '))}</w:ins>` + `<w:del w:id="2" w:author="A"><w:r><w:delText>deleted</w:delText></w:r></w:del>` + r(t('end')))
+        para(r(t('kept ')) + `<w:ins w:id="1" w:author="A" w:date="2024-01-02T03:04:05Z">${r(t('inserted '))}</w:ins>` + `<w:del w:id="2" w:author="B"><w:r><w:delText>deleted</w:delText></w:r></w:del>` + r(t('end')))
       );
-      expect(block).toMatchObject({ content: [{ type: 'text', text: 'kept ' }, { type: 'text', text: 'inserted ' }, { type: 'text', text: 'end' }] });
+      expect(block).toMatchObject({
+        content: [
+          { type: 'text', text: 'kept ' },
+          { type: 'text', text: 'inserted ', revision: { insertion: { id: '1', author: 'A', date: '2024-01-02T03:04:05Z' } } },
+          { type: 'text', text: 'deleted', revision: { deletion: { id: '2', author: 'B' } } },
+          { type: 'text', text: 'end' },
+        ],
+      });
     });
 
     it('keeps the base text of a ruby annotation and drops the reading marks', async () => {

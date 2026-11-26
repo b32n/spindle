@@ -229,6 +229,24 @@ function fields(root: XmlNode[]): Item[] {
 
 const isSectPrChild = (path: readonly string[]) => path[path.length - 1] === 'w:sectPr' && !inRevisionProps(path);
 
+/**
+ * Tracked insertions and deletions the importer does not keep as changes. Those around runs are kept (as marks on the text);
+ * what is left are the marks on a paragraph mark (`w:pPr/w:rPr`) and on a table row (`w:trPr`), whose content is imported
+ * as ordinary content. Text boxes are reported as such and not counted here.
+ */
+function trackedChanges(root: XmlNode[]): Item[] {
+  const counts = { 'w:ins': 0, 'w:del': 0 };
+  walk(root, (_n, tag, path) => {
+    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:rPr' || parent === 'w:trPr') counts[tag]++;
+  });
+  return [
+    ...item('docx.trackedInsertions', 'tracked insertion(s) of a paragraph mark or table row', counts['w:ins'], 'the paragraph or row is imported as ordinary content; the change is not recorded'),
+    ...item('docx.trackedDeletions', 'tracked deletion(s) of a paragraph mark or table row', counts['w:del'], 'the paragraph or row is imported as ordinary content; the change is not recorded'),
+  ];
+}
+
 function trackedMoves(root: XmlNode[]): Item[] {
   let total = 0;
   walk(root, (_n, tag) => {
@@ -383,9 +401,10 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
+    ...safe(() => trackedChanges(root)),
     ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),

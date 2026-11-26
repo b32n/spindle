@@ -33,9 +33,6 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
     if (count > 0) items.push({ id, label, count, effect });
   };
 
-  add('docx.trackedInsertions', 'tracked insertion(s)', countMatches(doc, /<w:ins[\s>/]/g), 'imported as ordinary text, as if accepted; author and date are lost');
-  add('docx.trackedDeletions', 'tracked deletion(s)', countMatches(doc, /<w:del[\s>/]/g), 'applied (the deleted text is gone)');
-
   // A note the body refers to is imported (with its text); one nothing in the body refers to, and any in a damaged part, is not.
   const noteLoss = async (kind: 'footnote' | 'endnote') => {
     const xml = await text(`word/${kind}s.xml`);

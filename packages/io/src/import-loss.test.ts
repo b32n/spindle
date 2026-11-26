@@ -131,7 +131,8 @@ describe('detectDocxLoss', () => {
       let xml = await zip.file('word/document.xml')!.async('string');
       xml = xml.replace(
         '</w:body>',
-        '<w:p><w:ins w:id="1"><w:r><w:t>new</w:t></w:r></w:ins><w:del w:id="2"><w:r><w:delText>old</w:delText></w:r></w:del></w:p>' +
+        '<w:p><w:pPr><w:rPr><w:ins w:id="1"/></w:rPr></w:pPr><w:ins w:id="3"><w:r><w:t>new</w:t></w:r></w:ins></w:p>' +
+          '<w:p><w:pPr><w:rPr><w:del w:id="2"/></w:rPr></w:pPr><w:del w:id="4"><w:r><w:delText>old</w:delText></w:r></w:del></w:p>' +
           '<w:sdt><w:sdtPr><w15:repeatingSection/></w:sdtPr><w:sdtContent><w:p><w:r><w:t>cc</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
           '<w:sdt><w:sdtContent><w:p><w:r><w:t>kept control</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
           '<w:p><w:r><w:drawing><wp:anchor><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"/></a:graphic></wp:anchor></w:drawing></w:r></w:p>' +

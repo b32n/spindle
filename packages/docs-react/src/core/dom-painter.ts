@@ -20,6 +20,7 @@ import {
   ImageBlock,
   isRunContainingBlock,
   noteKeyString,
+  DEFAULT_REVISION_COLOR,
 } from './flow-blocks';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
@@ -1065,6 +1066,7 @@ export class DomPainter {
             const piece = document.createElement('span');
             piece.textContent = part;
             piece.style.cssText = this.getRunStyles(run);
+            this.applyRevisionDecoration(piece, run);
             if (pmPos) {
               piece.dataset.pmStart = String(pmPos.start + 1 + offset);
               piece.dataset.pmEnd = String(pmPos.start + 1 + offset + part.length);
@@ -1084,6 +1086,7 @@ export class DomPainter {
           }
 
           this.applyCommentDecoration(span, run);
+          this.applyRevisionDecoration(span, run);
           this.applyControlDecoration(span, run);
           lineDiv.appendChild(span);
         } else if (run.kind === 'link') {
@@ -1106,6 +1109,7 @@ export class DomPainter {
           }
 
           this.applyCommentDecoration(a, run);
+          this.applyRevisionDecoration(a, run);
           this.applyControlDecoration(a, run);
           lineDiv.appendChild(a);
         }
@@ -1437,6 +1441,7 @@ export class DomPainter {
               runCharOffset += run.text.length;
 
               this.applyCommentDecoration(span, run);
+              this.applyRevisionDecoration(span, run);
               this.applyControlDecoration(span, run);
               p.appendChild(span);
             } else if (run.kind === 'link') {
@@ -1451,6 +1456,7 @@ export class DomPainter {
               a.dataset.pmEnd = String(linkStart + run.text.length);
               runCharOffset += run.text.length;
               this.applyCommentDecoration(a, run);
+              this.applyRevisionDecoration(a, run);
               this.applyControlDecoration(a, run);
               p.appendChild(a);
             } else if (run.kind === 'image') {
@@ -1584,6 +1590,7 @@ export class DomPainter {
         }
 
         this.applyCommentDecoration(span, run);
+        this.applyRevisionDecoration(span, run);
         this.applyControlDecoration(span, run);
         container.appendChild(span);
       } else if (run.kind === 'lineBreak') {
@@ -1619,6 +1626,7 @@ export class DomPainter {
         }
 
         this.applyCommentDecoration(a, run);
+        this.applyRevisionDecoration(a, run);
         this.applyControlDecoration(a, run);
         container.appendChild(a);
       }
@@ -1641,6 +1649,30 @@ export class DomPainter {
     el.setAttribute('data-comment-thread', threadId);
     el.style.backgroundColor = 'rgba(99, 102, 241, 0.18)';
     el.style.cursor = 'pointer';
+  }
+
+  /**
+   * Show a tracked change the way Word's "All Markup" does: inserted text underlined, deleted text struck through,
+   * both in the colour of the author who made the change (the last one to change it when it was inserted and deleted).
+   */
+  private applyRevisionDecoration(el: HTMLElement, run: Run): void {
+    if ((run.kind !== 'text' && run.kind !== 'link') || !run.revision) return;
+    const { insertion, deletion } = run.revision;
+    const author = (deletion ?? insertion)?.author;
+    if (author === undefined) return;
+    const lines = new Set<string>();
+    if (run.kind === 'link' ? !run.plain : run.underline) lines.add('underline');
+    if (run.kind === 'text' && run.strikethrough) lines.add('line-through');
+    if (insertion) lines.add('underline');
+    if (deletion) lines.add('line-through');
+    const color = safeCssColor((deletion ?? insertion)?.color) || DEFAULT_REVISION_COLOR;
+    el.style.color = color;
+    el.style.textDecoration = [...lines].join(' ');
+    el.style.textDecorationColor = color;
+    if (insertion) el.dataset.revisionInsertion = insertion.id;
+    if (deletion) el.dataset.revisionDeletion = deletion.id;
+    el.dataset.revisionAuthor = author;
+    el.title = [insertion && `Inserted by ${insertion.author}`, deletion && `Deleted by ${deletion.author}`].filter(Boolean).join('; ');
   }
 
   /**

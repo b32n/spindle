@@ -12,18 +12,6 @@
       "effect": "their text is not imported",
       "id": "docx.textBoxes",
       "label": "text box(es)/shape(s)"
-    },
-    {
-      "count": 1,
-      "effect": "applied (the deleted text is gone)",
-      "id": "docx.trackedDeletions",
-      "label": "tracked deletion(s)"
-    },
-    {
-      "count": 2,
-      "effect": "imported as ordinary text, as if accepted; author and date are lost",
-      "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s)"
     }
   ]
 }

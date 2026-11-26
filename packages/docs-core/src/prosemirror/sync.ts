@@ -5,6 +5,7 @@ import type {
   Block,
   Section,
   InlineContent,
+  RunRevision,
   TextRun,
   InlineLink,
   TextStyle,
@@ -397,6 +398,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
+      marks.push(...revisionMarks(item.revision));
 
       return textWithBreaks(item.text, marks);
     }
@@ -412,6 +414,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
+      marks.push(...revisionMarks(item.revision));
       return textWithBreaks(item.text, marks);
     }
 
@@ -874,6 +877,8 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
     const commentMark = child.marks.find((m) => m.type.name === 'comment');
     const commentThreadId = commentMark ? (commentMark.attrs.threadId as string) : undefined;
 
+    const revision = revisionOf(child.marks);
+
     const style = extractStyleFromMarks(child.marks);
     const linkMark = child.marks.find((m) => m.type.name === 'link');
     let item: InlineContent;
@@ -900,6 +905,7 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
     if (commentThreadId) {
       (item as TextRun | InlineLink).commentThreadId = commentThreadId;
     }
+    if (revision) (item as TextRun | InlineLink).revision = revision;
     // Text following a folded line break continues the same plain run.
     const prev = content[content.length - 1];
     if (
@@ -913,6 +919,29 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
   });
 
   return content;
+}
+
+/** The `insertion` / `deletion` marks for a run's tracked changes. */
+function revisionMarks(revision: RunRevision | undefined): PmMarkJSON[] {
+  const marks: PmMarkJSON[] = [];
+  for (const kind of ['insertion', 'deletion'] as const) {
+    const meta = revision?.[kind];
+    if (meta) marks.push({ type: kind, attrs: { revisionId: meta.id, author: meta.author, ...(meta.date && { date: meta.date }) } });
+  }
+  return marks;
+}
+
+/** The tracked changes a text node's marks record, if any. */
+export function revisionOf(marks: readonly { type: { name: string }; attrs: Record<string, unknown> }[]): RunRevision | undefined {
+  const revision: RunRevision = {};
+  for (const kind of ['insertion', 'deletion'] as const) {
+    const mark = marks.find((m) => m.type.name === kind);
+    if (mark) {
+      const date = mark.attrs.date;
+      revision[kind] = { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), ...(typeof date === 'string' && date && { date }) };
+    }
+  }
+  return revision.insertion || revision.deletion ? revision : undefined;
 }
 
 /** True if a text run carries any formatting or comment anchor. */

@@ -12,16 +12,16 @@
       ]
     },
     {
-      "count": 13,
-      "effect": "applied (the deleted text is gone)",
+      "count": 2,
+      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
       "id": "docx.trackedDeletions",
-      "label": "tracked deletion(s)"
+      "label": "tracked deletion(s) of a paragraph mark or table row"
     },
     {
-      "count": 15,
-      "effect": "imported as ordinary text, as if accepted; author and date are lost",
+      "count": 2,
+      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
       "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s)"
+      "label": "tracked insertion(s) of a paragraph mark or table row"
     },
     {
       "count": 4,

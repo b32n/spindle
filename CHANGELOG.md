@@ -303,8 +303,30 @@ lockstep.
   like the text around it. The measurer treated a tab and the text after it as two pieces on the same line and gave the text twice;
   it is one piece now (this also affects tabs in imported text).
 
+- **Tracked changes (insertions and deletions) are kept, shown and written back.** `w:ins` and `w:del` around runs and links
+  (also inside table cells, content controls, smart tags and hyperlinks) are imported as the same text carrying the change, not
+  applied: inserted text stays in the text, deleted text (`w:delText`) stays too, struck through, until the change is accepted
+  or rejected (the review panel and suggesting mode are the next steps of this milestone). A run can be both inserted by one
+  author and deleted by another. The export writes `w:ins`, `w:del` and `w:delText` with the author, date and id (the runs of a
+  change share one element; ids that are not numbers, or are taken, get new ones), the link of a changed link inside the
+  hyperlink. Additive: `DocRevision` / `DocRevisionMeta` and `revision?` on the interchange runs (`DocRunBase`), `RunRevision` /
+  `RevisionMeta` and `revision?` on `TextRun` and `InlineLink`, and `docsSchema` gains the `insertion` and `deletion` marks
+  (attributes `revisionId`, `author`, `date`; not inclusive), plain ProseMirror marks that sync over Yjs, so the collaboration
+  `schemaVersion` is now 6; `getCollabBlockers` is unchanged (runs with a change are ordinary text). The editor draws insertions
+  underlined and deletions struck through in the author's colour (like Word's All Markup; deleted text takes part in the
+  layout) and shows a legend of the authors above the page (`RevisionLegend`). New helpers in docs-core: `authorColor`,
+  `assignAuthorColors` (a colour per author of the document, the same on every client, nothing stored), `collectRevisions`,
+  `revisionAuthors`, `documentRevisionAuthors`.
+
 ### Changed
 
+- **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
+  `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
+  deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted
+  one is dropped, with a warning), as are a deleted image and a deleted note reference (dropped, with a warning).
+- **DOCX loss report: `docx.trackedInsertions` and `docx.trackedDeletions` count only what is still lost**: a change on a
+  paragraph mark (`w:pPr/w:rPr`) or on a table row (`w:trPr`), whose paragraph or row is imported as ordinary content. Changes
+  around runs are kept and no longer counted (32 and 22 occurrences in the corpus before).
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,
   citation, bibliography and group controls, and controls wrapping table rows or cells, whose content is kept without the
   control), by reason in `where`, in both detail levels; it counted every `w:sdt` before. `docx.fields` no longer counts the
@@ -341,8 +363,7 @@ lockstep.
   other than page breaks, `w:cr`) as `\n`, soft and non-breaking hyphens as U+00AD and U+2011, and the text inside
   `w:smartTag`, `w:customXml`, content controls (`w:sdt`: inline, block, in table rows, cells and cell content, and
   in headers and footers), tracked insertions (`w:ins`) and `w:ruby` base text is kept. The wrappers themselves
-  are still lost: tracked insertions show as ordinary text (as if accepted) while tracked deletions are still
-  applied, content controls lose their type, tag, placeholder and lock, and ruby reading marks are dropped.
+  are still lost (tracked changes are kept as such since the tracked-changes entry above), content controls lose their type, tag, placeholder and lock, and ruby reading marks are dropped.
   `exportDocx` writes `\t` as `w:tab` and `\n` as `w:br`. Placeholder text of content controls is now imported
   as ordinary text. The editor measures text with `white-space: pre-wrap`, like the pages it paints, so tabs get
   a visible width (default tab stops; custom tab stops are still not imported), and header/footer text keeps tabs

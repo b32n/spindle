@@ -12,6 +12,22 @@
 // Text Runs - Inline content within blocks
 // ============================================================================
 
+/** The tracked changes a run is part of (see docs-core `RunRevision`): who made them and the id that groups the runs of one change. */
+export interface RunRevisionInfo {
+  insertion?: RevisionInfo;
+  deletion?: RevisionInfo;
+}
+
+/** One tracked change on a run; `color` is the author's colour, picked for the whole document (see docs-core `assignAuthorColors`). */
+export interface RevisionInfo {
+  id: string;
+  author: string;
+  color: string;
+}
+
+/** The colour of a change whose author has none (a document converted without the colours). */
+export const DEFAULT_REVISION_COLOR = '#c5221f';
+
 /** Which note: its kind and its number among the notes of that kind, in document order (1-based). */
 export interface NoteKey {
   kind: 'footnote' | 'endnote';
@@ -63,6 +79,8 @@ export interface TextRun {
   hidden?: boolean;
   /** Thread ID when this run is covered by a comment. */
   commentThreadId?: string;
+  /** Tracked insertion and/or deletion this run is part of. */
+  revision?: RunRevisionInfo;
 }
 
 /**
@@ -100,6 +118,8 @@ export interface LinkRun {
   color?: string;
   /** Thread ID when this link is covered by a comment. */
   commentThreadId?: string;
+  /** Tracked insertion and/or deletion this link is part of. */
+  revision?: RunRevisionInfo;
 }
 
 /**

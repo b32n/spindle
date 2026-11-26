@@ -295,9 +295,12 @@ edits, and the inverse operations broadcast to peers like any other edit.
 - **Table of contents.** A table of contents is a ProseMirror node (`toc`) holding its entries, so it syncs like
   other content and does not block attach. Updating it writes the entries and adds bookmarks to the headings in one
   transaction; two people updating it at once is last-writer-wins on its entries.
+- **Tracked changes.** An insertion or deletion is a ProseMirror mark (`insertion`, `deletion`: revision id, author, date)
+  on the text, so it syncs like other formatting and does not block attach. Two people editing inside the same change merge
+  as for text; accepting and rejecting are not collaborative yet.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
   1, the layout without section breaks; 2 adds section breaks; 3 adds content
-  controls; 4 adds footnote and endnote references; 5 adds the table of contents). A client that finds a newer version
+  controls; 4 adds footnote and endnote references; 5 adds the table of contents; 6 adds tracked changes). A client that finds a newer version
   than it supports rejects `attachCollab` with a `CollabSchemaVersionError`
   instead of editing a document whose newer nodes it would drop. Clients from
   before this check have no such guard: do not open a multi-section room with

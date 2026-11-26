@@ -304,6 +304,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-RES-05 | undo under collaboration reverts only your own typing (B5) | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-07 | redo and the toolbar Undo/Redo buttons are also scoped to your own edits | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/docs/resilience.spec.ts` |
+| D-REV-01 | a .docx with tracked changes shows insertions underlined and deletions struck through in each author’s colour, with a legend of the authors | covered | yes |  | `e2e/docs/revisions.spec.ts` |
+| D-REV-02 | the tracked changes are kept when the document is downloaded | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-SEC-01 | a .docx with four sections shows each with its own page size and headers | covered | yes |  | `e2e/docs/sections.spec.ts` |
 | D-SEC-02 | a next-page section break starts a new page and downloads as a second section | covered | yes |  | `e2e/docs/sections.spec.ts` |
 | D-SEC-03 | a continuous section break keeps the text on the page and is written as a continuous section | covered |  |  | `e2e/docs/sections.spec.ts` |

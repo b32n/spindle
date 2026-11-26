@@ -7,6 +7,8 @@ import type {
   DocInline,
   DocParagraphStyle,
   DocSection,
+  DocRevision,
+  DocRevisionMeta,
   DocTextRun,
   DocBorders,
   DocCellTextDirection,
@@ -128,14 +130,21 @@ function flattenBlocks(nodes: XmlNode[], keepControls = false): XmlNode[] {
   });
 }
 
-/** Paragraph-level children with w:customXml, w:smartTag and w:ins (tracked insertion) wrappers replaced by their content, at any depth. Content controls are left to the caller. */
+/** Paragraph-level children with w:customXml and w:smartTag wrappers replaced by their content, at any depth. Content controls and tracked changes (w:ins, w:del) are left to the caller. */
 function flattenInline(nodes: XmlNode[]): XmlNode[] {
   return nodes.flatMap((n) => {
     const tag = tagOf(n);
     if (tag === 'w:customXml') return flattenInline(unwrapContainer(n));
-    if (tag === 'w:smartTag' || tag === 'w:ins') return flattenInline(childrenOf(n).filter((k) => tagOf(k) !== 'w:smartTagPr'));
+    if (tag === 'w:smartTag') return flattenInline(childrenOf(n).filter((k) => tagOf(k) !== 'w:smartTagPr'));
     return [n];
   });
+}
+
+/** The tracked change a `w:ins` / `w:del` element records. A change without an id gets the next number of its paragraph's reader. */
+function revisionMeta(node: XmlNode, fallbackId: () => string): DocRevisionMeta {
+  const attrs = attrsOf(node);
+  const date = attrs['@_w:date'];
+  return { id: attrs['@_w:id'] || fallbackId(), author: attrs['@_w:author'] || 'Unknown', ...(date && { date }) };
 }
 
 /**
@@ -162,6 +171,10 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   let out: DocInline[] = [];
   const pStyleId = paragraphStyleId(pNode);
   ctx.comments?.paragraphStart();
+  /** Tracked changes (`w:ins`, `w:del`) the content being read is inside of. */
+  let revision: DocRevision | undefined;
+  let revisionsSeen = 0;
+  const deleted = () => revision?.deletion !== undefined;
   const fields: OpenField[] = []; // begin/.../end sequences in progress, outermost first
   const top = (): OpenField | undefined => fields[fields.length - 1];
   const inInstruction = () => top()?.phase === 'instruction';
@@ -181,6 +194,11 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
 
   /** A field whose end was reached: nested in another field it becomes part of that field, else it is written to the paragraph. */
   const finishField = (done: OpenField) => {
+    if (done.revision) {
+      // A change around a field is not kept as a change: an inserted field stays as it is, a deleted one is dropped (as it was before changes were kept).
+      warnings.push(`A tracked ${done.revision.deletion ? 'deletion' : 'insertion'} around the field "${done.instruction.trim()}" was not kept as a change${done.revision.deletion ? '; the field was dropped' : ''}.`);
+      if (done.revision.deletion) return;
+    }
     const parent = top();
     if (!parent) {
       emitField(done, out);
@@ -199,7 +217,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     // `Hyperlink` on a link is Word's implicit link style, which the writer applies to every link again.
     const characterStyle = ctx.styles.namedCharacterStyle(rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined);
     const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
-    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }) };
+    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(revision && !top() && { revision }) };
     let text = '';
     /** A reference followed by its custom mark (`w:customMarkFollows`): the text after it in the run is that mark. */
     let markOf: Extract<DocInline, { type: 'noteRef' }> | undefined;
@@ -225,7 +243,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         flush();
         if (type === 'begin') {
           const dirty = attrsOf(piece)['@_w:dirty'];
-          fields.push({ instruction: '', phase: 'instruction', result: [], dirty: dirty === 'true' || dirty === '1' });
+          fields.push({ instruction: '', phase: 'instruction', result: [], dirty: dirty === 'true' || dirty === '1', revision });
         } else if (type === 'separate') {
           const open = top();
           if (open) open.phase = 'result';
@@ -233,10 +251,10 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
           const done = fields.pop();
           if (done) finishField(done);
         }
-      } else if (pieceTag === 'w:instrText') {
+      } else if (pieceTag === 'w:instrText' || pieceTag === 'w:delInstrText') {
         const open = top();
         if (open?.phase === 'instruction') open.instruction += textOf(piece);
-      } else if (pieceTag === 'w:t') {
+      } else if (pieceTag === 'w:t' || pieceTag === 'w:delText') {
         if (markOf) markOf.customMark = (markOf.customMark ?? '') + textOf(piece);
         else if (!inInstruction()) text += textOf(piece);
       } else if (pieceTag === 'w:footnoteReference' || pieceTag === 'w:endnoteReference') {
@@ -246,6 +264,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         // A reference in a field's result, in a header or footer, or inside a note is not kept.
         if (!ctx.notes) {
           warnings.push(`A ${kind} reference in a header, footer or note was not imported.`);
+        } else if (deleted()) {
+          warnings.push(`A deleted ${kind} reference was not kept as a tracked deletion; it was dropped.`);
         } else if (!top() && id !== undefined) {
           const note = ctx.notes(kind, id);
           if (note) {
@@ -273,6 +293,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         flush();
         const base = find(childrenOf(piece), 'w:rubyBase');
         if (base) consumeRuns(childrenOf(base), target);
+      } else if (pieceTag === 'w:drawing' && deleted()) {
+        warnings.push('A deleted image was not kept as a tracked deletion; it was dropped.');
       } else if (pieceTag === 'w:drawing') {
         const image = inInstruction() ? null : parseDrawing(piece, ctx.media, warnings);
         if (image) place(image);
@@ -307,9 +329,15 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   const consumeRuns = (runs: XmlNode[], target: string | undefined) => {
     for (const child of flattenInline(runs)) {
       const tag = tagOf(child);
-      if (tag === 'w:fldSimple') {
+      if (tag === 'w:ins' || tag === 'w:del') {
+        const outer = revision;
+        const meta = revisionMeta(child, () => `r${++revisionsSeen}`);
+        revision = { ...outer, ...(tag === 'w:ins' ? { insertion: meta } : { deletion: meta }) };
+        consumeRuns(childrenOf(child), target);
+        revision = outer;
+      } else if (tag === 'w:fldSimple') {
         const dirty = attrsOf(child)['@_w:dirty'];
-        fields.push({ instruction: attrsOf(child)['@_w:instr'] ?? '', phase: 'result', result: [], dirty: dirty === 'true' || dirty === '1' });
+        fields.push({ instruction: attrsOf(child)['@_w:instr'] ?? '', phase: 'result', result: [], dirty: dirty === 'true' || dirty === '1', revision });
         consumeRuns(childrenOf(child), target);
         const done = fields.pop();
         if (done) finishField(done);
@@ -391,6 +419,8 @@ interface OpenField {
   phase: 'instruction' | 'result';
   result: Array<DocTextRun | DocImageRun>;
   dirty: boolean;
+  /** The tracked changes the field began inside of. */
+  revision?: DocRevision;
 }
 
 /** Fields whose result is block content (a table of contents, an index): the text stays, the field does not. */

@@ -113,16 +113,10 @@
       "label": "text box(es)/shape(s)"
     },
     {
-      "count": 2,
-      "effect": "applied (the deleted text is gone)",
-      "id": "docx.trackedDeletions",
-      "label": "tracked deletion(s)"
-    },
-    {
-      "count": 7,
-      "effect": "imported as ordinary text, as if accepted; author and date are lost",
+      "count": 1,
+      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
       "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s)"
+      "label": "tracked insertion(s) of a paragraph mark or table row"
     },
     {
       "count": 2,
