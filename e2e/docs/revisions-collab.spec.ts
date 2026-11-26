@@ -20,7 +20,7 @@ type Peer = Awaited<ReturnType<typeof peer>>;
 
 const suggesting = (p: Peer) =>
   p.page
-    .getByRole('group', { name: 'Editing mode' })
+    .getByRole('group', { name: 'Editor mode' })
     .getByRole('button', { name: 'Suggesting' })
     .click();
 const insertionsOf = (p: Peer) => p.doc.pages.locator('[data-revision-insertion]');
