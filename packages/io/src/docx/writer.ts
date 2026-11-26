@@ -222,13 +222,29 @@ function withoutNoteRefs(content: DocInline[]): DocInline[] {
   });
 }
 
-/** True when the run is part of a tracked insertion or deletion. */
 /** The author and date of a change can come from a collaborator: keep characters XML cannot carry out of the file. */
 // eslint-disable-next-line no-control-regex
-const XML_INVALID = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
-const xmlText = (text: string): string => text.replace(XML_INVALID, '').trim();
-const isIsoDate = (date: string | undefined): date is string => !!date && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/.test(date);
+const XML_INVALID_UNIT = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/;
+const isHigh = (code: number) => code >= 0xd800 && code <= 0xdbff;
+const isLow = (code: number) => code >= 0xdc00 && code <= 0xdfff;
+/** Text without control characters and without unpaired surrogates (no look-behind: older Safari cannot parse one). */
+function xmlText(text: string): string {
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (isHigh(code) && i + 1 < text.length && isLow(text.charCodeAt(i + 1))) {
+      out += text[i] + text[i + 1];
+      i++;
+    } else if (!isHigh(code) && !isLow(code) && !XML_INVALID_UNIT.test(text[i])) {
+      out += text[i];
+    }
+  }
+  return out.trim();
+}
+const isIsoDate = (date: string | undefined): date is string =>
+  !!date && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$/.test(date);
 
+/** True when the run is part of a tracked insertion or deletion. */
 function hasRevision(revision: DocRevision | undefined): revision is DocRevision {
   return !!revision && (!!revision.insertion || !!revision.deletion);
 }

@@ -285,6 +285,24 @@ describe('writing the author and date of a change', () => {
   });
 });
 
+describe('writing the author and date of a change: edge cases', () => {
+  it('keeps a valid surrogate pair, drops an unpaired low surrogate and accepts a date without seconds', async () => {
+    const { xml } = await exportXml([
+      { type: 'text', text: 'a', revision: { insertion: { id: '1', author: 'Ann \u{1F600}\uDC00 Lee', date: '2024-01-05T10:00Z' } } },
+    ]);
+    expect(xml).toContain('w:author="Ann \u{1F600} Lee"');
+    expect(xml).toContain('w:date="2024-01-05T10:00Z"');
+    expect(() => parseXml(xml)).not.toThrow();
+  });
+});
+
+describe('a deleted run before a page break', () => {
+  it('counts as content, so the break is after the paragraph', async () => {
+    const { result } = await importBody(`<w:p ${W}>${del('1', 'Bo', delRun('gone'))}<w:r><w:br w:type="page"/></w:r></w:p>`);
+    expect(result.sections[0].blocks.map((b) => b.type)).toEqual(['paragraph', 'pageBreak']);
+  });
+});
+
 describe('loss report', () => {
   it('no longer counts changes around runs, only those on a paragraph mark or table row', async () => {
     const { bytes } = await importBody(

@@ -577,7 +577,7 @@ function pageBreakPlacement(pNode: XmlNode): 'before' | 'after' | null {
       const br = find(runKids, 'w:br');
       if (br && attrsOf(br)['@_w:type'] === 'page') return sawContent ? 'after' : 'before';
       if (runKids.some((k) => ['w:t', 'w:drawing', 'w:pict', 'w:tab'].includes(tagOf(k) ?? ''))) sawContent = true;
-    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:sdt' || tag === 'w:smartTag') {
+    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:del' || tag === 'w:sdt' || tag === 'w:smartTag') {
       sawContent = true;
     }
   }

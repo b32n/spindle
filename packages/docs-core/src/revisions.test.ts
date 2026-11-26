@@ -2,6 +2,8 @@
 // blockers and the DOCX mapping.
 
 import * as Y from 'yjs';
+import { EditorState } from 'prosemirror-state';
+import { updateYFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror';
 import JSZip from 'jszip';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -9,7 +11,7 @@ import { docsSchema } from './prosemirror/schema';
 import { blocksToPmDoc, proseMirrorToDocument, revisionOf } from './prosemirror/sync';
 import { DocumentImpl } from './document';
 import { getCollabBlockers } from './collab/blockers';
-import { hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
+import { getYDocFields, hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
 import { exportToDocx, importFromDocx } from './export/docx';
 import { REVISION_COLORS, assignAuthorColors, authorColor, collectRevisions, documentRevisionAuthors, revisionAuthors, sameRevisionAuthors } from './revisions';
 import { DEFAULT_PAGE_CONFIG } from './types';
@@ -136,12 +138,32 @@ describe('tracked changes in the Y document and in collaboration', () => {
     expect(getCollabBlockers(dataWith([PARAGRAPH]))).toEqual([]);
   });
 
-  it('survive a document with two clients editing around them', () => {
+  it('survive two clients editing on either side of them', () => {
     const a = new Y.Doc();
     hydrateYDocFromData(a, dataWith([PARAGRAPH]));
     const b = new Y.Doc();
     Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
-    expect(strip(serializeYDocToData(b).sections[0].blocks)).toEqual(strip([PARAGRAPH]));
+    // Each client types in the paragraph with a plain ProseMirror transaction pushed back into its Y document.
+    const type = (ydoc: Y.Doc, at: 'start' | 'end', text: string) => {
+      const fragment = getYDocFields(ydoc).content;
+      const state = EditorState.create({ doc: yXmlFragmentToProseMirrorRootNode(fragment, docsSchema) });
+      const paragraph = state.doc.firstChild!;
+      const pos = at === 'start' ? 1 : paragraph.nodeSize - 1;
+      const tr = state.tr.insertText(text, pos);
+      updateYFragment(ydoc, fragment, tr.doc, { mapping: new Map(), isOMark: new Map() });
+    };
+    type(a, 'start', '>> ');
+    type(b, 'end', ' <<');
+    Y.applyUpdate(b, Y.encodeStateAsUpdate(a, Y.encodeStateVector(b)));
+    Y.applyUpdate(a, Y.encodeStateAsUpdate(b, Y.encodeStateVector(a)));
+    const [one, two] = [a, b].map((d) => serializeYDocToData(d).sections[0].blocks[0] as ParagraphBlock);
+    expect(strip([one])).toEqual(strip([two]));
+    const content = one.content;
+    expect(content[0]).toMatchObject({ type: 'text' });
+    expect((content[0] as { text: string }).text.startsWith('>> keep')).toBe(true);
+    expect(content.filter((c) => c.type === 'text' && c.revision?.insertion).length).toBeGreaterThan(0);
+    expect(content.filter((c) => c.type === 'text' && c.revision?.deletion).length).toBeGreaterThan(0);
+    expect((content[content.length - 1] as { text: string }).text.endsWith(' end <<')).toBe(true);
   });
 });
 

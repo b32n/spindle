@@ -13,6 +13,7 @@ import {
 } from 'prosemirror-inputrules';
 import { Plugin, PluginKey, type Command } from 'prosemirror-state';
 import { goToNextCell } from './commands';
+import { createRevisionEditPlugin, insertTrackedLineBreak } from './revision-edit';
 import type { Schema } from 'prosemirror-model';
 import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
 
@@ -133,7 +134,7 @@ export function buildKeymap(schema: Schema, options: { collab?: boolean } = {}):
   // Hard break
   if (schema.nodes.hard_break) {
     const br = schema.nodes.hard_break;
-    const cmd = chainCommands(exitCode, (state, dispatch) => {
+    const cmd = chainCommands(insertTrackedLineBreak, exitCode, (state, dispatch) => {
       if (dispatch) {
         dispatch(state.tr.replaceSelectionWith(br.create()).scrollIntoView());
       }
@@ -340,6 +341,7 @@ export function createPlugins(schema: Schema, options: { collab?: boolean } = {}
     // prosemirror-history would record remote Yjs changes as local steps; collab uses yUndoPlugin instead.
     ...(options.collab ? [] : [history()]),
     createActiveMarksPlugin(),
+    ...[createRevisionEditPlugin(schema)].filter((p): p is Plugin => !!p),
   ];
 }
 

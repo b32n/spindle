@@ -316,7 +316,13 @@ lockstep.
   underlined and deletions struck through in the author's colour (like Word's All Markup; deleted text takes part in the
   layout) and shows a legend of the authors above the page (`RevisionLegend`). New helpers in docs-core: `authorColor`,
   `assignAuthorColors` (a colour per author of the document, the same on every client, nothing stored), `collectRevisions`,
-  `revisionAuthors`, `documentRevisionAuthors`.
+  `revisionAuthors`, `documentRevisionAuthors`. Marked text takes the author's colour over its own (a link, a content-control
+  placeholder), as in All Markup. Editing around changes: copying tracked text and pasting it gives the copy change ids of its own
+  (author and date stay), so accepting or rejecting one place never touches the other (`freshRevisionIds`); text typed in the
+  middle of a deleted run is live text, not part of the deletion (IME composition is not covered); a line break typed in tracked
+  text (Shift+Enter) is a newline in the text, so its change survives collaboration. The DOCX writer no longer uses a regular
+  expression look-behind (older Safari cannot parse one), accepts a `w:date` without seconds and a deleted run counts as content
+  when a page break follows it.
 
 ### Changed
 
