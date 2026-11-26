@@ -539,7 +539,7 @@ lockstep.
   `STDEV.S/.P`, `VAR.S/.P`, `PERCENTILE.INC/.EXC`, `QUARTILE.INC/.EXC`, `RANK.EQ`, `MODE.SNGL`, `SLOPE`,
   `INTERCEPT`, `RSQ`, `FORECAST`, `FORECAST.LINEAR`, `GEOMEAN` and `FREQUENCY`. Scalar functions of the batch lift
   over ranges and arrays. `MODE` now returns the first of equally frequent values and `CORREL`/`COVAR` propagate
-  error values, as Excel does. The XLSX `values` golden for `formulas-core` improves from 110 to 123 of 159
+  error values, as Excel does. The XLSX `values` golden for `formulas-core` improves from 112 to 125 of 159
   matching and `xlsx.formulas.unsupported` shrinks (34 to 15 formulas there); `_xlfn.`-prefixed spellings still
   wait for S4.
 

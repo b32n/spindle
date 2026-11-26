@@ -40,8 +40,6 @@ const oracle = JSON.parse(
 
 /** Probe rows the engine fails today, with the reason, until the PR that fixes them lands. */
 const KNOWN_FAILING: Record<string, string> = {
-  'probe-059': 'TEXT() has no date codes yet (number-format engine, PR S3 / #210)',
-  'probe-060': 'TEXT() has no date codes yet (number-format engine, PR S3 / #210)',
   'probe-063': 'CLEAN is a batch B text function (S12)',
   'probe-065': 'NUMBERVALUE is a batch B text function (S12)',
   'probe-066': 'TEXTBEFORE is a batch B text function (S12)',
