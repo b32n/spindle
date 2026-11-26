@@ -30,11 +30,7 @@ export interface SheetsCoreModule {
   inspectXlsx(bytes: Uint8Array, options?: { detail: 'full' }): Promise<LossSnapshot>;
 }
 
-/**
- * Bind the harness to a sheets-core module. `inspectXlsx` is asked for the `full` detail level: the
- * current detector ignores the option and reports its summary ids (S1 adds the full level, after which the
- * loss goldens pick it up without a change here).
- */
+/** Bind the harness to a sheets-core module. `inspectXlsx` is asked for the `full` detail level (every loss id, not only the dialog's). */
 export function createApi(core: SheetsCoreModule): XlsxEditorApi {
   return {
     createWorkbook: () => new core.WorkbookImpl('fixture', 'Untitled'),

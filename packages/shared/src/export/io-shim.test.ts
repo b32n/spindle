@@ -22,7 +22,9 @@ describe('deprecated export/xlsx and export/docx shims', () => {
     await importXlsx(bytes);
     await detectXlsxLoss(bytes);
     expect(xlsx.importXlsx).toHaveBeenCalledWith(bytes);
-    expect(xlsx.detectXlsxLoss).toHaveBeenCalledWith(bytes);
+    expect(xlsx.detectXlsxLoss).toHaveBeenCalledWith(bytes, undefined);
+    await detectXlsxLoss(bytes, { detail: 'full' });
+    expect(xlsx.detectXlsxLoss).toHaveBeenLastCalledWith(bytes, { detail: 'full' });
 
     expect((await exportDocx({ title: 't', sections: [] })).bytes).toEqual(new Uint8Array([2]));
     await importDocx(bytes);

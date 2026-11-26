@@ -87,3 +87,13 @@ export interface SpreadsheetImportResult {
   /** Non-fatal issues (unrecognized cell shape, unresolvable shared formula, etc.) — surfaced rather than silently dropped. */
   warnings: string[];
 }
+
+/** Options for the loss detector (`detectXlsxLoss`, and `inspectXlsx` in sheets-core). All optional. */
+export interface DetectXlsxLossOptions {
+  /** `'summary'` (default) drives the import-confirmation dialog; `'full'` adds the finer ids the fidelity harness records. */
+  detail?: 'summary' | 'full';
+  /** Upper-case names of the functions the formula engine implements; without it `xlsx.formulas.unsupported` is not reported. */
+  knownFunctions?: ReadonlySet<string>;
+  /** True when the editor reproduces a number format code exactly; without it `xlsx.numberFormats.approximated` is not reported. */
+  isNumberFormatExact?: (code: string) => boolean;
+}
