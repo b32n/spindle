@@ -43,6 +43,11 @@ import {
 export interface ConversionOptions {
   /** Reset block ID counter before conversion (useful for consistent IDs) */
   resetIds?: boolean;
+  /**
+   * Leave the footnotes out of the notes area: their text is returned separately (see `SectionedFlowBlocks.footnotes`)
+   * for the layout to put at the bottom of the pages their references are on. Only the sectioned conversion supports it.
+   */
+  footnotesAtPageBottom?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,10 +87,23 @@ export function noteLabel(key: NoteKey): string {
   return out;
 }
 
+/** The block that draws one note in the notes area (or at the bottom of a page): its number, then its text in a smaller size. */
+function noteEntryBlock(entry: NoteEntry): ParagraphBlock {
+  const runs: Run[] = [{ kind: 'text', text: entry.label, superscript: true, color: '#1a73e8', noteRef: entry.key }, { kind: 'text', text: ' ' }];
+  const body: Run[] = [];
+  collectRuns(entry.node, body);
+  for (const run of body) {
+    if (run.kind === 'text' || run.kind === 'link') runs.push({ ...run, fontSize: (run as TextRun).fontSize ?? 10 } as Run);
+    else runs.push(run);
+  }
+  return { kind: 'paragraph', id: generateBlockId(), synthetic: true, noteTarget: entry.key, runs, attrs: { spaceAfter: 2 } };
+}
+
 /** Heading and entries of the notes area for the references found since `from`, or nothing when there are none. */
-function notesArea(from: number): FlowBlock[] {
+function notesArea(from: number, withFootnotes = true): FlowBlock[] {
   const blocks: FlowBlock[] = [];
   for (const [kind, title] of [['footnote', 'Footnotes'], ['endnote', 'Endnotes']] as const) {
+    if (kind === 'footnote' && !withFootnotes) continue;
     const entries = noteEntries.slice(from).filter((e) => e.key.kind === kind);
     if (entries.length === 0) continue;
     blocks.push({
@@ -95,16 +113,7 @@ function notesArea(from: number): FlowBlock[] {
       runs: [{ kind: 'text', text: title, bold: true, fontSize: 11, color: '#5f6368' }],
       attrs: { spaceBefore: 18, spaceAfter: 4 },
     });
-    for (const entry of entries) {
-      const runs: Run[] = [{ kind: 'text', text: entry.label, superscript: true, color: '#1a73e8', noteRef: entry.key }, { kind: 'text', text: ' ' }];
-      const body: Run[] = [];
-      collectRuns(entry.node, body);
-      for (const run of body) {
-        if (run.kind === 'text' || run.kind === 'link') runs.push({ ...run, fontSize: (run as TextRun).fontSize ?? 10 } as Run);
-        else runs.push(run);
-      }
-      blocks.push({ kind: 'paragraph', id: generateBlockId(), synthetic: true, noteTarget: entry.key, runs, attrs: { spaceAfter: 2 } });
-    }
+    for (const entry of entries) blocks.push(noteEntryBlock(entry));
   }
   return blocks;
 }
@@ -150,6 +159,8 @@ export interface SectionedFlowBlocks {
    * last section, which has none) and `blockStart`..`blockEnd` the slice of `blocks` it owns (possibly empty).
    */
   sections: Array<{ sectionId: string | null; blockStart: number; blockEnd: number }>;
+  /** With `footnotesAtPageBottom`: the block that draws each footnote, in document order, and the section (index into `sections`) its reference is in. */
+  footnotes: Array<{ block: ParagraphBlock; sectionIndex: number }>;
 }
 
 /**
@@ -163,11 +174,18 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
   resetNotes();
   const blocks: FlowBlock[] = [];
   const sections: SectionedFlowBlocks['sections'] = [];
+  const footnotes: SectionedFlowBlocks['footnotes'] = [];
+  const atPageBottom = !!options.footnotesAtPageBottom;
   let blockStart = 0;
   let notesFrom = 0;
   /** Close the section being read: the notes of its references follow its blocks. */
   const endSection = (sectionId: string | null) => {
-    blocks.push(...notesArea(notesFrom));
+    blocks.push(...notesArea(notesFrom, !atPageBottom));
+    if (atPageBottom) {
+      for (const entry of noteEntries.slice(notesFrom)) {
+        if (entry.key.kind === 'footnote') footnotes.push({ block: noteEntryBlock(entry), sectionIndex: sections.length });
+      }
+    }
     notesFrom = noteEntries.length;
     sections.push({ sectionId, blockStart, blockEnd: blocks.length });
     blockStart = blocks.length;
@@ -182,7 +200,7 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
     else if (block) blocks.push(block);
   });
   endSection(null);
-  return { blocks, sections };
+  return { blocks, sections, footnotes };
 }
 
 /**

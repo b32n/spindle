@@ -4,6 +4,7 @@ import {
   findBlockFragments,
   getPageY,
   findPageAtY,
+  type FootnoteHooks,
   type LayoutOptions,
 } from './true-layout-engine';
 import type { FlowBlock } from './flow-blocks';
@@ -176,5 +177,104 @@ describe('layout query helpers', () => {
   it('findPageAtY maps a y coordinate back to its page index', () => {
     expect(findPageAtY(l, 10)).toBe(0);
     expect(findPageAtY(l, 700 + 24 + 10)).toBe(1);
+  });
+});
+
+describe('computeTrueLayout — footnotes', () => {
+  // Hooks for a body of blocks where block `a` has a reference to note `n1` on line 0, and so on. A page's notes take
+  // 10px of separator and 30px for each note (so a page with one note gives up 40px).
+  const hooks = (refs: Record<string, string[]>, indexOf: (i: number) => string, overrides: Partial<FootnoteHooks> = {}): FootnoteHooks => ({
+    refsIn: (i, from, to) => (from <= 0 && to > 0 ? refs[indexOf(i)] ?? [] : []),
+    place: (_h, carry, keys) => {
+      const all = [...carry.map((c) => c.key), ...keys];
+      const items = all.map((key) => ({ key, blockIndex: 99, blockId: key, fromLine: 0, toLine: 1, totalLines: 1, height: 30 }));
+      return { items, height: items.length > 0 ? 10 + 30 * items.length : 0, continued: carry.length > 0, carry: [] };
+    },
+    ...overrides,
+  });
+
+  it('is the same layout as without footnotes when no line refers to one', () => {
+    const pairs = [{ b: block('a'), m: para('a', 20, 40) }, { b: block('b'), m: image('b', 100) }];
+    const plain = layout(pairs);
+    const withHooks = layout(pairs, { footnotes: hooks({}, () => '') });
+    expect(withHooks.pages.map((p) => p.fragments)).toEqual(plain.pages.map((p) => p.fragments));
+    expect(withHooks.pages.every((p) => p.notes === undefined)).toBe(true);
+  });
+
+  it('counts the notes a block brings against the space the page has for it', () => {
+    // Three 190px blocks fit a 600px page (570px); a note of 40px for the third leaves 560px: it goes to the next page.
+    const ids = ['a', 'b', 'c'];
+    const l = layout(ids.map((id) => ({ b: block(id), m: image(id, 190) })), { footnotes: hooks({ c: ['n1'] }, (i) => ids[i]) });
+    expect(l.pages.map((p) => p.fragments.map((f) => f.blockId))).toEqual([['a', 'b'], ['c']]);
+    expect(l.pages[0].notes).toBeUndefined();
+    expect(l.pages[1].notes).toMatchObject({ keys: ['n1'], height: 40 });
+    expect(l.pages[1].remainingHeight).toBe(CONTENT_HEIGHT - 190 - 40);
+  });
+
+  it('fits a block with its notes when there is room, and keeps what the page carries', () => {
+    const ids = ['a', 'b'];
+    const l = layout(ids.map((id) => ({ b: block(id), m: image(id, 200) })), { footnotes: hooks({ a: ['n1'], b: ['n2'] }, (i) => ids[i]) });
+    expect(l.pages).toHaveLength(1);
+    expect(l.pages[0].notes).toMatchObject({ keys: ['n1', 'n2'], height: 70, carryIn: [], carry: [] });
+    expect(l.pages[0].remainingHeight).toBe(CONTENT_HEIGHT - 400 - 70);
+  });
+
+  it('places the lines of a split block only while they fit with their notes', () => {
+    // 40 lines of 20px; the reference is on line 27 and the note area takes 40px: 27 lines (540px) + the line (20px) + 40px = 600px fits.
+    const refs = (i: number, from: number, to: number) => (from <= 27 && to > 27 ? ['n1'] : []);
+    const fits = layout([{ b: block('a'), m: para('a', 20, 40) }], { footnotes: hooks({}, () => '', { refsIn: refs }), minLinesAtBreak: 1 });
+    expect(fits.pages[0].fragments[0]).toMatchObject({ fromLine: 0, toLine: 28 });
+    // With a 41px note area (30px per note + 11 separator) the line with the reference no longer fits.
+    const tight = layout([{ b: block('a'), m: para('a', 20, 40) }], {
+      footnotes: hooks({}, () => '', { refsIn: refs, place: (_h, _c, keys) => ({ items: keys.length ? [{ key: 'n1', blockIndex: 9, blockId: 'n1', fromLine: 0, toLine: 1, totalLines: 1, height: 31 }] : [], height: keys.length ? 41 : 0, continued: false, carry: [] }) }),
+      minLinesAtBreak: 1,
+    });
+    expect(tight.pages[0].fragments[0]).toMatchObject({ fromLine: 0, toLine: 27 });
+    expect(tight.pages[1].fragments[0]).toMatchObject({ fromLine: 27 });
+    expect(tight.pages[0].notes).toBeUndefined();
+    expect(tight.pages[1].notes).toMatchObject({ keys: ['n1'] });
+  });
+
+  it('starts the next page with the notes that did not fit, and gives left-over notes pages of their own', () => {
+    let calls = 0;
+    const carrying = hooks({ a: ['n1'] }, () => 'a', {
+      place: (_h, carry, keys) => {
+        calls++;
+        // The first note needs two pages: it places 30px and carries the rest, then a second piece, then nothing.
+        const piece = carry.length > 0 ? carry[0].fromLine : 0;
+        const items = carry.length + keys.length > 0 ? [{ key: 'n1', blockIndex: 9, blockId: 'n1', fromLine: piece, toLine: piece + 1, totalLines: 3, height: 30 }] : [];
+        return { items, height: items.length ? 40 : 0, continued: carry.length > 0, carry: piece + 1 < 3 && items.length ? [{ key: 'n1', fromLine: piece + 1 }] : [] };
+      },
+    });
+    const l = layout([{ b: block('a'), m: image('a', 100) }], { footnotes: carrying });
+    expect(l.pages.map((p) => p.notes?.items.map((i) => [i.fromLine, i.toLine]))).toEqual([[[0, 1]], [[1, 2]], [[2, 3]]]);
+    expect(l.pages.map((p) => p.notesOnly ?? false)).toEqual([false, true, true]);
+    expect(l.pages.map((p) => p.notes?.continued)).toEqual([false, true, true]);
+    expect(l.pages.map((p) => p.pageIndex)).toEqual([0, 1, 2]);
+    expect(l.totalHeight).toBe(3 * 700 + 2 * 24);
+    expect(calls).toBeGreaterThan(0);
+  });
+
+  it('accounts for notes carried onto a page when placing its first lines, and lets a continuing page start with notes already on it', () => {
+    const carryHooks = hooks({}, () => '', { refsIn: () => [] });
+    const l = layout([{ b: block('a'), m: image('a', 570) }], { footnotes: carryHooks, initialNotes: { keys: ['n0'], carry: [{ key: 'n0', fromLine: 1 }] }, initialY: 10 });
+    // The page already carries a 40px area (10 + 30): 570px more does not fit in the 590px left, the block goes to page 2.
+    expect(l.pages.map((p) => p.fragments.length)).toEqual([0, 1]);
+    expect(l.pages[0].notes).toMatchObject({ keys: ['n0'], carryIn: [{ key: 'n0', fromLine: 1 }] });
+  });
+
+  it('forces the first line of a page even when its notes do not fit with it, and keeps oversize blocks and their notes', () => {
+    const l = layout([{ b: block('a'), m: para('a', 700, 2) }], { footnotes: hooks({ a: ['n1'] }, () => 'a'), minLinesAtBreak: 1 });
+    const covered = l.pages.flatMap((p) => p.fragments).reduce((n, f) => n + f.toLine - f.fromLine, 0);
+    expect(covered).toBe(2);
+    const big = layout([{ b: block('img'), m: image('img', 900) }], { footnotes: hooks({ img: ['n1'] }, () => 'img') });
+    expect(big.pages[0].fragments[0].height).toBe(900);
+    expect(big.pages[0].notes?.keys).toEqual(['n1']);
+  });
+
+  it('puts a page break between pages and carries notes across it', () => {
+    const ids = ['a', 'pb', 'b'];
+    const l = layout([{ b: block('a'), m: image('a', 50) }, { b: block('pb'), m: pageBreak('pb') }, { b: block('b'), m: image('b', 50) }], { footnotes: hooks({ a: ['n1'], b: ['n2'] }, (i) => ids[i]) });
+    expect(l.pages.map((p) => p.notes?.keys)).toEqual([['n1'], ['n2']]);
   });
 });

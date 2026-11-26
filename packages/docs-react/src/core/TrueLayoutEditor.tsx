@@ -32,7 +32,8 @@ import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
 
 import { FlowBlock, NoteKey, noteKeyString } from './flow-blocks';
-import { proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
+import { proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
+import { applyPageNotes, createFootnoteHooks, footnoteRefs, type FootnotePlan } from './footnote-layout';
 import { DomMeasurer, Measure } from './measurer';
 import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
 import { computeTrueLayout, DocumentLayout, PageConfig, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
@@ -117,6 +118,11 @@ export interface TrueLayoutEditorProps {
   pageGap?: number;
   /** Minimum lines to keep together at page break */
   minLinesAtBreak?: number;
+  /**
+   * Lay footnotes out at the bottom of the page their reference is on (default: true). When false they are collected in
+   * the notes area at the end of each section, with the endnotes.
+   */
+  footnotesAtPageBottom?: boolean;
   /** Text style pool for efficient style storage (recommended for large documents) */
   textStylePool?: import('@b32nio/spindle-docs-core').TextStylePool;
   /** Header content configuration */
@@ -199,6 +205,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       height = '100%',
       pageGap = 24,
       minLinesAtBreak = 2,
+      footnotesAtPageBottom = true,
       textStylePool,
       header: headerProp,
       footer: footerProp,
@@ -789,31 +796,51 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       // Removed logging for production
       if (!measurerRef.current || !painterRef.current || !pagesContainerRef.current) return;
       
-      // 1. Convert ProseMirror doc to FlowBlocks (and, with sections, find where each section's blocks are)
+      // 1. Convert ProseMirror doc to FlowBlocks (and find where each section's blocks are). Footnotes at the bottom of their
+      //    pages come back separately; the blocks that draw them follow the body's blocks in the arrays given to the layout.
       const known = sectionsRef.current;
-      const sectioned = known ? proseMirrorToSectionedFlowBlocks(doc, { resetIds: true }) : null;
-      const blocks = sectioned ? sectioned.blocks : proseMirrorToFlowBlocks(doc, { resetIds: true });
+      const sectioned = proseMirrorToSectionedFlowBlocks(doc, { resetIds: true, footnotesAtPageBottom });
+      const bodyBlocks = sectioned.blocks;
+      const noteBlocks = sectioned.footnotes.map((f) => f.block);
+      const blocks: FlowBlock[] = [...bodyBlocks, ...noteBlocks];
       blocksRef.current = blocks;
       
-      // 2. Create PM position map for blocks
-      const pmPositions = createBlockPositionMap(doc, blocks);
+      // 2. Create PM position map for blocks (the notes' blocks have no node)
+      const pmPositions = createBlockPositionMap(doc, bodyBlocks);
       blockPositionMapRef.current = pmPositions;
       
       // 3. Measure all blocks (clear cache first to ensure fresh measurements)
       measurerRef.current.clearCache();
       let measures: Measure[];
       let newLayout: DocumentLayout;
-      if (known && sectioned) {
+      /** Measure the footnote blocks of each section at that section's width; they follow the body's measures. */
+      const measureNotes = (widthOf: (sectionIndex: number) => number): Measure[] => {
+        const out: Measure[] = [];
+        for (let i = 0; i < sectioned.sections.length; i++) {
+          const own = sectioned.footnotes.filter((f) => f.sectionIndex === i).map((f) => f.block);
+          if (own.length === 0) continue;
+          measurerRef.current!.updateContentWidth(Math.floor(widthOf(i)));
+          out.push(...measurerRef.current!.measureBlocks(own));
+        }
+        return out;
+      };
+      const plan = (allMeasures: Measure[]): FootnotePlan | undefined => {
+        if (noteBlocks.length === 0) return undefined;
+        const noteIndex = new Map<string, { index: number; id: string }>();
+        noteBlocks.forEach((b, k) => b.noteTarget && noteIndex.set(noteKeyString(b.noteTarget), { index: bodyBlocks.length + k, id: b.id }));
+        return { refs: footnoteRefs(blocks, allMeasures, bodyBlocks.length), noteBlocks: noteIndex };
+      };
+      if (known) {
         // Each section is measured at its own content width and laid out with its own page setup.
         const matched = matchSectionsToBreaks(sectioned.sections.map((s) => s.sectionId), known);
         const headers = resolveInheritedContent(matched.map((s) => s.header));
         const footers = resolveInheritedContent(matched.map((s) => s.footer));
+        const sectionWidth = (i: number) => matched[i].pageConfig.width - matched[i].pageConfig.margins.left - matched[i].pageConfig.margins.right;
         measures = [];
         const layoutSections: LayoutSection[] = sectioned.sections.map((range, i) => {
           const setup = matched[i];
-          const width = setup.pageConfig.width - setup.pageConfig.margins.left - setup.pageConfig.margins.right;
-          measurerRef.current!.updateContentWidth(Math.floor(width));
-          measures.push(...measurerRef.current!.measureBlocks(blocks.slice(range.blockStart, range.blockEnd)));
+          measurerRef.current!.updateContentWidth(Math.floor(sectionWidth(i)));
+          measures.push(...measurerRef.current!.measureBlocks(bodyBlocks.slice(range.blockStart, range.blockEnd)));
           return {
             pageConfig: setup.pageConfig,
             blockStart: range.blockStart,
@@ -824,17 +851,23 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
             differentOddEven: !!(headers[i]?.differentOddEven || footers[i]?.differentOddEven),
           };
         });
-        newLayout = computeSectionedLayout(blocks, measures, layoutSections, { scale: zoom, pageGap, minLinesAtBreak });
+        measures.push(...measureNotes(sectionWidth));
+        const notesPlan = plan(measures);
+        newLayout = computeSectionedLayout(blocks, measures, layoutSections, { scale: zoom, pageGap, minLinesAtBreak, ...(notesPlan && { footnotes: createFootnoteHooks(notesPlan, measures, zoom) }) });
+        if (notesPlan) newLayout = applyPageNotes(newLayout, notesPlan);
         painterRef.current.updateConfig({ pageConfig: matched[0].pageConfig, sectionHeaders: headers, sectionFooters: footers });
         sectionOwnersRef.current = { ids: matched.map((s) => s.id), headers, footers, headerOwners: ownersOf(matched.map((s) => s.header)), footerOwners: ownersOf(matched.map((s) => s.footer)) };
       } else {
-        measures = measurerRef.current.measureBlocks(blocks);
-        newLayout = computeTrueLayout(blocks, measures, {
+        measures = [...measurerRef.current.measureBlocks(bodyBlocks), ...measureNotes(() => measureContentWidth)];
+        const notesPlan = plan(measures);
+        newLayout = computeTrueLayout(bodyBlocks, measures.slice(0, bodyBlocks.length), {
           pageConfig,
           scale: zoom,
           pageGap,
           minLinesAtBreak,
+          ...(notesPlan && { footnotes: createFootnoteHooks(notesPlan, measures, zoom) }),
         });
+        if (notesPlan) newLayout = applyPageNotes(newLayout, notesPlan);
       }
       measuresRef.current = measures;
       
@@ -860,7 +893,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       // 8. Refresh remote-cursor overlay so peer carets/selections re-place on
       //    the freshly painted pages.
       remoteCursorOverlayRef.current?.refresh();
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, measureContentWidth]);
     
     // Keep performLayoutRef in sync to avoid stale closures
     performLayoutRef.current = performLayout;
@@ -875,7 +908,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       }
       // Note: We use performLayoutRef to avoid adding performLayout to deps
       // which would cause infinite loops. The ref is always up-to-date.
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak, editorView, header, footer, sectionsKey]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, editorView, header, footer, sectionsKey]);
     
     // Initialize table interaction manager
     useEffect(() => {

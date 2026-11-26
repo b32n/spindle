@@ -12,6 +12,7 @@ import type { Measure } from './measurer';
 import {
   computeTrueLayout,
   type DocumentLayout,
+  type FootnoteHooks,
   type HeaderFooterVariant,
   type PageConfig,
   type PageLayout,
@@ -45,6 +46,11 @@ export interface SectionedLayoutOptions {
   pageGap?: number;
   /** Minimum number of lines to keep together at page break (widow/orphan control) */
   minLinesAtBreak?: number;
+  /**
+   * Footnotes at the bottom of their pages (see `LayoutOptions.footnotes`). Block indexes are those of the whole `blocks`
+   * array; the notes' own blocks follow the sections' blocks in it.
+   */
+  footnotes?: FootnoteHooks;
 }
 
 /** True when a continuous section can share the page of the previous one: same size and same margins. */
@@ -151,7 +157,7 @@ export function computeSectionedLayout(
   sections: LayoutSection[],
   options: SectionedLayoutOptions = {},
 ): DocumentLayout {
-  const { scale = 1, pageGap = 24, minLinesAtBreak = 2 } = options;
+  const { scale = 1, pageGap = 24, minLinesAtBreak = 2, footnotes } = options;
   const scaledGap = pageGap * scale;
   if (sections.length === 0) throw new Error('computeSectionedLayout needs at least one section');
   const first = sections[0];
@@ -162,9 +168,11 @@ export function computeSectionedLayout(
   sections.forEach((section, sectionIndex) => {
     const previous = sectionIndex > 0 ? sections[sectionIndex - 1] : undefined;
     const lastPage = pages[pages.length - 1];
+    // A page that only holds footnotes continuing from the body before it cannot be shared with the next section.
     const continues =
       !!previous &&
       !!lastPage &&
+      !lastPage.notesOnly &&
       section.breakType === 'continuous' &&
       canContinueOnPage(lastPage.pageConfig ?? previous.pageConfig, section.pageConfig);
 
@@ -174,6 +182,11 @@ export function computeSectionedLayout(
       pageGap,
       minLinesAtBreak,
       initialY: continues ? lastPage.contentHeight : 0,
+      ...(footnotes && {
+        // The section sees its own blocks from 0; a section that continues on a page starts with the notes already on it.
+        footnotes: { refsIn: (i: number, from: number, to: number) => footnotes.refsIn(i + section.blockStart, from, to), place: footnotes.place },
+        ...(continues && { initialNotes: { keys: lastPage.notes?.keys ?? [], carry: lastPage.notes?.carryIn ?? [] } }),
+      }),
     });
     const own: PageLayout[] = laid.pages.map((page) => ({
       ...page,
@@ -187,6 +200,9 @@ export function computeSectionedLayout(
       lastPage.fragments.push(...head.fragments);
       lastPage.contentHeight = Math.max(lastPage.contentHeight, head.contentHeight);
       lastPage.remainingHeight = head.remainingHeight;
+      // The shared page's notes are those of both sections' lines (the later section started from the earlier one's).
+      if (head.notes) lastPage.notes = head.notes;
+      else delete lastPage.notes;
       newPages = rest;
     }
 

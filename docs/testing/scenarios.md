@@ -291,9 +291,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-NOT-04 | Insert -> Footnote puts a numbered reference at the caret and edits the note in the notes area | covered | yes |  | `e2e/docs/notes-edit.spec.ts` |
 | D-NOT-05 | a second footnote placed earlier renumbers the first, and deleting a reference removes its note and renumbers | covered |  |  | `e2e/docs/notes-edit.spec.ts` |
 | D-NOT-06 | an endnote is numbered in roman numerals and listed under Endnotes; editing a note keeps its formatting | covered |  |  | `e2e/docs/notes-edit.spec.ts` |
+| D-NOT-08 | a footnote near the end of a page makes the text above it make room, and later text moves to the next page | covered |  |  | `e2e/docs/notes-edit.spec.ts` |
 | D-NOT-07 | notes inserted in the editor survive the download and the file opens with the same notes | covered |  |  | `e2e/docs/notes-edit.spec.ts` |
-| D-NOT-01 | a .docx with footnotes and endnotes shows numbered references and collects the notes at the end | covered | yes |  | `e2e/docs/notes.spec.ts` |
-| D-NOT-02 | clicking the number of a note in the notes area goes back to its reference, and clicking the reference goes to the note again | covered |  |  | `e2e/docs/notes.spec.ts` |
+| D-NOT-01 | a .docx with footnotes and endnotes shows numbered references, with each footnote at the bottom of its reference\ | covered |  |  | `e2e/docs/notes.spec.ts` |
+| D-NOT-02 | clicking the number of a note goes back to its reference, and clicking the reference goes to the note again | covered |  |  | `e2e/docs/notes.spec.ts` |
 | D-NOT-03 | the notes survive the download: the .docx has the notes in its notes parts | covered |  |  | `e2e/docs/notes.spec.ts` |
 | D-RES-01 | a dropped connection reconnects and edits sync both ways without duplication | covered |  |  | `e2e/docs/resilience.spec.ts` |
 | D-RES-02 | edits made while offline on both sides merge on reconnect, nothing is lost | covered |  |  | `e2e/docs/resilience.spec.ts` |
@@ -457,7 +458,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 391
+- covered: 392
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

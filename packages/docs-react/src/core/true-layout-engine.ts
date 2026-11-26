@@ -100,6 +100,54 @@ export interface PageLayout {
   headerFooterVariant?: HeaderFooterVariant;
   /** True for a page added only so that the next section starts on an even or odd page. */
   isBlank?: boolean;
+  /** The footnotes the page carries (set by a layout made with `LayoutOptions.footnotes`; see `applyPageNotes` for drawing them). */
+  notes?: PageNotes;
+  /** True for a page added only for footnotes that continue past the last page of the body. */
+  notesOnly?: boolean;
+  /** Where the page's footnotes start (set by `applyPageNotes`): the separator is drawn at `top` (scaled, in the content area), the notes follow it. */
+  footnotes?: { top: number; separatorHeight: number; continued: boolean };
+}
+
+/** A footnote, or what is left of one, waiting for room on a page: it starts at `fromLine`. */
+export interface PendingNote {
+  key: string;
+  fromLine: number;
+}
+
+/** A piece of a footnote on a page. */
+export interface PageNote {
+  key: string;
+  blockIndex: number;
+  blockId: string;
+  fromLine: number;
+  toLine: number;
+  /** Lines the note has in all: a piece that ends before this continues on the next page. */
+  totalLines: number;
+  /** Height (scaled). */
+  height: number;
+}
+
+/** What a page carries at its bottom: its footnotes (or parts of them), and what the layout needs to go on from it. */
+export interface PageNotes {
+  items: PageNote[];
+  /** Height of the whole area, separator included (scaled); 0 when there are no notes. */
+  height: number;
+  /** The first note continues from the previous page. */
+  continued: boolean;
+  /** Notes (or their remaining lines) that did not fit and go on to the next page. */
+  carry: PendingNote[];
+  /** The footnotes referenced from the lines on the page. */
+  keys: string[];
+  /** Notes that continued onto this page from the one before. */
+  carryIn: PendingNote[];
+}
+
+/** How the layout learns about footnotes: which lines refer to which, and what a page's notes take. */
+export interface FootnoteHooks {
+  /** The footnotes referenced by lines `fromLine`..`toLine` of a block (an index into the array given to the layout), in order. */
+  refsIn(blockIndex: number, fromLine: number, toLine: number): string[];
+  /** The notes a page of this content height (scaled) carries, with `carry` continuing onto it from the page before and `keys` referenced on it. */
+  place(contentHeight: number, carry: PendingNote[], keys: string[]): Pick<PageNotes, 'items' | 'height' | 'continued' | 'carry'>;
 }
 
 /**
@@ -135,11 +183,29 @@ export interface LayoutOptions {
    * page of the previous one. The first page of the result then holds only the new fragments, placed below it.
    */
   initialY?: number;
+  /**
+   * Footnotes at the bottom of their pages. A line (or block) is placed on a page only if it fits together with the
+   * notes the page then carries, and a note that does not fit goes on to the next page. Without it there are no notes.
+   */
+  footnotes?: FootnoteHooks;
+  /** For a first page that continues earlier content: the footnotes already on it, and those continuing onto it. */
+  initialNotes?: { keys: string[]; carry: PendingNote[] };
 }
 
 // ============================================================================
 // Layout Engine
 // ============================================================================
+
+/** The keys of `base` followed by those of `more` that are not in it. */
+function unionKeys(base: readonly string[], more: readonly string[]): string[] {
+  if (more.length === 0) return base as string[];
+  const out = [...base];
+  for (const key of more) if (!out.includes(key)) out.push(key);
+  return out;
+}
+
+/** Notes still waiting to be placed are at most this many pages past the last page of the body (a guard against a runaway). */
+const MAX_NOTES_ONLY_PAGES = 200;
 
 /**
  * Compute the document layout
@@ -157,7 +223,7 @@ export function computeTrueLayout(
   measures: Measure[],
   options: LayoutOptions
 ): DocumentLayout {
-  const { pageConfig, scale = 1, pageGap = 24, minLinesAtBreak = 2, initialY = 0 } = options;
+  const { pageConfig, scale = 1, pageGap = 24, minLinesAtBreak = 2, initialY = 0, footnotes, initialNotes } = options;
   
   // Calculate content area dimensions (scaled)
   const contentHeight = (pageConfig.height - pageConfig.margins.top - pageConfig.margins.bottom) * scale;
@@ -169,6 +235,27 @@ export function computeTrueLayout(
   // A first page that continues earlier content counts as occupied even before it gets a fragment of its own.
   const carried = currentY > 0;
   const pageOccupied = (): boolean => currentPage.fragments.length > 0 || (carried && pages.length === 0);
+
+  // The footnotes of the page being filled: those its lines refer to, and those continuing onto it from the page before.
+  let pageKeys: string[] = initialNotes?.keys ?? [];
+  let carryIn: PendingNote[] = initialNotes?.carry ?? [];
+  /** The height the notes of the current page take, given the footnotes its lines (so far, and `more`) refer to. */
+  const notesHeight = (more: readonly string[]): number => (footnotes ? footnotes.place(contentHeight, carryIn, unionKeys(pageKeys, more)).height : 0);
+
+  /** Finish the current page (it goes into `pages`) and start the next one. */
+  const closePage = () => {
+    const placed = footnotes ? footnotes.place(contentHeight, carryIn, pageKeys) : undefined;
+    currentPage.contentHeight = currentY;
+    currentPage.remainingHeight = contentHeight - currentY - (placed?.height ?? 0);
+    if (placed && (placed.items.length > 0 || carryIn.length > 0 || pageKeys.length > 0)) {
+      currentPage.notes = { ...placed, keys: pageKeys, carryIn };
+    }
+    pages.push(currentPage);
+    carryIn = placed?.carry ?? [];
+    pageKeys = [];
+    currentPage = createEmptyPage(pages.length, contentHeight);
+    currentY = 0;
+  };
   
   // Process each block
   for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
@@ -178,27 +265,23 @@ export function computeTrueLayout(
     // Handle page breaks
     if (measure.kind === 'pageBreak') {
       // Force a new page
-      if (pageOccupied()) {
-        currentPage.contentHeight = currentY;
-        currentPage.remainingHeight = contentHeight - currentY;
-        pages.push(currentPage);
-        currentPage = createEmptyPage(pages.length, contentHeight);
-        currentY = 0;
-      }
+      if (pageOccupied()) closePage();
       continue;
     }
     
     // Scale the measurement height
     const blockHeight = measure.totalHeight * scale;
+    const lineCount = getLineCount(measure);
+    const wholeKeys = footnotes ? footnotes.refsIn(blockIndex, 0, lineCount) : [];
     
-    // Check if the entire block fits on the current page
-    if (currentY + blockHeight <= contentHeight) {
+    // Check if the entire block fits on the current page (with the notes it brings)
+    if (currentY + blockHeight + notesHeight(wholeKeys) <= contentHeight) {
       // Block fits entirely - add as single fragment
       currentPage.fragments.push({
         blockId: block.id,
         blockIndex,
         fromLine: 0,
-        toLine: getLineCount(measure),
+        toLine: lineCount,
         x: 0,
         y: currentY,
         height: blockHeight,
@@ -206,59 +289,52 @@ export function computeTrueLayout(
         isLastFragment: true,
       });
       currentY += blockHeight;
+      pageKeys = unionKeys(pageKeys, wholeKeys);
     } else if (hasLineData(measure) && measure.lines.length > 1) {
-      // Block doesn't fit and has multiple lines - try to split
-      const result = splitBlockAcrossPages(
-        block,
-        measure,
-        blockIndex,
-        currentY,
-        contentHeight,
-        scale,
-        minLinesAtBreak
-      );
-      
-      // Add first fragment to current page (if any)
-      if (result.firstFragment) {
-        currentPage.fragments.push(result.firstFragment);
-        currentY += result.firstFragment.height;
-      }
-      
-      // Push current page and create new pages for remaining fragments
-      if (result.remainingFragments.length > 0) {
-        currentPage.contentHeight = currentY;
-        currentPage.remainingHeight = contentHeight - currentY;
-        pages.push(currentPage);
-        
-        // Add fragments to new pages
-        for (let i = 0; i < result.remainingFragments.length; i++) {
-          const fragment = result.remainingFragments[i];
-          const isLastFragment = i === result.remainingFragments.length - 1;
-          
-          currentPage = createEmptyPage(pages.length, contentHeight);
-          
-          // Update fragment position for new page
-          fragment.y = 0;
-          currentPage.fragments.push(fragment);
-          currentY = fragment.height;
-          
-          // If not the last fragment, push this page too
-          if (!isLastFragment) {
-            currentPage.contentHeight = currentY;
-            currentPage.remainingHeight = contentHeight - currentY;
-            pages.push(currentPage);
-          }
+      // Block doesn't fit and has multiple lines - split it at line boundaries
+      const totalLines = measure.lines.length;
+      let line = 0;
+      let first = true;
+      while (line < totalLines) {
+        const refsOfLine = (l: number) => (footnotes ? footnotes.refsIn(blockIndex, l, l + 1) : []);
+        const fit = findLinesToFit(measure, line, contentHeight - (first ? currentY : 0), scale, minLinesAtBreak, totalLines, footnotes && {
+          held: pageKeys,
+          refsOfLine: refsOfLine,
+          heightFor: (keys) => footnotes.place(contentHeight, carryIn, keys).height,
+        });
+        let take = fit.linesToFit;
+        let height = fit.heightUsed;
+        if (take === 0 && !first) {
+          // findLinesToFit can return 0 even on a full page — e.g. a single line taller than the whole page, where the
+          // widow guard refuses to place fewer than minLinesAtBreak lines. Force one line so the loop always advances;
+          // otherwise the remaining lines are silently dropped and the block vanishes.
+          take = 1;
+          height = getLineRangeHeight(measure, line, line + 1) * scale;
         }
+        if (take > 0) {
+          const toLine = line + take;
+          currentPage.fragments.push({
+            blockId: block.id,
+            blockIndex,
+            fromLine: line,
+            toLine,
+            x: 0,
+            y: first ? currentY : 0,
+            height,
+            isFirstFragment: line === 0,
+            isLastFragment: toLine >= totalLines,
+          });
+          currentY = (first ? currentY : 0) + height;
+          pageKeys = unionKeys(pageKeys, footnotes ? footnotes.refsIn(blockIndex, line, toLine) : []);
+          line = toLine;
+        }
+        // Whatever is left goes on a new page.
+        if (line < totalLines) closePage();
+        first = false;
       }
     } else {
       // Block doesn't fit and can't be split - start new page
-      if (pageOccupied()) {
-        currentPage.contentHeight = currentY;
-        currentPage.remainingHeight = contentHeight - currentY;
-        pages.push(currentPage);
-        currentPage = createEmptyPage(pages.length, contentHeight);
-        currentY = 0;
-      }
+      if (pageOccupied()) closePage();
       
       // Add block to new page (even if it overflows). Use the block's full
       // height — never clamp to contentHeight, or the overflowing remainder of
@@ -267,7 +343,7 @@ export function computeTrueLayout(
         blockId: block.id,
         blockIndex,
         fromLine: 0,
-        toLine: getLineCount(measure),
+        toLine: lineCount,
         x: 0,
         y: 0,
         height: blockHeight,
@@ -275,29 +351,34 @@ export function computeTrueLayout(
         isLastFragment: true,
       });
       currentY = blockHeight;
+      pageKeys = unionKeys(pageKeys, wholeKeys);
       
       // If block overflows single page, we need to handle that
       // For now, we just let it overflow (tables/images might do this)
       if (blockHeight > contentHeight) {
-        currentPage.contentHeight = contentHeight;
-        currentPage.remainingHeight = 0;
-        pages.push(currentPage);
-        currentPage = createEmptyPage(pages.length, contentHeight);
-        currentY = 0;
+        currentY = contentHeight;
+        closePage();
       }
     }
   }
   
   // Don't forget the last page
-  if (pageOccupied()) {
-    currentPage.contentHeight = currentY;
-    currentPage.remainingHeight = contentHeight - currentY;
-    pages.push(currentPage);
-  }
+  if (pageOccupied()) closePage();
   
   // Ensure at least one page exists
   if (pages.length === 0) {
     pages.push(createEmptyPage(0, contentHeight));
+  }
+
+  // Footnotes still waiting for room get pages of their own after the last one.
+  for (let extra = 0; footnotes && carryIn.length > 0 && extra < MAX_NOTES_ONLY_PAGES; extra++) {
+    const placed = footnotes.place(contentHeight, carryIn, []);
+    const page = createEmptyPage(pages.length, contentHeight);
+    page.remainingHeight = contentHeight - placed.height;
+    page.notes = { ...placed, keys: [], carryIn };
+    page.notesOnly = true;
+    pages.push(page);
+    carryIn = placed.carry;
   }
   
   // Calculate total height
@@ -326,101 +407,16 @@ function createEmptyPage(pageIndex: number, contentHeight: number): PageLayout {
   };
 }
 
-/**
- * Split a block across pages at line boundaries
- */
-function splitBlockAcrossPages(
-  block: FlowBlock,
-  measure: Measure,
-  blockIndex: number,
-  startY: number,
-  pageContentHeight: number,
-  scale: number,
-  minLinesAtBreak: number
-): { firstFragment: PageFragment | null; remainingFragments: PageFragment[] } {
-  if (!hasLineData(measure)) {
-    // Can't split - return as single fragment
-    return {
-      firstFragment: {
-        blockId: block.id,
-        blockIndex,
-        fromLine: 0,
-        toLine: 1,
-        x: 0,
-        y: startY,
-        height: measure.totalHeight * scale,
-        isFirstFragment: true,
-        isLastFragment: true,
-      },
-      remainingFragments: [],
-    };
-  }
-  
-  const lines = measure.lines;
-  const totalLines = lines.length;
-  
-  // Find how many lines fit on the current page
-  const availableHeight = pageContentHeight - startY;
-  const { linesToFit, heightUsed } = findLinesToFit(
-    measure,
-    0,
-    availableHeight,
-    scale,
-    minLinesAtBreak,
-    totalLines
-  );
-  
-  // If no lines fit, don't add a first fragment
-  if (linesToFit === 0) {
-    // All lines go to next page(s)
-    const remainingFragments = createFragmentsForLines(
-      block,
-      measure,
-      blockIndex,
-      0,
-      totalLines,
-      pageContentHeight,
-      scale,
-      minLinesAtBreak
-    );
-    return { firstFragment: null, remainingFragments };
-  }
-  
-  // Create first fragment
-  const firstFragment: PageFragment = {
-    blockId: block.id,
-    blockIndex,
-    fromLine: 0,
-    toLine: linesToFit,
-    x: 0,
-    y: startY,
-    height: heightUsed,
-    isFirstFragment: true,
-    isLastFragment: linesToFit >= totalLines,
-  };
-  
-  // If all lines fit, we're done
-  if (linesToFit >= totalLines) {
-    return { firstFragment, remainingFragments: [] };
-  }
-  
-  // Create fragments for remaining lines
-  const remainingFragments = createFragmentsForLines(
-    block,
-    measure,
-    blockIndex,
-    linesToFit,
-    totalLines,
-    pageContentHeight,
-    scale,
-    minLinesAtBreak
-  );
-  
-  return { firstFragment, remainingFragments };
+/** What `findLinesToFit` needs to know about footnotes: those already on the page, the ones a line refers to, and what notes take. */
+interface NotesInFit {
+  held: readonly string[];
+  refsOfLine: (line: number) => string[];
+  heightFor: (keys: string[]) => number;
 }
 
 /**
- * Find how many lines fit in available height
+ * Find how many lines fit in available height. With `notes`, a line fits only together with the footnotes the page then
+ * carries (their height counts against the available height).
  */
 function findLinesToFit(
   measure: Measure,
@@ -428,7 +424,8 @@ function findLinesToFit(
   availableHeight: number,
   scale: number,
   minLinesAtBreak: number,
-  totalLines: number
+  totalLines: number,
+  notes?: NotesInFit
 ): { linesToFit: number; heightUsed: number } {
   if (!hasLineData(measure)) {
     return { linesToFit: 1, heightUsed: measure.totalHeight * scale };
@@ -436,6 +433,7 @@ function findLinesToFit(
   
   let height = 0;
   let lineIndex = startLine;
+  let keys: string[] = notes ? [...notes.held] : [];
   
   // Add space before if this is the start of the block
   if (startLine === 0) {
@@ -445,13 +443,16 @@ function findLinesToFit(
   // Add lines until we run out of space
   while (lineIndex < totalLines) {
     const lineHeight = measure.lines[lineIndex].height * scale;
+    const withLine = notes ? unionKeys(keys, notes.refsOfLine(lineIndex)) : keys;
+    const notesHeight = notes ? notes.heightFor(withLine) : 0;
     
     // Check if adding this line would exceed available height
-    if (height > 0 && height + lineHeight > availableHeight) {
+    if (height > 0 && height + lineHeight + notesHeight > availableHeight) {
       break;
     }
     
     height += lineHeight;
+    keys = withLine;
     lineIndex++;
   }
   
@@ -486,64 +487,6 @@ function findLinesToFit(
   }
   
   return { linesToFit: lineIndex - startLine, heightUsed: height };
-}
-
-/**
- * Create fragments for a range of lines that span multiple pages
- */
-function createFragmentsForLines(
-  block: FlowBlock,
-  measure: Measure,
-  blockIndex: number,
-  startLine: number,
-  endLine: number,
-  pageContentHeight: number,
-  scale: number,
-  minLinesAtBreak: number
-): PageFragment[] {
-  if (!hasLineData(measure)) {
-    return [];
-  }
-  
-  const fragments: PageFragment[] = [];
-  let currentLine = startLine;
-
-  while (currentLine < endLine) {
-    const { linesToFit, heightUsed } = findLinesToFit(
-      measure,
-      currentLine,
-      pageContentHeight,
-      scale,
-      minLinesAtBreak,
-      endLine
-    );
-
-    // findLinesToFit can return 0 even on a full page — e.g. a single line
-    // taller than the whole page, where the widow guard refuses to place fewer
-    // than minLinesAtBreak lines. Force one line so the loop always advances;
-    // otherwise the remaining lines are silently dropped and the block vanishes.
-    const take = linesToFit > 0 ? linesToFit : 1;
-    const height =
-      linesToFit > 0 ? heightUsed : getLineRangeHeight(measure, currentLine, currentLine + 1) * scale;
-
-    const toLine = currentLine + take;
-    
-    fragments.push({
-      blockId: block.id,
-      blockIndex,
-      fromLine: currentLine,
-      toLine,
-      x: 0,
-      y: 0, // Will be set by caller
-      height,
-      isFirstFragment: currentLine === 0,
-      isLastFragment: toLine >= endLine,
-    });
-
-    currentLine = toLine;
-  }
-  
-  return fragments;
 }
 
 // ============================================================================

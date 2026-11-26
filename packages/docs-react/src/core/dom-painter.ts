@@ -512,6 +512,21 @@ export class DomPainter {
       }
     }
     
+    // The separator above the page's footnotes: a short rule, or the full width when a note continues from the page before.
+    if (page.footnotes) {
+      const rule = document.createElement('div');
+      rule.className = 'footnote-separator';
+      rule.style.cssText = `
+        position: absolute;
+        top: ${page.footnotes.top + page.footnotes.separatorHeight / 2}px;
+        left: 0;
+        width: ${page.footnotes.continued ? '100%' : '33%'};
+        border-top: 1px solid #5f6368;
+        pointer-events: none;
+      `;
+      contentArea.appendChild(rule);
+    }
+    
     pageEl.appendChild(contentArea);
     for (const chipEl of chipEls) pageEl.appendChild(chipEl);
     
@@ -1391,6 +1406,7 @@ export class DomPainter {
               runCharOffset += run.text.length;
 
               this.applyCommentDecoration(span, run);
+              this.applyControlDecoration(span, run);
               p.appendChild(span);
             } else if (run.kind === 'link') {
               // A link run must render as an anchor — the previous loop only
@@ -1404,6 +1420,7 @@ export class DomPainter {
               a.dataset.pmEnd = String(linkStart + run.text.length);
               runCharOffset += run.text.length;
               this.applyCommentDecoration(a, run);
+              this.applyControlDecoration(a, run);
               p.appendChild(a);
             } else if (run.kind === 'image') {
               const img = document.createElement('img');

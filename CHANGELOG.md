@@ -249,11 +249,19 @@ lockstep.
   do not nest). It is a plain ProseMirror node, so it syncs over Yjs and `getCollabBlockers` knows it. The collaboration
   `schemaVersion` (`COLLAB_SCHEMA_VERSION`) is now 4: a client from before this change refuses to join a room written
   with it, and rooms written before it need no migration.
-- **Editor: notes area.** A reference is drawn as its number, a superscript (digits for footnotes, lower-case roman
-  numerals for endnotes, numbered per kind in document order, or the custom mark). The notes are collected in an area at the
-  end of each section, footnotes first and then endnotes, drawn in the page flow after the section's last block;
-  clicking a reference scrolls to its note and clicking a note's number goes back to its reference. Footnotes are not
-  yet laid out at the bottom of each page.
+- **Editor: notes.** A reference is drawn as its number, a superscript (digits for footnotes, lower-case roman
+  numerals for endnotes, numbered per kind in document order, or the custom mark). Footnotes are laid out at the
+  bottom of the page their reference is on, under a separator; endnotes are collected in an area after the last block of
+  each section. Clicking a reference scrolls to its note and clicking a note's number goes back to its reference.
+- **Footnotes at the bottom of the page (layout).** The True Layout engine places a line (or a block that is not split,
+  such as a table) on a page only if it fits together with the footnotes the page then carries; the line moves to the next
+  page with its notes when it does not. A page gives at most half of its content height to notes: a note that does not fit
+  continues on the next page, under a full-width separator, and notes still waiting after the last page get pages of
+  their own. New in `@b32nio/spindle-docs-react`: `LayoutOptions.footnotes` / `SectionedLayoutOptions.footnotes`
+  (`FootnoteHooks`) and `initialNotes`, `PageLayout.notes` / `.footnotes` / `.notesOnly`, `createFootnoteHooks`,
+  `footnoteRefs`, `applyPageNotes` and `FootnotePlan`; a layout made without the hooks is unchanged. A continuous section
+  that shares a page also shares its notes. `TrueLayoutEditor` has a `footnotesAtPageBottom` prop (default true; false
+  puts the footnotes in the notes area at the end of each section as before).
 - **Editor: insert and edit notes.** The toolbar has a Footnote menu (Insert footnote, Insert endnote, shown when the host
   `Toolbar` gets `onInsertNote`; `DocumentEditor` wires it) that puts a reference at the caret and opens a small editor
   over the new note's entry in the notes area; clicking a note's text edits it the same way, keeping its formatting, links

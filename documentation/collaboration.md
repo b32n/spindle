@@ -289,7 +289,7 @@ edits, and the inverse operations broadcast to peers like any other edit.
   last-writer-wins). A control's lock is not enforced against a collaborator.
 - **Footnotes and endnotes.** A note reference is a ProseMirror node holding the
   text of its note (`note_ref`), so it syncs like other content and does not block
-  attach. The notes area is drawn from the references, not stored. A note's text is
+  attach. The footnotes at the bottom of the pages and the endnotes area are drawn from the references, not stored. A note's text is
   edited in a small editor of its own and written back into the reference when the edit
   ends, so two people editing the same note at once is last-writer-wins on its text.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
