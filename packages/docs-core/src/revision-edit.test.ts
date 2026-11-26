@@ -65,7 +65,7 @@ describe('freshRevisionIds', () => {
     expect(newRevisionId()).not.toBe(newRevisionId());
   });
 
-  it('turns a paste of tracked text into a separate change: accepting one leaves the other', () => {
+  it('gives pasted tracked text change ids of its own (distinct from the copied change)', () => {
     const state = stateOf(docOf(text('A '), text('kept', insertion.create(ADA)), text(' B ')));
     // Copy the inserted run, paste it at the end through the plugin's transformPasted.
     const run = state.doc.slice(3, 7);

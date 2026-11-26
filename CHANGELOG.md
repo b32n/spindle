@@ -319,7 +319,7 @@ lockstep.
   `revisionAuthors`, `documentRevisionAuthors`. Marked text takes the author's colour over its own (a link, a content-control
   placeholder), as in All Markup. Editing around changes: copying tracked text and pasting it gives the copy change ids of its own
   (author and date stay), so accepting or rejecting one place never touches the other (`freshRevisionIds`); text typed in the
-  middle of a deleted run is live text, not part of the deletion (IME composition is not covered); a line break typed in tracked
+  middle of a deleted run is live text, not part of the deletion (also through the editor's own input path; IME composition is not covered, and typing over a selection that lies wholly inside a deletion replaces the struck-through text, as any edit in Editing mode that is not recorded); a line break typed in tracked
   text (Shift+Enter) is a newline in the text, so its change survives collaboration. The DOCX writer no longer uses a regular
   expression look-behind (older Safari cannot parse one), accepts a `w:date` without seconds and a deleted run counts as content
   when a page break follows it.

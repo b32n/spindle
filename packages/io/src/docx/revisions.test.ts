@@ -262,6 +262,28 @@ describe('writing tracked changes', () => {
     expect(ids).toContain('1');
   });
 
+  it('does not reuse a change id of the body in a footnote or an endnote', async () => {
+    const out = await exportDocx({
+      title: 'T',
+      sections: [{
+        ...BASE,
+        blocks: [{
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'body', revision: { insertion: { id: 'n1abc', author: 'Ada' } } },
+            { type: 'noteRef', kind: 'footnote', id: '1', content: [{ type: 'text', text: 'in note', revision: { insertion: { id: 'n2def', author: 'Bo' } } }] },
+            { type: 'noteRef', kind: 'endnote', id: '1', content: [{ type: 'text', text: 'in end', revision: { deletion: { id: 'n3ghi', author: 'Cy' } } }] },
+          ],
+        }],
+      }],
+    });
+    const zip = await JSZip.loadAsync(out.bytes);
+    const idsOf = async (part: string) => [...(await zip.file(part)!.async('string')).matchAll(/<w:(?:ins|del) [^>]*w:id="(\d+)"/g)].map((m) => m[1]);
+    const all = [...(await idsOf('word/document.xml')), ...(await idsOf('word/footnotes.xml')), ...(await idsOf('word/endnotes.xml'))];
+    expect(all).toHaveLength(3);
+    expect(new Set(all).size).toBe(3);
+  });
+
   it('does not write a revision with a run in a field result or a text without a change', async () => {
     const { xml } = await exportXml([{ type: 'field', instruction: 'REF a', kind: 'REF', result: [{ type: 'text', text: '3', revision: { deletion: B } }] }]);
     expect(xml).not.toContain('<w:del ');

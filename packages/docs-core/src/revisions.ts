@@ -78,6 +78,8 @@ export interface RevisionAuthor {
 /**
  * The tracked changes of the document in order, runs of one change (same kind and id) joined. With `withText` false the
  * `text` of each is left empty, which spares building the strings when only the authors and counts are wanted.
+ * Runs are joined only when they sit next to each other: a change that crosses a paragraph boundary (pasted tracked text
+ * of several paragraphs keeps one id) is one entry per paragraph, so the count can be higher than Word's.
  */
 export function collectRevisions(doc: PmNode, withText = true): RevisionSummary[] {
   const found: RevisionSummary[] = [];

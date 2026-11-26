@@ -265,7 +265,7 @@ class DocxBuilder {
   private nextControlId = 1000001;
   /** `w:id` written for each tracked change (by kind and id in the model), the ids taken, and the next free number. */
   private readonly revisionIds = new Map<string, number>();
-  private readonly usedRevisionIds = new Set<number>();
+  readonly usedRevisionIds = new Set<number>();
   private nextRevisionId = 1;
   /** Width of the content area of the section being built, in twips: where the right tab of a table of contents entry goes. */
   private contentWidthTwips = 9360;
@@ -864,9 +864,15 @@ function truncate(s: string, max = 60): string {
 }
 
 export async function exportDocx(input: DocumentExportInput): Promise<DocumentExportResult> {
+  return exportDocxPart(input, new Set());
+}
+
+/** `reservedRevisionIds`: the `w:id`s of tracked changes already written in other parts, which this part must not reuse (it adds its own). */
+async function exportDocxPart(input: DocumentExportInput, reservedRevisionIds: Set<number>): Promise<DocumentExportResult> {
   const comments = planComments(input.comments, input.sections);
   const namedStyles = usableNamedStyles(input.namedStyles);
   const builder = new DocxBuilder(comments, namedStyles);
+  for (const id of reservedRevisionIds) builder.usedRevisionIds.add(id);
   builder.evenAndOdd = input.sections.some((s) => s.header?.differentOddEven || s.footer?.differentOddEven);
   const doc = new Document({
     title: input.title,
@@ -879,10 +885,11 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   const buffer = await Packer.toArrayBuffer(doc);
   let bytes: Uint8Array = new Uint8Array(buffer);
   bytes = await addNamedStyles(bytes, namedStyles);
+  for (const id of builder.usedRevisionIds) reservedRevisionIds.add(id);
   if (builder.notes.footnote.length > 0 || builder.notes.endnote.length > 0) {
     bytes = await addNoteParts(bytes, builder.notes, async (bodies) => {
       const blocks: DocBlock[] = bodies.map((content) => ({ type: 'paragraph', content }));
-      return (await exportDocx({ title: '', sections: [{ ...input.sections[0], blocks, header: undefined, footer: undefined, columns: undefined }], namedStyles: input.namedStyles })).bytes;
+      return (await exportDocxPart({ title: '', sections: [{ ...input.sections[0], blocks, header: undefined, footer: undefined, columns: undefined }], namedStyles: input.namedStyles }, reservedRevisionIds)).bytes;
     });
   }
   if (comments.threads.size > 0) {
