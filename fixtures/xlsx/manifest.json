@@ -201,7 +201,7 @@
         "workbook.externalLinks",
         "sheets.multiple"
       ],
-      "notes": "Whole-column and whole-row sums, a cross-sheet reference, a 3D reference over three sheets, a self-referencing (circular) formula and a formula using an external workbook link with its externalLink part.",
+      "notes": "Whole-column and whole-row sums, a cross-sheet reference, a 3D reference over three sheets, one self-referencing (circular) formula, F12 (the others sit outside the summed column and row), and a formula using an external workbook link with its externalLink part.",
       "generator": "generators/build_styles_formulas.py"
     },
     {
@@ -459,7 +459,7 @@
         "pivots.tables",
         "pivots.slicers"
       ],
-      "notes": "A pivot table (sum of sales by region) with its cache definition and records, and a slicer on the Region field with its slicer cache. Hand-authored from the specification and not yet checked in Excel (real exports arrive with D8).",
+      "notes": "A pivot table (sum of sales by region) with its cache definition and records, and a slicer on the Region field with its slicer cache. Hand-authored from the specification and not yet checked in Excel (real exports arrive with D8); the slicer is not anchored by a drawing on a sheet and the pivot sheet holds no cell values.",
       "generator": "generators/build_objects.py"
     },
     {

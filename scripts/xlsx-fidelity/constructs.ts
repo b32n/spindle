@@ -84,6 +84,36 @@ function dateCells(p: OoxmlParts): number {
   );
 }
 
+/** True when `text` (a formula on the same sheet as `cell`) refers to `cell` directly or through a range, column or row. */
+function refersTo(cell: string, text: string): boolean {
+  const at = /^([A-Z]+)(\d+)$/.exec(cell);
+  if (!at) return false;
+  const [col, row] = [colNumber(at[1]), Number(at[2])];
+  const local = text.replace(
+    /(?:'[^']+'|[A-Za-z0-9_.]+)!\$?[A-Z]*\$?\d*(?::\$?[A-Z]*\$?\d*)?/g,
+    ''
+  ); // other sheets
+  const between = (n: number, a: number, b: number) => n >= Math.min(a, b) && n <= Math.max(a, b);
+  const cells = [
+    ...local.matchAll(
+      /(?<![A-Za-z0-9_$.:!])\$?([A-Z]{1,3})\$?(\d+)(?::\$?([A-Z]{1,3})\$?(\d+))?(?![A-Za-z0-9_(])/g
+    ),
+  ];
+  const cols = [
+    ...local.matchAll(/(?<![A-Za-z0-9_$.!])\$?([A-Z]{1,3}):\$?([A-Z]{1,3})(?![A-Za-z0-9_(])/g),
+  ];
+  const rows = [...local.matchAll(/(?<![A-Za-z0-9_$.:!])\$?(\d+):\$?(\d+)(?![A-Za-z0-9_(])/g)];
+  return (
+    cells.some(
+      (m) =>
+        between(col, colNumber(m[1]), colNumber(m[3] ?? m[1])) &&
+        between(row, Number(m[2]), Number(m[4] ?? m[2]))
+    ) ||
+    cols.some((m) => between(col, colNumber(m[1]), colNumber(m[2]))) ||
+    rows.some((m) => between(row, Number(m[1]), Number(m[2])))
+  );
+}
+
 const colNumber = (letters: string) =>
   [...letters].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
 /** Cells covered by the largest `<dimension ref>` in the package. */
@@ -290,13 +320,9 @@ export const CONSTRUCTS: XlsxConstruct[] = [
   },
   {
     id: 'formulas.circular',
-    label: 'Self-referencing formulas',
-    count: (p) =>
-      formulas(p).filter(
-        (f) =>
-          f.cell !== '' &&
-          new RegExp(`(?<![A-Z$])\\$?${f.cell.replace(/(\d+)/, '\\$?$1')}(?!\\d)`).test(f.text)
-      ).length,
+    label:
+      'Self-referencing formulas (the cell itself, or a range, column or row that contains it)',
+    count: (p) => formulas(p).filter((f) => refersTo(f.cell, f.text)).length,
   },
   {
     id: 'names.defined',

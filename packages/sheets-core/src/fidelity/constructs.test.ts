@@ -560,11 +560,31 @@ describe('XLSX construct probes', () => {
     ).toBe(1);
   });
 
-  it('copes with a formula cell that has no reference', () => {
+  it('counts a self-reference through a range, column or row, but not other sheets or literals', () => {
+    const circular = (formula: string, cell: string) =>
+      findConstruct('formulas.circular')?.count(mk(f(formula, cell)));
+    expect(circular('SUM(A1:A5)', 'A3')).toBe(1);
+    expect(circular('SUM(A5:A1)', 'A3')).toBe(1);
+    expect(circular('SUM($A$1:B2)', 'B2')).toBe(1);
+    expect(circular('SUM(B:B)', 'B8')).toBe(1);
+    expect(circular('SUM(D:A)', 'B8')).toBe(1);
+    expect(circular('SUM(2:2)', 'F2')).toBe(1);
+    expect(circular('SUM($1:$9)', 'F2')).toBe(1);
+    expect(circular('A1+1', 'A1')).toBe(1);
+    expect(circular('SUM(A1:A5)', 'B3')).toBe(0);
+    expect(circular('SUM(A4:A5)', 'A3')).toBe(0);
+    expect(circular('SUM(B:C)', 'A8')).toBe(0);
+    expect(circular('SUM(3:4)', 'F2')).toBe(0);
+    expect(circular("SUM(Other!A1:A5)+Other!B:B+'My Sheet'!3:3+Other!A3", 'A3')).toBe(0);
+    expect(circular('IF(A1="A3","A3","")+LOG10(A2)+XA3+A30+A3A', 'A3')).toBe(0);
+    expect(circular('A1', 'not-a-cell')).toBe(0);
     expect(findConstruct('formulas.circular')?.count(mk(cells('<c><f>A1</f></c>')))).toBe(0);
-    expect(findConstruct('formulas.basic')?.count(mk(cells('<c><f t="shared" si="0"/></c>')))).toBe(
-      1
-    );
+  });
+
+  it('counts self-closing formulas (shared-formula followers)', () => {
+    expect(
+      findConstruct('formulas.basic')?.count(mk(cells('<c r="A2"><f t="shared" si="0"/></c>')))
+    ).toBe(1);
   });
 
   it('decodes escaped formula text before matching', () => {

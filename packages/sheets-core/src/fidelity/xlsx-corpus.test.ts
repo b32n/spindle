@@ -164,6 +164,11 @@ describe('XLSX corpus', () => {
     }
   );
 
+  it('keeps the circular-reference fixture circular in exactly one cell', async () => {
+    const circular = CONSTRUCTS.find((c) => c.id === 'formulas.circular');
+    expect(circular?.count(await parts('references.xlsx'))).toBe(1);
+  });
+
   it('keeps the README coverage matrix in sync (XLSX_FIDELITY_UPDATE=1 rewrites it)', () => {
     const file = path.join(XLSX_FIXTURES_DIR, 'README.md');
     const current = readFileSync(file, 'utf8');

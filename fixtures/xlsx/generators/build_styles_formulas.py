@@ -20,13 +20,17 @@ def styles_theme(path):
     b.wbrels.add("theme", "theme/theme1.xml")
     st = b.styles
     st.colors = '<colors><indexedColors>' + "".join(f'<rgbColor rgb="FF{c}"/>' for c in ["000000", "FFFFFF", "FF0000", "00FF00", "0000FF", "FFFF00", "FF00FF", "00FFFF"] * 8) + "</indexedColors></colors>"
-    st.cell_style_xfs.append('<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>')
-    st.cell_styles += ['<cellStyle name="Good" xfId="1" builtinId="26"/>', '<cellStyle name="Spindle Emphasis" xfId="1"/>']
+    good_font = st.font('<font><sz val="11"/><color rgb="FF006100"/><name val="Calibri"/><family val="2"/></font>')
+    good_fill = st.fill(st.solid("C6EFCE"))
+    bold_font = st.font('<font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font>')
+    st.cell_style_xfs += [f'<xf numFmtId="0" fontId="{good_font}" fillId="{good_fill}" borderId="0" applyFont="1" applyFill="1"/>', f'<xf numFmtId="0" fontId="{bold_font}" fillId="0" borderId="0" applyFont="1"/>']
+    st.cell_styles += ['<cellStyle name="Good" xfId="1" builtinId="26"/>', '<cellStyle name="Spindle Emphasis" xfId="2"/>']
     sh = b.sheet("Theme")
     sh.set(1, 1, "theme colour + tint", st.xf(font='<font><sz val="11"/><color theme="4" tint="-0.249977111117893"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',
                                                fill='<fill><patternFill patternType="solid"><fgColor theme="5" tint="0.79998168889431442"/><bgColor indexed="64"/></patternFill></fill>'))
     sh.set(2, 1, "indexed colour", st.xf(font='<font><sz val="11"/><color indexed="10"/><name val="Calibri"/></font>', fill='<fill><patternFill patternType="solid"><fgColor indexed="13"/><bgColor indexed="64"/></patternFill></fill>'))
-    sh.set(3, 1, "named style (Good)", st.xf(fill=st.solid("C6EFCE"), xf_id=1))
+    sh.set(3, 1, "named style (Good)", st.xf(font=st.fonts[good_font], fill=st.solid("C6EFCE"), xf_id=1))
+    sh.set(4, 3, "named style (Spindle Emphasis)", st.xf(font=st.fonts[bold_font], xf_id=2))
     sh.set(4, 1, "gradient fill", st.xf(fill='<fill><gradientFill degree="90"><stop position="0"><color rgb="FFFFFFFF"/></stop><stop position="1"><color theme="4"/></stop></gradientFill></fill>'))
     for i, p in enumerate(PATTERNS):
         sh.set(5 + i, 1, p, st.xf(fill=f'<fill><patternFill patternType="{p}"><fgColor rgb="FF1F4E78"/><bgColor rgb="FFFFFFFF"/></patternFill></fill>'))
@@ -78,12 +82,13 @@ def references(path):
     sample(b.sheet("Other"), rows=[("a", 100, 200, 300)] * 3)
     b.sheet("Third").set(1, 1, 7)
     sh = b.sheets[0]
-    sh.set(8, 1, "Whole column").set(8, 2, ("f", "SUM(B:B)", 27, ""))
-    sh.set(9, 1, "Whole row").set(9, 2, ("f", "SUM(2:2)", 60, ""))
-    sh.set(10, 1, "Cross-sheet").set(10, 2, ("f", "Other!B2*2", 200, ""))
-    sh.set(11, 1, "3D").set(11, 2, ("f", "SUM(Data:Third!B2)", 110, ""))
-    sh.set(12, 1, "Circular (self)").set(12, 2, ("f", "B12+1", 0, ""))
-    sh.set(13, 1, "External workbook").set(13, 2, ("f", "[1]Remote!$A$1", 42, ""))
+    # Formulas sit in column F, outside the summed column B and row 2, so only F12 is circular.
+    sh.set(8, 1, "Whole column").set(8, 6, ("f", "SUM(B:B)", 27, ""))
+    sh.set(9, 1, "Whole row").set(9, 6, ("f", "SUM(2:2)", 60, ""))
+    sh.set(10, 1, "Cross-sheet").set(10, 6, ("f", "Other!B2*2", 200, ""))
+    sh.set(11, 1, "3D").set(11, 6, ("f", "SUM(Data:Third!B2)", 110, ""))
+    sh.set(12, 1, "Circular (self)").set(12, 6, ("f", "F12+1", 0, ""))
+    sh.set(13, 1, "External workbook").set(13, 6, ("f", "[1]Remote!$A$1", 42, ""))
     b.add("xl/externalLinks/externalLink1.xml", f'{X.HEAD}<externalLink xmlns="{X.M}" xmlns:r="{X.R}"><externalBook r:id="rId1"><sheetNames><sheetName val="Remote"/></sheetNames>'
           '<sheetDataSet><sheetData sheetId="0"><row r="1"><cell r="A1"><v>42</v></cell></row></sheetData></sheetDataSet></externalBook></externalLink>', X.SS + "externalLink+xml")
     rels = X.Rels()

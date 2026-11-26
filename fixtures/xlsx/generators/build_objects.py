@@ -126,8 +126,8 @@ def comments(path):
     b = X.Book(title="Comments")
     sh = sample(b.sheet("Notes"))
     guid = "{5A6A8F52-3C1D-4E0B-9D55-0A1B2C3D4E01}"
-    notes = [("A2", "Reviewer One", "Plain note on the first region."), ("B3", "Reviewer Two", "Second note, with <markup> & an ampersand."), ("C4", "Reviewer One", "[Threaded comment]\n\nComment:\n    Please confirm this figure.\n")]
-    authors = ["Reviewer One", "Reviewer Two"]
+    notes = [("A2", "Reviewer One", "Plain note on the first region."), ("B3", "Reviewer Two", "Second note, with <markup> & an ampersand."), ("C4", "tc={5A6A8F52-3C1D-4E0B-9D55-0A1B2C3D4E01}", "[Threaded comment]\n\nYour version of Excel allows you to read this threaded comment; however, any edits to it will get removed if the file is opened in a newer version of Excel.\n\nComment:\n    Please confirm this figure.\nReply:\n    Confirmed.\n")]
+    authors = ["Reviewer One", "Reviewer Two", "tc={5A6A8F52-3C1D-4E0B-9D55-0A1B2C3D4E01}"]
     cm = "".join(f'<comment ref="{r}" authorId="{authors.index(a)}"><text><t xml:space="preserve">{X.esc(t)}</t></text></comment>' for r, a, t in notes)
     b.add("xl/comments1.xml", f'{X.HEAD}<comments xmlns="{X.M}"><authors>{"".join(f"<author>{a}</author>" for a in authors)}</authors><commentList>{cm}</commentList></comments>', "comments")
     b.add("xl/drawings/vmlDrawing1.vml", X.HEAD + VML % "".join(VSHAPE % (1025 + i, 10 + 20 * i, i + 1, r_, r_ + 3, r_) for i, r_ in enumerate([1, 2, 3])))
