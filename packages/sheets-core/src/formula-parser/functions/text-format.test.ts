@@ -95,5 +95,11 @@ describe('TEXT reads text and General like Excel', () => {
     expect(ev('=TEXT("Infinity","0")')).toBe('Infinity');
     expect(ev('=TEXT("1,2,3","0")')).toBe('1,2,3');
     expect(ev('=TEXT("5%x","0")')).toBe('5%x');
+    expect(ev('=TEXT("abc%","0")')).toBe('abc%');
+    expect(ev('=TEXT("%","0")')).toBe('%');
+    expect(ev('=TEXT("(5)","0")')).toBe('-5');
+    expect(ev('=TEXT("($1,234.5)","0.0")')).toBe('-1234.5');
+    expect(ev('=TEXT("(abc)","0")')).toBe('(abc)');
+    expect(ev('=TEXT("((5))","0")')).toBe('((5))');
   });
 });

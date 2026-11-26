@@ -9,7 +9,7 @@ LibreOffice version.
 
 `expected` is LibreOffice's string except where Excel is known to differ (negative dates and times, the 1900 calendar
 before 1900-03-01, time rounding to the displayed second, General's 11-character width, the system date tokens). Those
-rows carry `excel: true` and a `note`; the Excel string is computed by the small independent renderer below (dates and
+rows carry `excel: true` and a `note`; the Excel string is computed by the small renderer below (self-authored, same author as the engine: not independent evidence) (dates and
 times) or taken from numfmt_cases.py. None of it was checked in Excel (plan decision D8). LibreOffice pads `?` with a
 figure space (U+2007); that is replaced by a plain space, which is what Excel writes.
 

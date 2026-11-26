@@ -46,6 +46,33 @@ describe('limits of a format code', () => {
   });
 });
 
+describe('many percent signs and scaling commas', () => {
+  const pct = (code: string, n: number) => code + '%'.repeat(n);
+  it('overflow of the scaled value shows ####, never NaN, Infinity or an exponent', () => {
+    for (const v of [0, 0.5, 1, 1e300, Number.MAX_VALUE]) {
+      for (const code of [pct('0', 200), pct('0.0E+0', 200), pct('# ?/?', 200), pct('#,##0.00', 200), pct('?/8', 200), pct('0.0E+00', 240)]) {
+        const text = formatDisplay(v, code);
+        expect(text).toBe('####');
+      }
+    }
+    expect(formatDisplay(1e308, '0%%%%')).toBe('####');
+    expect(formatDisplay(1e307, '0%')).toBe('####');
+    expect(formatDisplay(1e305, '0%')).toMatch(/^10{307}%$/);
+    expect(formatDisplay(1e300, '0.0E+00%%')).toBe('1.0E+304%%');
+  });
+
+  it('a long run of scaling commas divides to zero without garbage', () => {
+    expect(formatDisplay(0.5, '0' + ','.repeat(200))).toBe('0');
+    expect(formatDisplay(1e300, '0.0E+0' + ','.repeat(3))).toBe('1.0E+291');
+  });
+
+  it('whatever the code, a finite value never prints NaN or Infinity', () => {
+    for (const code of [pct('0', 254), pct('0.', 253), pct('0E+0', 250), pct('0/', 250), ','.repeat(254) + '0', '0' + ','.repeat(254)]) {
+      for (const v of [0, -0, 1, -1, 0.5, 1e-300, 1e300, 2958465]) expect(formatDisplay(v, code)).not.toMatch(/NaN|Infinity/);
+    }
+  });
+});
+
 describe('nearest fraction', () => {
   // brute force: the closest p/q with q <= max, the smallest q among equally close
   const brute = (x: number, max: number): [number, number] => {
@@ -105,10 +132,15 @@ describe('adversarial codes stay fast', () => {
     expect(ms).toBeLessThan(1000);
   });
 
-  it('a 255-comma run compiles in linear time', () => {
+  it('compile time grows linearly with the length of a comma run (two sizes, best of three)', () => {
     compileFormat('x'); // warm up
-    const run = (n: number) => timed(() => { for (let i = 0; i < 200; i++) compileFormat(`0${','.repeat(n)}${i}`.slice(0, 255)); }).ms;
-    expect(run(250)).toBeLessThan(500);
+    const best = (n: number) =>
+      Math.min(...[0, 1, 2].map(() => timed(() => { for (let i = 0; i < 1500; i++) compileFormat(`0${','.repeat(n)}${i % 7}0`); }).ms));
+    const small = best(60);
+    const large = best(250);
+    // 4x the commas: linear is about 4x; the old per-comma rescan was 16x and worse
+    expect(large).toBeLessThan(Math.max(small, 5) * 10);
+    expect(large).toBeLessThan(1000);
   });
 
   it('a five-digit denominator formats 5,000 values quickly', () => {

@@ -117,20 +117,24 @@ function scaled(section: Section, abs: number): number {
   return (abs * 100 ** section.percent) / 1000 ** section.scale;
 }
 
-function numberBody(s: Section, abs: number): Body {
+function numberBody(s: Section, abs: number): Body | null {
+  const v = scaled(s, abs);
+  if (!Number.isFinite(v)) return null; // many % signs can overflow: ####
   const out: Out = new Map();
   const anchor = s.int[0] ?? s.tokens.findIndex((t) => t.t === 'point');
-  const { int, frac } = roundToPlaces(toDecimal(scaled(s, abs)), s.fracDigits.length);
+  const { int, frac } = roundToPlaces(toDecimal(v), s.fracDigits.length);
   placeInt(s.tokens, s.int, int, s.grouping, Math.max(anchor, 0), out);
   placeFraction(s.tokens, s.fracDigits, frac, out);
   return { ...compose(s.tokens, out) };
 }
 
-function exponentBody(s: Section, abs: number): Body {
+function exponentBody(s: Section, abs: number): Body | null {
+  const v = scaled(s, abs);
+  if (!Number.isFinite(v)) return null;
   const out: Out = new Map();
   const per = Math.max(1, s.int.length);
   const places = s.fracDigits.length;
-  const dec = abs === 0 ? { digits: '0', exp: 0 } : toDecimal(scaled(s, abs));
+  const dec = abs === 0 ? { digits: '0', exp: 0 } : toDecimal(v);
   let exp = abs === 0 ? 0 : Math.floor(dec.exp / per) * per;
   let mantissa = roundToPlaces({ digits: dec.digits, exp: dec.exp - exp }, places);
   if (mantissa.int.length > per) {
@@ -173,7 +177,7 @@ function fractionBody(s: Section, abs: number): Body | null {
   const out: Out = new Map();
   const f = s.fraction!;
   const v = scaled(s, abs);
-  if (v >= 1e15) return null;
+  if (!(v < 1e15)) return null; // too large for the field, or not a finite number after the % signs
   const hasWhole = f.whole.length > 0;
   let whole = hasWhole ? Math.floor(v) : 0;
   const rest = v - whole;

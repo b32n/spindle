@@ -10,6 +10,11 @@ const GROUPED = /^[+-]?\d{1,3}(,\d{3})+(\.\d*)?$/;
 
 /** What Excel's TEXT reads as a number from text: a decimal, with `$`, thousands commas or `%`, or a date. */
 function numberFromText(text: string): number | undefined {
+  const bracketed = /^\(([^()]*)\)$/.exec(text.trim()); // Excel reads (5) as -5
+  if (bracketed) {
+    const inner = numberFromText(bracketed[1]);
+    return inner === undefined ? undefined : -inner;
+  }
   let t = text.trim().replace(/^([+-]?)\$/, '$1');
   const percent = t.endsWith('%');
   if (percent) t = t.slice(0, -1);

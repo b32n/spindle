@@ -509,7 +509,7 @@ lockstep.
   correction where Excel is believed to differ (negative dates `####`, the 1900 calendar before March 1900, `-0.00`
   keeping its sign, General's width, ...) with the reason, and 51 of them (time rounding, `am/pm` case) plus 9 condition
   rows are tagged `unverified` pending real Excel files; the Excel strings are self-authored, not an independent oracle.
-  `TEXT(x,"General")` gives 15 significant digits and `TEXT` reads `"$5"`, `"1,234"`, `"50%"` and date text like Excel.
+  `TEXT(x,"General")` gives 15 significant digits and `TEXT` reads `"$5"`, `"1,234"`, `"50%"`, `"(5)"` and date text like Excel.
   The `formulas-core` XLSX goldens record the two `TEXT` formulas that now match (probe values 110 to 112 of 159).
   Mapping imported codes onto the model follows in the next change.
 
