@@ -35,7 +35,7 @@ const VECTOR = /\.(?:emf|wmf|emz|wmz)$/i;
 
 export const LEDGER_RULES: readonly LedgerRule[] = [
   { id: 'package.contentTypes', match: /^\[Content_Types\]\.xml$/i, outcome: 'mapped' },
-  { id: 'package.relationships', match: /\.rels$/i, outcome: 'mapped' },
+  { id: 'package.relationships', match: /(?:^|\/)_rels\/[^/]*\.rels$/i, outcome: 'mapped' },
   // The writer rebuilds document properties; presentation and view properties and the table style list are settings
   // the exporter will write afresh; printer settings are a binary printer configuration with no content.
   { id: 'docProps', match: /^docProps\//, outcome: 'mapped' },

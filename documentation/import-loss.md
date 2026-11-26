@@ -115,13 +115,13 @@ Summary ids (dialog):
 | `pptx.media` | audio and video pictures (`a:audioFile`, `a:videoFile`, `a:quickTimeFile`) |
 | `pptx.embeddedObjects` | OLE objects (`p:oleObj`) and ActiveX controls (`p:control`) |
 | `pptx.transitions` | slides with a transition |
-| `pptx.animations` | animation effects (`p:cTn` with a `presetClass`); a slide whose timing tree has none counts one |
-| `pptx.comments` | comment threads, legacy (`p:cm`) and modern (`p188:cm`; replies are not counted separately) |
+| `pptx.animations` | animation effects (`p:cTn` with a `presetClass`); a slide whose timing tree has no preset effect but animates something (`p:set`, `p:anim`, `p:animEffect`, `p:animMotion`, `p:animClr`, `p:animScale`, `p:animRot`) counts one; a tree with only media playback nodes is not an animation |
+| `pptx.comments` | comment threads, legacy (`p:cm`) and modern (`p188:cm`; replies are not counted: modern `p188:reply` is not a `cm`, and a legacy reply, a `cm` with a `p15:parentCm`, is skipped) |
 | `pptx.macros` | the macro project (`ppt/vbaProject.bin`), at most one |
 | `pptx.hiddenSlides` | slides with `show="0"` |
 | `pptx.notes` | slides whose notes page has text (the slide number, date, header, footer and slide-image placeholders do not count) |
 | `pptx.fonts.unavailable` | distinct font families (case-insensitive) used by runs, by the layouts and masters, or by the theme of a master, outside a short list (below); `where` = the names. Theme references (`+mj-lt`, `+mn-ea`) never count |
-| `pptx.shapes.unsupportedGeometry` | shapes with custom geometry, or with a preset outside the 18 of slides-core (`rect`, `roundRect`, `ellipse`, `triangle`, `rightTriangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star5`, `arrowRight`, `arrowLeft`, `chevron`, `parallelogram`, `trapezoid`, `plus`, `heart`, `cloud`) and the two line geometries (`line`, `straightConnector1`); `where` = the preset names (`custGeom` for custom geometry). Connectors with an elbow or curved geometry are not counted here (see `pptx.shapes.connectors.elbowCurved`); a picture's crop-to-shape geometry is not counted |
+| `pptx.shapes.unsupportedGeometry` | shapes with custom geometry, or with a preset outside the 18 of slides-core (`rect`, `roundRect`, `ellipse`, `triangle`, `rightTriangle`, `diamond`, `pentagon`, `hexagon`, `octagon`, `star5`, `arrowRight`, `arrowLeft`, `chevron`, `parallelogram`, `trapezoid`, `plus`, `heart`, `cloud`) and the two line geometries (`line`, `straightConnector1`); `where` = the preset names (`custGeom` for custom geometry). Connectors with an elbow or curved geometry are not counted here (see `pptx.shapes.connectors.elbowCurved`); a picture's crop-to-shape preset is not counted, but a picture with custom geometry is |
 | `pptx.images.unsupportedFormat` | pictures whose image file is EMF, WMF, EMZ or WMZ (browsers cannot show them) |
 | `pptx.encrypted`, `pptx.legacyBinary` | an OLE container with an `EncryptedPackage`/`EncryptionInfo` stream (password-protected), or any other OLE container (a legacy `.ppt`); these two end the scan |
 | `pptx.sizeLimit` | parts not read because of the size limits (named), or one item for a package with too many entries |

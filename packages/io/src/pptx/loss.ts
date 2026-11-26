@@ -252,9 +252,9 @@ async function notesHaveText(pkg: OoxmlPackage, part: string): Promise<boolean> 
   });
 }
 
-/** Comment threads in a comments part (legacy `p:cm` or modern `p188:cm`). */
+/** Comment threads in a comments part (legacy `p:cm` or modern `p188:cm`); a legacy reply (a `cm` with a `parentCm`) is not a thread. */
 async function countComments(pkg: OoxmlPackage, part: string): Promise<number> {
-  return descendants(await pkg.xml(part), 'cm').length;
+  return descendants(await pkg.xml(part), 'cm').filter((cm) => descendants(cm, 'parentCm').length === 0).length;
 }
 
 function scanTheme(root: XmlElement | undefined, label: string, t: Tallies): void {

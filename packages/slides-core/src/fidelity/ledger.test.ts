@@ -84,6 +84,11 @@ describe('classifyPart', () => {
     ).toMatchObject({ loss: ['pptx.embeddedObjects'] });
   });
 
+  it('maps relationship parts only inside a _rels folder', () => {
+    expect(classifyPart('stray/file.rels', base).status).toBe('unaccounted');
+    expect(classifyPart('stray/file.rels', { ...base, lossIds: ['pptx.package.unaccountedParts'] }).rule).toBe('unknownPart');
+  });
+
   it('has no rule for an empty part name, so it is unaccounted', () => {
     expect(classifyPart('', base)).toEqual({ name: '', status: 'unaccounted', rule: 'none' });
   });

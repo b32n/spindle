@@ -20,6 +20,8 @@ const RECOLOR = new Set(['duotone', 'grayscl', 'biLevel', 'lum', 'clrChange', 't
 const FILL_HOLDERS = new Set(['spPr', 'bgPr', 'tcPr', 'grpSpPr']);
 const EFFECT_HOLDERS = new Set(['spPr', 'grpSpPr', 'rPr']);
 const ZOOM = new Set(['sldZmObj', 'secZmObj', 'sldZm', 'secZm']);
+/** Timing nodes that animate something; a tree with only media playback nodes (`cMediaNode`) is not an animation. */
+const ANIMATES = new Set(['set', 'anim', 'animEffect', 'animMotion', 'animClr', 'animScale', 'animRot']);
 const SHAPE_LIKE = new Set(['sp', 'pic', 'graphicFrame', 'cxnSp']);
 const A14 = 'http://schemas.microsoft.com/office/drawing/2010/main';
 
@@ -45,6 +47,7 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
   let transition = false;
   let timing = false;
   let effects = 0;
+  let animates = false;
 
   const geometry = (e: XmlElement): void => {
     const spPr = kid(e, 'spPr');
@@ -183,6 +186,13 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
       case 'timing':
         timing = true;
         break;
+      case 'pic':
+        // a picture's crop-to-shape preset is not counted, but custom geometry is
+        if (kid(kid(e, 'spPr'), 'custGeom')) {
+          t.custGeom.add(label);
+          t.geometry.add('custGeom');
+        }
+        break;
       case 'cTn':
         if (e.attrs.presetClass !== undefined) effects++;
         break;
@@ -202,6 +212,7 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
         break;
       default:
         if (ZOOM.has(e.name)) t.zoom.add(label);
+        else if (ANIMATES.has(e.name)) animates = true;
     }
     const nests = e.name === 'grpSp';
     if (nests) groupDepth++;
@@ -213,5 +224,5 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
   if (!isOn(root.attrs.show)) t.hidden.add(label);
   if (transition) t.transitions.add(label);
   if (effects > 0) t.animations.add(label, effects);
-  else if (timing) t.animations.add(label);
+  else if (timing && animates) t.animations.add(label);
 }

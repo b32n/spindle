@@ -175,8 +175,13 @@ describe('summary ids', () => {
   it('counts animation effects, or one tree for a slide whose timing has no preset effect', async () => {
     const cTn = (cls: string, id: number) => `<p:par><p:cTn id="${id}" presetID="1" presetClass="${cls}" fill="hold"/></p:par>`;
     const timing = (inner: string) => `<p:timing><p:tnLst><p:par><p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot">${inner}</p:cTn></p:par></p:tnLst></p:timing>`;
-    const r = await build({ slides: [{ tail: timing(cTn('entr', 2) + cTn('exit', 3) + cTn('emph', 4)) }, { tail: timing('') }, {}] }).then(full);
+    const r = await build({ slides: [{ tail: timing(cTn('entr', 2) + cTn('exit', 3) + cTn('emph', 4)) }, { tail: timing('<p:set/>') }, { tail: timing('<p:video><p:cMediaNode vol="80000"/></p:video>') }, {}] }).then(full);
     expect(item(r, 'pptx.animations')).toMatchObject({ count: 4, where: ['Slide 1', 'Slide 2'] });
+  });
+
+  it('does not count a timing tree that only plays media', async () => {
+    const media = '<p:timing><p:tnLst><p:par><p:cTn id="1" nodeType="tmRoot"><p:video><p:cMediaNode/></p:video></p:cTn></p:par></p:tnLst></p:timing>';
+    expect(item(await build({ slides: [{ tail: media }] }).then(full), 'pptx.animations')).toBeUndefined();
   });
 
   it('counts comment threads in legacy and modern parts, per slide', async () => {
@@ -187,6 +192,13 @@ describe('summary ids', () => {
       files: { 'ppt/comments/comment1.xml': legacy, 'ppt/comments/modernComment_1.xml': modern, 'ppt/commentAuthors.xml': '<x/>' },
     }).then(full);
     expect(item(r, 'pptx.comments')).toMatchObject({ count: 3, where: ['Slide 1', 'Slide 2'] });
+  });
+
+  it('does not count a legacy reply (a comment with a parentCm) as a thread', async () => {
+    const parent = '<p:extLst><p:ext uri="x"><p15:threadingInfo xmlns:p15="http://schemas.microsoft.com/office/powerpoint/2012/main"><p15:parentCm authorId="0" idx="1"/></p15:threadingInfo></p:ext></p:extLst>';
+    const legacy = `<p:cmLst ${NS}><p:cm authorId="0" idx="1"><p:text>a</p:text></p:cm><p:cm authorId="1" idx="1"><p:text>reply</p:text>${parent}</p:cm></p:cmLst>`;
+    const r = await build({ slides: [{ rels: [rel('rId1', 'comments', '../comments/comment1.xml')] }], files: { 'ppt/comments/comment1.xml': legacy } }).then(full);
+    expect(item(r, 'pptx.comments')?.count).toBe(1);
   });
 
   it('counts comment parts that no slide points at, by file name', async () => {
@@ -240,6 +252,13 @@ describe('summary ids', () => {
     );
     expect(item(r, 'pptx.shapes.unsupportedGeometry')).toMatchObject({ count: 4, where: ['rightArrow', 'flowChartProcess', 'custGeom'] });
     expect(item(r, 'pptx.shapes.custGeom')).toMatchObject({ count: 1, where: ['Slide 1'] });
+  });
+
+  it('counts a picture with custom geometry, not one cropped to a preset shape', async () => {
+    const withGeom = (g: string) => pic().replace(`<p:spPr>${frame}</p:spPr>`, `<p:spPr>${frame}${g}</p:spPr>`);
+    const r = await one(withGeom('<a:custGeom><a:pathLst/></a:custGeom>') + withGeom('<a:prstGeom prst="ellipse"/>') + withGeom('<a:prstGeom prst="rightArrow"/>'));
+    expect(item(r, 'pptx.shapes.unsupportedGeometry')).toMatchObject({ count: 1, where: ['custGeom'] });
+    expect(item(r, 'pptx.shapes.custGeom')?.count).toBe(1);
   });
 
   it('does not count a connector as unsupported geometry (it is reported as elbow/curved at the full level)', async () => {
@@ -533,6 +552,47 @@ describe('package level', () => {
       expect(Date.now() - started).toBeLessThan(5000);
     } finally {
       PACKAGE_LIMITS.partBytes = saved;
+    }
+  });
+
+  it('charges the bytes of parts that hit the limit to the total budget, so forged sizes on many parts stop the scan', async () => {
+    const saved = { ...PACKAGE_LIMITS };
+    PACKAGE_LIMITS.partBytes = 50_000;
+    PACKAGE_LIMITS.totalBytes = 160_000;
+    try {
+      const files = Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => [`ppt/slides/slide${i + 1}.xml`, `<p:sld ${NS}><!--${' '.repeat(2_000_000)}--></p:sld>`])
+      );
+      const bytes = await build({ slides: [], files });
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      for (let i = 0; i + 30 < bytes.length; i++) {
+        const sig = view.getUint32(i, true);
+        if (sig === 0x02014b50 && view.getUint32(i + 24, true) > 1_000_000) view.setUint32(i + 24, 1000, true);
+        if (sig === 0x04034b50 && view.getUint32(i + 22, true) > 1_000_000) view.setUint32(i + 22, 1000, true);
+      }
+      const { OoxmlPackage } = await import('../common/ooxml-package');
+      const pkg = new OoxmlPackage(await JSZip.loadAsync(bytes));
+      const proto = Object.getPrototypeOf(await JSZip.loadAsync(bytes).then((z) => z.file('ppt/slides/slide1.xml')));
+      const real = proto.internalStream;
+      let inflated = 0;
+      proto.internalStream = function (this: unknown, ...args: unknown[]) {
+        inflated++;
+        return real.apply(this, args);
+      };
+      try {
+        for (let i = 1; i <= 12; i++) await pkg.text(`ppt/slides/slide${i}.xml`);
+      } finally {
+        proto.internalStream = real;
+      }
+      // the parts after the budget is spent are refused on their declared size, without being inflated
+      expect(inflated).toBeLessThan(8);
+      // without the charge each of the 12 parts would inflate 50,000 bytes (600,000); with it the budget runs out after
+      // about 160,000 (plus at most one stream chunk of overshoot) and the rest are refused without inflating
+      expect(pkg.read).toBeGreaterThanOrEqual(160_000);
+      expect(pkg.read).toBeLessThan(160_000 + 70_000);
+      expect(pkg.skipped).toHaveLength(12);
+    } finally {
+      Object.assign(PACKAGE_LIMITS, saved);
     }
   });
 
