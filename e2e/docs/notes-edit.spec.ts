@@ -2,7 +2,12 @@ import { test, expect, type Page } from '@playwright/test';
 import JSZip from 'jszip';
 import path from 'node:path';
 import { DocsPage } from '../support/docs';
-import { captureDownload, collectPageErrors, openViaChooser } from '../support/file-io';
+import {
+  captureDownload,
+  collectPageErrors,
+  openDocxConfirmingLoss,
+  openViaChooser,
+} from '../support/file-io';
 
 const OPEN = 'Open file (.docx)';
 const NOTES_DOCX = path.resolve(__dirname, '..', '..', 'fixtures', 'docx', 'notes-toc-fields.docx');
@@ -97,11 +102,7 @@ test.describe('docs: inserting and editing footnotes and endnotes', () => {
     await expect(doc.pages.getByText('Endnotes', { exact: true })).toBeVisible();
 
     // Edit a note that has formatting (the fixture's third footnote has italic, bold and a link) and add to the end.
-    await openViaChooser(page, OPEN, NOTES_DOCX);
-    await page
-      .getByRole('dialog', { name: /Import/ })
-      .getByRole('button', { name: 'Import anyway' })
-      .click();
+    await openDocxConfirmingLoss(page, NOTES_DOCX);
     await doc.pages.locator('[data-note-ref="footnote:3"]:not([data-note-target] *)').click();
     const entry = doc.pages.locator('[data-note-target="footnote:3"]');
     await expect(entry).toContainText('A longer note.');

@@ -233,12 +233,7 @@ function toBlock(
     case 'content-control':
       return { type: 'contentControl', control: copyControl(block.control), blocks: block.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) };
     case 'toc':
-      // Written as Word writes a table of contents block: a building block control around the entries' paragraphs.
-      return {
-        type: 'contentControl',
-        control: { type: 'docPart', gallery: 'Table of Contents' },
-        blocks: block.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)),
-      };
+      return { type: 'toc', instruction: block.instruction, blocks: block.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) };
   }
 }
 
@@ -687,6 +682,8 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
       return { id: generateBlockId(), type: 'page-break' };
     case 'contentControl':
       return { id: generateBlockId(), type: 'content-control', control: copyControl(block.control), blocks: block.blocks.map((b) => toBlockFromDocx(b, textStylePool)) };
+    case 'toc':
+      return { id: generateBlockId(), type: 'toc', instruction: block.instruction, blocks: block.blocks.map((b) => toBlockFromDocx(b, textStylePool)) };
   }
 }
 

@@ -8,7 +8,8 @@ import { blocksToPmDoc, proseMirrorToDocument } from './prosemirror/sync';
 import { DocumentImpl } from './document';
 import { getCollabBlockers } from './collab/blockers';
 import { hydrateYDocFromData, serializeYDocToData, COLLAB_SCHEMA_VERSION } from './collab/y-schema';
-import { exportToDocx } from './export/docx';
+import { exportToDocx, importFromDocx } from './export/docx';
+import { getPlainText as getPlainTextOf } from './blocks/utils';
 import { isBlockEmpty } from './blocks/utils';
 import { getBlockText, getBlockTextLength } from './selection';
 import {
@@ -20,8 +21,10 @@ import {
   updateTableOfContents,
 } from './prosemirror/toc';
 import { DEFAULT_PAGE_CONFIG } from './types';
-import type { Block, DocumentData, TocBlock } from './types';
+import type { Block, DocumentData, InlineContent, TocBlock } from './types';
 import JSZip from 'jszip';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const { doc: docType, paragraph, heading, toc, bookmark } = docsSchema.nodes;
 const text = (t: string, marks?: readonly import('prosemirror-model').Mark[]) => docsSchema.text(t, marks);
@@ -127,14 +130,38 @@ describe('a table of contents in the block helpers and in DOCX', () => {
     expect(isBlockEmpty({ ...TOC_BLOCK, blocks: [{ id: 'e', type: 'paragraph', content: [] }] })).toBe(true);
   });
 
-  it('is written as a building block control around its entries, which Word reads as the table of contents', async () => {
+  it('is written as a TOC field Word can refresh and read back as a table of contents', async () => {
     const doc = new DocumentImpl('doc', 'Doc');
     doc.setData(dataWith([TOC_BLOCK]));
     const { bytes } = await exportToDocx(doc);
     const xml = (await (await JSZip.loadAsync(bytes)).file('word/document.xml')!.async('string')) ?? '';
-    expect(xml).toContain('<w:docPartGallery w:val="Table of Contents"/>');
+    expect(xml).toMatch(/<w:instrText[^>]*> TOC \\o &quot;1-2&quot; \\h \\z \\u <\/w:instrText>/);
     expect(xml).toContain('Intro');
     expect(xml).toContain('Detail');
+    const reopened = new DocumentImpl('doc2', 'Doc2');
+    await importFromDocx(bytes, reopened);
+    const toc = reopened.getSections()[0].blocks[0];
+    expect(toc).toMatchObject({ type: 'toc', instruction: 'TOC \\o "1-2" \\h \\z \\u' });
+    // The page numbers come back as the PAGEREF fields they were written as.
+    const entries = toc?.type === 'toc' ? toc.blocks.flatMap((b) => (b.type === 'paragraph' ? [b.content] : [])) : [];
+    expect(entries.map((c) => getPlainTextOf(c))).toEqual(['Intro\t', 'Detail\t2']);
+    expect(entries.map((c) => c.filter((i) => i.type === 'field').map((i) => (i.type === 'field' ? [i.kind, i.result] : [])))).toEqual([[['PAGEREF', '1']], []]);
+  });
+
+  it('is read from a file as a block with its cached entries, which the editor then keeps in the document and the Y document', async () => {
+    const bytes = new Uint8Array(readFileSync(path.resolve(__dirname, '../../../fixtures/docx/notes-toc-fields.docx')));
+    const doc = new DocumentImpl('doc', 'Doc');
+    await importFromDocx(bytes, doc);
+    const blocks = doc.getSections()[0].blocks;
+    const toc = blocks.find((b): b is TocBlock => b.type === 'toc');
+    expect(toc?.instruction).toBe('TOC \\o "1-3" \\h \\z \\u');
+    expect(toc?.blocks.length).toBeGreaterThan(3);
+    expect(getCollabBlockers(doc.getData())).toEqual([]);
+    expect(viaYjs(blocks).find((b) => b.type === 'toc')).toBeDefined();
+    // The cached numbers are as they were in the file.
+    const first = toc?.blocks[0];
+    const shown = (i: InlineContent) => (i.type === 'field' ? (typeof i.result === 'string' ? i.result : i.result.map((r) => (r.type === 'text' ? r.text : '')).join('')) : i.type === 'link' || i.type === 'text' ? i.text : '');
+    expect(first?.type === 'paragraph' && first.content.map(shown)).toEqual(['Overview', '\t', '1']);
   });
 });
 

@@ -71,3 +71,14 @@ export function findDeep(node: XmlNode, tag: string): XmlNode | undefined {
   return undefined;
 }
 
+
+/** The text under an element: every `#text` leaf below it, in order. */
+export function flattenText(node: XmlNode): string {
+  let out = '';
+  for (const child of childrenOf(node)) {
+    const tag = tagOf(child);
+    if (tag === '#text') out += String((child as Record<string, unknown>)['#text'] ?? '');
+    else out += flattenText(child);
+  }
+  return out;
+}

@@ -7,11 +7,12 @@
         "heading": 25,
         "image": 1,
         "list-item": 15,
-        "paragraph": 171,
-        "table": 14
+        "paragraph": 161,
+        "table": 14,
+        "toc": 1
       },
       "sections": 4,
-      "textChars": 28983
+      "textChars": 28989
     },
     "before": {
       "blocks": {
@@ -19,11 +20,12 @@
         "heading": 25,
         "image": 1,
         "list-item": 15,
-        "paragraph": 171,
-        "table": 14
+        "paragraph": 161,
+        "table": 14,
+        "toc": 1
       },
       "sections": 4,
-      "textChars": 28983
+      "textChars": 28989
     },
     "byField": {},
     "changed": 0,

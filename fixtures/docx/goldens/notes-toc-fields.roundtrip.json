@@ -4,20 +4,22 @@
     "after": {
       "blocks": {
         "heading": 9,
-        "paragraph": 37,
-        "table": 1
+        "paragraph": 30,
+        "table": 1,
+        "toc": 1
       },
       "sections": 1,
-      "textChars": 5683
+      "textChars": 5689
     },
     "before": {
       "blocks": {
         "heading": 9,
-        "paragraph": 37,
-        "table": 1
+        "paragraph": 30,
+        "table": 1,
+        "toc": 1
       },
       "sections": 1,
-      "textChars": 5683
+      "textChars": 5689
     },
     "byField": {},
     "changed": 0,

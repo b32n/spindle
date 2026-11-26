@@ -185,27 +185,43 @@ describe('detectDocxLoss: XML-based detectors', () => {
     const fld = (...instr: string[]) =>
       `<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r>${instr.map((i) => `<w:r><w:instrText xml:space="preserve">${i}</w:instrText></w:r>`).join('')}` +
       `<w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>cached</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
-    it('counts only the fields that are not kept as fields (tables of contents, indexes), by kind; legacy form fields are docx.legacyForms', async () => {
+    it('counts only the fields that are not kept as fields (indexes, and a table of contents that is not read as a block), by kind; legacy form fields are docx.legacyForms', async () => {
       const bytes = await docx(
         fld(' PAGEREF _Toc1 \\h ') + fld(' PAGEREF _Toc2 \\h ') + fld(' PAGE ') + fld(' NUMPAGES ') +
           fld(' SEQ Figure ') + '<w:p><w:fldSimple w:instr=" DATE \\@ &quot;yyyy&quot; "><w:r><w:t>x</w:t></w:r></w:fldSimple></w:p>' +
           fld(' TOC \\o "1-3" ') + fld(' INDEX ') + fld(' FORMTEXT ')
       );
-      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 2, where: ['INDEX ×1', 'TOC ×1'] });
+      // The table of contents is read as a block (its field starts and ends in body paragraphs), so it is not reported.
+      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 1, where: ['INDEX ×1'] });
     });
     it('counts a field once when its instruction is split across runs', async () => {
-      const bytes = await docx(fld(' TOC ', '\\o', ' "1-3" '));
-      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 1, where: ['TOC ×1'] });
+      const bytes = await docx(fld(' INDEX ', '\\f', ' "x" '));
+      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 1, where: ['INDEX ×1'] });
     });
     it('counts nested fields separately, ignoring instruction text in a field result', async () => {
       const bytes = await docx(
-        '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TOC \\o "1-3" </w:instrText></w:r>' +
+        '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> INDEX \\h "A" </w:instrText></w:r>' +
           '<w:r><w:fldChar w:fldCharType="separate"/></w:r>' +
           '<w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> PAGEREF _Toc1 </w:instrText></w:r>' +
           '<w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>4</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r>' +
           '<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>'
       );
-      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 1, where: ['TOC ×1'] });
+      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 1, where: ['INDEX ×1'] });
+    });
+    it('reports a table of contents that is not read as a block: one with a table inside, a section break inside, no end, or as a simple field', async () => {
+      const tocStart = '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TOC \\o "1-3" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>entry</w:t></w:r></w:p>';
+      const tocEnd = '<w:p><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>';
+      const withTable = await docx(tocStart + '<w:tbl><w:tr><w:tc><w:p/></w:tc></w:tr></w:tbl>' + tocEnd);
+      expect(await item(withTable, 'docx.fields')).toMatchObject({ count: 1, where: ['TOC ×1'] });
+      const withBreak = await docx(tocStart + '<w:p><w:pPr><w:sectPr/></w:pPr></w:p>' + tocEnd);
+      expect(await item(withBreak, 'docx.fields')).toMatchObject({ count: 1, where: ['TOC ×1'] });
+      const noEnd = await docx(tocStart);
+      expect(await item(noEnd, 'docx.fields')).toMatchObject({ count: 1, where: ['TOC ×1'] });
+      const simple = await docx('<w:p><w:fldSimple w:instr=" TOC \\o &quot;1-3&quot; "><w:r><w:t>x</w:t></w:r></w:fldSimple></w:p>');
+      expect(await item(simple, 'docx.fields')).toMatchObject({ count: 1, where: ['TOC ×1'] });
+      // Read as a block: several paragraphs, a content control around them, and two tables of contents.
+      const read = await docx(tocStart + tocEnd + tocStart + tocEnd);
+      expect(await item(read, 'docx.fields')).toBeUndefined();
     });
   });
 
@@ -228,9 +244,9 @@ describe('detectDocxLoss: XML-based detectors', () => {
       expect(summary.items).toEqual([
         {
           id: 'docx.fields',
-          label: 'field(s) (table of contents, index)',
+          label: 'field(s) (table of contents not read as one, index)',
           count: 1,
-          effect: 'tables of contents and indexes are kept as static text',
+          effect: 'a table of contents that could not be read as a block and an index are kept as static text',
         },
       ]);
       const full = await detectDocxLoss(bytes, { detail: 'full' });

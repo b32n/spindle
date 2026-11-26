@@ -22,6 +22,7 @@ import type {
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
 import { isKeptBlockControl, parseSdt, sdtContent } from './content-controls';
 import { parseNotes, type NoteKind } from './notes';
+import { findTocRanges, isEmptyParagraph, withoutMarkers, type TocRange } from './toc-field';
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './numbering';
 import { parsePPr, StyleSheet, toDocParagraphStyle } from './styles';
@@ -831,6 +832,68 @@ function parseTextDirection(el: XmlNode | undefined): DocCellTextDirection | und
   return undefined;
 }
 
+/**
+ * A table of contents (a `TOC` field) as a block: its entries are the paragraphs the field spans, read without the field's
+ * own markup. A paragraph that only held the end of the field is not an entry, and a link around the tab and the page number
+ * is split at the tab, so the tab is plain text the editor can draw as a leader.
+ */
+function parseTocBlock(
+  range: TocRange,
+  paragraphs: XmlNode[],
+  numbering: NumberingInfo,
+  ctx: PartContext,
+  warnings: string[]
+): DocBlock {
+  const entries: DocBlock[] = [];
+  paragraphs.forEach((paragraph) => {
+    const stripped = withoutMarkers(paragraph, range.markers);
+    if (stripped !== paragraph && isEmptyParagraph(stripped)) return;
+    const parsed = parseParagraph(stripped, numbering, ctx, warnings, true);
+    if (parsed.type === 'paragraph' || parsed.type === 'heading' || parsed.type === 'listItem') {
+      // An entry is a paragraph, whatever its style says (a numbered or heading style does not make it a list item or a heading).
+      const { type: _type, level: _level, listType: _listType, start: _start, content, ...format } = parsed as unknown as Record<string, unknown> & { content: DocInline[] };
+      entries.push({ ...format, type: 'paragraph', content: splitTabsOutOfLinks(content) } as DocBlock);
+    }
+  });
+  return { type: 'toc', instruction: range.instruction, blocks: entries };
+}
+
+/** A link whose text holds a tab becomes the link, the tab as plain text, and the link again. */
+function splitTabsOutOfLinks(content: DocInline[]): DocInline[] {
+  return content.flatMap((item): DocInline[] => {
+    if (item.type !== 'link' || !item.text.includes('\t')) return [item];
+    const { text, ...props } = item;
+    const out: DocInline[] = [];
+    text.split('\t').forEach((part, i) => {
+      if (i > 0) out.push({ type: 'text', text: '\t' });
+      if (part) out.push({ ...props, text: part });
+    });
+    return out;
+  });
+}
+
+/**
+ * The elements of a list of blocks with each table of contents (a `TOC` field spanning paragraphs) replaced by a marker
+ * naming the field and its paragraphs, so the caller can read it as one block.
+ */
+type TocItem = { kind: 'node'; node: XmlNode } | { kind: 'toc'; range: TocRange; paragraphs: XmlNode[] };
+function groupTocFields(nodes: XmlNode[]): TocItem[] {
+  const ranges = findTocRanges(nodes);
+  const items: TocItem[] = [];
+  let i = 0;
+  while (i < nodes.length) {
+    const range = ranges.find((r) => r.start === i);
+    if (range) {
+      items.push({ kind: 'toc', range, paragraphs: nodes.slice(range.start, range.end + 1) });
+      i = range.end + 1;
+    } else {
+      items.push({ kind: 'node', node: nodes[i] });
+      i++;
+    }
+  }
+  return items;
+}
+
 /** The paragraphs, headings and list items among blocks, looking inside content controls. */
 function textBlocks(blocks: DocBlock[]): DocBlock[] {
   return blocks.flatMap((b) => (b.type === 'contentControl' ? textBlocks(b.blocks) : b.type === 'paragraph' || b.type === 'heading' || b.type === 'listItem' ? [b] : []));
@@ -861,7 +924,12 @@ function parseControlBlock(
     }
     blocks.push(...added);
   };
-  for (const child of flattenBlocks(sdtContent(sdt), true)) {
+  for (const item of groupTocFields(flattenBlocks(sdtContent(sdt), true))) {
+    if (item.kind === 'toc') {
+      place([parseTocBlock(item.range, item.paragraphs, numbering, ctx, warnings)]);
+      continue;
+    }
+    const child = item.node;
     const tag = tagOf(child);
     if (tag === 'w:p') {
       place(plain ? [parseParagraph(child, numbering, ctx, warnings, true)] : parseParagraphBlocks(child, numbering, ctx, warnings));
@@ -1180,7 +1248,12 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
     return blocks;
   };
 
-  for (const node of bodyChildren) {
+  for (const item of groupTocFields(bodyChildren)) {
+    if (item.kind === 'toc') {
+      currentBlocks.push(parseTocBlock(item.range, item.paragraphs, numbering, ctx, warnings));
+      continue;
+    }
+    const node = item.node;
     const tag = tagOf(node);
     if (tag === 'w:bookmarkStart') {
       const name = bookmarkName(node);
@@ -1327,6 +1400,7 @@ function usedStyleIds(sections: DocSection[]): Set<string> {
     for (const inline of content) {
       if ((inline.type === 'text' || inline.type === 'link') && inline.namedStyleId) used.add(inline.namedStyleId);
       else if (inline.type === 'contentControl' || inline.type === 'noteRef') inlines(inline.content);
+      else if (inline.type === 'field' && typeof inline.result !== 'string') inlines(inline.result);
     }
   };
   const hf = (part: DocHeaderFooter | undefined) => {
@@ -1341,7 +1415,7 @@ function usedStyleIds(sections: DocSection[]): Set<string> {
           else inlines(cell.content);
         }
       }
-    } else if (block.type === 'contentControl') {
+    } else if (block.type === 'contentControl' || block.type === 'toc') {
       block.blocks.forEach(visit);
     } else if ('content' in block) {
       inlines(block.content);

@@ -315,8 +315,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-TOC-01 | Insert -> Table of contents lists the headings with the page each is on, after the block the caret is in | covered | yes |  | `e2e/docs/toc.spec.ts` |
 | D-TOC-02 | Update lists a heading added later, with the page it is on; entries are not changed until then | covered |  |  | `e2e/docs/toc.spec.ts` |
 | D-TOC-03 | clicking an entry goes to its heading | covered |  |  | `e2e/docs/toc.spec.ts` |
-| D-TOC-04 | the table of contents downloads as a Word table of contents block, with bookmarks on the headings | covered |  |  | `e2e/docs/toc.spec.ts` |
+| D-TOC-04 | the table of contents downloads as a TOC field Word can refresh, with PAGEREF fields and bookmarks on the headings | covered |  |  | `e2e/docs/toc.spec.ts` |
 | D-TOC-05 | Remove deletes the table of contents | covered |  |  | `e2e/docs/toc.spec.ts` |
+| D-TOC-06 | a table of contents in a .docx shows its entries with the numbers it was saved with, and opening does not change them | covered | yes |  | `e2e/docs/toc.spec.ts` |
+| D-TOC-07 | Update rewrites the numbers of an imported table of contents from the editor’s pages, and the download has the field Word can refresh | covered |  |  | `e2e/docs/toc.spec.ts` |
 | D-GAP-01 | DOCX fidelity beyond the fixtures: floating images, comments, tracked changes, multiple sections, footnotes, text boxes | not covered | | Open / Download are covered (D-FIO-*, D-ERR-*, D-IMG-*). The importer drops floating images and the rest with a warning; none of that is exercised end to end yet. | |
 | D-GAP-02 | Triple-click paragraph selection and mouse drag selection | not covered | | Needs a stable way to read the ProseMirror selection; double-click is covered (D-SEL-02). | |
 | D-GAP-03 | Ruler margin handles, table column resize, image resize handles | not covered | | Pointer gestures on the canvas-like page layer; to add. | |
@@ -463,7 +465,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 397
+- covered: 399
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

@@ -286,9 +286,18 @@ lockstep.
   gains a `toc` node (an atom holding its entry paragraphs; at the top level and in content controls, not in cells or list
   items), plain ProseMirror content that syncs over Yjs; `getCollabBlockers` knows it. The collaboration `schemaVersion` is now 5.
   New commands `insertTableOfContents`, `updateTableOfContents` and `removeTableOfContents`, `parseTocInstruction`, and
-  `TrueLayoutEditorHandle.tableOfContents(action)`. Until the table of contents is read from and written to files as a field
-  (the next change), a table in a document is written to DOCX as Word writes the block around it, a Table of Contents building
-  block control around the entry paragraphs, with the `_Toc` bookmarks on the headings and the entries as links to them.
+  `TrueLayoutEditorHandle.tableOfContents(action)`.
+- **DOCX tables of contents are read and written back as fields.** A Word table of contents (a `TOC` field that starts in the first
+  entry paragraph and ends after the last, in the body or inside a content control such as Word's Table of Contents building
+  block) is imported as a table of contents block with the entries it showed, unchanged: links to the `_Toc` bookmarks, tabs, the
+  `PAGEREF` fields with their cached page numbers, and the entry paragraph styles. Nothing recomputes them until the user updates
+  the table. The export writes the field again: begin, instruction and separator in the first entry, each entry with a right tab
+  and dotted leader at the margin, and the end in a paragraph of its own; an entry made in the editor (a link to a heading, a tab
+  and a number) gets its number as a `PAGEREF` field of the heading's `_Toc` bookmark so Word can refresh the table (F9, or
+  Update Field). No `updateFields` setting is written (it makes Word ask on open). Additive interchange block member
+  `DocBlock` `{ type: 'toc'; instruction; blocks }`. A table of contents whose field does not end in the same body or control,
+  has a table or a section break inside it, or is a simple field stays static text and is still reported. Entry paragraphs are read
+  as plain paragraphs whatever their style; a link around the tab and the number is split at the tab.
 - **Layout: a tab with a leader, and measuring a tab.** A paragraph can ask for a tab to be drawn as a dotted leader up to the text
   after it at the right (`ParagraphAttrs.tabLeader`; used by the entries of a table of contents), and `LinkRun.plain` draws a link
   like the text around it. The measurer treated a tab and the text after it as two pieces on the same line and gave the text twice;
@@ -299,7 +308,7 @@ lockstep.
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,
   citation, bibliography and group controls, and controls wrapping table rows or cells, whose content is kept without the
   control), by reason in `where`, in both detail levels; it counted every `w:sdt` before. `docx.fields` no longer counts the
-  legacy form fields (see `docx.legacyForms`). The DOCX fidelity harness now counts the text inside content controls.
+  legacy form fields (see `docx.legacyForms`), and no longer counts a table of contents the importer reads as a block (it counts one that stays static text, and indexes). The DOCX fidelity harness now counts the text inside content controls.
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
   lazily on first XLSX/DOCX open or save (public APIs unchanged).
 - `@b32nio/spindle-shared` no longer depends on `exceljs`, `docx`, `jszip` or `fast-xml-parser`.

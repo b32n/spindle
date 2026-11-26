@@ -306,7 +306,14 @@ export type DocBlock =
   | { type: 'horizontalRule' }
   | { type: 'pageBreak' }
   /** Blocks wrapped by a content control (a block-level `w:sdt`). Controls nest. */
-  | { type: 'contentControl'; control: DocContentControl; blocks: DocBlock[] };
+  | { type: 'contentControl'; control: DocContentControl; blocks: DocBlock[] }
+  /**
+   * A table of contents (a `TOC` field): the instruction (`TOC \\o "1-3" \\h \\z \\u`) and the entries it showed when it was last
+   * updated, one paragraph each. In a file the field starts in the first entry and ends after the last; the entries link to
+   * `_Toc` bookmarks and give their page numbers with `PAGEREF` fields, which a reader that does not update the table keeps as
+   * they were.
+   */
+  | { type: 'toc'; instruction: string; blocks: DocBlock[] };
 
 export interface DocHeaderFooterParagraph {
   content: DocInline[];

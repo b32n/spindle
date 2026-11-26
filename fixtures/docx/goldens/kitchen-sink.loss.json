@@ -44,15 +44,6 @@
       "label": "equation(s)"
     },
     {
-      "count": 1,
-      "effect": "tables of contents and indexes are kept as static text",
-      "id": "docx.fields",
-      "label": "field(s) (table of contents, index)",
-      "where": [
-        "TOC ×1"
-      ]
-    },
-    {
       "count": 5,
       "effect": "not imported (only inline images are)",
       "id": "docx.floatingImages",
