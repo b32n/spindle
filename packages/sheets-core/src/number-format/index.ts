@@ -1,5 +1,5 @@
 // Excel number-format engine: `formatValue(value, code)` renders a cell value the way Excel would display it.
-// Codes are compiled once and cached. See documentation/sheets/number-formats.md for the supported grammar and the
+// Codes are compiled once and cached. See documentation/sheets/core/number-formats.md for the supported grammar and the
 // places where this differs from Excel or LibreOffice on purpose.
 
 import { generalDigits } from './digits';

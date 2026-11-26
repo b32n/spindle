@@ -101,5 +101,12 @@ describe('TEXT reads text and General like Excel', () => {
     expect(ev('=TEXT("($1,234.5)","0.0")')).toBe('-1234.5');
     expect(ev('=TEXT("(abc)","0")')).toBe('(abc)');
     expect(ev('=TEXT("((5))","0")')).toBe('((5))');
+    expect(ev('=TEXT("(-5)","0")')).toBe('(-5)');
+    expect(ev('=TEXT("(+5)","0")')).toBe('(+5)');
+    expect(ev('=TEXT("(5)","@")')).toBe('(5)');
+    expect(ev('=TEXT("1,234","@")')).toBe('1,234');
+    expect(ev('=TEXT("1,234","@@")')).toBe('1,2341,234');
+    expect(ev('=TEXT("12","""x""")')).toBe('12');
+    expect(ev('=TEXT("1,234","0;0;0;@")')).toBe('1234');
   });
 });

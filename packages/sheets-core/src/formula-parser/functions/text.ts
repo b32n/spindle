@@ -2,7 +2,7 @@
 
 import type { EagerFn } from './helpers';
 import { flatten, toText, toNum, toBoolean, wildcardSearch } from './helpers';
-import { formatValue, isValidFormatCode } from '../../number-format';
+import { compileFormat, formatValue, isValidFormatCode } from '../../number-format';
 import { parseDateString } from '../../utils/format-utils';
 
 const DECIMAL = /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i;
@@ -10,7 +10,7 @@ const GROUPED = /^[+-]?\d{1,3}(,\d{3})+(\.\d*)?$/;
 
 /** What Excel's TEXT reads as a number from text: a decimal, with `$`, thousands commas or `%`, or a date. */
 function numberFromText(text: string): number | undefined {
-  const bracketed = /^\(([^()]*)\)$/.exec(text.trim()); // Excel reads (5) as -5
+  const bracketed = /^\(([^()+-][^()]*)\)$/.exec(text.trim()); // Excel reads (5) as -5, not (-5)
   if (bracketed) {
     const inner = numberFromText(bracketed[1]);
     return inner === undefined ? undefined : -inner;
@@ -127,7 +127,9 @@ export const textFunctions: Record<string, EagerFn> = {
     const text = toText(value); // an error value propagates
     const options = { fullGeneral: true }; // no column to fit: General gives the 15 significant digits
     if (value === null || value === undefined) return formatValue(0, code, options).text;
-    const number = typeof value === 'string' ? numberFromText(text) : undefined;
+    // text is read as a number only when the code has a number, date or General section (not for `@` alone)
+    const numeric = compileFormat(code).sections.some((s) => s.kind !== 'text' && s.kind !== 'literal');
+    const number = typeof value === 'string' && numeric ? numberFromText(text) : undefined;
     return formatValue(number ?? value, code, options).text;
   },
 

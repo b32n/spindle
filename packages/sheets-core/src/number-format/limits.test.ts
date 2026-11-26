@@ -132,14 +132,21 @@ describe('adversarial codes stay fast', () => {
     expect(ms).toBeLessThan(1000);
   });
 
-  it('compile time grows linearly with the length of a comma run (two sizes, best of three)', () => {
-    compileFormat('x'); // warm up
-    const best = (n: number) =>
-      Math.min(...[0, 1, 2].map(() => timed(() => { for (let i = 0; i < 1500; i++) compileFormat(`0${','.repeat(n)}${i % 7}0`); }).ms));
+  it('compile time grows linearly with the length of a comma run (unique codes, so nothing is served from the cache)', () => {
+    let unique = 0;
+    const run = (n: number) =>
+      timed(() => {
+        for (let i = 0; i < 1500; i++) {
+          const code = `0${','.repeat(n)}"${unique++}"`;
+          expect(compileFormat(code).ok).toBe(true);
+        }
+      }).ms;
+    run(60); // warm up
+    const best = (n: number) => Math.min(run(n), run(n), run(n));
     const small = best(60);
-    const large = best(250);
-    // 4x the commas: linear is about 4x; the old per-comma rescan was 16x and worse
-    expect(large).toBeLessThan(Math.max(small, 5) * 10);
+    const large = best(240);
+    // 4x the commas: linear parsing is about 4x, a per-comma rescan about 16x
+    expect(large).toBeLessThan(small * 9 + 25);
     expect(large).toBeLessThan(1000);
   });
 
