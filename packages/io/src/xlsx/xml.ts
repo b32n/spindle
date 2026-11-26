@@ -46,6 +46,8 @@ const parser = new XMLParser({
   parseTagValue: false,
   parseAttributeValue: false,
   processEntities: false,
+  // depth cap, set here so a change of the parser's default cannot change the safety behaviour
+  maxNestedTags: 100,
 });
 
 const ENTITY = /&(?:#(\d+)|#x([0-9a-fA-F]+)|(lt|gt|amp|quot|apos));/g;

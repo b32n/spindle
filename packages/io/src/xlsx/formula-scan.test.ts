@@ -65,7 +65,11 @@ describe('scanFormula references', () => {
     ['[1]Sheet1!A1+1', true],
     ["'[2]My Sheet'!B2", true],
     ['SUM([3]S!A:A)', true],
-    ['Table1[1]', true],
+    ['Table1[1]', false],
+    ['SUM(Sales[2024])', false],
+    ['Sales[[2024]]*2', false],
+    ['T[[#This Row],[2024]]', false],
+    ['SUM(Sales[2024])+[1]S!A1', true],
     ['"[1]x"', false],
     ['A1', false],
   ])('external reference in %s is %s', (text, expected) => {

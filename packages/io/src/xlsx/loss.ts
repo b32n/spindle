@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import { createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
 import type { DetectXlsxLossOptions } from '@b32nio/spindle-shared/export/xlsx';
-import { scanFormula, VOLATILE_FUNCTIONS } from './formula-scan';
+import { scanFormula, VOLATILE_FUNCTIONS, withoutStrings, type FormulaFacts } from './formula-scan';
 import { isEncryptedOle, isKnownPart, isOleFile } from './package-kind';
 import { parseStyles } from './styles-scan';
 import { descendants, isMain, isOn, isTrue, kid, kids, parseXml, walk, type XmlElement } from './xml';
@@ -34,6 +34,8 @@ interface Rel {
   /** Resolved part name, or the raw URL for an external target. */
   target: string;
   external: boolean;
+  /** The `Target` exactly as written. */
+  raw: string;
 }
 
 interface SheetEntry {
@@ -60,7 +62,7 @@ class Tally {
 
 const TALLY_KEYS = [
   'cf', 'dv', 'filter', 'protect', 'outline', 'spark', 'comments', 'charts', 'images',
-  'formulas', 'structured', 'unsupported', 'array', 'dynamic', 'external', 'whole', 'volatile',
+  'structured', 'unsupported', 'array', 'dynamic', 'external', 'whole', 'volatile',
   'columnRowStyles', 'tabColor', 'zoom', 'rtl', 'gridlines', 'customViews',
   'printSetup', 'breaks', 'headerFooter',
   'dataBarExt', 'iconSetExt', 'formulaRule', 'stopIfTrue',
@@ -85,6 +87,48 @@ const relsPart = (part: string): string => {
   return `${part.slice(0, slash + 1)}_rels/${part.slice(slash + 1)}.rels`;
 };
 
+/** The part of JSZip's (untyped) streaming helper used here. */
+interface Stream {
+  on(event: 'data', fn: (chunk: Uint8Array) => void): Stream;
+  on(event: 'error' | 'end', fn: () => void): Stream;
+  pause(): Stream;
+  resume(): Stream;
+}
+
+/** Inflate a zip entry, giving up (`'limit'`) as soon as more than `limit` bytes have come out. `undefined` when it cannot be read. */
+function inflate(file: JSZip.JSZipObject, limit: number): Promise<Uint8Array | 'limit' | undefined> {
+  return new Promise((resolve) => {
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    let done = false;
+    const finish = (value: Uint8Array | 'limit' | undefined) => {
+      if (done) return;
+      done = true;
+      resolve(value);
+    };
+    const stream = (file as unknown as { internalStream(type: 'uint8array'): Stream }).internalStream('uint8array');
+    stream
+      .on('data', (chunk: Uint8Array) => {
+        total += chunk.length;
+        if (total > limit) {
+          stream.pause();
+          finish('limit');
+        } else chunks.push(chunk);
+      })
+      .on('error', () => finish(undefined))
+      .on('end', () => {
+        const out = new Uint8Array(total);
+        let at = 0;
+        for (const c of chunks) {
+          out.set(c, at);
+          at += c.length;
+        }
+        finish(out);
+      })
+      .resume();
+  });
+}
+
 class Package {
   read = 0;
   readonly skipped: string[] = [];
@@ -94,32 +138,36 @@ class Package {
     return this.zip.file(name) !== null;
   }
 
-  /** The text of a part, or `undefined` when it is absent, over the limits or unreadable. Never throws. */
+  /**
+   * The text of a part, or `undefined` when it is absent, over the limits or unreadable. Never throws. The declared size
+   * is a cheap first check; the inflated bytes are counted as they come out and the stream is stopped at the limit, so a
+   * forged header cannot make a bomb inflate.
+   */
   async text(name: string): Promise<string | undefined> {
     const file = this.zip.file(name);
     if (!file) return undefined;
-    // JSZip keeps the central-directory size on its internal record; reading it avoids inflating a bomb to find out.
     const size = (file as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize;
-    if (typeof size === 'number' && (size > LIMITS.partBytes || this.read + size > LIMITS.totalBytes)) {
+    const limit = Math.min(LIMITS.partBytes, LIMITS.totalBytes - this.read);
+    if (typeof size === 'number' && size > limit) {
       this.skipped.push(name);
       return undefined;
     }
-    try {
-      const text = await file.async('string');
-      if (text.length > LIMITS.partBytes) {
-        this.skipped.push(name);
-        return undefined;
-      }
-      this.read += text.length;
-      return text;
-    } catch {
-      return undefined;
-    }
+    const bytes = await inflate(file, limit);
+    if (bytes === 'limit') this.skipped.push(name);
+    if (typeof bytes === 'string' || bytes === undefined) return undefined;
+    this.read += bytes.length;
+    return new TextDecoder().decode(bytes);
   }
 
+  private readonly parsed = new Map<string, XmlElement | undefined>();
+
+  /** A parsed part; each part is read, counted against the budget and parsed once however many sheets refer to it. */
   async xml(name: string): Promise<XmlElement | undefined> {
+    if (this.parsed.has(name)) return this.parsed.get(name);
     const text = await this.text(name);
-    return text === undefined ? undefined : (parseXml(text) ?? undefined);
+    const root = text === undefined ? undefined : (parseXml(text) ?? undefined);
+    this.parsed.set(name, root);
+    return root;
   }
 
   async rels(part: string): Promise<Rel[]> {
@@ -132,6 +180,7 @@ class Package {
         type: (r.attrs.Type ?? '').slice((r.attrs.Type ?? '').lastIndexOf('/') + 1),
         target: external ? target : resolveTarget(part, target),
         external,
+        raw: target,
       };
     });
   }
@@ -139,7 +188,6 @@ class Package {
 
 /** What a worksheet's cell data holds that matters here. Rows are parsed in chunks so a large sheet is never one tree. */
 interface CellFacts {
-  formulas: number;
   structuredRefs: number;
   arrays: number;
   dynamicArrays: number;
@@ -152,11 +200,12 @@ interface CellFacts {
   styledRows: number;
   styleIds: Set<number>;
   richInline: number;
+  /** Facts of each shared formula's master by `si`, applied to its followers (cells with no formula text). */
+  shared: Map<string, FormulaFacts>;
 }
 
 async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined): Promise<{ outer: string; cells: CellFacts; limited: boolean }> {
   const cells: CellFacts = {
-    formulas: 0,
     structuredRefs: 0,
     arrays: 0,
     dynamicArrays: 0,
@@ -169,6 +218,7 @@ async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined
     styledRows: 0,
     styleIds: new Set(),
     richInline: 0,
+    shared: new Map(),
   };
   const open = /<((?:[A-Za-z_][\w.-]*:)?)sheetData\b[^>]*?(\/?)>/.exec(xml);
   if (!open) return { outer: xml, cells, limited: false };
@@ -203,7 +253,7 @@ async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined
     const slice = xml.slice(pos, end);
     pos = end;
     // cells with no formula, format, outline or rich text have nothing to report
-    if (!/<(?:[A-Za-z_][\w.-]*:)?f[\s>/]| s="|outlineLevel|<(?:[A-Za-z_][\w.-]*:)?rPr/.test(slice)) continue;
+    if (!/<(?:[A-Za-z_][\w.-]*:)?f[\s>/]| s=["']|outlineLevel|<(?:[A-Za-z_][\w.-]*:)?rPr/.test(slice)) continue;
     const chunk = parseXml(head + slice + tail) ?? undefined;
     for (const row of kids(chunk, 'row')) {
       const level = Number(row.attrs.outlineLevel);
@@ -225,14 +275,17 @@ function readCell(c: XmlElement, cells: CellFacts, known: ReadonlySet<string> | 
   if (kid(kid(c, 'is'), 'r')?.children.some((e) => e.name === 'rPr')) cells.richInline++;
   const f = kid(c, 'f');
   if (!f) return;
-  cells.formulas++;
   if (f.attrs.t === 'array') {
     if (c.attrs.cm !== undefined) cells.dynamicArrays++;
     else cells.arrays++;
   }
-  // a shared formula's followers have no text; the master was scanned
-  if (f.text === '') return;
-  const facts = scanFormula(f.text);
+  // a shared formula's followers have no text of their own: they count with the facts of their master
+  let facts: FormulaFacts | undefined;
+  if (f.text !== '') {
+    facts = scanFormula(f.text);
+    if (f.attrs.t === 'shared' && f.attrs.si !== undefined) cells.shared.set(f.attrs.si, facts);
+  } else if (f.attrs.t === 'shared') facts = cells.shared.get(f.attrs.si ?? '');
+  if (!facts) return;
   if (facts.structuredRef) cells.structuredRefs++;
   if (facts.externalRef) cells.externalRefs++;
   if (facts.wholeColumnOrRow) cells.wholeColumns++;
@@ -259,7 +312,7 @@ function customPrintSetup(root: XmlElement): boolean {
     a.orientation === 'landscape' ||
     (a.scale !== undefined && Number(a.scale) !== 100) ||
     (a.paperSize !== undefined && a.paperSize !== '1' && a.paperSize !== '9') ||
-    a.useFirstPageNumber === '1' ||
+    isTrue(a.useFirstPageNumber) ||
     Object.values(options).some(isTrue) ||
     Object.entries(defaults).some(([k, v]) => margins[k] !== undefined && Math.abs(Number(margins[k]) - v) > 1e-9)
   );
@@ -544,7 +597,7 @@ function scanValidation(dv: XmlElement, name: string, t: Tallies, forceCrossShee
   if (['error', 'errorTitle', 'prompt', 'promptTitle'].some((a) => dv.attrs[a] !== undefined && dv.attrs[a] !== '')) t.dvMessages.add(name);
   const refersElsewhere = dv.children
     .filter((c) => c.name.startsWith('formula'))
-    .some((c) => (c.text + c.children.map((g) => g.text).join('')).includes('!'));
+    .some((c) => withoutStrings(c.text + c.children.map((g) => g.text).join('')).includes('!'));
   if (forceCrossSheet || refersElsewhere) t.dvCrossSheet.add(name);
 }
 
@@ -613,7 +666,7 @@ function scanLinks(root: XmlElement, rels: Rel[], name: string, t: Tallies): voi
   for (const link of kids(kid(root, 'hyperlinks'), 'hyperlink')) {
     const rel = link.attrs.id === undefined ? undefined : rels.find((r) => r.id === link.attrs.id);
     if (rel) {
-      if (rel.external && isUnsafeTarget(rel.target)) t.linksUnsafe.add(name);
+      if (isUnsafeTarget(rel.raw)) t.linksUnsafe.add(name);
     } else if (link.attrs.location !== undefined) t.linksInternal.add(name);
   }
 }
@@ -635,9 +688,26 @@ async function scanDrawing(pkg: Package, part: string, name: string, owned: Read
   });
 }
 
+const EMPHASIS = ['b', 'i', 'u', 'strike', 'vertAlign'];
+const signature = (rPr: XmlElement | undefined): string =>
+  JSON.stringify((rPr?.children ?? []).map((e) => [e.name, e.attrs]));
+
+/**
+ * True when a note's text is formatted beyond what every note has. Excel and LibreOffice write a bold run for the author
+ * line (`Author:` + newline) and plain run properties (font, size, colour) on the rest; neither counts.
+ */
+function hasFormattedRuns(comment: XmlElement): boolean {
+  let runs = descendants(kid(comment, 'text'), 'r');
+  const first = runs[0];
+  if (first && kid(kid(first, 'rPr'), 'b') && kid(first, 't')?.text.endsWith('\n')) runs = runs.slice(1);
+  const props = runs.map((r) => kid(r, 'rPr'));
+  if (props.some((p) => EMPHASIS.some((e) => kid(p, e)))) return true;
+  return new Set(props.map(signature)).size > 1;
+}
+
 async function scanComments(pkg: Package, part: string, name: string, t: Tallies): Promise<void> {
   const comments = descendants(await pkg.xml(part), 'comment');
-  t.commentsRich.add(name, comments.filter((c) => descendants(c, 'rPr').length > 0).length);
+  t.commentsRich.add(name, comments.filter(hasFormattedRuns).length);
 }
 
 /** Pictures placed in cells (`IMAGE`, "Place in cell") and other rich values, from the richData parts. */

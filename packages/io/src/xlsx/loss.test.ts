@@ -421,6 +421,35 @@ describe('formulas', () => {
     expect(item(report, 'xlsx.formulas.unsupported')).toMatchObject({ count: 2, where: ['IFS', 'SORT', 'STDEV.S', 'LET'] });
   });
 
+  it('counts every cell of a shared formula with the facts of its master', async () => {
+    const rows =
+      '<row r="1">' +
+      cell('A1', '<f t="shared" ref="A1:A3" si="0">SUM(Table1[a])+NOW()+FANCY(1)+SUM(A:A)+[1]S!A1</f><v>1</v>') +
+      cell('A2', '<f t="shared" si="0"/><v>1</v>') +
+      cell('A3', '<f t="shared" si="0"/><v>1</v>') +
+      cell('A4', '<f t="shared" si="9"/><v>1</v>') +
+      cell('A5', '<f t="shared"/><v>1</v>') +
+      cell('B1', '<f t="shared" ref="B1:B2" si="1">SUM(1)</f><v>1</v>') +
+      cell('B2', '<f t="shared" si="1"/><v>1</v>') +
+      '</row>';
+    const report = await full(await build({ sheets: [{ name: 'S', rows }] }), { knownFunctions: KNOWN });
+    for (const id of ['structuredRefs', 'externalRef', 'wholeColumn', 'volatile', 'unsupported']) expect(item(report, `xlsx.formulas.${id}`)?.count).toBe(3);
+  });
+
+  it('scans cells written with single-quoted attributes', async () => {
+    const rows = "<row r='1'><c r='A1' s='1'><f>SUM(Table1[a])</f></c></row>";
+    const saved = LIMITS.chunkBytes;
+    LIMITS.chunkBytes = 10;
+    try {
+      const report = await full(await build({ sheets: [{ rows: rows + "<row r='2' outlineLevel='1'/>" + "<row r='3'><c r='A3' s='3'/></row>" }], styles: STYLES('<cellXfs><xf/><xf/><xf/><xf fontId="1"/></cellXfs><fonts><font/><font><color theme="4"/></font></fonts>') }));
+      expect(item(report, 'xlsx.formulas.structuredRefs')?.count).toBe(1);
+      expect(item(report, 'xlsx.outline')?.count).toBe(1);
+      expect(item(report, 'xlsx.styles.themeColors')?.count).toBe(1);
+    } finally {
+      LIMITS.chunkBytes = saved;
+    }
+  });
+
   it('reports nothing when every function is known, and the formula text is not required', async () => {
     const bytes = await build({ sheets: [{ rows: f('SUM(1)+_xlfn.IF(1,2,3)') }] });
     expect(ids(await detectXlsxLoss(bytes, { knownFunctions: KNOWN }))).toEqual([]);
@@ -787,11 +816,38 @@ describe('conditional formatting, validation, comments and links', () => {
     expect(item(report, 'xlsx.links.unsafeScheme')?.effect).toMatch(/^kept: /);
   });
 
-  it('does not treat a relationship to a non-external target as an unsafe link', async () => {
+  it('checks the target as written, so a script link without TargetMode="External" is still reported', async () => {
     const bytes = await build({
-      sheets: [{ tail: '<hyperlinks><hyperlink ref="A1" r:id="rId1"/></hyperlinks>', rels: [rel('rId1', 'hyperlink', 'javascript:x')] }],
+      sheets: [{ tail: '<hyperlinks><hyperlink ref="A1" r:id="rId1"/><hyperlink ref="A2" r:id="rId2"/></hyperlinks>', rels: [rel('rId1', 'hyperlink', 'javascript:x'), rel('rId2', 'hyperlink', 'other.xlsx')] }],
     });
-    expect(ids(await full(bytes))).toEqual([]);
+    expect(item(await full(bytes), 'xlsx.links.unsafeScheme')?.count).toBe(1);
+  });
+
+  it('ignores an exclamation mark inside a string literal when looking for references to another sheet', async () => {
+    const bytes = await build({
+      sheets: [{ tail: '<dataValidations><dataValidation type="custom" sqref="A1"><formula1>A2="Hi!"</formula1></dataValidation><dataValidation type="list" sqref="A2"><formula1>Other!A1:A3</formula1></dataValidation></dataValidations>' }],
+    });
+    expect(item(await full(bytes), 'xlsx.dv.crossSheet')?.count).toBe(1);
+  });
+
+  it('does not call a note formatted for the author line and plain run properties that every note has', async () => {
+    const note = (runs: string) => `<comment ref="A1"><text>${runs}</text></comment>`;
+    const author = '<r><rPr><b/><sz val="9"/><rFont val="Tahoma"/></rPr><t>Author:\n</t></r>';
+    const body = (extra = '') => `<r><rPr><sz val="9"/>${extra}<rFont val="Tahoma"/></rPr><t>text</t></r>`;
+    const bytes = await build({
+      sheets: [{ name: 'N', rels: [rel('rId1', 'comments', '../comments1.xml')] }],
+      files: {
+        'xl/comments1.xml': `<comments><commentList>${[
+          note(author + body()), // Excel's shape: not formatted
+          note(body()), // LibreOffice's shape: not formatted
+          note(author + body('<i/>')), // italic text: formatted
+          note(body() + '<r><rPr><sz val="14"/><rFont val="Tahoma"/></rPr><t>big</t></r>'), // two different run formats
+          note(body() + body()), // the same format twice: not formatted
+          '<comment ref="B1"/>',
+        ].join('')}</commentList></comments>`,
+      },
+    });
+    expect(item(await full(bytes), 'xlsx.comments.richFormatting')?.count).toBe(2);
   });
 });
 
@@ -979,8 +1035,9 @@ describe('package level', () => {
     const real = JSZip.loadAsync.bind(JSZip);
     const spy = jest.spyOn(JSZip, 'loadAsync').mockImplementation(async (data: Parameters<typeof JSZip.loadAsync>[0]) => {
       const zip = await real(data);
-      const broken = zip.file('xl/worksheets/sheet1.xml');
-      if (broken) broken.async = (() => Promise.reject(new Error('invalid stored block lengths'))) as typeof broken.async;
+      const broken = zip.file('xl/worksheets/sheet1.xml') as unknown as { internalStream: () => unknown };
+      const failing = { on(event: string, fn: () => void) { if (event === 'error') setTimeout(fn, 0); return failing; }, pause: () => failing, resume: () => failing };
+      broken.internalStream = () => failing;
       return zip;
     });
     try {
@@ -1057,6 +1114,51 @@ describe('package level', () => {
       expect(item(report, 'xlsx.package.sizeLimit')).toMatchObject({ count: 2, where: ['xl/worksheets/sheet2.xml', 'xl/worksheets/sheet3.xml'] });
     } finally {
       Object.assign(LIMITS, saved);
+    }
+  });
+
+  it('stops a forged-header bomb: the inflated size is counted as the part comes out', async () => {
+    const saved = LIMITS.partBytes;
+    LIMITS.partBytes = 100_000;
+    try {
+      const zip = new JSZip();
+      zip.file('xl/workbook.xml', `<workbook ${MAIN}><sheets><sheet name="A" sheetId="1" r:id="rId1"/></sheets></workbook>`);
+      zip.file('xl/_rels/workbook.xml.rels', `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${REL}/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`);
+      zip.file('xl/worksheets/sheet1.xml', `<worksheet ${MAIN}><!--${' '.repeat(8_000_000)}--></worksheet>`);
+      const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+      // forge the uncompressed size (central directory and local header) of the sheet part down to 1000 bytes
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      let forged = 0;
+      for (let i = 0; i + 30 < bytes.length; i++) {
+        const sig = view.getUint32(i, true);
+        if (sig === 0x02014b50 && view.getUint32(i + 24, true) > 1_000_000) { view.setUint32(i + 24, 1000, true); forged++; }
+        if (sig === 0x04034b50 && view.getUint32(i + 22, true) > 1_000_000) { view.setUint32(i + 22, 1000, true); forged++; }
+      }
+      expect(forged).toBeGreaterThan(0);
+      const started = Date.now();
+      const report = await full(bytes);
+      expect(item(report, 'xlsx.package.sizeLimit')).toMatchObject({ count: 1, where: ['xl/worksheets/sheet1.xml'] });
+      expect(Date.now() - started).toBeLessThan(5000);
+    } finally {
+      LIMITS.partBytes = saved;
+    }
+  });
+
+  it('reads and counts a part shared by several sheets once', async () => {
+    const saved = LIMITS.totalBytes;
+    const pic = '<xdr:oneCellAnchor><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="P"/></xdr:nvPicPr></xdr:pic></xdr:oneCellAnchor>';
+    const drawing = `<xdr:wsDr ${XDR}>${pic}<!-- ${'x'.repeat(2000)} --></xdr:wsDr>`;
+    const bytes = await build({
+      sheets: ['A', 'B', 'C', 'D'].map((name) => ({ name, rels: [rel('rId1', 'drawing', '../drawings/drawing1.xml')] })),
+      files: { 'xl/drawings/drawing1.xml': drawing },
+    });
+    LIMITS.totalBytes = 8000; // the workbook parts and one copy of the drawing fit; four copies would not
+    try {
+      const report = await full(bytes);
+      expect(item(report, 'xlsx.images')?.count).toBe(4);
+      expect(item(report, 'xlsx.package.sizeLimit')).toBeUndefined();
+    } finally {
+      LIMITS.totalBytes = saved;
     }
   });
 

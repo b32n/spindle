@@ -36,7 +36,7 @@ model is built) and never throws on a malformed file; the import itself reports 
 `inspectXlsx(bytes, { detail })` (sheets-core) and `detectXlsxLoss(bytes, { detail, knownFunctions, isNumberFormatExact })` (`@b32nio/spindle-io/xlsx`)
 parse the package XML (entities are never expanded, oversized parts are skipped and named, nothing throws). The default `detail: 'summary'` is what the
 confirmation dialog shows; `'full'` adds the finer ids below and is what the XLSX fidelity harness records. Every `effect` starts with a state word:
-`lost:` (not kept at all), `approximated:` (kept in a weaker form) or `kept:` (kept, listed for information). Counts are of objects, not of package
+`lost:` (not kept at all), `approximated:` (kept in a weaker form) or `kept:` (kept, listed for information). Formula counts are per formula cell (every cell of a shared formula counts with its master's functions and references). Counts are of objects, not of package
 parts: a chart is one chart however many parts it has, a picture is one picture however many times its image file is used.
 
 Summary ids (dialog): `xlsx.conditionalFormatting`, `.dataValidation`, `.autoFilter`, `.sheetProtection`, `.workbookProtection`, `.outline`, `.sparklines`,
@@ -57,7 +57,7 @@ Full-only ids:
 | Print | `xlsx.print.setup` (a sheet whose orientation, paper size, scale, fit to page, print options or margins differ from Excel's defaults), `.areas`, `.titles`, `.breaks`, `.headersFooters` |
 | Conditional formatting | `xlsx.cf.dataBarExt`, `.iconSetExt` (Excel 2010 extensions), `.formulaRule`, `.stopIfTrue` |
 | Validation | `xlsx.dv.customFormula`, `.messages`, `.crossSheet` (references to another sheet, including Excel 2010 `x14` validations) |
-| Comments, links | `xlsx.comments.threaded`, `.richFormatting`; `xlsx.links.internal` (to a cell or name), `.unsafeScheme` (`javascript:`, `vbscript:`, `data:`, `file:` targets; state `kept:`, the target is stored as written and never opened or run by the library) |
+| Comments, links | `xlsx.comments.threaded`, `.richFormatting` (notes with bold, italic, underline, strike or script runs, or runs of differing font, size or colour; the bold author line and plain run properties every note has are not counted); `xlsx.links.internal` (to a cell or name), `.unsafeScheme` (`javascript:`, `vbscript:`, `data:`, `file:` targets; state `kept:`, the target is stored as written and never opened or run by the library) |
 | Objects | `xlsx.objects.shapes` (shapes and connectors), `.textBoxes`, `.formControls` (form and ActiveX controls), `.embeddedObjects` (OLE), `.cellImages` |
 | Workbook | `xlsx.workbook.date1904` (dates are converted to the 1900 system), `.calcSettings` (manual calculation, iteration, precision as displayed, R1C1; the `calcPr` Excel writes in every file is not reported), `.externalData` (connections, query tables, data model), `.richData` (linked data types) |
 | Package | `xlsx.package.unaccountedParts` (parts nothing reads or reports, named in `where`), `.encrypted` and `.legacyBinary` (an OLE container: password-protected package, or a legacy `.xls`; also a binary `.xlsb`), `.sizeLimit` (parts over the size limit, 64 MiB each or 256 MiB in total, and cell data past 48 MiB of one sheet, are not scanned) |
