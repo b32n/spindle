@@ -31,15 +31,17 @@ export interface FileFormulas {
 
 const VOLATILE = /\b(?:NOW|TODAY|RAND|RANDBETWEEN|RANDARRAY)\s*\(/i;
 
+const ENTITIES: Record<string, string> = { lt: '<', gt: '>', quot: '"', apos: "'", amp: '&' };
+
+/** One pass, so `&amp;#65;` stays the text `&#65;` instead of being decoded twice. */
 export function unescapeXml(text: string): string {
-  return text
-    .replace(
-      /&(lt|gt|quot|apos|amp);/g,
-      (_, n: string) => ({ lt: '<', gt: '>', quot: '"', apos: "'", amp: '&' })[n] as string
-    )
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, h: string) => safeChar(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d: string) => safeChar(parseInt(d, 10)))
-    .replace(/_x([0-9a-fA-F]{4})_/g, (_, h: string) => safeChar(parseInt(h, 16)));
+  return text.replace(
+    /&(lt|gt|quot|apos|amp);|&#x([0-9a-fA-F]+);|&#(\d+);|_x([0-9a-fA-F]{4})_/g,
+    (_, name?: string, hex?: string, dec?: string, esc?: string) =>
+      name !== undefined
+        ? ENTITIES[name]
+        : safeChar(parseInt((hex ?? esc ?? dec) as string, dec !== undefined ? 10 : 16))
+  );
 }
 
 const safeChar = (cp: number): string =>
@@ -86,7 +88,10 @@ function cachedValue(
   return raw === '' || Number.isNaN(n) ? undefined : n;
 }
 
-/** Formula cells of one worksheet part, with their cached values. */
+/**
+ * Formula cells of one worksheet part, with their cached values. The cell and formula regexes are lazy and can be
+ * quadratic on a sheet with many unclosed `<c>` elements; that is bounded by the 64 MB part cap and the corpus is trusted.
+ */
 export function readSheetFormulas(
   xml: string,
   strings: string[],
@@ -137,7 +142,9 @@ export function readFileFormulas(parts: Pick<OoxmlParts, 'xml'>): FileFormulas {
   return { sheets, cells, unreadableSheets };
 }
 
+/** Relative tolerance (9 significant digits) with a floor that only absorbs floating-point noise around zero. */
 const TOLERANCE = 1e-9;
+const ABSOLUTE_FLOOR = 1e-15;
 
 const ERROR =
   /^#(?:NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|GETTING_DATA|SPILL!|CALC!|CIRCULAR!)/;
@@ -153,7 +160,8 @@ export const errorCode = (v: Scalar): string | null =>
 export function sameValue(expected: Scalar, actual: Scalar): boolean {
   if (typeof expected === 'number' && typeof actual === 'number')
     return (
-      Math.abs(expected - actual) <= TOLERANCE * Math.max(1, Math.abs(expected), Math.abs(actual))
+      Math.abs(expected - actual) <=
+      Math.max(ABSOLUTE_FLOOR, TOLERANCE * Math.max(Math.abs(expected), Math.abs(actual)))
     );
   const [codeA, codeB] = [errorCode(expected), errorCode(actual)];
   if (codeA !== null && codeB !== null) return codeA === codeB;

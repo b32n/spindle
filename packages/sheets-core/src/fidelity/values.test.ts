@@ -20,6 +20,11 @@ describe('unescapeXml', () => {
     );
     expect(unescapeXml('&#1114112; &#x110000;')).toBe('� �');
     expect(unescapeXml('plain')).toBe('plain');
+    // decoded once: an escaped ampersand never starts another escape
+    expect(unescapeXml('&amp;#65;')).toBe('&#65;');
+    expect(unescapeXml('&amp;_x0041_')).toBe('&A'); // a real _xHHHH_ escape still decodes
+    expect(unescapeXml('_x005F_x0041_')).toBe('_x0041_'); // escaped underscore, not decoded twice
+    expect(unescapeXml('&amp;amp; &#38;lt;')).toBe('&amp; &lt;');
   });
 });
 
@@ -169,7 +174,11 @@ describe('comparing values', () => {
     expect(sameValue(1.7320508075688772, 1.73205080756888)).toBe(true);
     expect(sameValue(1e12, 1e12 + 100)).toBe(true);
     expect(sameValue(1, 1.001)).toBe(false);
-    expect(sameValue(0, 1e-12)).toBe(true);
+    expect(sameValue(0, 1e-16)).toBe(true);
+    expect(sameValue(0, 1e-10)).toBe(false);
+    expect(sameValue(1e-12, 0)).toBe(false);
+    expect(sameValue(1e-12, 1.0000000001e-12)).toBe(true);
+    expect(sameValue(1e-12, 1.1e-12)).toBe(false);
     expect(sameValue('a', 'a')).toBe(true);
     expect(sameValue('a', 'b')).toBe(false);
     expect(sameValue(true, true)).toBe(true);

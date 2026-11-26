@@ -12,6 +12,9 @@ export interface RegistryItem {
   label: string;
 }
 
+/** Keep a table cell on one line and stop a `|` from splitting it. */
+const cell = (text: string) => text.replace(/\|/g, '\\|').replace(/[\r\n]+/g, ' ');
+
 /**
  * Markdown for the generated README block: a numbered file list (title and producer, from the
  * manifest) followed by the construct x file matrix. A cell is "yes" only for constructs the manifest claims.
@@ -21,7 +24,8 @@ export function buildMatrix(registry: RegistryItem[], fixtures: MatrixFixture[])
     '| # | Fixture | Title | Produced by |',
     '|--:|---|---|---|',
     ...fixtures.map(
-      (f, i) => `| ${i + 1} | \`${f.id}\` | ${f.title ?? ''} | ${f.source?.tool ?? ''} |`
+      (f, i) =>
+        `| ${i + 1} | \`${f.id}\` | ${cell(f.title ?? '')} | ${cell(f.source?.tool ?? '')} |`
     ),
   ];
   const header = `| Construct | ${fixtures.map((_, i) => i + 1).join(' | ')} |`;

@@ -40,9 +40,11 @@ describe('parseArgs', () => {
     expect(args.reports).toEqual([{ format: 'md', out: 'x.md' }, { format: 'json' }]);
   });
 
-  it('ignores empty --only entries and a missing --only value', () => {
+  it('ignores empty --only entries but needs at least one id', () => {
     expect(parseArgs(['--only', 'a,,b,']).only).toEqual(['a', 'b']);
-    expect(parseArgs(['--only']).only).toEqual([]);
+    expect(() => parseArgs(['--only'])).toThrow('--only needs at least one fixture id');
+    expect(() => parseArgs(['--only', ''])).toThrow('--only needs at least one fixture id');
+    expect(() => parseArgs(['--only', ',,'])).toThrow('--only needs at least one fixture id');
   });
 
   it.each([

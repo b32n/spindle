@@ -32,8 +32,11 @@ export function parseArgs(argv: string[]): CliArgs {
     if (arg === '--update') args.update = true;
     else if (arg === '--matrix') args.matrix = true;
     else if (arg === '--runtime') args.runtime = true;
-    else if (arg === '--only') args.only.push(...(argv[++i] ?? '').split(',').filter(Boolean));
-    else if (arg === '--timeout') {
+    else if (arg === '--only') {
+      const ids = (argv[++i] ?? '').split(',').filter(Boolean);
+      if (ids.length === 0) throw new Error('--only needs at least one fixture id');
+      args.only.push(...ids);
+    } else if (arg === '--timeout') {
       const seconds = Number(argv[++i]);
       if (!Number.isFinite(seconds) || seconds <= 0)
         throw new Error('--timeout expects a positive number of seconds');

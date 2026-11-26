@@ -30,6 +30,13 @@ describe('matrix', () => {
     ]);
   });
 
+  it('escapes pipes and line breaks in titles and producers', () => {
+    const md = buildMatrix(registry, [
+      { id: 'f1', constructs: [], title: 'a|b\nc', source: { tool: 'x|y' } },
+    ]);
+    expect(md.split('\n')[2]).toBe('| 1 | `f1` | a\\|b c | x\\|y |');
+  });
+
   it('lists constructs no fixture claims', () => {
     expect(uncoveredConstructs(registry, [{ constructs: ['a.one'] }])).toEqual(['a.two']);
     expect(

@@ -125,7 +125,9 @@ XLSX_FIDELITY_UPDATE=1 npm test -w @b32nio/spindle-sheets-core -- fidelity   # s
 The report ends with a launch-bar scoreboard (plan section 7.3): L4 imports that did not end as the manifest says,
 L5 formulas matching the cached values, L7 round-trip differences and L8 unaccounted parts, each with the measured
 number and its target. A row that is not met is the recorded baseline, not a failure. CI writes the markdown to the
-job summary and uploads the JSON as `xlsx-fidelity-report-node<version>`.
+job summary and uploads the JSON as `xlsx-fidelity-report-node<version>`. `--report md --report-out FILE` appends to
+the file (as `$GITHUB_STEP_SUMMARY` requires) and never truncates it, so delete the file between local runs; JSON
+reports are overwritten.
 
 The run-time files (zip bomb, huge dimension, 100,000 x 10) are never part of the default run: `--runtime` writes
 them to a temporary directory with `generators/build_runtime.py`, imports each once under the per-file time limit

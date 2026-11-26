@@ -61,6 +61,17 @@ describe('digestBinaries', () => {
     expect(digestBinaries(null)).toBeNull();
   });
 
+  it('turns dates into ISO strings and maps and sets into arrays', () => {
+    expect(digestBinaries({ d: new Date(Date.UTC(2026, 0, 15, 9)), bad: new Date(NaN) })).toEqual({
+      d: '2026-01-15T09:00:00.000Z',
+      bad: 'Invalid Date',
+    });
+    expect(digestBinaries(new Map([['k', new Uint8Array(0)]]))).toEqual([
+      ['k', { bytes: 0, sha256: sha('') }],
+    ]);
+    expect(digestBinaries(new Set([1, 'a']))).toEqual([1, 'a']);
+  });
+
   it('writes non-finite numbers as text so JSON keeps them', () => {
     expect(digestBinaries([Infinity, -Infinity, NaN, 1.5])).toEqual([
       '#number:Infinity',
