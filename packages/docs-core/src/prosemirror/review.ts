@@ -289,6 +289,8 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
         tr.setNodeMarkup(unit.from, undefined, withBlockRevisionKind(node.attrs, kind, null));
         return;
       }
+      // The last row of a table takes the table with it. (The schema does not nest tables in a cell; if it ever does, a table that
+      // was the only block of a cell would leave the cell empty and need a paragraph.)
       const $row = tr.doc.resolve(unit.from);
       if ($row.parent.childCount === 1) tr.delete($row.before(), $row.after());
       else tr.delete(unit.from, unit.from + node.nodeSize);

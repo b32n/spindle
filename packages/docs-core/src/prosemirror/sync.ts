@@ -355,7 +355,6 @@ export function paragraphFormatAttrs(kind: 'paragraph' | 'heading', format: Para
         spaceBefore: format.spaceBefore || 0,
         spaceAfter: format.spaceAfter ?? 8,
         ...formatAttrs(rest),
-        revision: null,
       }
     : {
         level,
@@ -364,7 +363,6 @@ export function paragraphFormatAttrs(kind: 'paragraph' | 'heading', format: Para
         spaceBefore: format.spaceBefore ?? null,
         spaceAfter: format.spaceAfter ?? null,
         ...formatAttrs(rest),
-        revision: null,
       };
 }
 

@@ -323,6 +323,10 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const editorInitializedRef = useRef(false);
     
     // Refs for callbacks to avoid stale closures in dispatchTransaction
+    // `editable` is read live by the view: switching to and from read-only (Viewing mode, the Final and Original views) must
+    // not rebuild the editor, which would start again from the document the editor was mounted with and lose every edit.
+    const editableRef = useRef(editable);
+    editableRef.current = editable;
     const onDocChangeRef = useRef(onDocChange);
     const onSelectionChangeRef = useRef(onSelectionChange);
     const onActivePageChangeRef = useRef(onActivePageChange);
@@ -507,7 +511,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       // eslint-disable-next-line prefer-const -- `const` would TDZ-crash; see above
       view = new EditorView(hiddenEditorRef.current, {
         state,
-        editable: () => editable,
+        editable: () => editableRef.current,
         dispatchTransaction(transaction: Transaction) {
            
           const v = (view ?? (this as unknown as EditorView));
@@ -630,8 +634,13 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         editorInitializedRef.current = false;  // Allow re-init if component remounts
       };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editable]);  // Only depend on editable, NOT on initialDoc
+    }, []);  // Not on initialDoc (the document lives in the editor after the first render), nor on editable (read through a ref)
     
+    // Switching between editable and read-only: the view reads `editable` again.
+    useEffect(() => {
+      editorView?.setProps({ editable: () => editableRef.current });
+    }, [editable, editorView]);
+
     // Initialize input bridge
     useEffect(() => {
       if (!editorView || !pagesContainerRef.current || !viewportRef.current) return;

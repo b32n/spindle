@@ -354,4 +354,37 @@ test.describe('docs: tracked changes in a .docx', () => {
     await doc.typeText('ZZ');
     await expect(doc.pages.first()).toContainText('ZZTotal tonnage');
   });
+
+  test('D-REV-10 edits and accepted changes made before a read-only view are still there after it', async ({
+    page,
+  }) => {
+    // An edit in All markup, and a change accepted from the panel.
+    await doc.clickText('Total tonnage handled in');
+    await doc.press('Home');
+    await doc.typeText('QQ');
+    await openPanel(page);
+    const items = panel(page).getByTestId('review-change');
+    const before = await items.count();
+    await panel(page).getByRole('button', { name: 'Accept change' }).first().click();
+    await expect(items).toHaveCount(before - 1);
+
+    // To the Final view and back: the editor is not rebuilt from the document it was mounted with.
+    const view = panel(page).getByRole('group', { name: 'Show changes as' });
+    await view.getByRole('button', { name: 'Final' }).click();
+    await expect(page.getByTestId('revision-view-banner')).toBeVisible();
+    await expect(doc.pages.first()).toContainText('QQTotal tonnage');
+    await page
+      .getByTestId('revision-view-banner')
+      .getByRole('button', { name: 'Switch to All markup' })
+      .click();
+    await expect(doc.pages.first()).toContainText('QQTotal tonnage');
+    await expect(items).toHaveCount(before - 1);
+
+    // The next keystroke does not bring the old document back.
+    await doc.clickText('QQTotal tonnage handled in');
+    await doc.press('Home');
+    await doc.typeText('W');
+    await expect(doc.pages.first()).toContainText('WQQTotal tonnage');
+    await expect(items).toHaveCount(before - 1);
+  });
 });

@@ -701,7 +701,8 @@ describe('concurrent suggestions on one paragraph mark or table row', () => {
       expect(revisionOfBlock(c)).toBeUndefined();
       expect(paragraphTexts(c)).toEqual(['hello ', 'world']);
     }
-    // Ada's record is rejected (the split goes), Bo's stays pending on the joined paragraph.
+    // Ada's record is rejected (the split goes): the joined paragraph has no record. Bo's deletion record sat on the mark that
+    // the join removes, so it goes with it (a known limit: rejecting a split silently drops a concurrent record on that mark).
     [a, b] = make();
     settleBy(a, 'Ada', 'reject');
     sync(a, b);
