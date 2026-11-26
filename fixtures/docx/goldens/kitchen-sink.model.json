@@ -3149,6 +3149,13 @@
               },
               {
                 "href": "https://example.com/tracked",
+                "revision": {
+                  "insertion": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-06T10:00:00Z",
+                    "id": "id-17"
+                  }
+                },
                 "styleId": "text-style-1",
                 "text": "tracked hyperlink text",
                 "type": "link"
@@ -3179,7 +3186,7 @@
                     "type": "text"
                   }
                 ],
-                "id": "id-17",
+                "id": "id-18",
                 "kind": "footnote",
                 "type": "noteRef"
               },
@@ -3307,6 +3314,26 @@
                       {
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
+                        "revision": {
+                          "deletion": {
+                            "author": "Bram Keller",
+                            "date": "2026-01-06T10:00:00Z",
+                            "id": "id-19"
+                          }
+                        },
+                        "text": "deleted in cell",
+                        "type": "text"
+                      },
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "revision": {
+                          "insertion": {
+                            "author": "Bram Keller",
+                            "date": "2026-01-06T10:00:00Z",
+                            "id": "id-20"
+                          }
+                        },
                         "text": "inserted in cell",
                         "type": "text"
                       }
@@ -3333,7 +3360,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "id-18",
+                        "id": "id-21",
                         "kind": "footnote",
                         "type": "noteRef"
                       }
@@ -3353,6 +3380,13 @@
                       {
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
+                        "revision": {
+                          "insertion": {
+                            "author": "Dana Whitfield",
+                            "date": "2026-01-07T10:00:00Z",
+                            "id": "id-22"
+                          }
+                        },
                         "text": "tracked row, cell 1",
                         "type": "text"
                       }
@@ -3374,6 +3408,13 @@
                       {
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
+                        "revision": {
+                          "insertion": {
+                            "author": "Dana Whitfield",
+                            "date": "2026-01-07T10:00:00Z",
+                            "id": "id-23"
+                          }
+                        },
                         "text": "tracked row, cell 3",
                         "type": "text"
                       },
@@ -3441,6 +3482,13 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-08T10:00:00Z",
+                    "id": "id-24"
+                  }
+                },
                 "text": "A tracked list item at level 2",
                 "type": "text"
               }
@@ -11184,6 +11232,8 @@
   "importError": null,
   "warnings": [
     "A field nested in the instruction of \"IF 1\" was kept as its cached value.",
+    "A tracked insertion around the field \"DATE \\@ \"d MMM yyyy\"\" was not kept as a change.",
+    "A deleted footnote reference was not kept as a tracked deletion; it was dropped.",
     "A floating (anchored) image was skipped — only inline images are supported.",
     "A floating (anchored) image was skipped — only inline images are supported.",
     "A floating (anchored) image was skipped — only inline images are supported.",

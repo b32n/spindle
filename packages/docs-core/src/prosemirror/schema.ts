@@ -601,6 +601,40 @@ const nodes: Record<string, NodeSpec> = {
 /**
  * Mark specifications for inline formatting
  */
+/** Above the default (50) of the `span` rule of `textStyle`, so a pasted change is parsed as a change. */
+export const REVISION_PARSE_PRIORITY = 60;
+
+function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): MarkSpec {
+  return {
+    attrs: { revisionId: {}, author: {}, date: { default: null } },
+    inclusive: false,
+    parseDOM: [
+      {
+        tag: `span[${dataAttr}]`,
+        // Before the plain `span` rule of `textStyle`, which would otherwise take the element and drop the change.
+        priority: REVISION_PARSE_PRIORITY,
+        getAttrs(dom: HTMLElement) {
+          const revisionId = dom.getAttribute(dataAttr);
+          const author = dom.getAttribute('data-revision-author');
+          return revisionId && author ? { revisionId, author, date: dom.getAttribute('data-revision-date') } : false;
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      return [
+        'span',
+        {
+          [dataAttr]: String(node.attrs.revisionId),
+          'data-revision-author': String(node.attrs.author),
+          ...(node.attrs.date ? { 'data-revision-date': String(node.attrs.date) } : {}),
+          class: `revision-${kind}`,
+        },
+        0,
+      ];
+    },
+  };
+}
+
 const marks: Record<string, MarkSpec> = {
   bold: {
     parseDOM: [
@@ -809,6 +843,13 @@ const marks: Record<string, MarkSpec> = {
       return ['span', { 'data-comment-thread': node.attrs.threadId as string }, 0];
     },
   },
+
+  // A tracked insertion and a tracked deletion (a Word `w:ins` / `w:del`): the text carrying the mark was inserted or
+  // removed by `author`. `revisionId` groups the runs of one change. The text stays in the document until the change is
+  // accepted or rejected. `inclusive: false` so typing next to a change does not become part of it; the suggesting mode
+  // adds the marks itself.
+  insertion: revisionMarkSpec('insertion', 'data-insertion'),
+  deletion: revisionMarkSpec('deletion', 'data-deletion'),
 };
 
 /**

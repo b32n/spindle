@@ -17,6 +17,7 @@ import { Measure, hasLineData } from './measurer';
 import { DocumentLayout, PageConfig, findPageAtY, getPageContentOrigin } from './true-layout-engine';
 import { createBlockPositionMap } from './pm-to-blocks';
 import { Node as PmNode } from 'prosemirror-model';
+import { typeOutsideDeletion } from '@b32nio/spindle-docs-core';
 import { constrainSelectionToIsolatingBlock } from './selection-constraint';
 
 // ============================================================================
@@ -368,9 +369,9 @@ export class InputBridge {
       case 'insertText':
       case 'insertReplacementText':
         if (e.data) {
-          // Insert the text at current selection
-          const tr = state.tr.insertText(e.data);
-          view.dispatch(tr);
+          // Insert the text at current selection (typing inside a tracked deletion is live text, not more deletion)
+          const { from, to } = state.selection;
+          view.dispatch(typeOutsideDeletion(state, from, to, e.data) ?? state.tr.insertText(e.data));
         }
         break;
         

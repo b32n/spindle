@@ -12,13 +12,14 @@
  */
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import type { PageConfig, PageMargins, Block, HeaderFooterContent } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, createCommands, docsSchema } from '@b32nio/spindle-docs-core';
+import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, collectRevisions, createCommands, docsSchema, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
 import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
+import { RevisionLegend } from './RevisionLegend';
 import { Ruler } from './Ruler';
 import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
@@ -33,6 +34,9 @@ import {
   inspectDocumentFile,
   type DocsExportFormat,
 } from '../file-io';
+
+/** How long typing pauses before the authors of the tracked changes are collected again. */
+const AUTHORS_DELAY_MS = 150;
 
 interface DocumentEditorProps {
   width?: number;
@@ -132,6 +136,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [activePageInfo, setActivePageInfo] = useState<ActivePageInfo | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [showComments, setShowComments] = useState(false);
+  const [authors, setAuthors] = useState<RevisionAuthor[]>([]);
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   
@@ -281,16 +286,33 @@ export const DocumentEditor = memo(function DocumentEditor({
   }, [docModel, readOnly]);
   
   // Handle selection changes from the editor
+  const authorsDoc = useRef<EditorState['doc'] | null>(null);
+  const authorsTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(authorsTimer.current), []);
+  const updateAuthors = useCallback((state: EditorState) => {
+    if (authorsDoc.current === state.doc) return;
+    authorsDoc.current = state.doc;
+    // The walk over the whole document waits until typing pauses, so a long document is not scanned on every key.
+    clearTimeout(authorsTimer.current);
+    authorsTimer.current = setTimeout(() => {
+      const next = revisionAuthors(collectRevisions(state.doc, false));
+      // Keep the old list (and skip a render) when nothing in it changed.
+      setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
+    }, AUTHORS_DELAY_MS);
+  }, []);
+
   const handleSelectionChange = useCallback((state: EditorState) => {
     const marks = activeMarksPluginKey.getState(state) as ActiveMarks | undefined;
     if (marks) {
       setActiveMarks(marks);
     }
-  }, []);
+    updateAuthors(state);
+  }, [updateAuthors]);
   
   // Handle editor ready
   const handleEditorReady = useCallback((view: EditorView) => {
     setEditorView(view);
+    updateAuthors(view.state);
     
     // Get initial active marks
     const marks = activeMarksPluginKey.getState(view.state) as ActiveMarks | undefined;
@@ -304,7 +326,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         setScrollContainer(editorRef.current.getScrollContainer());
       }
     }, 0);
-  }, []);
+  }, [updateAuthors]);
   
   // Handle cell selection changes
   const handleCellSelectionChange = useCallback((selection: CellSelection | null) => {
@@ -540,6 +562,8 @@ export const DocumentEditor = memo(function DocumentEditor({
         </div>
       )}
       
+      <RevisionLegend authors={authors} />
+
       {/* Editor area with vertical ruler */}
       <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
         {/* Vertical Ruler - positioned to the left */}

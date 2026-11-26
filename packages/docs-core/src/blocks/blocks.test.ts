@@ -17,6 +17,20 @@ describe('inline content helpers', () => {
     const content = [createTextRun('Hello '), createTextRun('world')];
     expect(getPlainText(content)).toBe('Hello world');
   });
+
+  it('getPlainText leaves out text deleted by a tracked change, unless asked for it', () => {
+    const gone = { ...createTextRun('2024'), revision: { deletion: { id: '1', author: 'Bo' } } };
+    const content = [createTextRun('in '), gone, { ...createTextRun('2025'), revision: { insertion: { id: '2', author: 'Ada' } } }];
+    expect(getPlainText(content)).toBe('in 2025');
+    expect(getPlainText(content, true)).toBe('in 20242025');
+    const link = { type: 'link' as const, text: 'old', href: 'https://a.example', revision: { deletion: { id: '3', author: 'Bo' } } };
+    expect(getPlainText([createTextRun('x'), link])).toBe('x');
+    // A block that holds only deleted text still has content.
+    const para = createParagraphFromText('');
+    para.content = [gone];
+    expect(hasTextContent(para)).toBe(true);
+    expect(isBlockEmpty(para)).toBe(false);
+  });
 });
 
 describe('paragraph blocks', () => {

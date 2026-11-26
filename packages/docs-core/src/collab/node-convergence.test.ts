@@ -433,6 +433,8 @@ const MARK_SAMPLES: Record<string, Json> = {
   link: { type: 'link', attrs: { href: 'https://example.com/a', title: null, target: '_blank' } },
   textStyle: { type: 'textStyle', attrs: { color: '#ff0000', backgroundColor: '#00ff00', fontSize: 18, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Arial' } },
   comment: { type: 'comment', attrs: { threadId: 'thread_1' } },
+  insertion: { type: 'insertion', attrs: { revisionId: '12', author: 'Ada Lovelace', date: '2024-05-06T07:08:09Z' } },
+  deletion: { type: 'deletion', attrs: { revisionId: '13', author: 'Grace Hopper', date: null } },
   namedStyle: { type: 'namedStyle', attrs: { id: 'AccentWord' } },
 };
 

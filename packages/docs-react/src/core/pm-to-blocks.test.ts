@@ -45,7 +45,7 @@ describe('proseMirrorToFlowBlocks — link marks', () => {
 });
 
 // The real docs schema: paragraph formatting and run flags travel through ProseMirror attrs and marks.
-import { docsSchema } from '@b32nio/spindle-docs-core';
+import { assignAuthorColors, docsSchema } from '@b32nio/spindle-docs-core';
 import type { ListItemBlock, TextRun } from './flow-blocks';
 
 const j = (json: unknown) => docsSchema.nodeFromJSON({ type: 'doc', content: json });
@@ -476,5 +476,33 @@ describe('a table of contents', () => {
       { sectionId: 'a', blockStart: 0, blockEnd: 0 },
       { sectionId: null, blockStart: 0, blockEnd: 2 },
     ]);
+  });
+});
+
+describe('proseMirrorToFlowBlocks: tracked changes', () => {
+  const insertion = { type: 'insertion', attrs: { revisionId: '1', author: 'Ada', date: null } };
+  const deletion = { type: 'deletion', attrs: { revisionId: '2', author: 'Bo', date: null } };
+
+  it('carries the insertion and deletion of a text run, with author and id, and nothing for plain text', () => {
+    const doc = j([{ type: 'paragraph', content: [text('plain '), text('new', [insertion]), text('old', [deletion]), text('both', [insertion, deletion])] }]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs as TextRun[];
+    const colors = assignAuthorColors(['Ada', 'Bo']);
+    const ada = { id: '1', author: 'Ada', color: colors.get('Ada') };
+    const bo = { id: '2', author: 'Bo', color: colors.get('Bo') };
+    expect(runs.map((r) => r.revision)).toEqual([undefined, { insertion: ada }, { deletion: bo }, { insertion: ada, deletion: bo }]);
+    expect(ada.color).not.toBe(bo.color);
+  });
+
+  it('carries the change of a link', () => {
+    const doc = j([{ type: 'paragraph', content: [text('go', [{ type: 'link', attrs: { href: 'https://example.com/' } }, insertion])] }]);
+    expect((proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs[0]).toMatchObject({ kind: 'link', revision: { insertion: { id: '1', author: 'Ada', color: expect.any(String) } } });
+  });
+
+  it('breaks the line at a line break inside a tracked run, and keeps the change on the text around it', () => {
+    const doc = j([{ type: 'paragraph', content: [text('a\nb', [deletion]), text('\n', [insertion])] }]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs;
+    expect(runs.map((r) => (r.kind === 'text' ? r.text : r.kind))).toEqual(['a', 'lineBreak', 'b', 'lineBreak']);
+    expect(runs[0]).toMatchObject({ revision: { deletion: { id: '2' } } });
+    expect(runs[2]).toMatchObject({ revision: { deletion: { id: '2' } } });
   });
 });

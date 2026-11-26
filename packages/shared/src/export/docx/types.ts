@@ -4,6 +4,25 @@
 // pooled styles down to concrete values (and text-style-pool refs to plain
 // booleans/colors) before calling exportDocx.
 
+/** Who made a tracked change, when, and the id it has in the file (`w:id`). */
+export interface DocRevisionMeta {
+  /** Identifies the change: runs that share it are one change. */
+  id: string;
+  author: string;
+  /** ISO 8601, as in the file. */
+  date?: string;
+}
+
+/**
+ * Tracked changes (`w:ins`, `w:del`) a run is part of. The text is kept as written: an inserted run is part of the
+ * current text, a deleted run is the text that was removed (shown struck through, written as `w:delText`). A run
+ * inserted by one author and deleted by another has both.
+ */
+export interface DocRevision {
+  insertion?: DocRevisionMeta;
+  deletion?: DocRevisionMeta;
+}
+
 export interface DocRunBase {
   bold?: boolean;
   italic?: boolean;
@@ -30,6 +49,8 @@ export interface DocRunBase {
   commentThreadId?: string;
   /** Id of the named character style (`w:rStyle`) of the run, a key of `namedStyles`. The run's own fields still hold the effective formatting. */
   namedStyleId?: string;
+  /** Tracked insertion and/or deletion this run is part of. */
+  revision?: DocRevision;
 }
 
 export interface DocTextRun extends DocRunBase {

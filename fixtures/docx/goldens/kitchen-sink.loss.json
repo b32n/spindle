@@ -114,15 +114,19 @@
     },
     {
       "count": 2,
-      "effect": "applied (the deleted text is gone)",
-      "id": "docx.trackedDeletions",
-      "label": "tracked deletion(s)"
+      "effect": "a deleted field, image or note reference is dropped and an inserted one is kept as ordinary content; deleted text in a field result is dropped; the change is not recorded",
+      "id": "docx.trackedChangesNotKept",
+      "label": "tracked change(s) around a field, image or note reference, or inside a field result",
+      "where": [
+        "field ×1",
+        "note reference ×1"
+      ]
     },
     {
-      "count": 7,
-      "effect": "imported as ordinary text, as if accepted; author and date are lost",
+      "count": 1,
+      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
       "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s)"
+      "label": "tracked insertion(s) of a paragraph mark or table row"
     },
     {
       "count": 2,

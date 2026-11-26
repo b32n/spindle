@@ -100,7 +100,7 @@ function planEntries(
     const rows: PmNode[] = [];
     for (const heading of headings) {
       const level = Number(heading.node.attrs.level) || 1;
-      const text = heading.node.textContent.trim();
+      const text = finalText(heading.node).trim();
       if (level < settings.fromLevel || level > settings.toLevel || !text) continue;
       const content: PmNode[] = [];
       const label = settings.pageNumbers ? pageLabelAt(heading.pos) : undefined;
@@ -118,6 +118,16 @@ function planEntries(
     return rows;
   });
   return { operations, entries };
+}
+
+/** The text of a node as it reads once every tracked deletion is accepted (a table of contents lists the final text). */
+function finalText(node: PmNode): string {
+  let text = '';
+  node.descendants((child) => {
+    if (child.isText && !child.marks.some((mark) => mark.type.name === 'deletion')) text += child.text;
+    return true;
+  });
+  return text;
 }
 
 /** The tables of contents of a document, with their positions (the ones inside another are not looked for: they cannot nest). */

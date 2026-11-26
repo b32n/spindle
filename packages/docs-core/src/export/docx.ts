@@ -319,6 +319,7 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
         ...resolveTextStyle(item, pool),
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
+        ...(item.revision && { revision: item.revision }),
       };
     case 'link':
       return {
@@ -328,6 +329,7 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
         ...(item.styleId && pool[item.styleId] ? toDocRunBase(pool[item.styleId]) : {}),
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
+        ...(item.revision && { revision: item.revision }),
       };
     case 'image':
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };
@@ -740,6 +742,7 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
         ...toTextStyle(item),
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
+        ...(item.revision && { revision: item.revision }),
       };
     case 'link':
       // InlineLink carries no inline style fields of its own — only a
@@ -752,6 +755,7 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
         styleId: hasAnyRunStyle(item) ? textStylePool.getOrCreate(toTextStyle(item)) : undefined,
         ...(item.namedStyleId && { namedStyleId: item.namedStyleId }),
         ...(item.commentThreadId && { commentThreadId: item.commentThreadId }),
+        ...(item.revision && { revision: item.revision }),
       };
     case 'image':
       return { type: 'image', src: item.src, width: item.width, height: item.height, alt: item.alt };

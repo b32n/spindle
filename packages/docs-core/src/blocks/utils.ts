@@ -28,18 +28,16 @@ export function createTextRun(text: string, styleId?: string): TextRun {
 }
 
 /**
- * Get plain text from inline content array
+ * Get plain text from inline content array. Text deleted by a tracked change is left out (the final text) unless
+ * `includeDeleted` is set.
  */
-export function getPlainText(content: InlineContent[]): string {
+export function getPlainText(content: InlineContent[], includeDeleted = false): string {
   return content.reduce((text, item) => {
-    if (item.type === 'text') {
-      return text + item.text;
-    }
-    if (item.type === 'link') {
-      return text + item.text;
+    if (item.type === 'text' || item.type === 'link') {
+      return !includeDeleted && item.revision?.deletion ? text : text + item.text;
     }
     if (item.type === 'contentControl') {
-      return text + getPlainText(item.content);
+      return text + getPlainText(item.content, includeDeleted);
     }
     return text;
   }, '');
@@ -50,7 +48,7 @@ export function getPlainText(content: InlineContent[]): string {
  */
 export function hasTextContent(block: Block): boolean {
   if (block.type === 'paragraph' || block.type === 'heading' || block.type === 'list-item') {
-    return block.content.length > 0 && getPlainText(block.content).length > 0;
+    return block.content.length > 0 && getPlainText(block.content, true).length > 0;
   }
   return false;
 }
@@ -60,7 +58,7 @@ export function hasTextContent(block: Block): boolean {
  */
 export function isBlockEmpty(block: Block): boolean {
   if (block.type === 'paragraph' || block.type === 'heading' || block.type === 'list-item') {
-    return block.content.length === 0 || getPlainText(block.content) === '';
+    return block.content.length === 0 || getPlainText(block.content, true) === '';
   }
   if (block.type === 'table') {
     return block.rows.length === 0;

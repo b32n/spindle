@@ -188,6 +188,27 @@ export interface TextRun {
   commentThreadId?: string;
   /** Named character style of the run (a key of `DocumentData.namedStyles`); distinct from the pool `styleId`. */
   namedStyleId?: string;
+  /** Tracked insertion and/or deletion this run is part of. */
+  revision?: RunRevision;
+}
+
+/** Who made a tracked change, when, and the id of the change in its file. */
+export interface RevisionMeta {
+  /** Identifies the change: runs that share it are one change. */
+  id: string;
+  author: string;
+  /** ISO 8601. */
+  date?: string;
+}
+
+/**
+ * Tracked changes (insertions and deletions) a run is part of. The text is kept as written: a deleted run is the text
+ * that was removed, shown struck through until the change is accepted. A run inserted by one author and deleted by
+ * another has both.
+ */
+export interface RunRevision {
+  insertion?: RevisionMeta;
+  deletion?: RevisionMeta;
 }
 
 export interface InlineImage {
@@ -208,6 +229,8 @@ export interface InlineLink extends TextStyle {
   commentThreadId?: string;
   /** Named character style of the run (a key of `DocumentData.namedStyles`). */
   namedStyleId?: string;
+  /** Tracked insertion and/or deletion this link is part of. */
+  revision?: RunRevision;
 }
 
 /**

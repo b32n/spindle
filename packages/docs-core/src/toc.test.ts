@@ -279,6 +279,17 @@ describe('inserting, updating and removing a table of contents', () => {
     expect(next.doc.child(1).firstChild!.type.name).toBe('text');
   });
 
+  it('lists the final text of a heading: words in a tracked deletion are left out, an heading that is only deleted is not listed', () => {
+    const gone = docsSchema.marks.deletion.create({ revisionId: '1', author: 'Ann', date: null });
+    const doc = docType.create(null, [
+      toc.create({ instruction: 'TOC \\o "1-2" \\n' }),
+      heading.create({ level: 1 }, [text('Intro '), text('old ', [gone]), text('plan')]),
+      heading.create({ level: 1 }, [text('removed', [gone])]),
+    ]);
+    const next = apply(stateOf(doc), updateTableOfContents());
+    expect(entries(next).map((e) => e.text)).toEqual(['Intro plan']);
+  });
+
   it('updates every table of contents of the document, once, in one transaction, and is not applicable without one', () => {
     const doc = docType.create(null, [toc.create(), h(1, 'A'), toc.create({ instruction: 'TOC \\o "1-1" \\h' }), h(1, 'B')]);
     const state = stateOf(doc);

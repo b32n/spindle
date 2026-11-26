@@ -1,9 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import { DocsPage } from '../support/docs';
-import { collectPageErrors, openViaChooser } from '../support/file-io';
+import { collectPageErrors, openDocxConfirmingLoss } from '../support/file-io';
 
-const OPEN = 'Open file (.docx)';
 /** The DOCX fidelity corpus (a LibreOffice review file: two comment threads and tracked changes). */
 const REVIEW_DOCX = path.resolve(
   __dirname,
@@ -28,12 +27,8 @@ test.describe('docs: comments imported from a .docx', () => {
   });
 
   async function openReview(page: Page) {
-    await openViaChooser(page, OPEN, REVIEW_DOCX);
-    // The file has tracked changes, so the import is confirmed first.
-    await page
-      .getByRole('dialog', { name: /Import/ })
-      .getByRole('button', { name: 'Import anyway' })
-      .click();
+    // The file has tracked changes and moves; a dialog asks first when something would be lost, and tracked insertions and deletions no longer are.
+    await openDocxConfirmingLoss(page, REVIEW_DOCX);
   }
 
   test('D-CMT-03 a .docx with comment threads shows them anchored in the text and listed in the sidebar @smoke', async ({

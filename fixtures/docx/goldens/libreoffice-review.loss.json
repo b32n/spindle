@@ -6,18 +6,6 @@
       "effect": "not applied (lines are broken without hyphenation)",
       "id": "docx.hyphenation",
       "label": "automatic hyphenation setting"
-    },
-    {
-      "count": 6,
-      "effect": "applied (the deleted text is gone)",
-      "id": "docx.trackedDeletions",
-      "label": "tracked deletion(s)"
-    },
-    {
-      "count": 8,
-      "effect": "imported as ordinary text, as if accepted; author and date are lost",
-      "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s)"
     }
   ]
 }

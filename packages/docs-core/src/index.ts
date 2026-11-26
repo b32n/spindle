@@ -7,6 +7,9 @@ export * from './types';
 // Comments
 export * from './comments';
 
+// Tracked changes
+export { REVISION_COLORS, authorColor, assignAuthorColors, documentRevisionAuthors, collectRevisions, revisionAuthors, sameRevisionAuthors, type RevisionSummary, type RevisionAuthor } from './revisions';
+
 // Document
 export { DocumentImpl, createDocument, createSection } from './document';
 

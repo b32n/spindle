@@ -303,8 +303,44 @@ lockstep.
   like the text around it. The measurer treated a tab and the text after it as two pieces on the same line and gave the text twice;
   it is one piece now (this also affects tabs in imported text).
 
+- **Tracked changes (insertions and deletions) are kept, shown and written back.** `w:ins` and `w:del` around runs and links
+  (also inside table cells, content controls, smart tags and hyperlinks) are imported as the same text carrying the change, not
+  applied: inserted text stays in the text, deleted text (`w:delText`) stays too, struck through, until the change is accepted
+  or rejected (the review panel and suggesting mode are the next steps of this milestone). A run can be both inserted by one
+  author and deleted by another. The export writes `w:ins`, `w:del` and `w:delText` with the author, date and id (the runs of a
+  change share one element; ids that are not numbers, or are taken, get new ones), the link of a changed link inside the
+  hyperlink. Additive: `DocRevision` / `DocRevisionMeta` and `revision?` on the interchange runs (`DocRunBase`), `RunRevision` /
+  `RevisionMeta` and `revision?` on `TextRun` and `InlineLink`, and `docsSchema` gains the `insertion` and `deletion` marks
+  (attributes `revisionId`, `author`, `date`; not inclusive), plain ProseMirror marks that sync over Yjs, so the collaboration
+  `schemaVersion` is now 6; `getCollabBlockers` is unchanged (runs with a change are ordinary text). The editor draws insertions
+  underlined and deletions struck through in the author's colour (like Word's All Markup; deleted text takes part in the
+  layout) and shows a legend of the authors above the page (`RevisionLegend`). New helpers in docs-core: `authorColor`,
+  `assignAuthorColors` (a colour per author of the document, the same on every client, nothing stored), `collectRevisions`,
+  `revisionAuthors`, `documentRevisionAuthors`. Marked text takes the author's colour over its own (a link, a content-control
+  placeholder), as in All Markup. Editing around changes: copying tracked text and pasting it gives the copy change ids of its own
+  (author and date stay), so accepting or rejecting one place never touches the other (`freshRevisionIds`); text typed in the
+  middle of a deleted run is live text, not part of the deletion (also through the editor's own input path and IME composition, dead keys and other browser-reported input, which never take the deletion; text typed inside someone else's insertion in Editing mode becomes part of that insertion, as it grows the change; typing over a selection that lies wholly inside a deletion replaces the struck-through text, as any edit in Editing mode that is not recorded; pasting plain text into a deleted run is live text too, while pasted HTML keeps its own marks; cut and paste, and drag and drop, also count as a paste, so a moved tracked range gets a new id); the plain text copied to the clipboard, `getPlainText` and `getPmPlainText` leave deleted text out (the final text; pass `includeDeleted` to keep it); a line break typed in tracked
+  text (Shift+Enter) is a newline in the text, so its change survives collaboration. The DOCX writer no longer uses a regular
+  expression look-behind (older Safari cannot parse one), writes a `w:date` without seconds with `:00` added (the file format requires the seconds) and a deleted run counts as content
+  when a page break follows it. Copied tracked text now keeps its changes when pasted in the browser (the clipboard HTML was parsed as plain text style before: the parse rules of the change marks have a priority of their own). Updating a table of contents lists the final text of a heading (words in a tracked
+  deletion are left out). The authors of the changes are collected when typing pauses, not on every key. The paragraph break between the paragraphs of a note no longer becomes part of a tracked change at the end of the paragraph before it, and the same change id from two authors counts as two changes in the list of changes.
+
 ### Changed
 
+- **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
+  `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
+  deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted
+  one is dropped, with a warning), as are a deleted image and a deleted note reference (dropped, with a warning); an inserted
+  image or note reference stays as ordinary content, with a warning. Headers and footers keep no tracked changes: deleted text is
+  dropped, inserted text stays as ordinary text (warnings, and `docx.trackedHeaderFooterChanges` in the loss report). Changes
+  around whole paragraphs or tables are counted as `docx.trackedBlockChanges` (their content is not imported). A change without
+  an id gets a number that is unique in the import. A line break inside changed text keeps the change (it stays in the text node
+  in the editor, because the collaboration binding keeps marks on text only), and the export drops characters XML cannot carry
+  from an author and a date that is not a date (a date out of range is dropped too, and two authors' changes with the same id get two `w:id`s). The still-lost changes around a field, an
+  image or a note reference, and deleted text in a field result, are counted as `docx.trackedChangesNotKept` in the loss report; a deleted image in `mc:AlternateContent` is dropped like a plain one.
+- **DOCX loss report: `docx.trackedInsertions` and `docx.trackedDeletions` count only what is still lost**: a change on a
+  paragraph mark (`w:pPr/w:rPr`) or on a table row (`w:trPr`), whose paragraph or row is imported as ordinary content. Changes
+  around runs are kept and no longer counted (32 and 22 occurrences in the corpus before).
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,
   citation, bibliography and group controls, and controls wrapping table rows or cells, whose content is kept without the
   control), by reason in `where`, in both detail levels; it counted every `w:sdt` before. `docx.fields` no longer counts the
@@ -341,8 +377,7 @@ lockstep.
   other than page breaks, `w:cr`) as `\n`, soft and non-breaking hyphens as U+00AD and U+2011, and the text inside
   `w:smartTag`, `w:customXml`, content controls (`w:sdt`: inline, block, in table rows, cells and cell content, and
   in headers and footers), tracked insertions (`w:ins`) and `w:ruby` base text is kept. The wrappers themselves
-  are still lost: tracked insertions show as ordinary text (as if accepted) while tracked deletions are still
-  applied, content controls lose their type, tag, placeholder and lock, and ruby reading marks are dropped.
+  are still lost (tracked changes are kept as such since the tracked-changes entry above), content controls lose their type, tag, placeholder and lock, and ruby reading marks are dropped.
   `exportDocx` writes `\t` as `w:tab` and `\n` as `w:br`. Placeholder text of content controls is now imported
   as ordinary text. The editor measures text with `white-space: pre-wrap`, like the pages it paints, so tabs get
   a visible width (default tab stops; custom tab stops are still not imported), and header/footer text keeps tabs

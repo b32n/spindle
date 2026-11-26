@@ -6,6 +6,7 @@
  * presentation layer (layout engine + painter).
  */
 
+import { assignAuthorColors, authorColor, documentRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { Node as PmNode, Mark } from 'prosemirror-model';
 import { sanitizeHref } from './sanitize';
 
@@ -65,7 +66,18 @@ interface NoteEntry {
 let noteEntries: NoteEntry[] = [];
 const noteCounts = { footnote: 0, endnote: 0 };
 
-function resetNotes(): void {
+/** The document being converted, and the colours of its tracked-change authors (worked out when the first change is met). */
+let convertedDoc: PmNode | null = null;
+let authorColors: Map<string, string> | null = null;
+
+function authorColorOf(author: string): string {
+  authorColors ??= convertedDoc ? assignAuthorColors(documentRevisionAuthors(convertedDoc)) : new Map();
+  return authorColors.get(author) ?? authorColor(author);
+}
+
+function resetNotes(doc: PmNode): void {
+  convertedDoc = doc;
+  authorColors = null;
   noteEntries = [];
   noteCounts.footnote = 0;
   noteCounts.endnote = 0;
@@ -132,7 +144,7 @@ export function proseMirrorToFlowBlocks(
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes();
+  resetNotes(doc);
   
   const blocks: FlowBlock[] = [];
   
@@ -171,7 +183,7 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes();
+  resetNotes(doc);
   const blocks: FlowBlock[] = [];
   const sections: SectionedFlowBlocks['sections'] = [];
   const footnotes: SectionedFlowBlocks['footnotes'] = [];
@@ -521,7 +533,16 @@ function collectRuns(node: PmNode, runs: Run[], control?: RunControl): void {
     if (child.isText) {
       const textRun = createTextRunFromNode(child);
       if (control) textRun.control = control;
-      runs.push(textRun);
+      // A line break inside a tracked run is kept in the text (the break node cannot carry the change through
+      // the Y binding); it still breaks the line.
+      if (child.text && child.text.includes('\n')) {
+        child.text.split('\n').forEach((part, i) => {
+          if (i > 0) runs.push({ kind: 'lineBreak' });
+          if (part) runs.push({ ...textRun, text: part });
+        });
+      } else {
+        runs.push(textRun);
+      }
     } else if (child.type.name === 'hard_break') {
       runs.push({ kind: 'lineBreak' });
     } else if (child.type.name === 'dynamic_field') {
@@ -600,6 +621,7 @@ function createTextRunFromNode(node: PmNode): TextRun | LinkRun {
       underline: run.underline,
       color: run.color,
       commentThreadId: run.commentThreadId,
+      ...(run.revision && { revision: run.revision }),
     };
   }
 
@@ -675,6 +697,14 @@ function applyMarkToRun(run: TextRun, mark: Mark): void {
 
     case 'comment':
       run.commentThreadId = mark.attrs.threadId as string;
+      break;
+
+    case 'insertion':
+    case 'deletion':
+      run.revision = {
+        ...run.revision,
+        [mark.type.name]: { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), color: authorColorOf(String(mark.attrs.author)) },
+      };
       break;
   }
 }

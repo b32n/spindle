@@ -5,6 +5,7 @@ import type {
   Block,
   Section,
   InlineContent,
+  RunRevision,
   TextRun,
   InlineLink,
   TextStyle,
@@ -357,6 +358,11 @@ function inlineStyleOf(item: TextStyle): TextStyle {
  * represents as a `hard_break` node (PM text nodes cannot contain it).
  */
 function textWithBreaks(text: string, marks: PmMarkJSON[]): PmNodeJSON[] {
+  // A break inside a tracked run stays in the text node: the Y binding keeps
+  // marks on text only, so a marked `hard_break` would lose its change.
+  if (text.includes('\n') && marks.some((m) => m.type === 'insertion' || m.type === 'deletion')) {
+    return [{ type: 'text', text, marks }];
+  }
   const out: PmNodeJSON[] = [];
   text.split('\n').forEach((part, i) => {
     if (i > 0) out.push({ type: 'hard_break' });
@@ -397,6 +403,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
+      marks.push(...revisionMarks(item.revision));
 
       return textWithBreaks(item.text, marks);
     }
@@ -412,6 +419,7 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       if (item.commentThreadId) {
         marks.push({ type: 'comment', attrs: { threadId: item.commentThreadId } });
       }
+      marks.push(...revisionMarks(item.revision));
       return textWithBreaks(item.text, marks);
     }
 
@@ -858,7 +866,10 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
     // run when possible so a paragraph with soft breaks stays compact.
     if (child.type.name === 'hard_break') {
       const prev = content[content.length - 1];
-      if (prev && prev.type === 'text' && !prev.styleId && !hasRunFormatting(prev)) {
+      const breakRevision = revisionOf(child.marks);
+      if (breakRevision) {
+        content.push({ type: 'text', text: '\n', revision: breakRevision });
+      } else if (prev && prev.type === 'text' && !prev.styleId && !hasRunFormatting(prev)) {
         prev.text += '\n';
       } else {
         content.push({ type: 'text', text: '\n' });
@@ -873,6 +884,8 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
     // A comment mark anchors a thread to this run.
     const commentMark = child.marks.find((m) => m.type.name === 'comment');
     const commentThreadId = commentMark ? (commentMark.attrs.threadId as string) : undefined;
+
+    const revision = revisionOf(child.marks);
 
     const style = extractStyleFromMarks(child.marks);
     const linkMark = child.marks.find((m) => m.type.name === 'link');
@@ -900,6 +913,7 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
     if (commentThreadId) {
       (item as TextRun | InlineLink).commentThreadId = commentThreadId;
     }
+    if (revision) (item as TextRun | InlineLink).revision = revision;
     // Text following a folded line break continues the same plain run.
     const prev = content[content.length - 1];
     if (
@@ -913,6 +927,29 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
   });
 
   return content;
+}
+
+/** The `insertion` / `deletion` marks for a run's tracked changes. */
+function revisionMarks(revision: RunRevision | undefined): PmMarkJSON[] {
+  const marks: PmMarkJSON[] = [];
+  for (const kind of ['insertion', 'deletion'] as const) {
+    const meta = revision?.[kind];
+    if (meta) marks.push({ type: kind, attrs: { revisionId: meta.id, author: meta.author, ...(meta.date && { date: meta.date }) } });
+  }
+  return marks;
+}
+
+/** The tracked changes a text node's marks record, if any. */
+export function revisionOf(marks: readonly { type: { name: string }; attrs: Record<string, unknown> }[]): RunRevision | undefined {
+  const revision: RunRevision = {};
+  for (const kind of ['insertion', 'deletion'] as const) {
+    const mark = marks.find((m) => m.type.name === kind);
+    if (mark) {
+      const date = mark.attrs.date;
+      revision[kind] = { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), ...(typeof date === 'string' && date && { date }) };
+    }
+  }
+  return revision.insertion || revision.deletion ? revision : undefined;
 }
 
 /** True if a text run carries any formatting or comment anchor. */
@@ -1018,12 +1055,13 @@ function blocksToPmContent(blocks: Block[], stylePool?: TextStylePool): PmNodeJS
 }
 
 /**
- * Get plain text from a ProseMirror node
+ * Get plain text from a ProseMirror node. Text deleted by a tracked change is left out (the final text) unless
+ * `includeDeleted` is set.
  */
-export function getPmPlainText(node: PmNode): string {
+export function getPmPlainText(node: PmNode, includeDeleted = false): string {
   let text = '';
   node.descendants((child) => {
-    if (child.isText) {
+    if (child.isText && (includeDeleted || !child.marks.some((m) => m.type.name === 'deletion'))) {
       text += child.text;
     }
   });

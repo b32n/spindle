@@ -2,7 +2,7 @@ import type { ImportLossItem } from '@b32nio/spindle-shared';
 import { unsupportedControls } from './content-controls';
 import { findTocRanges, tocLists } from './toc-field';
 import { drawingKind } from './drawing-kind';
-import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
+import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
 
 /**
  * XML-based detectors for constructs the importer does not bring across. They parse the part and walk the
@@ -229,6 +229,85 @@ function fields(root: XmlNode[]): Item[] {
 
 const isSectPrChild = (path: readonly string[]) => path[path.length - 1] === 'w:sectPr' && !inRevisionProps(path);
 
+/**
+ * Tracked insertions and deletions the importer does not keep as changes. Those around runs are kept (as marks on the text);
+ * what is left are the marks on a paragraph mark (`w:pPr/w:rPr`) and on a table row (`w:trPr`), whose content is imported
+ * as ordinary content. Text boxes are reported as such and not counted here.
+ */
+function trackedChanges(root: XmlNode[]): Item[] {
+  const counts = { 'w:ins': 0, 'w:del': 0 };
+  walk(root, (_n, tag, path) => {
+    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:rPr' || parent === 'w:trPr') counts[tag]++;
+  });
+  return [
+    ...item('docx.trackedInsertions', 'tracked insertion(s) of a paragraph mark or table row', counts['w:ins'], 'the paragraph or row is imported as ordinary content; the change is not recorded'),
+    ...item('docx.trackedDeletions', 'tracked deletion(s) of a paragraph mark or table row', counts['w:del'], 'the paragraph or row is imported as ordinary content; the change is not recorded'),
+  ];
+}
+
+const CHANGE_NOT_KEPT_RUN_CONTENT = ['w:fldChar', 'w:fldSimple', 'w:drawing', 'mc:AlternateContent', 'w:footnoteReference', 'w:endnoteReference'];
+
+/**
+ * Tracked changes around runs that the importer cannot keep as a change: a change around a field (a deleted field is dropped),
+ * a deleted image or note reference (dropped), an inserted image, field or note reference (kept as ordinary content), and
+ * deleted text inside a field's result (dropped). The reader also warns about each of these.
+ */
+function trackedChangesNotKept(root: XmlNode[]): Item[] {
+  let count = 0;
+  // Field nesting in document order: true once a field is past its separator (inside its result).
+  const fields: boolean[] = [];
+  const kinds = new Map<string, number>();
+  walk(root, (node, tag, path) => {
+    if (tag === 'w:fldChar') {
+      const type = attr(node, 'w:fldCharType');
+      if (type === 'begin') fields.push(false);
+      else if (type === 'separate' && fields.length > 0) fields[fields.length - 1] = true;
+      else if (type === 'end') fields.pop();
+      return;
+    }
+    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:rPr' || parent === 'w:trPr' || parent === 'w:body' || parent === 'w:tc') return;
+    // A change inside another one (the writer nests a deletion in an insertion) is one change with its outer element.
+    const nested = path.includes('w:ins') || path.includes('w:del');
+    const found = nested ? undefined : CHANGE_NOT_KEPT_RUN_CONTENT.find((t) => findDeep(node, t));
+    if (found) {
+      count++;
+      bump(kinds, found === 'w:fldChar' || found === 'w:fldSimple' ? 'field' : found === 'w:footnoteReference' || found === 'w:endnoteReference' ? 'note reference' : 'image');
+    } else if (tag === 'w:del' && !path.includes('w:del') && fields.some(Boolean) && findDeep(node, 'w:delText')) {
+      count++;
+      bump(kinds, 'text in a field result');
+    }
+  });
+  return item('docx.trackedChangesNotKept', 'tracked change(s) around a field, image or note reference, or inside a field result', count, 'a deleted field, image or note reference is dropped and an inserted one is kept as ordinary content; deleted text in a field result is dropped; the change is not recorded', kinds);
+}
+
+/**
+ * Tracked changes the importer does not keep because of where they are: around whole paragraphs or tables (a direct child of
+ * the body or a table cell, whose content is not imported), and in headers and footers (deleted text is dropped, inserted
+ * text is kept as ordinary text).
+ */
+function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item[] {
+  let blocks = 0;
+  walk(root, (_n, tag, path) => {
+    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:body' || parent === 'w:tc') blocks++;
+  });
+  let headers = 0;
+  for (const xml of headerFooters) {
+    walk(parseXml(xml), (_n, tag, path) => {
+      if ((tag === 'w:ins' || tag === 'w:del') && !inRevisionProps(path)) headers++;
+    });
+  }
+  return [
+    ...item('docx.trackedBlockChanges', 'tracked change(s) around whole paragraphs or tables', blocks, 'the paragraphs or tables inside are not imported'),
+    ...item('docx.trackedHeaderFooterChanges', 'tracked change(s) in headers and footers', headers, 'deleted text is dropped and inserted text is kept as ordinary text; the change is not recorded'),
+  ];
+}
+
 function trackedMoves(root: XmlNode[]): Item[] {
   let total = 0;
   walk(root, (_n, tag) => {
@@ -383,9 +462,12 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => trackedChangesNotKept(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
+    ...safe(() => trackedChanges(root)),
+    ...safe(() => trackedChangesNotKept(root)),
+    ...safe(() => trackedChangesElsewhere(root, input.headerFooters)),
     ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),

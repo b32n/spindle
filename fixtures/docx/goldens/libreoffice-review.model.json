@@ -232,6 +232,26 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-08T10:00:00Z",
+                    "id": "id-1"
+                  }
+                },
+                "text": "48",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Bram Keller",
+                    "date": "2026-01-09T10:00:00Z",
+                    "id": "id-2"
+                  }
+                },
                 "text": "72",
                 "type": "text"
               },
@@ -251,6 +271,13 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-10T10:00:00Z",
+                    "id": "id-3"
+                  }
+                },
                 "text": "Permits are issued by the harbour office. ",
                 "type": "text"
               },
@@ -284,6 +311,26 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Bram Keller",
+                    "date": "2026-01-09T10:00:00Z",
+                    "id": "id-4"
+                  }
+                },
+                "text": " by the council",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Dana Whitfield",
+                    "date": "2026-01-09T10:00:00Z",
+                    "id": "id-5"
+                  }
+                },
                 "text": " by the harbour board",
                 "type": "text"
               },
@@ -306,7 +353,21 @@
           },
           {
             "alignment": "justify",
-            "content": [],
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-10T10:00:00Z",
+                    "id": "id-6"
+                  }
+                },
+                "text": "This paragraph is struck out entirely by the third reviewer.",
+                "type": "text"
+              }
+            ],
             "id": "block-6",
             "lineSpacing": {
               "type": "multiple",
@@ -323,6 +384,13 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-10T10:00:00Z",
+                    "id": "id-7"
+                  }
+                },
                 "text": "This paragraph is new: night mooring requires a lit stern light.",
                 "type": "text"
               }
@@ -375,6 +443,13 @@
                 "bold": true,
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Bram Keller",
+                    "date": "2026-01-11T10:00:00Z",
+                    "id": "id-8"
+                  }
+                },
                 "text": "and day-trip operators ",
                 "type": "text"
               },
@@ -387,6 +462,26 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-11T10:00:00Z",
+                    "id": "id-9"
+                  }
+                },
+                "text": "Auctions start at six. ",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Alice Archer",
+                    "date": "2026-01-11T10:00:00Z",
+                    "id": "id-10"
+                  }
+                },
                 "text": "Auctions start at seven. ",
                 "type": "text"
               },
@@ -505,6 +600,26 @@
                       {
                         "fontFamily": "Liberation Sans",
                         "fontSize": 11,
+                        "revision": {
+                          "deletion": {
+                            "author": "Alice Archer",
+                            "date": "2026-01-12T10:00:00Z",
+                            "id": "id-11"
+                          }
+                        },
+                        "text": "10",
+                        "type": "text"
+                      },
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "revision": {
+                          "insertion": {
+                            "author": "Alice Archer",
+                            "date": "2026-01-12T10:00:00Z",
+                            "id": "id-12"
+                          }
+                        },
                         "text": "12",
                         "type": "text"
                       }
@@ -610,6 +725,13 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "insertion": {
+                    "author": "Dana Whitfield",
+                    "date": "2026-01-12T10:00:00Z",
+                    "id": "id-13"
+                  }
+                },
                 "text": "Insurance schedule",
                 "type": "text"
               }
@@ -628,7 +750,21 @@
           },
           {
             "alignment": "left",
-            "content": [],
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "revision": {
+                  "deletion": {
+                    "author": "Dana Whitfield",
+                    "date": "2026-01-12T10:00:00Z",
+                    "id": "id-14"
+                  }
+                },
+                "text": "Old permit form",
+                "type": "text"
+              }
+            ],
             "id": "block-15",
             "leftIndent": 48,
             "level": 0,

@@ -8,6 +8,8 @@ export { DocumentProvider, useDocument, useSelection, useSections, useHistory } 
 export { DocumentEditor } from './components/DocumentEditor';
 export { Toolbar } from './components/Toolbar';
 export { CommentsSidebar } from './components/CommentsSidebar';
+export { RevisionLegend } from './components/RevisionLegend';
+export type { RevisionLegendProps } from './components/RevisionLegend';
 export { Ruler } from './components/Ruler';
 export { PageView } from './components/PageView';
 export { PageSetupModal } from './components/PageSetupModal';

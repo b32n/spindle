@@ -52,6 +52,8 @@ import type {
   DocInline,
   DocNamedStyle,
   DocParagraphStyle,
+  DocRevision,
+  DocRevisionMeta,
   DocRunBase,
   DocSection,
   DocumentExportInput,
@@ -220,12 +222,60 @@ function withoutNoteRefs(content: DocInline[]): DocInline[] {
   });
 }
 
+/** The author and date of a change can come from a collaborator: keep characters XML cannot carry out of the file. */
+// eslint-disable-next-line no-control-regex
+const XML_INVALID_UNIT = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/;
+const isHigh = (code: number) => code >= 0xd800 && code <= 0xdbff;
+const isLow = (code: number) => code >= 0xdc00 && code <= 0xdfff;
+/** Text without control characters and without unpaired surrogates (no look-behind: older Safari cannot parse one). */
+function xmlText(text: string): string {
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (isHigh(code) && i + 1 < text.length && isLow(text.charCodeAt(i + 1))) {
+      out += text[i] + text[i + 1];
+      i++;
+    } else if (!isHigh(code) && !isLow(code) && !XML_INVALID_UNIT.test(text[i])) {
+      out += text[i];
+    }
+  }
+  return out.trim();
+}
+const ISO_DATE = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(:\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$/;
+/** `w:date` is an xsd:dateTime, which needs the seconds: a date without them gets `:00`; anything else is dropped. */
+const wordDate = (date: string | undefined): string | undefined => {
+  const match = date ? ISO_DATE.exec(date) : null;
+  if (!match) return undefined;
+  const [, day, hour, minute] = /^\d{4}-(\d{2}-\d{2})T(\d{2}):(\d{2})/.exec(match[1]) as RegExpExecArray;
+  const [month, dayOfMonth] = day.split('-').map(Number);
+  const seconds = match[2] ? Number(match[2].slice(1, 3)) : 0;
+  if (month < 1 || month > 12 || dayOfMonth < 1 || dayOfMonth > 31 || Number(hour) > 23 || Number(minute) > 59 || seconds > 59) return undefined;
+  return `${match[1]}${match[2] ?? ':00'}${match[3] ?? ''}`;
+};
+
+/** True when the run is part of a tracked insertion or deletion. */
+function hasRevision(revision: DocRevision | undefined): revision is DocRevision {
+  return !!revision && (!!revision.insertion || !!revision.deletion);
+}
+
+function sameMeta(a: DocRevisionMeta | undefined, b: DocRevisionMeta | undefined): boolean {
+  return a === b || (!!a && !!b && a.id === b.id && a.author === b.author && a.date === b.date);
+}
+
+function sameRevision(a: DocRevision, b: DocRevision): boolean {
+  return sameMeta(a.insertion, b.insertion) && sameMeta(a.deletion, b.deletion);
+}
+
 class DocxBuilder {
   readonly warnings: string[] = [];
   /** The notes referenced so far, in document order (a note's id in the file is its position + 1). */
   readonly notes: WrittenNotes = { footnote: [], endnote: [] };
   /** `w:id` of the next content control. */
   private nextControlId = 1000001;
+  /** `w:id` written for each tracked change (by kind and id in the model), the ids taken, and the next free number. */
+  private readonly revisionIds = new Map<string, number>();
+  readonly usedRevisionIds = new Set<number>();
+  private nextRevisionId = 1;
   /** Width of the content area of the section being built, in twips: where the right tab of a table of contents entry goes. */
   private contentWidthTwips = 9360;
   /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
@@ -251,17 +301,69 @@ class DocxBuilder {
   /** `anchorComments: false` for header/footer content, which has no comment anchors. */
   buildRuns(content: DocInline[], anchorComments = true): ParagraphChild[] {
     const out: ParagraphChild[] = [];
+    // Consecutive text runs of one tracked change are written inside one w:ins / w:del.
+    let group: { revision: DocRevision; runs: ParagraphChild[] } | undefined;
+    const flushGroup = () => {
+      if (group) out.push(...this.wrapRevision(group.revision, group.runs));
+      group = undefined;
+    };
     for (const inline of content) {
       const planned =
         anchorComments && (inline.type === 'text' || inline.type === 'link') && inline.commentThreadId
           ? this.comments.threads.get(inline.commentThreadId)
           : undefined;
       // A comment's range runs from its first tagged run to its last; replies share the range of their root.
-      if (planned && planned.seen === 0) out.push(...this.rangeStarts(planned));
-      out.push(...this.buildRun(inline).filter((r): r is ParagraphChild => r != null));
-      if (planned && ++planned.seen === planned.total) out.push(...this.rangeEnds(planned));
+      if (planned && planned.seen === 0) {
+        flushGroup();
+        out.push(...this.rangeStarts(planned));
+      }
+      if (inline.type === 'text' && hasRevision(inline.revision)) {
+        if (group && !sameRevision(group.revision, inline.revision)) flushGroup();
+        group ??= { revision: inline.revision, runs: [] };
+        group.runs.push(...this.textRuns(inline, inline.text, {}, !!inline.revision.deletion));
+      } else {
+        flushGroup();
+        out.push(...this.buildRun(inline).filter((r): r is ParagraphChild => r != null));
+      }
+      if (planned && ++planned.seen === planned.total) {
+        flushGroup();
+        out.push(...this.rangeEnds(planned));
+      }
     }
+    flushGroup();
     return out;
+  }
+
+  /** The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next free number. A change is identified by kind, author and id, so two authors' changes with the same id stay two changes. */
+  private revisionId(kind: 'ins' | 'del', meta: DocRevisionMeta): number {
+    const key = `${kind}:${meta.author}:${meta.id}`;
+    const known = this.revisionIds.get(key);
+    if (known !== undefined) return known;
+    let id = /^\d{1,9}$/.test(meta.id) ? Number(meta.id) : -1;
+    while (id < 0 || this.usedRevisionIds.has(id)) id = this.nextRevisionId++;
+    this.usedRevisionIds.add(id);
+    this.revisionIds.set(key, id);
+    return id;
+  }
+
+  /** `runs` inside the tracked changes of `revision`: a deletion directly around the runs, an insertion around that. */
+  private wrapRevision(revision: DocRevision, runs: ParagraphChild[]): ParagraphChild[] {
+    const element = (name: 'w:ins' | 'w:del', meta: DocRevisionMeta, children: unknown[]) => {
+      const date = wordDate(meta.date);
+      return new BuilderElement({
+        name,
+        attributes: {
+          id: { key: 'w:id', value: String(this.revisionId(name === 'w:ins' ? 'ins' : 'del', meta)) },
+          author: { key: 'w:author', value: xmlText(meta.author) || 'Unknown' },
+          ...(date !== undefined && { date: { key: 'w:date', value: date } }),
+        },
+        children: children as BuilderElement[],
+      });
+    };
+    let wrapped: unknown[] = runs;
+    if (revision.deletion) wrapped = [element('w:del', revision.deletion, wrapped)];
+    if (revision.insertion) wrapped = [element('w:ins', revision.insertion, wrapped)];
+    return wrapped as ParagraphChild[];
   }
 
   private rangeStarts(planned: CommentPlanThread): ParagraphChild[] {
@@ -289,21 +391,29 @@ class DocxBuilder {
    * A text run's text with '\t' written as w:tab and '\n' as w:br, all inside one run so the formatting
    * is shared. Text with neither stays a plain `text` run.
    */
-  private textRuns(base: DocRunBase, text: string, extra: Partial<IRunOptions> = {}): TextRun[] {
-    if (!/[\t\n]/.test(text)) return [new TextRun(this.runOptions(base, { ...extra, text }))];
+  private textRuns(base: DocRunBase, text: string, extra: Partial<IRunOptions> = {}, deleted = false): TextRun[] {
+    if (!deleted && !/[\t\n]/.test(text)) return [new TextRun(this.runOptions(base, { ...extra, text }))];
     const children: (string | Tab | BuilderElement)[] = [];
     for (const part of text.split(/(\t|\n)/)) {
       if (part === '\t') children.push(new Tab());
       else if (part === '\n') children.push(new BuilderElement({ name: 'w:br' }));
+      // Inside a tracked deletion the text of a run is w:delText.
+      else if (part && deleted) children.push(new BuilderElement({ name: 'w:delText', attributes: { space: { key: 'xml:space', value: 'preserve' } }, children: [part] as unknown as BuilderElement[] }));
       else if (part) children.push(part);
     }
     return [new TextRun(this.runOptions(base, { ...extra, children }))];
   }
 
+  /** The runs inside a hyperlink; its tracked changes go inside the link (a w:ins cannot hold a w:hyperlink). */
+  private linkRuns(link: Extract<DocInline, { type: 'link' }>, extra: Partial<IRunOptions> = {}): ParagraphChild[] {
+    const runs = this.textRuns(link, link.text, extra, !!link.revision?.deletion);
+    return hasRevision(link.revision) ? this.wrapRevision(link.revision, runs) : runs;
+  }
+
   private buildRun(inline: DocInline): (ParagraphChild | null)[] {
     switch (inline.type) {
       case 'text':
-        return this.textRuns(inline, inline.text);
+        return hasRevision(inline.revision) ? this.wrapRevision(inline.revision, this.textRuns(inline, inline.text, {}, !!inline.revision.deletion)) : this.textRuns(inline, inline.text);
       case 'bookmark':
         return inline.name ? [new Bookmark({ id: inline.name, children: [] })] : [];
       case 'link':
@@ -313,14 +423,14 @@ class DocxBuilder {
             new InternalHyperlink({
               anchor: inline.href.slice(1),
               // No Hyperlink character style: Word's own internal links (tables of contents) look like their text.
-              children: this.textRuns(inline, inline.text),
+              children: this.linkRuns(inline),
             }),
           ];
         }
         return [
           new ExternalHyperlink({
             link: inline.href,
-            children: this.textRuns(inline, inline.text, { style: 'Hyperlink' }),
+            children: this.linkRuns(inline, { style: 'Hyperlink' }),
           }),
         ];
       case 'image':
@@ -765,9 +875,15 @@ function truncate(s: string, max = 60): string {
 }
 
 export async function exportDocx(input: DocumentExportInput): Promise<DocumentExportResult> {
+  return exportDocxPart(input, new Set());
+}
+
+/** `reservedRevisionIds`: the `w:id`s of tracked changes already written in other parts, which this part must not reuse (it adds its own). */
+async function exportDocxPart(input: DocumentExportInput, reservedRevisionIds: Set<number>): Promise<DocumentExportResult> {
   const comments = planComments(input.comments, input.sections);
   const namedStyles = usableNamedStyles(input.namedStyles);
   const builder = new DocxBuilder(comments, namedStyles);
+  for (const id of reservedRevisionIds) builder.usedRevisionIds.add(id);
   builder.evenAndOdd = input.sections.some((s) => s.header?.differentOddEven || s.footer?.differentOddEven);
   const doc = new Document({
     title: input.title,
@@ -780,10 +896,11 @@ export async function exportDocx(input: DocumentExportInput): Promise<DocumentEx
   const buffer = await Packer.toArrayBuffer(doc);
   let bytes: Uint8Array = new Uint8Array(buffer);
   bytes = await addNamedStyles(bytes, namedStyles);
+  for (const id of builder.usedRevisionIds) reservedRevisionIds.add(id);
   if (builder.notes.footnote.length > 0 || builder.notes.endnote.length > 0) {
     bytes = await addNoteParts(bytes, builder.notes, async (bodies) => {
       const blocks: DocBlock[] = bodies.map((content) => ({ type: 'paragraph', content }));
-      return (await exportDocx({ title: '', sections: [{ ...input.sections[0], blocks, header: undefined, footer: undefined, columns: undefined }], namedStyles: input.namedStyles })).bytes;
+      return (await exportDocxPart({ title: '', sections: [{ ...input.sections[0], blocks, header: undefined, footer: undefined, columns: undefined }], namedStyles: input.namedStyles }, reservedRevisionIds)).bytes;
     });
   }
   if (comments.threads.size > 0) {

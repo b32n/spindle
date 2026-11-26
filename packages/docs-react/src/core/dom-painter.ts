@@ -21,6 +21,7 @@ import {
   isRunContainingBlock,
   noteKeyString,
 } from './flow-blocks';
+import { addTitle, revisionDecoration } from './revision-decoration';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
 import { DocumentLayout, PageLayout, PageFragment, PageConfig, findPageAtY, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
@@ -1065,6 +1066,7 @@ export class DomPainter {
             const piece = document.createElement('span');
             piece.textContent = part;
             piece.style.cssText = this.getRunStyles(run);
+            this.applyRevisionDecoration(piece, run);
             if (pmPos) {
               piece.dataset.pmStart = String(pmPos.start + 1 + offset);
               piece.dataset.pmEnd = String(pmPos.start + 1 + offset + part.length);
@@ -1084,6 +1086,7 @@ export class DomPainter {
           }
 
           this.applyCommentDecoration(span, run);
+          this.applyRevisionDecoration(span, run);
           this.applyControlDecoration(span, run);
           lineDiv.appendChild(span);
         } else if (run.kind === 'link') {
@@ -1106,6 +1109,7 @@ export class DomPainter {
           }
 
           this.applyCommentDecoration(a, run);
+          this.applyRevisionDecoration(a, run);
           this.applyControlDecoration(a, run);
           lineDiv.appendChild(a);
         }
@@ -1437,6 +1441,7 @@ export class DomPainter {
               runCharOffset += run.text.length;
 
               this.applyCommentDecoration(span, run);
+              this.applyRevisionDecoration(span, run);
               this.applyControlDecoration(span, run);
               p.appendChild(span);
             } else if (run.kind === 'link') {
@@ -1451,6 +1456,7 @@ export class DomPainter {
               a.dataset.pmEnd = String(linkStart + run.text.length);
               runCharOffset += run.text.length;
               this.applyCommentDecoration(a, run);
+              this.applyRevisionDecoration(a, run);
               this.applyControlDecoration(a, run);
               p.appendChild(a);
             } else if (run.kind === 'image') {
@@ -1584,6 +1590,7 @@ export class DomPainter {
         }
 
         this.applyCommentDecoration(span, run);
+        this.applyRevisionDecoration(span, run);
         this.applyControlDecoration(span, run);
         container.appendChild(span);
       } else if (run.kind === 'lineBreak') {
@@ -1619,6 +1626,7 @@ export class DomPainter {
         }
 
         this.applyCommentDecoration(a, run);
+        this.applyRevisionDecoration(a, run);
         this.applyControlDecoration(a, run);
         container.appendChild(a);
       }
@@ -1643,6 +1651,17 @@ export class DomPainter {
     el.style.cursor = 'pointer';
   }
 
+  /** Show a tracked change the way Word's "All Markup" does (see `revisionDecoration`). */
+  private applyRevisionDecoration(el: HTMLElement, run: Run): void {
+    const decoration = revisionDecoration(run);
+    if (!decoration) return;
+    el.style.color = decoration.color;
+    el.style.textDecoration = decoration.textDecoration;
+    el.style.textDecorationColor = decoration.color;
+    Object.assign(el.dataset, decoration.data);
+    addTitle(el, decoration.title);
+  }
+
   /**
    * Decorate an element inside a content control: a faint tint, the control's title as a tooltip, grey text while
    * it shows placeholder text, and for a check box a pointer cursor and an attribute the click handler keys off.
@@ -1656,7 +1675,7 @@ export class DomPainter {
     if ((run.kind !== 'text' && run.kind !== 'link') || !run.control) return;
     const { control } = run;
     el.dataset.contentControl = control.title;
-    el.title = control.title;
+    addTitle(el, control.title);
     if (!el.style.backgroundColor) el.style.backgroundColor = 'rgba(66, 133, 244, 0.08)';
     if (control.placeholder && !el.style.color) el.style.color = '#80868b';
     if (control.checkbox) {
