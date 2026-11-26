@@ -7,10 +7,11 @@ runner that lifts the shared harness; until then the files and the checks below 
 
 ## What is here
 
-- **Hand-authored constructs**: cell types, dates (1900 and 1904), basic styles, layout, sheet properties,
-  names, conditional formatting and data validation. The rest of the planned constructs (theme styles, number
-  formats, modern formulas, references, comments, links, images, charts, tables, filters, pivots, sparklines,
-  protection, print setup, rich text, `.xlsm`) follow in the next PR.
+- **Hand-authored constructs** (about thirty files): cell types, dates (1900 and 1904), styles, theme
+  colours, sixty number formats, formulas (modern, syntax probe, references), layout, sheet
+  properties, names, conditional formatting (classic and x14), validation, comments (notes and threads),
+  links, images, charts, tables, filters, a pivot table with a slicer, sparklines, protection, print
+  setup, rich text and an inert `.xlsm`.
 - **Probe workbooks** from the fidelity plan: 159 common formulas, 33 number-format codes x 3 values and
   23 formula-syntax forms (cached values in the syntax probe are what Excel computes).
 - **Producer variety**: openpyxl (three single-feature files that make the importer throw), xlsxwriter and
@@ -72,119 +73,179 @@ rebuilding gives the same bytes.
 | 1 | `cell-types` | Cell types | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
 | 2 | `dates-1904` | 1904 date system | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
 | 3 | `styles-basic` | Basic styles | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 4 | `number-format-probe` | Number format probe (33 codes x 3 values) | xlsxwriter (Python), written by the library |
-| 5 | `formulas-core` | Formulas core: the 159 probe formulas | xlsxwriter (Python), written by the library |
-| 6 | `formula-syntax` | Formula syntax probe (23 forms) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 7 | `layout` | Layout | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 8 | `sheet-properties` | Sheet properties | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 9 | `names` | Defined names | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 10 | `cf-basic` | Conditional formatting | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 11 | `data-validation` | Data validation | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 12 | `openpyxl-image` | openpyxl: workbook with an image | openpyxl (Python), written by the library |
-| 13 | `openpyxl-chart` | openpyxl: workbook with charts | openpyxl (Python), written by the library |
-| 14 | `openpyxl-comment` | openpyxl: workbook with a cell comment | openpyxl (Python), written by the library |
-| 15 | `xlsxwriter-rich` | xlsxwriter: many features | xlsxwriter (Python), written by the library |
-| 16 | `libreoffice-rich` | LibreOffice: many features | openpyxl workbook converted by LibreOffice headless (soffice --convert-to xlsx) |
-| 17 | `edge-truncated-zip` | Edge: truncated zip | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 18 | `edge-no-workbook` | Edge: no workbook part | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 19 | `edge-bad-rels` | Edge: relationships that point nowhere | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 20 | `edge-xml-entities` | Edge: XML entity declarations | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 21 | `edge-invalid-xml` | Edge: malformed worksheet XML | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 22 | `edge-encrypted` | Edge: encrypted workbook (OLE stub) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 23 | `edge-legacy-xls` | Edge: legacy .xls (OLE stub) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 24 | `edge-duplicate-sheet-names` | Edge: duplicate sheet names | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 25 | `edge-index-out-of-range` | Edge: indexes out of range | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 26 | `edge-empty-workbook` | Edge: empty workbook | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 27 | `edge-zip-bomb` | Edge: zip bomb (generated at run time) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 28 | `edge-huge-dimension` | Edge: huge dimension (generated at run time) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
-| 29 | `perf-100k-x-10` | Performance: 100,000 rows x 10 columns (generated at run time) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 4 | `styles-theme` | Theme colours, named styles and fills | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 5 | `number-formats` | Sixty number format codes | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 6 | `number-format-probe` | Number format probe (33 codes x 3 values) | xlsxwriter (Python), written by the library |
+| 7 | `formulas-core` | Formulas core: the 159 probe formulas | xlsxwriter (Python), written by the library |
+| 8 | `formulas-modern` | Modern formulas | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 9 | `formula-syntax` | Formula syntax probe (23 forms) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 10 | `references` | References | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 11 | `layout` | Layout | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 12 | `sheet-properties` | Sheet properties | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 13 | `names` | Defined names | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 14 | `cf-basic` | Conditional formatting | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 15 | `cf-x14` | Conditional formatting: x14 extensions | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 16 | `data-validation` | Data validation | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 17 | `comments` | Comments: notes and threads | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 18 | `links` | Hyperlinks | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 19 | `images` | Images | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 20 | `charts` | Charts | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 21 | `tables` | Tables | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 22 | `filters-sort` | Filters and sort | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 23 | `pivots-slicers` | Pivot table and slicer | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 24 | `sparklines` | Sparklines | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 25 | `protection` | Protection | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 26 | `print-setup` | Print setup | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 27 | `rich-text` | Rich-text cells | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 28 | `macro-enabled` | Macro-enabled workbook (.xlsm) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 29 | `openpyxl-image` | openpyxl: workbook with an image | openpyxl (Python), written by the library |
+| 30 | `openpyxl-chart` | openpyxl: workbook with charts | openpyxl (Python), written by the library |
+| 31 | `openpyxl-comment` | openpyxl: workbook with a cell comment | openpyxl (Python), written by the library |
+| 32 | `xlsxwriter-rich` | xlsxwriter: many features | xlsxwriter (Python), written by the library |
+| 33 | `libreoffice-rich` | LibreOffice: many features | openpyxl workbook converted by LibreOffice headless (soffice --convert-to xlsx) |
+| 34 | `edge-truncated-zip` | Edge: truncated zip | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 35 | `edge-no-workbook` | Edge: no workbook part | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 36 | `edge-bad-rels` | Edge: relationships that point nowhere | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 37 | `edge-xml-entities` | Edge: XML entity declarations | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 38 | `edge-invalid-xml` | Edge: malformed worksheet XML | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 39 | `edge-encrypted` | Edge: encrypted workbook (OLE stub) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 40 | `edge-legacy-xls` | Edge: legacy .xls (OLE stub) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 41 | `edge-duplicate-sheet-names` | Edge: duplicate sheet names | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 42 | `edge-index-out-of-range` | Edge: indexes out of range | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 43 | `edge-empty-workbook` | Edge: empty workbook | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 44 | `edge-zip-bomb` | Edge: zip bomb (generated at run time) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 45 | `edge-huge-dimension` | Edge: huge dimension (generated at run time) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
+| 46 | `perf-100k-x-10` | Performance: 100,000 rows x 10 columns (generated at run time) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py) |
 
-| Construct | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Numeric cells (`cells.numbers`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |
-| Shared-string cells (`cells.sharedStrings`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Inline-string cells (`cells.inlineStrings`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  | yes |
-| Boolean cells (`cells.booleans`) | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Error cells (`cells.errors`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Date / time formatted cells (`cells.dates`) | yes | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Non-ASCII text (`cells.unicode`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Right-to-left text (Hebrew, Arabic) (`cells.rtl`) | yes |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Rich-text strings (runs) (`cells.richText`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 1904 date system (`workbook.date1904`) |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Calculation settings (calcPr) (`workbook.calcSettings`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Cell formats beyond the default (`styles.basic`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Alignment (wrap, rotation, indent) (`styles.alignment`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Custom number formats (`styles.customNumFmts`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Indexed colours (other than the default pen 64) (`styles.indexedColors`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Distinct border styles (13 exist) (`styles.borderStyles`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Formulas (`formulas.basic`) |  |  |  |  | yes |  |  |  | yes |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Formulas with a cached value (`formulas.cachedValues`) | yes |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Array formulas (t="array") (`formulas.array`) |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Dynamic-array formulas (cm metadata) (`formulas.dynamicArray`) |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Future functions (_xlfn. prefix) (`formulas.xlfn`) |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| LET / LAMBDA parameters (_xlpm.) (`formulas.lambda`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Whole-column references (A:A) (`formulas.wholeColumn`) |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Whole-row references (1:1) (`formulas.wholeRow`) |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Cross-sheet references (`formulas.crossSheet`) |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 3D references (Sheet1:Sheet3!A1) (`formulas.threeD`) |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Defined names (`names.defined`) |  |  |  |  |  |  |  |  | yes |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Sheet-scoped names (`names.sheetScoped`) |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Print areas (`names.printArea`) |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Print titles (`names.printTitles`) |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Names holding constants (`names.constants`) |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Custom column widths (`layout.colWidths`) |  |  | yes |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Custom row heights (`layout.rowHeights`) |  |  | yes |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Default column / row sizes (`layout.defaultSizes`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Hidden rows and columns (`layout.hidden`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Outline groups (`layout.outline`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Column default styles (`layout.columnStyles`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Frozen panes (`layout.frozenPanes`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Merged cells (`layout.merges`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Zoom other than 100% (`layout.zoom`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Gridlines off (`layout.noGridlines`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Right-to-left sheet (`layout.rtl`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| More than one sheet (`sheets.multiple`) |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |
-| Hidden sheets (`sheets.hidden`) |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Very hidden sheets (`sheets.veryHidden`) |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Tab colours (`sheets.tabColor`) |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Active tab other than the first (`sheets.activeTab`) |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: cell value (`cf.cellIs`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: formula (`cf.expression`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: top / bottom (`cf.top10`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: above / below average (`cf.aboveAverage`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: duplicate / unique (`cf.duplicates`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: text rules (`cf.text`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: dates occurring (`cf.dates`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: colour scales (`cf.colorScale`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: data bars (`cf.dataBar`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: icon sets (`cf.iconSet`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Conditional formatting: stop if true (`cf.stopIfTrue`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: list (`dv.list`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: whole number (`dv.whole`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: decimal (`dv.decimal`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: date (`dv.date`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: time (`dv.time`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: text length (`dv.textLength`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: custom formula (`dv.custom`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Validation: input / error messages (`dv.messages`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Comments (notes) (`comments.notes`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Images: PNG (`images.png`) |  |  |  |  |  |  |  |  |  |  |  | yes |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Charts: bar / column (`charts.bar`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Charts: line (`charts.line`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Tables (list objects) (`tables.listObjects`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Page setup (orientation, paper, scale) (`print.pageSetup`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Truncated zip (starts as a zip, cannot be read) (`edge.truncatedZip`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |
-| Encrypted package (OLE with EncryptionInfo) (`edge.encrypted`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |
-| Legacy .xls binary (OLE with a Workbook stream) (`edge.legacyBinary`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |
-| Package without xl/workbook.xml (`edge.noWorkbook`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |
-| Relationships that point nowhere (`edge.brokenRels`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |
-| Part that is not well-formed XML (`edge.invalidXml`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |
-| XML entity declarations (DOCTYPE) (`edge.xmlEntities`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |
-| Duplicate sheet names (`edge.duplicateSheetNames`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |
-| Shared-string or style index out of range (`edge.indexOutOfRange`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |
-| Workbook whose sheets hold no cells (`edge.emptyWorkbook`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |
-| Sheet dimension of 10 million cells or more (`edge.hugeDimension`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |
-| Zip entry with a compression ratio of 200:1 or more (1 MB+) (`edge.zipBomb`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |
-| Sheet of 100,000 rows or more (`perf.largeSheet`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |
+| Construct | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Numeric cells (`cells.numbers`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |
+| Shared-string cells (`cells.sharedStrings`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Inline-string cells (`cells.inlineStrings`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  | yes |
+| Boolean cells (`cells.booleans`) | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Error cells (`cells.errors`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Date / time formatted cells (`cells.dates`) | yes | yes |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Non-ASCII text (`cells.unicode`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Right-to-left text (Hebrew, Arabic) (`cells.rtl`) | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Rich-text strings (runs) (`cells.richText`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 1904 date system (`workbook.date1904`) |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Calculation settings (calcPr) (`workbook.calcSettings`) | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| External workbook links (`workbook.externalLinks`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Cell formats beyond the default (`styles.basic`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Alignment (wrap, rotation, indent) (`styles.alignment`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Custom number formats (`styles.customNumFmts`) |  |  | yes |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Theme colours (`styles.themeColors`) |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Indexed colours (other than the default pen 64) (`styles.indexedColors`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Colour tints (`styles.tint`) |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Named cell styles (`styles.namedStyles`) |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Pattern fills (other than solid) (`styles.patternFill`) |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Gradient fills (`styles.gradientFill`) |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Distinct border styles (13 exist) (`styles.borderStyles`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Diagonal borders (`styles.diagonalBorder`) |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Formulas (`formulas.basic`) |  |  |  |  |  |  | yes |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Formulas with a cached value (`formulas.cachedValues`) | yes |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Shared formulas (`formulas.shared`) |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Array formulas (t="array") (`formulas.array`) |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Dynamic-array formulas (cm metadata) (`formulas.dynamicArray`) |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Future functions (_xlfn. prefix) (`formulas.xlfn`) |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| LET / LAMBDA parameters (_xlpm.) (`formulas.lambda`) |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Whole-column references (A:A) (`formulas.wholeColumn`) |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Whole-row references (1:1) (`formulas.wholeRow`) |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Cross-sheet references (`formulas.crossSheet`) |  |  |  |  |  |  | yes |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 3D references (Sheet1:Sheet3!A1) (`formulas.threeD`) |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Structured table references (`formulas.structuredRef`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| External workbook references ([1]Sheet!A1) (`formulas.externalRef`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Self-referencing formulas (the cell itself, or a range, column or row that contains it) (`formulas.circular`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Defined names (`names.defined`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Sheet-scoped names (`names.sheetScoped`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Print areas (`names.printArea`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Print titles (`names.printTitles`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Names holding constants (`names.constants`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Custom column widths (`layout.colWidths`) |  |  | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Custom row heights (`layout.rowHeights`) |  |  | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Default column / row sizes (`layout.defaultSizes`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Hidden rows and columns (`layout.hidden`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Outline groups (`layout.outline`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Column default styles (`layout.columnStyles`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Frozen panes (`layout.frozenPanes`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Merged cells (`layout.merges`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Zoom other than 100% (`layout.zoom`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Gridlines off (`layout.noGridlines`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Right-to-left sheet (`layout.rtl`) |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| More than one sheet (`sheets.multiple`) |  |  |  |  |  |  |  |  |  | yes | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |
+| Hidden sheets (`sheets.hidden`) |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Very hidden sheets (`sheets.veryHidden`) |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Tab colours (`sheets.tabColor`) |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Active tab other than the first (`sheets.activeTab`) |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: cell value (`cf.cellIs`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: formula (`cf.expression`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: top / bottom (`cf.top10`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: above / below average (`cf.aboveAverage`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: duplicate / unique (`cf.duplicates`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: text rules (`cf.text`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: dates occurring (`cf.dates`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: colour scales (`cf.colorScale`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: data bars (`cf.dataBar`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: icon sets (`cf.iconSet`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: stop if true (`cf.stopIfTrue`) |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Conditional formatting: x14 extensions (`cf.x14`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: list (`dv.list`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: whole number (`dv.whole`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: decimal (`dv.decimal`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: date (`dv.date`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: time (`dv.time`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: text length (`dv.textLength`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: custom formula (`dv.custom`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Validation: input / error messages (`dv.messages`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Comments (notes) (`comments.notes`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Threaded comments (`comments.threaded`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| External hyperlinks (http, https) (`links.external`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| mailto hyperlinks (`links.mailto`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Internal hyperlinks (location) (`links.internal`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Hyperlinks with a script scheme (`links.unsafeScheme`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: PNG (`images.png`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: JPEG (`images.jpeg`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: GIF (`images.gif`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: SVG (`images.svg`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: EMF (`images.emf`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: one-cell anchor (`images.oneCell`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: two-cell anchor (`images.twoCell`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Images: absolute anchor (`images.absolute`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Cropped images (`images.crop`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Charts: bar / column (`charts.bar`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Charts: line (`charts.line`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Charts: pie (`charts.pie`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Charts: scatter (`charts.scatter`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Charts: combination (several plot types) (`charts.combo`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Tables (list objects) (`tables.listObjects`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Tables with a totals row (`tables.totals`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Auto-filters (`filters.autoFilter`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Filter criteria (`filters.criteria`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Sort state (`filters.sort`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Pivot tables (`pivots.tables`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Slicers (`pivots.slicers`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Sparklines (`sparklines`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Sheet protection (`protection.sheet`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Sheet protection with a password hash (`protection.password`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Sheet protection without a password (`protection.noPassword`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Workbook structure protection (`protection.workbook`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Page setup (orientation, paper, scale) (`print.pageSetup`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Fit to page (`print.fitToPage`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Print headers and footers (`print.headerFooter`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Manual page breaks (`print.breaks`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Macro project (vbaProject.bin) (`macros.vba`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Truncated zip (starts as a zip, cannot be read) (`edge.truncatedZip`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |
+| Encrypted package (OLE with EncryptionInfo) (`edge.encrypted`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |
+| Legacy .xls binary (OLE with a Workbook stream) (`edge.legacyBinary`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |
+| Package without xl/workbook.xml (`edge.noWorkbook`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |
+| Relationships that point nowhere (`edge.brokenRels`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |
+| Part that is not well-formed XML (`edge.invalidXml`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |
+| XML entity declarations (DOCTYPE) (`edge.xmlEntities`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |
+| Duplicate sheet names (`edge.duplicateSheetNames`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |
+| Shared-string or style index out of range (`edge.indexOutOfRange`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |
+| Workbook whose sheets hold no cells (`edge.emptyWorkbook`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |
+| Sheet dimension of 10 million cells or more (`edge.hugeDimension`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |
+| Zip entry with a compression ratio of 200:1 or more (1 MB+) (`edge.zipBomb`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Sheet of 100,000 rows or more (`perf.largeSheet`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |
 
 <!-- coverage-matrix:end -->

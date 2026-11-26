@@ -37,7 +37,7 @@ const notAPackage = (claims: string[]) =>
 
 describe('XLSX corpus', () => {
   it('has the planned shape', () => {
-    expect(committed.length).toBeGreaterThanOrEqual(26);
+    expect(committed.length).toBeGreaterThanOrEqual(40);
     expect(runtime.map((f) => f.id).sort()).toEqual([
       'edge-huge-dimension',
       'edge-zip-bomb',
@@ -63,6 +63,7 @@ describe('XLSX corpus', () => {
       'formulas-core',
       'number-format-probe',
       'formula-syntax',
+      'macro-enabled',
     ]) {
       expect(committed.map((f) => f.id)).toContain(id);
     }
@@ -162,6 +163,11 @@ describe('XLSX corpus', () => {
       for (const n of sheetNames) expect(n.length).toBeLessThanOrEqual(31);
     }
   );
+
+  it('keeps the circular-reference fixture circular in exactly one cell', async () => {
+    const circular = CONSTRUCTS.find((c) => c.id === 'formulas.circular');
+    expect(circular?.count(await parts('references.xlsx'))).toBe(1);
+  });
 
   it('keeps the README coverage matrix in sync (XLSX_FIDELITY_UPDATE=1 rewrites it)', () => {
     const file = path.join(XLSX_FIXTURES_DIR, 'README.md');

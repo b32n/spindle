@@ -64,6 +64,44 @@
       "generator": "generators/build_core.py"
     },
     {
+      "id": "styles-theme",
+      "filename": "styles-theme.xlsx",
+      "title": "Theme colours, named styles and fills",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "styles.themeColors",
+        "styles.indexedColors",
+        "styles.tint",
+        "styles.namedStyles",
+        "styles.patternFill",
+        "styles.gradientFill",
+        "styles.borderStyles",
+        "styles.diagonalBorder"
+      ],
+      "notes": "A workbook with a theme part: theme colours with tints, indexed colours (with a custom palette), a named style (Good) and a custom one, a gradient fill, twelve pattern fills, all thirteen border styles and diagonal borders.",
+      "generator": "generators/build_styles_formulas.py"
+    },
+    {
+      "id": "number-formats",
+      "filename": "number-formats.xlsx",
+      "title": "Sixty number format codes",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "styles.customNumFmts",
+        "cells.dates"
+      ],
+      "notes": "Sixty number-format codes (built-in and custom: dates, times, elapsed, fractions, scaling commas, literals, conditions, locale-tagged currency) each applied to a positive, a negative, a date-time and a zero value.",
+      "generator": "generators/build_styles_formulas.py"
+    },
+    {
       "id": "number-format-probe",
       "filename": "number-format-probe.xlsx",
       "title": "Number format probe (33 codes x 3 values)",
@@ -102,6 +140,26 @@
       "generator": "generators/build_probes.py"
     },
     {
+      "id": "formulas-modern",
+      "filename": "formulas-modern.xlsx",
+      "title": "Modern formulas",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "formulas.xlfn",
+        "formulas.lambda",
+        "formulas.array",
+        "formulas.dynamicArray",
+        "formulas.shared",
+        "formulas.cachedValues"
+      ],
+      "notes": "_xlfn.-prefixed functions (IFS, XLOOKUP, CONCAT, TEXTJOIN, STDEV.S, MAXIFS), LET and LAMBDA with _xlpm. parameters, a dynamic-array SORT with metadata and a spill range, a legacy array formula, and a shared formula over five rows; every formula has its Excel-computed cached value.",
+      "generator": "generators/build_styles_formulas.py"
+    },
+    {
       "id": "formula-syntax",
       "filename": "formula-syntax.xlsx",
       "title": "Formula syntax probe (23 forms)",
@@ -123,6 +181,28 @@
       ],
       "notes": "Plan 2.2 item 4: whole-column and whole-row references, percent literal, 3D reference, array constants, range ending in INDEX, implicit intersection, spill operator, intersection and union operators, operator precedence, quoted sheet names. Each cached value is what Excel computes.",
       "generator": "generators/build_probes.py"
+    },
+    {
+      "id": "references",
+      "filename": "references.xlsx",
+      "title": "References",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "formulas.wholeColumn",
+        "formulas.wholeRow",
+        "formulas.crossSheet",
+        "formulas.threeD",
+        "formulas.circular",
+        "formulas.externalRef",
+        "workbook.externalLinks",
+        "sheets.multiple"
+      ],
+      "notes": "Whole-column and whole-row sums, a cross-sheet reference, a 3D reference over three sheets, one self-referencing (circular) formula, F12 (the others sit outside the summed column and row), and a formula using an external workbook link with its externalLink part.",
+      "generator": "generators/build_styles_formulas.py"
     },
     {
       "id": "layout",
@@ -216,6 +296,23 @@
       "generator": "generators/build_core.py"
     },
     {
+      "id": "cf-x14",
+      "filename": "cf-x14.xlsx",
+      "title": "Conditional formatting: x14 extensions",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "cf.x14",
+        "cf.dataBar",
+        "cf.iconSet"
+      ],
+      "notes": "A data bar with the x14 extension (negative colour, axis, solid fill) and an icon set with custom icons, each linked to its base rule by an x14 id.",
+      "generator": "generators/build_objects.py"
+    },
+    {
       "id": "data-validation",
       "filename": "data-validation.xlsx",
       "title": "Data validation",
@@ -236,6 +333,219 @@
       ],
       "notes": "One rule per type (list inline and from a range, whole, decimal, date, time, text length, custom formula) and a rule with a prompt, an error title and a warning style.",
       "generator": "generators/build_core.py"
+    },
+    {
+      "id": "comments",
+      "filename": "comments.xlsx",
+      "title": "Comments: notes and threads",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "comments.notes",
+        "comments.threaded"
+      ],
+      "notes": "Three legacy notes (with their VML shapes) and one threaded comment with a reply, its persons part and the placeholder note Excel keeps for it. Reviewer names are invented.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "links",
+      "filename": "links.xlsx",
+      "title": "Hyperlinks",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "links.external",
+        "links.mailto",
+        "links.internal",
+        "links.unsafeScheme"
+      ],
+      "notes": "An https link, a mailto link, an internal location link and a javascript: target (inert text; importers must not keep it as a live link).",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "images",
+      "filename": "images.xlsx",
+      "title": "Images",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "images.png",
+        "images.jpeg",
+        "images.gif",
+        "images.svg",
+        "images.emf",
+        "images.oneCell",
+        "images.twoCell",
+        "images.absolute",
+        "images.crop"
+      ],
+      "notes": "Five pictures with the three anchor kinds: PNG (one-cell), cropped JPEG (two-cell), GIF (absolute), SVG with a PNG fallback (one-cell) and an empty EMF (two-cell).",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "charts",
+      "filename": "charts.xlsx",
+      "title": "Charts",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "charts.bar",
+        "charts.line",
+        "charts.pie",
+        "charts.scatter",
+        "charts.combo"
+      ],
+      "notes": "A clustered column, a line, a pie, a scatter and a column + line combination chart over one data block (no cached values).",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "tables",
+      "filename": "tables.xlsx",
+      "title": "Tables",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "tables.listObjects",
+        "tables.totals",
+        "formulas.structuredRef"
+      ],
+      "notes": "A table with a totals row, a calculated column, an auto-filter, a table style, SUBTOTAL totals and structured references (this-row and whole-column).",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "filters-sort",
+      "filename": "filters-sort.xlsx",
+      "title": "Filters and sort",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "filters.autoFilter",
+        "filters.criteria",
+        "filters.sort",
+        "layout.hidden",
+        "names.defined"
+      ],
+      "notes": "An auto-filter with a value-list filter and a custom filter, the rows it hides, a sort state (descending by Q1) and the hidden _FilterDatabase name.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "pivots-slicers",
+      "filename": "pivots-slicers.xlsx",
+      "title": "Pivot table and slicer",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "pivots.tables",
+        "pivots.slicers"
+      ],
+      "notes": "A pivot table (sum of sales by region) with its cache definition and records, and a slicer on the Region field with its slicer cache. Hand-authored from the specification and not yet checked in Excel (real exports arrive with D8); the slicer is not anchored by a drawing on a sheet and the pivot sheet holds no cell values.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "sparklines",
+      "filename": "sparklines.xlsx",
+      "title": "Sparklines",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "sparklines"
+      ],
+      "notes": "Two sparkline groups (line and column) with series, negative, marker, high and low colours.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "protection",
+      "filename": "protection.xlsx",
+      "title": "Protection",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "protection.sheet",
+        "protection.password",
+        "protection.noPassword",
+        "protection.workbook",
+        "styles.basic"
+      ],
+      "notes": "Sheets protected with a legacy password hash, with a SHA-512 hash (salt and spin count) and without a password, an unlocked input cell, and workbook structure protection. The password is a throwaway word and protects nothing.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "print-setup",
+      "filename": "print-setup.xlsx",
+      "title": "Print setup",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "print.pageSetup",
+        "print.fitToPage",
+        "print.headerFooter",
+        "print.breaks",
+        "names.printArea",
+        "names.printTitles"
+      ],
+      "notes": "Landscape A4, fit to one page wide, centred with gridlines, header and footer codes, a manual row and column break, print area and titles.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "rich-text",
+      "filename": "rich-text.xlsx",
+      "title": "Rich-text cells",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "cells.richText",
+        "cells.inlineStrings"
+      ],
+      "notes": "A shared string with four formatted runs (bold red, italic underlined Cambria, superscript) and an inline string with runs.",
+      "generator": "generators/build_objects.py"
+    },
+    {
+      "id": "macro-enabled",
+      "filename": "macro-enabled.xlsm",
+      "title": "Macro-enabled workbook (.xlsm)",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/xlsx/generators/xlsxbuilder.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "macros.vba"
+      ],
+      "notes": "A macro-enabled main content type with an inert dummy vbaProject.bin part (text that is neither an OLE file nor VBA). Importers must drop it and report it, never run it.",
+      "generator": "generators/build_objects.py"
     },
     {
       "id": "openpyxl-image",
