@@ -18,9 +18,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
+import build_charts as CH  # noqa: E402
 import build_edge as E  # noqa: E402
+import build_flow as F  # noqa: E402
+import build_images as I  # noqa: E402
 import build_layouts as L  # noqa: E402
+import build_misc as M  # noqa: E402
+import build_producers as PR  # noqa: E402
 import build_shapes as S  # noqa: E402
+import build_tables as TB  # noqa: E402
 import build_text as T  # noqa: E402
 from catalog import CATALOG, LICENSE, OS, RUNTIME  # noqa: E402
 
@@ -29,6 +35,11 @@ BUILDERS = {
     "layouts-masters": L.layouts_masters, "themes": L.themes, "sizes-16x9": L.sizes_16x9, "sizes-4x3": L.sizes_4x3, "sizes-a4": L.sizes_a4, "sizes-custom": L.sizes_custom,
     "sizes-portrait": L.sizes_portrait,
     "shapes-presets": S.shapes_presets, "shapes-custgeom": S.shapes_custgeom, "fills-lines": S.fills_lines, "effects": S.effects,
+    "images": I.images, "media": I.media, "tables": TB.tables, "groups-connectors": TB.groups_connectors,
+    "charts": CH.charts, "smartart": CH.smartart, "wordart-ink-ole-equations": CH.objects,
+    "transitions-animations": F.transitions_animations, "notes": F.notes, "comments-legacy": F.comments_legacy, "comments-modern": F.comments_modern,
+    "hidden-sections": F.hidden_sections, "rtl-cjk": F.rtl_cjk,
+    "python-pptx-deck": PR.python_pptx_deck, "libreoffice-deck": PR.libreoffice_deck, "kitchen-sink": M.kitchen_sink, "macro-enabled": M.macro_enabled,
     "edge-truncated-zip": E.truncated_zip, "edge-no-presentation": E.no_presentation, "edge-slide-missing": E.slide_missing, "edge-bad-rels": E.bad_rels,
     "edge-invalid-xml": E.invalid_xml, "edge-deep-groups": E.deep_groups, "edge-relationship-cycles": E.relationship_cycles,
     "edge-encrypted": E.encrypted, "edge-legacy-ppt": E.legacy_ppt,
