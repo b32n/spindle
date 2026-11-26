@@ -252,8 +252,15 @@ lockstep.
 - **Editor: notes area.** A reference is drawn as its number, a superscript (digits for footnotes, lower-case roman
   numerals for endnotes, numbered per kind in document order, or the custom mark). The notes are collected in an area at the
   end of each section, footnotes first and then endnotes, drawn in the page flow after the section's last block;
-  clicking a reference scrolls to its note and clicking a note goes back to its reference. The area is read-only for
-  now: notes are not yet inserted or edited in the editor, and are not laid out at the bottom of each page.
+  clicking a reference scrolls to its note and clicking a note's number goes back to its reference. Footnotes are not
+  yet laid out at the bottom of each page.
+- **Editor: insert and edit notes.** The toolbar has a Footnote menu (Insert footnote, Insert endnote, shown when the host
+  `Toolbar` gets `onInsertNote`; `DocumentEditor` wires it) that puts a reference at the caret and opens a small editor
+  over the new note's entry in the notes area; clicking a note's text edits it the same way, keeping its formatting, links
+  and line breaks (Enter is a line break; Escape or clicking away ends the edit, as one undoable step). Deleting a
+  reference removes its note and renumbers the rest, since numbers follow from where the references are. New
+  `TrueLayoutEditorHandle.insertNote(kind)` and, in docs-core, `insertNoteReference`, `findNoteRef`, `noteOrdinalAt`,
+  `nextNoteId` and `noteTextFragment`.
 
 ### Changed
 

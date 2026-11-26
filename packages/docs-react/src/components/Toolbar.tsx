@@ -45,6 +45,7 @@ import {
   Highlighter,
   SeparatorHorizontal,
   SplitSquareVertical,
+  Asterisk,
   FileDown,
   MessageSquarePlus,
   Type,
@@ -286,6 +287,8 @@ export interface ToolbarProps {
   onRemoveSectionBreak?: () => void;
   /** Whether the document has a section break to remove (default: true). */
   canRemoveSectionBreak?: boolean;
+  /** Insert a footnote or endnote reference at the caret and edit its text; providing this shows the Footnote menu. */
+  onInsertNote?: (kind: 'footnote' | 'endnote') => void;
 }
 
 interface ToolbarButtonProps {
@@ -487,6 +490,7 @@ export const Toolbar = memo(function Toolbar({
   onInsertSectionBreak,
   onRemoveSectionBreak,
   canRemoveSectionBreak = true,
+  onInsertNote,
   editorView,
   activeMarks,
   selectedCell,
@@ -848,6 +852,16 @@ export const Toolbar = memo(function Toolbar({
       <ToolbarButton onClick={() => runCommand(commands.insertPageBreak())} tooltip="Page break">
         <FileDown size={18} strokeWidth={2} />
       </ToolbarButton>
+      {onInsertNote && (
+        <OverflowDropdown triggerIcon={<Asterisk size={18} strokeWidth={2} />} menuLabel="Footnote" width={200}>
+          <DropdownItemStandalone onClick={() => onInsertNote('footnote')} style={{ justifyContent: 'flex-start' }}>
+            Insert footnote
+          </DropdownItemStandalone>
+          <DropdownItemStandalone onClick={() => onInsertNote('endnote')} style={{ justifyContent: 'flex-start' }}>
+            Insert endnote
+          </DropdownItemStandalone>
+        </OverflowDropdown>
+      )}
       {onInsertSectionBreak && (
         <OverflowDropdown triggerIcon={<SplitSquareVertical size={18} strokeWidth={2} />} menuLabel="Section break" width={230}>
           <DropdownItemStandalone onClick={() => onInsertSectionBreak('nextPage')} style={{ justifyContent: 'flex-start' }}>

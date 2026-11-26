@@ -50,7 +50,7 @@ test.describe('docs: footnotes and endnotes from a .docx', () => {
     await expect(note).toBeInViewport();
   });
 
-  test('D-NOT-02 clicking a note in the notes area goes back to its reference, and clicking the reference goes to the note again', async ({
+  test('D-NOT-02 clicking the number of a note in the notes area goes back to its reference, and clicking the reference goes to the note again', async ({
     page,
   }) => {
     await openNotes(page);
@@ -60,8 +60,8 @@ test.describe('docs: footnotes and endnotes from a .docx', () => {
     await expect(note).toBeInViewport();
     await expect(reference).not.toBeInViewport();
 
-    // Back to the reference.
-    await note.click();
+    // Back to the reference (the note's number; its text starts editing it).
+    await note.locator('[data-note-ref]').click();
     await expect(reference).toBeInViewport();
     await expect(note).not.toBeInViewport();
 
