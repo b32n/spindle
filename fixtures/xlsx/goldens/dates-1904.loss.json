@@ -1,4 +1,11 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "approximated: dates are converted to the 1900 system; the setting itself is not kept",
+      "id": "xlsx.workbook.date1904",
+      "label": "1904 date system"
+    }
+  ]
 }

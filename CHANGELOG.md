@@ -400,6 +400,22 @@ lockstep.
   whose import throws. CI gains an "XLSX fidelity corpus" step in the `packages` job (job summary plus a
   `xlsx-fidelity-report-node<version>` artifact). The cached values of `formulas-core.xlsx` are now the
   LibreOffice-computed results instead of zeros. No importer, exporter or runtime behaviour changes.
+- **XLSX loss detector, round 2 (XML-based, `full` detail).** `detectXlsxLoss(bytes, options)`
+  (`@b32nio/spindle-io/xlsx`) and `inspectXlsx(bytes, options)` (`@b32nio/spindle-sheets-core`) now parse the
+  package XML instead of matching text and file names. `options.detail` is `'summary'` (default, the import
+  dialog) or `'full'` (the fidelity harness); `options.knownFunctions` and `options.isNumberFormatExact` are
+  optional (additive `DetectXlsxLossOptions` in `@b32nio/spindle-shared/export/xlsx`), and `inspectXlsx` passes the
+  formula catalog and the number-format mapping. The summary report gains three ids: `xlsx.formulas.unsupported`
+  (functions the editor does not have, `_xlfn.`/`_xlws.` removed before matching), `xlsx.formulas.structuredRefs`
+  and `xlsx.numberFormats.approximated`, so the confirmation dialog now also appears for files with those. The
+  full report adds 46 ids (formulas, styles, sheet, print, conditional formatting, validation, comments, links,
+  objects, workbook and package: see `documentation/import-loss.md`), including `xlsx.package.encrypted` and
+  `xlsx.package.legacyBinary` for OLE containers. Counts now count objects, not parts (a chart is one chart; a
+  picture is one picture; a sheet with notes and threaded comments is one sheet), so some existing counts change
+  (`xlsx.images`, `xlsx.outline`, `xlsx.comments`) and `xlsx.richText` finds rich strings whose first run is plain.
+  Effect texts start with `lost:`, `approximated:` or `kept:`. The detector never expands XML entities, skips parts
+  over a size limit (reported as `xlsx.package.sizeLimit`) and never throws. The XLSX fidelity loss goldens and the
+  package-ledger rules are regenerated.
 
 ## [0.4.0] - 2026-10-26
 

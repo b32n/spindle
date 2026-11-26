@@ -14,12 +14,12 @@
     },
     {
       "name": "docProps/app.xml",
-      "rule": "none",
+      "rule": "docProps",
       "status": "unaccounted"
     },
     {
       "name": "docProps/core.xml",
-      "rule": "none",
+      "rule": "docProps",
       "status": "unaccounted"
     },
     {
@@ -63,7 +63,7 @@
     },
     {
       "name": "xl/theme/theme1.xml",
-      "rule": "none",
+      "rule": "theme",
       "status": "unaccounted"
     },
     {

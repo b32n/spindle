@@ -27,9 +27,43 @@ model is built) and never throws on a malformed file; the import itself reports 
 
 | Format | Reported |
 |---|---|
-| XLSX | conditional formatting, data validation, filters, protected sheets / workbook protection, grouped rows/columns, sparklines, hidden sheets (become visible), named ranges, charts, images, comments/notes, tables, pivot tables, macros, external links, slicers, rich text inside cells |
+| XLSX | conditional formatting, data validation, filters, protected sheets / workbook protection, grouped rows/columns, sparklines, hidden sheets (become visible), named ranges, charts, images, comments/notes, tables, pivot tables, macros, external links, slicers, rich text inside cells, formulas that use functions the editor does not have (`xlsx.formulas.unsupported`), formulas with table (structured) references (`xlsx.formulas.structuredRefs`), number formats the editor cannot reproduce exactly (`xlsx.numberFormats.approximated`) |
 | DOCX | tracked insertions (text kept as if accepted, author/date lost) and deletions (applied), content controls that cannot be kept (repeating sections, data-bound, group, row- or cell-level controls: their content is kept, the control lost), footnotes and endnotes that nothing in the body refers to, floating images, text boxes/shapes, equations, embedded objects, charts/diagrams, multi-column sections (kept for export, laid out as one column), tables of contents that cannot be read as a block and indexes (text kept, field lost), legacy form fields (text kept as plain text) |
 | CSV | semicolon- or tab-separated files (they import into one column) |
+
+### XLSX loss ids
+
+`inspectXlsx(bytes, { detail })` (sheets-core) and `detectXlsxLoss(bytes, { detail, knownFunctions, isNumberFormatExact })` (`@b32nio/spindle-io/xlsx`)
+parse the package XML (entities are never expanded, oversized parts are skipped and named, nothing throws). The default `detail: 'summary'` is what the
+confirmation dialog shows; `'full'` adds the finer ids below and is what the XLSX fidelity harness records. Every `effect` starts with a state word:
+`lost:` (not kept at all), `approximated:` (kept in a weaker form) or `kept:` (kept, listed for information). Counts are of objects, not of package
+parts: a chart is one chart however many parts it has, a picture is one picture however many times its image file is used.
+
+Summary ids (dialog): `xlsx.conditionalFormatting`, `.dataValidation`, `.autoFilter`, `.sheetProtection`, `.workbookProtection`, `.outline`, `.sparklines`,
+`.hiddenSheets`, `.definedNames`, `.charts`, `.images` (pictures, sheet backgrounds and pictures in cells), `.comments` (sheets with notes or threads),
+`.tables`, `.pivotTables`, `.macros`, `.externalLinks`, `.slicers`, `.richText`, and three new ones: `xlsx.formulas.unsupported` (`where` = function names;
+a function counts as supported when the editor's formula catalog has it after the `_xlfn.`/`_xlws.` prefix is removed; only reported when the caller passes
+`knownFunctions`, as `inspectXlsx` does), `xlsx.formulas.structuredRefs` and `xlsx.numberFormats.approximated` (`where` = the codes; a code counts as exact when
+it maps to a structured format and the export writes the same code back; only reported when the caller passes `isNumberFormatExact`, as `inspectXlsx` does).
+`xlsx.formulas.cachedOnly` is not reported yet: it needs the cached-value fallback of the formula work (plan S4).
+
+Full-only ids:
+
+| Group | Ids (what is counted) |
+|---|---|
+| Formulas | `xlsx.formulas.array` (`t="array"`), `.dynamicArray` (array formula with `cm` metadata), `.externalRef` (`[1]Sheet!A1`), `.wholeColumn` (`A:A`, `1:1`; calculate as empty until plan S5), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
+| Styles | `xlsx.styles.themeColors` (cell formats in use with a theme or indexed colour; plain black text excluded), `.patternFill`, `.gradientFill`, `.diagonalBorder`, `.namedStyles` (named styles in use), `.columnRowStyles` (column and row default formats) |
+| Sheet | `xlsx.sheet.tabColor`, `.zoom` (other than 100), `.rtl`, `.gridlines` (turned off), `.veryHidden`, `.customViews` |
+| Print | `xlsx.print.setup` (a sheet whose orientation, paper size, scale, fit to page, print options or margins differ from Excel's defaults), `.areas`, `.titles`, `.breaks`, `.headersFooters` |
+| Conditional formatting | `xlsx.cf.dataBarExt`, `.iconSetExt` (Excel 2010 extensions), `.formulaRule`, `.stopIfTrue` |
+| Validation | `xlsx.dv.customFormula`, `.messages`, `.crossSheet` (references to another sheet, including Excel 2010 `x14` validations) |
+| Comments, links | `xlsx.comments.threaded`, `.richFormatting`; `xlsx.links.internal` (to a cell or name), `.unsafeScheme` (`javascript:`, `vbscript:`, `data:`, `file:` targets; state `kept:`, the target is stored as written and never opened or run by the library) |
+| Objects | `xlsx.objects.shapes` (shapes and connectors), `.textBoxes`, `.formControls` (form and ActiveX controls), `.embeddedObjects` (OLE), `.cellImages` |
+| Workbook | `xlsx.workbook.date1904` (dates are converted to the 1900 system), `.calcSettings` (manual calculation, iteration, precision as displayed, R1C1; the `calcPr` Excel writes in every file is not reported), `.externalData` (connections, query tables, data model), `.richData` (linked data types) |
+| Package | `xlsx.package.unaccountedParts` (parts nothing reads or reports, named in `where`), `.encrypted` and `.legacyBinary` (an OLE container: password-protected package, or a legacy `.xls`; also a binary `.xlsb`), `.sizeLimit` (parts over the size limit, 64 MiB each or 256 MiB in total, and cell data past 48 MiB of one sheet, are not scanned) |
+
+The XLSX loss counts grow with each fidelity change that keeps a construct: a feature that becomes preserved leaves the table or changes state. The package ledger
+in `fixtures/xlsx/` maps every part of a file to a mapped, dropped or unaccounted status using these ids.
 
 `inspectDocx(bytes)` / `detectDocxLoss(bytes)` return the table above (the report the confirmation dialog uses). Pass `{ detail: 'full' }` for the
 complete measurement, which adds ids for things the importer flattens or ignores rather than drops: `docx.listFormatting` (other number formats) and `docx.sectionProperties` (chapter numbers in page numbers), and a `where` breakdown by field kind on

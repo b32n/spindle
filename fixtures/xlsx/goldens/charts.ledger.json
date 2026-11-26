@@ -14,13 +14,13 @@
     },
     {
       "name": "docProps/app.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "docProps/core.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "xl/_rels/workbook.xml.rels",
@@ -108,9 +108,9 @@
   ],
   "totals": {
     "dropped": 6,
-    "mapped": 9,
+    "mapped": 11,
     "opaque": 0,
     "total": 17,
-    "unaccounted": 2
+    "unaccounted": 0
   }
 }

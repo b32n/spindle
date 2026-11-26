@@ -1,4 +1,11 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 2,
+      "effect": "approximated: imported as plain text",
+      "id": "xlsx.richText",
+      "label": "cell(s) with mixed formatting inside the text"
+    }
+  ]
 }

@@ -2,8 +2,17 @@
   "format": "xlsx",
   "items": [
     {
+      "count": 9,
+      "effect": "lost: table references are not calculated",
+      "id": "xlsx.formulas.structuredRefs",
+      "label": "formula(s) using table (structured) references",
+      "where": [
+        "Tables"
+      ]
+    },
+    {
       "count": 1,
-      "effect": "imported as plain cells (no table styling or structured references)",
+      "effect": "approximated: imported as plain cells (no table styling or structured references)",
       "id": "xlsx.tables",
       "label": "table(s)"
     }

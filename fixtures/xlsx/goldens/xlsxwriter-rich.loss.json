@@ -3,19 +3,34 @@
   "items": [
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.charts",
-      "label": "chart(s)"
+      "label": "chart(s)",
+      "where": [
+        "Data"
+      ]
     },
     {
       "count": 1,
-      "effect": "comments are dropped",
+      "effect": "lost: comments are dropped",
       "id": "xlsx.comments",
-      "label": "sheet(s) with comments/notes"
+      "label": "sheet(s) with comments/notes",
+      "where": [
+        "Data"
+      ]
     },
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: comments are not imported, so their formatting is not either",
+      "id": "xlsx.comments.richFormatting",
+      "label": "comment(s) with formatted text",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
       "id": "xlsx.conditionalFormatting",
       "label": "conditional formatting rule(s)",
       "where": [
@@ -24,7 +39,7 @@
     },
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.dataValidation",
       "label": "data validation rule(s) (dropdowns, limits)",
       "where": [
@@ -33,7 +48,7 @@
     },
     {
       "count": 1,
-      "effect": "not imported; formulas using them break",
+      "effect": "lost: not imported; formulas using them break",
       "id": "xlsx.definedNames",
       "label": "named range(s)/name(s)",
       "where": [
@@ -41,10 +56,37 @@
       ]
     },
     {
+      "count": 2,
+      "effect": "approximated: imported as an ordinary formula; Excel's array metadata is dropped",
+      "id": "xlsx.formulas.dynamicArray",
+      "label": "dynamic-array formula(s)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: cannot be calculated (the cells show #NAME?)",
+      "id": "xlsx.formulas.unsupported",
+      "label": "formula(s) using functions the editor does not have",
+      "where": [
+        "LET"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
       "id": "xlsx.images",
-      "label": "image(s)/drawing(s)"
+      "label": "image(s)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "approximated: imported as plain text",
+      "id": "xlsx.richText",
+      "label": "cell(s) with mixed formatting inside the text"
     }
   ]
 }

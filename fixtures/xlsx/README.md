@@ -76,7 +76,7 @@ that throws is recorded as `importError` with the message.
 | Kind | What it records |
 |---|---|
 | `model` | The sheets-core workbook after `importFromXlsx`, normalised: cells by address (`A1`), pooled styles and formats renumbered `s1`.. and `f1`.. in position order, row and column ids turned into positions, formula text without the stable-id AST, binary payloads (when the model has any) as size plus SHA-256. Also `importError` and the import `warnings`. |
-| `loss` | `inspectXlsx(bytes, { detail: 'full' })` sorted by id. Today the detector ignores the option and reports its summary ids; when S1 adds the full level the goldens pick it up without a change to the runner. |
+| `loss` | `inspectXlsx(bytes, { detail: 'full' })` sorted by id. The full level reports every loss id (the summary ids the import dialog shows plus the finer `xlsx.*` ids of the loss table in `documentation/import-loss.md`). |
 | `roundtrip` | Import, export, import again, and the structured difference between the two imported models (styles inlined so pool numbering never counts): total, added, removed, changed, counts per field and the first 40 differences. `status` is `ok`, `skipped-import-error`, `export-error` or `reimport-error`. |
 | `ledger` | Every part of the input package with a status, see below. |
 | `values` | What the engine computes for each formula cell after import against the value the file caches for it (read from the package XML, not from the importer): counts compared, matched and mismatched, mismatches by kind (`number -> error`), and the first 20 with sheet, cell, expected and actual. Formulas without a cached value and formulas calling NOW, TODAY or RAND* are counted but not compared. Numbers match to 9 significant digits; two errors match when the code is the same (`#NAME?`). |
@@ -92,17 +92,20 @@ Every part (zip entry) of the input gets exactly one status, decided by the firs
 `scripts/xlsx-fidelity/ledger.ts` (the rule id is recorded next to the part):
 
 - `mapped`: the part's content flows into the model (workbook, worksheets, shared strings, styles) or it is package
-  plumbing the export rebuilds (`[Content_Types].xml`, every `.rels`). A mapped part can still hold features the
-  model lacks; those are reported through loss ids, not here.
+  plumbing the export rebuilds (`[Content_Types].xml`, every `.rels`, `docProps/`, the calculation chain). A mapped
+  part can still hold features the model lacks; those are reported through loss ids, not here.
 - `opaque`: the part is kept byte for byte and written back on export. Always zero until the opaque part store (plan
   X5) exists; the runner already has the hook.
 - `dropped`: not imported, and the loss report covers it. A rule only applies when the file's loss report contains
-  one of the rule's ids (`xlsx.charts` for charts and chart sheets, `xlsx.images` for media and drawings,
-  `xlsx.comments` for notes, threads and legacy drawings, `xlsx.tables`, `xlsx.pivotTables`, `xlsx.slicers`,
-  `xlsx.externalLinks`, `xlsx.macros`); the covering id is listed.
-- `unaccounted`: nothing accounts for the part. It is not read and no reported loss covers it: document properties,
-  themes, the calc chain, printer settings, custom XML, a drawing holding only shapes. The number is recorded as is
-  (launch-bar row L8 wants 0; the plan's S1, S6 and X5 take it there).
+  one of the rule's ids (`xlsx.charts` for charts and chart sheets, `xlsx.images` and the `xlsx.objects.*` ids for
+  media and drawings, `xlsx.comments` and `xlsx.comments.threaded` for notes, threads and legacy drawings,
+  `xlsx.tables`, `xlsx.pivotTables`, `xlsx.slicers`, `xlsx.externalLinks`, `xlsx.macros`, `xlsx.print.setup` for
+  printer settings, `xlsx.styles.themeColors` for the theme, `xlsx.workbook.richData` and
+  `xlsx.workbook.externalData`); the covering id is listed. A part no rule names (custom XML, dialog sheets, SmartArt)
+  is covered by the detector's catch-all `xlsx.package.unaccountedParts`, which lists it.
+- `unaccounted`: nothing accounts for the part. It is not read and no reported loss covers it: a theme or printer
+  settings part in a file whose reported losses do not mention them, or any part of a file the importer could not read
+  (below). The number is recorded as is (launch-bar row L8 wants 0; the plan's S2, S6 and X5 take it there).
 
 If the import throws, nothing reached the model, so `mapped` parts count as `unaccounted` for that file (`dropped`
 stays: the loss report is produced independently). A package that cannot be read at all (truncated zip, OLE stub)

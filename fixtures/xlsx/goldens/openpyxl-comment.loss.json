@@ -1,4 +1,23 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: comments are dropped",
+      "id": "xlsx.comments",
+      "label": "sheet(s) with comments/notes",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.setup",
+      "label": "sheet(s) with page setup (orientation, paper size, scale, margins, fit to page)",
+      "where": [
+        "Data"
+      ]
+    }
+  ]
 }

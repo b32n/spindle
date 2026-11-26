@@ -3,9 +3,21 @@
   "items": [
     {
       "count": 2,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.charts",
-      "label": "chart(s)"
+      "label": "chart(s)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.print.setup",
+      "label": "sheet(s) with page setup (orientation, paper size, scale, margins, fit to page)",
+      "where": [
+        "Data"
+      ]
     }
   ]
 }

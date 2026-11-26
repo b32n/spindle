@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.autoFilter",
       "label": "filter(s)",
       "where": [

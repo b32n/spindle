@@ -1,4 +1,35 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "approximated: imported as an ordinary formula in the first cell; the other cells keep their saved values",
+      "id": "xlsx.formulas.array",
+      "label": "array formula(s)",
+      "where": [
+        "Modern"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "approximated: imported as an ordinary formula; Excel's array metadata is dropped",
+      "id": "xlsx.formulas.dynamicArray",
+      "label": "dynamic-array formula(s)",
+      "where": [
+        "Modern"
+      ]
+    },
+    {
+      "count": 4,
+      "effect": "lost: cannot be calculated (the cells show #NAME?)",
+      "id": "xlsx.formulas.unsupported",
+      "label": "formula(s) using functions the editor does not have",
+      "where": [
+        "STDEV.S",
+        "LET",
+        "LAMBDA",
+        "MAXIFS"
+      ]
+    }
+  ]
 }

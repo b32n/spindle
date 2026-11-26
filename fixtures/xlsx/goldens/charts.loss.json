@@ -3,9 +3,12 @@
   "items": [
     {
       "count": 5,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.charts",
-      "label": "chart(s)"
+      "label": "chart(s)",
+      "where": [
+        "Charts"
+      ]
     }
   ]
 }

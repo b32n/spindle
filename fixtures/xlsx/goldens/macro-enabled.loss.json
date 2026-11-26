@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "macros are dropped",
+      "effect": "lost: macros are dropped",
       "id": "xlsx.macros",
       "label": "macro project"
     }

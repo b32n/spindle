@@ -14,13 +14,13 @@
     },
     {
       "name": "docProps/app.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "docProps/core.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "docProps",
+      "status": "mapped"
     },
     {
       "name": "xl/_rels/workbook.xml.rels",
@@ -28,9 +28,12 @@
       "status": "mapped"
     },
     {
+      "loss": [
+        "xlsx.formulas.dynamicArray"
+      ],
       "name": "xl/metadata.xml",
-      "rule": "none",
-      "status": "unaccounted"
+      "rule": "metadata",
+      "status": "dropped"
     },
     {
       "name": "xl/sharedStrings.xml",
@@ -64,10 +67,10 @@
     }
   ],
   "totals": {
-    "dropped": 0,
-    "mapped": 9,
+    "dropped": 1,
+    "mapped": 11,
     "opaque": 0,
     "total": 12,
-    "unaccounted": 3
+    "unaccounted": 0
   }
 }

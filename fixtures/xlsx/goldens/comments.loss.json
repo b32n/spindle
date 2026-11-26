@@ -2,10 +2,22 @@
   "format": "xlsx",
   "items": [
     {
-      "count": 2,
-      "effect": "comments are dropped",
+      "count": 1,
+      "effect": "lost: comments are dropped",
       "id": "xlsx.comments",
-      "label": "sheet(s) with comments/notes"
+      "label": "sheet(s) with comments/notes",
+      "where": [
+        "Notes"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "lost: not imported, replies included",
+      "id": "xlsx.comments.threaded",
+      "label": "threaded comment(s)",
+      "where": [
+        "Notes"
+      ]
     }
   ]
 }

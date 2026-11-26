@@ -2,8 +2,26 @@
   "format": "xlsx",
   "items": [
     {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.cf.dataBarExt",
+      "label": "data bar(s) with Excel 2010 extensions",
+      "where": [
+        "CFx14"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: not imported",
+      "id": "xlsx.cf.iconSetExt",
+      "label": "icon set(s) with Excel 2010 extensions",
+      "where": [
+        "CFx14"
+      ]
+    },
+    {
       "count": 2,
-      "effect": "not imported",
+      "effect": "lost: not imported",
       "id": "xlsx.conditionalFormatting",
       "label": "conditional formatting rule(s)",
       "where": [

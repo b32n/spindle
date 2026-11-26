@@ -1,4 +1,20 @@
 {
   "format": "xlsx",
-  "items": []
+  "items": [
+    {
+      "count": 1,
+      "effect": "lost: only cells present in the file keep their formatting",
+      "id": "xlsx.styles.columnRowStyles",
+      "label": "column/row default style(s)",
+      "where": [
+        "Styles"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "lost: the colour is dropped (only RGB colours are imported)",
+      "id": "xlsx.styles.themeColors",
+      "label": "cell format(s) using theme or indexed colours"
+    }
+  ]
 }

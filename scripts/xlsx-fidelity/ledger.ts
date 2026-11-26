@@ -8,7 +8,8 @@
  *                part store (plan X5) exists: `opaque` is the hook that will decide it.
  *   dropped      the part is not imported and the loss report says so: a loss id covers it (`loss` lists the ids).
  *   unaccounted  nothing accounts for the part: it is not read and no reported loss covers it. The count is
- *                recorded as is (plan row L8 wants 0; today it is not).
+ *                recorded as is (plan row L8 wants 0). A part no rule knows is covered by the detector's
+ *                catch-all `xlsx.package.unaccountedParts`, so it is `dropped` rather than silent.
  *
  * Rules are the first-match table below, keyed by part name. A `dropped` rule only holds when the file's loss
  * report really contains one of the rule's loss ids; otherwise the part is `unaccounted`. If the import threw,
@@ -31,22 +32,54 @@ export interface LedgerRule {
 export const LEDGER_RULES: readonly LedgerRule[] = [
   { id: 'package.contentTypes', match: /^\[Content_Types\]\.xml$/i, outcome: 'mapped' },
   { id: 'package.relationships', match: /\.rels$/i, outcome: 'mapped' },
+  // The writer rebuilds document properties and the calculation chain is a cache: nothing to carry over.
+  { id: 'docProps', match: /^docProps\//, outcome: 'mapped' },
+  { id: 'calcChain', match: /^xl\/calcChain\.xml$/, outcome: 'mapped' },
   { id: 'workbook', match: /^xl\/workbook\.xml$/, outcome: 'mapped' },
   { id: 'worksheet', match: /^xl\/worksheets\/[^/]+\.xml$/, outcome: 'mapped' },
   { id: 'sharedStrings', match: /^xl\/sharedStrings\.xml$/, outcome: 'mapped' },
   { id: 'styles', match: /^xl\/styles\.xml$/, outcome: 'mapped' },
+  { id: 'theme', match: /^xl\/theme\//, outcome: { dropped: ['xlsx.styles.themeColors'] } },
+  {
+    id: 'printerSettings',
+    match: /^xl\/printerSettings\//,
+    outcome: { dropped: ['xlsx.print.setup'] },
+  },
+  {
+    id: 'metadata',
+    match: /^xl\/metadata\.xml$/,
+    outcome: { dropped: ['xlsx.formulas.dynamicArray'] },
+  },
   { id: 'chartsheet', match: /^xl\/chartsheets\//, outcome: { dropped: ['xlsx.charts'] } },
   {
-    id: 'drawing',
-    match: /^xl\/drawings\/(?!vmlDrawing)/,
-    outcome: { dropped: ['xlsx.images', 'xlsx.charts'] },
+    id: 'vmlDrawing',
+    match: /^xl\/drawings\/[^/]*\.vml$/,
+    outcome: { dropped: ['xlsx.comments', 'xlsx.objects.formControls', 'xlsx.images'] },
   },
-  { id: 'media', match: /^xl\/media\//, outcome: { dropped: ['xlsx.images'] } },
+  {
+    id: 'drawing',
+    match: /^xl\/drawings\//,
+    outcome: {
+      dropped: [
+        'xlsx.images',
+        'xlsx.charts',
+        'xlsx.objects.shapes',
+        'xlsx.objects.textBoxes',
+        'xlsx.objects.formControls',
+        'xlsx.objects.embeddedObjects',
+      ],
+    },
+  },
+  {
+    id: 'media',
+    match: /^xl\/media\//,
+    outcome: { dropped: ['xlsx.images', 'xlsx.objects.cellImages'] },
+  },
   { id: 'chart', match: /^xl\/charts\//, outcome: { dropped: ['xlsx.charts'] } },
   {
     id: 'comments',
-    match: /^xl\/(comments[^/]*\.xml|threadedComments\/|persons\/|drawings\/vmlDrawing)/,
-    outcome: { dropped: ['xlsx.comments'] },
+    match: /^xl\/(comments[^/]*\.xml|comments\/|threadedComments\/|persons\/)/,
+    outcome: { dropped: ['xlsx.comments', 'xlsx.comments.threaded'] },
   },
   { id: 'table', match: /^xl\/tables\//, outcome: { dropped: ['xlsx.tables'] } },
   {
@@ -61,9 +94,37 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
     outcome: { dropped: ['xlsx.externalLinks'] },
   },
   {
+    id: 'controls',
+    match: /^xl\/(ctrlProps|activeX)\//,
+    outcome: { dropped: ['xlsx.objects.formControls'] },
+  },
+  {
+    id: 'embedding',
+    match: /^xl\/embeddings\//,
+    outcome: { dropped: ['xlsx.objects.embeddedObjects'] },
+  },
+  {
+    id: 'richData',
+    match: /^xl\/(richData\/|cellimages\.xml$)/,
+    outcome: {
+      dropped: ['xlsx.workbook.richData', 'xlsx.objects.cellImages', 'xlsx.images'],
+    },
+  },
+  {
+    id: 'externalData',
+    match: /^xl\/(connections\.xml$|queryTables\/|model\/)/,
+    outcome: { dropped: ['xlsx.workbook.externalData'] },
+  },
+  {
     id: 'macro',
     match: /^xl\/vbaProject\.bin$|^xl\/vbaProjectSignature\.bin$/,
     outcome: { dropped: ['xlsx.macros'] },
+  },
+  // Any other part: covered only by the detector's catch-all report (`full` detail), which names it.
+  {
+    id: 'unknownPart',
+    match: /./,
+    outcome: { dropped: ['xlsx.package.unaccountedParts'] },
   },
 ];
 
