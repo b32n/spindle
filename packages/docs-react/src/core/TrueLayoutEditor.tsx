@@ -204,7 +204,11 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
   ) {
     // With several sections the first one's setup stands for the document where one setup is needed (the painter's
     // default, the hidden editor's width); each page uses its own section's setup.
-    const pageConfig = sections?.[0]?.pageConfig ?? pageConfigProp;
+    // (Kept referentially stable: a new object on every render of the host would re-lay the document out and repaint
+    // the pages between a mouse press and its release, losing the click.)
+    const pageConfigKey = JSON.stringify(sections?.[0]?.pageConfig ?? pageConfigProp);
+     
+    const pageConfig = useMemo<PageConfig>(() => JSON.parse(pageConfigKey), [pageConfigKey]);
     const header = sections ? undefined : headerProp;
     const footer = sections ? undefined : footerProp;
     const sectionsRef = useRef(sections);
