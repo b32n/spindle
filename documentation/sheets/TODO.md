@@ -6,11 +6,11 @@ of the remaining work is **feature parity** in the non-formula feature set.
 
 ## Formula engine — shipped
 
-The engine ships **229 functions** across math, logical, text, lookup,
+The engine ships **242 functions** across math, logical, text, lookup,
 statistical, date/time, information, financial, reference and array categories
 (`packages/sheets-core/src/formula-parser/functions/`).
 
-- [x] **Standard function library** — all categories above (229 in `catalog.ts`)
+- [x] **Standard function library** — all categories above (242 in `catalog.ts`)
 - [x] **Excel-grade recalculation** — topological dirty-propagation (each cell
       computed once per pass), volatile functions, complete range-rectangle
       dependency tracking (`formula-graph.ts`, `workbook.ts`)
@@ -68,10 +68,13 @@ statistical, date/time, information, financial, reference and array categories
 - [ ] **`TEXTBEFORE`, `TEXTAFTER`, `TEXTSPLIT`** — deferred until Excel-computed files exist (plan S12, D8): LibreOffice 25.2 has no
       such function, so there is no trustworthy oracle. Their probe rows are in `KNOWN_FAILING`. (`omittable.ts` is where
       `TEXTSPLIT(a,,";")` would need its blank argument kept.)
-- [ ] **Missing functions** — `HSTACK`, `VSTACK`, `TAKE`, `DROP`, `CHOOSECOLS`, `CHOOSEROWS`, `EXPAND`, `TOCOL`, `TOROW`, `WRAPROWS`,
-      `WRAPCOLS`, `ARRAYTOTEXT`, `VALUETOTEXT` (no LibreOffice oracle and outside plan S12: S13 / post-launch); `LET` and `LAMBDA`
-      with its helpers need names in scope in the evaluator (post-launch). The unprefixed names work; the `_xlfn.` spellings
-      Excel writes into files are mapped on import (plan S4).
+- [ ] **Missing functions** — `LET` and `LAMBDA` with its helpers (`MAP`, `REDUCE`, `SCAN`, `BYROW`, `BYCOL`) need names in
+      scope in the evaluator (post-launch). The unprefixed names work; the `_xlfn.` spellings Excel writes into files are mapped
+      on import (plan S4).
+- [ ] **Functions without an oracle (S12c, not for merge under the stream's delegation)** — `ARRAYTOTEXT`, `VALUETOTEXT`, `TAKE`,
+      `DROP`, `HSTACK`, `VSTACK`, `CHOOSECOLS`, `CHOOSEROWS`, `EXPAND`, `TOCOL`, `TOROW`, `WRAPROWS`, `WRAPCOLS`: implemented on
+      Excel's documented semantics with every conformance row tagged unverified (LibreOffice 25.2 has none of them); outside the
+      plan's S12 list (S13 / post-launch). Bharat to confirm or revert.
 - [x] **Text and date, batch B** — `CLEAN`, `NUMBERVALUE`, `UNICHAR`, `UNICODE`, `T`,
       `FIXED`, `DOLLAR`, `BASE`, `DECIMAL`, `ROMAN`, `ARABIC`, `ISNONTEXT`, `DAYS`, `DAYS360`,
       `YEARFRAC` (all five bases), `ISOWEEKNUM`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`, and `INDEX(range,0,col)` /
@@ -135,5 +138,5 @@ alignment, wrap, rotation), number formats, hyperlinks, date-entry
 auto-detection, hide/show and insert/delete rows and columns, merged cells,
 multiple sheets, undo/redo, find & replace, autofill (numbers, dates,
 month/weekday name lists and text patterns), **CSV and XLSX import/export** (with Open/Download in the toolbar), the
-229-function formula engine with dynamic arrays, and formula autocomplete with
+242-function formula engine with dynamic arrays, and formula autocomplete with
 parameter help.

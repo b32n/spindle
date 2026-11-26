@@ -681,6 +681,12 @@ lockstep.
   row carries Excel's documented value, tagged unverified). `LET` and `LAMBDA` stay post-launch. The XLSX `values` golden for `formulas-core`
   improves from 127 to 130 of 159 matching and `xlsx.formulas.unsupported` shrinks again (10 to 6 formulas there); `=TRANSPOSE(A1:B2)` in that
   fixture evaluates but its spill range is blocked by the next probe row (`#SPILL!`).
+- **Functions without an oracle (S12c, not for merge under the stream's delegation).** 13 functions (229 to 242) that LibreOffice 25.2 lacks and
+  the plan's S12 entry does not list: `ARRAYTOTEXT`, `VALUETOTEXT` (15-digit General numbers, strict quoting), `TAKE`, `DROP`, `HSTACK`,
+  `VSTACK`, `CHOOSECOLS`, `CHOOSEROWS`, `EXPAND`, `TOCOL`, `TOROW`, `WRAPROWS` and `WRAPCOLS` (spilled; a blank cell that passes through
+  reads 0; padding with `#N/A` or `pad_with`; a blank argument in the middle is kept for `TAKE`, `DROP`, `EXPAND`, `TOCOL`, `TOROW`). 77 conformance
+  rows, all Excel-documented and tagged unverified until real Excel files confirm them. In the XLSX `formulas-core` loss golden `xlsx.formulas.unsupported`
+  shrinks from 6 to 3 formulas (`HSTACK`, `VSTACK` and `TAKE`); the values golden does not change (those cells are `_xlfn.`-prefixed).
 
 ## [0.4.0] - 2026-10-26
 

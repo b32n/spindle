@@ -1,6 +1,6 @@
 # Function list
 
-The sheets engine ships **229 built-in functions**. This is the published list, by category, with the evidence for
+The sheets engine ships **242 built-in functions**. This is the published list, by category, with the evidence for
 each function's Excel parity. It is checked against the function catalog (`formula-parser/functions/catalog.ts`) by
 `functions-doc.test.ts`, so a function cannot be added without being listed here.
 
@@ -11,7 +11,7 @@ How to read the **Excel parity** column:
   values LibreOffice 25.2 computes. LibreOffice is the available oracle, not Excel itself.
 - *Excel-documented (unverified)*: LibreOffice 25.2 lacks the function or differs from Excel, so the row carries the behaviour Excel's
   documentation gives (tagged `excel: true, unverified: true` in the table) until a real Excel file confirms it (plan decision D8).
-  This covers the rows where LibreOffice's error code or calendar differs from Excel's.
+  This covers `ARRAYTOTEXT`, `VALUETOTEXT` and the array-shaping functions (which have no oracle at all and are outside the plan's S12 list), and the rows where LibreOffice's error code or calendar differs from Excel's.
 - *unit tests*: older functions covered by their module's unit tests (a few also appear in the 159-formula probe).
 
 Notes that apply to the whole list:
@@ -118,11 +118,12 @@ Notes that apply to the whole list:
 | `TRUE()` | Returns the logical value TRUE. | unit tests |
 | `XOR(logical1, [logical2, ...])` | Returns TRUE if an odd number of arguments are TRUE. | 1 oracle rows, LibreOffice-verified |
 
-## Text (32)
+## Text (34)
 
 | Function | Description | Excel parity |
 |---|---|---|
 | `ARABIC(text)` | Converts a Roman numeral to a number. | 7 oracle rows, 1 Excel-documented (unverified) |
+| `ARRAYTOTEXT(array, [format])` | Writes an array as text (0: concise, 1: strict with braces and quotes). | 7 oracle rows, Excel-documented (unverified) |
 | `BASE(number, radix, [min_length])` | Writes a number as text in another base (2 to 36). | 11 oracle rows, 4 Excel-documented (unverified) |
 | `CHAR(number)` | Returns the character for a character code. | unit tests |
 | `CLEAN(text)` | Removes the non-printing characters (codes 0-31) from text. | 8 oracle rows, 1 Excel-documented (unverified) |
@@ -154,6 +155,7 @@ Notes that apply to the whole list:
 | `UNICODE(text)` | Returns the Unicode code point of the first character. | 6 oracle rows, LibreOffice-verified |
 | `UPPER(text)` | Converts text to uppercase. | 1 oracle rows, LibreOffice-verified |
 | `VALUE(text)` | Converts a text value to a number. | 1 oracle rows, LibreOffice-verified |
+| `VALUETOTEXT(value, [format])` | Writes a value as text (0: concise, 1: strict with quotes). | 8 oracle rows, Excel-documented (unverified) |
 
 ## Lookup (12)
 
@@ -292,14 +294,25 @@ Notes that apply to the whole list:
 | `OFFSET(reference, rows, cols, [height], [width])` | Returns a reference shifted from a starting reference. | 1 oracle rows, LibreOffice-verified |
 | `ROW([reference])` | Returns the row number of a reference. | 1 oracle rows, LibreOffice-verified |
 
-## Array (dynamic arrays) (7)
+## Array (dynamic arrays) (18)
 
 | Function | Description | Excel parity |
 |---|---|---|
+| `CHOOSECOLS(array, col_num1, [col_num2, ...])` | Returns the chosen columns of an array. | 6 oracle rows, Excel-documented (unverified) |
+| `CHOOSEROWS(array, row_num1, [row_num2, ...])` | Returns the chosen rows of an array. | 5 oracle rows, Excel-documented (unverified) |
+| `DROP(array, [rows], [columns])` | Removes rows or columns from the start or end of an array. | 6 oracle rows, Excel-documented (unverified) |
+| `EXPAND(array, [rows], [columns], [pad_with])` | Grows an array to a size, padding the new cells. | 6 oracle rows, Excel-documented (unverified) |
 | `FILTER(array, include, [if_empty])` | Returns the rows of a range that meet a condition. | 1 oracle rows, LibreOffice-verified |
+| `HSTACK(array1, [array2, ...])` | Joins arrays side by side, padding with #N/A. | 6 oracle rows, Excel-documented (unverified) |
 | `SEQUENCE(rows, [columns], [start], [step])` | Generates a sequence of numbers in an array. | 1 oracle rows, LibreOffice-verified |
 | `SORT(array, [sort_index], [sort_order], [by_column])` | Sorts the rows of a range. | 1 oracle rows, LibreOffice-verified |
 | `SORTBY(array, by_array1, [sort_order1], [by_array, sort_order, ...])` | Sorts a range by the values in one or more other ranges. | 1 oracle rows, LibreOffice-verified |
 | `SPLIT(text, delimiter, [split_by_each], [remove_empty])` | Splits text into an array around a delimiter. | unit tests |
+| `TAKE(array, [rows], [columns])` | Returns rows or columns from the start or end of an array. | 8 oracle rows, Excel-documented (unverified) |
+| `TOCOL(array, [ignore], [scan_by_column])` | Returns an array as a single column. | 7 oracle rows, Excel-documented (unverified) |
+| `TOROW(array, [ignore], [scan_by_column])` | Returns an array as a single row. | 5 oracle rows, Excel-documented (unverified) |
 | `TRANSPOSE(array)` | Swaps the rows and columns of an array. | 9 oracle rows, 1 Excel-documented (unverified) |
 | `UNIQUE(array, [by_column], [exactly_once])` | Returns the unique rows of a range. | 1 oracle rows, LibreOffice-verified |
+| `VSTACK(array1, [array2, ...])` | Joins arrays one above the other, padding with #N/A. | 6 oracle rows, Excel-documented (unverified) |
+| `WRAPCOLS(vector, wrap_count, [pad_with])` | Wraps a row or column of values into columns of a given length. | 4 oracle rows, Excel-documented (unverified) |
+| `WRAPROWS(vector, wrap_count, [pad_with])` | Wraps a row or column of values into rows of a given length. | 6 oracle rows, Excel-documented (unverified) |
