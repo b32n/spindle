@@ -76,7 +76,7 @@ export interface RevisionAuthor {
 }
 
 /**
- * The tracked changes of the document in order, runs of one change (same kind and id) joined. With `withText` false the
+ * The tracked changes of the document in order, runs of one change (same kind, id and author) joined; the same id from two authors is two changes, as the DOCX writer treats it. With `withText` false the
  * `text` of each is left empty, which spares building the strings when only the authors and counts are wanted.
  * Runs are joined only when they sit next to each other: a change that crosses a paragraph boundary (pasted tracked text
  * of several paragraphs keeps one id) is one entry per paragraph, so the count can be higher than Word's.
@@ -90,7 +90,7 @@ export function collectRevisions(doc: PmNode, withText = true): RevisionSummary[
       const kind = mark.type.name;
       if (kind !== 'insertion' && kind !== 'deletion') continue;
       const id = String(mark.attrs.revisionId);
-      const key = `${kind}:${id}`;
+      const key = `${kind}:${id}:${mark.attrs.author}`;
       const last = open.get(key);
       const text = withText ? (node.text ?? '') : '';
       if (last && last.to === pos) {

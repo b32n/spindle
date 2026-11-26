@@ -1382,7 +1382,7 @@ function dropCustomMark(content: DocInline[], mark: string): void {
   first.text = first.text.slice(mark.length);
   if (first.text === '') content.shift();
   const next = content[0];
-  if (next && next.type === 'text' && next.text.startsWith(' ')) {
+  if (next && next.type === 'text' && !next.revision && next.text.startsWith(' ')) {
     next.text = next.text.slice(1);
     if (next.text === '') content.shift();
   }
@@ -1396,9 +1396,10 @@ function noteContent(blocks: XmlNode[], ctx: PartContext, warnings: string[]): D
     const tag = tagOf(block);
     if (tag === 'w:p') {
       if (content.length > 0) {
-        // The line break joins the paragraphs; it takes the formatting of the text before it.
+        // The line break joins the paragraphs; it takes the formatting of the text before it, but never a tracked
+        // change of it (the break was not part of that change).
         const last = content[content.length - 1];
-        if (last.type === 'text') last.text += '\n';
+        if (last.type === 'text' && !last.revision) last.text += '\n';
         else content.push({ type: 'text', text: '\n' });
       }
       content.push(...paragraphInlineContent(block, ctx, warnings));
@@ -1409,7 +1410,7 @@ function noteContent(blocks: XmlNode[], ctx: PartContext, warnings: string[]): D
   if (tables > 0) warnings.push('A table in a note was not imported.');
   // The mark is followed by a space, in a run of its own or at the start of the text.
   const first = content[0];
-  if (first && first.type === 'text' && first.text.startsWith(' ')) {
+  if (first && first.type === 'text' && !first.revision && first.text.startsWith(' ')) {
     first.text = first.text.slice(1);
     if (first.text === '') content.shift();
   }

@@ -96,6 +96,26 @@ describe('reading notes', () => {
     ]);
   });
 
+  it('keeps the line break between note paragraphs out of a tracked change at the end of the paragraph before it', async () => {
+    const del = (id: string, inner: string) => `<w:del w:id="${id}" w:author="Bo">${inner}</w:del>`;
+    const ins = (id: string, inner: string) => `<w:ins w:id="${id}" w:author="Ada">${inner}</w:ins>`;
+    const result = await importParts({
+      body: p(ref('footnote', 1)),
+      footnotes: note('footnote', 1, [r(' kept') + del('7', r('gone')), ins('8', r('added')) + r(' tail')]),
+    });
+    const content = refs(firstContent(result))[0].content;
+    expect(content.map((i) => (i as { text: string }).text).join('')).toBe('keptgone\nadded tail');
+    const gone = content.find((i) => (i as { text: string }).text === 'gone') as { revision?: unknown };
+    expect(gone.revision).toMatchObject({ deletion: { author: 'Bo' } });
+    expect(content).toContainEqual({ type: 'text', text: '\n' });
+  });
+
+  it('does not take the space after the mark out of a tracked run', async () => {
+    const ins = `<w:ins w:id="3" w:author="Ada">${r(' spaced')}</w:ins>`;
+    const result = await importParts({ body: p(ref('footnote', 1)), footnotes: note('footnote', 1, [ins]) });
+    expect(refs(firstContent(result))[0].content).toMatchObject([{ type: 'text', text: ' spaced', revision: { insertion: { author: 'Ada' } } }]);
+  });
+
   it('puts a line break of its own between paragraphs when the first note paragraph ends in something that is not text', async () => {
     const result = await importParts({
       body: p(ref('footnote', 1)),

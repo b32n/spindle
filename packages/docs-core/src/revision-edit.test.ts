@@ -116,6 +116,12 @@ describe('typing inside a deletion', () => {
     expect(next.storedMarks?.some((m) => m.type.name === 'deletion') ?? false).toBe(false);
   });
 
+  it('is tagged as ordinary input, like the default text input', () => {
+    const state = at(stateOf(), 1 + 5 + 3);
+    const tr = typeOutsideDeletion(state, state.selection.from, state.selection.to, 'Q')!;
+    expect(tr.getMeta('uiEvent')).toBe('input');
+  });
+
   it('replaces a selection inside a deletion with live text', () => {
     const state = stateOf();
     const next = state.apply(typeOutsideDeletion(state, 7, 9, 'Z')!);

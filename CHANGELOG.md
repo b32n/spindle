@@ -323,7 +323,7 @@ lockstep.
   text (Shift+Enter) is a newline in the text, so its change survives collaboration. The DOCX writer no longer uses a regular
   expression look-behind (older Safari cannot parse one), writes a `w:date` without seconds with `:00` added (the file format requires the seconds) and a deleted run counts as content
   when a page break follows it. Copied tracked text now keeps its changes when pasted in the browser (the clipboard HTML was parsed as plain text style before: the parse rules of the change marks have a priority of their own). Updating a table of contents lists the final text of a heading (words in a tracked
-  deletion are left out). The authors of the changes are collected when typing pauses, not on every key.
+  deletion are left out). The authors of the changes are collected when typing pauses, not on every key. The paragraph break between the paragraphs of a note no longer becomes part of a tracked change at the end of the paragraph before it, and the same change id from two authors counts as two changes in the list of changes.
 
 ### Changed
 

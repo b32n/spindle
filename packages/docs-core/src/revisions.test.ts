@@ -226,6 +226,25 @@ describe('author colours and the list of changes', () => {
   });
 });
 
+describe('one id from two authors', () => {
+  it('is two changes, not one, as the DOCX writer treats it', () => {
+    const pm = blocksToPmDoc([
+      {
+        id: 'p',
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'a', revision: { insertion: { id: '1', author: 'Ada' } } },
+          { type: 'text', text: 'b', revision: { insertion: { id: '1', author: 'Bo' } } },
+        ],
+      },
+    ]);
+    expect(collectRevisions(pm).map((c) => [c.id, c.author, c.text])).toEqual([
+      ['1', 'Ada', 'a'],
+      ['1', 'Bo', 'b'],
+    ]);
+  });
+});
+
 describe('the authors list in state', () => {
   const pm = blocksToPmDoc([{ id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'ab', revision: { insertion: ADA } }, { type: 'text', text: 'c', revision: { deletion: BO } }] }]);
 

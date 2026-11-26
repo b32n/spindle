@@ -60,7 +60,7 @@ export function typeOutsideDeletion(state: EditorState, from: number, to: number
   const tr = state.tr.insertText(text, from, to);
   tr.removeMark(from, from + text.length, type);
   tr.setStoredMarks(marks.filter((m) => m.type !== type));
-  return tr;
+  return tr.setMeta('uiEvent', 'input');
 }
 
 /**

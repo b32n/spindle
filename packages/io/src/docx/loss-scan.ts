@@ -247,7 +247,7 @@ function trackedChanges(root: XmlNode[]): Item[] {
   ];
 }
 
-const CHANGE_NOT_KEPT_RUN_CONTENT = ['w:fldChar', 'w:fldSimple', 'w:drawing', 'mc:AlternateContent', 'w:pict', 'w:footnoteReference', 'w:endnoteReference'];
+const CHANGE_NOT_KEPT_RUN_CONTENT = ['w:fldChar', 'w:fldSimple', 'w:drawing', 'mc:AlternateContent', 'w:footnoteReference', 'w:endnoteReference'];
 
 /**
  * Tracked changes around runs that the importer cannot keep as a change: a change around a field (a deleted field is dropped),

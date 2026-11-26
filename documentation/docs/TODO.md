@@ -64,7 +64,9 @@ Verified absent in code.
 - [ ] **Track changes / suggestions mode** — tracked insertions and deletions around runs are read from a file, shown
       (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
       rejecting, a Suggesting mode, moves, formatting changes, paragraph-mark and table-row changes, and a change around a
-      field, image or note reference (those are not kept as changes).
+      field, image or note reference (those are not kept as changes). Also open: IME composition inside a deleted run is
+      not covered (the composed text can take the deletion), and deleted text still counts in the plain-text and HTML
+      exports, word count and search (only the table of contents leaves it out).
 - [ ] **Spell-check** — browser spellcheck is deliberately disabled
       (`input-bridge.ts`); no custom engine.
 - [ ] **Equation editor, drawing / shapes / canvas** — none.
