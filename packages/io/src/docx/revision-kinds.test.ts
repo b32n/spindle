@@ -202,6 +202,19 @@ describe('writing', () => {
     });
   });
 
+  it('keeps two different formatting changes inside one insertion as two rPrChanges under one w:ins, and reads them back', async () => {
+    const ins = { id: '1', author: 'Ada' };
+    const content: DocInline[] = [
+      { type: 'text', text: 'one', bold: true, revision: { insertion: ins, formatChange: { id: '8', author: 'Bo', previous: { italic: true } } } },
+      { type: 'text', text: 'two', bold: true, revision: { insertion: ins, formatChange: { id: '9', author: 'Cy', previous: { color: '#c00000' } } } },
+    ];
+    const { xml } = await exportXml([{ type: 'paragraph', content }]);
+    expect(xml.match(/<w:ins /g)).toHaveLength(1);
+    expect(xml.match(/<w:rPrChange /g)).toHaveLength(2);
+    const back = (await roundTrip([{ type: 'paragraph', content }]))[0] as Paragraph;
+    expect(back.content.map((c) => (c as { revision?: { formatChange?: { id: string } } }).revision?.formatChange?.id)).toEqual(['8', '9']);
+  });
+
   it('writes an inserted and deleted paragraph mark and the formatting before a paragraph change', async () => {
     const blocks: DocBlock[] = [
       { type: 'paragraph', content: [{ type: 'text', text: 'a' }], revision: { insertion: { id: '1', author: 'Ada' } } },

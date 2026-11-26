@@ -42,4 +42,27 @@ describe('block revision attributes', () => {
     expect(readBlockRevision(withBlockRevision({}, { deletion: BO }))).toEqual({ deletion: BO });
     expect(readBlockRevision({ ...blockRevisionAttrs(undefined) })).toBeUndefined();
   });
+
+  it('reads a formatting record without a previous formatting as an empty one, and never throws on one', () => {
+    for (const record of [{ id: '1', author: 'Bo' }, { id: '1', author: 'Bo', previous: null }, { id: '1', author: 'Bo', previous: 'x' }, { id: '1', author: 'Bo', previous: [1] }]) {
+      expect(readBlockRevision({ revisionFormat: record })).toEqual({ formatChange: { id: '1', author: 'Bo', previous: {} } });
+    }
+  });
+
+  it('rebuilds records from a source that is not trusted', () => {
+    const long = 'x'.repeat(500);
+    expect(readBlockRevision({ revisionInsertion: { id: 7, author: 'Ada', date: 5, evil: 1 } })).toEqual({ insertion: { id: '7', author: 'Ada' } });
+    expect(readBlockRevision({ revisionDeletion: { id: '1', author: { name: 'x' }, date: '2024-01-01T00:00:00Z', moveId: 'm' } })).toEqual({ deletion: { id: '1', author: 'Unknown', date: '2024-01-01T00:00:00Z', moveId: 'm' } });
+    // A record without a usable id (missing, empty, too long, not a string or number) is ignored.
+    for (const id of [undefined, '', long, {}, true, Number.NaN]) {
+      expect(readBlockRevision({ revisionInsertion: { id, author: 'Ada' }, revisionDeletion: { id, author: 'Bo' }, revisionFormat: { id, author: 'Cy', previous: {} } })).toBeUndefined();
+    }
+    expect(readBlockRevision({ revisionInsertion: { id: '1', author: long, moveId: long } })).toEqual({ insertion: { id: '1', author: 'Unknown' } });
+    // Reading does not hand out the node's own objects.
+    const attrs = { revisionInsertion: ADA, revisionFormat: CY };
+    const read = readBlockRevision(attrs, false)!;
+    expect(read.insertion).toEqual(ADA);
+    expect(read.insertion).not.toBe(ADA);
+    expect(read.formatChange!.previous).not.toBe(CY.previous);
+  });
 });

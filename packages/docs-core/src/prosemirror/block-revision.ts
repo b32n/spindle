@@ -4,7 +4,7 @@
 // or row at once (one splits it, the other marks it deleted) each set a different Y attribute and both survive; one
 // attribute holding all three would be replaced as a whole (last writer wins).
 
-import type { BlockRevision, LineSpacing, PreviousParagraphFormat } from '../types';
+import type { BlockRevision, LineSpacing, PreviousParagraphFormat, RevisionMeta } from '../types';
 
 /** Node attributes that hold a paragraph's or row's tracked changes: an insertion, a deletion, a formatting change. */
 export const BLOCK_REVISION_ATTRS = {
@@ -68,18 +68,35 @@ export function blockRevisionAttrs(revision: BlockRevision | null | undefined): 
   };
 }
 
+const MAX_ID = 200;
+
+/** A change record from a source that is not trusted: an id (a string or a number) and strings for the rest, or nothing when it has no usable id. */
+function sanitizeMeta(raw: unknown): RevisionMeta | undefined {
+  if (!isRecord(raw)) return undefined;
+  const id = typeof raw.id === 'number' && Number.isFinite(raw.id) ? String(raw.id) : raw.id;
+  if (typeof id !== 'string' || id.length === 0 || id.length > MAX_ID) return undefined;
+  const meta: RevisionMeta = { id, author: typeof raw.author === 'string' && raw.author.length <= MAX_ID ? raw.author : 'Unknown' };
+  if (typeof raw.date === 'string' && raw.date.length <= 64) meta.date = raw.date;
+  if (typeof raw.moveId === 'string' && raw.moveId.length > 0 && raw.moveId.length <= MAX_ID) meta.moveId = raw.moveId;
+  return meta;
+}
+
 /**
- * The model revision of a node's attributes, or undefined when it has none. Values that are not objects are ignored.
- * The records are copies unless `copy` is false (for reading only: the records are the node's own objects).
+ * The model revision of a node's attributes, or undefined when it has none. The attributes may come from another client's
+ * Y document, so each record is rebuilt from the fields it should have (an id, an author, a date, a move name, the
+ * formatting before); a record without a usable id is ignored, and one without `previous` has an empty one. Always a copy:
+ * `copy` is kept for callers that pass false and means nothing now that the records are rebuilt.
  */
-export function readBlockRevision(attrs: Record<string, unknown>, copy = true): BlockRevision | undefined {
+export function readBlockRevision(attrs: Record<string, unknown>, _copy = true): BlockRevision | undefined {
   const revision: BlockRevision = {};
-  const take = <T,>(value: unknown): T => (copy ? cloneJson(value as T) : (value as T));
-  if (isRecord(attrs.revisionInsertion)) revision.insertion = take<NonNullable<BlockRevision['insertion']>>(attrs.revisionInsertion);
-  if (isRecord(attrs.revisionDeletion)) revision.deletion = take<NonNullable<BlockRevision['deletion']>>(attrs.revisionDeletion);
-  if (isRecord(attrs.revisionFormat)) {
-    const { previous, ...rest } = attrs.revisionFormat;
-    revision.formatChange = { ...take<Omit<NonNullable<BlockRevision['formatChange']>, 'previous'>>(rest), previous: sanitizePreviousParagraphFormat(take(previous)) };
+  const insertion = sanitizeMeta(attrs.revisionInsertion);
+  const deletion = sanitizeMeta(attrs.revisionDeletion);
+  if (insertion) revision.insertion = insertion;
+  if (deletion) revision.deletion = deletion;
+  const format = sanitizeMeta(attrs.revisionFormat);
+  if (format) {
+    const { moveId: _moveId, ...meta } = format;
+    revision.formatChange = { ...meta, previous: sanitizePreviousParagraphFormat(isRecord(attrs.revisionFormat) ? cloneJson(attrs.revisionFormat.previous ?? {}) : {}) };
   }
   return revision.insertion || revision.deletion || revision.formatChange ? revision : undefined;
 }

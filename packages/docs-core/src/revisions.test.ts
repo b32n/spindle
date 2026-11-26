@@ -82,6 +82,9 @@ describe('tracked changes in the ProseMirror document', () => {
     expect(read(insertion, { 'data-insertion': '9', 'data-revision-author': 'Ada', 'data-revision-date': 'd' })).toEqual({ revisionId: '9', author: 'Ada', date: 'd', moveId: null });
     expect(read(deletion, { 'data-deletion': '9', 'data-revision-author': 'Bo', 'data-revision-move': 'm1' })).toMatchObject({ moveId: 'm1' });
     expect(read(deletion, { 'data-deletion': '9' })).toBe(false);
+    // Pasted HTML is not trusted for size: an id, author, date or move name is cut at 200 characters.
+    const long = 'y'.repeat(900);
+    expect(read(deletion, { 'data-deletion': long, 'data-revision-author': long, 'data-revision-date': long, 'data-revision-move': long })).toEqual({ revisionId: 'y'.repeat(200), author: 'y'.repeat(200), date: 'y'.repeat(200), moveId: 'y'.repeat(200) });
     expect(read(deletion, { 'data-revision-author': 'x' })).toBe(false);
   });
 

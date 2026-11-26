@@ -22,8 +22,9 @@ const BLOCK_KINDS: ReadonlyArray<[string, string]> = [
 /**
  * The slice with a fresh change id for every distinct change in it (per kind), so pasting a copy of tracked text makes a
  * change of its own: accepting or rejecting one place never touches the other. Author and date stay as in the source.
- * Records on paragraphs and table rows get the same treatment, and share the new id of text marks of the same change and kind. The runs of one change inside the slice still share one id, and so do the two ends of a move that are both in it
- * (they get one new move name).
+ * Records on paragraphs and table rows get the same treatment, and share the new id of text marks of the same change and kind.
+ * The runs of one change inside the slice still share one id.
+ * The two ends of a move that are both in the slice get one new move name.
  */
 export function freshRevisionIds(slice: Slice, makeId: () => string = newRevisionId): Slice {
   const ids = new Map<string, string>();

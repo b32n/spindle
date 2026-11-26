@@ -626,6 +626,10 @@ export function sanitizeRunFormat(raw: unknown): Record<string, unknown> {
   return out;
 }
 
+/** The longest id, author or move name taken from pasted HTML (a longer one is cut). */
+const MAX_PASTED_REVISION_FIELD = 200;
+const cap = (value: string | null): string | null => (value === null ? null : value.slice(0, MAX_PASTED_REVISION_FIELD));
+
 function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): MarkSpec {
   return {
     attrs: { revisionId: {}, author: {}, date: { default: null }, moveId: { default: null } },
@@ -638,7 +642,7 @@ function revisionMarkSpec(kind: 'insertion' | 'deletion', dataAttr: string): Mar
         getAttrs(dom: HTMLElement) {
           const revisionId = dom.getAttribute(dataAttr);
           const author = dom.getAttribute('data-revision-author');
-          return revisionId && author ? { revisionId, author, date: dom.getAttribute('data-revision-date'), moveId: dom.getAttribute('data-revision-move') } : false;
+          return revisionId && author ? { revisionId: cap(revisionId), author: cap(author), date: cap(dom.getAttribute('data-revision-date')), moveId: cap(dom.getAttribute('data-revision-move')) } : false;
         },
       },
     ],
@@ -896,7 +900,7 @@ const marks: Record<string, MarkSpec> = {
           } catch {
             previous = {};
           }
-          return { revisionId, author, date: dom.getAttribute('data-revision-date'), previous: sanitizeRunFormat(previous) };
+          return { revisionId: cap(revisionId), author: cap(author), date: cap(dom.getAttribute('data-revision-date')), previous: sanitizeRunFormat(previous) };
         },
       },
     ],
