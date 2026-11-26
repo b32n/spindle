@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { assignAuthorColors, type ReviewChange } from '@b32nio/spindle-docs-core';
-import { ReviewPanel, type ReviewPanelProps } from './ReviewPanel';
+import { ReviewPanel, neighbourChange, type ReviewPanelProps } from './ReviewPanel';
 
 const unit = { key: 'ins:1', kind: 'insertion', id: '1', author: 'Ada', from: 1, to: 4, text: 'abc' } as const;
 const change = (over: Partial<ReviewChange>): ReviewChange => ({ id: 'c', kind: 'insertion', author: 'Ada', text: 'abc', from: 1, to: 4, units: [unit], ...over });
@@ -69,5 +69,38 @@ describe('ReviewPanel', () => {
     expect(html).toMatch(/aria-pressed="false"[^>]*>All markup</);
     expect(html).toMatch(/aria-label="Next change" disabled/);
     expect(render({ changes: [change({})] })).not.toMatch(/aria-label="Next change" disabled/);
+  });
+});
+
+describe('neighbourChange', () => {
+  const list = [change({ id: 'a', from: 5 }), change({ id: 'b', from: 20 }), change({ id: 'c', from: 40 })];
+  const id = (c: ReviewChange | undefined) => c?.id;
+
+  it('goes to the first change from nowhere, forwards, and to the last, backwards', () => {
+    expect(id(neighbourChange(list, null, 'next'))).toBe('a');
+    expect(id(neighbourChange(list, null, 'previous'))).toBe('c');
+  });
+
+  it('goes on from a position, wrapping around at the ends', () => {
+    expect(id(neighbourChange(list, 5, 'next'))).toBe('b');
+    expect(id(neighbourChange(list, 40, 'next'))).toBe('a');
+    expect(id(neighbourChange(list, 20, 'previous'))).toBe('a');
+    expect(id(neighbourChange(list, 5, 'previous'))).toBe('c');
+  });
+
+  it('goes on from where it was even when the document changed since (ids moved, positions did not)', () => {
+    expect(id(neighbourChange([change({ id: 'x', from: 6 }), change({ id: 'y', from: 22 })], 5, 'next'))).toBe('x');
+    expect(id(neighbourChange([change({ id: 'x', from: 6 }), change({ id: 'y', from: 22 })], 10, 'next'))).toBe('y');
+  });
+
+  it('is nothing without changes', () => {
+    expect(neighbourChange([], 3, 'next')).toBeUndefined();
+    expect(neighbourChange([], null, 'previous')).toBeUndefined();
+  });
+});
+
+describe('ReviewPanel rows', () => {
+  it('can be reached by keyboard', () => {
+    expect(render({ changes: [change({ id: 'a' })] })).toContain('tabindex="0"');
   });
 });

@@ -183,9 +183,41 @@ describe('changes of paragraph marks', () => {
       { id: 'l1', type: 'list-item', listType: 'bullet', level: 0, content: [run('a')], revision: { insertion: ADA } } as Block,
       { id: 'l2', type: 'list-item', listType: 'bullet', level: 0, content: [run('b')] } as Block,
     ];
-    expect(texts(apply(stateOf(list), resolveAll('reject')).doc)).toEqual(['ab']);
-    const item = stateOf(list).doc.child(0).child(0).child(0);
-    expect(item.attrs.revision).toMatchObject({ insertion: { id: '1' } });
+    const next2 = apply(stateOf(list), resolveAll('reject'));
+    // The result of the command, not the fixture: both items stay and the first one's change is cleared.
+    expect(next2.doc.child(0).childCount).toBe(2);
+    expect(next2.doc.child(0).child(0).child(0).attrs.revision).toBeNull();
+    expect(next2.doc.child(0).textContent).toBe('ab');
+    expect(stateOf(list).doc.child(0).child(0).child(0).attrs.revision).toMatchObject({ insertion: { id: '1' } });
+  });
+
+  it('settling one deleted mark of several leaves the next one open, with its change', () => {
+    const CY = { id: '3', author: 'Cy' };
+    const blocks: Block[] = [
+      para([run('one')], { revision: { deletion: BO } }),
+      para([run('two')], { revision: { deletion: CY } }),
+      para([run('three')]),
+    ];
+    const state = stateOf(blocks);
+    const first = listChanges(state.doc).find((c) => c.author === 'Bo')!;
+    const next = apply(state, resolveChange(first.id, 'accept'));
+    expect(texts(next.doc)).toEqual(['onetwo', 'three']);
+    // The paragraph that now ends with the second mark still carries its deletion, and the panel still lists it.
+    expect(next.doc.child(0).attrs.revision).toEqual({ deletion: CY });
+    expect(listChanges(next.doc).map((c) => [c.kind, c.author])).toEqual([['paragraphDeleted', 'Cy']]);
+    expect(texts(apply(next, resolveAll('accept')).doc)).toEqual(['onetwothree']);
+  });
+
+  it('joining takes the second mark\'s changes and the first one\'s formatting change, and drops the second one\'s formatting change', () => {
+    const CY = { id: '3', author: 'Cy' };
+    const fmt = (author: string) => ({ id: author, author, previous: { alignment: 'right' } });
+    const blocks: Block[] = [
+      para([run('one')], { revision: { deletion: BO, formatChange: fmt('Ann') } }),
+      para([run('two')], { revision: { insertion: CY, formatChange: fmt('Dee') } }),
+    ];
+    const next = apply(stateOf(blocks), resolveChange(listChanges(stateOf(blocks).doc).find((c) => c.kind === 'paragraphDeleted')!.id, 'accept'));
+    expect(texts(next.doc)).toEqual(['onetwo']);
+    expect(next.doc.child(0).attrs.revision).toEqual({ insertion: CY, formatChange: fmt('Ann') });
   });
 
   it('keeps a mark that is both inserted and deleted until both are settled', () => {
@@ -221,11 +253,52 @@ describe('changes of a paragraph’s formatting', () => {
     expect(toParagraph.doc.child(0).attrs.indent).toBe(0);
   });
 
+  it('rejecting a change from a heading in a list item keeps a paragraph there (a list item starts with one) and does not fail', () => {
+    const blocks: Block[] = [
+      { id: 'l1', type: 'list-item', listType: 'bullet', level: 0, content: [run('a')], revision: { formatChange: { id: '9', author: 'Ada', previous: { headingLevel: 2, alignment: 'center' } } } } as Block,
+    ];
+    const next = apply(stateOf(blocks), resolveAll('reject'));
+    const item = next.doc.child(0).child(0).child(0);
+    expect(item.type.name).toBe('paragraph');
+    expect(item.attrs).toMatchObject({ alignment: 'center', revision: null });
+    expect(item.textContent).toBe('a');
+  });
+
+  it('rejecting a change in a paragraph that stays a paragraph does not touch its indent beyond what was recorded', () => {
+    const blocks: Block[] = [para([run('t')], { indent: 2, revision: { formatChange: { id: '9', author: 'Ada', previous: { alignment: 'right' } } } })];
+    const next = apply(stateOf(blocks), resolveAll('reject'));
+    expect(next.doc.child(0).attrs).toMatchObject({ alignment: 'right', indent: 0 });
+  });
+
   it('keep the paragraph mark change that is still open', () => {
     const blocks: Block[] = [para([run('t')], { revision: { insertion: ADA, formatChange: { id: '9', author: 'Bo', previous: { alignment: 'right' } } } }), para([run('u')])];
     const next = apply(stateOf(blocks), resolveAll('reject', 'Bo'));
     expect(next.doc.child(0).attrs.revision).toEqual({ insertion: { id: '1', author: 'Ada', date: '2024-01-01T00:00:00Z' } });
     expect(next.doc.child(0).attrs.alignment).toBe('right');
+  });
+});
+
+describe('line breaks inside tracked text', () => {
+  const blocks = [para([run('a'), run('x\ny', { deletion: BO }), run('z', { insertion: ADA }), run('p\nq', { insertion: ADA })])];
+
+  it('are part of the change: one change for the text and its break, and the break goes with the text', () => {
+    const changes = listChanges(stateOf(blocks).doc);
+    expect(changes.map((c) => [c.kind, c.text])).toEqual([['deletion', 'x\ny'], ['insertion', 'zp\nq']]);
+    expect(texts(apply(stateOf(blocks), resolveAll('accept')).doc)).toEqual(['azp\nq']);
+    expect(texts(apply(stateOf(blocks), resolveAll('reject')).doc)).toEqual(['ax\ny']);
+  });
+});
+
+describe('settling the changes of one author', () => {
+  it('settles both ends of a move whose ends are by different authors, never one end alone', () => {
+    const blocks = [
+      para([run('a '), run('moved', { deletion: { id: '5', author: 'Bo', moveId: 'm1' } })]),
+      para([run('b '), run('moved', { insertion: { id: '6', author: 'Ada', moveId: 'm1' } })]),
+    ];
+    // The move is Ada's (the end it went to): whoever is settled, it goes whole or not at all.
+    expect(texts(apply(stateOf(blocks), resolveAll('accept', 'Ada')).doc)).toEqual(['a ', 'b moved']);
+    expect(texts(apply(stateOf(blocks), resolveAll('reject', 'Ada')).doc)).toEqual(['a moved', 'b ']);
+    expect(resolveAll('accept', 'Bo')(stateOf(blocks), undefined)).toBe(false);
   });
 });
 

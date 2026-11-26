@@ -62,9 +62,21 @@ function when(iso: string | undefined): string {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString();
 }
 
+/**
+ * The change after (or before) a position, wrapping around; the first (last) one when there is no position yet. Changes are
+ * found by position, not by id, because an id carries the position and so changes with every edit above it.
+ */
+export function neighbourChange(changes: readonly ReviewChange[], from: number | null, direction: 'next' | 'previous'): ReviewChange | undefined {
+  if (changes.length === 0) return undefined;
+  if (direction === 'next') return (from === null ? undefined : changes.find((c) => c.from > from)) ?? changes[0];
+  return (from === null ? undefined : [...changes].reverse().find((c) => c.from < from)) ?? changes[changes.length - 1];
+}
+
 export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChange, onResolve, onGoTo, onClose }: ReviewPanelProps) {
   const [author, setAuthor] = useState<string>('');
   const [currentId, setCurrentId] = useState<string | null>(null);
+  // Where the last change gone to was: next and previous go on from here even after the document changed.
+  const [currentFrom, setCurrentFrom] = useState<number | null>(null);
   const authors = useMemo(() => [...new Set(changes.map((c) => c.author))], [changes]);
   const colors = useMemo(() => assignAuthorColors(authors), [authors]);
   // A filter on an author who has no changes left shows everybody again.
@@ -72,15 +84,15 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
     if (author && !authors.includes(author)) setAuthor('');
   }, [author, authors]);
   const shown = useMemo(() => (author ? changes.filter((c) => c.author === author) : changes), [changes, author]);
-  const index = shown.findIndex((c) => c.id === currentId);
 
   const go = (change: ReviewChange | undefined) => {
     if (!change) return;
     setCurrentId(change.id);
+    setCurrentFrom(change.from);
     onGoTo(change);
   };
-  const next = () => go(shown[index < 0 ? 0 : (index + 1) % shown.length]);
-  const previous = () => go(shown[index < 0 ? shown.length - 1 : (index - 1 + shown.length) % shown.length]);
+  const next = () => go(neighbourChange(shown, currentFrom, 'next'));
+  const previous = () => go(neighbourChange(shown, currentFrom, 'previous'));
 
   return (
     <aside
@@ -152,7 +164,15 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
               data-kind={change.kind}
               data-author={change.author}
               aria-current={change.id === currentId ? 'true' : undefined}
+              tabIndex={0}
               onClick={() => go(change)}
+              onKeyDown={(e) => {
+                // Only the row itself: Enter or Space on its Accept and Reject buttons are theirs.
+                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  go(change);
+                }
+              }}
               style={{
                 padding: '8px 12px',
                 borderBottom: '1px solid #f1f3f4',

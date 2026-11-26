@@ -355,8 +355,13 @@ lockstep.
   ends of a move as one), `changeUnits`, and the commands `resolveChange`, `resolveAll` (all, or one author's) and
   `resolveSelection`, plus `settle`. Accepting keeps an inserted run, drops a deleted one, keeps new formatting, keeps an inserted
   paragraph mark or row and joins away a deleted one; rejecting does the reverse (the old formatting of a run, and the old
-  formatting and heading level of a paragraph, come back). Everything one action does is one transaction, so one undo takes it
-  back.
+  formatting and heading level of a paragraph, come back; in a list item a former heading comes back as a paragraph). Joining two
+  paragraphs (a paragraph mark that goes) keeps the first one's formatting and the second one's mark with its changes. A move
+  is settled whole, also for one author (it belongs to the author of the end it went to). Everything one action does is one
+  transaction, so one undo takes it back. Known limits: the Original view restores character formatting only (not links or the
+  character style from before a change); deleting text with a comment on it removes the comment's anchor and leaves the thread
+  in the document; the legend counts changes the way the panel lists them (a move once, the runs of one change as one), not runs.
+  The list of changes is kept only while the panel is open.
 
 ### Changed
 

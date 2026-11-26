@@ -197,13 +197,27 @@ function withoutChange(revision: BlockRevision, kind: 'insertion' | 'deletion' |
   return Object.keys(rest).length > 0 ? rest : null;
 }
 
-/** Join the node at `pos` with the one after it, when both are paragraphs or headings of one parent: the mark between them goes. */
+/**
+ * Join the node at `pos` with the one after it, when both are paragraphs or headings of one parent: the mark between them
+ * goes. The paragraph that results ends with the second one's mark, so it takes that mark's changes (inserted, deleted) and
+ * keeps the first one's formatting and the change of it (the second one's formatting is not kept, so neither is its change).
+ */
 function joinWithNext(tr: Transaction, pos: number): void {
   const node = tr.doc.nodeAt(pos);
   if (!node) return;
   const end = pos + node.nodeSize;
   const next = tr.doc.resolve(end).nodeAfter;
-  if (next && isTextblock(node) && isTextblock(next)) tr.join(end);
+  if (!next || !isTextblock(node) || !isTextblock(next)) return;
+  const first = (node.attrs.revision ?? {}) as BlockRevision;
+  const second = (next.attrs.revision ?? {}) as BlockRevision;
+  const revision: BlockRevision = {
+    ...(second.insertion && { insertion: second.insertion }),
+    ...(second.deletion && { deletion: second.deletion }),
+    ...(first.formatChange && { formatChange: first.formatChange }),
+  };
+  tr.join(end);
+  const joined = tr.doc.nodeAt(pos);
+  if (joined) tr.setNodeMarkup(pos, undefined, { ...joined.attrs, revision: Object.keys(revision).length > 0 ? revision : null });
 }
 
 /** The type and attrs a paragraph gets back when its formatting change is rejected. */
@@ -259,10 +273,15 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
         tr.setNodeMarkup(unit.from, undefined, { ...node.attrs, revision: withoutChange(revision, 'formatChange') });
         return;
       }
-      const { type, attrs } = previousParagraph(revision.formatChange);
+      const previous = previousParagraph(revision.formatChange);
       const rest = withoutChange(revision, 'formatChange');
+      // A list item holds a paragraph first: a paragraph that was a heading before stays a paragraph there, with its other formatting back.
+      const $pos = tr.doc.resolve(unit.from);
+      const fits = $pos.parent.canReplaceWith($pos.index(), $pos.index() + 1, previous.type);
+      const type = fits ? previous.type : docsSchema.nodes.paragraph;
+      const attrs = fits ? previous.attrs : previousParagraph({ ...revision.formatChange, previous: { ...revision.formatChange.previous, headingLevel: undefined } }).attrs;
       // The node's own revision attrs outlive the restoring (its mark may still be inserted or deleted).
-      tr.setNodeMarkup(unit.from, type, { ...attrs, revision: rest, ...(type.name === 'heading' ? {} : { indent: 0 }) });
+      tr.setNodeMarkup(unit.from, type, { ...attrs, revision: rest });
       return;
     }
     case 'rowInsertion':
@@ -318,11 +337,6 @@ export function settle(state: EditorState, units: readonly ChangeUnit[], action:
   return tr.docChanged ? tr.scrollIntoView() : tr;
 }
 
-/** The units of the change whose id is given (a `ReviewChange.id`), or of every change that matches. */
-function unitsWhere(state: EditorState, match: (unit: ChangeUnit) => boolean): ChangeUnit[] {
-  return changeUnits(state.doc).filter(match);
-}
-
 /** All units that belong to the same change as `unit`: its other runs and the other end of a move. */
 function wholeChange(state: EditorState, changeId: string): ChangeUnit[] {
   const change = listChanges(state.doc).find((c) => c.id === changeId);
@@ -344,11 +358,16 @@ export const resolveChange =
   (state, dispatch) =>
     run(state, dispatch, wholeChange(state, changeId), action);
 
-/** Accept or reject every change, or every change of one author. */
+/** Accept or reject every change, or every change of one author (a move is one change, by the author of the end it went to). */
 export const resolveAll =
   (action: 'accept' | 'reject', author?: string): Command =>
   (state, dispatch) =>
-    run(state, dispatch, unitsWhere(state, (u) => author === undefined || u.author === author), action);
+    run(
+      state,
+      dispatch,
+      author === undefined ? changeUnits(state.doc) : listChanges(state.doc).filter((c) => c.author === author).flatMap((c) => c.units),
+      action
+    );
 
 /** Accept or reject the changes the selection touches (a caret touches the change it is in or at the edge of). */
 export const resolveSelection =

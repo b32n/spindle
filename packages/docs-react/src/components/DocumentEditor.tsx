@@ -146,6 +146,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [authors, setAuthors] = useState<RevisionAuthor[]>([]);
   const [changes, setChanges] = useState<ReviewChange[]>([]);
   const [showReview, setShowReview] = useState(false);
+  const showReviewRef = useRef(false);
   const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
@@ -319,9 +320,16 @@ export const DocumentEditor = memo(function DocumentEditor({
       const next = revisionAuthors(nextChanges);
       // Keep the old list (and skip a render) when nothing in it changed.
       setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
-      setChanges((prev) => (prev.length === 0 && nextChanges.length === 0 ? prev : nextChanges));
+      // The list of changes (new ids with every edit) is only kept while the panel shows it, so typing does not render the editor.
+      if (showReviewRef.current) setChanges(nextChanges);
     }, AUTHORS_DELAY_MS);
   }, []);
+
+  // Opening the panel lists the changes as they are now; closing it stops keeping the list.
+  useEffect(() => {
+    showReviewRef.current = showReview;
+    if (showReview && editorView) setChanges(listChanges(editorView.state.doc));
+  }, [showReview, editorView]);
 
   const handleSelectionChange = useCallback((state: EditorState) => {
     const marks = activeMarksPluginKey.getState(state) as ActiveMarks | undefined;

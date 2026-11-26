@@ -604,4 +604,12 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(runs[3]).toMatchObject({ italic: true, fontSize: 14 });
     expect(runs[3].bold).toBeUndefined();
   });
+
+  it('breaks lines at the line break of tracked text that a view shows, and nowhere in text a view leaves out', () => {
+    const breaks = () => j([{ type: 'paragraph', content: [text('a\nb', [deletion]), text('c\nd', [insertion])] }]);
+    const kinds = (view: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(breaks(), { revisionView: view })[0] as ParagraphBlock).runs.map((r) => (r.kind === 'text' ? r.text : r.kind));
+    expect(kinds('markup')).toEqual(['a', 'lineBreak', 'b', 'c', 'lineBreak', 'd']);
+    expect(kinds('final')).toEqual(['\u200B\u200B\u200B', 'c', 'lineBreak', 'd']);
+    expect(kinds('original')).toEqual(['a', 'lineBreak', 'b', '\u200B\u200B\u200B']);
+  });
 });
