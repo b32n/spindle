@@ -1,68 +1,10 @@
 {
   "compared": 9,
-  "firstMismatches": [
-    {
-      "actual": "\"#VALUE!\"",
-      "cell": "E2",
-      "expected": "60",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "\"#VALUE!\"",
-      "cell": "E3",
-      "expected": "45",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "\"#VALUE!\"",
-      "cell": "E4",
-      "expected": "24",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "\"#VALUE!\"",
-      "cell": "E5",
-      "expected": "6",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "0",
-      "cell": "B6",
-      "expected": "23",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "0",
-      "cell": "C6",
-      "expected": "45",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "0",
-      "cell": "D6",
-      "expected": "67",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "0",
-      "cell": "E6",
-      "expected": "135",
-      "sheet": "Tables"
-    },
-    {
-      "actual": "0",
-      "cell": "B8",
-      "expected": "23",
-      "sheet": "Tables"
-    }
-  ],
+  "firstMismatches": [],
   "formulaCells": 9,
-  "matched": 0,
-  "mismatchClasses": {
-    "number -> error": 4,
-    "number -> number": 5
-  },
-  "mismatched": 9,
+  "matched": 9,
+  "mismatchClasses": {},
+  "mismatched": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

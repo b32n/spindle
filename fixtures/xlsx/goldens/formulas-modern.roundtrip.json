@@ -19,23 +19,10 @@
     },
     "byField": {
       "added sheets[].config.colWidths.*": 7,
-      "added sheets[].config.rowHeights.*": 23,
-      "changed sheets[].cells.*.value": 2
+      "added sheets[].config.rowHeights.*": 23
     },
-    "changed": 2,
+    "changed": 0,
     "entries": [
-      {
-        "after": "\"#VALUE!\"",
-        "before": "\"_xlfn.CONCAT(A2,\\\"-\\\",A3)\"",
-        "kind": "changed",
-        "path": "sheets[0].cells.G4.value"
-      },
-      {
-        "after": "\"#VALUE!\"",
-        "before": "\"_xlfn.MAXIFS(B2:B6,A2:A6,\\\"?o*\\\")\"",
-        "kind": "changed",
-        "path": "sheets[0].cells.G9.value"
-      },
       {
         "after": "100",
         "kind": "added",
@@ -188,7 +175,7 @@
       }
     ],
     "removed": 0,
-    "total": 32,
+    "total": 30,
     "truncated": false
   },
   "exportWarnings": [],

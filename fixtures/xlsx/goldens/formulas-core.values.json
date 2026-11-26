@@ -62,43 +62,43 @@
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.MAXIFS(A1:A10,B1:B10,\\\"x\\\")\"",
+      "actual": "\"#NAME? Function _XLFN.MAXIFS not found\"",
       "cell": "I24",
       "expected": "9",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.AGGREGATE(9,6,A1:A10)\"",
+      "actual": "\"#NAME? Function _XLFN.AGGREGATE not found\"",
       "cell": "I25",
       "expected": "55",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.IFS(A1>5,\\\"a\\\",TRUE,\\\"b\\\")\"",
+      "actual": "\"#NAME? Function _XLFN.IFS not found\"",
       "cell": "I32",
       "expected": "\"b\"",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.SWITCH(A1,1,\\\"one\\\",\\\"other\\\")\"",
+      "actual": "\"#NAME? Function _XLFN.SWITCH not found\"",
       "cell": "I33",
       "expected": "\"one\"",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.XOR(TRUE,FALSE)\"",
+      "actual": "\"#NAME? Function _XLFN.XOR not found\"",
       "cell": "I36",
       "expected": "TRUE",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.CONCAT(\\\"a\\\",\\\"b\\\")\"",
+      "actual": "\"#NAME? Function _XLFN.CONCAT not found\"",
       "cell": "I52",
       "expected": "\"ab\"",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.TEXTJOIN(\\\",\\\",TRUE,B1:B3)\"",
+      "actual": "\"#NAME? Function _XLFN.TEXTJOIN not found\"",
       "cell": "I53",
       "expected": "\"x,y,x\"",
       "sheet": "Data"
@@ -123,17 +123,15 @@
     }
   ],
   "formulaCells": 159,
-  "matched": 109,
+  "matched": 110,
   "mismatchClasses": {
-    "boolean -> error": 1,
-    "boolean -> text": 1,
+    "boolean -> error": 2,
     "error -> error": 1,
-    "number -> error": 17,
-    "number -> text": 20,
-    "text -> error": 1,
-    "text -> text": 9
+    "number -> error": 36,
+    "text -> error": 8,
+    "text -> text": 2
   },
-  "mismatched": 50,
+  "mismatched": 49,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

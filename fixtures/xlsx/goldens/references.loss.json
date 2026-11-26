@@ -15,15 +15,6 @@
       "where": [
         "Data"
       ]
-    },
-    {
-      "count": 2,
-      "effect": "lost: calculated as empty ranges",
-      "id": "xlsx.formulas.wholeColumn",
-      "label": "formula(s) with whole-column or whole-row references",
-      "where": [
-        "Data"
-      ]
     }
   ]
 }

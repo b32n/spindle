@@ -46,12 +46,12 @@
             "value": 1
           },
           "B6": {
-            "formula": "=SUBTOTAL(109,\"Sales[Q1]\")",
-            "value": 0
+            "formula": "=SUBTOTAL(109,Sales[Q1])",
+            "value": 23
           },
           "B8": {
-            "formula": "=SUM(\"Sales[Q1]\")",
-            "value": 0
+            "formula": "=SUM(Sales[Q1])",
+            "value": 23
           },
           "C1": {
             "value": "Q2"
@@ -69,8 +69,8 @@
             "value": 2
           },
           "C6": {
-            "formula": "=SUBTOTAL(109,\"Sales[Q2]\")",
-            "value": 0
+            "formula": "=SUBTOTAL(109,Sales[Q2])",
+            "value": 45
           },
           "D1": {
             "value": "Q3"
@@ -88,31 +88,31 @@
             "value": 3
           },
           "D6": {
-            "formula": "=SUBTOTAL(109,\"Sales[Q3]\")",
-            "value": 0
+            "formula": "=SUBTOTAL(109,Sales[Q3])",
+            "value": 67
           },
           "E1": {
             "value": "Total"
           },
           "E2": {
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
-            "value": "#VALUE!"
+            "value": 60
           },
           "E3": {
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
-            "value": "#VALUE!"
+            "value": 45
           },
           "E4": {
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
-            "value": "#VALUE!"
+            "value": 24
           },
           "E5": {
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
-            "value": "#VALUE!"
+            "value": 6
           },
           "E6": {
-            "formula": "=SUBTOTAL(109,\"Sales[Total]\")",
-            "value": 0
+            "formula": "=SUBTOTAL(109,Sales[Total])",
+            "value": 135
           }
         },
         "colCount": 100,

@@ -2,13 +2,13 @@
   "compared": 2,
   "firstMismatches": [
     {
-      "actual": "0",
+      "actual": "\"#NAME? Name Quarter1 not found\"",
       "cell": "B8",
       "expected": "27",
       "sheet": "Data"
     },
     {
-      "actual": "\"#VALUE!\"",
+      "actual": "\"#NAME? Name TaxRate not found\"",
       "cell": "B9",
       "expected": "32.4",
       "sheet": "Data"
@@ -17,8 +17,7 @@
   "formulaCells": 2,
   "matched": 0,
   "mismatchClasses": {
-    "number -> error": 1,
-    "number -> number": 1
+    "number -> error": 2
   },
   "mismatched": 2,
   "status": "ok",
