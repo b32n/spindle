@@ -340,7 +340,7 @@ lockstep.
   `deletion` marks, and a `revision` attribute on paragraphs, headings and table rows; all are plain ProseMirror content that
   syncs over Yjs; the collaboration `schemaVersion` is now 7 (a client at 6 would drop the `formatChange` mark and the new attributes, so it refuses to join such a room). The editor draws the two ends of a move with a
   double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
-  paragraph with a change, and a tint on the cells of an inserted or deleted row.
+  paragraph with a change, and a tint on the cells of an inserted or deleted row. `documentRevisionAuthors` also lists the authors of changes recorded on paragraphs and rows and of formatting changes, so they share out the palette like the others.
 
 ### Changed
 

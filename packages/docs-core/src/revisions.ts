@@ -44,11 +44,24 @@ export function assignAuthorColors(authors: Iterable<string>): Map<string, strin
   return colors;
 }
 
-/** The authors with tracked changes in a document (the marks of its text), in order of first appearance. */
+/**
+ * The authors with tracked changes in a document, in order of first appearance: the marks of its text (insertions, deletions,
+ * formatting changes) and the changes recorded on paragraphs, headings and table rows (a paragraph mark, a row, formatting).
+ */
 export function documentRevisionAuthors(doc: PmNode): string[] {
   const authors = new Set<string>();
   doc.descendants((node) => {
-    if (node.isText) for (const mark of node.marks) if (mark.type.name === 'insertion' || mark.type.name === 'deletion') authors.add(String(mark.attrs.author));
+    if (node.isText) {
+      for (const mark of node.marks) if (mark.type.name === 'insertion' || mark.type.name === 'deletion' || mark.type.name === 'formatChange') authors.add(String(mark.attrs.author));
+      return true;
+    }
+    const revision = node.attrs.revision as Record<string, { author?: unknown } | undefined> | null | undefined;
+    if (revision && typeof revision === 'object') {
+      for (const kind of ['insertion', 'deletion', 'formatChange']) {
+        const author = revision[kind]?.author;
+        if (typeof author === 'string') authors.add(author);
+      }
+    }
     return true;
   });
   return [...authors];

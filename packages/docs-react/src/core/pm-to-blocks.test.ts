@@ -550,4 +550,17 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
     expect(runs[0]).toMatchObject({ revision: { deletion: { id: '2' } } });
     expect(runs[2]).toMatchObject({ revision: { deletion: { id: '2' } } });
   });
+
+  it('gives authors who only changed a paragraph mark, a row or formatting a colour of their own, like authors of text changes', () => {
+    // "Bo" and "Di" hash to the same palette colour: sharing the palette out keeps them apart, whatever kind of change they made.
+    const doc = j([
+      { type: 'paragraph', attrs: { revision: { insertion: { id: '1', author: 'Bo' } } }, content: [text('a')] },
+      { type: 'paragraph', attrs: { revision: { deletion: { id: '2', author: 'Di' } } }, content: [text('b')] },
+    ]);
+    const [first, second] = proseMirrorToFlowBlocks(doc) as ParagraphBlock[];
+    const colors = assignAuthorColors(['Bo', 'Di']);
+    expect(first.attrs?.changeBar?.color).toBe(colors.get('Bo'));
+    expect(second.attrs?.changeBar?.color).toBe(colors.get('Di'));
+    expect(first.attrs?.changeBar?.color).not.toBe(second.attrs?.changeBar?.color);
+  });
 });

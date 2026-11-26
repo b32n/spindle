@@ -215,6 +215,16 @@ describe('author colours and the list of changes', () => {
     expect(new Set(many.values()).size).toBe(REVISION_COLORS.length);
   });
 
+  it('lists the authors of changes recorded on paragraphs and rows, and of formatting changes, too', () => {
+    const pm = blocksToPmDoc([
+      { id: 'a', type: 'paragraph', content: [{ type: 'text', text: 'x', revision: { formatChange: { id: '5', author: 'Cy', previous: {} } } }] },
+      { id: 'b', type: 'paragraph', content: [{ type: 'text', text: 'y' }], revision: { insertion: { id: '6', author: 'Di' }, formatChange: { id: '7', author: 'Ed', previous: {} } } },
+      { id: 'c', type: 'heading', level: 1, content: [{ type: 'text', text: 'z' }], revision: { deletion: { id: '8', author: 'Flo' } } },
+      { id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'k', content: [{ type: 'text', text: 'c' }] }], revision: { insertion: { id: '9', author: 'Gus' } } }] },
+    ] as Block[]);
+    expect(documentRevisionAuthors(pm)).toEqual(['Cy', 'Di', 'Ed', 'Flo', 'Gus']);
+  });
+
   it('lists the authors of changes in a document\'s marks', () => {
     const pm = blocksToPmDoc([{ id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'x', revision: { insertion: ADA } }, { type: 'text', text: 'y', revision: { deletion: BO } }, { type: 'text', text: 'z' }] }]);
     expect(documentRevisionAuthors(pm)).toEqual(['Ada', 'Bo']);
