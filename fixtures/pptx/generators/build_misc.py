@@ -44,7 +44,7 @@ def kitchen_sink(path):
     box = lambda i, name, x, t: sp(i, name, x, 1700000, 1600000, 800000, fill=solid(scheme("accent1")), paras=para(t, algn="ctr"))
     s.add(grp(10, "Group", 700000, 1700000, 3600000, 800000, box(11, "A", 700000, "A") + box(12, "B", 2700000, "B")))
     s.add(sp(13, "Target", 6000000, 3200000, 1600000, 800000, fill=solid(scheme("accent2")), paras=para("target", algn="ctr")))
-    s.add(cxn(14, "Elbow", 4300000, 2100000, 1700000, 1500000, "bentConnector3", line(25400, tail=("triangle", "med")), st=(12, 3), end=(13, 0)))
+    s.add(cxn(14, "Elbow", 4300000, 2100000, 1700000, 1500000, "bentConnector3", line(25400, tail=("triangle", "med")), st=(12, 3), end=(13, 1)))
     s = d.slide(3)
     s.hidden = True
     s.add(title(2, "Hidden slide with animation"))
@@ -58,7 +58,7 @@ def kitchen_sink(path):
     d.slide_comments = {0: [(0, 1000, 800, "Check the subtitle.")]}
     d.pres_extra["ext"] = (f'<p:extLst><p:ext uri="{{521415D9-36F7-43E2-AB2F-B90AF26B5E84}}"><p14:sectionLst xmlns:p14="{F.P14}"><p14:section name="Content" id="{{00000000-0000-4000-8000-000000000061}}"><p14:sldIdLst>'
                            + "".join(f'<p14:sldId id="{i}"/>' for i in range(256, 260)) + '</p14:sldIdLst></p14:section><p14:section name="Backup" id="{00000000-0000-4000-8000-000000000062}"><p14:sldIdLst>'
-                           + "".join(f'<p14:sldId id="{i}"/>' for i in range(260, 263)) + "</p14:sldIdLst></p14:section></p14:sectionLst></p:ext></p:extLst>")
+                           + "".join(f'<p14:sldId id="{i}"/>' for i in range(260, 264)) + "</p14:sldIdLst></p14:section></p14:sectionLst></p:ext></p:extLst>")
     d.write(path)
 
 

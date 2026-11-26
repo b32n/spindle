@@ -406,7 +406,7 @@ class Deck:
                 notes_rid = rid
             else:
                 handout_rid = rid
-        sld_ids, notes_no, slide_rids = "", 0, []
+        sld_ids, notes_no, slide_rids, last_idx = "", 0, [], {}  # last_idx: highest comment index used per author
         for si, s in enumerate(self.slides, 1):
             srels = Rels()
             srels.items = list(s.rels.items)  # media, links and parts added first keep their rIds
@@ -427,7 +427,10 @@ class Deck:
                 ct[f"ppt/notesSlides/notesSlide{notes_no}.xml"] = CT["notes"]
             if si - 1 in self.slide_comments:
                 srels.add("comments", f"../comments/comment{si}.xml")
-                body = "".join(f'<p:cm authorId="{a}" dt="{ISO[:-1]}.000" idx="{n}"><p:pos x="{x}" y="{y}"/><p:text>{esc(t)}</p:text></p:cm>' for n, (a, x, y, t) in enumerate(self.slide_comments[si - 1], 1))
+                body = ""
+                for a, x, y, t in self.slide_comments[si - 1]:
+                    last_idx[a] = last_idx.get(a, 0) + 1
+                    body += f'<p:cm authorId="{a}" dt="{ISO[:-1]}.000" idx="{last_idx[a]}"><p:pos x="{x}" y="{y}"/><p:text>{esc(t)}</p:text></p:cm>'
                 P_[f"ppt/comments/comment{si}.xml"] = f'{HEAD}<p:cmLst {NS}>{body}</p:cmLst>'.encode()
                 ct[f"ppt/comments/comment{si}.xml"] = CT["comments"]
             P_[f"ppt/slides/_rels/slide{si}.xml.rels"] = srels.xml().encode()
@@ -442,7 +445,7 @@ class Deck:
                 ct[name] = c
         if self.comment_authors:
             pres_rels.add("commentAuthors", "commentAuthors.xml")
-            au = "".join(f'<p:cmAuthor id="{i}" name="{esc(n)}" initials="{esc(ini)}" lastIdx="1" clrIdx="{i}"/>' for i, n, ini in self.comment_authors)
+            au = "".join(f'<p:cmAuthor id="{i}" name="{esc(n)}" initials="{esc(ini)}" lastIdx="{last_idx.get(i, 0)}" clrIdx="{i}"/>' for i, n, ini in self.comment_authors)
             P_["ppt/commentAuthors.xml"] = f'{HEAD}<p:cmAuthorLst {NS}>{au}</p:cmAuthorLst>'.encode()
             ct["ppt/commentAuthors.xml"] = CT["commentAuthors"]
         for typ, target in self.pres_rels_extra:

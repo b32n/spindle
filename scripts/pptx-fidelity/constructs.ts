@@ -38,6 +38,8 @@ const tagRe = (...names: string[]) => new RegExp(`<a:(?:${names.join('|')})\\b`,
 
 const PROPS = new RegExp(`<p:spPr\\b${OPEN}([\\s\\S]*?)</p:spPr>`, 'g');
 const OUTLINE = new RegExp(`<a:ln\\b${OPEN}[\\s\\S]*?</a:ln>`, 'g');
+const CELL_PROPS = new RegExp(`<a:tcPr\\b${OPEN}[\\s\\S]*?</a:tcPr>`, 'g');
+const CELL_BORDER = new RegExp(`<a:(ln[LRTB]|lnTlToBr|lnBlToTr)\\b${OPEN}[\\s\\S]*?</a:\\1>`, 'g');
 const RUN_PROPS = `<a:rPr\\b${OPEN}(?:(?!</a:rPr>)[\\s\\S])*?`;
 
 /** Shape property blocks of the slides, with the outline removed (fills) and the outlines apart. */
@@ -467,20 +469,21 @@ export const CONSTRUCTS: PptxConstruct[] = [
   },
   {
     id: 'tables.cellFill',
-    label: 'Cell fills',
+    label: 'Cell fills (borders excluded)',
     count: (p) =>
-      inSlides(
-        p,
-        new RegExp(
-          `<a:tcPr\\b${OPEN}(?:(?!</a:tcPr>)[\\s\\S])*?<a:(?:solidFill|gradFill|pattFill|blipFill)\\b`,
-          'g'
-        )
-      ),
+      partsOf(p, SLIDE)
+        .flatMap((x) => x.match(CELL_PROPS) ?? [])
+        .reduce(
+          (sum, b) =>
+            sum +
+            count(b.replace(CELL_BORDER, ''), /<a:(?:solidFill|gradFill|pattFill|blipFill)\b/g),
+          0
+        ),
   },
   { id: 'groups.basic', label: 'Groups', count: (p) => inSlides(p, /<p:grpSp\b/g) },
   {
     id: 'groups.nested',
-    label: 'Groups inside groups',
+    label: 'Slides with groups inside groups',
     count: (p) => partsOf(p, SLIDE).filter((x) => maxGroupDepth(x) >= 2).length,
   },
   {
@@ -537,7 +540,7 @@ export const CONSTRUCTS: PptxConstruct[] = [
   { id: 'media.video', label: 'Video', count: (p) => inSlides(p, tagRe('videoFile')) },
   {
     id: 'transitions.basic',
-    label: 'Slide transitions',
+    label: 'Transition elements (a PowerPoint 2010 transition counts twice: choice and fallback)',
     count: (p) => inSlides(p, /<p:transition\b/g),
   },
   {
@@ -623,7 +626,7 @@ export const CONSTRUCTS: PptxConstruct[] = [
   },
   {
     id: 'text.cjk',
-    label: 'Chinese, Japanese and Korean text',
+    label: 'Chinese, Japanese and Korean characters',
     count: (p) => inSlides(p, /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g),
   },
   {

@@ -122,10 +122,14 @@ def comments_modern(path):
                '<p188:author id="{00000000-0000-4000-8000-0000000000A1}" name="Reviewer One" initials="R1" userId="reviewer.one" providerId="None"/>'
                '<p188:author id="{00000000-0000-4000-8000-0000000000A2}" name="Reviewer Two" initials="R2" userId="reviewer.two" providerId="None"/></p188:authorLst>')
     mk = lambda text: f'<p188:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US"/><a:t>{text}</a:t></a:r></a:p></p188:txBody>'
+    reply = (f'<p188:replyLst><p188:reply id="{{00000000-0000-4000-8000-0000000000C2}}" authorId="{{00000000-0000-4000-8000-0000000000A2}}" created="2026-01-15T09:00:00.000">'
+             f'{mk("Yes, it is.")}</p188:reply></p188:replyLst>')
+    # element order inside a comment: anchor, replies, then the text body
     comment = (f'{X.HEAD}<p188:cmLst xmlns:a="{X.A}" xmlns:r="{X.R}" xmlns:p188="{P188}"><p188:cm id="{{00000000-0000-4000-8000-0000000000C1}}" authorId="{{00000000-0000-4000-8000-0000000000A1}}" created="2026-01-15T09:00:00.000">'
                '<pc:sldMkLst xmlns:pc="http://schemas.microsoft.com/office/powerpoint/2013/main/command"><pc:docMk/><pc:sldMk cId="1000" sldId="256"/></pc:sldMkLst>'
-               f'{mk("Is this the final title?")}<p188:replyLst><p188:reply id="{{00000000-0000-4000-8000-0000000000C2}}" authorId="{{00000000-0000-4000-8000-0000000000A2}}" created="2026-01-15T09:00:00.000">'
-               f'{mk("Yes, it is.")}</p188:reply></p188:replyLst></p188:cm></p188:cmLst>')
+               f'{reply}{mk("Is this the final title?")}</p188:cm></p188:cmLst>')
+    # the slide's creation id is what the comment's sldMk cId refers to
+    s1.ext = f'<p:extLst><p:ext uri="{{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}}"><p14:creationId xmlns:p14="{P14}" val="1000"/></p:ext></p:extLst>'
     s1.part("ppt/comments/modernComment_100_3E8.xml", comment, "application/vnd.ms-powerpoint.comments+xml", "http://schemas.microsoft.com/office/2018/10/relationships/comments")
     d.extra["ppt/authors.xml"] = (authors.encode(), "application/vnd.ms-powerpoint.authors+xml")
     d.pres_rels_extra.append(("http://schemas.microsoft.com/office/2018/10/relationships/authors", "authors.xml"))

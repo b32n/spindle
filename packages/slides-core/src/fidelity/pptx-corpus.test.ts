@@ -277,7 +277,7 @@ describe('PPTX corpus', () => {
     expect(core).not.toMatch(/<dcterms:(?:created|modified)\b[^>]*>(?!2026-01-15T09:00:00Z)/);
   });
 
-  it('keeps the flow fixtures consistent: custom shows name existing slides, sections cover the slide ids', async () => {
+  it('keeps the flow fixtures consistent: custom shows name existing slides, every deck with sections puts each slide in one', async () => {
     const p = await parts('hidden-sections.pptx');
     const pres = p.xml['ppt/presentation.xml'];
     const rids = new Set(
@@ -289,14 +289,40 @@ describe('PPTX corpus', () => {
     const shown = [...pres.matchAll(/<p:sld r:id="([^"]+)"\/>/g)].map((m) => m[1]);
     expect(shown.length).toBeGreaterThan(0);
     for (const id of shown) expect(rids.has(id)).toBe(true);
-    const listed = [...pres.matchAll(/<p:sldId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
-    const sectioned = [...pres.matchAll(/<p14:sldId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
-    expect(sectioned).toEqual(listed);
+    for (const f of committed) {
+      const q = await parts(f.filename);
+      const xml = q.xml['ppt/presentation.xml'] ?? '';
+      if (!xml.includes('<p14:sectionLst')) continue;
+      const listed = [...xml.matchAll(/<p:sldId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+      const sectioned = [...xml.matchAll(/<p14:sldId\b[^>]*\bid="(\d+)"/g)].map((m) => m[1]);
+      expect({ id: f.id, sectioned }).toEqual({ id: f.id, sectioned: listed });
+    }
   });
 
   it('keeps the kitchen sink broad: at least 45 distinct constructs', async () => {
     const found = CONSTRUCTS.filter((c) => c.count(kitchen) > 0);
     expect(found.length).toBeGreaterThanOrEqual(45);
+  });
+
+  it('keeps the legacy comment indexes and the modern comment anchor consistent', async () => {
+    const legacy = await parts('comments-legacy.pptx');
+    const used = new Map<string, number>();
+    for (const [name, xml] of Object.entries(legacy.xml)) {
+      if (!/^ppt\/comments\/comment\d+\.xml$/.test(name)) continue;
+      for (const m of xml.matchAll(/<p:cm\b[^>]*\bauthorId="(\d+)"[^>]*\bidx="(\d+)"/g))
+        used.set(m[1], Math.max(used.get(m[1]) ?? 0, Number(m[2])));
+    }
+    const authors = [
+      ...legacy.xml['ppt/commentAuthors.xml'].matchAll(/\bid="(\d+)"[^>]*\blastIdx="(\d+)"/g),
+    ];
+    expect(authors).toHaveLength(2);
+    for (const m of authors) expect(Number(m[2])).toBe(used.get(m[1]) ?? 0);
+    const modern = await parts('comments-modern.pptx');
+    expect(modern.xml['ppt/slides/slide1.xml']).toContain('<p14:creationId');
+    expect(modern.xml['ppt/slides/slide1.xml']).toContain('val="1000"');
+    expect(modern.xml['ppt/comments/modernComment_100_3E8.xml']).toContain('sldMk cId="1000"');
+    const c = modern.xml['ppt/comments/modernComment_100_3E8.xml'];
+    expect(c.indexOf('<p188:replyLst>')).toBeLessThan(c.indexOf('<p188:txBody>'));
   });
 
   it('keeps the README coverage matrix in sync (PPTX_FIDELITY_UPDATE=1 rewrites it)', () => {

@@ -701,6 +701,14 @@ describe('PPTX construct probes', () => {
       'tables.cellFill',
       mk(slide('<a:tcPr/><a:tcPr><a:lnL/></a:tcPr><a:tcPr><a:noFill/></a:tcPr>'))
     );
+    none(
+      'tables.cellFill',
+      mk(
+        slide(
+          '<a:tcPr><a:lnL><a:solidFill/></a:lnL><a:lnTlToBr w="1"><a:gradFill/></a:lnTlToBr></a:tcPr>'
+        )
+      )
+    );
     none('tables.customStyles', mk({ 'ppt/tableStyles.xml': '<a:tblStyleLst def="x"/>' }));
     none('groups.nested', mk(slide('<p:grpSp><p:grpSpPr/></p:grpSp>')));
     none('connectors.connected', cxn('<a:prstGeom prst="line"/>'));
@@ -831,6 +839,18 @@ describe('PPTX construct probes', () => {
     expect(findConstruct('fills.solid')?.count(p)).toBe(1);
     expect(findConstruct('fills.gradient')?.count(p)).toBe(1);
     expect(findConstruct('fills.noFill')?.count(p)).toBe(0);
+  });
+
+  it('counts a cell fill next to coloured borders once', () => {
+    expect(
+      findConstruct('tables.cellFill')?.count(
+        mk(
+          slide(
+            '<a:tcPr><a:lnL><a:solidFill/></a:lnL><a:solidFill/><a:lnR><a:pattFill/></a:lnR></a:tcPr>'
+          )
+        )
+      )
+    ).toBe(1);
   });
 
   it('finds constructs by id', () => {
