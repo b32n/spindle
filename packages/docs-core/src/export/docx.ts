@@ -13,6 +13,7 @@ import type {
   DocImageRun,
   DocInline,
   DocNamedStyle,
+  DocBlockRevision,
   DocParagraphStyle,
   DocRunBase,
   DocSection,
@@ -24,6 +25,7 @@ import type {
 } from '@b32nio/spindle-shared/export/docx';
 import type {
   Block,
+  BlockRevision,
   ContentControl,
   DocumentData,
   DynamicFieldRun,
@@ -207,6 +209,7 @@ function toBlock(
         rows: block.rows.map((row) => ({
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
+          ...(row.revision && { revision: row.revision }),
           cells: row.cells.map((cell) => ({
             content: toInlineContent(cell.content, title, textStylePool),
             ...(cell.blocks && { blocks: cell.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) }),
@@ -303,7 +306,30 @@ function resolveParagraphStyle(block: ParagraphLikeBlock, pool: Record<string, P
     ...(keepTogether && { keepTogether: true }),
     ...(pageBreakBefore && { pageBreakBefore: true }),
     ...(block.namedStyleId && { namedStyleId: block.namedStyleId }),
+    ...(block.revision && { revision: toDocBlockRevision(block.revision) }),
   };
+}
+
+/** A paragraph's tracked changes for the interchange format: what the formatting was before is in points. */
+function toDocBlockRevision(revision: BlockRevision): DocBlockRevision {
+  const { formatChange, ...marks } = revision;
+  if (!formatChange) return marks;
+  const { headingLevel, ...previous } = formatChange.previous;
+  const { revision: _nested, ...format } = resolveParagraphStyle(previous as ParagraphLikeBlock, {});
+  return { ...marks, formatChange: { ...formatChange, previous: { ...compact(format), ...(headingLevel && { headingLevel }) } } };
+}
+
+/** A paragraph's tracked changes from the interchange format: what the formatting was before is in pixels. */
+function fromDocBlockRevision(revision: DocBlockRevision): BlockRevision {
+  const { formatChange, ...marks } = revision;
+  if (!formatChange) return marks;
+  const { headingLevel, ...previous } = formatChange.previous;
+  return { ...marks, formatChange: { ...formatChange, previous: { ...toParagraphFormat(previous), ...(headingLevel && { headingLevel }) } } };
+}
+
+/** The object without the keys whose value is undefined (they would not survive being stored as JSON). */
+function compact<T extends object>(value: T): T {
+  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
 }
 
 function toInlineContent(content: InlineContent[], title: string, pool: Record<string, TextStyle>): DocInline[] {
@@ -612,6 +638,7 @@ function toParagraphFormat(style: DocParagraphStyle): ParagraphFormat {
     ...(style.keepTogether && { keepTogether: true }),
     ...(style.pageBreakBefore && { pageBreakBefore: true }),
     ...(style.namedStyleId && { namedStyleId: style.namedStyleId }),
+    ...(style.revision && { revision: fromDocBlockRevision(style.revision) }),
   };
 }
 
@@ -650,6 +677,7 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
           id: generateRowId(),
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
+          ...(row.revision && { revision: row.revision }),
           cells: row.cells.map((cell) => ({
             id: generateCellId(),
             content: toInlineContentFromDocx(cell.content, textStylePool),

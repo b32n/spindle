@@ -325,8 +325,29 @@ lockstep.
   when a page break follows it. Copied tracked text now keeps its changes when pasted in the browser (the clipboard HTML was parsed as plain text style before: the parse rules of the change marks have a priority of their own). Updating a table of contents lists the final text of a heading (words in a tracked
   deletion are left out). The authors of the changes are collected when typing pauses, not on every key. The paragraph break between the paragraphs of a note no longer becomes part of a tracked change at the end of the paragraph before it, and the same change id from two authors counts as two changes in the list of changes.
 
+- **Tracked moves, formatting changes, paragraph-mark and table-row changes are kept, shown and written back.** The two ends
+  of a move (`w:moveFrom` / `w:moveTo` with their range markers) are read as a deletion and an insertion that share the name of
+  the move (`moveId`) and written back with the range markers; a change of a run's formatting (`w:rPrChange`) keeps what the
+  formatting was before (`formatChange`: the effective formatting, in the same fields as a run) next to the formatting now;
+  likewise `w:pPrChange` for a paragraph (with the heading level it had); an inserted or deleted paragraph mark
+  (`w:pPr/w:rPr/w:ins|w:del|w:moveFrom|w:moveTo`; a move of a paragraph mark is written as an insertion or deletion, as the writer's
+  library has no move there) and an inserted or deleted table row (`w:trPr`). Additive: `DocRevisionMeta.moveId`,
+  `DocFormatChange`, `DocRunFormat`, `DocParagraphFormat`, `DocBlockRevision`, `DocRevision.formatChange`,
+  `DocParagraphStyle.revision` and `DocTableRow.revision` in the interchange types; `RevisionMeta.moveId`, `FormatChange`,
+  `RunFormat`, `PreviousParagraphFormat`, `BlockRevision`, `RunRevision.formatChange`, `ParagraphFormat.revision` and
+  `TableRow.revision` in docs-core. `docsSchema` gains the `formatChange` mark (attributes `revisionId`, `author`, `date`,
+  `previous`; the formatting read back from pasted HTML is limited to known fields), a `moveId` attribute on the `insertion` and
+  `deletion` marks, and a `revision` attribute on paragraphs, headings and table rows; all are plain ProseMirror content that
+  syncs over Yjs, within the collaboration `schemaVersion` 6 of the previous entry. The editor draws the two ends of a move with a
+  double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
+  paragraph with a change, and a tint on the cells of an inserted or deleted row.
+
 ### Changed
 
+- **DOCX loss report: `docx.trackedMoves` and `docx.formattingRevisions` count only what is still lost, and `docx.trackedInsertions`
+  / `docx.trackedDeletions` narrow again** (see the previous entry): the changes of a paragraph mark in a table cell of one
+  paragraph (such a cell keeps only its text), the formatting change of a paragraph mark's own formatting, and changes of tables and
+  sections (`w:tblPrChange`, `w:sectPrChange`). A change inside a field result is not kept either (and not counted).
 - **Tracked insertions and deletions are no longer applied on import.** Before, `w:ins` text came in as ordinary text and
   `w:del` text was dropped. Now both are in the document, as marked text (see above), so the text of a document with
   deletions is longer than before. A change around a field is not kept as a change (an inserted field stays as it is, a deleted

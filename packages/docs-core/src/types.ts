@@ -199,6 +199,29 @@ export interface RevisionMeta {
   author: string;
   /** ISO 8601. */
   date?: string;
+  /** The name of the move when the change is one end of a move: a deletion (where the text was) and an insertion (where it went) that share it. */
+  moveId?: string;
+}
+
+/** A change of formatting: who made it, and what the formatting was before (what is on the run or paragraph is the formatting after it). */
+export interface FormatChange<T> extends RevisionMeta {
+  previous: T;
+}
+
+/** The formatting of a run before a tracked change of it. */
+export type RunFormat = TextStyle & { namedStyleId?: string };
+
+/** The formatting of a paragraph before a tracked change of it, with the heading level it had (absent for body text). */
+export type PreviousParagraphFormat = Omit<ParagraphFormat, 'revision'> & { headingLevel?: number };
+
+/**
+ * Tracked changes of a paragraph or of a table row. `insertion` / `deletion`: the paragraph mark (the break between this
+ * paragraph and the next) or the row was inserted / deleted; `formatChange`: the paragraph's formatting was changed.
+ */
+export interface BlockRevision {
+  insertion?: RevisionMeta;
+  deletion?: RevisionMeta;
+  formatChange?: FormatChange<PreviousParagraphFormat>;
 }
 
 /**
@@ -209,6 +232,8 @@ export interface RevisionMeta {
 export interface RunRevision {
   insertion?: RevisionMeta;
   deletion?: RevisionMeta;
+  /** The formatting of the run was changed (and what it was). */
+  formatChange?: FormatChange<RunFormat>;
 }
 
 export interface InlineImage {
@@ -357,6 +382,8 @@ export interface ParagraphFormat {
   pageBreakBefore?: boolean;
   /** Named paragraph style of the block (a key of `DocumentData.namedStyles`); distinct from the pool `styleId`. */
   namedStyleId?: string;
+  /** Tracked changes of the paragraph: its mark inserted or deleted, its formatting changed. */
+  revision?: BlockRevision;
 }
 
 export interface ParagraphBlock extends BaseBlock, ParagraphFormat {
@@ -452,6 +479,8 @@ export interface TableRow {
   repeatHeader?: boolean;
   /** Keep the row on one page (DOCX `w:cantSplit`). */
   cantSplit?: boolean;
+  /** The row was inserted or deleted as a tracked change. */
+  revision?: Pick<BlockRevision, 'insertion' | 'deletion'>;
 }
 
 export interface TableBlock extends BaseBlock {

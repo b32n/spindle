@@ -16,12 +16,15 @@ import {
   HeadingBlock,
   ListItemBlock,
   TableBlock,
+  TableRow,
   TableCell,
   ImageBlock,
+  ParagraphAttrs,
+  ChangeBar,
   isRunContainingBlock,
   noteKeyString,
 } from './flow-blocks';
-import { addTitle, revisionDecoration } from './revision-decoration';
+import { addTitle, revisionDecoration, rowRevisionTint } from './revision-decoration';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
 import { DocumentLayout, PageLayout, PageFragment, PageConfig, findPageAtY, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
@@ -510,6 +513,9 @@ export class DomPainter {
         contentArea.appendChild(fragmentEl);
         const titles = fragment.isFirstFragment ? this.blockLookup.get(fragment.blockId)?.block.controlChips : undefined;
         if (titles && titles.length > 0) chipEls.push(this.renderControlChips(titles, margins.left, margins.top + fragment.y));
+        const block = this.blockLookup.get(fragment.blockId)?.block;
+        const bar = block && (block.kind === 'paragraph' || block.kind === 'heading' || block.kind === 'listItem') ? block.attrs?.changeBar : undefined;
+        if (bar) chipEls.push(this.renderChangeBar(bar, margins.left, margins.top + fragment.y, fragment.height));
       }
     }
     
@@ -941,6 +947,8 @@ export class DomPainter {
       padding-right: ${(attrs.rightIndent || 0) * this.config.scale}px;
     `;
     
+    this.applyChangeBar(para, attrs);
+
     // Only apply first-line indent if this is the first fragment
     if (fragment.isFirstFragment && attrs.firstLineIndent) {
       para.style.textIndent = `${attrs.firstLineIndent * this.config.scale}px`;
@@ -1368,6 +1376,7 @@ export class DomPainter {
           cellStyles += `background-color: ${cellBg};`;
         }
         td.style.cssText = cellStyles;
+        this.applyRowRevision(td, row);
         
         // Add PM position data for click-to-position mapping
         if (cell.pmStart !== undefined && cell.pmEnd !== undefined) {
@@ -1655,11 +1664,48 @@ export class DomPainter {
   private applyRevisionDecoration(el: HTMLElement, run: Run): void {
     const decoration = revisionDecoration(run);
     if (!decoration) return;
-    el.style.color = decoration.color;
+    if (decoration.color) el.style.color = decoration.color;
     el.style.textDecoration = decoration.textDecoration;
-    el.style.textDecorationColor = decoration.color;
+    el.style.textDecorationColor = decoration.textDecorationColor;
+    if (decoration.textDecorationStyle) el.style.textDecorationStyle = decoration.textDecorationStyle;
     Object.assign(el.dataset, decoration.data);
     addTitle(el, decoration.title);
+  }
+
+  /** A cell of a row inserted or deleted as a tracked change: tinted in the author's colour. */
+  private applyRowRevision(td: HTMLElement, row: TableRow): void {
+    const tint = rowRevisionTint(row.revision);
+    if (!tint) return;
+    // The tint goes over any background of the cell, so it keeps its own colour.
+    td.style.backgroundImage = tint.backgroundImage;
+    Object.assign(td.dataset, tint.data);
+  }
+
+  /** A paragraph with a tracked change: what changed as data attributes (the bar itself is drawn in the margin by `renderChangeBar`). */
+  private applyChangeBar(el: HTMLElement, attrs: ParagraphAttrs): void {
+    const bar = attrs.changeBar;
+    if (!bar) return;
+    el.dataset.revisionBlock = bar.kinds.join(' ');
+    el.dataset.revisionAuthor = bar.author;
+  }
+
+  /** The bar beside a paragraph with a tracked change, in the margin (outside the clipped content area), in the author's colour. */
+  private renderChangeBar(bar: ChangeBar, marginLeft: number, y: number, height: number): HTMLElement {
+    const el = document.createElement('div');
+    el.className = 'change-bar';
+    el.dataset.revisionBlock = bar.kinds.join(' ');
+    el.dataset.revisionAuthor = bar.author;
+    const width = Math.max(1, 2 * this.config.scale);
+    el.style.cssText = `
+      position: absolute;
+      left: ${Math.max(0, marginLeft - 10 * this.config.scale)}px;
+      top: ${y}px;
+      width: ${width}px;
+      height: ${height}px;
+      background: ${safeCssColor(bar.color) || DEFAULT_REVISION_COLOR};
+      pointer-events: none;
+    `;
+    return el;
   }
 
   /**

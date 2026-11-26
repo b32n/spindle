@@ -61,13 +61,13 @@ Verified absent in code.
 - [ ] **Footnotes / endnotes** — none.
 - [ ] **Bookmarks / cross-references** — imported bookmarks and internal links are kept (a bookmark is a point, clicking a
       `#name` link scrolls to it); there is no UI to insert bookmarks or cross-references, and `REF` fields are not recalculated.
-- [ ] **Track changes / suggestions mode** — tracked insertions and deletions around runs are read from a file, shown
-      (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
-      rejecting, a Suggesting mode, moves, formatting changes, paragraph-mark and table-row changes, and a change around a
-      field, image or note reference (those are not kept as changes). The library has no plain-text, HTML or Markdown
-      export, word count or search of its own; `getPlainText` / `getPmPlainText` and the clipboard text leave deleted text
-      out, the clipboard HTML keeps it (so a paste keeps the change). A host that counts or searches text takes the final
-      text from those helpers.
+- [ ] **Track changes / suggestions mode** — tracked insertions, deletions, moves, formatting changes and paragraph and row changes are read
+      from a file, shown (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
+      rejecting, a Suggesting mode, changes of cells, tables and sections, and a change around a field, image or note
+      reference (those are not kept as changes). Moves, formatting changes and paragraph-mark and table-row changes are
+      kept and shown. The library has no plain-text, HTML or Markdown export, word count or search of its own;
+      `getPlainText` / `getPmPlainText` and the clipboard text leave deleted text out, the clipboard HTML keeps it (so a
+      paste keeps the change). A host that counts or searches text takes the final text from those helpers.
 - [ ] **Spell-check** — browser spellcheck is deliberately disabled
       (`input-bridge.ts`); no custom engine.
 - [ ] **Equation editor, drawing / shapes / canvas** — none.

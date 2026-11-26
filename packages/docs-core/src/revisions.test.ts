@@ -78,7 +78,8 @@ describe('tracked changes in the ProseMirror document', () => {
     expect((bare.type.spec.toDOM!(bare, true) as readonly unknown[])[1]).not.toHaveProperty('data-revision-date');
     const read = (kind: typeof insertion, attrs: Record<string, string | null>) =>
       (kind.spec.parseDOM![0].getAttrs as (d: unknown) => unknown)({ getAttribute: (n: string) => attrs[n] ?? null });
-    expect(read(insertion, { 'data-insertion': '9', 'data-revision-author': 'Ada', 'data-revision-date': 'd' })).toEqual({ revisionId: '9', author: 'Ada', date: 'd' });
+    expect(read(insertion, { 'data-insertion': '9', 'data-revision-author': 'Ada', 'data-revision-date': 'd' })).toEqual({ revisionId: '9', author: 'Ada', date: 'd', moveId: null });
+    expect(read(deletion, { 'data-deletion': '9', 'data-revision-author': 'Bo', 'data-revision-move': 'm1' })).toMatchObject({ moveId: 'm1' });
     expect(read(deletion, { 'data-deletion': '9' })).toBe(false);
     expect(read(deletion, { 'data-revision-author': 'x' })).toBe(false);
   });
@@ -319,5 +320,100 @@ describe('tracked changes in DOCX', () => {
     expect(changes.some((c) => c.kind === 'deletion')).toBe(true);
     expect(getCollabBlockers(doc.getData())).toEqual([]);
     expect(JSON.stringify(viaYjs(doc.getSections()[0].blocks))).toContain('"revision"');
+  });
+});
+
+
+// Moves, formatting changes, and changes of paragraph marks and table rows.
+describe('moves, formatting changes, paragraph marks and rows', () => {
+  const MOVE_FROM = { id: '5', author: 'Cy', date: '2024-01-02T00:00:00Z', moveId: 'move-1' };
+  const MOVE_TO = { id: '6', author: 'Cy', moveId: 'move-1' };
+  const FORMAT = { id: '7', author: 'Di', date: '2024-03-04T00:00:00Z', previous: { bold: true, fontSize: 14, color: '#c00000', namedStyleId: 'Strong' } };
+  const KINDS: Block[] = [
+    {
+      id: 'p',
+      type: 'paragraph',
+      revision: { insertion: { id: '8', author: 'Ada' }, formatChange: { id: '9', author: 'Bo', previous: { alignment: 'right', leftIndent: 24, headingLevel: 2 } } },
+      content: [
+        { type: 'text', text: 'from', revision: { deletion: MOVE_FROM } },
+        { type: 'text', text: 'to', revision: { insertion: MOVE_TO } },
+        { type: 'text', text: 'now', italic: true, revision: { formatChange: FORMAT } },
+        { type: 'link', text: 'link', href: 'https://example.com/', revision: { insertion: ADA, formatChange: FORMAT } },
+      ],
+    },
+    { id: 'h', type: 'heading', level: 2, content: [{ type: 'text', text: 'H' }], revision: { deletion: { id: '10', author: 'Bo' } } },
+    {
+      id: 't',
+      type: 'table',
+      rows: [
+        { id: 'r1', cells: [{ id: 'c1', content: [{ type: 'text', text: 'new row' }] }], revision: { insertion: { id: '11', author: 'Ada' } } },
+        { id: 'r2', cells: [{ id: 'c2', content: [{ type: 'text', text: 'old row' }] }], revision: { deletion: { id: '12', author: 'Bo' } } },
+        { id: 'r3', cells: [{ id: 'c3', content: [{ type: 'text', text: 'row' }] }] },
+      ],
+    },
+  ];
+
+  it('travel through the ProseMirror document and the Y document unchanged', () => {
+    for (const via of [viaPm, viaYjs]) {
+      const back = via(KINDS);
+      expect(strip(back.slice(0, 2))).toEqual(strip(KINDS.slice(0, 2)));
+      expect((back[2] as Extract<Block, { type: 'table' }>).rows.map((r) => r.revision)).toEqual([{ insertion: { id: '11', author: 'Ada' } }, { deletion: { id: '12', author: 'Bo' } }, undefined]);
+    }
+    expect(getCollabBlockers(dataWith(KINDS))).toEqual([]);
+  });
+
+  it('are PM marks and attributes of their own', () => {
+    const pm = blocksToPmDoc(KINDS);
+    const para = pm.child(0);
+    expect(para.attrs.revision).toMatchObject({ insertion: { id: '8' }, formatChange: { id: '9', previous: { headingLevel: 2 } } });
+    expect(para.child(0).marks.map((m) => [m.type.name, m.attrs.moveId])).toEqual([['deletion', 'move-1']]);
+    expect(para.child(2).marks.find((m) => m.type.name === 'formatChange')!.attrs).toMatchObject({ revisionId: '7', previous: { bold: true, fontSize: 14 } });
+    expect(pm.child(2).child(0).attrs.revision).toEqual({ insertion: { id: '11', author: 'Ada' } });
+    expect(pm.child(2).child(2).attrs.revision).toBeNull();
+    expect(revisionOf(para.child(2).marks)).toEqual({ formatChange: { id: '7', author: 'Di', date: '2024-03-04T00:00:00Z', previous: FORMAT.previous } });
+  });
+
+  it('keep what the model gave them apart from the model (no shared objects)', () => {
+    const blocks = JSON.parse(JSON.stringify(KINDS)) as Block[];
+    const pm = blocksToPmDoc(blocks);
+    (blocks[0] as ParagraphBlock).revision!.insertion!.author = 'changed';
+    expect(pm.child(0).attrs.revision.insertion.author).toBe('Ada');
+  });
+
+  it('survive a DOCX export and import through the editor model', async () => {
+    const doc = new DocumentImpl('doc', 'Doc');
+    doc.setData(dataWith(KINDS));
+    const { bytes } = await exportToDocx(doc);
+    const xml = await (await JSZip.loadAsync(bytes)).file('word/document.xml')!.async('string');
+    for (const element of ['<w:moveFrom ', '<w:moveTo ', '<w:rPrChange ', '<w:pPrChange ', '<w:trPr><w:ins ', '<w:trPr><w:del ']) expect(xml).toContain(element);
+    const reopened = new DocumentImpl('doc2', 'Doc2');
+    await importFromDocx(bytes, reopened);
+    const [para, heading, table] = reopened.getSections()[0].blocks;
+    expect((para as ParagraphBlock).revision).toMatchObject({ insertion: { id: '8', author: 'Ada' }, formatChange: { id: '9', author: 'Bo', previous: { alignment: 'right', leftIndent: 24 } } });
+    expect((para as ParagraphBlock).content).toMatchObject([
+      { revision: { deletion: { id: '5', moveId: 'move-1' } } },
+      { revision: { insertion: { id: '6', moveId: 'move-1' } } },
+      { italic: true, revision: { formatChange: { id: '7', author: 'Di', previous: { bold: true, fontSize: 14, color: '#c00000' } } } },
+      { type: 'link', revision: { insertion: { author: 'Ada' }, formatChange: { id: '7' } } },
+    ]);
+    expect(heading).toMatchObject({ revision: { deletion: { id: '10', author: 'Bo' } } });
+    expect((table as Extract<Block, { type: 'table' }>).rows.map((r) => r.revision)).toMatchObject([{ insertion: { id: '11' } }, { deletion: { id: '12' } }, undefined]);
+  });
+
+  it('read a formatting change from pasted HTML with known fields of the right type only', () => {
+    const { formatChange } = docsSchema.marks;
+    const read = (previous: string) => (formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => { previous: unknown } | false)({
+      getAttribute: (n: string) => ({ 'data-format-change': '1', 'data-revision-author': 'A', 'data-format-previous': previous })[n] ?? null,
+    });
+    expect(read('{"bold":true,"fontSize":12,"color":"#112233","fontFamily":"Arial","namedStyleId":"S","evil":1,"italic":"yes","backgroundColor":"url(x)"}')).toMatchObject({
+      previous: { bold: true, fontSize: 12, color: '#112233', fontFamily: 'Arial', namedStyleId: 'S' },
+    });
+    expect(Object.keys((read('{"bold":true,"evil":1,"italic":"yes","backgroundColor":"url(x)","fontSize":-3}') as { previous: object }).previous)).toEqual(['bold']);
+    expect(read('not json')).toMatchObject({ previous: {} });
+    expect(read('[1]')).toMatchObject({ previous: {} });
+    expect(read('null')).toMatchObject({ previous: {} });
+    const mark = formatChange.create({ revisionId: '1', author: 'A', previous: { bold: true } });
+    expect(formatChange.spec.toDOM!(mark, true)).toEqual(['span', expect.objectContaining({ 'data-format-change': '1', 'data-format-previous': '{"bold":true}', class: 'revision-format-change' }), 0]);
+    expect((formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => unknown)({ getAttribute: () => null })).toBe(false);
   });
 });

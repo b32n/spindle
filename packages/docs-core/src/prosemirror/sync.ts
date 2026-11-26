@@ -5,6 +5,8 @@ import type {
   Block,
   Section,
   InlineContent,
+  BlockRevision,
+  RunFormat,
   RunRevision,
   TextRun,
   InlineLink,
@@ -105,7 +107,13 @@ function formatAttrs(block: ParagraphFormat): Record<string, unknown> {
     keepTogether: block.keepTogether || null,
     pageBreakBefore: block.pageBreakBefore || null,
     namedStyleId: block.namedStyleId ?? null,
+    revision: block.revision ? cloneJson(block.revision) : null,
   };
+}
+
+/** A plain-data copy (revisions are stored in node attributes, which must not share objects with the model). */
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
 }
 
 /**
@@ -125,6 +133,7 @@ function readFormat(attrs: Record<string, unknown>, defaults: { spaceBefore: num
   if (attrs.keepTogether === true) out.keepTogether = true;
   if (attrs.pageBreakBefore === true) out.pageBreakBefore = true;
   if (typeof attrs.namedStyleId === 'string' && attrs.namedStyleId) out.namedStyleId = attrs.namedStyleId;
+  if (attrs.revision && typeof attrs.revision === 'object') out.revision = cloneJson(attrs.revision as BlockRevision);
   return out;
 }
 
@@ -239,7 +248,7 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
         attrs: { colWidths: block.colWidths ?? null, styleId: block.styleId ?? null, borders: block.borders ?? null, look: block.look ?? null, namedStyleId: block.namedStyleId ?? null },
         content: block.rows.map(row => ({
           type: 'table_row',
-          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false },
+          attrs: { height: row.height ?? null, repeatHeader: row.repeatHeader ?? false, cantSplit: row.cantSplit ?? false, revision: row.revision ? cloneJson(row.revision) : null },
           content: row.cells.map(cell => ({
             type: cell.isHeader ? 'table_header' : 'table_cell',
             attrs: {
@@ -682,6 +691,7 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
           ...(rowNode.attrs.height != null ? { height: rowNode.attrs.height as number } : {}),
           ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
           ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
+          ...(rowNode.attrs.revision && typeof rowNode.attrs.revision === 'object' ? { revision: cloneJson(rowNode.attrs.revision as TableRow['revision']) } : {}),
         });
       });
 
@@ -934,8 +944,10 @@ function revisionMarks(revision: RunRevision | undefined): PmMarkJSON[] {
   const marks: PmMarkJSON[] = [];
   for (const kind of ['insertion', 'deletion'] as const) {
     const meta = revision?.[kind];
-    if (meta) marks.push({ type: kind, attrs: { revisionId: meta.id, author: meta.author, ...(meta.date && { date: meta.date }) } });
+    if (meta) marks.push({ type: kind, attrs: { revisionId: meta.id, author: meta.author, ...(meta.date && { date: meta.date }), ...(meta.moveId && { moveId: meta.moveId }) } });
   }
+  const change = revision?.formatChange;
+  if (change) marks.push({ type: 'formatChange', attrs: { revisionId: change.id, author: change.author, ...(change.date && { date: change.date }), previous: cloneJson(change.previous) } });
   return marks;
 }
 
@@ -946,10 +958,22 @@ export function revisionOf(marks: readonly { type: { name: string }; attrs: Reco
     const mark = marks.find((m) => m.type.name === kind);
     if (mark) {
       const date = mark.attrs.date;
-      revision[kind] = { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), ...(typeof date === 'string' && date && { date }) };
+      const moveId = mark.attrs.moveId;
+      revision[kind] = { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), ...(typeof date === 'string' && date && { date }), ...(typeof moveId === 'string' && moveId && { moveId }) };
     }
   }
-  return revision.insertion || revision.deletion ? revision : undefined;
+  const change = marks.find((m) => m.type.name === 'formatChange');
+  if (change) {
+    const date = change.attrs.date;
+    const previous = change.attrs.previous;
+    revision.formatChange = {
+      id: String(change.attrs.revisionId),
+      author: String(change.attrs.author),
+      ...(typeof date === 'string' && date && { date }),
+      previous: previous && typeof previous === 'object' ? cloneJson(previous as RunFormat) : {},
+    };
+  }
+  return revision.insertion || revision.deletion || revision.formatChange ? revision : undefined;
 }
 
 /** True if a text run carries any formatting or comment anchor. */

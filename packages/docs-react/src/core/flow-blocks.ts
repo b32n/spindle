@@ -16,6 +16,8 @@
 export interface RunRevisionInfo {
   insertion?: RevisionInfo;
   deletion?: RevisionInfo;
+  /** The formatting of the run was changed. */
+  formatChange?: RevisionInfo;
 }
 
 /** One tracked change on a run; `color` is the author's colour, picked for the whole document (see docs-core `assignAuthorColors`). */
@@ -23,6 +25,15 @@ export interface RevisionInfo {
   id: string;
   author: string;
   color: string;
+  /** The name of the move when the change is one end of a move. */
+  moveId?: string;
+}
+
+/** What marks a paragraph as changed: a bar in the margin in the colour of the author who made the last change, with what changed. */
+export interface ChangeBar {
+  color: string;
+  author: string;
+  kinds: Array<'insertion' | 'deletion' | 'format'>;
 }
 
 /** The colour of a change whose author has none (a document converted without the colours). */
@@ -150,6 +161,8 @@ export interface ParagraphAttrs {
   indent?: number;       // Indent level (0, 1, 2, etc.) - each level = 24px
   leftIndent?: number;   // Additional left padding in pixels
   rightIndent?: number;  // Additional right padding in pixels
+  /** The paragraph has a tracked change (its mark inserted or deleted, its formatting changed). */
+  changeBar?: ChangeBar;
 }
 
 /**
@@ -253,6 +266,8 @@ export interface TableRow {
   height?: number;
   repeatHeader?: boolean;
   cantSplit?: boolean;
+  /** The row was inserted or deleted as a tracked change. */
+  revision?: { insertion?: RevisionInfo; deletion?: RevisionInfo };
 }
 
 /**

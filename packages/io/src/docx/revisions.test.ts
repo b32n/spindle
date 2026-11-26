@@ -390,20 +390,23 @@ describe('a deleted run before a page break', () => {
 });
 
 describe('loss report', () => {
-  it('no longer counts changes around runs, only those on a paragraph mark or table row', async () => {
+  const cell = (paragraphs: string) => `<w:tbl ${W}><w:tr><w:tc>${paragraphs}</w:tc></w:tr></w:tbl>`;
+
+  it('counts only a paragraph-mark change in a table cell of one paragraph (the editor keeps just the text of such a cell)', async () => {
     const { bytes } = await importBody(
       `<w:p ${W}><w:pPr><w:rPr><w:ins w:id="1" w:author="A"/></w:rPr></w:pPr>${ins('2', 'A', r(t('x')))}${del('3', 'A', delRun('y'))}</w:p>` +
-        `<w:tbl ${W}><w:tr><w:trPr><w:del w:id="4" w:author="A"/></w:trPr><w:tc><w:p/></w:tc></w:tr></w:tbl>`
+        cell('<w:p><w:pPr><w:rPr><w:ins w:id="5" w:author="A"/></w:rPr></w:pPr></w:p>') +
+        cell('<w:p><w:pPr><w:rPr><w:del w:id="6" w:author="A"/></w:rPr></w:pPr></w:p><w:p/>')
     );
     const items = (await detectDocxLoss(bytes)).items;
     expect(items.find((i) => i.id === 'docx.trackedInsertions')).toMatchObject({ count: 1 });
-    expect(items.find((i) => i.id === 'docx.trackedDeletions')).toMatchObject({ count: 1 });
+    expect(items.find((i) => i.id === 'docx.trackedDeletions')).toBeUndefined();
     expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedInsertions')).toMatchObject({ count: 1 });
   });
 
   it('reports nothing for a document whose only changes are around runs', async () => {
     const { bytes } = await importBody(`<w:p ${W}>${ins('2', 'A', r(t('x')))}${del('3', 'A', delRun('y'))}</w:p>`);
-    expect((await detectDocxLoss(bytes)).items.filter((i) => i.id.startsWith('docx.tracked'))).toEqual([]);
+    expect((await detectDocxLoss(bytes, { detail: 'full' })).items.filter((i) => i.id.startsWith('docx.tracked') || i.id === 'docx.formattingRevisions')).toEqual([]);
   });
 
   it('does not count a change inside a text box or a property-change record', async () => {

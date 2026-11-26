@@ -1,33 +1,4 @@
 {
   "format": "docx",
-  "items": [
-    {
-      "count": 5,
-      "effect": "the change history is dropped; the current formatting is imported",
-      "id": "docx.formattingRevisions",
-      "label": "tracked formatting change(s)",
-      "where": [
-        "rPrChange ×3",
-        "pPrChange ×2"
-      ]
-    },
-    {
-      "count": 2,
-      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
-      "id": "docx.trackedDeletions",
-      "label": "tracked deletion(s) of a paragraph mark or table row"
-    },
-    {
-      "count": 2,
-      "effect": "the paragraph or row is imported as ordinary content; the change is not recorded",
-      "id": "docx.trackedInsertions",
-      "label": "tracked insertion(s) of a paragraph mark or table row"
-    },
-    {
-      "count": 4,
-      "effect": "their text is not imported",
-      "id": "docx.trackedMoves",
-      "label": "tracked move(s)"
-    }
-  ]
+  "items": []
 }

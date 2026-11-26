@@ -3303,7 +3303,22 @@
                     "colwidth": [
                       200
                     ],
-                    "content": [],
+                    "content": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "revision": {
+                          "deletion": {
+                            "author": "Alice Archer",
+                            "date": "2026-01-07T10:00:00Z",
+                            "id": "id-19",
+                            "moveId": "mv-t"
+                          }
+                        },
+                        "text": "moved cell text",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-6"
                   },
                   {
@@ -3318,7 +3333,7 @@
                           "deletion": {
                             "author": "Bram Keller",
                             "date": "2026-01-06T10:00:00Z",
-                            "id": "id-19"
+                            "id": "id-20"
                           }
                         },
                         "text": "deleted in cell",
@@ -3331,7 +3346,7 @@
                           "insertion": {
                             "author": "Bram Keller",
                             "date": "2026-01-06T10:00:00Z",
-                            "id": "id-20"
+                            "id": "id-21"
                           }
                         },
                         "text": "inserted in cell",
@@ -3360,7 +3375,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "id-21",
+                        "id": "id-22",
                         "kind": "footnote",
                         "type": "noteRef"
                       }
@@ -3384,7 +3399,7 @@
                           "insertion": {
                             "author": "Dana Whitfield",
                             "date": "2026-01-07T10:00:00Z",
-                            "id": "id-22"
+                            "id": "id-24"
                           }
                         },
                         "text": "tracked row, cell 1",
@@ -3397,7 +3412,22 @@
                     "colwidth": [
                       200
                     ],
-                    "content": [],
+                    "content": [
+                      {
+                        "fontFamily": "Liberation Sans",
+                        "fontSize": 11,
+                        "revision": {
+                          "insertion": {
+                            "author": "Alice Archer",
+                            "date": "2026-01-07T10:00:00Z",
+                            "id": "id-25",
+                            "moveId": "mv-t"
+                          }
+                        },
+                        "text": "moved cell text",
+                        "type": "text"
+                      }
+                    ],
                     "id": "cell-10"
                   },
                   {
@@ -3412,7 +3442,7 @@
                           "insertion": {
                             "author": "Dana Whitfield",
                             "date": "2026-01-07T10:00:00Z",
-                            "id": "id-23"
+                            "id": "id-26"
                           }
                         },
                         "text": "tracked row, cell 3",
@@ -3441,7 +3471,14 @@
                     "id": "cell-11"
                   }
                 ],
-                "id": "row-4"
+                "id": "row-4",
+                "revision": {
+                  "insertion": {
+                    "author": "Dana Whitfield",
+                    "date": "2026-01-07T10:00:00Z",
+                    "id": "id-23"
+                  }
+                }
               }
             ],
             "type": "table"
@@ -3486,7 +3523,7 @@
                   "insertion": {
                     "author": "Alice Archer",
                     "date": "2026-01-08T10:00:00Z",
-                    "id": "id-24"
+                    "id": "id-27"
                   }
                 },
                 "text": "A tracked list item at level 2",
@@ -3517,6 +3554,17 @@
                 "bold": true,
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "revision": {
+                  "formatChange": {
+                    "author": "Chidi Okafor",
+                    "date": "2026-01-08T10:00:00Z",
+                    "id": "id-28",
+                    "previous": {
+                      "fontFamily": "Liberation Sans",
+                      "fontSize": 11
+                    }
+                  }
+                },
                 "text": "now bold",
                 "type": "text"
               }

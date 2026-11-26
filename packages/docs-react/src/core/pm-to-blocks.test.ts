@@ -493,6 +493,51 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
     expect(ada.color).not.toBe(bo.color);
   });
 
+  it('carries a move, a formatting change and the colour of each author, which differ for different authors', () => {
+    const moveFrom = { type: 'deletion', attrs: { revisionId: '3', author: 'Cy', date: null, moveId: 'm1' } };
+    const format = { type: 'formatChange', attrs: { revisionId: '4', author: 'Di', date: null, previous: { bold: true } } };
+    const doc = j([{ type: 'paragraph', content: [text('a', [moveFrom]), text('b', [format]), text('c', [insertion])] }]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs as TextRun[];
+    expect(runs[0].revision).toMatchObject({ deletion: { id: '3', author: 'Cy', moveId: 'm1' } });
+    expect(runs[1].revision).toMatchObject({ formatChange: { id: '4', author: 'Di' } });
+    expect(runs[1].revision?.formatChange).not.toHaveProperty('moveId');
+    const colors = new Set(runs.map((r) => (r.revision?.deletion ?? r.revision?.formatChange ?? r.revision?.insertion)?.color));
+    expect(colors.size).toBe(3);
+  });
+
+  it('puts a bar on a paragraph with a tracked change, in the colour of its last author, also in a list item', () => {
+    const doc = j([
+      { type: 'paragraph', attrs: { revision: { insertion: { id: '1', author: 'Ada' }, formatChange: { id: '2', author: 'Bo' } } }, content: [text('a')] },
+      { type: 'heading', attrs: { level: 1, revision: { deletion: { id: '3', author: 'Cy' } } }, content: [text('h')] },
+      { type: 'paragraph', content: [text('plain')] },
+      { type: 'bullet_list', content: [{ type: 'list_item', content: [{ type: 'paragraph', attrs: { revision: { insertion: { id: '4', author: 'Ada' } } }, content: [text('li')] }] }] },
+    ]);
+    const blocks = proseMirrorToFlowBlocks(doc);
+    const colors = assignAuthorColors(['Ada', 'Bo', 'Cy']);
+    expect((blocks[0] as ParagraphBlock).attrs?.changeBar).toEqual({ color: colors.get('Bo'), author: 'Bo', kinds: ['insertion', 'format'] });
+    expect(blocks[1]).toMatchObject({ attrs: { changeBar: { author: 'Cy', kinds: ['deletion'] } } });
+    expect((blocks[2] as ParagraphBlock).attrs?.changeBar).toBeUndefined();
+    expect(blocks[3]).toMatchObject({ kind: 'listItem', attrs: { changeBar: { author: 'Ada', kinds: ['insertion'] } } });
+  });
+
+  it('carries the revision of a table row, and none for a row without one', () => {
+    const cell = { type: 'table_cell', content: [{ type: 'paragraph', content: [text('c')] }] };
+    const doc = j([
+      {
+        type: 'table',
+        content: [
+          { type: 'table_row', attrs: { revision: { insertion: { id: '1', author: 'Ada' } } }, content: [cell] },
+          { type: 'table_row', attrs: { revision: { deletion: { id: '2', author: 'Bo' }, insertion: { id: '3', author: 'Ada' } } }, content: [cell] },
+          { type: 'table_row', content: [cell] },
+        ],
+      },
+    ]);
+    const table = proseMirrorToFlowBlocks(doc)[0] as import('./flow-blocks').TableBlock;
+    expect(table.rows[0].revision).toEqual({ insertion: { id: '1', author: 'Ada', color: expect.any(String) } });
+    expect(table.rows[1].revision).toMatchObject({ deletion: { id: '2', author: 'Bo' }, insertion: { id: '3' } });
+    expect(table.rows[2].revision).toBeUndefined();
+  });
+
   it('carries the change of a link', () => {
     const doc = j([{ type: 'paragraph', content: [text('go', [{ type: 'link', attrs: { href: 'https://example.com/' } }, insertion])] }]);
     expect((proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs[0]).toMatchObject({ kind: 'link', revision: { insertion: { id: '1', author: 'Ada', color: expect.any(String) } } });

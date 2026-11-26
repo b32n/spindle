@@ -11,6 +11,32 @@ export interface DocRevisionMeta {
   author: string;
   /** ISO 8601, as in the file. */
   date?: string;
+  /** The name of the move (`w:name` of its range) when the change is one end of a move: the text of the `moveFrom` end is a deletion and that of the `moveTo` end an insertion that share it. */
+  moveId?: string;
+}
+
+/**
+ * A change of formatting (`w:rPrChange`, `w:pPrChange`): who made it and what the formatting was before. `previous`
+ * holds the effective formatting before the change; what is on the run or paragraph is the formatting after it.
+ */
+export interface DocFormatChange<T> extends DocRevisionMeta {
+  previous: T;
+}
+
+/** The formatting of a run before a tracked change of it: the run's formatting fields (a character style included). */
+export type DocRunFormat = Omit<DocRunBase, 'commentThreadId' | 'revision'>;
+
+/** The formatting of a paragraph before a tracked change of it, with the heading level it had (absent for body text). */
+export type DocParagraphFormat = Omit<DocParagraphStyle, 'revision'> & { headingLevel?: number };
+
+/**
+ * Tracked changes of a paragraph or of a table row. `insertion` / `deletion`: the paragraph mark (the break between this
+ * paragraph and the next) or the row was inserted / deleted; `formatChange`: the paragraph's formatting changed.
+ */
+export interface DocBlockRevision {
+  insertion?: DocRevisionMeta;
+  deletion?: DocRevisionMeta;
+  formatChange?: DocFormatChange<DocParagraphFormat>;
 }
 
 /**
@@ -21,6 +47,8 @@ export interface DocRevisionMeta {
 export interface DocRevision {
   insertion?: DocRevisionMeta;
   deletion?: DocRevisionMeta;
+  /** The formatting of the run was changed (and what it was). */
+  formatChange?: DocFormatChange<DocRunFormat>;
 }
 
 export interface DocRunBase {
@@ -205,6 +233,8 @@ export interface DocParagraphStyle {
   pageBreakBefore?: boolean;
   /** Id of the named paragraph style (`w:pStyle`) of the block, a key of `namedStyles`. The block's own fields still hold the effective formatting. */
   namedStyleId?: string;
+  /** Tracked changes of the paragraph: its mark inserted or deleted, its formatting changed. */
+  revision?: DocBlockRevision;
 }
 
 /**
@@ -312,6 +342,8 @@ export interface DocTableRow {
   repeatHeader?: boolean;
   /** Keep the row on one page (`w:cantSplit`). */
   cantSplit?: boolean;
+  /** The row was inserted or deleted as a tracked change (`w:trPr` `w:ins` / `w:del`). */
+  revision?: Pick<DocBlockRevision, 'insertion' | 'deletion'>;
 }
 
 /**

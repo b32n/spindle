@@ -60,12 +60,12 @@ describe('docs file I/O', () => {
 });
 
 describe('docs import loss report', () => {
-  // A tracked insertion of a paragraph mark: the one kind of tracked change the importer does not keep yet.
+  // A tracked insertion of a paragraph mark in a table cell of one paragraph: a tracked change the importer does not keep.
   async function docxWithTrackedChange(): Promise<File> {
     const out = await exportDocumentFile(makeDoc('Hello'), 'docx');
     const zip = await JSZip.loadAsync(out.data as Uint8Array);
     const xml = await zip.file('word/document.xml')!.async('string');
-    zip.file('word/document.xml', xml.replace('</w:body>', '<w:p><w:pPr><w:rPr><w:ins w:id="9" w:author="A"/></w:rPr></w:pPr><w:r><w:t>x</w:t></w:r></w:p></w:body>'));
+    zip.file('word/document.xml', xml.replace('</w:body>', '<w:tbl><w:tr><w:tc><w:p><w:pPr><w:rPr><w:ins w:id="9" w:author="A"/></w:rPr></w:pPr><w:r><w:t>x</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body>'));
     return new File([new Uint8Array(await zip.generateAsync({ type: 'uint8array' }))], 'tracked.docx');
   }
 

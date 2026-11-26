@@ -235,6 +235,13 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       pageBreakBefore: true,
     }),
     p([t('exact')], { lineSpacing: { type: 'exactly', value: 20 } }),
+    // Tracked changes of a paragraph: its mark inserted, and its formatting changed (with the formatting before).
+    p([t('marked')], {
+      revision: {
+        insertion: { id: '3', author: 'Ada', date: '2024-05-06T07:08:09Z' },
+        formatChange: { id: '4', author: 'Bo', previous: { alignment: 'right', leftIndent: 24, headingLevel: 2 } },
+      },
+    }),
     // A named paragraph style (DOCX pStyle).
     p([t('callout')], { namedStyleId: 'Callout' }),
   ],
@@ -300,6 +307,13 @@ const NODE_SAMPLES: Record<string, Json[]> = {
     },
   ],
   table_row: [
+    // A row inserted as a tracked change.
+    {
+      type: 'table',
+      content: [
+        { type: 'table_row', attrs: { revision: { insertion: { id: '8', author: 'Ada' }, deletion: { id: '9', author: 'Bo', date: '2024-01-01T00:00:00Z' } } }, content: [{ type: 'table_cell', content: [p([t('r')])] }] },
+      ],
+    },
     {
       type: 'table',
       content: [
@@ -434,7 +448,8 @@ const MARK_SAMPLES: Record<string, Json> = {
   textStyle: { type: 'textStyle', attrs: { color: '#ff0000', backgroundColor: '#00ff00', fontSize: 18, fontFamily: 'Georgia', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Arial' } },
   comment: { type: 'comment', attrs: { threadId: 'thread_1' } },
   insertion: { type: 'insertion', attrs: { revisionId: '12', author: 'Ada Lovelace', date: '2024-05-06T07:08:09Z' } },
-  deletion: { type: 'deletion', attrs: { revisionId: '13', author: 'Grace Hopper', date: null } },
+  deletion: { type: 'deletion', attrs: { revisionId: '13', author: 'Grace Hopper', date: null, moveId: 'move1' } },
+  formatChange: { type: 'formatChange', attrs: { revisionId: '14', author: 'Ada Lovelace', date: '2024-05-06T07:08:09Z', previous: { bold: true, fontSize: 14, color: '#c00000', namedStyleId: 'Strong' } } },
   namedStyle: { type: 'namedStyle', attrs: { id: 'AccentWord' } },
 };
 

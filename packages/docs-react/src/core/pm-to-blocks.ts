@@ -33,6 +33,8 @@ import {
   HorizontalRuleBlock,
   PageBreakBlock,
   ParagraphAttrs,
+  ChangeBar,
+  RevisionInfo,
   TextAlignment,
   generateBlockId,
   resetBlockIdCounter,
@@ -458,6 +460,7 @@ function convertTable(node: PmNode): TableBlock {
         cells,
         ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
         ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
+        ...rowRevision(rowNode.attrs.revision),
       });
     }
   });
@@ -701,10 +704,8 @@ function applyMarkToRun(run: TextRun, mark: Mark): void {
 
     case 'insertion':
     case 'deletion':
-      run.revision = {
-        ...run.revision,
-        [mark.type.name]: { id: String(mark.attrs.revisionId), author: String(mark.attrs.author), color: authorColorOf(String(mark.attrs.author)) },
-      };
+    case 'formatChange':
+      run.revision = { ...run.revision, [mark.type.name]: revisionInfo(mark) };
       break;
   }
 }
@@ -758,9 +759,48 @@ function extractParagraphAttrs(node: PmNode): ParagraphAttrs {
     if (node.attrs.rightIndent !== undefined) {
       attrs.rightIndent = node.attrs.rightIndent as number;
     }
+    const changeBar = changeBarOf(node.attrs.revision);
+    if (changeBar) attrs.changeBar = changeBar;
   }
   
   return attrs;
+}
+
+/** A tracked change of a text run as the layout carries it, with the colour of its author. */
+function revisionInfo(mark: Mark): RevisionInfo {
+  const moveId = mark.attrs.moveId;
+  return {
+    id: String(mark.attrs.revisionId),
+    author: String(mark.attrs.author),
+    color: authorColorOf(String(mark.attrs.author)),
+    ...(typeof moveId === 'string' && moveId && { moveId }),
+  };
+}
+
+type BlockRevisionAttr = { insertion?: { id?: string; author?: string }; deletion?: { id?: string; author?: string }; formatChange?: { id?: string; author?: string } } | null | undefined;
+
+/** The bar for a paragraph with a tracked change: in the colour of the author of the last of them (deletion, insertion, formatting). */
+function changeBarOf(revision: unknown): ChangeBar | undefined {
+  const r = revision as BlockRevisionAttr;
+  if (!r || typeof r !== 'object') return undefined;
+  const kinds: ChangeBar['kinds'] = [];
+  if (r.insertion) kinds.push('insertion');
+  if (r.deletion) kinds.push('deletion');
+  if (r.formatChange) kinds.push('format');
+  if (kinds.length === 0) return undefined;
+  const author = String((r.formatChange ?? r.deletion ?? r.insertion)?.author ?? '');
+  return { color: authorColorOf(author), author, kinds };
+}
+
+/** The `revision` of a flow table row for a row's `revision` attr (nothing when it has none). */
+function rowRevision(revision: unknown): { revision?: NonNullable<TableRow['revision']> } {
+  const r = revision as BlockRevisionAttr;
+  if (!r || typeof r !== 'object') return {};
+  const info = (meta: { id?: string; author?: string } | undefined): RevisionInfo | undefined =>
+    meta ? { id: String(meta.id ?? ''), author: String(meta.author ?? ''), color: authorColorOf(String(meta.author ?? '')) } : undefined;
+  const insertion = info(r.insertion);
+  const deletion = info(r.deletion);
+  return insertion || deletion ? { revision: { ...(insertion && { insertion }), ...(deletion && { deletion }) } } : {};
 }
 
 /**

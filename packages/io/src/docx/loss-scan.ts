@@ -229,21 +229,64 @@ function fields(root: XmlNode[]): Item[] {
 
 const isSectPrChild = (path: readonly string[]) => path[path.length - 1] === 'w:sectPr' && !inRevisionProps(path);
 
-/**
- * Tracked insertions and deletions the importer does not keep as changes. Those around runs are kept (as marks on the text);
- * what is left are the marks on a paragraph mark (`w:pPr/w:rPr`) and on a table row (`w:trPr`), whose content is imported
- * as ordinary content. Text boxes are reported as such and not counted here.
- */
-function trackedChanges(root: XmlNode[]): Item[] {
-  const counts = { 'w:ins': 0, 'w:del': 0 };
-  walk(root, (_n, tag, path) => {
-    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
-    const parent = path[path.length - 1];
-    if (parent === 'w:rPr' || parent === 'w:trPr') counts[tag]++;
+/** Tracked changes the importer does not keep, from `revisionLosses`. */
+interface RevisionLosses {
+  insertions: number;
+  deletions: number;
+  moves: number;
+  /** Formatting changes by element name (`rPrChange`, `pPrChange`, `tblPrChange`, `sectPrChange`). */
+  formatting: Map<string, number>;
+}
+
+/** The `w:p` that is the only block of its table cell: its paragraph mark and formatting changes are not kept (the cell holds just its inline content). */
+function lonelyCellParagraphs(root: XmlNode[]): Set<XmlNode> {
+  const lonely = new Set<XmlNode>();
+  walk(root, (cell, tag) => {
+    if (tag !== 'w:tc') return;
+    const blocks = childrenOf(cell).filter((k) => ['w:p', 'w:tbl', 'w:sdt', 'w:customXml'].includes(tagOf(k) ?? ''));
+    if (blocks.length === 1 && tagOf(blocks[0]) === 'w:p') lonely.add(blocks[0]);
   });
+  return lonely;
+}
+
+/**
+ * The tracked changes that are lost. Insertions, deletions and moves around runs, on paragraph marks and on table rows,
+ * and formatting changes of runs and paragraphs are kept. What is left: the changes of a paragraph mark in a table cell
+ * with a single paragraph, formatting changes of a paragraph mark's own formatting, and changes of tables and sections.
+ * Text boxes are reported as such and not counted here.
+ */
+function revisionLosses(root: XmlNode[]): RevisionLosses {
+  const out: RevisionLosses = { insertions: 0, deletions: 0, moves: 0, formatting: new Map() };
+  const lonely = lonelyCellParagraphs(root);
+  let lonelyParagraph = false;
+  let paragraph: XmlNode | undefined;
+  walk(root, (node, tag, path) => {
+    if (path.includes('w:txbxContent')) return;
+    if (tag === 'w:p') {
+      paragraph = node;
+      lonelyParagraph = lonely.has(node);
+      return;
+    }
+    if (tag === 'w:tblPrChange' || tag === 'w:sectPrChange') {
+      bump(out.formatting, tag.slice(2));
+      return;
+    }
+    const inParagraphMark = path[path.length - 1] === 'w:rPr' && path[path.length - 2] === 'w:pPr' && !inRevisionProps(path);
+    if (tag === 'w:rPrChange' && inParagraphMark) bump(out.formatting, 'rPrChange');
+    else if (tag === 'w:pPrChange' && path[path.length - 1] === 'w:pPr' && lonelyParagraph && paragraph) bump(out.formatting, 'pPrChange');
+    else if (inParagraphMark && lonelyParagraph) {
+      if (tag === 'w:ins') out.insertions++;
+      else if (tag === 'w:del') out.deletions++;
+      else if (tag === 'w:moveFrom' || tag === 'w:moveTo') out.moves++;
+    }
+  });
+  return out;
+}
+
+function trackedChanges(losses: RevisionLosses): Item[] {
   return [
-    ...item('docx.trackedInsertions', 'tracked insertion(s) of a paragraph mark or table row', counts['w:ins'], 'the paragraph or row is imported as ordinary content; the change is not recorded'),
-    ...item('docx.trackedDeletions', 'tracked deletion(s) of a paragraph mark or table row', counts['w:del'], 'the paragraph or row is imported as ordinary content; the change is not recorded'),
+    ...item('docx.trackedInsertions', 'tracked insertion(s) of a paragraph mark', losses.insertions, 'the paragraph is imported as ordinary content (it is in a table cell of one paragraph, which keeps only its text); the change is not recorded'),
+    ...item('docx.trackedDeletions', 'tracked deletion(s) of a paragraph mark', losses.deletions, 'the paragraph is imported as ordinary content (it is in a table cell of one paragraph, which keeps only its text); the change is not recorded'),
   ];
 }
 
@@ -292,14 +335,14 @@ function trackedChangesNotKept(root: XmlNode[]): Item[] {
 function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item[] {
   let blocks = 0;
   walk(root, (_n, tag, path) => {
-    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    if ((tag !== 'w:ins' && tag !== 'w:del' && tag !== 'w:moveFrom' && tag !== 'w:moveTo') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
     const parent = path[path.length - 1];
     if (parent === 'w:body' || parent === 'w:tc') blocks++;
   });
   let headers = 0;
   for (const xml of headerFooters) {
     walk(parseXml(xml), (_n, tag, path) => {
-      if ((tag === 'w:ins' || tag === 'w:del') && !inRevisionProps(path)) headers++;
+      if ((tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo') && !inRevisionProps(path)) headers++;
     });
   }
   return [
@@ -308,24 +351,13 @@ function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item
   ];
 }
 
-function trackedMoves(root: XmlNode[]): Item[] {
-  let total = 0;
-  walk(root, (_n, tag) => {
-    if (tag === 'w:moveFrom' || tag === 'w:moveTo') total++;
-  });
-  return item('docx.trackedMoves', 'tracked move(s)', total, 'their text is not imported');
+function trackedMoves(losses: RevisionLosses): Item[] {
+  return item('docx.trackedMoves', 'tracked move(s) of a paragraph mark', losses.moves, 'the paragraph is imported as ordinary content (it is in a table cell of one paragraph); the move is not recorded');
 }
 
-function formattingRevisions(root: XmlNode[]): Item[] {
-  const kinds = new Map<string, number>();
-  let total = 0;
-  walk(root, (_n, tag) => {
-    if (tag === 'w:rPrChange' || tag === 'w:pPrChange' || tag === 'w:tblPrChange' || tag === 'w:sectPrChange') {
-      total++;
-      bump(kinds, tag.slice(2));
-    }
-  });
-  return item('docx.formattingRevisions', 'tracked formatting change(s)', total, 'the change history is dropped; the current formatting is imported', kinds);
+function formattingRevisions(losses: RevisionLosses): Item[] {
+  const total = [...losses.formatting.values()].reduce((sum, n) => sum + n, 0);
+  return item('docx.formattingRevisions', 'tracked formatting change(s)', total, 'the change history is dropped; the current formatting is imported', losses.formatting);
 }
 
 function sectionLevel(root: XmlNode[]): Item[] {
@@ -458,22 +490,28 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
       return [];
     }
   };
+  let losses: RevisionLosses = { insertions: 0, deletions: 0, moves: 0, formatting: new Map() };
+  try {
+    losses = revisionLosses(root);
+  } catch {
+    // A detector that cannot read the tree reports nothing (like the others).
+  }
   const drawings = safe(() => {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => trackedChangesNotKept(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => trackedChanges(losses)), ...safe(() => trackedChangesNotKept(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
-    ...safe(() => trackedChanges(root)),
+    ...safe(() => trackedChanges(losses)),
     ...safe(() => trackedChangesNotKept(root)),
     ...safe(() => trackedChangesElsewhere(root, input.headerFooters)),
     ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),
     ...safe(() => fields(root)),
-    ...safe(() => trackedMoves(root)),
-    ...safe(() => formattingRevisions(root)),
+    ...safe(() => trackedMoves(losses)),
+    ...safe(() => formattingRevisions(losses)),
     ...safe(() => dropCaps(root)),
     ...safe(() => watermarks(input.headerFooters)),
     ...safe(() => sectionLevel(root)),

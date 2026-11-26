@@ -7,8 +7,11 @@ import type {
   DocInline,
   DocParagraphStyle,
   DocSection,
+  DocBlockRevision,
+  DocParagraphFormat,
   DocRevision,
   DocRevisionMeta,
+  DocRunFormat,
   DocTextRun,
   DocBorders,
   DocCellTextDirection,
@@ -149,6 +152,43 @@ function revisionMeta(node: XmlNode, fallbackId: () => string): DocRevisionMeta 
   return { id: attrs['@_w:id'] || fallbackId(), author: attrs['@_w:author'] || 'Unknown', ...(date && { date }) };
 }
 
+/** The formatting a run had before a tracked change of it (`w:rPrChange`): the effective formatting its old properties give. */
+function previousRunFormat(change: XmlNode, pStyleId: string | undefined, ctx: PartContext): DocRunFormat {
+  const oldRPr = find(childrenOf(change), 'w:rPr');
+  const oldStyleEl = oldRPr ? find(childrenOf(oldRPr), 'w:rStyle') : undefined;
+  const oldStyle = ctx.styles.namedCharacterStyle(oldStyleEl ? attrsOf(oldStyleEl)['@_w:val'] : undefined);
+  return { ...ctx.styles.run(oldRPr, pStyleId, ctx.tableText), ...(oldStyle && { namedStyleId: oldStyle }) };
+}
+
+/**
+ * The tracked changes of a paragraph: its mark inserted or deleted (`w:ins` / `w:del`, or the ends of a move, in the
+ * paragraph mark's run properties) and its formatting changed (`w:pPrChange`, holding the old properties).
+ */
+function paragraphRevision(pPr: XmlNode | undefined, ctx: PartContext): DocBlockRevision | undefined {
+  if (!pPr) return undefined;
+  const kids = childrenOf(pPr);
+  const markProps = find(kids, 'w:rPr');
+  const mark = (tags: string[]) => {
+    const el = markProps ? childrenOf(markProps).find((k) => tags.includes(tagOf(k) ?? '')) : undefined;
+    return el ? revisionMeta(el, anonymousRevisionId) : undefined;
+  };
+  const insertion = mark(['w:ins', 'w:moveTo']);
+  const deletion = mark(['w:del', 'w:moveFrom']);
+  const change = find(kids, 'w:pPrChange');
+  let formatChange: DocBlockRevision['formatChange'];
+  if (change) {
+    const oldPPr = find(childrenOf(change), 'w:pPr');
+    const oldStyleEl = oldPPr ? find(childrenOf(oldPPr), 'w:pStyle') : undefined;
+    const oldStyleId = oldStyleEl ? attrsOf(oldStyleEl)['@_w:val'] : undefined;
+    const effective = ctx.styles.paragraph(oldStyleId, parsePPr(oldPPr));
+    const oldNamed = ctx.styles.namedParagraphStyle(oldStyleId);
+    const previous: DocParagraphFormat = { ...toDocParagraphStyle(effective), ...(oldNamed && { namedStyleId: oldNamed }), ...(effective.headingLevel && { headingLevel: effective.headingLevel }) };
+    formatChange = { ...revisionMeta(change, anonymousRevisionId), previous };
+  }
+  if (!insertion && !deletion && !formatChange) return undefined;
+  return { ...(insertion && { insertion }), ...(deletion && { deletion }), ...(formatChange && { formatChange }) };
+}
+
 /**
  * Walk a paragraph's direct children, producing inline content. Handles
  * plain runs, hyperlinks (resolved through rels) and field-code sequences:
@@ -175,6 +215,8 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   ctx.comments?.paragraphStart();
   /** Tracked changes (`w:ins`, `w:del`) the content being read is inside of. */
   let revision: DocRevision | undefined;
+  /** The names of the move ranges open at this point (`w:moveFromRangeStart` ... `w:moveFromRangeEnd`), which the moved text belongs to. */
+  const openMove: { moveFrom?: string; moveTo?: string } = {};
   const deleted = () => revision?.deletion !== undefined;
   const fields: OpenField[] = []; // begin/.../end sequences in progress, outermost first
   const top = (): OpenField | undefined => fields[fields.length - 1];
@@ -220,7 +262,9 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     // `Hyperlink` on a link is Word's implicit link style, which the writer applies to every link again.
     const characterStyle = ctx.styles.namedCharacterStyle(rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined);
     const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
-    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(revision && !top() && { revision }) };
+    const change = rPr ? find(childrenOf(rPr), 'w:rPrChange') : undefined;
+    const runRevision: DocRevision | undefined = change ? { ...revision, formatChange: { ...revisionMeta(change, nextRevisionId), previous: previousRunFormat(change, pStyleId, ctx) } } : revision;
+    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(runRevision && !top() && { revision: runRevision }) };
     let text = '';
     /** A reference followed by its custom mark (`w:customMarkFollows`): the text after it in the run is that mark. */
     let markOf: Extract<DocInline, { type: 'noteRef' }> | undefined;
@@ -342,10 +386,16 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   const consumeRuns = (runs: XmlNode[], target: string | undefined) => {
     for (const child of flattenInline(runs)) {
       const tag = tagOf(child);
-      if (tag === 'w:ins' || tag === 'w:del') {
+      if (tag === 'w:moveFromRangeStart' || tag === 'w:moveToRangeStart') {
+        openMove[tag === 'w:moveFromRangeStart' ? 'moveFrom' : 'moveTo'] = attrsOf(child)['@_w:name'];
+      } else if (tag === 'w:moveFromRangeEnd' || tag === 'w:moveToRangeEnd') {
+        openMove[tag === 'w:moveFromRangeEnd' ? 'moveFrom' : 'moveTo'] = undefined;
+      } else if (tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo') {
         const outer = revision;
-        const meta = revisionMeta(child, () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`);
-        revision = { ...outer, ...(tag === 'w:ins' ? { insertion: meta } : { deletion: meta }) };
+        // The two ends of a move are a deletion (from) and an insertion (to) that share the name of the move.
+        const moveId = tag === 'w:moveFrom' || tag === 'w:moveTo' ? openMove[tag === 'w:moveFrom' ? 'moveFrom' : 'moveTo'] : undefined;
+        const meta = { ...revisionMeta(child, () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`), ...(moveId && { moveId }) };
+        revision = { ...outer, ...(tag === 'w:ins' || tag === 'w:moveTo' ? { insertion: meta } : { deletion: meta }) };
         consumeRuns(childrenOf(child), target);
         revision = outer;
       } else if (tag === 'w:fldSimple') {
@@ -649,7 +699,8 @@ function parseParagraph(
   const direct = parsePPr(pPr);
   const effective = ctx.styles.paragraph(paragraphStyleId(pNode), direct);
   const namedStyleId = ctx.styles.namedParagraphStyle(paragraphStyleId(pNode));
-  const style: DocParagraphStyle = { ...toDocParagraphStyle(effective), ...(namedStyleId && { namedStyleId }) };
+  const markRevision = paragraphRevision(pPr, ctx);
+  const style: DocParagraphStyle = { ...toDocParagraphStyle(effective), ...(namedStyleId && { namedStyleId }), ...(markRevision && { revision: markRevision }) };
 
   // An otherwise-empty paragraph carrying only a page-break run or a
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
@@ -855,7 +906,18 @@ function parseTable(tblNode: XmlNode, outerCtx: PartContext, numbering: Numberin
     for (const openCol of [...openVMerge.keys()]) if (!mergedHere.has(openCol)) openVMerge.delete(openCol);
     const repeatHeader = isOnEl(find(trPrKids, 'w:tblHeader'));
     const cantSplit = isOnEl(find(trPrKids, 'w:cantSplit'));
-    rows.push({ cells: rowCells, ...(repeatHeader && { repeatHeader }), ...(cantSplit && { cantSplit }) });
+    const rowChange = (tag: string) => {
+      const el = find(trPrKids, tag);
+      return el ? revisionMeta(el, anonymousRevisionId) : undefined;
+    };
+    const rowInsertion = rowChange('w:ins');
+    const rowDeletion = rowChange('w:del');
+    rows.push({
+      cells: rowCells,
+      ...(repeatHeader && { repeatHeader }),
+      ...(cantSplit && { cantSplit }),
+      ...((rowInsertion || rowDeletion) && { revision: { ...(rowInsertion && { insertion: rowInsertion }), ...(rowDeletion && { deletion: rowDeletion }) } }),
+    });
   }
 
   const colWidthsPx = grid.length > 0 && grid.every((w) => w > 0) ? grid : undefined;
@@ -1228,6 +1290,7 @@ async function readZipText(zip: JSZip, path: string): Promise<string | undefined
 }
 
 export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResult> {
+  anonymousRevisions = 0;
   const warnings: string[] = [];
   const zip = await JSZip.loadAsync(bytes);
 

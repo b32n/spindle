@@ -52,6 +52,7 @@ import type {
   DocInline,
   DocNamedStyle,
   DocParagraphStyle,
+  DocParagraphFormat,
   DocRevision,
   DocRevisionMeta,
   DocRunBase,
@@ -259,7 +260,7 @@ function hasRevision(revision: DocRevision | undefined): revision is DocRevision
 }
 
 function sameMeta(a: DocRevisionMeta | undefined, b: DocRevisionMeta | undefined): boolean {
-  return a === b || (!!a && !!b && a.id === b.id && a.author === b.author && a.date === b.date);
+  return a === b || (!!a && !!b && a.id === b.id && a.author === b.author && a.date === b.date && a.moveId === b.moveId);
 }
 
 function sameRevision(a: DocRevision, b: DocRevision): boolean {
@@ -335,34 +336,69 @@ class DocxBuilder {
   }
 
   /** The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next free number. A change is identified by kind, author and id, so two authors' changes with the same id stay two changes. */
-  private revisionId(kind: 'ins' | 'del', meta: DocRevisionMeta): number {
-    const key = `${kind}:${meta.author}:${meta.id}`;
+  private revisionId(kind: string, meta: { id: string; author?: string }): number {
+    const key = `${kind}:${meta.author ?? ''}:${meta.id}`;
     const known = this.revisionIds.get(key);
     if (known !== undefined) return known;
-    let id = /^\d{1,9}$/.test(meta.id) ? Number(meta.id) : -1;
-    while (id < 0 || this.usedRevisionIds.has(id)) id = this.nextRevisionId++;
+    const wanted = /^\d{1,9}$/.test(meta.id) ? Number(meta.id) : -1;
+    const id = wanted >= 0 && !this.usedRevisionIds.has(wanted) ? wanted : this.freshRevisionId();
     this.usedRevisionIds.add(id);
     this.revisionIds.set(key, id);
     return id;
   }
 
-  /** `runs` inside the tracked changes of `revision`: a deletion directly around the runs, an insertion around that. */
+  /** The next `w:id` nobody has used, for the markers of a move's range. */
+  private freshRevisionId(): number {
+    while (this.usedRevisionIds.has(this.nextRevisionId)) this.nextRevisionId++;
+    this.usedRevisionIds.add(this.nextRevisionId);
+    return this.nextRevisionId++;
+  }
+
+  /** A change in the form the `docx` library takes (`w:id`, `w:author`, `w:date`); a change without a date is written without one. */
+  private change(kind: string, meta: DocRevisionMeta) {
+    return { id: this.revisionId(kind, meta), author: xmlText(meta.author) || 'Unknown', date: wordDate(meta.date) as string };
+  }
+
+  /** An element `name` with the attributes of a tracked change (and any `extra`), around `children`. */
+  private changeElement(name: string, kind: string, meta: DocRevisionMeta, children: unknown[], extra: Record<string, string> = {}): BuilderElement {
+    const date = wordDate(meta.date);
+    const attributes = {
+      id: { key: 'w:id', value: String(this.revisionId(kind, meta)) },
+      ...Object.fromEntries(Object.entries(extra).map(([k, v]) => [k, { key: k, value: v }])),
+      author: { key: 'w:author', value: xmlText(meta.author) || 'Unknown' },
+      ...(date !== undefined && { date: { key: 'w:date', value: date } }),
+    };
+    return new BuilderElement({ name, attributes, children: children as BuilderElement[] });
+  }
+
+  /**
+   * `runs` inside the tracked changes of `revision`: a deletion directly around the runs, an insertion around that. One end
+   * of a move is `w:moveFrom` (a deletion) or `w:moveTo` (an insertion) between the start and end of the move's range.
+   */
   private wrapRevision(revision: DocRevision, runs: ParagraphChild[]): ParagraphChild[] {
-    const element = (name: 'w:ins' | 'w:del', meta: DocRevisionMeta, children: unknown[]) => {
+    let wrapped: unknown[] = runs;
+    const wrap = (meta: DocRevisionMeta, plain: 'w:ins' | 'w:del', moved: 'w:moveTo' | 'w:moveFrom') => {
+      if (!meta.moveId) {
+        wrapped = [this.changeElement(plain, plain === 'w:ins' ? 'ins' : 'del', meta, wrapped)];
+        return;
+      }
+      const range = moved === 'w:moveTo' ? 'w:moveToRange' : 'w:moveFromRange';
+      const rangeId = this.freshRevisionId();
       const date = wordDate(meta.date);
-      return new BuilderElement({
-        name,
+      const start = new BuilderElement({
+        name: `${range}Start`,
         attributes: {
-          id: { key: 'w:id', value: String(this.revisionId(name === 'w:ins' ? 'ins' : 'del', meta)) },
+          id: { key: 'w:id', value: String(rangeId) },
+          name: { key: 'w:name', value: xmlText(meta.moveId) },
           author: { key: 'w:author', value: xmlText(meta.author) || 'Unknown' },
           ...(date !== undefined && { date: { key: 'w:date', value: date } }),
         },
-        children: children as BuilderElement[],
       });
+      const end = new BuilderElement({ name: `${range}End`, attributes: { id: { key: 'w:id', value: String(rangeId) } } });
+      wrapped = [start, this.changeElement(moved, moved === 'w:moveTo' ? 'moveTo' : 'moveFrom', meta, wrapped), end];
     };
-    let wrapped: unknown[] = runs;
-    if (revision.deletion) wrapped = [element('w:del', revision.deletion, wrapped)];
-    if (revision.insertion) wrapped = [element('w:ins', revision.insertion, wrapped)];
+    if (revision.deletion) wrap(revision.deletion, 'w:del', 'w:moveFrom');
+    if (revision.insertion) wrap(revision.insertion, 'w:ins', 'w:moveTo');
     return wrapped as ParagraphChild[];
   }
 
@@ -576,8 +612,11 @@ class DocxBuilder {
 
   private runOptions(base: DocRunBase, extra: Partial<IRunOptions>): IRunOptions {
     const style = this.namedStyle(base.namedStyleId, 'character');
+    const formatChange = base.revision?.formatChange;
     return {
       ...extra,
+      // The formatting the run had before a tracked change of it (`w:rPrChange`).
+      ...(formatChange && { revision: { ...this.change('fmt', formatChange), ...this.runOptions(formatChange.previous, {}) } }),
       ...(style && { style }),
       ...(base.bold != null && { bold: base.bold }),
       ...(base.italic != null && { italics: base.italic }),
@@ -615,7 +654,8 @@ class DocxBuilder {
     } as ConstructorParameters<typeof ImageRun>[0]);
   }
 
-  buildParagraph(style: DocParagraphStyle, children: ParagraphChild[], extra: Record<string, unknown> = {}): Paragraph {
+  /** The paragraph options a paragraph's formatting gives (also used for the formatting before a tracked change). */
+  private paragraphOptions(style: DocParagraphFormat): Record<string, unknown> {
     const custom = style.lineSpacingCustom;
     const spacingLine =
       custom != null
@@ -625,8 +665,7 @@ class DocxBuilder {
         : { line: style.lineSpacing ? LINE_SPACING_MAP[style.lineSpacing] : undefined };
     const firstLine = style.firstLineIndentPt;
     const namedStyle = this.namedStyle(style.namedStyleId, 'paragraph');
-    return new Paragraph({
-      children,
+    return {
       ...(namedStyle && { style: namedStyle }),
       alignment: style.alignment ? ALIGNMENT_MAP[style.alignment] : undefined,
       spacing: {
@@ -644,6 +683,29 @@ class DocxBuilder {
       ...(style.keepWithNext && { keepNext: true }),
       ...(style.keepTogether && { keepLines: true }),
       ...(style.pageBreakBefore && { pageBreakBefore: true }),
+    };
+  }
+
+  buildParagraph(style: DocParagraphStyle, children: ParagraphChild[], extra: Record<string, unknown> = {}): Paragraph {
+    const revision = style.revision;
+    const previous = revision?.formatChange?.previous;
+    return new Paragraph({
+      children,
+      ...this.paragraphOptions(style),
+      // The paragraph mark inserted or deleted (`w:rPr` of the paragraph mark), and the formatting before a tracked change of the paragraph (`w:pPrChange`).
+      ...((revision?.insertion || revision?.deletion) && {
+        run: {
+          ...(revision.insertion && { insertion: this.change('pins', revision.insertion) }),
+          ...(revision.deletion && { deletion: this.change('pdel', revision.deletion) }),
+        },
+      }),
+      ...(revision?.formatChange && previous && {
+        revision: {
+          ...this.change('pfmt', revision.formatChange),
+          ...this.paragraphOptions(previous),
+          ...(previous.headingLevel && !this.namedStyle(previous.namedStyleId, 'paragraph') && previous.headingLevel >= 1 && previous.headingLevel <= 6 && { heading: HEADING_MAP[previous.headingLevel as 1 | 2 | 3 | 4 | 5 | 6] }),
+        },
+      }),
       ...extra,
     });
   }
@@ -731,6 +793,8 @@ class DocxBuilder {
     const tableRows = rows.map(
       (row) =>
         new TableRow({
+          ...(row.revision?.insertion && { insertion: this.change('rins', row.revision.insertion) }),
+          ...(row.revision?.deletion && { deletion: this.change('rdel', row.revision.deletion) }),
           ...(row.repeatHeader && { tableHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
           children: row.cells.map((cell) => {
