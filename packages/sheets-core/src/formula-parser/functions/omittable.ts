@@ -12,4 +12,5 @@ export const omittableArgFunctions: ReadonlySet<string> = new Set([
   'FIXED',
   'WORKDAY.INTL',
   'NETWORKDAYS.INTL',
+  'XIRR',
 ]);

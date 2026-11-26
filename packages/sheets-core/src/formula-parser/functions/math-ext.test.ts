@@ -269,3 +269,66 @@ describe('CEILING.MATH and FLOOR.MATH', () => {
     expect(err('FLOOR.MATH', 1, '#NUM!')).toBe('#NUM!');
   });
 });
+
+describe('QUOTIENT and SQRTPI', () => {
+  it('QUOTIENT truncates the quotient, snapping float noise first', () => {
+    expect(call('QUOTIENT', 7, 2)).toBe(3);
+    expect(call('QUOTIENT', -7, 2)).toBe(-3);
+    expect(call('QUOTIENT', 7.9, 2.1)).toBe(3);
+    expect(call('QUOTIENT', 0.6, 0.2)).toBe(3);
+    expect(call('QUOTIENT', 0.9, 0.3)).toBe(3);
+    expect(Object.is(call('QUOTIENT', -1, 5), 0)).toBe(true);
+    expect(call('QUOTIENT', [[10], [-10]], 3)).toEqual([[3], [-3]]);
+    expect(err('QUOTIENT', 7, 0)).toBe('#DIV/0!');
+    expect(err('QUOTIENT', 'x', 1)).toBe('#VALUE!');
+    expect(err('QUOTIENT', 1)).toBe('#VALUE!');
+  });
+
+  it('SQRTPI is the square root of n times pi', () => {
+    expect(call('SQRTPI', 2)).toBeCloseTo(2.506628274631, 11);
+    expect(call('SQRTPI', 0)).toBe(0);
+    expect(call('SQRTPI', 1)).toBeCloseTo(Math.sqrt(Math.PI), 14);
+    expect(call('SQRTPI', [[4], [9]])).toEqual([[Math.sqrt(4 * Math.PI)], [Math.sqrt(9 * Math.PI)]]);
+    expect(err('SQRTPI', -1)).toBe('#NUM!');
+    expect(err('SQRTPI')).toBe('#VALUE!');
+  });
+});
+
+describe('SUMX2MY2, SUMX2PY2 and SUMXMY2', () => {
+  const x = [[2], [3], [4]];
+  const y = [[5], [6], [7]];
+
+  it('sum over the pairs of two arrays', () => {
+    expect(call('SUMX2MY2', x, y)).toBe(4 - 25 + 9 - 36 + 16 - 49);
+    expect(call('SUMX2PY2', x, y)).toBe(4 + 9 + 16 + 25 + 36 + 49);
+    expect(call('SUMXMY2', x, y)).toBe(27);
+    expect(call('SUMX2MY2', [[2, 3, 4]], [[5, 6, 7]])).toBe(-81);
+    expect(call('SUMX2PY2', [[1, 2], [3, 4]], [[4, 3], [2, 1]])).toBe(60);
+    expect(call('SUMXMY2', [1, 2, 3], [3, 2, 1])).toBe(8);
+    expect(call('SUMX2MY2', 3, 2)).toBe(5);
+  });
+
+  it('skip a pair with text, a logical or an empty cell, and propagate errors', () => {
+    expect(call('SUMX2MY2', [[2], ['x'], [4]], [[5], [6], [null]])).toBe(-21);
+    expect(call('SUMXMY2', [[2], [true], [4]], [[5], [6], [7]])).toBe(18);
+    expect(call('SUMX2PY2', [['a']], [['b']])).toBe(0);
+    expect(err('SUMX2MY2', [[2], ['#DIV/0!']], [[5], [6]])).toBe('#DIV/0!');
+    expect(err('SUMX2MY2', [[2], [3]], [[5], ['#N/A']])).toBe('#N/A');
+  });
+
+  it('are #N/A for arrays of different shapes and refuse a wrong argument count', () => {
+    expect(err('SUMX2MY2', x, [[5], [6]])).toBe('#N/A');
+    expect(err('SUMX2PY2', [[1, 2]], [[1], [2]])).toBe('#N/A');
+    expect(err('SUMXMY2', [[1, 2, 3]], [[1, 2]])).toBe('#N/A');
+    expect(err('SUMX2MY2', x)).toBe('#VALUE!');
+    expect(err('SUMXMY2', x, y, x)).toBe('#VALUE!');
+  });
+
+  it('is #NUM! on overflow and linear on large arrays', () => {
+    expect(err('SUMX2MY2', [[1e200]], [[1]])).toBe('#NUM!');
+    const big = Array.from({ length: 200_000 }, (_, i) => [i % 7]);
+    const started = Date.now();
+    expect(call('SUMXMY2', big, big)).toBe(0);
+    expect(Date.now() - started).toBeLessThan(1000);
+  });
+});

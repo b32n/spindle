@@ -103,6 +103,11 @@ const mathDocs: FunctionDoc[] = [
   { name: 'MAXIFS', category: 'math', args: [req('max_range'), req('criteria_range1'), req('criterion1'), rest('criteria_range, criterion')], description: 'Returns the largest value among the cells that meet multiple criteria.' },
   { name: 'MINIFS', category: 'math', args: [req('min_range'), req('criteria_range1'), req('criterion1'), rest('criteria_range, criterion')], description: 'Returns the smallest value among the cells that meet multiple criteria.' },
   { name: 'AGGREGATE', category: 'math', args: [req('function_num'), req('options'), req('ref1'), rest('ref2 or k')], description: 'Applies one of 19 functions to a list, optionally ignoring errors.' },
+  { name: 'SQRTPI', category: 'math', args: [req('number')], description: 'Returns the square root of a number times pi.' },
+  { name: 'QUOTIENT', category: 'math', args: [req('numerator'), req('denominator')], description: 'Returns the integer part of a division.' },
+  { name: 'SUMX2MY2', category: 'math', args: [req('array_x'), req('array_y')], description: 'Returns the sum of the differences of the squares of two arrays.' },
+  { name: 'SUMX2PY2', category: 'math', args: [req('array_x'), req('array_y')], description: 'Returns the sum of the sums of the squares of two arrays.' },
+  { name: 'SUMXMY2', category: 'math', args: [req('array_x'), req('array_y')], description: 'Returns the sum of the squares of the differences of two arrays.' },
 ];
 
 const logicalDocs: FunctionDoc[] = [
@@ -254,6 +259,18 @@ const financialDocs: FunctionDoc[] = [
   { name: 'IRR', category: 'financial', args: [req('values'), opt('guess')], description: 'Returns the internal rate of return for a series of cash flows.' },
   { name: 'IPMT', category: 'financial', args: [req('rate'), req('per'), req('nper'), req('pv'), opt('fv'), opt('type')], description: 'Returns the interest portion of a given payment.' },
   { name: 'PPMT', category: 'financial', args: [req('rate'), req('per'), req('nper'), req('pv'), opt('fv'), opt('type')], description: 'Returns the principal portion of a given payment.' },
+  { name: 'XNPV', category: 'financial', args: [req('rate'), req('values'), req('dates')], description: 'Returns the net present value of cash flows on given dates.' },
+  { name: 'XIRR', category: 'financial', args: [req('values'), req('dates'), opt('guess')], description: 'Returns the internal rate of return of cash flows on given dates.' },
+  { name: 'MIRR', category: 'financial', args: [req('values'), req('finance_rate'), req('reinvest_rate')], description: 'Returns the modified internal rate of return.' },
+  { name: 'SLN', category: 'financial', args: [req('cost'), req('salvage'), req('life')], description: 'Returns the straight-line depreciation for one period.' },
+  { name: 'SYD', category: 'financial', args: [req('cost'), req('salvage'), req('life'), req('period')], description: 'Returns the sum-of-years-digits depreciation for a period.' },
+  { name: 'DDB', category: 'financial', args: [req('cost'), req('salvage'), req('life'), req('period'), opt('factor')], description: 'Returns the double-declining-balance depreciation for a period.' },
+  { name: 'EFFECT', category: 'financial', args: [req('nominal_rate'), req('npery')], description: 'Returns the effective annual interest rate.' },
+  { name: 'NOMINAL', category: 'financial', args: [req('effect_rate'), req('npery')], description: 'Returns the nominal annual interest rate.' },
+  { name: 'RRI', category: 'financial', args: [req('nper'), req('pv'), req('fv')], description: 'Returns the equivalent interest rate for the growth of an investment.' },
+  { name: 'PDURATION', category: 'financial', args: [req('rate'), req('pv'), req('fv')], description: 'Returns the periods an investment needs to reach a value.' },
+  { name: 'ISPMT', category: 'financial', args: [req('rate'), req('per'), req('nper'), req('pv')], description: 'Returns the interest paid in a period of a loan with even principal payments.' },
+  { name: 'FVSCHEDULE', category: 'financial', args: [req('principal'), req('schedule')], description: 'Returns the future value of a principal after a series of interest rates.' },
 ];
 
 const referenceDocs: FunctionDoc[] = [
@@ -273,6 +290,7 @@ const arrayDocs: FunctionDoc[] = [
   { name: 'SORTBY', category: 'array', args: [req('array'), req('by_array1'), opt('sort_order1'), rest('by_array, sort_order')], description: 'Sorts a range by the values in one or more other ranges.' },
   { name: 'FILTER', category: 'array', args: [req('array'), req('include'), opt('if_empty')], description: 'Returns the rows of a range that meet a condition.' },
   { name: 'SPLIT', category: 'array', args: [req('text'), req('delimiter'), opt('split_by_each'), opt('remove_empty')], description: 'Splits text into an array around a delimiter.' },
+  { name: 'TRANSPOSE', category: 'array', args: [req('array')], description: 'Swaps the rows and columns of an array.' },
 ];
 
 const allDocs: FunctionDoc[] = [

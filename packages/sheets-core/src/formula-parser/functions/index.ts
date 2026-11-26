@@ -14,8 +14,10 @@ import { dateExtFunctions } from './date-ext';
 import { textExtFunctions } from './text-ext';
 import { informationEagerFunctions, informationLazyFunctions } from './information';
 import { financialFunctions } from './financial';
+import { financialExtFunctions } from './financial-ext';
 import { referenceFunctions } from './reference';
 import { arrayFunctions } from './array';
+import { arrayExtFunctions } from './array-ext';
 
 export type { EagerFn, LazyFn, RefFn } from './helpers';
 export { omittableArgFunctions } from './omittable';
@@ -35,7 +37,9 @@ export const eagerFunctions: Record<string, EagerFn> = {
   ...dateExtFunctions,
   ...informationEagerFunctions,
   ...financialFunctions,
+  ...financialExtFunctions,
   ...arrayFunctions,
+  ...arrayExtFunctions,
 };
 
 /** Functions that receive argument thunks so they can short-circuit. */
