@@ -1,4 +1,4 @@
-import { compileFormat, dateToSerial, formatDisplay, formatGeneral, formatValue, isDateTimeFormatCode, isFaithfulFormatCode, isValidFormatCode, serialToDate } from './index';
+import { compileFormat, dateToSerial, formatDisplay, formatGeneral, formatValue, hasDatePart, isDateTimeFormatCode, isFaithfulFormatCode, isValidFormatCode, serialToDate } from './index';
 import { generalDigits, roundToPlaces, toDecimal } from './digits';
 import { selectSection } from './render';
 
@@ -467,5 +467,16 @@ describe('isFaithfulFormatCode', () => {
   });
   it('rejects invalid codes and date sections tagged with another language', () => {
     for (const code of ['[$-407]dddd', '[$-411]yyyy', '0 abc', '[$-404]e/m/d', '0.00;[$-407]mmm']) expect(isFaithfulFormatCode(code)).toBe(false);
+  });
+});
+
+describe('hasDatePart', () => {
+  it('is true only for a valid date code with a year, month or day', () => {
+    expect(hasDatePart('d-mmm-yy')).toBe(true);
+    expect(hasDatePart('yyyy-mm-dd hh:mm')).toBe(true);
+    expect(hasDatePart('h:mm:ss')).toBe(false);
+    expect(hasDatePart('[h]:mm')).toBe(false);
+    expect(hasDatePart('0.00')).toBe(false);
+    expect(hasDatePart('d "abc')).toBe(false);
   });
 });

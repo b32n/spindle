@@ -84,7 +84,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
     }
   }, [isOpen, currentFormat]);
 
-  const customInvalid = activeCategory === 'custom' && customPattern.trim() !== '' && !isValidFormatCode(customPattern.trim());
+  const customInvalid = activeCategory === 'custom' && customPattern.trim() !== '' && !isValidFormatCode(customPattern);
 
   const handleApply = () => {
     if (customInvalid) return; // an Excel-invalid code would only show as General
@@ -95,7 +95,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
       finalFormat = {
         ...finalFormat,
         type: 'custom',
-        pattern: customPattern.trim(),
+        pattern: customPattern, // verbatim: a code may need its spaces
       };
     }
 
@@ -153,7 +153,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
   const getSampleFormattedValue = (): string => {
     try {
       const testFormat = activeCategory === 'custom' && customPattern.trim()
-        ? { ...format, type: 'custom' as const, pattern: customPattern.trim() }
+        ? { ...format, type: 'custom' as const, pattern: customPattern }
         : format;
 
       return formatNumber(sampleValue, testFormat as CellFormat);
@@ -741,7 +741,7 @@ const CustomFormatOptions = memo(function CustomFormatOptions({
     { pattern: '0.0%', description: 'Percentage with 1 decimal' },
     { pattern: 'yyyy-mm-dd', description: 'Date, 2026-01-02' },
     { pattern: 'dddd, mmmm d, yyyy', description: 'Long date, Friday, January 2, 2026' },
-    { pattern: '$#,##0.00', description: 'Currency format' },
+    { pattern: '$#,##0.00', description: 'Currency (a custom code, not the Currency type)' },
     { pattern: '#,##0.00;[Red](#,##0.00)', description: 'Negative numbers in red parentheses' },
     { pattern: '[h]:mm:ss', description: 'Elapsed time' },
     { pattern: '# ?/?', description: 'Fraction' },

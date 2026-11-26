@@ -215,3 +215,13 @@ describe('fromExcelNumberFormatCode', () => {
     expect(fromExcelNumberFormatCode('@ "units"')).toEqual({ type: 'custom', pattern: '@ "units"' });
   });
 });
+
+describe('public exports', () => {
+  it('the mapping functions and the built-in table are exported from the package root', async () => {
+    const root = await import('../index');
+    expect(root.fromExcelNumberFormatCode('0.00')).toEqual({ type: 'number', decimalPlaces: 2, useThousandsSeparator: false, negativeFormat: 'minus' });
+    expect(root.toExcelNumberFormatCode({ type: 'percentage', decimalPlaces: 1 })).toBe('0.0%');
+    expect(root.normalizeExcelNumberFormatCode('mm-dd-yy')).toBe('m/d/yyyy');
+    expect(root.BUILTIN_NUMBER_FORMAT_CODES[14]).toBe('m/d/yyyy');
+  });
+});

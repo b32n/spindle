@@ -522,10 +522,11 @@ lockstep.
   The loss predicate behind `xlsx.numberFormats.approximated` now means "the engine cannot read the code or would show another
   language's month names", so the id drops from 66 occurrences in 3 corpus files to 0 (`number-formats` 46 to 0, the probe 19 to 0,
   `cell-types` 1 to 0). The XLSX model goldens of those three files show `custom` formats with the original codes, and their
-  round-trip goldens lose the `currencyCode` differences. Number, currency and percentage types no longer show a minus sign for a
-  negative that rounds to zero in the plain minus style (`-0`, `$-0.00`). The Format Cells dialog gains accessible markup, test ids,
+  round-trip goldens lose the `currencyCode` differences. The Format Cells dialog gains accessible markup, test ids,
   Excel codes as common patterns and an inline message plus a disabled Apply for a code Excel would reject; autofill treats a custom
-  date code as a date (`isDateFormat`). E2E `S-FMC-06` opens a workbook with currency, date, time, elapsed, scaled and conditional
+  code with a year, month or day as a date (`isDateFormat`; not `h:mm` or `[h]:mm`), and the dialog applies the code untrimmed. The
+  loss label and effect for `xlsx.numberFormats.approximated` now say the code is kept and saved unchanged but shown in General or
+  with English names (`packages/io/src/xlsx/loss.ts`, text only). E2E `S-FMC-06` opens a workbook with currency, date, time, elapsed, scaled and conditional
   formats and reads the dialog's sample; `S-FMC-04b` (custom suffix, issue 83) is no longer `fixme`, and `S-FIO-01` now expects the
   verbatim `$#,##0.00` and `#,##0.0" kg"` codes.
 

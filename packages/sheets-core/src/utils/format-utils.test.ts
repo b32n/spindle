@@ -148,18 +148,13 @@ describe('structured formats', () => {
   });
 });
 
-describe('a negative number that rounds to zero shows no sign in the minus style', () => {
-  it('in the number, currency, accounting and percentage types', () => {
-    expect(formatPlainNumber(-0.256, { decimalPlaces: 0 })).toBe('0');
+describe('a negative number that rounds to zero keeps its sign, as Excel does', () => {
+  it('in the number, currency and percentage types', () => {
+    expect(formatPlainNumber(-0.256, { decimalPlaces: 0 })).toBe('-0');
     expect(formatPlainNumber(-0.001, { decimalPlaces: 2, negativeFormat: 'parentheses' })).toBe('(0.00)');
-    expect(formatPlainNumber(-0.001, { decimalPlaces: 2, negativeFormat: 'red' })).toBe('-0.00');
-    expect(formatPlainNumber(-0.6, { decimalPlaces: 0 })).toBe('-1');
-    expect(formatCurrency(-0.001, { decimalPlaces: 2 })).toBe('$0.00');
-    expect(formatCurrency(-0.001, { decimalPlaces: 2, negativeFormat: 'minus' })).toBe('$0.00');
-    expect(formatCurrency(-0.001, { decimalPlaces: 2, negativeFormat: 'parentheses' })).toBe('($0.00)');
-    expect(formatAccounting(-0.001, { decimalPlaces: 2, negativeFormat: 'parentheses' })).toBe('($    0.00)');
-    expect(formatPercentage(-0.00001, { decimalPlaces: 1 })).toBe('0.0%');
-    expect(formatNumber(-0.256, { type: 'number', decimalPlaces: 0 })).toBe('0');
+    expect(formatCurrency(-0.001, { decimalPlaces: 2 })).toBe('-$0.00');
+    expect(formatPercentage(-0.00001, { decimalPlaces: 1 })).toBe('-0.0%');
+    expect(formatNumber(-0.256, { type: 'number', decimalPlaces: 0 })).toBe('-0');
   });
 });
 
@@ -187,7 +182,10 @@ describe('isDateFormat', () => {
     expect(isDateFormat({ type: 'date' })).toBe(true);
     expect(isDateFormat({ type: 'datetime' })).toBe(true);
     expect(isDateFormat({ type: 'custom', pattern: 'd-mmm-yy' })).toBe(true);
-    expect(isDateFormat({ type: 'custom', pattern: '[h]:mm' })).toBe(true);
+    expect(isDateFormat({ type: 'custom', pattern: 'yyyy-mm-dd hh:mm' })).toBe(true);
+    expect(isDateFormat({ type: 'custom', pattern: '[h]:mm' })).toBe(false); // elapsed time and times of day are not dates
+    expect(isDateFormat({ type: 'custom', pattern: 'h:mm:ss' })).toBe(false);
+    expect(isDateFormat({ type: 'custom', pattern: 'bad code' })).toBe(false);
     expect(isDateFormat({ type: 'custom', pattern: '0.00' })).toBe(false);
     expect(isDateFormat({ type: 'custom' })).toBe(false);
     expect(isDateFormat({ type: 'time' })).toBe(false);

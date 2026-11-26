@@ -47,6 +47,12 @@ export function isFaithfulFormatCode(code: string): boolean {
   return compiled.ok && compiled.sections.every((s) => s.kind !== 'date' || !s.locale || isEnglishLocale(s.locale));
 }
 
+/** True when the code shows a year, month or day (not only a time): what makes a number in it a date to fill a series from. */
+export function hasDatePart(code: string): boolean {
+  const compiled = compileFormat(code);
+  return compiled.ok && compiled.sections[0].kind === 'date' && compiled.sections[0].needsDate;
+}
+
 const ERROR_TEXT = /^#(NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|SPILL!|CALC!|ERROR!)/;
 
 /** The text of a number in General format (also what text-only sections show for a number). */
