@@ -138,32 +138,58 @@ describe('tracked changes in the Y document and in collaboration', () => {
     expect(getCollabBlockers(dataWith([PARAGRAPH]))).toEqual([]);
   });
 
-  it('survive two clients editing on either side of them', () => {
-    const a = new Y.Doc();
-    hydrateYDocFromData(a, dataWith([PARAGRAPH]));
-    const b = new Y.Doc();
-    Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
-    // Each client types in the paragraph with a plain ProseMirror transaction pushed back into its Y document.
-    const type = (ydoc: Y.Doc, at: 'start' | 'end', text: string) => {
+  describe('survive two clients editing', () => {
+    const merge = (a: Y.Doc, b: Y.Doc) => {
+      Y.applyUpdate(b, Y.encodeStateAsUpdate(a, Y.encodeStateVector(b)));
+      Y.applyUpdate(a, Y.encodeStateAsUpdate(b, Y.encodeStateVector(a)));
+    };
+    const pair = () => {
+      const a = new Y.Doc();
+      hydrateYDocFromData(a, dataWith([PARAGRAPH]));
+      const b = new Y.Doc();
+      Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
+      return [a, b] as const;
+    };
+    // Each client types in the paragraph with a plain ProseMirror transaction pushed back into its Y document; `at` is an
+    // offset in the paragraph text, 'start' and 'end' the two ends.
+    const type = (ydoc: Y.Doc, at: 'start' | 'end' | number, text: string) => {
       const fragment = getYDocFields(ydoc).content;
       const state = EditorState.create({ doc: yXmlFragmentToProseMirrorRootNode(fragment, docsSchema) });
       const paragraph = state.doc.firstChild!;
-      const pos = at === 'start' ? 1 : paragraph.nodeSize - 1;
+      const pos = at === 'start' ? 1 : at === 'end' ? paragraph.nodeSize - 1 : 1 + at;
       const tr = state.tr.insertText(text, pos);
       updateYFragment(ydoc, fragment, tr.doc, { mapping: new Map(), isOMark: new Map() });
     };
-    type(a, 'start', '>> ');
-    type(b, 'end', ' <<');
-    Y.applyUpdate(b, Y.encodeStateAsUpdate(a, Y.encodeStateVector(b)));
-    Y.applyUpdate(a, Y.encodeStateAsUpdate(b, Y.encodeStateVector(a)));
-    const [one, two] = [a, b].map((d) => serializeYDocToData(d).sections[0].blocks[0] as ParagraphBlock);
-    expect(strip([one])).toEqual(strip([two]));
-    const content = one.content;
-    expect(content[0]).toMatchObject({ type: 'text' });
-    expect((content[0] as { text: string }).text.startsWith('>> keep')).toBe(true);
-    expect(content.filter((c) => c.type === 'text' && c.revision?.insertion).length).toBeGreaterThan(0);
-    expect(content.filter((c) => c.type === 'text' && c.revision?.deletion).length).toBeGreaterThan(0);
-    expect((content[content.length - 1] as { text: string }).text.endsWith(' end <<')).toBe(true);
+    const contentOf = (d: Y.Doc) => (serializeYDocToData(d).sections[0].blocks[0] as ParagraphBlock).content;
+
+    it('on either side of the changes: ids, authors and dates of every run are kept', () => {
+      const [a, b] = pair();
+      type(a, 'start', '>> ');
+      type(b, 'end', ' <<');
+      merge(a, b);
+      expect(strip([{ ...PARAGRAPH, content: contentOf(a) }])).toEqual(strip([{ ...PARAGRAPH, content: contentOf(b) }]));
+      expect(strip([{ ...PARAGRAPH, content: contentOf(a) }])).toEqual(
+        strip([{ ...PARAGRAPH, content: [{ type: 'text', text: '>> keep ' }, ...CONTENT.slice(1, 4), { type: 'text', text: ' end <<' }] }])
+      );
+    });
+
+    it('with one client typing inside a deletion while the other types at the end', () => {
+      const [a, b] = pair();
+      // "keep new old link end": offset 10 is inside the deletion "old ".
+      type(a, 'keep new o'.length, 'X');
+      type(b, 'end', '!');
+      merge(a, b);
+      const content = contentOf(a);
+      expect(strip([{ ...PARAGRAPH, content }])).toEqual(strip([{ ...PARAGRAPH, content: contentOf(b) }]));
+      // The deletion keeps its change (id, author, no date) and the typed character is inside it, as a plain edit gives.
+      const deleted = content.filter((c) => c.type === 'text' && c.revision?.deletion);
+      expect(deleted.map((c) => (c as { text: string }).text).join('')).toBe('oXld ');
+      expect(deleted.every((c) => c.type === 'text' && c.revision?.deletion?.id === '2' && c.revision.deletion.author === 'Bo')).toBe(true);
+      // The insertion and the link keep both of their changes.
+      expect(content.find((c) => c.type === 'text' && c.revision?.insertion)).toMatchObject({ text: 'new ', bold: true, revision: { insertion: ADA } });
+      expect(content.find((c) => c.type === 'link')).toMatchObject({ revision: { insertion: ADA, deletion: BO } });
+      expect((content[content.length - 1] as { text: string }).text).toBe(' end!');
+    });
   });
 });
 

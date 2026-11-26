@@ -270,11 +270,13 @@ function trackedChangesNotKept(root: XmlNode[]): Item[] {
     if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
     const parent = path[path.length - 1];
     if (parent === 'w:rPr' || parent === 'w:trPr' || parent === 'w:body' || parent === 'w:tc') return;
-    const found = CHANGE_NOT_KEPT_RUN_CONTENT.find((t) => findDeep(node, t));
+    // A change inside another one (the writer nests a deletion in an insertion) is one change with its outer element.
+    const nested = path.includes('w:ins') || path.includes('w:del');
+    const found = nested ? undefined : CHANGE_NOT_KEPT_RUN_CONTENT.find((t) => findDeep(node, t));
     if (found) {
       count++;
       bump(kinds, found === 'w:fldChar' || found === 'w:fldSimple' ? 'field' : found === 'w:footnoteReference' || found === 'w:endnoteReference' ? 'note reference' : 'image');
-    } else if (tag === 'w:del' && fields.some(Boolean) && findDeep(node, 'w:delText')) {
+    } else if (tag === 'w:del' && !path.includes('w:del') && fields.some(Boolean) && findDeep(node, 'w:delText')) {
       count++;
       bump(kinds, 'text in a field result');
     }

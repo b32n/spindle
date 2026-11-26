@@ -4,7 +4,8 @@ import { EditorState, TextSelection } from 'prosemirror-state';
 import { Fragment, Slice } from 'prosemirror-model';
 import { docsSchema } from './prosemirror/schema';
 import { createPlugins } from './prosemirror/plugins';
-import { freshRevisionIds, insertTrackedLineBreak, newRevisionId, pasteOutsideDeletion, typeOutsideDeletion } from './prosemirror/revision-edit';
+import { getPmPlainText } from './prosemirror/sync';
+import { finalClipboardText, freshRevisionIds, insertTrackedLineBreak, newRevisionId, pasteOutsideDeletion, typeOutsideDeletion } from './prosemirror/revision-edit';
 import { collectRevisions } from './revisions';
 
 const { insertion, deletion } = docsSchema.marks;
@@ -230,5 +231,77 @@ describe('a line break typed inside tracked text', () => {
     // A selection is replaced by the default break, not by this command.
     const tracked = stateOf(docOf(text('ab', insertion.create(ADA))));
     expect(insertTrackedLineBreak(tracked.apply(tracked.tr.setSelection(TextSelection.create(tracked.doc, 1, 2))))).toBe(false);
+  });
+});
+
+describe('input the browser reports as a DOM change (IME composition) inside a deletion', () => {
+  const composed = (state: EditorState, from: number, to: number, content: string, ...meta: [string, unknown][]) => {
+    const tr = state.tr.replaceWith(from, to, text(content, deletion.create(BO))); // parsed from the deleted span
+    meta.forEach(([k, v]) => tr.setMeta(k, v));
+    return state.apply(tr);
+  };
+  const runs = (state: EditorState) => {
+    const out: { text: string; marks: string[] }[] = [];
+    state.doc.firstChild!.forEach((c) => out.push({ text: c.text!, marks: c.marks.map((m) => m.type.name) }));
+    return out;
+  };
+
+  it('is live text: composed text takes no deletion, also beside the deletion and over earlier composed text', () => {
+    const state = stateOf();
+    // First update of a composition, strictly inside "gone away" (positions 6 to 15).
+    const first = composed(state, 9, 9, 'ni', ['composition', 1]);
+    expect(runs(first).slice(0, 4)).toEqual([
+      { text: 'keep ', marks: [] },
+      { text: 'gon', marks: ['deletion'] },
+      { text: 'ni', marks: [] },
+      { text: 'e away', marks: ['deletion'] },
+    ]);
+    // The next update replaces the composed text and is parsed from the deleted span again.
+    const second = composed(first, 9, 11, '你', ['composition', 1]);
+    expect(runs(second)[2]).toEqual({ text: '你', marks: [] });
+    // Composition at the edge of the deletion.
+    const edge = composed(state, 15, 15, 'x', ['composition', 2]);
+    expect(runs(edge).find((r) => r.text === 'x')!.marks).toEqual([]);
+    // The text typed through uiEvent input (spell-check replacement, Android) is covered too.
+    const typed = composed(state, 9, 9, 'z', ['uiEvent', 'input']);
+    expect(runs(typed)[2]).toEqual({ text: 'z', marks: [] });
+  });
+
+  it('leaves pastes, undo, collaboration and other changes with the marks they bring', () => {
+    const state = stateOf();
+    for (const meta of [[['paste', true]], [['history$', {}]], [['addToHistory', false]], []] as [string, unknown][][]) {
+      const next = composed(state, 9, 9, 'kept', ...meta);
+      expect(runs(next).find((r) => r.text.includes('kept'))!.marks).toEqual(['deletion']);
+    }
+    // Text without the mark, and a change that is not a replacement, are untouched.
+    const plain = state.apply(state.tr.insertText('abc', 3).setMeta('composition', 3));
+    expect(plain.doc.textBetween(0, plain.doc.content.size)).toContain('abc');
+    const format = state.apply(state.tr.addMark(1, 4, docsSchema.marks.bold.create()).setMeta('composition', 4));
+    expect(format.doc.nodeAt(1)!.marks.map((m) => m.type.name)).toEqual(['bold']);
+  });
+
+  it('is part of the same history event as the input (appended transaction)', () => {
+    const state = stateOf();
+    const res = state.applyTransaction(state.tr.replaceWith(9, 9, text('ni', deletion.create(BO))).setMeta('composition', 1));
+    expect(res.transactions).toHaveLength(2);
+    expect(res.transactions[1].getMeta('appendedTransaction')).toBe(res.transactions[0]);
+  });
+});
+
+describe('the final text of a selection', () => {
+  it('leaves deleted text out of the plain text put on the clipboard, and keeps other text', () => {
+    const doc = docsSchema.node('doc', null, [paragraph(text('20'), text('24', deletion.create(BO)), text('25', insertion.create(ADA))), paragraph(text('next'))]);
+    const slice = doc.slice(0, doc.content.size);
+    expect(finalClipboardText(slice)).toBe('2025\n\nnext');
+    expect(finalClipboardText(slice, ' ')).toBe('2025 next');
+  });
+
+  it('is installed as the clipboard text serializer, and the plain-text helpers skip deleted text', () => {
+    const state = stateOf();
+    const plugin = state.plugins.find((p) => p.props.clipboardTextSerializer)!;
+    const slice = state.doc.slice(0, state.doc.content.size);
+    expect((plugin.props.clipboardTextSerializer as (s: Slice) => string)(slice)).toBe('keep  new');
+    expect(getPmPlainText(state.doc)).toBe('keep  new');
+    expect(getPmPlainText(state.doc, true)).toBe('keep gone away new');
   });
 });

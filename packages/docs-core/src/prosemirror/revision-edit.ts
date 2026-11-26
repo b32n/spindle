@@ -1,6 +1,7 @@
 // Editing around tracked changes: pasted tracked text gets change ids of its own, and typing inside a deleted run stays live.
 
 import { Fragment, Slice, type Node as PmNode, type Schema } from 'prosemirror-model';
+import { ReplaceStep } from 'prosemirror-transform';
 import { Plugin, type EditorState, type Transaction } from 'prosemirror-state';
 
 let counter = 0;
@@ -96,12 +97,70 @@ export function insertTrackedLineBreak(state: EditorState, dispatch?: (tr: Trans
   return true;
 }
 
+/** The fragment without text that is deleted by a tracked change (the final text). */
+function withoutDeletedText(fragment: Fragment, deletion: string): Fragment {
+  const out: PmNode[] = [];
+  fragment.forEach((child) => {
+    if (child.isText) {
+      if (!child.marks.some((m) => m.type.name === deletion)) out.push(child);
+    } else out.push(child.content.size ? child.copy(withoutDeletedText(child.content, deletion)) : child);
+  });
+  return Fragment.fromArray(out);
+}
+
+/** The plain text of a slice as it is copied to the clipboard: text deleted by a tracked change is left out. */
+export function finalClipboardText(slice: Slice, blockSeparator = '\n\n'): string {
+  const content = withoutDeletedText(slice.content, 'deletion');
+  return content.textBetween(0, content.size, blockSeparator);
+}
+
+/**
+ * Typing that the browser reports as a DOM change (IME composition, dead keys, Android keyboards) does not always pass
+ * `handleTextInput`; the text it inserts inside or beside a deletion is parsed from the deleted span and carries the
+ * deletion. This takes the deletion off text inserted by such an input, as typing does. Pastes, drops, undo and
+ * collaboration keep the marks of what they insert.
+ */
+export function stripDeletionFromInput(trs: readonly Transaction[], newState: EditorState): Transaction | null {
+  const type = newState.schema.marks.deletion;
+  if (!type) return null;
+  const ranges: [number, number][] = [];
+  trs.forEach((tr, t) => {
+    if (!tr.docChanged || tr.getMeta('paste') || tr.getMeta('history$') || tr.getMeta('addToHistory') === false) return;
+    if (tr.getMeta('composition') === undefined && tr.getMeta('uiEvent') !== 'input') return;
+    const later = trs.slice(t + 1);
+    tr.steps.forEach((step, i) => {
+      if (!(step instanceof ReplaceStep)) return;
+      let hasDeleted = false;
+      step.slice.content.descendants((n) => {
+        if (n.isText && type.isInSet(n.marks)) hasDeleted = true;
+      });
+      if (!hasDeleted) return;
+      step.getMap().forEach((_oldStart, _oldEnd, from, to) => {
+        const rest = tr.mapping.slice(i + 1);
+        let a = rest.map(from, 1);
+        let b = rest.map(to, -1);
+        for (const l of later) {
+          a = l.mapping.map(a, 1);
+          b = l.mapping.map(b, -1);
+        }
+        if (b > a) ranges.push([a, b]);
+      });
+    });
+  });
+  if (!ranges.length) return null;
+  const tr = newState.tr;
+  for (const [a, b] of ranges) tr.removeMark(a, Math.min(b, tr.doc.content.size), type);
+  return tr.docChanged ? tr : null;
+}
+
 /** Plugin: pasted tracked text gets fresh change ids, and typing or pasting plain text inside a deletion is not part of it. */
 export function createRevisionEditPlugin(schema: Schema): Plugin | null {
   if (!schema.marks.insertion && !schema.marks.deletion) return null;
   return new Plugin({
+    appendTransaction: (trs, _oldState, newState) => stripDeletionFromInput(trs, newState),
     props: {
       transformPasted: (slice) => freshRevisionIds(slice),
+      clipboardTextSerializer: (slice) => finalClipboardText(slice),
       handlePaste(view, event, slice) {
         if (event.clipboardData?.getData('text/html')) return false;
         const tr = pasteOutsideDeletion(view.state, slice);

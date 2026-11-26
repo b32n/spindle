@@ -1055,12 +1055,13 @@ function blocksToPmContent(blocks: Block[], stylePool?: TextStylePool): PmNodeJS
 }
 
 /**
- * Get plain text from a ProseMirror node
+ * Get plain text from a ProseMirror node. Text deleted by a tracked change is left out (the final text) unless
+ * `includeDeleted` is set.
  */
-export function getPmPlainText(node: PmNode): string {
+export function getPmPlainText(node: PmNode, includeDeleted = false): string {
   let text = '';
   node.descendants((child) => {
-    if (child.isText) {
+    if (child.isText && (includeDeleted || !child.marks.some((m) => m.type.name === 'deletion'))) {
       text += child.text;
     }
   });

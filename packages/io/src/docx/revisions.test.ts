@@ -367,6 +367,15 @@ describe('loss report for changes the importer cannot keep around runs', () => {
     expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedChangesNotKept')?.where).toEqual(['image ×2', 'field ×1', 'note reference ×1', 'text in a field result ×1']);
   });
 
+  it('counts an insertion that wraps a deletion once (the shape the writer makes)', async () => {
+    const { bytes } = await importBody(`<w:p ${W}>${ins('1', 'A', del('2', 'B', r(drawing)))}${ins('3', 'A', del('4', 'B', delRun('x')))}</w:p>`);
+    const found = (await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedChangesNotKept');
+    expect(found).toMatchObject({ count: 1 });
+    // Deleted text in a field result inside an insertion is still counted once.
+    const nested = await importBody(`<w:p ${W}>${begin}${ins('5', 'A', del('6', 'B', delRun('old')))}${end}</w:p>`);
+    expect((await detectDocxLoss(nested.bytes)).items.find((i) => i.id === 'docx.trackedChangesNotKept')).toMatchObject({ count: 1 });
+  });
+
   it('does not count changes around plain text, even after a field closed', async () => {
     const { bytes } = await importBody(`<w:p ${W}>${begin}${r(t('3'))}${end}${del('1', 'A', delRun('y'))}${ins('2', 'A', r(t('z')))}</w:p>`);
     expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedChangesNotKept')).toBeUndefined();
