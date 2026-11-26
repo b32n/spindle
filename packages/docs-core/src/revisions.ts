@@ -123,7 +123,7 @@ export function collectRevisions(doc: PmNode, withText = true): RevisionSummary[
 }
 
 /** The authors of the given changes, in order of first appearance, each with the colour `assignAuthorColors` gives them. */
-export function revisionAuthors(revisions: readonly RevisionSummary[]): RevisionAuthor[] {
+export function revisionAuthors(revisions: ReadonlyArray<{ author: string }>): RevisionAuthor[] {
   const colors = assignAuthorColors(revisions.map((r) => r.author));
   const byName = new Map<string, RevisionAuthor>();
   for (const r of revisions) {

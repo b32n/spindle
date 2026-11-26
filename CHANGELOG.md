@@ -342,6 +342,22 @@ lockstep.
   double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
   paragraph with a change, and a tint on the cells of an inserted or deleted row. `documentRevisionAuthors` also lists the authors of changes recorded on paragraphs and rows and of formatting changes, so they share out the palette like the others.
 
+- **Review panel: accept and reject tracked changes.** `DocumentEditor` has a Review changes button in the toolbar that opens a
+  panel listing the changes (author, date, what it did, the text) with Accept and Reject for each, for all of them and for all of
+  one author's (a filter), a next and a previous change (the caret goes there and the page scrolls to it), and a choice of how
+  changes show: **All markup**, **Final** (as if every change were accepted: deleted text left out, no markup) and **Original**
+  (as if every change were rejected: inserted text left out, the formatting before a change back). The panel has no Accept or
+  Reject in a read-only editor. New prop `DocumentEditor.revisionView` (the view to begin with) and `TrueLayoutEditor.revisionView`;
+  `proseMirrorToFlowBlocks` takes `revisionView` in its options (text a view leaves out keeps its length as zero-width spaces,
+  so positions stay in step; in the Final and Original views the editor can still be edited, and rows and paragraph formatting
+  are not shown as they were, only text and character formatting). New `TrueLayoutEditorHandle.goTo(pos)`; new components
+  `ReviewPanel` and `RevisionLegend`. In docs-core: `listChanges` (the changes of a document, runs of one change joined, the two
+  ends of a move as one), `changeUnits`, and the commands `resolveChange`, `resolveAll` (all, or one author's) and
+  `resolveSelection`, plus `settle`. Accepting keeps an inserted run, drops a deleted one, keeps new formatting, keeps an inserted
+  paragraph mark or row and joins away a deleted one; rejecting does the reverse (the old formatting of a run, and the old
+  formatting and heading level of a paragraph, come back). Everything one action does is one transaction, so one undo takes it
+  back.
+
 ### Changed
 
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`

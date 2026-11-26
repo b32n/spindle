@@ -51,7 +51,16 @@ export interface ConversionOptions {
    * for the layout to put at the bottom of the pages their references are on. Only the sectioned conversion supports it.
    */
   footnotesAtPageBottom?: boolean;
+  /**
+   * How tracked changes show: `markup` (default) shows every change; `final` shows the text as if every change were accepted
+   * and `original` as if every change were rejected, with no markup. Hidden text keeps its length (as zero-width spaces), so
+   * every position of the document stays one position on the page.
+   */
+  revisionView?: RevisionView;
 }
+
+/** How tracked changes are shown (see `ConversionOptions.revisionView`). */
+export type RevisionView = 'markup' | 'final' | 'original';
 
 // ---------------------------------------------------------------------------
 // Notes. A note reference is drawn as its number; the text of the notes is collected in an area at the end of the
@@ -71,14 +80,16 @@ const noteCounts = { footnote: 0, endnote: 0 };
 /** The document being converted, and the colours of its tracked-change authors (worked out when the first change is met). */
 let convertedDoc: PmNode | null = null;
 let authorColors: Map<string, string> | null = null;
+let convertedView: RevisionView = 'markup';
 
 function authorColorOf(author: string): string {
   authorColors ??= convertedDoc ? assignAuthorColors(documentRevisionAuthors(convertedDoc)) : new Map();
   return authorColors.get(author) ?? authorColor(author);
 }
 
-function resetNotes(doc: PmNode): void {
+function resetNotes(doc: PmNode, view: RevisionView = 'markup'): void {
   convertedDoc = doc;
+  convertedView = view;
   authorColors = null;
   noteEntries = [];
   noteCounts.footnote = 0;
@@ -146,7 +157,7 @@ export function proseMirrorToFlowBlocks(
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes(doc);
+  resetNotes(doc, options.revisionView);
   
   const blocks: FlowBlock[] = [];
   
@@ -185,7 +196,7 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes(doc);
+  resetNotes(doc, options.revisionView);
   const blocks: FlowBlock[] = [];
   const sections: SectionedFlowBlocks['sections'] = [];
   const footnotes: SectionedFlowBlocks['footnotes'] = [];
@@ -615,7 +626,7 @@ function createTextRunFromNode(node: PmNode): TextRun | LinkRun {
   }
 
   if (linkHref !== undefined) {
-    return {
+    return inRevisionView({
       kind: 'link',
       text: run.text,
       href: linkHref,
@@ -625,10 +636,35 @@ function createTextRunFromNode(node: PmNode): TextRun | LinkRun {
       color: run.color,
       commentThreadId: run.commentThreadId,
       ...(run.revision && { revision: run.revision }),
-    };
+    });
   }
 
-  return run;
+  return inRevisionView(run);
+}
+
+/** The formatting fields of a run that a formatting change records the old value of. */
+const FORMAT_KEYS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden', 'fontFamily', 'fontSize', 'color', 'backgroundColor'] as const;
+
+/**
+ * A run as the revision view shows it. Final and original view show no markup; what the view leaves out (deleted text in the
+ * final view, inserted text in the original) keeps its length as zero-width spaces, and the original view brings back the
+ * formatting a run had before it was changed.
+ */
+function inRevisionView<T extends TextRun | LinkRun>(run: T): T {
+  if (convertedView === 'markup' || !run.revision) return run;
+  const { revision, ...plain } = run;
+  const gone = convertedView === 'final' ? revision.deletion : revision.insertion;
+  if (gone) return { ...plain, text: '\u200B'.repeat(run.text.length) } as T;
+  if (convertedView === 'original' && revision.formatChange && plain.kind === 'text') {
+    const text = plain as TextRun;
+    for (const key of FORMAT_KEYS) delete (text as unknown as Record<string, unknown>)[key];
+    const previous = revision.formatChange.previous;
+    for (const key of FORMAT_KEYS) {
+      const value = previous?.[key];
+      if (value !== undefined && value !== false) (text as unknown as Record<string, unknown>)[key] = value;
+    }
+  }
+  return plain as T;
 }
 
 /**
@@ -759,7 +795,7 @@ function extractParagraphAttrs(node: PmNode): ParagraphAttrs {
     if (node.attrs.rightIndent !== undefined) {
       attrs.rightIndent = node.attrs.rightIndent as number;
     }
-    const changeBar = changeBarOf(readBlockRevision(node.attrs));
+    const changeBar = convertedView === 'markup' ? changeBarOf(readBlockRevision(node.attrs)) : undefined;
     if (changeBar) attrs.changeBar = changeBar;
   }
   
@@ -774,6 +810,7 @@ function revisionInfo(mark: Mark): RevisionInfo {
     author: String(mark.attrs.author),
     color: authorColorOf(String(mark.attrs.author)),
     ...(typeof moveId === 'string' && moveId && { moveId }),
+    ...(mark.type.name === 'formatChange' && mark.attrs.previous && typeof mark.attrs.previous === 'object' && { previous: mark.attrs.previous as Record<string, unknown> }),
   };
 }
 
@@ -793,7 +830,7 @@ function changeBarOf(r: BlockRevisionAttr): ChangeBar | undefined {
 
 /** The `revision` of a flow table row for a row's `revision` attr (nothing when it has none). */
 function rowRevision(r: BlockRevisionAttr): { revision?: NonNullable<TableRow['revision']> } {
-  if (!r) return {};
+  if (!r || convertedView !== 'markup') return {};
   const info = (meta: { id?: string; author?: string } | undefined): RevisionInfo | undefined =>
     meta ? { id: String(meta.id ?? ''), author: String(meta.author ?? ''), color: authorColorOf(String(meta.author ?? '')) } : undefined;
   const insertion = info(r.insertion);

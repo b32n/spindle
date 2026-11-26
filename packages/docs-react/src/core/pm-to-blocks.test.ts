@@ -564,3 +564,44 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
     expect(first.attrs?.changeBar?.color).not.toBe(second.attrs?.changeBar?.color);
   });
 });
+
+describe('proseMirrorToFlowBlocks: the revision view', () => {
+  const insertion = { type: 'insertion', attrs: { revisionId: '1', author: 'Ada', date: null } };
+  const deletion = { type: 'deletion', attrs: { revisionId: '2', author: 'Bo', date: null } };
+  const format = { type: 'formatChange', attrs: { revisionId: '3', author: 'Cy', date: null, previous: { italic: true, fontSize: 14 } } };
+  const doc = () =>
+    j([
+      {
+        type: 'paragraph',
+        attrs: { revision: { insertion: { id: '4', author: 'Ada' } } },
+        content: [text('keep '), text('new', [insertion]), text('old', [deletion]), text('fmt', [{ type: 'bold' }, format]), text('go', [{ type: 'link', attrs: { href: 'https://example.com/' } }, deletion])],
+      },
+      { type: 'table', content: [{ type: 'table_row', attrs: { revision: { insertion: { id: '5', author: 'Ada' } } }, content: [{ type: 'table_cell', content: [{ type: 'paragraph', content: [text('c')] }] }] }] },
+    ]);
+  const runsOf = (revisionView?: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(doc(), { revisionView })[0] as ParagraphBlock).runs as TextRun[];
+
+  it('shows every change in the markup view, which is the default', () => {
+    expect(runsOf().map((r) => r.text)).toEqual(['keep ', 'new', 'old', 'fmt', 'go']);
+    expect(runsOf('markup')[1].revision).toBeDefined();
+    expect((proseMirrorToFlowBlocks(doc())[0] as ParagraphBlock).attrs?.changeBar).toBeDefined();
+  });
+
+  it('leaves out deleted text in the final view, keeping its length, and shows no markup', () => {
+    const runs = runsOf('final');
+    expect(runs.map((r) => r.text)).toEqual(['keep ', 'new', '​​​', 'fmt', '​​']);
+    expect(runs.every((r) => r.revision === undefined)).toBe(true);
+    expect(runs[3].bold).toBe(true);
+    expect(runs[3].italic).toBeUndefined();
+    const blocks = proseMirrorToFlowBlocks(doc(), { revisionView: 'final' });
+    expect((blocks[0] as ParagraphBlock).attrs?.changeBar).toBeUndefined();
+    expect((blocks[1] as import('./flow-blocks').TableBlock).rows[0].revision).toBeUndefined();
+  });
+
+  it('leaves out inserted text in the original view and brings back the formatting before a change', () => {
+    const runs = runsOf('original');
+    expect(runs.map((r) => r.text)).toEqual(['keep ', '​​​', 'old', 'fmt', 'go']);
+    expect(runs.every((r) => r.revision === undefined)).toBe(true);
+    expect(runs[3]).toMatchObject({ italic: true, fontSize: 14 });
+    expect(runs[3].bold).toBeUndefined();
+  });
+});

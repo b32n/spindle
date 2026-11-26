@@ -93,3 +93,20 @@ describe('docs Toolbar table of contents control', () => {
     expect(render({ onTableOfContents: () => {} })).toContain('Table of contents');
   });
 });
+
+describe('docs Toolbar review control', () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('is hidden unless a handler is given', () => {
+    expect(render({})).not.toContain('Review changes');
+  });
+
+  it('is shown when onToggleReview is given', () => {
+    expect(render({ onToggleReview: () => {} })).toContain('Review changes');
+  });
+});

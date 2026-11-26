@@ -12,18 +12,19 @@
  */
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, collectRevisions, createCommands, docsSchema, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
+import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor, ReviewChange } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, createCommands, docsSchema, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
 import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
 import { RevisionLegend } from './RevisionLegend';
+import { ReviewPanel } from './ReviewPanel';
 import { Ruler } from './Ruler';
 import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
-import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle, type TrueLayoutSection } from '../core';
+import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle, type RevisionView, type TrueLayoutSection } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { downloadFile, useImportConfirm, ImageHooksContext, type FontSource, type ImageHooks, type ImportConfirmation } from '@b32nio/spindle-shared/react';
@@ -83,6 +84,11 @@ interface DocumentEditorProps {
   uploadImage?: ImageHooks['uploadImage'];
   /** Largest accepted image in bytes (default 10 MB). */
   maxImageBytes?: number;
+  /**
+   * How tracked changes show to begin with: `markup` (default, every change marked), `final` (as if all were accepted) or
+   * `original` (as if all were rejected). The review panel changes it; the document is not changed by it.
+   */
+  revisionView?: RevisionView;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -125,6 +131,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   resolveImage,
   uploadImage,
   maxImageBytes,
+  revisionView: initialRevisionView = 'markup',
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -137,6 +144,9 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [authors, setAuthors] = useState<RevisionAuthor[]>([]);
+  const [changes, setChanges] = useState<ReviewChange[]>([]);
+  const [showReview, setShowReview] = useState(false);
+  const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   
@@ -221,6 +231,16 @@ export const DocumentEditor = memo(function DocumentEditor({
     editorRef.current?.tableOfContents(action);
   }, [readOnly]);
 
+  const handleResolve = useCallback((action: 'accept' | 'reject', target: { change: ReviewChange } | { author?: string }) => {
+    if (readOnly || !editorView) return;
+    const command = 'change' in target ? resolveChange(target.change.id, action) : resolveAll(action, target.author);
+    command(editorView.state, editorView.dispatch);
+  }, [readOnly, editorView]);
+
+  const handleGoToChange = useCallback((change: ReviewChange) => {
+    editorRef.current?.goTo(change.from);
+  }, []);
+
   const handleRemoveSectionBreak = useCallback(() => {
     if (readOnly || !editorView) return;
     createCommands(docsSchema).removeSectionBreak()(editorView.state, editorView.dispatch);
@@ -295,9 +315,11 @@ export const DocumentEditor = memo(function DocumentEditor({
     // The walk over the whole document waits until typing pauses, so a long document is not scanned on every key.
     clearTimeout(authorsTimer.current);
     authorsTimer.current = setTimeout(() => {
-      const next = revisionAuthors(collectRevisions(state.doc, false));
+      const nextChanges = listChanges(state.doc);
+      const next = revisionAuthors(nextChanges);
       // Keep the old list (and skip a render) when nothing in it changed.
       setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
+      setChanges((prev) => (prev.length === 0 && nextChanges.length === 0 ? prev : nextChanges));
     }, AUTHORS_DELAY_MS);
   }, []);
 
@@ -350,6 +372,7 @@ export const DocumentEditor = memo(function DocumentEditor({
     setPendingComment({ from, to, quote });
     setActiveThreadId(null);
     setShowComments(true);
+    setShowReview(false);
   }, [editorView]);
 
   // Create the thread and apply the comment mark over the captured range.
@@ -416,6 +439,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         setActiveThreadId(threadId);
         setPendingComment(null);
         setShowComments(true);
+        setShowReview(false);
       }
     };
     root.addEventListener('click', onClick);
@@ -534,6 +558,11 @@ export const DocumentEditor = memo(function DocumentEditor({
             onAddComment={startComment}
             onInsertNote={handleInsertNote}
             onTableOfContents={handleTableOfContents}
+            onToggleReview={() => {
+              setShowReview((v) => !v);
+              setShowComments(false);
+            }}
+            reviewOpen={showReview}
             onInsertSectionBreak={handleInsertSectionBreak}
             onRemoveSectionBreak={handleRemoveSectionBreak}
             canRemoveSectionBreak={sections.length > 1}
@@ -611,7 +640,32 @@ export const DocumentEditor = memo(function DocumentEditor({
           onFooterChange={handleFooterChange}
           onHeaderFooterLinkChange={handleHeaderFooterLinkChange}
           collabHandle={docModel.getCollabHandle()}
+          revisionView={revisionView}
         />
+
+        {/* Review panel — tracked changes, in the place of the comments sidebar */}
+        {showReview && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: 320,
+              zIndex: 30,
+              boxShadow: '-8px 0 24px -12px rgba(15, 23, 42, 0.15)',
+            }}
+          >
+            <ReviewPanel
+              changes={changes}
+              view={revisionView}
+              onViewChange={setRevisionView}
+              onResolve={readOnly ? undefined : handleResolve}
+              onGoTo={handleGoToChange}
+              onClose={() => setShowReview(false)}
+            />
+          </div>
+        )}
 
         {/* Comments sidebar — a floating overlay so the page + ruler stay put */}
         {!readOnly && showComments && (

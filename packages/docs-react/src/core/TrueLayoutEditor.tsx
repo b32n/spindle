@@ -32,7 +32,7 @@ import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
 
 import { FlowBlock, NoteKey, noteKeyString } from './flow-blocks';
-import { proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
+import { proseMirrorToSectionedFlowBlocks, createBlockPositionMap, type RevisionView } from './pm-to-blocks';
 import { applyPageNotes, createFootnoteHooks, footnoteRefs, type FootnotePlan } from './footnote-layout';
 import { DomMeasurer, Measure } from './measurer';
 import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
@@ -123,6 +123,11 @@ export interface TrueLayoutEditorProps {
    * the notes area at the end of each section, with the endnotes.
    */
   footnotesAtPageBottom?: boolean;
+  /**
+   * How tracked changes show (default `markup`): every change marked, or the text as if every change were accepted
+   * (`final`) or rejected (`original`). The document itself is not changed.
+   */
+  revisionView?: RevisionView;
   /** Text style pool for efficient style storage (recommended for large documents) */
   textStylePool?: import('@b32nio/spindle-docs-core').TextStylePool;
   /** Header content configuration */
@@ -177,6 +182,8 @@ export interface TrueLayoutEditorHandle {
    * pages they are on), or remove the one at the caret. False when there is nothing to do or it cannot be done there.
    */
   tableOfContents: (action: 'insert' | 'update' | 'remove') => boolean;
+  /** Put the caret at a position of the document and scroll it into view (the pages outside the window are brought in first). */
+  goTo: (pos: number) => void;
 }
 
 // ============================================================================
@@ -211,6 +218,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       pageGap = 24,
       minLinesAtBreak = 2,
       footnotesAtPageBottom = true,
+      revisionView = 'markup',
       textStylePool,
       header: headerProp,
       footer: footerProp,
@@ -688,6 +696,37 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       return () => container.removeEventListener('click', onClick);
     }, [editorView]);
 
+    // Going to a position (the review panel's next and previous change): the caret there, and the line in view.
+    const goToRef = useRef<((pos: number) => void) | null>(null);
+    useEffect(() => {
+      const container = pagesContainerRef.current;
+      const viewport = viewportRef.current;
+      if (!editorView || !container || !viewport) return;
+      goToRef.current = (target) => {
+        const { state } = editorView;
+        const pos = Math.max(0, Math.min(target, state.doc.content.size));
+        const current = layoutRef.current;
+        const page = current?.pages.findIndex((p) =>
+          p.fragments.some((f) => {
+            const info = blockPositionMapRef.current.get(f.blockId);
+            return !!info && pos >= info.start && pos <= info.end;
+          })
+        );
+        if (page !== undefined && page >= 0 && current) viewport.scrollTop = getPageY(current, page);
+        editorView.dispatch(state.tr.setSelection(TextSelection.near(state.doc.resolve(pos))));
+        let tries = 0;
+        const reveal = () => {
+          const el = findElementAtPos(container, pos);
+          if (el) el.scrollIntoView({ block: 'center' });
+          else if (++tries < 10) requestAnimationFrame(reveal);
+        };
+        requestAnimationFrame(reveal);
+      };
+      return () => {
+        goToRef.current = null;
+      };
+    }, [editorView]);
+
     // Clicking the number of a note reference scrolls to the note in the notes area; clicking a note there (its number or
     // its text) goes back to the reference.
     useEffect(() => {
@@ -846,7 +885,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       // 1. Convert ProseMirror doc to FlowBlocks (and find where each section's blocks are). Footnotes at the bottom of their
       //    pages come back separately; the blocks that draw them follow the body's blocks in the arrays given to the layout.
       const known = sectionsRef.current;
-      const sectioned = proseMirrorToSectionedFlowBlocks(doc, { resetIds: true, footnotesAtPageBottom });
+      const sectioned = proseMirrorToSectionedFlowBlocks(doc, { resetIds: true, footnotesAtPageBottom, revisionView });
       const bodyBlocks = sectioned.blocks;
       const noteBlocks = sectioned.footnotes.map((f) => f.block);
       const blocks: FlowBlock[] = [...bodyBlocks, ...noteBlocks];
@@ -947,7 +986,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         tocRefreshRef.current = false;
         runTableOfContentsRef.current?.(view, 'update', false);
       }
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, measureContentWidth]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, revisionView, measureContentWidth]);
     
     // Keep performLayoutRef in sync to avoid stale closures
     performLayoutRef.current = performLayout;
@@ -962,7 +1001,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       }
       // Note: We use performLayoutRef to avoid adding performLayout to deps
       // which would cause infinite loops. The ref is always up-to-date.
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, editorView, header, footer, sectionsKey]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, footnotesAtPageBottom, revisionView, editorView, header, footer, sectionsKey]);
     
     // Initialize table interaction manager
     useEffect(() => {
@@ -1188,6 +1227,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         }
       },
       getScrollContainer: () => viewportRef.current,
+      goTo: (pos) => goToRef.current?.(pos),
       tableOfContents: (action) => (editorView && editable ? runTableOfContentsRef.current?.(editorView, action) ?? false : false),
       insertNote: (kind) => {
         if (!editorView || !editable) return false;

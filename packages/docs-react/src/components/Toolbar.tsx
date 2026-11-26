@@ -54,6 +54,7 @@ import {
   Settings2,
   FolderOpen,
   Download,
+  FileDiff,
 } from 'lucide-react';
 import { DOCS_EXPORT_FORMATS, DOCS_IMPORT_ACCEPT, type DocsExportFormat, type DocsExportFormatInfo } from '../file-io';
 
@@ -292,6 +293,10 @@ export interface ToolbarProps {
   onInsertNote?: (kind: 'footnote' | 'endnote') => void;
   /** Insert, update or remove a table of contents; providing this shows the Table of contents menu. */
   onTableOfContents?: (action: 'insert' | 'update' | 'remove') => void;
+  /** Show or hide the review panel (tracked changes); providing this shows the Review button. */
+  onToggleReview?: () => void;
+  /** Whether the review panel is open. */
+  reviewOpen?: boolean;
 }
 
 interface ToolbarButtonProps {
@@ -495,6 +500,8 @@ export const Toolbar = memo(function Toolbar({
   canRemoveSectionBreak = true,
   onInsertNote,
   onTableOfContents,
+  onToggleReview,
+  reviewOpen,
   editorView,
   activeMarks,
   selectedCell,
@@ -911,6 +918,13 @@ export const Toolbar = memo(function Toolbar({
       <ToolbarButton onClick={onAddComment} tooltip="Comment">
         <MessageSquarePlus size={18} strokeWidth={2} />
       </ToolbarButton>
+
+      {/* Review: tracked changes */}
+      {onToggleReview && (
+        <ToolbarButton onClick={onToggleReview} active={reviewOpen} tooltip="Review changes">
+          <FileDiff size={18} strokeWidth={2} />
+        </ToolbarButton>
+      )}
 
       {/* Page Setup */}
       <ToolbarButton onClick={onPageSetup} tooltip="Page setup">

@@ -19,7 +19,7 @@ export * from './flow-blocks';
 
 // ProseMirror to FlowBlocks converter
 export { proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
-export type { ConversionOptions, SectionedFlowBlocks } from './pm-to-blocks';
+export type { ConversionOptions, SectionedFlowBlocks, RevisionView } from './pm-to-blocks';
 
 // DOM Measurer
 export { DomMeasurer, hasLineData, getLineCount, getLineRangeHeight } from './measurer';

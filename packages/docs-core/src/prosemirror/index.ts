@@ -77,3 +77,7 @@ export {
   removeTableOfContents,
   type TocSettings,
 } from './toc';
+
+// Reviewing tracked changes: what can be accepted or rejected, and the commands that do it
+export { changeUnits, listChanges, settle, resolveChange, resolveAll, resolveSelection } from './review';
+export type { ChangeUnit, ChangeUnitKind, ReviewChange } from './review';

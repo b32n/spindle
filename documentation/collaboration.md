@@ -298,7 +298,9 @@ edits, and the inverse operations broadcast to peers like any other edit.
 - **Tracked changes.** An insertion, deletion or formatting change is a ProseMirror mark (`insertion`, `deletion`,
   `formatChange`: revision id, author, date; a move's name; the formatting before) on the text, and a paragraph's or table
   row's change is an attribute of the node, so they sync like other content and do not block attach. Two people editing inside the same change merge
-  as for text; accepting and rejecting are not collaborative yet. A paragraph mark or row keeps one attribute per kind of
+  as for text. Accepting or rejecting a change in the review panel is an ordinary edit (text deleted, marks removed, attributes set)
+  that syncs like any other; the coordination of two people settling the same change at once is not done yet, and the
+  Final / Original view is local to each client. A paragraph mark or row keeps one attribute per kind of
   change (`revisionInsertion`, `revisionDeletion`, `revisionFormat`), each a Yjs key of its own, so two people suggesting
   different things on the same paragraph mark or row at once (one presses Enter, the other deletes the mark) both keep
   theirs, and each can be accepted or rejected alone. Two people suggesting the same kind on the same mark at once is
