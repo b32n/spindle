@@ -30,7 +30,7 @@ export const ModeSwitch = memo(function ModeSwitch({ mode, onModeChange }: ModeS
   return (
     <div
       role="group"
-      aria-label="Editing mode"
+      aria-label="Editor mode"
       data-testid="mode-switch"
       style={{ display: 'inline-flex', border: '1px solid #dadce0', borderRadius: 6, overflow: 'hidden', background: '#fff', font: '12px/16px Arial, sans-serif' }}
     >

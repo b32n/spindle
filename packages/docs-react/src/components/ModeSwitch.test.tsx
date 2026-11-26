@@ -8,7 +8,7 @@ describe('ModeSwitch', () => {
   it('offers Editing, Suggesting and Viewing, and marks the one that is on', () => {
     for (const [mode, label] of [['editing', 'Editing'], ['suggesting', 'Suggesting'], ['viewing', 'Viewing']] as const) {
       const html = render(mode);
-      expect(html).toContain('aria-label="Editing mode"');
+      expect(html).toContain('aria-label="Editor mode"');
       for (const other of ['Editing', 'Suggesting', 'Viewing']) expect(html).toContain(`>${other}<`);
       expect(html).toMatch(new RegExp(`aria-pressed="true"[^>]*>${label}<`));
       expect((html.match(/aria-pressed="true"/g) ?? []).length).toBe(1);

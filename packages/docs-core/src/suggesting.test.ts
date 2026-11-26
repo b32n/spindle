@@ -5,9 +5,9 @@ import { EditorState, TextSelection, type Transaction } from 'prosemirror-state'
 import { history, undo } from 'prosemirror-history';
 import { deleteSelection, joinBackward, joinForward, splitBlock } from 'prosemirror-commands';
 import type { Node as PmNode } from 'prosemirror-model';
-import { Step, StepMap, StepResult } from 'prosemirror-transform';
+import { Step, StepMap, StepResult, Transform } from 'prosemirror-transform';
 import { docsSchema } from './prosemirror/schema';
-import { blocksToPmDoc } from './prosemirror/sync';
+import { blocksToPmDoc, paragraphFormatAttrs } from './prosemirror/sync';
 import { readBlockRevision } from './prosemirror/block-revision';
 import { changeUnits, listChanges, resolveAll } from './prosemirror/review';
 import { suggestingPlugin, type SuggestingOptions } from './prosemirror/suggesting';
@@ -268,6 +268,25 @@ describe('formatting', () => {
     const mark = state.doc.child(0).child(0).marks.find((m) => m.type.name === 'formatChange')!;
     expect(mark.attrs.previous).toEqual({});
     expect(listChanges(state.doc)).toHaveLength(1);
+  });
+
+  it('tells the host when text with another person’s formatting change is formatted, and keeps their record', async () => {
+    let state = stateOf([para(run('abc'))]);
+    state = apply(state, state.tr.addMark(1, 4, bold.create()));
+    setup.notices = [];
+    setup.author = 'Bo';
+    state = apply(state, state.tr.addMark(1, 4, docsSchema.marks.italic.create()));
+    const mark = state.doc.child(0).child(0).marks.find((m) => m.type.name === 'formatChange')!;
+    expect(mark.attrs).toMatchObject({ author: 'Ada', previous: {} });
+    expect(state.doc.child(0).child(0).marks.map((m) => m.type.name)).toContain('italic');
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(/another person's formatting change was applied directly/);
+    // The same person formatting their own change again says nothing.
+    setup.notices = [];
+    setup.author = 'Ada';
+    apply(state, state.tr.addMark(1, 4, docsSchema.marks.underline.create()));
+    await flush();
+    expect(setup.notices).toEqual([]);
   });
 
   it('does not record formatting of text the author inserted themselves, nor the marks of comments and links', () => {
@@ -874,7 +893,7 @@ describe('a change to the type or properties of a node that is not a paragraph',
 });
 
 describe('Increase and Decrease indent', () => {
-  const NOTICE = /indent cannot be suggested and was made directly/;
+  const NOTICE = /paragraph property .* cannot be suggested and was made directly/;
 
   it('are made directly, with a notice, since a record cannot carry the indent level', async () => {
     const state = stateOf([para(run('abc'))], 2);
@@ -964,5 +983,96 @@ describe('a note edited in place', () => {
     expect(listChanges(next.doc).map((c) => [c.kind, c.text])).toEqual([['deletion', 'old note'], ['insertion', 'new note']]);
     expect(texts(settleAll(next, 'accept').doc)).toEqual(['anew note']);
     expect(texts(settleAll(next, 'reject').doc)).toEqual(['aold note']);
+  });
+});
+
+describe('when deleted text cannot be put back as a suggestion', () => {
+  const PUT_BACK = /Deleted text could not be put back as a suggestion and was deleted directly/;
+  afterEach(() => jest.restoreAllMocks());
+
+  it('deletes directly, with a notice, when putting the text back throws', async () => {
+    const state = stateOf([para(run('abcdef'))], 4, 6);
+    const deletion = state.tr.deleteSelection(); // the user's own step is made before the plugin runs
+    jest.spyOn(Transform.prototype, 'replace').mockImplementationOnce(() => {
+      throw new RangeError('cannot put it back');
+    });
+    const next = apply(state, deletion);
+    // The deletion the user made stays as it was: the text is gone and nothing is marked.
+    expect(texts(next.doc)).toEqual(['abcf']);
+    expect(changeUnits(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(PUT_BACK);
+  });
+
+  it('deletes directly, with a notice, when putting the text back adds nothing', async () => {
+    const state = stateOf([para(run('abcdef'))], 4, 6);
+    const deletion = state.tr.deleteSelection();
+    jest.spyOn(Transform.prototype, 'replace').mockImplementationOnce(function (this: Transform) {
+      return this;
+    });
+    const next = apply(state, deletion);
+    expect(texts(next.doc)).toEqual(['abcf']);
+    expect(changeUnits(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(PUT_BACK);
+  });
+
+  it('records the deletion as a suggestion when nothing is mocked (the same edit)', () => {
+    const state = stateOf([para(run('abcdef'))], 4, 6);
+    const next = apply(state, state.tr.deleteSelection());
+    expect(texts(next.doc)).toEqual(['abcdef']);
+    expect(runs(next.doc)).toEqual(['abc:', 'de:deletion', 'f:']);
+  });
+});
+
+describe('a structure change that wraps a node', () => {
+  it('says the structure was changed directly, once, and leaves the document as the user made it', async () => {
+    const state = stateOf([para(run('abc'))], 2);
+    const next = apply(state, state.tr.wrap(state.doc.resolve(1).blockRange()!, [{ type: docsSchema.nodes.bullet_list }, { type: docsSchema.nodes.list_item }]));
+    expect(next.doc.child(0).type.name).toBe('bullet_list');
+    expect(changeUnits(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices).toEqual([['A change to the structure of the document (a list, a quote, a table) cannot be suggested and was made directly.']]);
+  });
+});
+
+describe('the defaults of the plugin', () => {
+  it('stamps a change with the current time and an id of its own when the host gives neither', () => {
+    const plain = suggestingPlugin({ isActive: () => true, author: () => 'Ada' });
+    const doc = blocksToPmDoc([para(run('abc'))]);
+    const state = EditorState.create({ doc, plugins: [plain] });
+    const at = state.apply(state.tr.setSelection(TextSelection.create(doc, 4)));
+    const first = at.apply(at.tr.insertText('X'));
+    const [change] = listChanges(first.doc);
+    expect(change).toMatchObject({ kind: 'insertion', author: 'Ada', text: 'X' });
+    expect(new Date(change.date!).toISOString()).toBe(change.date);
+    expect(Math.abs(Date.now() - new Date(change.date!).getTime())).toBeLessThan(60_000);
+    expect(change.id.length).toBeGreaterThan(3);
+    // A second change by the same person next to it continues that one; a distant one gets another id.
+    expect(listChanges(first.apply(first.tr.insertText('Y')).doc)).toHaveLength(1);
+  });
+});
+
+describe('the attributes of a paragraph that a suggestion records', () => {
+  // Rejecting a paragraph's formatting change puts back the attributes `paragraphFormatAttrs` writes; every other attribute of a
+  // paragraph or heading must be named here as one a suggestion does not record (it is made directly, with a notice), so that a
+  // new attribute added to the schema cannot be left out of the records without somebody deciding it.
+  const NOT_RECORDED: Record<'paragraph' | 'heading', string[]> = { paragraph: ['indent'], heading: [] };
+  const populated = {
+    alignment: 'center' as const,
+    lineSpacing: { type: 'multiple' as const, value: 2 },
+    spaceBefore: 1,
+    spaceAfter: 2,
+    keepWithNext: true,
+    keepTogether: true,
+    pageBreakBefore: true,
+    namedStyleId: 'N',
+  };
+
+  it.each(['paragraph', 'heading'] as const)('every attribute of a %s is restored by a formatting change, or named as not recorded', (kind) => {
+    const restored = new Set(Object.keys(paragraphFormatAttrs(kind, populated, 2)));
+    const own = Object.keys(docsSchema.nodes[kind].spec.attrs!).filter((name) => !name.startsWith('revision'));
+    const unclassified = own.filter((name) => !restored.has(name) && !NOT_RECORDED[kind].includes(name));
+    expect(unclassified).toEqual([]);
   });
 });

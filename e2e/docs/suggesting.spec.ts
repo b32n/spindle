@@ -18,7 +18,7 @@ test.describe('docs: Suggesting mode', () => {
     expect(pageErrors, 'uncaught page errors').toEqual([]);
   });
 
-  const modes = (page: Page) => page.getByRole('group', { name: 'Editing mode' });
+  const modes = (page: Page) => page.getByRole('group', { name: 'Editor mode' });
   const setMode = (page: Page, name: 'Editing' | 'Suggesting' | 'Viewing') =>
     modes(page).getByRole('button', { name }).click();
   const insertions = () => doc.pages.locator('[data-revision-insertion]');

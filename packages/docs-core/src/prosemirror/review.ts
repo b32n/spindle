@@ -244,7 +244,9 @@ function previousParagraph(change: NonNullable<BlockRevision['formatChange']>): 
 /**
  * Text that stays after its change is settled turns its newline characters back into line breaks: a line break inside tracked
  * text is a newline in the text (so its change survives collaboration), but untracked it is a `hard_break` node, as typing
- * one makes. Each replacement has the size of what it replaces, so positions do not move.
+ * one makes. Each replacement has the size of what it replaces, so positions do not move. This relies on imported text never
+ * holding a raw newline (the DOCX reader makes every break a line break node or a tracked newline): a reader that put one in text
+ * would have it turned into a break here.
  */
 function breaksToNodes(tr: Transaction, from: number, to: number): void {
   const found: Array<{ at: number; marks: readonly Mark[] }> = [];

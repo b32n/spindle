@@ -244,6 +244,8 @@ function markStep(ctx: Context, step: AddMarkStep | RemoveMarkStep, docBefore: P
       if (existing && !ctx.recorded.has(existing.attrs.previous as object)) {
         // Formatting that is back to what it was is no change.
         if (existing.attrs.author === ctx.author && sameFormat(existing.attrs.previous, runFormatOf(now.marks))) out.removeMark(na, nb, formatChangeType);
+        // Text with another person's formatting change keeps their record, so this formatting is not one: rejecting theirs brings back the old formatting.
+        else if (existing.attrs.author !== ctx.author) ctx.notices.add(OTHER_FORMAT_NOTICE);
         return false;
       }
       // Steps are handled from the last to the first: when a later step of this transaction recorded the text already, the
@@ -260,6 +262,9 @@ function markStep(ctx: Context, step: AddMarkStep | RemoveMarkStep, docBefore: P
     return false;
   });
 }
+
+/** Formatting of text that carries another person's formatting change is made directly (rejecting their change restores the formatting from before it). */
+const OTHER_FORMAT_NOTICE = "Formatting text that has another person's formatting change was applied directly; rejecting their change brings back the formatting from before it.";
 
 const FORMAT_KEYS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden', 'color', 'backgroundColor', 'fontSize', 'fontFamily', 'fontFamilyEastAsia', 'fontFamilyComplex', 'namedStyleId'] as const;
 
@@ -302,7 +307,7 @@ function changedAttributes(before: PmNode, after: PmNode): boolean {
 }
 
 /** A change of a paragraph attribute that a formatting change does not record. */
-const UNRECORDED_NOTICE = "A change of a paragraph's indent cannot be suggested and was made directly.";
+const UNRECORDED_NOTICE = 'A change of a paragraph property that a suggestion does not record (such as the indent level) cannot be suggested and was made directly.';
 
 /**
  * Tell the host what was done directly. The plugin runs inside `state.apply`, where a host must not set its own state, and

@@ -384,7 +384,7 @@ lockstep.
   says so once per mode; a note edited in place is recorded as a replacement of its whole text: the old text deleted, the new
   text inserted; a change to the properties of a list, table, image, form control or other structure, and Increase / Decrease indent, are made directly, with a notice; Enter in a list item is recorded as an inserted paragraph mark, lifting an item out of its list with Backspace is made directly; a link or
   a comment added inside someone's change is not recorded; text composed with an IME is recorded like typing but has not been tried with a real input method), and a change is continued by the same author name, with no time limit, so two people with one display name
-  share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses).
+  share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses). Formatting text that carries another person's formatting change is applied directly, with a notice (rejecting their change brings back the formatting from before it). The mode switch group is labelled "Editor mode", and the notice is announced through a live region that is always present.
 
 ### Changed
 

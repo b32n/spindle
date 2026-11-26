@@ -663,11 +663,14 @@ export const DocumentEditor = memo(function DocumentEditor({
           <div style={{ flex: 1, minWidth: 0 }}>
             <RevisionLegend authors={authors} bare />
           </div>
-          {notice && (
-            <span role="status" data-testid="suggesting-notice" style={{ font: '12px/16px Arial, sans-serif', color: '#b06000', background: '#fef7e0', borderRadius: 4, padding: '2px 8px' }}>
-              {notice}
-            </span>
-          )}
+          {/* The live region is always mounted: a region that appears together with its text is not announced by many screen readers. */}
+          <span role="status">
+            {notice && (
+              <span data-testid="suggesting-notice" style={{ font: '12px/16px Arial, sans-serif', color: '#b06000', background: '#fef7e0', borderRadius: 4, padding: '2px 8px' }}>
+                {notice}
+              </span>
+            )}
+          </span>
           {showModeSwitch && !readOnlyProp && <ModeSwitch mode={mode} onModeChange={handleModeChange} />}
         </div>
       )}
