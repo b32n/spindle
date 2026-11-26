@@ -234,6 +234,11 @@ function markStep(ctx: Context, step: AddMarkStep | RemoveMarkStep, docBefore: P
       if (!now.isInline) return true;
       const na = Math.max(nowPos, a);
       const nb = Math.min(nowPos + now.nodeSize, b);
+      // A mark on an image, field, bookmark or other inline node would not sync (marks travel on text only): the formatting stays, unrecorded.
+      if (!now.isText) {
+        ctx.notices.add('The formatting of an image, field or other object in the selection cannot be suggested and was applied directly.');
+        return false;
+      }
       if (now.marks.some((m) => m.type === insertionType && m.attrs.author === ctx.author)) return false;
       const existing = now.marks.find((m) => m.type === formatChangeType);
       if (existing && !ctx.recorded.has(existing.attrs.previous as object)) {
@@ -317,7 +322,7 @@ export function suggestChanges(trs: readonly Transaction[], oldState: EditorStat
   const old = oldState.selection;
   // Backspace deletes the text before the caret, or the paragraph mark before it (a join: from one before the caret to one after it).
   const first = steps[0].step as unknown as StepFields;
-  const backspace = old.empty && steps.length === 1 && (first.to === old.head || (first.from === old.head - 1 && first.to === old.head + 1));
+  const backspace = old.empty && steps.length === 1 && first.from < first.to && (first.to === old.head || (first.from === old.head - 1 && first.to === old.head + 1));
   const caret = { forward: !backspace };
   let caretAt: number | null = null;
   const onlyOne = steps.length === 1;

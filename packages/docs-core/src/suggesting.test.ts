@@ -382,6 +382,90 @@ describe('inline objects', () => {
   });
 });
 
+describe('formatting a range that holds inline objects', () => {
+  const OBJECTS = [
+    docsSchema.nodes.inline_image.createAndFill({ src: 'data:image/png;base64,AA==', width: 10, height: 10 })!,
+    docsSchema.nodes.field.createAndFill({ instruction: 'REF x', fieldType: 'REF' })!,
+    docsSchema.nodes.dynamic_field.createAndFill({ fieldType: 'pageNumber' })!,
+    docsSchema.nodes.bookmark.createAndFill({ name: 'b' })!,
+    docsSchema.nodes.note_ref.create({ kind: 'footnote', noteId: '1' }, docsSchema.text('note')),
+    docsSchema.nodes.content_control_inline.create(null, docsSchema.text('inside')),
+    docsSchema.nodes.hard_break.create(),
+  ];
+
+  it('records the change on the text only, never on a node that is not text, and says what was applied directly', async () => {
+    const children = [docsSchema.text('ab'), ...OBJECTS.flatMap((node) => [node, docsSchema.text('x')])];
+    const doc = docsSchema.node('doc', null, [docsSchema.nodes.paragraph.create(null, children)]);
+    const state = EditorState.create({ doc, plugins: [suggestingPlugin(options)] });
+    const next = apply(state, state.tr.addMark(1, doc.child(0).nodeSize - 1, docsSchema.marks.bold.create()));
+    const withRecord: string[] = [];
+    let recorded = 0;
+    next.doc.descendants((n) => {
+      if (!n.marks.some((m) => m.type.name === 'formatChange')) return;
+      if (n.isText) recorded++;
+      else withRecord.push(n.type.name);
+    });
+    expect(withRecord).toEqual([]);
+    expect(recorded).toBeGreaterThan(0);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(/formatting of an image, field or other object .* applied directly/);
+  });
+
+  it('gives no notice for a range of plain text', async () => {
+    const state = stateOf([para(run('abcd'))], 1, 3);
+    apply(state, state.tr.addMark(1, 3, docsSchema.marks.bold.create()));
+    await flush();
+    expect(setup.notices).toEqual([]);
+  });
+});
+
+describe('Enter and typing in a table cell, a heading and a list item', () => {
+  const stateOfJson = (json: object, at: number) => {
+    const doc = docsSchema.nodes.doc.create(null, [docsSchema.nodeFromJSON(json)]);
+    return EditorState.create({ doc, plugins: [suggestingPlugin(options)], selection: TextSelection.create(doc, at) });
+  };
+  const paragraphOf = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+
+  it('typing in a table cell is recorded as an insertion', () => {
+    const state = stateOfJson({ type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [paragraphOf('cell')] }] }] }, 5);
+    const next = type(state, 'Z');
+    expect(listChanges(next.doc).map((c) => [c.kind, c.author, c.text])).toEqual([['insertion', 'Ada', 'Z']]);
+  });
+
+  it('Enter in a table cell records the new paragraph mark as inserted', () => {
+    const state = stateOfJson({ type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [paragraphOf('cell')] }] }] }, 4);
+    const next = doCommand(state, splitBlock);
+    expect(listChanges(next.doc).map((c) => c.kind)).toEqual(['paragraphInserted']);
+    const rejected = settleAll(next, 'reject');
+    expect(rejected.doc.textContent).toBe('cell');
+    expect(rejected.doc.firstChild!.firstChild!.firstChild!.firstChild!.childCount).toBe(1); // one paragraph in the cell again
+  });
+
+  it('Enter in a heading records the mark as inserted and rejecting it joins the heading again', () => {
+    const state = stateOfJson({ type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Title' }] }, 3);
+    const next = doCommand(state, splitBlock);
+    expect(next.doc.childCount).toBe(2);
+    expect(listChanges(next.doc).map((c) => c.kind)).toEqual(['paragraphInserted']);
+    const rejected = settleAll(next, 'reject');
+    expect(rejected.doc.childCount).toBe(1);
+    expect(rejected.doc.child(0).textContent).toBe('Title');
+    expect(rejected.doc.child(0).type.name).toBe('heading');
+  });
+
+  it('splitting the paragraph of a list item records the new paragraph mark, with no mark that does not sync', () => {
+    const state = stateOfJson({ type: 'bullet_list', content: [{ type: 'list_item', content: [paragraphOf('item')] }] }, 5);
+    const next = doCommand(state, splitBlock);
+    let bad = 0;
+    next.doc.descendants((n) => {
+      if (!n.isText && !n.isTextblock && n.marks.length) bad++;
+    });
+    expect(bad).toBe(0);
+    expect(next.doc.textContent).toBe('item');
+    expect(listChanges(next.doc).map((c) => c.kind)).toEqual(['paragraphInserted']);
+    expect(settleAll(next, 'reject').doc.textContent).toBe('item');
+  });
+});
+
 describe('details of what is recorded and settled', () => {
   it('keeps the marks of a line break when its change is settled', () => {
     const state = stateOf([para(run('a\nb', { bold: true, revision: { insertion: { id: 'x', author: 'Bo' } } }))]);

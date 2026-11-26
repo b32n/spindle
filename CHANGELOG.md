@@ -372,7 +372,7 @@ lockstep.
   the caret over the kept text), Enter marks the paragraph break inserted, joining paragraphs keeps the break marked deleted
   (a pasted paragraph does not bring the formatting-change record of its source; Enter then Backspace leaves no trace, also after typing in the new paragraph, and the records another person had on the paragraph mark are kept; the first Backspace
   at the start of a paragraph moves the caret before the deleted break, so the second one deletes the character before),
-  text typed in the middle of another author's deletion is an insertion of its own, never part of the deletion, a change of character formatting records the formatting before (`formatChange`, and none
+  text typed in the middle of another author's deletion is an insertion of its own, never part of the deletion, a change of character formatting records the formatting before, on text only (`formatChange`; an image, field, bookmark or other object in the range keeps the formatting without a record and the notice says so; none
   when it is put back, or on the author's own insertion), a change of a paragraph's formatting or type records the old formatting.
   What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list, an inline image, field, bookmark, note reference or content control, which would lose a mark in collaboration because marks sync on text only; a paragraph pasted with such an object is inserted directly) is left as
   the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. (A transaction that a host plugin appends is recorded like the user's own edit.) Changes from collaborators, undo

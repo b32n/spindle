@@ -66,7 +66,7 @@ Verified absent in code.
       written back. A review panel accepts and rejects changes (one, all, one author's) and shows All markup / Final /
       Original. Suggesting mode records typing, deleting, paragraph breaks and formatting as tracked changes (lists,
       tables, images and wrapping blocks are not recorded: they are done directly, with a notice; text composed with an IME is
-      recorded like typing, but has not been tried with a real input method, see components.md). Not
+      recorded like typing, but has not been tried with a real input method, see components.md; a transaction of very many steps, such as replace-all, is handled in time that grows with the square of the number of steps; formatting a range that holds an image, field or other object records the text only and says so). Not
       done: changes of cells, tables and sections, and a change around a field, image or note reference (those are not
       kept as changes); the Final and Original views (read-only, with a banner to switch back) do not remove deleted rows or show the old
       paragraph formatting, a paragraph whose text is hidden stays as an empty line, paragraph breaks are not hidden (a deleted mark still splits paragraphs in Final, an inserted one in Original), accepting the deletion of the mark of an empty paragraph keeps the first paragraph's type (a heading after it becomes a paragraph), and the zero-width placeholders can change where
