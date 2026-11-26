@@ -3,6 +3,9 @@
 import type { Node as PmNode } from 'prosemirror-model';
 import { readBlockRevision } from './prosemirror/block-revision';
 
+/** A six-digit hex colour: the only form of colour taken from outside (a cursor colour announced by a peer), as it is safe as a CSS value. */
+export const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
 /** Colours the authors of tracked changes are drawn in, dark enough to read on white. */
 export const REVISION_COLORS: readonly string[] = ['#c5221f', '#1a73e8', '#188038', '#a142f4', '#e8710a', '#129eaf', '#d01884', '#7b5e00'];
 
@@ -33,7 +36,7 @@ export function assignAuthorColors(authors: Iterable<string>, preferred?: Readon
   // Authors with a colour of their own (the colour of their cursor while they are in the room) keep it, and nobody else takes it.
   for (const name of names) {
     const color = preferred?.get(name);
-    if (color && /^#[0-9a-f]{6}$/i.test(color) && !taken.has(color.toLowerCase())) {
+    if (color && HEX_COLOR.test(color) && !taken.has(color.toLowerCase())) {
       colors.set(name, color.toLowerCase());
       taken.add(color.toLowerCase());
     }

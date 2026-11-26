@@ -381,6 +381,13 @@ describe('the room’s version and people’s colours', () => {
     expect(collabAuthorColors(room('#112233', 'blue')).get('Ann')).toBe('#112233');
   });
 
+  it('ignores awareness states that carry no usable user', () => {
+    const room = (...states: unknown[]) => ({ awareness: { getStates: () => new Map(states.map((state, i) => [i, state])) } }) as never;
+    expect(collabAuthorColors(room({ user: null }, { user: 'x' }, { user: 5 }, { user: { name: 5, color: '#112233' } }, { user: { name: 'Ann' } }, { user: { name: 'Ann', color: 7 } }, {}, null, undefined)).size).toBe(0);
+    // A usable state next to unusable ones still counts.
+    expect(collabAuthorColors(room({ user: null }, { user: { name: 'Ann', color: '#112233' } })).get('Ann')).toBe('#112233');
+  });
+
   it('keys the cursor colour by the trimmed name a suggestion is written under, and ignores a blank name', () => {
     const room = (...users: Array<{ name: string; color: string }>) => ({ awareness: { getStates: () => new Map(users.map((user, i) => [i, { user }])) } }) as never;
     const colors = collabAuthorColors(room({ name: ' Ada ', color: '#00aa00' }, { name: '   ', color: '#112233' }));
@@ -417,6 +424,8 @@ describe('the room’s version and people’s colours', () => {
     expect(collabAuthorColors(states(twins, other)).get('Ann')).toBe('#BB0000');
     for (const aw of [awareness, none, twins, other]) aw.destroy();
     // The same colour for two people goes to the first (by name) only.
-    expect(new Set(assignAuthorColors(['A', 'B'], new Map([['A', '#112233'], ['B', '#112233']])).values()).size).toBe(2);
+    const shared = assignAuthorColors(['A', 'B'], new Map([['A', '#112233'], ['B', '#112233']]));
+    expect(shared.get('A')).toBe('#112233');
+    expect(shared.get('B')).not.toBe('#112233');
   });
 });
