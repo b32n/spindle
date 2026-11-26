@@ -41,6 +41,9 @@ const SKIPPED_META = ['y-sync$', 'history$', 'y-undo$', 'suggesting$'];
 const TEXTBLOCKS = new Set(['paragraph', 'heading']);
 /** The attributes that hold the changes of a paragraph mark or row: setting them is not an edit to suggest. */
 const BLOCK_REVISION_ATTR_NAMES = new Set(['revisionInsertion', 'revisionDeletion', 'revisionFormat']);
+/** Formatting of text that carries another person's formatting change is made directly (rejecting their change restores the formatting from before it). */
+const OTHER_FORMAT_NOTICE = "Formatting text that has another person's formatting change was applied directly; rejecting their change brings back the formatting from before it.";
+
 const NOT_FORMATTING = new Set(['insertion', 'deletion', 'formatChange', 'comment', 'link']);
 
 const { insertion: insertionType, deletion: deletionType, formatChange: formatChangeType } = docsSchema.marks;
@@ -262,9 +265,6 @@ function markStep(ctx: Context, step: AddMarkStep | RemoveMarkStep, docBefore: P
     return false;
   });
 }
-
-/** Formatting of text that carries another person's formatting change is made directly (rejecting their change restores the formatting from before it). */
-const OTHER_FORMAT_NOTICE = "Formatting text that has another person's formatting change was applied directly; rejecting their change brings back the formatting from before it.";
 
 const FORMAT_KEYS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden', 'color', 'backgroundColor', 'fontSize', 'fontFamily', 'fontFamilyEastAsia', 'fontFamilyComplex', 'namedStyleId'] as const;
 
