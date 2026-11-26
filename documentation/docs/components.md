@@ -28,11 +28,27 @@ import { DocumentEditor } from '@b32nio/spindle-docs-react';
 | `showToolbar` | `boolean` | `true` | Show the formatting toolbar |
 | `showRuler` | `boolean` | `true` | Show horizontal and vertical rulers |
 | `readOnly` | `boolean` | `false` | View-only: hides the toolbar, rulers and comments |
+| `mode` | `'editing' \| 'suggesting' \| 'viewing'` | uncontrolled, starts `'editing'` | What typing does: `editing` changes the document, `suggesting` records what the user does as tracked changes (Word's Track Changes) by the current user (`currentUser` of `DocumentProvider`), `viewing` cannot change it. Give it to control the mode |
+| `onModeChange` | `(mode) => void` | — | Called when the user picks another mode in the Editing / Suggesting / Viewing switch |
+| `showModeSwitch` | `boolean` | `true` | Show the Editing / Suggesting / Viewing switch above the page (never with `readOnly`) |
+| `revisionView` | `'markup' \| 'final' \| 'original'` | `'markup'` | How tracked changes show to begin with (every change marked, as if all were accepted, as if all were rejected); the Review panel changes it |
 | `fileActions` | `boolean` | `false` | Show Open (`.docx`) and Download (DOCX) in the toolbar |
 | `exportFormats` | `'docx'[]` | all | Formats offered by Download |
 | `fileName` | `string` | document title | Base name for downloads |
 | `onFileOpened` | `(info: { fileName; warnings }) => void` | — | Called after a file was opened |
 | `onFileError` | `(error, action: 'open' \| 'download') => void` | — | Called when opening or downloading fails |
+
+#### Tracked changes
+
+A file's tracked changes (insertions, deletions, moves, formatting changes, inserted and deleted paragraph marks and table rows) are
+kept, shown in the colour of their author with a legend above the page, and written back to `.docx`. The **Review changes** button
+of the toolbar opens a panel that lists them with Accept and Reject for each, for all and for one author, goes to the next and
+previous change and shows the document as **All markup**, **Final** or **Original**. In **Suggesting** mode text typed becomes an
+insertion, text deleted stays as a deletion (text the user inserted themselves is simply removed), a paragraph break typed or
+joined away is recorded, and character and paragraph formatting changes record what the formatting was. What cannot be suggested
+(a list, table or image inserted or deleted, wrapping text in a list…) is done directly and a notice says so; changes from
+collaborators and undo and redo are not touched. The commands (`listChanges`, `resolveChange`, `resolveAll`, `resolveSelection`)
+and the plugin (`suggestingPlugin`) are exported from `@b32nio/spindle-docs-core` for hosts with their own UI.
 
 #### Features
 

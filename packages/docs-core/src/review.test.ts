@@ -420,6 +420,13 @@ describe('changes of table rows', () => {
     expect(readBlockRevision(kept.doc.firstChild!.child(1).attrs)).toBeUndefined();
   });
 
+  it('a row both inserted and deleted goes when accepted, and stays as it was before when everything is rejected', () => {
+    const blocks = table([{ text: 'a' }, { text: 'x', revision: { insertion: ADA, deletion: BO } }]);
+    expect(rowTexts(apply(stateOf(blocks), resolveAll('accept')))).toEqual(['a']);
+    expect(rowTexts(apply(stateOf(blocks), resolveAll('reject')))).toEqual(['a']);
+    expect(rowTexts(apply(stateOf(blocks), resolveAll('reject', 'Bo')))).toEqual(['a', 'x']);
+  });
+
   it('removes the table when its only row goes', () => {
     const blocks = table([{ text: 'only', revision: { deletion: BO } }]);
     const next = apply(stateOf(blocks), resolveAll('accept'));

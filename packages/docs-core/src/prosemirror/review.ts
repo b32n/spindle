@@ -347,6 +347,8 @@ export function settle(state: EditorState, units: readonly ChangeUnit[], action:
   const tr = state.tr;
   const ordered = [...units].sort((a, b) => anchorOf(b) - anchorOf(a) || rank(a, action) - rank(b, action));
   for (const unit of ordered) settleUnit(tr, unit, action);
+  // Settling a change is not itself suggested, in Suggesting mode.
+  tr.setMeta('suggesting$', 'review');
   // Nothing changed (a unit whose node is gone): no empty step on the undo history, and the command reports no success.
   return tr.docChanged ? tr.scrollIntoView() : null;
 }

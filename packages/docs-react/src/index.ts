@@ -9,6 +9,8 @@ export { DocumentEditor } from './components/DocumentEditor';
 export { Toolbar } from './components/Toolbar';
 export { CommentsSidebar } from './components/CommentsSidebar';
 export { RevisionLegend } from './components/RevisionLegend';
+export { ModeSwitch } from './components/ModeSwitch';
+export type { EditorMode, ModeSwitchProps } from './components/ModeSwitch';
 export { ReviewPanel } from './components/ReviewPanel';
 export { RevisionViewBanner } from './components/RevisionViewBanner';
 export type { RevisionViewBannerProps } from './components/RevisionViewBanner';

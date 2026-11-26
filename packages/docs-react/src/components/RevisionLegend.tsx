@@ -21,9 +21,7 @@ export const RevisionLegend = memo(function RevisionLegend({ authors }: Revision
         flexWrap: 'wrap',
         alignItems: 'center',
         gap: 12,
-        padding: '4px 16px',
-        background: '#ffffff',
-        borderBottom: '1px solid #e8eaed',
+        padding: '4px 0',
         font: '12px/16px Arial, sans-serif',
         color: '#3c4043',
       }}

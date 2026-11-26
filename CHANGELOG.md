@@ -363,6 +363,20 @@ lockstep.
   in the document; the legend counts changes the way the panel lists them (a move once, the runs of one change as one), not runs.
   The list of changes is kept only while the panel is open. Switching between editable and read-only (these views, a host's `readOnly`) no longer rebuilds the editor from the document it was mounted with: the editor reads `editable` live, so edits and accepted or rejected changes made before the switch stay.
 
+- **Suggesting mode: typing creates tracked changes.** `DocumentEditor` has an Editing / Suggesting / Viewing mode switch
+  above the page (props `mode`, `onModeChange`, `showModeSwitch`; uncontrolled by default; Viewing is read-only; never shown with
+  `readOnly`). In Suggesting mode the author is the current user (`currentUser`). The new `suggestingPlugin` of docs-core (also
+  `suggestChanges`, `suggestingKey`) puts what the user does into the state a suggestion would have left it in, in a transaction
+  that joins the user's in the undo history: typed or pasted text gets an insertion mark (consecutive typing is one change), deleted
+  text is put back with a deletion mark (text the same author inserted themselves is just removed; backspaces and deletes move
+  the caret over the kept text), Enter marks the paragraph break inserted, joining paragraphs keeps the break marked deleted
+  (Enter then Backspace leaves no trace), a change of character formatting records the formatting before (`formatChange`, and none
+  when it is put back, or on the author's own insertion), a change of a paragraph's formatting or type records the old formatting.
+  What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list…) is left as
+  the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. Changes from collaborators, undo
+  and redo, and accepting or rejecting in the review panel are never suggested. New `TrueLayoutEditor` props `suggesting`,
+  `suggestAuthor` and `onSuggestionNotice`; new `ModeSwitch` component and `EditorMode` type.
+
 ### Changed
 
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
@@ -400,6 +414,9 @@ lockstep.
 
 ### Fixed
 
+- **Switching an editor to read-only and back no longer resets the document.** `TrueLayoutEditor` rebuilt its ProseMirror view (and
+  seeded it again from the initial content) whenever `editable` changed, so the edits made before the switch were lost on screen.
+  It now reads `editable` live. (Needed by the Viewing mode.)
 - **DOCX loss report: `docx.namedStyles` is gone** (the style names are now imported and exported).
 - **A paragraph's `indent` is a level of 24 px, not pixels.** The DOCX importer stored pixels in `indent` (the editor's
   indent command stores levels), so an imported indent of 48 px was laid out as 48 levels. The importer now sets

@@ -6,6 +6,8 @@ import type {
   Block,
   Section,
   InlineContent,
+  BlockRevision,
+  PreviousParagraphFormat,
   RunFormat,
   RunRevision,
   TextRun,
@@ -342,6 +344,22 @@ export function runFormatMarks(format: RunFormat): PmMarkJSON[] {
   const marks = styleToMarks(format);
   if (format.namedStyleId) marks.push({ type: 'namedStyle', attrs: { id: format.namedStyleId } });
   return marks;
+}
+
+/** The formatting a text node's marks give it (character formatting and character style), as a `formatChange` records it. */
+export function runFormatOf(marks: readonly Mark[]): RunFormat {
+  const format: RunFormat = { ...(extractStyleFromMarks(marks) ?? {}) };
+  const named = marks.find((m) => m.type.name === 'namedStyle');
+  if (named && typeof named.attrs.id === 'string' && named.attrs.id) format.namedStyleId = named.attrs.id;
+  return format;
+}
+
+/** The formatting of a paragraph or heading node (pixels), as a `formatChange` of the paragraph records it. */
+export function paragraphFormatOf(node: PmNode): PreviousParagraphFormat {
+  const isHeading = node.type.name === 'heading';
+  const { revision: _revision, ...format } = readFormat(node.attrs, isHeading ? { spaceBefore: null, spaceAfter: null } : { spaceBefore: 0, spaceAfter: 8 });
+  const level = node.attrs.level;
+  return { ...format, ...(isHeading && typeof level === 'number' && { headingLevel: level }) };
 }
 
 /** The attrs of a paragraph or heading node with the given formatting (pixels), as `blocksToPmDoc` writes them. */
