@@ -23,6 +23,68 @@ const PARAGRAPH_FORMAT_ATTRS = {
   namedStyleId: { default: null },
 };
 
+/**
+ * Properties of a content control, on the block and the inline node alike (null/false when unset). `items` is a list of
+ * `{ text, value }` choices; the rest are strings and flags that mirror DOCX's `w:sdtPr`.
+ */
+const CONTENT_CONTROL_ATTRS = {
+  controlType: { default: 'richText' },
+  tag: { default: null },
+  alias: { default: null },
+  lock: { default: null },
+  placeholder: { default: null },
+  showingPlaceholder: { default: false },
+  items: { default: null },
+  dateFormat: { default: null },
+  dateValue: { default: null },
+  checked: { default: false },
+  multiline: { default: false },
+  gallery: { default: null },
+};
+
+const CONTROL_TYPES = new Set(['richText', 'text', 'dropDown', 'comboBox', 'date', 'checkbox', 'picture', 'docPart']);
+const CONTROL_LOCKS = new Set(['sdtLocked', 'contentLocked', 'sdtContentLocked']);
+
+/** The attrs of a content control read back from `data-content-control` (pasted or dropped HTML is untrusted): unknown fields and wrongly typed values are dropped. */
+function contentControlAttrsFromDom(dom: HTMLElement): Record<string, unknown> | false {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(dom.getAttribute('data-content-control') || '');
+  } catch {
+    return false;
+  }
+  if (!raw || typeof raw !== 'object') return false;
+  const r = raw as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === 'string' ? v : null);
+  const items = Array.isArray(r.items)
+    ? r.items.filter((i): i is { text: string; value: string } => !!i && typeof (i as { text?: unknown }).text === 'string' && typeof (i as { value?: unknown }).value === 'string').map((i) => ({ text: i.text, value: i.value }))
+    : null;
+  return {
+    controlType: typeof r.controlType === 'string' && CONTROL_TYPES.has(r.controlType) ? r.controlType : 'richText',
+    tag: str(r.tag),
+    alias: str(r.alias),
+    lock: typeof r.lock === 'string' && CONTROL_LOCKS.has(r.lock) ? r.lock : null,
+    placeholder: str(r.placeholder),
+    showingPlaceholder: r.showingPlaceholder === true,
+    items,
+    dateFormat: str(r.dateFormat),
+    dateValue: str(r.dateValue),
+    checked: r.checked === true,
+    multiline: r.multiline === true,
+    gallery: str(r.gallery),
+  };
+}
+
+/** DOM attributes of a content control: the title, and every property as JSON so a copy pasted into the editor keeps them. */
+function contentControlDom(attrs: Record<string, unknown>, tag: 'div' | 'span'): DOMOutputSpec {
+  const domAttrs: Record<string, string> = {
+    class: 'content-control',
+    'data-content-control': JSON.stringify(Object.fromEntries(Object.keys(CONTENT_CONTROL_ATTRS).map((k) => [k, attrs[k]]))),
+  };
+  if (typeof attrs.alias === 'string' && attrs.alias) domAttrs.title = attrs.alias;
+  return [tag, domAttrs, 0];
+}
+
 /** The displayed text of a field's cached result (a string, or text/image runs stored as JSON in the node attr). */
 export function fieldResultText(result: unknown): string {
   if (typeof result === 'string') return result;
@@ -48,7 +110,8 @@ function indentStyle(attrs: Record<string, unknown>): string {
 const nodes: Record<string, NodeSpec> = {
   doc: {
     // A section break only ends a section of the body, so it is allowed here and not inside cells or list items.
-    content: '(block | section_break)+',
+    // A content control wraps blocks; like a section break it is outside the `block` group so lists and quotes cannot hold one.
+    content: '(block | content_control | section_break)+',
   },
 
   paragraph: {
@@ -177,7 +240,7 @@ const nodes: Record<string, NodeSpec> = {
   },
 
   table_cell: {
-    content: 'block+',
+    content: '(block | content_control)+',
     attrs: {
       colspan: { default: 1 },
       rowspan: { default: 1 },
@@ -216,7 +279,7 @@ const nodes: Record<string, NodeSpec> = {
   },
 
   table_header: {
-    content: 'block+',
+    content: '(block | content_control)+',
     attrs: {
       colspan: { default: 1 },
       rowspan: { default: 1 },
@@ -317,6 +380,26 @@ const nodes: Record<string, NodeSpec> = {
     toDOM(node): DOMOutputSpec {
       return ['div', { class: 'section-break', 'data-section-id': String(node.attrs.sectionId) }];
     },
+  },
+
+  // A content control (a Word structured document tag) around blocks. It only sits at the top level of the document, in
+  // table cells and in other controls. Its properties are attrs; `checked` is the state of a checkbox control.
+  content_control: {
+    content: '(block | content_control)+',
+    defining: true,
+    attrs: CONTENT_CONTROL_ATTRS,
+    parseDOM: [{ tag: 'div[data-content-control]', getAttrs: contentControlAttrsFromDom }],
+    toDOM: (node) => contentControlDom(node.attrs, 'div'),
+  },
+
+  // A content control inside a paragraph, around inline content.
+  content_control_inline: {
+    inline: true,
+    group: 'inline',
+    content: 'inline*',
+    attrs: CONTENT_CONTROL_ATTRS,
+    parseDOM: [{ tag: 'span[data-content-control]', getAttrs: contentControlAttrsFromDom }],
+    toDOM: (node) => contentControlDom(node.attrs, 'span'),
   },
 
   hard_break: {

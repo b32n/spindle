@@ -3,27 +3,27 @@
     "added": 0,
     "after": {
       "blocks": {
+        "content-control": 5,
         "heading": 13,
-        "image": 2,
+        "image": 1,
         "list-item": 3,
-        "page-break": 1,
-        "paragraph": 76,
+        "paragraph": 67,
         "table": 9
       },
       "sections": 1,
-      "textChars": 10226
+      "textChars": 10249
     },
     "before": {
       "blocks": {
+        "content-control": 5,
         "heading": 13,
-        "image": 2,
+        "image": 1,
         "list-item": 3,
-        "page-break": 1,
-        "paragraph": 76,
+        "paragraph": 67,
         "table": 9
       },
       "sections": 1,
-      "textChars": 10226
+      "textChars": 10249
     },
     "byField": {},
     "changed": 0,

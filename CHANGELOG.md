@@ -210,8 +210,36 @@ lockstep.
   Nothing is laid out from them yet: the editor draws the first-page header and footer as before, and even-page headers, page
   number restarts and formats, vertical alignment and columns are stored and exported only.
 
+- **DOCX content controls are kept, edited (check boxes) and written back.** A Word content control (`w:sdt`) of type rich
+  text, plain text, drop-down list, combo box, date, check box, picture or building block (cover page, table of contents
+  wrapper) is imported as a wrapper around the content it holds, at the block level (around paragraphs, lists, tables and
+  other controls) and inside a paragraph, nested to any depth, with its title (`w:alias`), tag, lock, placeholder, list
+  items, date format and value, and check box state. The export writes it back as a `w:sdt` with its properties. Additive
+  interchange types `DocContentControl`, `DocContentControlRun` (a `DocInline` member, `type: 'contentControl'`) and a
+  `DocBlock` member of the same type, and in docs-core `ContentControl`, `InlineContentControl` and `ContentControlBlock`
+  (block type `'content-control'`). `getPlainText` reads through inline controls. Widening these unions can break a host's
+  exhaustive `switch` at compile time.
+- **Content controls in the ProseMirror document and in collaboration.** `docsSchema` gains a block node `content_control`
+  (top level, table cells and other controls) and an inline node `content_control_inline`, with the control's properties as
+  attributes; both are plain ProseMirror nodes, so they sync over Yjs like any other content and
+  `getCollabBlockers` knows them (it looks inside them for types it does not know). The collaboration `schemaVersion`
+  (`COLLAB_SCHEMA_VERSION`) is now 3: a client from before this change refuses to join a room written with it, and rooms
+  written before it need no migration. Pasted HTML that carries a control (`data-content-control`) is validated, not trusted.
+  New commands `toggleCheckboxControl(pos?)` and `findCheckboxControl`.
+- **Editor: content controls.** The editor draws the content of a control as before, with a title chip in the left margin
+  next to the first line of a block control (its title, tag or kind) and a faint tint and tooltip on the content of an inline
+  one; placeholder text is grey. Clicking the glyph of a check box control toggles it (its state and glyph). Other control
+  types are shown but have no picker yet, and a control's lock is kept and written back but not enforced.
+- **DOCX legacy form fields keep their text.** `FORMTEXT`, `FORMCHECKBOX` and `FORMDROPDOWN` fields now import the text they
+  display as plain text (it was dropped, with a warning). The form behaviour is still lost and is reported as
+  `docx.legacyForms`.
+
 ### Changed
 
+- **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,
+  citation, bibliography and group controls, and controls wrapping table rows or cells, whose content is kept without the
+  control), by reason in `where`, in both detail levels; it counted every `w:sdt` before. `docx.fields` no longer counts the
+  legacy form fields (see `docx.legacyForms`). The DOCX fidelity harness now counts the text inside content controls.
 - `@b32nio/spindle-sheets-core` and `@b32nio/spindle-docs-core` now depend on `@b32nio/spindle-io` and load it
   lazily on first XLSX/DOCX open or save (public APIs unchanged).
 - `@b32nio/spindle-shared` no longer depends on `exceljs`, `docx`, `jszip` or `fast-xml-parser`.

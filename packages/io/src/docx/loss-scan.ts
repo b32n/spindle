@@ -1,4 +1,5 @@
 import type { ImportLossItem } from '@b32nio/spindle-shared';
+import { unsupportedControls } from './content-controls';
 import { drawingKind } from './drawing-kind';
 import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
 
@@ -186,26 +187,25 @@ export function fieldInstructions(root: XmlNode[]): string[] {
 
 /**
  * Fields whose displayed value is not kept as a field: a table of contents or index keeps its text but not the field
- * (it is static), and legacy form fields lose their value. Every other field keeps its instruction and cached result.
+ * (it is static). Legacy form fields keep their text too and are reported as `docx.legacyForms`. Every other field keeps its instruction and cached result.
  * A complex field is counted once even when its instruction is split over several instrText runs.
  */
 const STATIC_FIELD_KINDS = new Set(['TOC', 'TOA', 'INDEX']);
-const LEGACY_FORM_KINDS = new Set(['FORMTEXT', 'FORMCHECKBOX', 'FORMDROPDOWN']);
 
 function fields(root: XmlNode[]): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
   for (const raw of fieldInstructions(root)) {
     const kind = raw.trim().toUpperCase().split(/[\s\\"]/)[0];
-    if (!STATIC_FIELD_KINDS.has(kind) && !LEGACY_FORM_KINDS.has(kind)) continue;
+    if (!STATIC_FIELD_KINDS.has(kind)) continue;
     total++;
     bump(kinds, kind);
   }
   return item(
     'docx.fields',
-    'field(s) (table of contents, index, legacy form fields)',
+    'field(s) (table of contents, index)',
     total,
-    'tables of contents and indexes are kept as static text, legacy form fields lose their value',
+    'tables of contents and indexes are kept as static text',
     kinds,
     20
   );
@@ -301,6 +301,13 @@ function countElements(root: XmlNode[], tag: string, id: string, label: string, 
   return item(id, label, total, effect);
 }
 
+/** Content controls that are read as their content only (see `unsupportedControls`); the others are kept. */
+function contentControls(root: XmlNode[]): Item[] {
+  const reasons = unsupportedControls(root);
+  const total = [...reasons.values()].reduce((sum, n) => sum + n, 0);
+  return item('docx.contentControls', 'content control(s)', total, 'their content is kept; the control itself (repeating section, data binding, row or cell wrapper, ...) is lost', reasons);
+}
+
 function legacyForms(root: XmlNode[]): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
@@ -310,7 +317,7 @@ function legacyForms(root: XmlNode[]): Item[] {
     total++;
     bump(kinds, kind);
   }
-  return item('docx.legacyForms', 'legacy form field(s)', total, 'their displayed value is dropped (also counted under docx.fields)', kinds);
+  return item('docx.legacyForms', 'legacy form field(s)', total, 'their displayed text is kept as plain text; the form field (checkbox state, list, text limits) is lost', kinds);
 }
 
 function watermarks(headerFooters: string[]): Item[] {
@@ -365,9 +372,10 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
+    ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),
     ...safe(() => fields(root)),

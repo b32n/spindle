@@ -209,88 +209,111 @@
             "type": "heading"
           },
           {
-            "alignment": "justify",
-            "content": [
+            "blocks": [
               {
-                "color": "#808080",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Click here to enter a summary.",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "color": "#808080",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Click here to enter a summary.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-5",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               }
             ],
+            "control": {
+              "alias": "Summary",
+              "showingPlaceholder": true,
+              "tag": "summary",
+              "type": "richText"
+            },
             "id": "block-4",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
+            "type": "content-control"
           },
           {
-            "alignment": "justify",
-            "content": [
+            "blocks": [
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Rich text control with ",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Rich text control with ",
+                    "type": "text"
+                  },
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "bold",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": " and ",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "italic": true,
+                    "text": "italic",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": " runs.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-7",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               },
               {
-                "bold": true,
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "bold",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": " and ",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "italic": true,
-                "text": "italic",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": " runs.",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "And a second paragraph inside the same control.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-8",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               }
             ],
-            "id": "block-5",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
+            "control": {
+              "alias": "Notes",
+              "tag": "notes",
+              "type": "richText"
             },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "And a second paragraph inside the same control.",
-                "type": "text"
-              }
-            ],
             "id": "block-6",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -302,10 +325,20 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Ada Marlowe",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Ada Marlowe",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Name",
+                  "tag": "name",
+                  "type": "text"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -314,10 +347,34 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "East",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "East",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Berth",
+                  "items": [
+                    {
+                      "text": "North",
+                      "value": "N"
+                    },
+                    {
+                      "text": "East",
+                      "value": "E"
+                    },
+                    {
+                      "text": "South",
+                      "value": "S"
+                    }
+                  ],
+                  "tag": "berth",
+                  "type": "dropDown"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -326,10 +383,30 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Thornback",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Thornback",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Vessel",
+                  "items": [
+                    {
+                      "text": "Marguerite",
+                      "value": "m"
+                    },
+                    {
+                      "text": "Thornback",
+                      "value": "t"
+                    }
+                  ],
+                  "tag": "vessel",
+                  "type": "comboBox"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -338,10 +415,22 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "2 March 2026",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "2 March 2026",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Arrival",
+                  "dateFormat": "d MMMM yyyy",
+                  "dateValue": "2026-03-02T00:00:00Z",
+                  "tag": "arrival",
+                  "type": "date"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -350,10 +439,21 @@
                 "type": "text"
               },
               {
-                "fontFamily": "DejaVu Sans",
-                "fontSize": 11,
-                "text": "☒",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "DejaVu Sans",
+                    "fontSize": 11,
+                    "text": "☒",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Inspected",
+                  "checked": true,
+                  "tag": "inspected",
+                  "type": "checkbox"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -362,7 +462,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-7",
+            "id": "block-9",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -372,12 +472,32 @@
             "type": "paragraph"
           },
           {
-            "alt": "logo placeholder",
-            "height": 80,
-            "id": "block-8",
-            "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
-            "type": "image",
-            "width": 80
+            "content": [
+              {
+                "content": [
+                  {
+                    "alt": "logo placeholder",
+                    "height": 80,
+                    "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
+                    "type": "image",
+                    "width": 80
+                  }
+                ],
+                "control": {
+                  "alias": "Logo",
+                  "tag": "logo",
+                  "type": "picture"
+                },
+                "type": "contentControl"
+              }
+            ],
+            "id": "block-10",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 10.666666666666666,
+            "type": "paragraph"
           },
           {
             "content": [
@@ -394,7 +514,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-9",
+            "id": "block-11",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -420,7 +540,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-10",
+            "id": "block-12",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -446,7 +566,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-11",
+            "id": "block-13",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -482,7 +602,7 @@
               200,
               200
             ],
-            "id": "block-12",
+            "id": "block-14",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -516,10 +636,20 @@
                     ],
                     "content": [
                       {
-                        "fontFamily": "Liberation Sans",
-                        "fontSize": 11,
-                        "text": "12",
-                        "type": "text"
+                        "content": [
+                          {
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 11,
+                            "text": "12",
+                            "type": "text"
+                          }
+                        ],
+                        "control": {
+                          "alias": "Qty",
+                          "tag": "qty",
+                          "type": "text"
+                        },
+                        "type": "contentControl"
                       }
                     ],
                     "id": "cell-2"
@@ -579,72 +709,137 @@
                 "type": "text"
               }
             ],
-            "id": "block-13",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "bold": true,
-                "fontFamily": "Liberation Serif",
-                "fontSize": 16,
-                "text": "Cover page building block",
-                "type": "text"
-              }
-            ],
-            "id": "block-14",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Title",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "color": "#595959",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 14,
-                "italic": true,
-                "text": "Wrapped in a docPartObj content control.",
-                "type": "text"
-              }
-            ],
             "id": "block-15",
             "lineSpacing": {
               "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Subtitle",
-            "spaceAfter": 10.666666666666666,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Innermost paragraph, 5 controls deep.",
-                "type": "text"
-              }
-            ],
-            "id": "block-16",
-            "lineSpacing": {
-              "type": "multiple",
               "value": 1.15
             },
             "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
+          },
+          {
+            "blocks": [
+              {
+                "content": [
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Serif",
+                    "fontSize": 16,
+                    "text": "Cover page building block",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-17",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Title",
+                "spaceAfter": 8,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "color": "#595959",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 14,
+                    "italic": true,
+                    "text": "Wrapped in a docPartObj content control.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-18",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Subtitle",
+                "spaceAfter": 10.666666666666666,
+                "type": "paragraph"
+              }
+            ],
+            "control": {
+              "gallery": "Cover Pages",
+              "type": "docPart"
+            },
+            "id": "block-16",
+            "type": "content-control"
+          },
+          {
+            "blocks": [
+              {
+                "blocks": [
+                  {
+                    "blocks": [
+                      {
+                        "blocks": [
+                          {
+                            "blocks": [
+                              {
+                                "alignment": "justify",
+                                "content": [
+                                  {
+                                    "fontFamily": "Liberation Sans",
+                                    "fontSize": 11,
+                                    "text": "Innermost paragraph, 5 controls deep.",
+                                    "type": "text"
+                                  }
+                                ],
+                                "id": "block-24",
+                                "lineSpacing": {
+                                  "type": "multiple",
+                                  "value": 1.15
+                                },
+                                "namedStyleId": "BodyText",
+                                "spaceAfter": 8,
+                                "type": "paragraph"
+                              }
+                            ],
+                            "control": {
+                              "alias": "Level 5",
+                              "tag": "nest5",
+                              "type": "richText"
+                            },
+                            "id": "block-23",
+                            "type": "content-control"
+                          }
+                        ],
+                        "control": {
+                          "alias": "Level 4",
+                          "tag": "nest4",
+                          "type": "richText"
+                        },
+                        "id": "block-22",
+                        "type": "content-control"
+                      }
+                    ],
+                    "control": {
+                      "alias": "Level 3",
+                      "tag": "nest3",
+                      "type": "richText"
+                    },
+                    "id": "block-21",
+                    "type": "content-control"
+                  }
+                ],
+                "control": {
+                  "alias": "Level 2",
+                  "tag": "nest2",
+                  "type": "richText"
+                },
+                "id": "block-20",
+                "type": "content-control"
+              }
+            ],
+            "control": {
+              "alias": "Level 1",
+              "tag": "nest1",
+              "type": "richText"
+            },
+            "id": "block-19",
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -656,7 +851,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-17",
+            "id": "block-25",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -677,6 +872,12 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "text": "Ada Marlowe",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "   Cleared: ",
                 "type": "text"
               },
@@ -685,9 +886,15 @@
                 "fontSize": 11,
                 "text": "   Flag colour: ",
                 "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "Green",
+                "type": "text"
               }
             ],
-            "id": "block-18",
+            "id": "block-26",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -718,9 +925,5 @@
     "title": "Content controls and forms"
   },
   "importError": null,
-  "warnings": [
-    "Unsupported field code \"FORMTEXT\" — its cached value was dropped.",
-    "Unsupported field code \"FORMCHECKBOX\" — its cached value was dropped.",
-    "Unsupported field code \"FORMDROPDOWN\" — its cached value was dropped."
-  ]
+  "warnings": []
 }

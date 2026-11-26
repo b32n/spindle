@@ -22,6 +22,8 @@ import type {
   ListType,
   DynamicFieldType,
   InlineField,
+  ContentControl,
+  ContentControlType,
 } from '../types';
 
 /**
@@ -125,6 +127,55 @@ function readFormat(attrs: Record<string, unknown>, defaults: { spaceBefore: num
   return out;
 }
 
+const CONTROL_TYPES: readonly ContentControlType[] = ['richText', 'text', 'dropDown', 'comboBox', 'date', 'checkbox', 'picture', 'docPart'];
+
+/** The attrs of a `content_control` / `content_control_inline` node for a content control (null/false when unset). */
+function controlAttrs(control: ContentControl): Record<string, unknown> {
+  return {
+    controlType: control.type,
+    tag: control.tag ?? null,
+    alias: control.alias ?? null,
+    lock: control.lock ?? null,
+    placeholder: control.placeholder ?? null,
+    showingPlaceholder: control.showingPlaceholder ?? false,
+    items: control.items ? control.items.map((i) => ({ ...i })) : null,
+    dateFormat: control.dateFormat ?? null,
+    dateValue: control.dateValue ?? null,
+    checked: control.checked ?? false,
+    multiline: control.multiline ?? false,
+    gallery: control.gallery ?? null,
+  };
+}
+
+/** The `{ text, value }` choices of a `items` attr (anything else in it is dropped). */
+function controlItems(items: unknown[]): Array<{ text: string; value: string }> {
+  return items.flatMap((i) => {
+    const item = i as { text?: unknown; value?: unknown } | null;
+    return item && typeof item.text === 'string' && typeof item.value === 'string' ? [{ text: item.text, value: item.value }] : [];
+  });
+}
+
+/** The content control a `content_control` / `content_control_inline` node's attrs describe. */
+function readControl(attrs: Record<string, unknown>): ContentControl {
+  const type = CONTROL_TYPES.find((t) => t === attrs.controlType) ?? 'richText';
+  const str = (v: unknown): string | undefined => (typeof v === 'string' && v ? v : undefined);
+  const lock = attrs.lock === 'sdtLocked' || attrs.lock === 'contentLocked' || attrs.lock === 'sdtContentLocked' ? attrs.lock : undefined;
+  return {
+    type,
+    ...(str(attrs.tag) && { tag: str(attrs.tag) }),
+    ...(str(attrs.alias) && { alias: str(attrs.alias) }),
+    ...(lock && { lock }),
+    ...(str(attrs.placeholder) && { placeholder: str(attrs.placeholder) }),
+    ...(attrs.showingPlaceholder === true && { showingPlaceholder: true }),
+    ...(Array.isArray(attrs.items) && controlItems(attrs.items).length > 0 && { items: controlItems(attrs.items) }),
+    ...(str(attrs.dateFormat) && { dateFormat: str(attrs.dateFormat) }),
+    ...(str(attrs.dateValue) && { dateValue: str(attrs.dateValue) }),
+    ...(type === 'checkbox' && { checked: attrs.checked === true }),
+    ...(attrs.multiline === true && { multiline: true }),
+    ...(str(attrs.gallery) && { gallery: str(attrs.gallery) }),
+  } as ContentControl;
+}
+
 /**
  * Convert a single block to ProseMirror node JSON
  */
@@ -225,6 +276,15 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
       
     case 'page-break':
       return { type: 'page_break' };
+
+    case 'content-control': {
+      const content = blocksToPmContent(block.blocks, stylePool);
+      return {
+        type: 'content_control',
+        attrs: controlAttrs(block.control),
+        content: content.length > 0 ? content : [{ type: 'paragraph', content: [] }],
+      };
+    }
       
     default:
       return null;
@@ -382,6 +442,14 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
       };
     }
 
+    if (item.type === 'contentControl') {
+      return {
+        type: 'content_control_inline',
+        attrs: controlAttrs(item.control),
+        content: inlineContentToPm(item.content, stylePool),
+      };
+    }
+
     return null;
   }).flat().filter((node): node is PmNodeJSON => node !== null);
 }
@@ -466,19 +534,30 @@ export function proseMirrorToDocument(
   };
 }
 
+/** The paragraphs, headings and list items among blocks, looking inside content controls. */
+function textBlocks(blocks: Block[]): Block[] {
+  return blocks.flatMap((b) => (b.type === 'content-control' ? textBlocks(b.blocks) : b.type === 'paragraph' || b.type === 'heading' || b.type === 'list-item' ? [b] : []));
+}
+
+/** The blocks of a node's children (a table cell or a content control): a list becomes its items. */
+function pmChildrenToBlocks(parent: PmNode, startIndex: number, stylePool?: TextStylePool): Block[] {
+  const blocks: Block[] = [];
+  let previous: PmNode | undefined;
+  parent.forEach((child) => {
+    blocks.push(...pmNodeToBlocks(child, startIndex + blocks.length, stylePool, previous?.type.name === 'ordered_list'));
+    previous = child;
+  });
+  return blocks;
+}
+
 /**
  * The content of a table cell: `content` is the inline content of its first paragraph that has any (what a cell of
  * one paragraph holds), `blocks` the whole cell unless it is one paragraph.
  */
 function pmCellContent(cellNode: PmNode, startIndex: number, stylePool?: TextStylePool): { content: InlineContent[]; blocks?: Block[] } {
-  const blocks: Block[] = [];
-  let previous: PmNode | undefined;
-  cellNode.forEach((child) => {
-    blocks.push(...pmNodeToBlocks(child, startIndex + blocks.length, stylePool, previous?.type.name === 'ordered_list'));
-    previous = child;
-  });
+  const blocks = pmChildrenToBlocks(cellNode, startIndex, stylePool);
   const inline = (block: Block | undefined): InlineContent[] => (block && 'content' in block ? block.content : []);
-  const paragraphs = blocks.filter((b) => b.type === 'paragraph' || b.type === 'heading' || b.type === 'list-item');
+  const paragraphs = textBlocks(blocks);
   const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
   // Bookmarks of the paragraphs before the first one with content stay in front of it
   const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
@@ -617,6 +696,14 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
         id: `block_${startIndex}_${Date.now()}`,
         type: 'page-break',
       }];
+
+    case 'content_control':
+      return [{
+        id: `block_${startIndex}_${Date.now()}`,
+        type: 'content-control',
+        control: readControl(node.attrs),
+        blocks: pmChildrenToBlocks(node, startIndex + 1, stylePool),
+      }];
       
     default:
       return [];
@@ -715,6 +802,11 @@ function pmContentToInline(node: PmNode, stylePool?: TextStylePool): InlineConte
         result: child.attrs.result as InlineField['result'],
         ...(child.attrs.dirty ? { dirty: true } : {}),
       });
+      return;
+    }
+
+    if (child.type.name === 'content_control_inline') {
+      content.push({ type: 'contentControl', control: readControl(child.attrs), content: pmContentToInline(child, stylePool) });
       return;
     }
 

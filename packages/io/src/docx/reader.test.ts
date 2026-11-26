@@ -400,14 +400,19 @@ describe('importDocx', () => {
       expect(block).toMatchObject({ content: [{ type: 'text', text: 'Visit ' }, { type: 'text', text: 'Paris' }, { type: 'text', text: ' France' }] });
     });
 
-    it('keeps the text of inline custom XML and inline content controls', async () => {
+    it('keeps the text of inline custom XML, and an inline content control around its text', async () => {
       const block = await firstText(
         para(
           `<w:customXml w:element="e"><w:customXmlPr/>${r(t('custom '))}</w:customXml>` +
             `<w:sdt><w:sdtPr><w:alias w:val="A"/></w:sdtPr><w:sdtContent>${r(t('control'))}</w:sdtContent></w:sdt>`
         )
       );
-      expect(block).toMatchObject({ content: [{ type: 'text', text: 'custom ' }, { type: 'text', text: 'control' }] });
+      expect(block).toMatchObject({
+        content: [
+          { type: 'text', text: 'custom ' },
+          { type: 'contentControl', control: { type: 'richText', alias: 'A' }, content: [{ type: 'text', text: 'control' }] },
+        ],
+      });
     });
 
     it('keeps tracked insertions as ordinary text but still applies tracked deletions', async () => {
@@ -428,20 +433,25 @@ describe('importDocx', () => {
       expect(block).toMatchObject({ content: [{ type: 'text', text: '漢' }, { type: 'text', text: '字' }] });
     });
 
-    it('keeps the text of block-level content controls and custom XML, with block types intact', async () => {
+    it('keeps block-level content controls as wrappers around their blocks, and the text of custom XML', async () => {
       const result = await importXml(
         `<w:sdt ${W}><w:sdtPr/><w:sdtContent><w:p>${r(t('inside'))}</w:p></w:sdtContent></w:sdt>` +
           `<w:customXml ${W} w:element="e"><w:p>${r(t('wrapped'))}</w:p></w:customXml>` +
           `<w:sdt ${W}><w:sdtContent><w:sdt><w:sdtContent><w:p>${r(t('nested'))}</w:p></w:sdtContent></w:sdt></w:sdtContent></w:sdt>`
       );
-      expect(result.sections[0].blocks.map((b) => (b.type === 'paragraph' ? b.content : b))).toEqual([
-        [{ type: 'text', text: 'inside' }],
-        [{ type: 'text', text: 'wrapped' }],
-        [{ type: 'text', text: 'nested' }],
+      const paragraph = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+      expect(result.sections[0].blocks).toEqual([
+        { type: 'contentControl', control: { type: 'richText' }, blocks: [paragraph('inside')] },
+        paragraph('wrapped'),
+        {
+          type: 'contentControl',
+          control: { type: 'richText' },
+          blocks: [{ type: 'contentControl', control: { type: 'richText' }, blocks: [paragraph('nested')] }],
+        },
       ]);
     });
 
-    it('keeps the text of content controls around table rows, cells and cell content', async () => {
+    it('keeps the text of content controls around table rows and cells, and keeps one around cell content', async () => {
       const cell = (inner: string) => `<w:tc><w:p>${r(t(inner))}</w:p></w:tc>`;
       const result = await importXml(
         `<w:tbl ${W}><w:tblPr/><w:tblGrid/>` +
@@ -455,6 +465,10 @@ describe('importDocx', () => {
       expect(table.rows.map((row) => row.cells.map((c) => c.content))).toEqual([
         [[{ type: 'text', text: 'row-level' }]],
         [[{ type: 'text', text: 'cell-level' }], [{ type: 'text', text: 'in-cell' }]],
+      ]);
+      // A control around the content of a cell stays a wrapper in the cell's blocks.
+      expect(table.rows[1].cells[1].blocks).toEqual([
+        { type: 'contentControl', control: { type: 'richText' }, blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'in-cell' }] }] },
       ]);
     });
 

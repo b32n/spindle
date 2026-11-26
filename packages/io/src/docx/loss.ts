@@ -34,7 +34,6 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
 
   add('docx.trackedInsertions', 'tracked insertion(s)', countMatches(doc, /<w:ins[\s>/]/g), 'imported as ordinary text, as if accepted; author and date are lost');
   add('docx.trackedDeletions', 'tracked deletion(s)', countMatches(doc, /<w:del[\s>/]/g), 'applied (the deleted text is gone)');
-  add('docx.contentControls', 'content control(s)', countMatches(doc, /<w:sdt[\s>/]/g), 'their text is kept; the control (type, tag, placeholder, lock) is lost');
 
   const footnotes = await text('word/footnotes.xml');
   const endnotes = await text('word/endnotes.xml');

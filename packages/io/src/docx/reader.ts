@@ -20,6 +20,7 @@ import type {
 } from '@b32nio/spindle-shared/export/docx';
 
 import { createCommentTracker, parseComments, type CommentTracker } from './comments';
+import { isKeptBlockControl, parseSdt, sdtContent } from './content-controls';
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './numbering';
 import { parsePPr, StyleSheet, toDocParagraphStyle } from './styles';
@@ -70,6 +71,8 @@ interface PartContext {
   lists?: ListCounter;
   /** Comment ranges open at the current position of the body walk (absent for headers/footers). */
   comments?: CommentTracker;
+  /** Content controls are kept as wrappers (the body); headers and footers read them as their content only. */
+  controls?: boolean;
 }
 
 const MEDIA_EXT_TO_MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', bmp: 'image/bmp' };
@@ -99,26 +102,27 @@ const SOFT_HYPHEN = '\u00ad';
 /** Content controls and custom XML wrap block or inline content: replace each wrapper by what it contains (its properties are dropped). */
 function unwrapContainer(node: XmlNode): XmlNode[] {
   const tag = tagOf(node);
-  if (tag === 'w:sdt') {
-    const content = find(childrenOf(node), 'w:sdtContent');
-    return content ? childrenOf(content) : [];
-  }
+  if (tag === 'w:sdt') return sdtContent(node);
   return childrenOf(node).filter((k) => tagOf(k) !== 'w:customXmlPr');
 }
 
-/** Block-level children with w:sdt / w:customXml wrappers replaced by their content, at any depth. */
-function flattenBlocks(nodes: XmlNode[]): XmlNode[] {
+/**
+ * Block-level children with w:sdt / w:customXml wrappers replaced by their content, at any depth. With `keepControls`
+ * (the body and table cells) a content control that is kept as a wrapper stays in place (see `isKeptBlockControl`).
+ */
+function flattenBlocks(nodes: XmlNode[], keepControls = false): XmlNode[] {
   return nodes.flatMap((n) => {
     const tag = tagOf(n);
-    return tag === 'w:sdt' || tag === 'w:customXml' ? flattenBlocks(unwrapContainer(n)) : [n];
+    if (tag === 'w:sdt' && keepControls && isKeptBlockControl(n)) return [n];
+    return tag === 'w:sdt' || tag === 'w:customXml' ? flattenBlocks(unwrapContainer(n), keepControls) : [n];
   });
 }
 
-/** Paragraph-level children with w:sdt, w:customXml, w:smartTag and w:ins (tracked insertion) wrappers replaced by their content, at any depth. */
+/** Paragraph-level children with w:customXml, w:smartTag and w:ins (tracked insertion) wrappers replaced by their content, at any depth. Content controls are left to the caller. */
 function flattenInline(nodes: XmlNode[]): XmlNode[] {
   return nodes.flatMap((n) => {
     const tag = tagOf(n);
-    if (tag === 'w:sdt' || tag === 'w:customXml') return flattenInline(unwrapContainer(n));
+    if (tag === 'w:customXml') return flattenInline(unwrapContainer(n));
     if (tag === 'w:smartTag' || tag === 'w:ins') return flattenInline(childrenOf(n).filter((k) => tagOf(k) !== 'w:smartTagPr'));
     return [n];
   });
@@ -145,7 +149,7 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
  * and this tree walk isn't.
  */
 function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: string[]): DocInline[] {
-  const out: DocInline[] = [];
+  let out: DocInline[] = [];
   const pStyleId = paragraphStyleId(pNode);
   ctx.comments?.paragraphStart();
   const fields: OpenField[] = []; // begin/.../end sequences in progress, outermost first
@@ -169,7 +173,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
   const finishField = (done: OpenField) => {
     const parent = top();
     if (!parent) {
-      emitField(done, out, warnings);
+      emitField(done, out);
     } else if (parent.phase === 'result') {
       parent.result.push(...done.result);
     } else {
@@ -252,6 +256,21 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     flush();
   };
 
+  /** A run-level content control wraps what it contains; one inside a field's result, or in a header or footer, is read as its content only. */
+  const consumeControl = (sdt: XmlNode, target: string | undefined) => {
+    const parsed = ctx.controls && !top() ? parseSdt(sdt) : undefined;
+    if (!parsed || !('control' in parsed)) {
+      consumeRuns(sdtContent(sdt), target);
+      return;
+    }
+    const outer = out;
+    out = [];
+    consumeRuns(sdtContent(sdt), target);
+    const content = out;
+    out = outer;
+    out.push({ type: 'contentControl', control: parsed.control, content });
+  };
+
   const consumeRuns = (runs: XmlNode[], target: string | undefined) => {
     for (const child of flattenInline(runs)) {
       const tag = tagOf(child);
@@ -261,26 +280,16 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         consumeRuns(childrenOf(child), target);
         const done = fields.pop();
         if (done) finishField(done);
-      } else if (tag === 'w:r') consumeRun(child, target);
+      } else if (tag === 'w:hyperlink') {
+        consumeRuns(childrenOf(child), resolveHyperlinkTarget(child, ctx.rels, warnings));
+      } else if (tag === 'w:sdt') consumeControl(child, target);
+      else if (tag === 'w:r') consumeRun(child, target);
       else if (tag === 'w:bookmarkStart') placeBookmark(child);
       else ctx.comments?.mark(child);
     }
   };
 
-  for (const child of flattenInline(childrenOf(pNode))) {
-    const tag = tagOf(child);
-    if (tag === 'w:hyperlink') {
-      const target = resolveHyperlinkTarget(child, ctx.rels, warnings);
-      consumeRuns(childrenOf(child), target);
-    } else if (tag === 'w:r' || tag === 'w:fldSimple') {
-      consumeRuns([child], undefined);
-    } else if (tag === 'w:bookmarkStart') {
-      placeBookmark(child);
-    } else {
-      ctx.comments?.mark(child);
-    }
-    // proofErr and other structural markers carry no content — skipped.
-  }
+  consumeRuns(childrenOf(pNode), undefined);
 
   // A field still open here continues in a later paragraph (a table of contents, for instance): what it displayed
   // so far stays as plain text. Anything open inside it is part of that text.
@@ -353,7 +362,7 @@ interface OpenField {
 
 /** Fields whose result is block content (a table of contents, an index): the text stays, the field does not. */
 const STATIC_RESULT_FIELDS = new Set(['TOC', 'TOA', 'INDEX']);
-/** Legacy form fields: owned by the form-field work, so their value is still dropped. */
+/** Legacy form fields (`FORMTEXT` and the like): the text they display stays, as plain text; the form behaviour (`w:ffData`) does not. */
 const LEGACY_FORM_FIELDS = new Set(['FORMTEXT', 'FORMCHECKBOX', 'FORMDROPDOWN']);
 
 function resultText(result: Array<DocTextRun | DocImageRun>): string {
@@ -394,7 +403,7 @@ function isPlainText(run: DocTextRun | DocImageRun): run is DocTextRun {
 }
 
 /** Writes a finished, outermost field into the paragraph (see paragraphInlineContent for what each kind becomes). */
-function emitField(field: OpenField, out: DocInline[], warnings: string[]): void {
+function emitField(field: OpenField, out: DocInline[]): void {
   const instruction = field.instruction.trim();
   const kind = fieldKind(instruction);
   if (!kind) {
@@ -409,12 +418,8 @@ function emitField(field: OpenField, out: DocInline[], warnings: string[]): void
     out.push({ type: 'totalPages' });
     return;
   }
-  if (STATIC_RESULT_FIELDS.has(kind)) {
+  if (STATIC_RESULT_FIELDS.has(kind) || LEGACY_FORM_FIELDS.has(kind)) {
     out.push(...field.result);
-    return;
-  }
-  if (LEGACY_FORM_FIELDS.has(kind)) {
-    warnings.push(`Unsupported field code "${instruction}" — its cached value was dropped.`);
     return;
   }
   if (kind === 'HYPERLINK') {
@@ -794,6 +799,61 @@ function parseTextDirection(el: XmlNode | undefined): DocCellTextDirection | und
   return undefined;
 }
 
+/** The paragraphs, headings and list items among blocks, looking inside content controls. */
+function textBlocks(blocks: DocBlock[]): DocBlock[] {
+  return blocks.flatMap((b) => (b.type === 'contentControl' ? textBlocks(b.blocks) : b.type === 'paragraph' || b.type === 'heading' || b.type === 'listItem' ? [b] : []));
+}
+
+/**
+ * A block-level content control: its blocks (paragraphs, tables and nested controls) wrapped with its properties.
+ * `plain` and `tableDepth` are those of the surrounding context (a table cell keeps its paragraphs as paragraphs);
+ * `pending` holds bookmarks that started before the control and go to its first paragraph.
+ */
+function parseControlBlock(
+  sdt: XmlNode,
+  numbering: NumberingInfo,
+  ctx: PartContext,
+  warnings: string[],
+  plain: boolean,
+  tableDepth: number,
+  pending: DocInline[]
+): DocBlock {
+  const parsed = parseSdt(sdt);
+  const control = 'control' in parsed ? parsed.control : { type: 'richText' as const };
+  const blocks: DocBlock[] = [];
+  const isText = (b: DocBlock) => b.type === 'paragraph' || b.type === 'heading' || b.type === 'listItem';
+  const place = (added: DocBlock[]) => {
+    if (pending.length > 0) {
+      const first = added.find(isText);
+      if (first && 'content' in first) first.content.unshift(...pending.splice(0));
+    }
+    blocks.push(...added);
+  };
+  for (const child of flattenBlocks(sdtContent(sdt), true)) {
+    const tag = tagOf(child);
+    if (tag === 'w:p') {
+      place(plain ? [parseParagraph(child, numbering, ctx, warnings, true)] : parseParagraphBlocks(child, numbering, ctx, warnings));
+    } else if (tag === 'w:tbl') {
+      if (tableDepth >= MAX_TABLE_DEPTH) {
+        warnings.push('A table nested too deeply was not imported.');
+        ctx.comments?.mark(child);
+      } else {
+        place([parseTable(child, ctx, numbering, warnings, tableDepth)]);
+      }
+    } else if (tag === 'w:sdt') {
+      place([parseControlBlock(child, numbering, ctx, warnings, plain, tableDepth, pending)]);
+    } else if (tag === 'w:bookmarkStart') {
+      const name = bookmarkName(child);
+      if (name) pending.push({ type: 'bookmark', name });
+    } else if (tag !== 'w:sdtPr' && tag !== 'w:sdtEndPr') {
+      ctx.comments?.mark(child);
+    }
+  }
+  // A bookmark left in `pending` (nothing after it in this control) goes to the next paragraph outside it.
+  settleListStarts(blocks);
+  return { type: 'contentControl', control, blocks };
+}
+
 /**
  * The content of a table cell: its paragraphs, lists and nested tables. `content` is the inline content of the first
  * paragraph that has any (what a cell of one paragraph holds); `blocks` is the whole cell, set unless the cell is one
@@ -813,10 +873,12 @@ function parseCellContent(
     if (pendingBookmarks.length > 0 && 'content' in block) block.content.unshift(...pendingBookmarks.splice(0));
     blocks.push(block);
   };
-  for (const child of flattenBlocks(childrenOf(tcNode))) {
+  for (const child of flattenBlocks(childrenOf(tcNode), !!ctx.controls)) {
     const tag = tagOf(child);
     if (tag === 'w:p') {
       addParagraph(parseParagraph(child, numbering, ctx, warnings, true));
+    } else if (tag === 'w:sdt') {
+      blocks.push(parseControlBlock(child, numbering, ctx, warnings, true, depth + 1, pendingBookmarks));
     } else if (tag === 'w:tbl') {
       if (depth + 1 >= MAX_TABLE_DEPTH) {
         warnings.push('A table nested too deeply was not imported.');
@@ -841,7 +903,7 @@ function parseCellContent(
   settleListStarts(blocks);
 
   const inline = (block: DocBlock | undefined): DocInline[] => (block && 'content' in block ? block.content : []);
-  const paragraphs = blocks.filter((b) => b.type === 'paragraph' || b.type === 'heading' || b.type === 'listItem');
+  const paragraphs = textBlocks(blocks);
   const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
   // Bookmarks of the paragraphs before the first one with content stay in front of it
   const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
@@ -1041,12 +1103,12 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const theme = parseTheme(themeXml);
   const styles = new StyleSheet(stylesXml, theme);
   const numbering = parseNumbering(numberingXml);
-  const ctx: PartContext = { rels, media, styles, theme, lists: new ListCounter(numbering), comments };
+  const ctx: PartContext = { rels, media, styles, theme, lists: new ListCounter(numbering), comments, controls: true };
 
   const root = parseXml(documentXml);
   const documentEl = find(root, 'w:document');
   const bodyEl = documentEl ? find(childrenOf(documentEl), 'w:body') : undefined;
-  const bodyChildren = bodyEl ? flattenBlocks(childrenOf(bodyEl)) : [];
+  const bodyChildren = bodyEl ? flattenBlocks(childrenOf(bodyEl), true) : [];
 
   const sections: DocSection[] = [];
   let currentBlocks: DocBlock[] = [];
@@ -1105,6 +1167,8 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
       currentBlocks.push(...paragraphBlocks(node));
     } else if (tag === 'w:tbl') {
       currentBlocks.push(parseTable(node, ctx, numbering, warnings));
+    } else if (tag === 'w:sdt') {
+      currentBlocks.push(parseControlBlock(node, numbering, ctx, warnings, false, 0, pendingBookmarks));
     } else if (tag === 'w:sectPr') {
       // The trailing sectPr for the document's last section.
       await flushSection(node);
@@ -1147,7 +1211,10 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
 function usedStyleIds(sections: DocSection[]): Set<string> {
   const used = new Set<string>();
   const inlines = (content: DocInline[]) => {
-    for (const inline of content) if ((inline.type === 'text' || inline.type === 'link') && inline.namedStyleId) used.add(inline.namedStyleId);
+    for (const inline of content) {
+      if ((inline.type === 'text' || inline.type === 'link') && inline.namedStyleId) used.add(inline.namedStyleId);
+      else if (inline.type === 'contentControl') inlines(inline.content);
+    }
   };
   const hf = (part: DocHeaderFooter | undefined) => {
     for (const p of [...(part?.paragraphs ?? []), ...(part?.firstPageParagraphs ?? []), ...(part?.evenPageParagraphs ?? [])]) inlines(p.content);
@@ -1161,6 +1228,8 @@ function usedStyleIds(sections: DocSection[]): Set<string> {
           else inlines(cell.content);
         }
       }
+    } else if (block.type === 'contentControl') {
+      block.blocks.forEach(visit);
     } else if ('content' in block) {
       inlines(block.content);
       if ('namedStyleId' in block && block.namedStyleId) used.add(block.namedStyleId);

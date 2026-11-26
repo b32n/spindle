@@ -123,10 +123,13 @@ describe('fields', () => {
     expect(warnings.filter((w) => w.includes('Unsupported field'))).toEqual([]);
   });
 
-  it('still drops legacy form fields with a warning', async () => {
-    const { sections, warnings } = await importBody(para(complex(' FORMTEXT ', r(t('typed')))));
-    expect((sections[0].blocks[0] as Extract<DocBlock, { type: 'paragraph' }>).content).toEqual([]);
-    expect(warnings).toContain('Unsupported field code "FORMTEXT" — its cached value was dropped.');
+  it('keeps the text a legacy form field displays as plain text, without a warning', async () => {
+    const { sections, warnings } = await importBody(para(complex(' FORMTEXT ', r(t('typed'))) + complex(' FORMCHECKBOX ', '') + complex(' FORMDROPDOWN ', r(t('Red')))));
+    expect((sections[0].blocks[0] as Extract<DocBlock, { type: 'paragraph' }>).content).toEqual([
+      { type: 'text', text: 'typed' },
+      { type: 'text', text: 'Red' },
+    ]);
+    expect(warnings.filter((w) => w.includes('Unsupported field'))).toEqual([]);
   });
 
   it('reads w:dirty', async () => {

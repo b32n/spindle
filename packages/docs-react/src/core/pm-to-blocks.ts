@@ -18,6 +18,7 @@ function fieldResultText(result: unknown): string {
 import {
   FlowBlock,
   Run,
+  RunControl,
   TextRun,
   LinkRun,
   ParagraphBlock,
@@ -137,6 +138,9 @@ function nodeToFlowBlock(node: PmNode): FlowBlock | FlowBlock[] | null {
     
     case 'page_break':
       return convertPageBreak();
+
+    case 'content_control':
+      return convertContentControl(node);
     
     default:
       // Unknown node type - try to extract text content as paragraph
@@ -145,6 +149,39 @@ function nodeToFlowBlock(node: PmNode): FlowBlock | FlowBlock[] | null {
       }
       return null;
   }
+}
+
+const CONTROL_TYPE_LABELS: Record<string, string> = {
+  richText: 'Rich text',
+  text: 'Text',
+  dropDown: 'Drop-down list',
+  comboBox: 'Combo box',
+  date: 'Date',
+  checkbox: 'Check box',
+  picture: 'Picture',
+  docPart: 'Building block',
+};
+
+/** The title a content control is shown with: its alias, else its tag, else its kind. */
+function controlTitle(attrs: Record<string, unknown>): string {
+  const alias = typeof attrs.alias === 'string' ? attrs.alias : '';
+  const tag = typeof attrs.tag === 'string' ? attrs.tag : '';
+  return alias || tag || CONTROL_TYPE_LABELS[String(attrs.controlType)] || 'Content control';
+}
+
+/**
+ * A content control around blocks draws nothing of its own: its blocks flow as if it were not there, and the first one
+ * carries the control's title (a chip in the margin).
+ */
+function convertContentControl(node: PmNode): FlowBlock[] {
+  const blocks: FlowBlock[] = [];
+  node.forEach((child) => {
+    const block = nodeToFlowBlock(child);
+    if (Array.isArray(block)) blocks.push(...block);
+    else if (block) blocks.push(block);
+  });
+  if (blocks.length > 0) blocks[0].controlChips = [controlTitle(node.attrs), ...(blocks[0].controlChips ?? [])];
+  return blocks;
 }
 
 /**
@@ -362,24 +399,41 @@ function convertGenericTextBlock(node: PmNode): ParagraphBlock {
  */
 function extractRuns(node: PmNode): Run[] {
   const runs: Run[] = [];
-  
+  collectRuns(node, runs);
+  return runs;
+}
+
+/** The runs of a node's inline children; `control` is the content control they are inside, if any. */
+function collectRuns(node: PmNode, runs: Run[], control?: RunControl): void {
   node.forEach((child) => {
     if (child.isText) {
       const textRun = createTextRunFromNode(child);
+      if (control) textRun.control = control;
       runs.push(textRun);
     } else if (child.type.name === 'hard_break') {
       runs.push({ kind: 'lineBreak' });
     } else if (child.type.name === 'dynamic_field') {
       // Body fields are resolved at paint time only in headers/footers; in the
       // body they render as a visible placeholder so they stay selectable.
-      runs.push({ kind: 'text', text: `\u2039${String(child.attrs.fieldType)}\u203A` });
+      runs.push({ kind: 'text', text: `\u2039${String(child.attrs.fieldType)}\u203A`, ...(control && { control }) });
     } else if (child.type.name === 'bookmark') {
       // Zero width on the page, but one editor position: a zero-width space keeps the
       // layout offsets and ProseMirror positions in step, and marks where to scroll to.
-      runs.push({ kind: 'text', text: '\u200B' });
+      runs.push({ kind: 'text', text: '\u200B', ...(control && { control }) });
+    } else if (child.type.name === 'content_control_inline') {
+      // The control's opening and closing tokens are two editor positions around its content, so each is a
+      // zero-width space too; the content between them is tagged with the control.
+      const inner: RunControl = {
+        title: controlTitle(child.attrs),
+        ...(child.attrs.showingPlaceholder === true && { placeholder: true }),
+        ...(child.attrs.controlType === 'checkbox' && { checkbox: true }),
+      };
+      runs.push({ kind: 'text', text: '\u200B', control: inner });
+      collectRuns(child, runs, inner);
+      runs.push({ kind: 'text', text: '\u200B', control: inner });
     } else if (child.type.name === 'field') {
       // A field shows the result Word last computed; it is never recalculated here.
-      runs.push({ kind: 'text', text: fieldResultText(child.attrs.result) });
+      runs.push({ kind: 'text', text: fieldResultText(child.attrs.result), ...(control && { control }) });
     } else if (child.type.name === 'image' || child.type.name === 'inline_image') {
       runs.push({
         kind: 'image',
@@ -390,8 +444,6 @@ function extractRuns(node: PmNode): Run[] {
       });
     }
   });
-  
-  return runs;
 }
 
 /**
@@ -572,12 +624,16 @@ export function createBlockPositionMap(
   const map = new Map<string, { start: number; end: number }>();
   
   let blockIndex = 0;
-  
-  doc.forEach((node, offset) => {
+
+  /** `nodeStart` is the position before `node`. A content control has no block of its own: its children follow in its place. */
+  const visit = (node: PmNode, nodeStart: number): void => {
     // A section break draws nothing: it has no FlowBlock to map.
     if (node.type.name === 'section_break') return;
-    const nodeStart = offset;
-    const nodeEnd = offset + node.nodeSize;
+    if (node.type.name === 'content_control') {
+      node.forEach((child, childOffset) => visit(child, nodeStart + 1 + childOffset));
+      return;
+    }
+    const nodeEnd = nodeStart + node.nodeSize;
     
     // Handle list nodes specially - they expand to multiple blocks
     if (node.type.name === 'bullet_list' || node.type.name === 'ordered_list') {
@@ -633,7 +689,9 @@ export function createBlockPositionMap(
         blockIndex++;
       }
     }
-  });
+  };
+
+  doc.forEach((node, offset) => visit(node, offset));
   
   return map;
 }
@@ -712,46 +770,53 @@ function assignCellBlockPositions(cellNode: PmNode, cell: TableCell, contentStar
     });
   };
 
-  let offset = contentStart;
-  cellNode.forEach((child) => {
-    switch (child.type.name) {
-      case 'paragraph':
-      case 'heading': {
-        const block = take();
-        if (block && (block.kind === 'paragraph' || block.kind === 'heading')) {
-          block.pmStart = offset;
-          block.pmEnd = offset + child.nodeSize;
+  const place = (parent: PmNode, start: number): void => {
+    let offset = start;
+    parent.forEach((child) => {
+      switch (child.type.name) {
+        case 'paragraph':
+        case 'heading': {
+          const block = take();
+          if (block && (block.kind === 'paragraph' || block.kind === 'heading')) {
+            block.pmStart = offset;
+            block.pmEnd = offset + child.nodeSize;
+          }
+          break;
         }
-        break;
-      }
-      case 'bullet_list':
-      case 'ordered_list':
-        placeItems(child, offset);
-        break;
-      case 'table': {
-        const block = take();
-        if (block?.kind === 'table') {
-          block.pmStart = offset;
-          block.pmEnd = offset + child.nodeSize;
-          populateTableCellPositions(child, block, offset);
+        case 'bullet_list':
+        case 'ordered_list':
+          placeItems(child, offset);
+          break;
+        case 'table': {
+          const block = take();
+          if (block?.kind === 'table') {
+            block.pmStart = offset;
+            block.pmEnd = offset + child.nodeSize;
+            populateTableCellPositions(child, block, offset);
+          }
+          break;
         }
-        break;
-      }
-      case 'image': {
-        const block = take();
-        if (block?.kind === 'image') {
-          block.pmStart = offset;
-          block.pmEnd = offset + child.nodeSize;
+        case 'image': {
+          const block = take();
+          if (block?.kind === 'image') {
+            block.pmStart = offset;
+            block.pmEnd = offset + child.nodeSize;
+          }
+          break;
         }
-        break;
+        case 'horizontal_rule':
+        case 'page_break':
+          take();
+          break;
+        case 'content_control':
+          // No block of its own: the blocks of its children follow in its place.
+          place(child, offset + 1);
+          break;
+        default:
+          if (child.isTextblock) take();
       }
-      case 'horizontal_rule':
-      case 'page_break':
-        take();
-        break;
-      default:
-        if (child.isTextblock) take();
-    }
-    offset += child.nodeSize;
-  });
+      offset += child.nodeSize;
+    });
+  };
+  place(cellNode, contentStart);
 }

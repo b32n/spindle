@@ -3,16 +3,18 @@
     "added": 2,
     "after": {
       "blocks": {
-        "paragraph": 13,
-        "table": 3
+        "content-control": 1,
+        "paragraph": 12,
+        "table": 2
       },
       "sections": 1,
       "textChars": 2236
     },
     "before": {
       "blocks": {
-        "paragraph": 13,
-        "table": 3
+        "content-control": 1,
+        "paragraph": 12,
+        "table": 2
       },
       "sections": 1,
       "textChars": 2236
@@ -26,12 +28,12 @@
       {
         "after": "[624]",
         "kind": "added",
-        "path": "sections[0].blocks[13].colWidths"
+        "path": "sections[0].blocks[12].colWidths"
       },
       {
         "after": "[624]",
         "kind": "added",
-        "path": "sections[0].blocks[13].rows[0].cells[0].colwidth"
+        "path": "sections[0].blocks[12].rows[0].cells[0].colwidth"
       }
     ],
     "removed": 0,

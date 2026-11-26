@@ -13,11 +13,26 @@
 // ============================================================================
 
 /**
+ * The content control (a Word structured document tag) a run is inside, innermost one. A control takes two editor
+ * positions around its content, which the converter draws as zero-width runs so offsets and positions stay in step.
+ */
+export interface RunControl {
+  /** Alias, tag or kind of the control: its tooltip. */
+  title: string;
+  /** The content is placeholder text. */
+  placeholder?: boolean;
+  /** A checkbox control: clicking its glyph toggles it. */
+  checkbox?: boolean;
+}
+
+/**
  * A text run with formatting
  */
 export interface TextRun {
   kind: 'text';
   text: string;
+  /** The content control the run is in, if any. */
+  control?: RunControl;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -62,6 +77,8 @@ export interface LinkRun {
   kind: 'link';
   text: string;
   href: string;
+  /** The content control the run is in, if any. */
+  control?: RunControl;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -103,6 +120,8 @@ export interface ParagraphAttrs {
  */
 export interface ParagraphBlock {
   kind: 'paragraph';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
   runs: Run[];
   attrs?: ParagraphAttrs;
@@ -116,6 +135,8 @@ export interface ParagraphBlock {
  */
 export interface HeadingBlock {
   kind: 'heading';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: Run[];
@@ -130,6 +151,8 @@ export interface HeadingBlock {
  */
 export interface ListItemBlock {
   kind: 'listItem';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
   listType: 'bullet' | 'ordered';
   level: number;
@@ -196,6 +219,8 @@ export interface TableRow {
  */
 export interface TableBlock {
   kind: 'table';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
   rows: TableRow[];
   colWidths?: number[];
@@ -211,6 +236,8 @@ export interface TableBlock {
  */
 export interface ImageBlock {
   kind: 'image';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
   src: string;
   width: number;
@@ -228,6 +255,8 @@ export interface ImageBlock {
  */
 export interface HorizontalRuleBlock {
   kind: 'horizontalRule';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
 }
 
@@ -236,6 +265,8 @@ export interface HorizontalRuleBlock {
  */
 export interface PageBreakBlock {
   kind: 'pageBreak';
+  /** Titles of the content controls that start with this block, outermost first (drawn as chips in the left margin). */
+  controlChips?: string[];
   id: string;
 }
 

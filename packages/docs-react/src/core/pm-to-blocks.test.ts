@@ -228,3 +228,102 @@ describe('proseMirrorToSectionedFlowBlocks', () => {
     ]);
   });
 });
+
+describe('content controls', () => {
+  const para = (t: string) => ({ type: 'paragraph', content: [text(t)] });
+  const control = (attrs: object, content: unknown[]) => ({ type: 'content_control', attrs: { controlType: 'richText', ...attrs }, content });
+  const inline = (attrs: object, content: unknown[]) => ({ type: 'content_control_inline', attrs: { controlType: 'text', ...attrs }, content });
+
+  it('flows the blocks of a control as if it were not there, and titles the first one with the control', () => {
+    const doc = j([para('before'), control({ alias: 'Summary', tag: 's' }, [para('in one'), para('in two')]), para('after')]);
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    expect(blocks.map((b) => b.kind)).toEqual(['paragraph', 'paragraph', 'paragraph', 'paragraph']);
+    expect(blocks.map((b) => b.controlChips)).toEqual([undefined, ['Summary'], undefined, undefined]);
+  });
+
+  it('titles a control by alias, then tag, then kind; nested controls give outermost-first chips', () => {
+    const titleOf = (attrs: object) => proseMirrorToFlowBlocks(j([control(attrs, [para('x')])]))[0].controlChips;
+    expect(titleOf({ alias: 'A', tag: 'T' })).toEqual(['A']);
+    expect(titleOf({ tag: 'T' })).toEqual(['T']);
+    expect(titleOf({ controlType: 'dropDown' })).toEqual(['Drop-down list']);
+    expect(titleOf({ controlType: 'weird' })).toEqual(['Content control']);
+    const nested = j([control({ alias: 'Outer' }, [control({ alias: 'Inner' }, [para('deep')])])]);
+    expect(proseMirrorToFlowBlocks(nested)[0].controlChips).toEqual(['Outer', 'Inner']);
+  });
+
+  it('puts a control around a list, a table and an empty one without blocks of its own', () => {
+    const item = { type: 'list_item', attrs: { level: 0 }, content: [para('li')] };
+    const table = { type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [para('c')] }] }] };
+    const blocks = proseMirrorToFlowBlocks(j([control({ alias: 'L' }, [{ type: 'bullet_list', content: [item] }, table])]));
+    expect(blocks.map((b) => b.kind)).toEqual(['listItem', 'table']);
+    expect(blocks[0].controlChips).toEqual(['L']);
+    expect(blocks[1].controlChips).toBeUndefined();
+  });
+
+  it('draws the opening and closing positions of an inline control as zero-width runs, so offsets stay in step with positions', () => {
+    const doc = j([{ type: 'paragraph', content: [text('a '), inline({ alias: 'Name' }, [text('Ada')]), text('!')] }]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs as TextRun[];
+    expect(runs.map((r) => r.text)).toEqual(['a ', '​', 'Ada', '​', '!']);
+    expect(runs.map((r) => r.control?.title)).toEqual([undefined, 'Name', 'Name', 'Name', undefined]);
+    // The paragraph holds 2 + 1 + 3 + 1 + 1 positions and the runs 2 + 1 + 3 + 1 + 1 characters.
+    const paragraph = doc.firstChild!;
+    expect(paragraph.content.size).toBe(runs.reduce((n, r) => n + r.text.length, 0));
+  });
+
+  it('tags placeholder text and a check box, and the innermost control wins', () => {
+    const doc = j([
+      {
+        type: 'paragraph',
+        content: [
+          inline({ alias: 'Outer', showingPlaceholder: true }, [text('click'), inline({ controlType: 'checkbox', alias: 'Box' }, [text('☐')])]),
+        ],
+      },
+    ]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs as TextRun[];
+    expect(runs.find((r) => r.text === 'click')?.control).toEqual({ title: 'Outer', placeholder: true });
+    expect(runs.find((r) => r.text === '☐')?.control).toEqual({ title: 'Box', checkbox: true });
+  });
+
+  it('keeps links, fields and bookmarks inside an inline control in step with positions', () => {
+    const doc = j([
+      {
+        type: 'paragraph',
+        content: [
+          inline({}, [
+            { type: 'bookmark', attrs: { name: 'b' } },
+            { type: 'field', attrs: { instruction: 'REF x', kind: 'REF', result: 'Fig' } },
+            text('go', [{ type: 'link', attrs: { href: 'https://example.com' } }]),
+          ]),
+        ],
+      },
+    ]);
+    const runs = (proseMirrorToFlowBlocks(doc)[0] as ParagraphBlock).runs;
+    expect(runs.map((r) => (r.kind === 'text' || r.kind === 'link' ? r.text : ''))).toEqual(['​', '​', 'Fig', 'go', '​']);
+    expect(runs.map((r) => (r.kind === 'text' || r.kind === 'link' ? r.control?.title : undefined))).toEqual(Array(5).fill('Text'));
+    expect(doc.firstChild!.content.size).toBe(1 + 1 + 1 + 'go'.length + 1);
+  });
+
+  it('maps blocks inside controls to their own positions, at the top level and in table cells', () => {
+    const cell = (children: unknown[]) => ({ type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: children }] }] });
+    const doc = j([para('one'), control({}, [para('two'), control({}, [para('three')])]), cell([para('c1'), control({}, [para('c2')]), para('c3')]), para('four')]);
+    const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+    const map = createBlockPositionMap(doc, blocks);
+    const paragraphs = blocks.filter((b): b is ParagraphBlock => b.kind === 'paragraph');
+    // Each paragraph's mapped range holds its own text.
+    const textAt = (start: number, end: number) => doc.textBetween(start, end, ' ');
+    expect(paragraphs.map((p) => textAt(map.get(p.id)!.start, map.get(p.id)!.end))).toEqual(['one', 'two', 'three', 'four']);
+    const table = blocks.find((b) => b.kind === 'table');
+    if (table?.kind !== 'table') throw new Error('table');
+    const cellBlocks = table.rows[0].cells[0].blocks as ParagraphBlock[];
+    expect(cellBlocks.map((b) => doc.textBetween(b.pmStart!, b.pmEnd!, ' '))).toEqual(['c1', 'c2', 'c3']);
+  });
+
+  it('splits sections at breaks after flattening controls', () => {
+    const doc = j([control({}, [para('a'), para('b')]), { type: 'section_break', attrs: { sectionId: 'x' } }, para('c')]);
+    const out = proseMirrorToSectionedFlowBlocks(doc);
+    expect(out.sections).toEqual([
+      { sectionId: 'x', blockStart: 0, blockEnd: 2 },
+      { sectionId: null, blockStart: 2, blockEnd: 3 },
+    ]);
+  });
+});

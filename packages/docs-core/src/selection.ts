@@ -45,7 +45,7 @@ export function getSelectionEnd(selection: TextSelection): CursorPosition {
  * Get the total text length of a block's content
  */
 export function getBlockTextLength(block: Block): number {
-  if (block.type === 'horizontal-rule' || block.type === 'page-break' || block.type === 'table') {
+  if (block.type === 'horizontal-rule' || block.type === 'page-break' || block.type === 'table' || block.type === 'content-control') {
     return 0;
   }
   
@@ -72,7 +72,7 @@ export function getBlockTextLength(block: Block): number {
  * Get text content from a block
  */
 export function getBlockText(block: Block): string {
-  if (block.type === 'horizontal-rule' || block.type === 'page-break' || block.type === 'table' || block.type === 'image') {
+  if (block.type === 'horizontal-rule' || block.type === 'page-break' || block.type === 'table' || block.type === 'content-control' || block.type === 'image') {
     return '';
   }
 

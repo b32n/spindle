@@ -370,6 +370,27 @@ const NODE_SAMPLES: Record<string, Json[]> = {
     ]),
   ],
   section_break: [{ type: 'section_break', attrs: { sectionId: 'sec_a' } }],
+  // A control around blocks, nested, with every property set; one around a table cell's content.
+  content_control: [
+    {
+      type: 'content_control',
+      attrs: { controlType: 'dropDown', tag: 'berth', alias: 'Berth', lock: 'sdtContentLocked', placeholder: 'Placeholder_1', showingPlaceholder: true, items: [{ text: 'North', value: 'N' }], dateFormat: 'dd/MM/yyyy', dateValue: '2026-03-02T00:00:00Z', multiline: true, gallery: 'Cover Pages' },
+      content: [p([t('outer')]), { type: 'content_control', attrs: { controlType: 'richText', alias: 'Inner' }, content: [p([t('inner')])] }],
+    },
+    {
+      type: 'table',
+      content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [{ type: 'content_control', attrs: { controlType: 'richText', tag: 'cell' }, content: [p([t('in a cell')])] }] }] }],
+    },
+  ],
+  content_control_inline: [
+    p([
+      t('name '),
+      { type: 'content_control_inline', attrs: { controlType: 'text', alias: 'Name', tag: 'name', multiline: true }, content: [t('Ada ', [{ type: 'bold' }]), { type: 'bookmark', attrs: { name: 'b' } }] },
+      { type: 'content_control_inline', attrs: { controlType: 'checkbox', checked: true, alias: 'Inspected' }, content: [t('\u2612')] },
+      { type: 'content_control_inline', attrs: { controlType: 'date', dateFormat: 'd MMMM yyyy', dateValue: '2026-03-02T00:00:00Z', showingPlaceholder: true }, content: [] },
+      { type: 'content_control_inline', attrs: { controlType: 'comboBox', items: [{ text: 'a', value: 'b' }] }, content: [{ type: 'content_control_inline', attrs: { controlType: 'richText' }, content: [t('nested')] }] },
+    ]),
+  ],
   dynamic_field: [p([{ type: 'dynamic_field', attrs: { fieldType: 'date', format: 'YYYY' } }, t(' / '), { type: 'dynamic_field', attrs: { fieldType: 'pageNumber' } }])],
 };
 

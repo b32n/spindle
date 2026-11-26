@@ -185,13 +185,13 @@ describe('detectDocxLoss: XML-based detectors', () => {
     const fld = (...instr: string[]) =>
       `<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r>${instr.map((i) => `<w:r><w:instrText xml:space="preserve">${i}</w:instrText></w:r>`).join('')}` +
       `<w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>cached</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
-    it('counts only the fields that are not kept as fields (tables of contents, indexes, legacy form fields), by kind', async () => {
+    it('counts only the fields that are not kept as fields (tables of contents, indexes), by kind; legacy form fields are docx.legacyForms', async () => {
       const bytes = await docx(
         fld(' PAGEREF _Toc1 \\h ') + fld(' PAGEREF _Toc2 \\h ') + fld(' PAGE ') + fld(' NUMPAGES ') +
           fld(' SEQ Figure ') + '<w:p><w:fldSimple w:instr=" DATE \\@ &quot;yyyy&quot; "><w:r><w:t>x</w:t></w:r></w:fldSimple></w:p>' +
           fld(' TOC \\o "1-3" ') + fld(' INDEX ') + fld(' FORMTEXT ')
       );
-      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 3, where: ['FORMTEXT ×1', 'INDEX ×1', 'TOC ×1'] });
+      expect(await item(bytes, 'docx.fields')).toMatchObject({ count: 2, where: ['INDEX ×1', 'TOC ×1'] });
     });
     it('counts a field once when its instruction is split across runs', async () => {
       const bytes = await docx(fld(' TOC ', '\\o', ' "1-3" '));
@@ -228,9 +228,9 @@ describe('detectDocxLoss: XML-based detectors', () => {
       expect(summary.items).toEqual([
         {
           id: 'docx.fields',
-          label: 'field(s) (table of contents, index, legacy form fields)',
+          label: 'field(s) (table of contents, index)',
           count: 1,
-          effect: 'tables of contents and indexes are kept as static text, legacy form fields lose their value',
+          effect: 'tables of contents and indexes are kept as static text',
         },
       ]);
       const full = await detectDocxLoss(bytes, { detail: 'full' });
@@ -357,11 +357,11 @@ describe('detectDocxLoss: long-tail detectors', () => {
     expect(await run(bytes, 'docx.embeddedFonts')).toMatchObject({ count: 2 });
   });
 
-  it('docx.legacyForms counts FORMTEXT/FORMCHECKBOX/FORMDROPDOWN, which stay in docx.fields too (a DATE field is kept as a field, so is in neither)', async () => {
+  it('docx.legacyForms counts FORMTEXT/FORMCHECKBOX/FORMDROPDOWN, which are not also counted in docx.fields (a DATE field is kept as a field, so is in neither)', async () => {
     const fld = (i: string) => `<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> ${i} </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>`;
     const bytes = await docx(fld('FORMTEXT') + fld('FORMCHECKBOX') + fld('FORMDROPDOWN') + fld('DATE'));
     expect(await run(bytes, 'docx.legacyForms')).toMatchObject({ count: 3, where: ['FORMCHECKBOX ×1', 'FORMDROPDOWN ×1', 'FORMTEXT ×1'] });
-    expect(await run(bytes, 'docx.fields')).toMatchObject({ count: 3 });
+    expect(await run(bytes, 'docx.fields')).toBeUndefined();
   });
 
   describe('drawing counts (also in the summary report)', () => {

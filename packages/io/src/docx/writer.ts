@@ -43,6 +43,7 @@ import type {
   DocBlock,
   DocBorder,
   DocBorders,
+  DocContentControl,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
   DocFieldRun,
@@ -128,6 +129,8 @@ function numberedStarts(sections: DocSection[]): number[] {
       starts.add(block.start);
     } else if (block.type === 'table') {
       for (const row of block.rows) for (const cell of row.cells) cell.blocks?.forEach(visit);
+    } else if (block.type === 'contentControl') {
+      block.blocks.forEach(visit);
     }
   };
   for (const section of sections) section.blocks.forEach(visit);
@@ -178,8 +181,21 @@ function fontOptions(base: DocRunBase): Partial<IRunOptions> {
   } as Partial<IRunOptions>;
 }
 
+/** Whether the last thing a list of blocks ends with is a table (a table cell must end with a paragraph). */
+function endsWithTable(block: DocBlock | undefined): boolean {
+  if (!block) return false;
+  if (block.type === 'table') return true;
+  return block.type === 'contentControl' && endsWithTable(block.blocks[block.blocks.length - 1]);
+}
+
+/** The glyphs Word draws in a check box content control. */
+const CHECKED_GLYPH = '2612';
+const UNCHECKED_GLYPH = '2610';
+
 class DocxBuilder {
   readonly warnings: string[] = [];
+  /** `w:id` of the next content control. */
+  private nextControlId = 1000001;
   /** Orphan comment threads still waiting for the first body paragraph to be anchored to. */
   private pendingOrphans: CommentPlanThread[];
   private inNumberedRun = false;
@@ -283,9 +299,79 @@ class DocxBuilder {
         return [new TextRun({ children: [PageNumber.TOTAL_PAGES] })];
       case 'field':
         return this.buildField(inline);
+      case 'contentControl':
+        return [this.buildControl(inline.control, this.buildRuns(inline.content))];
       default:
         return [];
     }
+  }
+
+  /** A `w:sdt` (run-level or block-level) with the properties of `control` around already built `content`. */
+  private buildControl(control: DocContentControl, content: unknown[]): ParagraphChild {
+    const el = (name: string, attrs: Record<string, string | undefined> = {}, children?: BuilderElement[]) =>
+      new BuilderElement({
+        name,
+        attributes: Object.fromEntries(Object.entries(attrs).filter(([, v]) => v !== undefined).map(([k, v]) => [k, { key: k, value: v as string }])),
+        ...(children && { children }),
+      });
+    const listItems = (tag: string) =>
+      el(tag, {}, (control.items ?? []).map((item) => el('w:listItem', { 'w:displayText': item.text, 'w:value': item.value })));
+    const properties: BuilderElement[] = [];
+    if (control.alias) properties.push(el('w:alias', { 'w:val': control.alias }));
+    if (control.tag) properties.push(el('w:tag', { 'w:val': control.tag }));
+    properties.push(el('w:id', { 'w:val': String(this.nextControlId++) }));
+    if (control.lock) properties.push(el('w:lock', { 'w:val': control.lock }));
+    if (control.placeholder) properties.push(el('w:placeholder', {}, [el('w:docPart', { 'w:val': control.placeholder })]));
+    if (control.showingPlaceholder) properties.push(el('w:showingPlcHdr'));
+    switch (control.type) {
+      case 'text':
+        properties.push(el('w:text', control.multiline ? { 'w:multiLine': '1' } : {}));
+        break;
+      case 'dropDown':
+        properties.push(listItems('w:dropDownList'));
+        break;
+      case 'comboBox':
+        properties.push(listItems('w:comboBox'));
+        break;
+      case 'date':
+        properties.push(
+          el('w:date', control.dateValue ? { 'w:fullDate': control.dateValue } : {}, [
+            ...(control.dateFormat ? [el('w:dateFormat', { 'w:val': control.dateFormat })] : []),
+            el('w:lid', { 'w:val': 'en-US' }),
+            el('w:storeMappedDataAs', { 'w:val': 'dateTime' }),
+            el('w:calendar', { 'w:val': 'gregorian' }),
+          ])
+        );
+        break;
+      case 'checkbox':
+        properties.push(
+          el('w14:checkbox', {}, [
+            el('w14:checked', { 'w14:val': control.checked ? '1' : '0' }),
+            el('w14:checkedState', { 'w14:val': CHECKED_GLYPH, 'w14:font': 'MS Gothic' }),
+            el('w14:uncheckedState', { 'w14:val': UNCHECKED_GLYPH, 'w14:font': 'MS Gothic' }),
+          ])
+        );
+        break;
+      case 'picture':
+        properties.push(el('w:picture'));
+        break;
+      case 'docPart':
+        properties.push(el('w:docPartObj', {}, control.gallery ? [el('w:docPartGallery', { 'w:val': control.gallery }), el('w:docPartUnique')] : [el('w:docPartUnique')]));
+        break;
+      case 'richText':
+        break;
+    }
+    return el('w:sdt', {}, [el('w:sdtPr', {}, properties), el('w:sdtContent', {}, content as BuilderElement[])]) as unknown as ParagraphChild;
+  }
+
+  /** A block-level control wraps its blocks; it must hold at least one paragraph. */
+  private buildControlBlock(block: Extract<DocBlock, { type: 'contentControl' }>): Paragraph {
+    this.inNumberedRun = false;
+    const children: unknown[] = block.blocks.map((b) => this.buildBlock(b));
+    if (children.length === 0) children.push(this.buildParagraph({}, []));
+    this.inNumberedRun = false;
+    // The writer's block builders return docx paragraphs and tables, which the section and cell take as children; the wrapper is another XML element of the same kind.
+    return this.buildControl(block.control, children) as unknown as Paragraph;
   }
 
   /** A complex field: begin, instruction, separate, the cached result runs, end, so Word can refresh it. */
@@ -441,6 +527,8 @@ class DocxBuilder {
         });
       case 'pageBreak':
         return new Paragraph({ children: [new PageBreak()] });
+      case 'contentControl':
+        return this.buildControlBlock(block);
     }
   }
 
@@ -450,7 +538,7 @@ class DocxBuilder {
     this.inNumberedRun = false;
     const children = cell.blocks.map((b) => this.buildBlock(b));
     this.inNumberedRun = false;
-    if (children[children.length - 1] instanceof Table) children.push(new Paragraph({}));
+    if (endsWithTable(cell.blocks[cell.blocks.length - 1])) children.push(new Paragraph({}));
     return children;
   }
 

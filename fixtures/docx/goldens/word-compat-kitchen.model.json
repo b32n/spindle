@@ -258,77 +258,87 @@
       {
         "blocks": [
           {
-            "content": [
+            "blocks": [
               {
-                "bold": true,
-                "color": "#1f3864",
-                "fontFamily": "Liberation Serif",
-                "fontSize": 28,
-                "text": "Quarterly Harbour Operations Report",
-                "type": "text"
+                "content": [
+                  {
+                    "bold": true,
+                    "color": "#1f3864",
+                    "fontFamily": "Liberation Serif",
+                    "fontSize": 28,
+                    "text": "Quarterly Harbour Operations Report",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-2",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Title",
+                "spaceAfter": 8,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "color": "#595959",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 14,
+                    "italic": true,
+                    "text": "Q4 2025 — Marguerite Harbour Authority",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-3",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Subtitle",
+                "spaceAfter": 10.666666666666666,
+                "type": "paragraph"
+              },
+              {
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Prepared by the Records Office",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-4",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
+              },
+              {
+                "content": [],
+                "id": "block-5",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "spaceAfter": 10.666666666666666,
+                "type": "paragraph"
+              },
+              {
+                "id": "block-6",
+                "type": "page-break"
               }
             ],
+            "control": {
+              "gallery": "Cover Pages",
+              "type": "docPart"
+            },
             "id": "block-1",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Title",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "color": "#595959",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 14,
-                "italic": true,
-                "text": "Q4 2025 — Marguerite Harbour Authority",
-                "type": "text"
-              }
-            ],
-            "id": "block-2",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Subtitle",
-            "spaceAfter": 10.666666666666666,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Prepared by the Records Office",
-                "type": "text"
-              }
-            ],
-            "id": "block-3",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [],
-            "id": "block-4",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "spaceAfter": 10.666666666666666,
-            "type": "paragraph"
-          },
-          {
-            "id": "block-5",
-            "type": "page-break"
+            "type": "content-control"
           },
           {
             "content": [
@@ -341,7 +351,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-6",
+            "id": "block-7",
             "keepTogether": true,
             "keepWithNext": true,
             "lineSpacing": {
@@ -376,7 +386,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-7",
+            "id": "block-8",
             "leftIndent": 0,
             "lineSpacing": {
               "type": "multiple",
@@ -414,7 +424,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-8",
+            "id": "block-9",
             "leftIndent": 0,
             "lineSpacing": {
               "type": "multiple",
@@ -452,7 +462,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-9",
+            "id": "block-10",
             "leftIndent": 14.666666666666666,
             "lineSpacing": {
               "type": "multiple",
@@ -490,7 +500,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-10",
+            "id": "block-11",
             "leftIndent": 14.666666666666666,
             "lineSpacing": {
               "type": "multiple",
@@ -528,7 +538,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-11",
+            "id": "block-12",
             "leftIndent": 0,
             "lineSpacing": {
               "type": "multiple",
@@ -566,7 +576,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-12",
+            "id": "block-13",
             "leftIndent": 0,
             "lineSpacing": {
               "type": "multiple",
@@ -578,7 +588,7 @@
           },
           {
             "content": [],
-            "id": "block-13",
+            "id": "block-14",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -601,7 +611,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-14",
+            "id": "block-15",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -624,7 +634,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-15",
+            "id": "block-16",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -648,7 +658,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-16",
+            "id": "block-17",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -671,7 +681,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-17",
+            "id": "block-18",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -695,7 +705,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-18",
+            "id": "block-19",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -718,7 +728,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-19",
+            "id": "block-20",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -742,7 +752,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-20",
+            "id": "block-21",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -765,7 +775,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-21",
+            "id": "block-22",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -789,7 +799,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-22",
+            "id": "block-23",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -812,7 +822,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-23",
+            "id": "block-24",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -836,7 +846,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-24",
+            "id": "block-25",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -859,7 +869,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-25",
+            "id": "block-26",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -883,7 +893,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-26",
+            "id": "block-27",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -910,7 +920,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-27",
+            "id": "block-28",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -967,7 +977,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-28",
+            "id": "block-29",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1056,7 +1066,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-29",
+            "id": "block-30",
             "lineSpacing": {
               "type": "single"
             },
@@ -1150,7 +1160,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-30",
+            "id": "block-31",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1227,7 +1237,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-31",
+            "id": "block-32",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1284,7 +1294,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-32",
+            "id": "block-33",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1327,7 +1337,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-33",
+            "id": "block-34",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1382,7 +1392,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-34",
+            "id": "block-35",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1414,7 +1424,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-35",
+            "id": "block-36",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1456,7 +1466,7 @@
                 "type": "field"
               }
             ],
-            "id": "block-36",
+            "id": "block-37",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1476,7 +1486,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-37",
+            "id": "block-38",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -1499,7 +1509,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-38",
+            "id": "block-39",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1554,7 +1564,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-39",
+            "id": "block-40",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1586,7 +1596,7 @@
                 "type": "link"
               }
             ],
-            "id": "block-40",
+            "id": "block-41",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1606,7 +1616,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-41",
+            "id": "block-42",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -1630,7 +1640,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-42",
+            "id": "block-43",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -1692,7 +1702,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-43",
+            "id": "block-44",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1705,7 +1715,7 @@
             "alignment": "center",
             "alt": "checkerboard, block-level inline image",
             "height": 150,
-            "id": "block-44",
+            "id": "block-45",
             "src": "data:image/png;sha256=012db674810a3177;chars=836",
             "type": "image",
             "width": 240
@@ -1745,7 +1755,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-45",
+            "id": "block-46",
             "lineSpacing": {
               "type": "single"
             },
@@ -1760,25 +1770,6 @@
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": "The tide almanac measured three disputed boundary stones as the tide turned. Local fishing crews catalogued the dredging contract with unusual care. A visiting engineer rebuilt the fog-signal schedule while the market was closed. Local fishing crews rebuilt the old customs register after several rounds of discussion. The quay-side bakery recorded the fog-signal schedule after several rounds of discussion. The regional council reorganised the fog-signal schedule while the market was closed. Several market traders reorganised the fog-signal schedule in the presence of two witnesses. The quay-side bakery documented the eastern jetty during the long spring inspection.",
-                "type": "text"
-              }
-            ],
-            "id": "block-46",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Our records office compared last season's tonnage figures and filed the result in triplicate. A junior surveyor relocated the eastern jetty and filed the result in triplicate. The tide almanac reviewed the lamp oil inventory during the long spring inspection. The winter inspection team recorded every outstanding repair order according to the standing orders. A junior surveyor inspected the old customs register according to the standing orders. A junior surveyor rebuilt the lamp oil inventory after several rounds of discussion. Local fishing crews documented a ledger of unpaid berth fees according to the standing orders. Every lighthouse keeper rebuilt a ledger of unpaid berth fees according to the standing orders.",
                 "type": "text"
               }
             ],
@@ -1797,7 +1788,7 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
-                "text": "Every lighthouse keeper postponed the dredging contract according to the standing orders. The bridge authority catalogued the lamp oil inventory during the long spring inspection. Our records office measured a ledger of unpaid berth fees without waiting for approval. An experienced pilot audited the ferry timetable after several rounds of discussion. Our records office audited the dredging contract in time for the autumn meeting. Every lighthouse keeper compared a ledger of unpaid berth fees in time for the autumn meeting. Our records office measured the eastern jetty without waiting for approval.",
+                "text": "Our records office compared last season's tonnage figures and filed the result in triplicate. A junior surveyor relocated the eastern jetty and filed the result in triplicate. The tide almanac reviewed the lamp oil inventory during the long spring inspection. The winter inspection team recorded every outstanding repair order according to the standing orders. A junior surveyor inspected the old customs register according to the standing orders. A junior surveyor rebuilt the lamp oil inventory after several rounds of discussion. Local fishing crews documented a ledger of unpaid berth fees according to the standing orders. Every lighthouse keeper rebuilt a ledger of unpaid berth fees according to the standing orders.",
                 "type": "text"
               }
             ],
@@ -1816,7 +1807,7 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
-                "text": "The harbour committee audited two dozen mooring rings before the first frost. A junior surveyor relocated a bundle of weathered charts as the tide turned. The northern ferry service audited the eastern jetty before the first frost. A junior surveyor documented the fog-signal schedule according to the standing orders.",
+                "text": "Every lighthouse keeper postponed the dredging contract according to the standing orders. The bridge authority catalogued the lamp oil inventory during the long spring inspection. Our records office measured a ledger of unpaid berth fees without waiting for approval. An experienced pilot audited the ferry timetable after several rounds of discussion. Our records office audited the dredging contract in time for the autumn meeting. Every lighthouse keeper compared a ledger of unpaid berth fees in time for the autumn meeting. Our records office measured the eastern jetty without waiting for approval.",
                 "type": "text"
               }
             ],
@@ -1835,7 +1826,7 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
-                "text": "Text over an image placed behind the text. The regional council reorganised the ferry timetable to the satisfaction of nobody in particular. The bridge authority catalogued the old customs register before the first frost. Every lighthouse keeper documented the winter storage sheds with unusual care.",
+                "text": "The harbour committee audited two dozen mooring rings before the first frost. A junior surveyor relocated a bundle of weathered charts as the tide turned. The northern ferry service audited the eastern jetty before the first frost. A junior surveyor documented the fog-signal schedule according to the standing orders.",
                 "type": "text"
               }
             ],
@@ -1854,11 +1845,30 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
-                "text": "Cropped images (a:srcRect) inside a table, next to an uncropped original:",
+                "text": "Text over an image placed behind the text. The regional council reorganised the ferry timetable to the satisfaction of nobody in particular. The bridge authority catalogued the old customs register before the first frost. Every lighthouse keeper documented the winter storage sheds with unusual care.",
                 "type": "text"
               }
             ],
             "id": "block-51",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
+            "namedStyleId": "BodyText",
+            "spaceAfter": 8,
+            "type": "paragraph"
+          },
+          {
+            "alignment": "justify",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "Cropped images (a:srcRect) inside a table, next to an uncropped original:",
+                "type": "text"
+              }
+            ],
+            "id": "block-52",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -1894,7 +1904,7 @@
               153.33,
               153.33
             ],
-            "id": "block-52",
+            "id": "block-53",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -1920,7 +1930,7 @@
                             "width": 160
                           }
                         ],
-                        "id": "block-53",
+                        "id": "block-54",
                         "lineSpacing": {
                           "type": "multiple",
                           "value": 1.079
@@ -1939,7 +1949,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "block-54",
+                        "id": "block-55",
                         "lineSpacing": {
                           "type": "single"
                         },
@@ -1975,7 +1985,7 @@
                             "width": 160
                           }
                         ],
-                        "id": "block-55",
+                        "id": "block-56",
                         "lineSpacing": {
                           "type": "multiple",
                           "value": 1.079
@@ -1994,7 +2004,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "block-56",
+                        "id": "block-57",
                         "lineSpacing": {
                           "type": "single"
                         },
@@ -2030,7 +2040,7 @@
                             "width": 160
                           }
                         ],
-                        "id": "block-57",
+                        "id": "block-58",
                         "lineSpacing": {
                           "type": "multiple",
                           "value": 1.079
@@ -2049,7 +2059,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "block-58",
+                        "id": "block-59",
                         "lineSpacing": {
                           "type": "single"
                         },
@@ -2085,7 +2095,7 @@
                             "width": 160
                           }
                         ],
-                        "id": "block-59",
+                        "id": "block-60",
                         "lineSpacing": {
                           "type": "multiple",
                           "value": 1.079
@@ -2104,7 +2114,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "block-60",
+                        "id": "block-61",
                         "lineSpacing": {
                           "type": "single"
                         },
@@ -2150,7 +2160,7 @@
                 "width": 40
               }
             ],
-            "id": "block-61",
+            "id": "block-62",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2170,7 +2180,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-62",
+            "id": "block-63",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 2,
@@ -2186,7 +2196,7 @@
           {
             "alignment": "center",
             "content": [],
-            "id": "block-63",
+            "id": "block-64",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -2206,7 +2216,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-64",
+            "id": "block-65",
             "lineSpacing": {
               "type": "single"
             },
@@ -2217,7 +2227,7 @@
           {
             "alignment": "center",
             "content": [],
-            "id": "block-65",
+            "id": "block-66",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -2237,7 +2247,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-66",
+            "id": "block-67",
             "lineSpacing": {
               "type": "single"
             },
@@ -2248,7 +2258,7 @@
           {
             "alignment": "center",
             "content": [],
-            "id": "block-67",
+            "id": "block-68",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -2268,7 +2278,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-68",
+            "id": "block-69",
             "lineSpacing": {
               "type": "single"
             },
@@ -2286,7 +2296,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-69",
+            "id": "block-70",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2306,7 +2316,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-70",
+            "id": "block-71",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -2329,7 +2339,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-71",
+            "id": "block-72",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2364,7 +2374,7 @@
               160,
               160
             ],
-            "id": "block-72",
+            "id": "block-73",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -2453,7 +2463,7 @@
                             "type": "text"
                           }
                         ],
-                        "id": "block-73",
+                        "id": "block-74",
                         "lineSpacing": {
                           "type": "multiple",
                           "value": 1.079
@@ -2486,7 +2496,7 @@
                           100,
                           100
                         ],
-                        "id": "block-74",
+                        "id": "block-75",
                         "look": {
                           "firstColumn": true,
                           "firstRow": true,
@@ -2557,7 +2567,7 @@
                                         "type": "text"
                                       }
                                     ],
-                                    "id": "block-75",
+                                    "id": "block-76",
                                     "lineSpacing": {
                                       "type": "multiple",
                                       "value": 1.079
@@ -2590,7 +2600,7 @@
                                       80,
                                       80
                                     ],
-                                    "id": "block-76",
+                                    "id": "block-77",
                                     "look": {
                                       "firstColumn": true,
                                       "firstRow": true,
@@ -2639,7 +2649,7 @@
                                   },
                                   {
                                     "content": [],
-                                    "id": "block-77",
+                                    "id": "block-78",
                                     "lineSpacing": {
                                       "type": "multiple",
                                       "value": 1.079
@@ -2669,7 +2679,7 @@
                       },
                       {
                         "content": [],
-                        "id": "block-78",
+                        "id": "block-79",
                         "lineSpacing": {
                           "type": "multiple",
                           "value": 1.079
@@ -2760,7 +2770,7 @@
           },
           {
             "content": [],
-            "id": "block-79",
+            "id": "block-80",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -2778,7 +2788,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-80",
+            "id": "block-81",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -2815,7 +2825,7 @@
               100,
               100
             ],
-            "id": "block-81",
+            "id": "block-82",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -3252,7 +3262,7 @@
           },
           {
             "content": [],
-            "id": "block-82",
+            "id": "block-83",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -3270,7 +3280,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-83",
+            "id": "block-84",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -3315,7 +3325,7 @@
               160,
               160
             ],
-            "id": "block-84",
+            "id": "block-85",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -3539,7 +3549,7 @@
           },
           {
             "content": [],
-            "id": "block-85",
+            "id": "block-86",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -3557,7 +3567,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-86",
+            "id": "block-87",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -3598,7 +3608,7 @@
               160,
               80
             ],
-            "id": "block-87",
+            "id": "block-88",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -5865,7 +5875,7 @@
           },
           {
             "content": [],
-            "id": "block-88",
+            "id": "block-89",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -5883,7 +5893,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-89",
+            "id": "block-90",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -5918,7 +5928,7 @@
               200,
               133.33
             ],
-            "id": "block-90",
+            "id": "block-91",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -6028,7 +6038,7 @@
           },
           {
             "content": [],
-            "id": "block-91",
+            "id": "block-92",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -6061,7 +6071,7 @@
               200,
               400
             ],
-            "id": "block-92",
+            "id": "block-93",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -6110,7 +6120,7 @@
           },
           {
             "content": [],
-            "id": "block-93",
+            "id": "block-94",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -6143,7 +6153,7 @@
               60,
               466.67
             ],
-            "id": "block-94",
+            "id": "block-95",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -6193,7 +6203,7 @@
           },
           {
             "content": [],
-            "id": "block-95",
+            "id": "block-96",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -6212,7 +6222,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-96",
+            "id": "block-97",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -6235,7 +6245,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-97",
+            "id": "block-98",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6260,7 +6270,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-98",
+            "id": "block-99",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6309,7 +6319,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-99",
+            "id": "block-100",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6328,7 +6338,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-100",
+            "id": "block-101",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6347,7 +6357,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-101",
+            "id": "block-102",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6366,7 +6376,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-102",
+            "id": "block-103",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6377,7 +6387,7 @@
           },
           {
             "content": [],
-            "id": "block-103",
+            "id": "block-104",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -6386,88 +6396,111 @@
             "type": "paragraph"
           },
           {
-            "alignment": "justify",
-            "content": [
+            "blocks": [
               {
-                "color": "#808080",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Click here to enter a summary.",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "color": "#808080",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Click here to enter a summary.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-106",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               }
             ],
-            "id": "block-104",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
+            "control": {
+              "alias": "Summary",
+              "showingPlaceholder": true,
+              "tag": "summary",
+              "type": "richText"
             },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Rich text control with ",
-                "type": "text"
-              },
-              {
-                "bold": true,
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "bold",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": " and ",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "italic": true,
-                "text": "italic",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": " runs.",
-                "type": "text"
-              }
-            ],
             "id": "block-105",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
+            "type": "content-control"
           },
           {
-            "alignment": "justify",
-            "content": [
+            "blocks": [
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "And a second paragraph inside the same control.",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Rich text control with ",
+                    "type": "text"
+                  },
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "bold",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": " and ",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "italic": true,
+                    "text": "italic",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": " runs.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-108",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
+              },
+              {
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "And a second paragraph inside the same control.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-109",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               }
             ],
-            "id": "block-106",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
+            "control": {
+              "alias": "Notes",
+              "tag": "notes",
+              "type": "richText"
             },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
+            "id": "block-107",
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -6479,10 +6512,20 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Ada Marlowe",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Ada Marlowe",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Name",
+                  "tag": "name",
+                  "type": "text"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -6491,10 +6534,34 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "East",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "East",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Berth",
+                  "items": [
+                    {
+                      "text": "North",
+                      "value": "N"
+                    },
+                    {
+                      "text": "East",
+                      "value": "E"
+                    },
+                    {
+                      "text": "South",
+                      "value": "S"
+                    }
+                  ],
+                  "tag": "berth",
+                  "type": "dropDown"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -6503,10 +6570,30 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Thornback",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Thornback",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Vessel",
+                  "items": [
+                    {
+                      "text": "Marguerite",
+                      "value": "m"
+                    },
+                    {
+                      "text": "Thornback",
+                      "value": "t"
+                    }
+                  ],
+                  "tag": "vessel",
+                  "type": "comboBox"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -6515,10 +6602,22 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "2 March 2026",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "2 March 2026",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Arrival",
+                  "dateFormat": "d MMMM yyyy",
+                  "dateValue": "2026-03-02T00:00:00Z",
+                  "tag": "arrival",
+                  "type": "date"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -6527,10 +6626,21 @@
                 "type": "text"
               },
               {
-                "fontFamily": "DejaVu Sans",
-                "fontSize": 11,
-                "text": "☒",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "DejaVu Sans",
+                    "fontSize": 11,
+                    "text": "☒",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Inspected",
+                  "checked": true,
+                  "tag": "inspected",
+                  "type": "checkbox"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -6539,7 +6649,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-107",
+            "id": "block-110",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6549,12 +6659,32 @@
             "type": "paragraph"
           },
           {
-            "alt": "logo placeholder",
-            "height": 80,
-            "id": "block-108",
-            "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
-            "type": "image",
-            "width": 80
+            "content": [
+              {
+                "content": [
+                  {
+                    "alt": "logo placeholder",
+                    "height": 80,
+                    "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
+                    "type": "image",
+                    "width": 80
+                  }
+                ],
+                "control": {
+                  "alias": "Logo",
+                  "tag": "logo",
+                  "type": "picture"
+                },
+                "type": "contentControl"
+              }
+            ],
+            "id": "block-111",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 10.666666666666666,
+            "type": "paragraph"
           },
           {
             "content": [
@@ -6571,7 +6701,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-109",
+            "id": "block-112",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -6597,7 +6727,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-110",
+            "id": "block-113",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -6623,7 +6753,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-111",
+            "id": "block-114",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -6659,7 +6789,7 @@
               200,
               200
             ],
-            "id": "block-112",
+            "id": "block-115",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -6693,10 +6823,20 @@
                     ],
                     "content": [
                       {
-                        "fontFamily": "Liberation Sans",
-                        "fontSize": 11,
-                        "text": "12",
-                        "type": "text"
+                        "content": [
+                          {
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 11,
+                            "text": "12",
+                            "type": "text"
+                          }
+                        ],
+                        "control": {
+                          "alias": "Qty",
+                          "tag": "qty",
+                          "type": "text"
+                        },
+                        "type": "contentControl"
                       }
                     ],
                     "id": "cell-205"
@@ -6756,64 +6896,6 @@
                 "type": "text"
               }
             ],
-            "id": "block-113",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "bold": true,
-                "fontFamily": "Liberation Serif",
-                "fontSize": 16,
-                "text": "Cover page building block",
-                "type": "text"
-              }
-            ],
-            "id": "block-114",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Title",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "color": "#595959",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 14,
-                "italic": true,
-                "text": "Wrapped in a docPartObj content control.",
-                "type": "text"
-              }
-            ],
-            "id": "block-115",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Subtitle",
-            "spaceAfter": 10.666666666666666,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Innermost paragraph, 5 controls deep.",
-                "type": "text"
-              }
-            ],
             "id": "block-116",
             "lineSpacing": {
               "type": "multiple",
@@ -6822,6 +6904,129 @@
             "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
+          },
+          {
+            "blocks": [
+              {
+                "content": [
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Serif",
+                    "fontSize": 16,
+                    "text": "Cover page building block",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-118",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Title",
+                "spaceAfter": 8,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "color": "#595959",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 14,
+                    "italic": true,
+                    "text": "Wrapped in a docPartObj content control.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-119",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Subtitle",
+                "spaceAfter": 10.666666666666666,
+                "type": "paragraph"
+              }
+            ],
+            "control": {
+              "gallery": "Cover Pages",
+              "type": "docPart"
+            },
+            "id": "block-117",
+            "type": "content-control"
+          },
+          {
+            "blocks": [
+              {
+                "blocks": [
+                  {
+                    "blocks": [
+                      {
+                        "blocks": [
+                          {
+                            "blocks": [
+                              {
+                                "alignment": "justify",
+                                "content": [
+                                  {
+                                    "fontFamily": "Liberation Sans",
+                                    "fontSize": 11,
+                                    "text": "Innermost paragraph, 5 controls deep.",
+                                    "type": "text"
+                                  }
+                                ],
+                                "id": "block-125",
+                                "lineSpacing": {
+                                  "type": "multiple",
+                                  "value": 1.15
+                                },
+                                "namedStyleId": "BodyText",
+                                "spaceAfter": 8,
+                                "type": "paragraph"
+                              }
+                            ],
+                            "control": {
+                              "alias": "Level 5",
+                              "tag": "nest5",
+                              "type": "richText"
+                            },
+                            "id": "block-124",
+                            "type": "content-control"
+                          }
+                        ],
+                        "control": {
+                          "alias": "Level 4",
+                          "tag": "nest4",
+                          "type": "richText"
+                        },
+                        "id": "block-123",
+                        "type": "content-control"
+                      }
+                    ],
+                    "control": {
+                      "alias": "Level 3",
+                      "tag": "nest3",
+                      "type": "richText"
+                    },
+                    "id": "block-122",
+                    "type": "content-control"
+                  }
+                ],
+                "control": {
+                  "alias": "Level 2",
+                  "tag": "nest2",
+                  "type": "richText"
+                },
+                "id": "block-121",
+                "type": "content-control"
+              }
+            ],
+            "control": {
+              "alias": "Level 1",
+              "tag": "nest1",
+              "type": "richText"
+            },
+            "id": "block-120",
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -6833,7 +7038,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-117",
+            "id": "block-126",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -6854,6 +7059,12 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "text": "Ada Marlowe",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "   Cleared: ",
                 "type": "text"
               },
@@ -6862,9 +7073,15 @@
                 "fontSize": 11,
                 "text": "   Flag colour: ",
                 "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "Green",
+                "type": "text"
               }
             ],
-            "id": "block-118",
+            "id": "block-127",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -7008,9 +7225,6 @@
     "A shape or text box was not imported — shapes and text boxes are not supported yet.",
     "A shape or text box was not imported — shapes and text boxes are not supported yet.",
     "A SmartArt diagram was not imported — diagrams are not supported yet.",
-    "Unsupported field code \"FORMTEXT\" — its cached value was dropped.",
-    "Unsupported field code \"FORMCHECKBOX\" — its cached value was dropped.",
-    "Unsupported field code \"FORMDROPDOWN\" — its cached value was dropped.",
     "Unsupported field code \"STYLEREF \"Heading 1\"\" — its cached value was dropped."
   ]
 }

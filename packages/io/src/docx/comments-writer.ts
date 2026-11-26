@@ -40,6 +40,7 @@ export interface CommentPlan {
 function runsOf(content: DocInline[], visit: (threadId: string) => void): void {
   for (const inline of content) {
     if ((inline.type === 'text' || inline.type === 'link') && inline.commentThreadId) visit(inline.commentThreadId);
+    else if (inline.type === 'contentControl') runsOf(inline.content, visit);
   }
 }
 
@@ -51,6 +52,8 @@ function blockRuns(block: DocBlock, visit: (threadId: string) => void): void {
         else runsOf(cell.content, visit);
       }
     }
+  } else if (block.type === 'contentControl') {
+    block.blocks.forEach((b) => blockRuns(b, visit));
   } else if ('content' in block) {
     runsOf(block.content, visit);
   }

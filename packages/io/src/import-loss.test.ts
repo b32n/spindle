@@ -132,7 +132,8 @@ describe('detectDocxLoss', () => {
       xml = xml.replace(
         '</w:body>',
         '<w:p><w:ins w:id="1"><w:r><w:t>new</w:t></w:r></w:ins><w:del w:id="2"><w:r><w:delText>old</w:delText></w:r></w:del></w:p>' +
-          '<w:sdt><w:sdtContent><w:p><w:r><w:t>cc</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
+          '<w:sdt><w:sdtPr><w15:repeatingSection/></w:sdtPr><w:sdtContent><w:p><w:r><w:t>cc</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
+          '<w:sdt><w:sdtContent><w:p><w:r><w:t>kept control</w:t></w:r></w:p></w:sdtContent></w:sdt>' +
           '<w:p><w:r><w:drawing><wp:anchor><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"/></a:graphic></wp:anchor></w:drawing></w:r></w:p>' +
           '<w:p><w:r><w:pict><w:txbxContent><w:p/></w:txbxContent></w:pict></w:r></w:p>' +
           '<w:p><m:oMath/></w:p>' +
@@ -149,7 +150,7 @@ describe('detectDocxLoss', () => {
     expect(by).toMatchObject({
       'docx.trackedInsertions': 1,
       'docx.trackedDeletions': 1,
-      'docx.contentControls': 1,
+      'docx.contentControls': 1, // the repeating section; the plain control is kept
       'docx.floatingImages': 1,
       'docx.textBoxes': 1,
       'docx.equations': 1,
