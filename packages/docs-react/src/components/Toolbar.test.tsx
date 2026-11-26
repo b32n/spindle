@@ -93,3 +93,28 @@ describe('docs Toolbar table of contents control', () => {
     expect(render({ onTableOfContents: () => {} })).toContain('Table of contents');
   });
 });
+
+describe('docs Toolbar review control', () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('is hidden unless a handler is given', () => {
+    expect(render({})).not.toContain('Review changes');
+  });
+
+  it('is shown when onToggleReview is given', () => {
+    expect(render({ onToggleReview: () => {} })).toContain('Review changes');
+  });
+
+  it('is drawn as pressed while the panel is open', () => {
+    const closed = render({ onToggleReview: () => {}, reviewOpen: false });
+    const open = render({ onToggleReview: () => {}, reviewOpen: true });
+    const pressed = 'inset 0 1px 2px rgba(99, 102, 241, 0.15)';
+    const count = (html: string) => html.split(pressed).length - 1;
+    expect(count(open)).toBe(count(closed) + 1);
+  });
+});

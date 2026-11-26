@@ -342,6 +342,27 @@ lockstep.
   double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
   paragraph with a change, and a tint on the cells of an inserted or deleted row. `documentRevisionAuthors` also lists the authors of changes recorded on paragraphs and rows and of formatting changes, so they share out the palette like the others.
 
+- **Review panel: accept and reject tracked changes.** `DocumentEditor` has a Review changes button in the toolbar that opens a
+  panel listing the changes (author, date, what it did, the text) with Accept and Reject for each, for all of them and for all of
+  one author's (a filter), a next and a previous change (the caret goes there and the page scrolls to it), and a choice of how
+  changes show: **All markup**, **Final** (as if every change were accepted: deleted text left out, no markup) and **Original**
+  (as if every change were rejected: inserted text left out, the formatting before a change back). The panel has no Accept or
+  Reject in a read-only editor, and the Review button is on the toolbar, which a read-only editor does not show (open the panel with the `ReviewPanel` component there). **The Final and Original views are read-only**: a banner ("Showing final text: switch to All markup to edit" / "Showing original text: ...") offers a one-click switch back to All markup (`RevisionViewBanner`), and the toolbar and rulers are hidden while a view is showing, as in a read-only editor; Accept and Reject in the panel still work there (they are explicit commands). The colours in the panel and the legend are shared out among every author of the document, as on the page (also for the author of the other end of a move). New prop `DocumentEditor.revisionView` (the view to begin with, of the type `RevisionView`, exported) and `TrueLayoutEditor.revisionView`;
+  `proseMirrorToFlowBlocks` takes `revisionView` in its options (text a view leaves out keeps its length as zero-width spaces,
+  so positions stay in step; in the Final and Original views rows and paragraph formatting are not shown as they were, only text and
+  character formatting, a paragraph whose text a view hides stays as an empty line, and paragraph breaks are not hidden: a deleted mark still splits paragraphs in Final, an inserted one in Original). New optional `TrueLayoutEditorHandle.goTo(pos)` (optional, so code that implements or mocks the handle keeps compiling). The Next and Previous buttons of the panel step through the changes in document order, also through changes that start at one position or a move whose old place is above its new one; a move with several ends covers all of them; a settle that changes nothing no longer puts an empty step on the undo history. Accepting the deletion of the mark of an empty paragraph keeps the first paragraph's type.
+  `ReviewPanel` and `RevisionViewBanner` (with `ReviewPanelProps`, `RevisionViewBannerProps`). In docs-core: `listChanges` (the changes of a document, runs of one change joined, the two
+  ends of a move as one), `changeUnits`, and the commands `resolveChange`, `resolveAll` (all, or one author's) and
+  `resolveSelection`, plus `settle`. Accepting keeps an inserted run, drops a deleted one, keeps new formatting, keeps an inserted
+  paragraph mark or row and joins away a deleted one; rejecting does the reverse (the old formatting of a run, and the old
+  formatting and heading level of a paragraph, come back; in a list item a former heading comes back as a paragraph). Joining two
+  paragraphs (a paragraph mark that goes) keeps the first one's formatting and the second one's mark with its changes (a deletion of somebody else on the first mark moves to the joined mark, so rejecting a concurrent split keeps the other person's suggestion; the same happens when somebody deletes a mark that somebody else inserted earlier and the insertion is rejected: the deletion stays on the joined mark). A move
+  is settled whole, also for one author (it belongs to the author of the end it went to). Everything one action does is one
+  transaction, so one undo takes it back. Known limits: the Original view restores character formatting only (not links or the
+  character style from before a change); a change mark on an inline object (an image, a field, a note reference) is still drawn in the Final and Original views, while the placeholder of a hidden link is plain text; rejecting all with an inserted paragraph mark before a table whose only row is also rejected joins the paragraph with the one after the table, while rejecting that mark alone leaves them apart; deleting text with a comment on it removes the comment's anchor and leaves the thread
+  in the document; the legend counts changes the way the panel lists them (a move once, the runs of one change as one), not runs.
+  The list of changes is kept only while the panel is open. Switching between editable and read-only (these views, a host's `readOnly`) no longer rebuilds the editor from the document it was mounted with: the editor reads `editable` live, so edits and accepted or rejected changes made before the switch stay.
+
 ### Changed
 
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`

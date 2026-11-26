@@ -337,6 +337,35 @@ function styleToMarks(style: TextStyle): PmMarkJSON[] {
   return marks;
 }
 
+/** The marks that give a run the formatting it had before a tracked change of it (character formatting and character style). */
+export function runFormatMarks(format: RunFormat): PmMarkJSON[] {
+  const marks = styleToMarks(format);
+  if (format.namedStyleId) marks.push({ type: 'namedStyle', attrs: { id: format.namedStyleId } });
+  return marks;
+}
+
+/** The attrs of a paragraph or heading node with the given formatting (pixels), as `blocksToPmDoc` writes them. */
+export function paragraphFormatAttrs(kind: 'paragraph' | 'heading', format: ParagraphFormat, level = 1): Record<string, unknown> {
+  const { revision: _revision, ...rest } = format;
+  return kind === 'paragraph'
+    ? {
+        alignment: format.alignment || 'left',
+        indent: 0,
+        lineSpacing: lineSpacingAttr(format.lineSpacing),
+        spaceBefore: format.spaceBefore || 0,
+        spaceAfter: format.spaceAfter ?? 8,
+        ...formatAttrs(rest),
+      }
+    : {
+        level,
+        alignment: format.alignment || 'left',
+        lineSpacing: lineSpacingAttr(format.lineSpacing),
+        spaceBefore: format.spaceBefore ?? null,
+        spaceAfter: format.spaceAfter ?? null,
+        ...formatAttrs(rest),
+      };
+}
+
 /** The character-formatting fields of a text run or link (same names in TextRun, InlineLink and TextStyle). */
 function inlineStyleOf(item: TextStyle): TextStyle {
   const style: TextStyle = {};

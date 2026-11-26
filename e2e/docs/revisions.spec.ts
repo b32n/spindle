@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import JSZip from 'jszip';
 import { DocsPage, MOD } from '../support/docs';
 import path from 'node:path';
@@ -203,5 +203,199 @@ test.describe('docs: tracked changes in a .docx', () => {
     await expect(doc.pages.first()).toContainText('20242025');
     expect(after.all.length).toBeGreaterThan(before.all.length);
     expect(after.distinct - before.distinct).toBe(after.all.length - before.all.length);
+  });
+
+  const panel = (page: Page) => page.getByTestId('review-panel');
+  const openPanel = async (page: Page) => {
+    await doc.toolbar('Review changes').click();
+    await expect(panel(page)).toBeVisible();
+  };
+  const markup = (doc: DocsPage) =>
+    doc.pages.locator('[data-revision-insertion], [data-revision-deletion]');
+
+  test('D-REV-04 the review panel lists the changes; accept an insertion, reject a deletion, accept all, and check the text @smoke', async ({
+    page,
+  }) => {
+    await openPanel(page);
+    const changes = panel(page).getByTestId('review-change');
+    expect(await changes.count()).toBeGreaterThan(15);
+
+    // "2024" was replaced by "2025" (Alice): accepting the insertion keeps "2025" as plain text, rejecting the deletion keeps "2024".
+    const inserted = changes.filter({ hasText: /Inserted/ }).filter({ hasText: '“2025”' });
+    await inserted.getByRole('button', { name: 'Accept change' }).click();
+    await expect(doc.pages.locator('[data-revision-insertion]', { hasText: '2025' })).toHaveCount(
+      0
+    );
+    await expect(doc.pages.first()).toContainText('2025');
+    const deleted = changes.filter({ hasText: /Deleted/ }).filter({ hasText: '“2024”' });
+    await deleted.getByRole('button', { name: 'Reject change' }).click();
+    await expect(doc.pages.locator('[data-revision-deletion]', { hasText: '2024' })).toHaveCount(0);
+    await expect(doc.pages.first()).toContainText('20242025');
+
+    // Rejecting an insertion takes its text away ("eleven" was inserted by Bram).
+    await expect(doc.pages.first()).toContainText('eleven');
+    await changes
+      .filter({ hasText: '“eleven”' })
+      .getByRole('button', { name: 'Reject change' })
+      .click();
+    await expect(doc.pages.first()).not.toContainText('eleven');
+
+    // Accept all: no markup is left, the text of every deletion is gone, the panel and the legend are empty.
+    await panel(page).getByRole('button', { name: 'Accept all', exact: true }).click();
+    await expect(markup(doc)).toHaveCount(0);
+    await expect(panel(page)).toContainText('No tracked changes.');
+    await expect(page.getByTestId('revision-legend')).toHaveCount(0);
+    await expect(doc.pages.first()).not.toContainText('This sentence was judged redundant');
+    await expect(doc.pages.first()).toContainText(
+      'A replacement sentence was supplied by the fourth reviewer'
+    );
+
+    // The download has no tracked changes left.
+    const file = await captureDownload(page, () =>
+      page.getByRole('button', { name: 'Download as Microsoft Word (.docx)' }).click()
+    );
+    const xml =
+      (await (await JSZip.loadAsync(file.bytes)).file('word/document.xml')?.async('string')) ?? '';
+    expect(xml).not.toMatch(/<w:(ins|del|moveFrom|moveTo|rPrChange|pPrChange)\b/);
+  });
+
+  test('D-REV-05 the Final and Original views show the text as if every change were accepted or rejected, and filtering by author limits Accept all', async ({
+    page,
+  }) => {
+    await openPanel(page);
+    const view = panel(page).getByRole('group', { name: 'Show changes as' });
+    // Bram replaced "eight" by "eleven".
+    await view.getByRole('button', { name: 'Final' }).click();
+    await expect(doc.pages.first()).toContainText('eleven');
+    await expect(doc.pages.first()).not.toContainText('eight');
+    await expect(markup(doc)).toHaveCount(0);
+    await view.getByRole('button', { name: 'Original' }).click();
+    await expect(doc.pages.first()).toContainText('eight');
+    await expect(doc.pages.first()).not.toContainText('eleven');
+    await expect(markup(doc)).toHaveCount(0);
+    await view.getByRole('button', { name: 'All markup' }).click();
+    await expect(doc.pages.first()).toContainText('eight');
+    await expect(doc.pages.first()).toContainText('eleven');
+    await expect(markup(doc).first()).toBeVisible();
+
+    // Reject all by Bram: his insertion is gone, his deletion is plain text again, the other authors' changes stay.
+    await panel(page).getByLabel('Author').selectOption('Bram Keller');
+    await expect(panel(page).getByTestId('review-change')).not.toHaveCount(0);
+    expect(
+      await panel(page)
+        .getByTestId('review-change')
+        .evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.author))
+    ).toEqual(expect.arrayContaining(['Bram Keller']));
+    await panel(page).getByRole('button', { name: 'Reject all by Bram Keller' }).click();
+    await expect(doc.pages.first()).toContainText('eight');
+    await expect(doc.pages.first()).not.toContainText('eleven');
+    await expect(page.getByTestId('revision-legend')).not.toContainText('Bram Keller');
+    await expect(page.getByTestId('revision-legend')).toContainText('Alice Archer');
+  });
+
+  test('D-REV-06 next and previous go through the changes, scrolling to each', async ({ page }) => {
+    await openPanel(page);
+    const items = panel(page).getByTestId('review-change');
+    await panel(page).getByRole('button', { name: 'Next change' }).click();
+    await expect(items.first()).toHaveAttribute('aria-current', 'true');
+    await panel(page).getByRole('button', { name: 'Next change' }).click();
+    await expect(items.nth(1)).toHaveAttribute('aria-current', 'true');
+    await panel(page).getByRole('button', { name: 'Previous change' }).click();
+    await expect(items.first()).toHaveAttribute('aria-current', 'true');
+    // The last change is on the second page; going there scrolls it into view.
+    await panel(page).getByRole('button', { name: 'Previous change' }).click();
+    await expect(items.last()).toHaveAttribute('aria-current', 'true');
+    await expect(doc.pages.locator('td[data-revision-row="deletion"]').first()).toBeInViewport();
+  });
+  test('D-REV-07 the Final and Original views are read-only, with a banner that switches back to All markup', async ({
+    page,
+  }) => {
+    await openPanel(page);
+    const view = panel(page).getByRole('group', { name: 'Show changes as' });
+    const banner = page.getByTestId('revision-view-banner');
+    // A read-only editor takes no focus (so `clickText` cannot be used): click the text and send the keys anyway.
+    // Typing, deleting, cutting, pasting and undoing all go to the same locked editor.
+    const tryTyping = async () => {
+      const before = await doc.pages.first().innerText();
+      await doc.pages.getByText('Total tonnage handled in').first().click();
+      await page.keyboard.press('Home');
+      await page.keyboard.type('ZZ');
+      await page.keyboard.press('Delete');
+      await page.keyboard.press('End');
+      await page.keyboard.press('Backspace');
+      await page.keyboard.press('Shift+Home');
+      await page.keyboard.press('Control+x');
+      await page.keyboard.press('Control+v');
+      await page.keyboard.press('Control+z');
+      await expect(doc.pages.first()).not.toContainText('ZZ');
+      expect(await doc.pages.first().innerText()).toBe(before);
+    };
+    await expect(banner).toHaveCount(0);
+
+    // Final: banner, and typing changes nothing.
+    await view.getByRole('button', { name: 'Final' }).click();
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText('Showing final text: switch to All markup to edit');
+    await tryTyping();
+    await expect(doc.pages.first()).not.toContainText('ZZ');
+    await expect(markup(doc)).toHaveCount(0);
+
+    // Original: the same.
+    await view.getByRole('button', { name: 'Original' }).click();
+    await expect(banner).toContainText('Showing original text: switch to All markup to edit');
+    await tryTyping();
+    await expect(doc.pages.first()).not.toContainText('ZZ');
+
+    // Accepting a change from the panel is an explicit command and still works in these views.
+    const items = panel(page).getByTestId('review-change');
+    const before = await items.count();
+    await panel(page).getByRole('button', { name: 'Accept change' }).first().click();
+    await expect(items).toHaveCount(before - 1);
+
+    // One click on the banner goes back to All markup, where the document can be edited again.
+    await banner.getByRole('button', { name: 'Switch to All markup' }).click();
+    await expect(banner).toHaveCount(0);
+    await expect(view.getByRole('button', { name: 'All markup' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    await expect(markup(doc).first()).toBeVisible();
+    await doc.clickText('Total tonnage handled in');
+    await doc.press('Home');
+    await doc.typeText('ZZ');
+    await expect(doc.pages.first()).toContainText('ZZTotal tonnage');
+  });
+
+  test('D-REV-10 edits and accepted changes made before a read-only view are still there after it', async ({
+    page,
+  }) => {
+    // An edit in All markup, and a change accepted from the panel.
+    await doc.clickText('Total tonnage handled in');
+    await doc.press('Home');
+    await doc.typeText('QQ');
+    await openPanel(page);
+    const items = panel(page).getByTestId('review-change');
+    const before = await items.count();
+    await panel(page).getByRole('button', { name: 'Accept change' }).first().click();
+    await expect(items).toHaveCount(before - 1);
+
+    // To the Final view and back: the editor is not rebuilt from the document it was mounted with.
+    const view = panel(page).getByRole('group', { name: 'Show changes as' });
+    await view.getByRole('button', { name: 'Final' }).click();
+    await expect(page.getByTestId('revision-view-banner')).toBeVisible();
+    await expect(doc.pages.first()).toContainText('QQTotal tonnage');
+    await page
+      .getByTestId('revision-view-banner')
+      .getByRole('button', { name: 'Switch to All markup' })
+      .click();
+    await expect(doc.pages.first()).toContainText('QQTotal tonnage');
+    await expect(items).toHaveCount(before - 1);
+
+    // The next keystroke does not bring the old document back.
+    await doc.clickText('QQTotal tonnage handled in');
+    await doc.press('Home');
+    await doc.typeText('W');
+    await expect(doc.pages.first()).toContainText('WQQTotal tonnage');
+    await expect(items).toHaveCount(before - 1);
   });
 });

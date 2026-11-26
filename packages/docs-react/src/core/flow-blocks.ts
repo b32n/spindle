@@ -27,6 +27,8 @@ export interface RevisionInfo {
   color: string;
   /** The name of the move when the change is one end of a move. */
   moveId?: string;
+  /** For a change of formatting: the formatting the run had before (the fields of a text run). */
+  previous?: Record<string, unknown>;
 }
 
 /** What marks a paragraph as changed: a bar in the margin in the colour of the author who made the last change, with what changed. */

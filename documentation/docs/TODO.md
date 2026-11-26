@@ -61,15 +61,16 @@ Verified absent in code.
 - [ ] **Footnotes / endnotes** — none.
 - [ ] **Bookmarks / cross-references** — imported bookmarks and internal links are kept (a bookmark is a point, clicking a
       `#name` link scrolls to it); there is no UI to insert bookmarks or cross-references, and `REF` fields are not recalculated.
-- [ ] **Track changes / suggestions mode** — tracked insertions, deletions, moves, formatting changes and paragraph and row changes are read
-      from a file, shown (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
-      rejecting, a Suggesting mode, changes of cells, tables and sections, and a change around a field, image or note
-      reference (those are not kept as changes). Moves, formatting changes and paragraph-mark and table-row changes are
-      kept and shown. The margin bar is drawn beside top-level paragraphs, headings and list items only, not inside table
-      cells, text boxes or tables of contents (those paragraphs carry the change, without a visible bar). Two move ranges of
-      one direction open in one paragraph at once are read as one (the later name wins). A formatting-only change on text that is also struck through draws the author's strike-through dotted too (one `text-decoration` shorthand). The library has no plain-text, HTML or Markdown export, word count or search of its own;
-      `getPlainText` / `getPmPlainText` and the clipboard text leave deleted text out, the clipboard HTML keeps it (so a
-      paste keeps the change). A host that counts or searches text takes the final text from those helpers.
+- [ ] **Track changes / suggestions mode** — tracked insertions, deletions, moves, formatting changes and paragraph and row
+      changes are read from a file, shown (underlined / struck through in the author's colour, with a legend) and written back;
+      a review panel accepts and rejects changes (one, all, one author's) and shows All markup / Final / Original. Not done:
+      Suggesting mode (typing as tracked changes); changes of cells, tables and sections, and a change around a field, image or
+      note reference (those are not kept as changes); the Final and Original views (read-only, with a banner to switch back)
+      do not remove deleted rows or show the old paragraph formatting, a paragraph whose text is hidden stays as an empty line, paragraph breaks are not hidden (a deleted mark still splits paragraphs in Final, an inserted one in Original), accepting the deletion of the mark of an empty paragraph keeps the first paragraph's type (a heading after it becomes a paragraph),
+      and the zero-width placeholders can change where a long hidden run wraps; accepting a change in a shared document is not
+      coordinated between collaborators yet. The margin bar is drawn beside top-level paragraphs, headings and list items only, not
+      inside table cells, text boxes or tables of contents (those paragraphs carry the change, without a visible bar). Two move
+      ranges of one direction open in one paragraph at once are read as one (the later name wins). A formatting-only change on text that is also struck through draws the author's strike-through dotted too (one `text-decoration` shorthand). The library has no plain-text, HTML or Markdown export, word count or search of its own; `getPlainText` / `getPmPlainText` and the clipboard text leave deleted text out, the clipboard HTML keeps it (so a paste keeps the change); a host that counts or searches text takes the final text from those helpers.
 - [ ] **Spell-check** — browser spellcheck is deliberately disabled
       (`input-bridge.ts`); no custom engine.
 - [ ] **Equation editor, drawing / shapes / canvas** — none.

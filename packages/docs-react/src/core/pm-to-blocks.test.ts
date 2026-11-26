@@ -564,3 +564,75 @@ describe('proseMirrorToFlowBlocks: tracked changes', () => {
     expect(first.attrs?.changeBar?.color).not.toBe(second.attrs?.changeBar?.color);
   });
 });
+
+describe('proseMirrorToFlowBlocks: the revision view', () => {
+  const insertion = { type: 'insertion', attrs: { revisionId: '1', author: 'Ada', date: null } };
+  const deletion = { type: 'deletion', attrs: { revisionId: '2', author: 'Bo', date: null } };
+  const format = { type: 'formatChange', attrs: { revisionId: '3', author: 'Cy', date: null, previous: { italic: true, fontSize: 14 } } };
+  const doc = () =>
+    j([
+      {
+        type: 'paragraph',
+        attrs: { revisionInsertion: { id: '4', author: 'Ada' } },
+        content: [text('keep '), text('new', [insertion]), text('old', [deletion]), text('fmt', [{ type: 'bold' }, format]), text('go', [{ type: 'link', attrs: { href: 'https://example.com/' } }, deletion])],
+      },
+      { type: 'table', content: [{ type: 'table_row', attrs: { revisionInsertion: { id: '5', author: 'Ada' } }, content: [{ type: 'table_cell', content: [{ type: 'paragraph', content: [text('c')] }] }] }] },
+    ]);
+  const runsOf = (revisionView?: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(doc(), { revisionView })[0] as ParagraphBlock).runs as TextRun[];
+
+  it('shows every change in the markup view, which is the default', () => {
+    expect(runsOf().map((r) => r.text)).toEqual(['keep ', 'new', 'old', 'fmt', 'go']);
+    expect(runsOf('markup')[1].revision).toBeDefined();
+    expect((proseMirrorToFlowBlocks(doc())[0] as ParagraphBlock).attrs?.changeBar).toBeDefined();
+  });
+
+  it('leaves out deleted text in the final view, keeping its length, and shows no markup', () => {
+    const runs = runsOf('final');
+    expect(runs.map((r) => r.text)).toEqual(['keep ', 'new', '​​​', 'fmt', '​​']);
+    expect(runs.every((r) => r.revision === undefined)).toBe(true);
+    expect(runs[3].bold).toBe(true);
+    expect(runs[3].italic).toBeUndefined();
+    // The placeholder of a deleted link is no link (nothing to click), and the link is back in the original view.
+    expect(runs[4]).toEqual({ kind: 'text', text: '\u200B\u200B' });
+    expect(runsOf('original')[4]).toMatchObject({ kind: 'link', href: 'https://example.com/' });
+    const blocks = proseMirrorToFlowBlocks(doc(), { revisionView: 'final' });
+    expect((blocks[0] as ParagraphBlock).attrs?.changeBar).toBeUndefined();
+    expect((blocks[1] as import('./flow-blocks').TableBlock).rows[0].revision).toBeUndefined();
+  });
+
+  it('leaves out inserted text in the original view and brings back the formatting before a change', () => {
+    const runs = runsOf('original');
+    expect(runs.map((r) => r.text)).toEqual(['keep ', '​​​', 'old', 'fmt', 'go']);
+    expect(runs.every((r) => r.revision === undefined)).toBe(true);
+    expect(runs[3]).toMatchObject({ italic: true, fontSize: 14 });
+    expect(runs[3].bold).toBeUndefined();
+  });
+
+  it('carries the formatting before a change with known fields of the right type only', () => {
+    const evil = { type: 'formatChange', attrs: { revisionId: '3', author: 'Cy', date: null, previous: { italic: true, fontSize: 'big', color: 'url(x)', evil: 1 } } };
+    const blocks = proseMirrorToFlowBlocks(j([{ type: 'paragraph', content: [text('fmt', [{ type: 'bold' }, evil])] }]), { revisionView: 'original' });
+    const run = (blocks[0] as ParagraphBlock).runs[0] as TextRun;
+    expect(run.italic).toBe(true);
+    expect(run.fontSize).toBeUndefined();
+    expect(run.color).toBeUndefined();
+    const marked = proseMirrorToFlowBlocks(j([{ type: 'paragraph', content: [text('fmt', [evil])] }]))[0] as ParagraphBlock;
+    expect(((marked.runs[0] as TextRun).revision?.formatChange as { previous?: object }).previous).toEqual({ italic: true });
+  });
+
+  it('keeps a paragraph that holds only hidden text as an empty line of placeholders, with no change bar', () => {
+    const only = () => j([{ type: 'paragraph', attrs: { revisionDeletion: { id: '6', author: 'Bo' } }, content: [text('gone', [deletion])] }]);
+    const first = (view: 'markup' | 'final' | 'original') => proseMirrorToFlowBlocks(only(), { revisionView: view })[0] as ParagraphBlock;
+    expect((first('final').runs as TextRun[]).map((r) => r.text)).toEqual(['\u200B\u200B\u200B\u200B']);
+    expect(first('final').attrs?.changeBar).toBeUndefined();
+    expect((first('original').runs as TextRun[]).map((r) => r.text)).toEqual(['gone']);
+    expect(first('markup').attrs?.changeBar).toBeDefined();
+  });
+
+  it('breaks lines at the line break of tracked text that a view shows, and nowhere in text a view leaves out', () => {
+    const breaks = () => j([{ type: 'paragraph', content: [text('a\nb', [deletion]), text('c\nd', [insertion])] }]);
+    const kinds = (view: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(breaks(), { revisionView: view })[0] as ParagraphBlock).runs.map((r) => (r.kind === 'text' ? r.text : r.kind));
+    expect(kinds('markup')).toEqual(['a', 'lineBreak', 'b', 'c', 'lineBreak', 'd']);
+    expect(kinds('final')).toEqual(['\u200B\u200B\u200B', 'c', 'lineBreak', 'd']);
+    expect(kinds('original')).toEqual(['a', 'lineBreak', 'b', '\u200B\u200B\u200B']);
+  });
+});

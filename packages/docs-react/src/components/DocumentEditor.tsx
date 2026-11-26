@@ -12,18 +12,20 @@
  */
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, collectRevisions, createCommands, docsSchema, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
+import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor, ReviewChange } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, createCommands, docsSchema, documentRevisionAuthors, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
 import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
+import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
+import { ReviewPanel } from './ReviewPanel';
 import { Ruler } from './Ruler';
 import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
-import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle, type TrueLayoutSection } from '../core';
+import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle, type RevisionView, type TrueLayoutSection } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { downloadFile, useImportConfirm, ImageHooksContext, type FontSource, type ImageHooks, type ImportConfirmation } from '@b32nio/spindle-shared/react';
@@ -83,6 +85,11 @@ interface DocumentEditorProps {
   uploadImage?: ImageHooks['uploadImage'];
   /** Largest accepted image in bytes (default 10 MB). */
   maxImageBytes?: number;
+  /**
+   * How tracked changes show to begin with: `markup` (default, every change marked), `final` (as if all were accepted) or
+   * `original` (as if all were rejected). The review panel changes it; the document is not changed by it.
+   */
+  revisionView?: RevisionView;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -114,7 +121,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   height,
   showToolbar = true,
   showRuler = true,
-  readOnly = false,
+  readOnly: readOnlyProp = false,
   fileActions = false,
   exportFormats,
   fileName,
@@ -125,6 +132,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   resolveImage,
   uploadImage,
   maxImageBytes,
+  revisionView: initialRevisionView = 'markup',
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
@@ -137,6 +145,13 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [authors, setAuthors] = useState<RevisionAuthor[]>([]);
+  const [changes, setChanges] = useState<ReviewChange[]>([]);
+  const [palette, setPalette] = useState<string[]>([]);
+  const [showReview, setShowReview] = useState(false);
+  const showReviewRef = useRef(false);
+  const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
+  // The Final and Original views hide text, so they cannot be edited (the banner offers the way back to All markup).
+  const readOnly = isEditLocked(readOnlyProp, revisionView);
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   
@@ -221,6 +236,19 @@ export const DocumentEditor = memo(function DocumentEditor({
     editorRef.current?.tableOfContents(action);
   }, [readOnly]);
 
+  const handleResolve = useCallback((action: 'accept' | 'reject', target: { change: ReviewChange } | { author?: string }) => {
+    // An explicit command by the reader: allowed in the Final and Original views too, not when the host made the editor read-only.
+    if (readOnlyProp || !editorView) return;
+    const command = 'change' in target ? resolveChange(target.change.id, action) : resolveAll(action, target.author);
+    command(editorView.state, editorView.dispatch);
+    // The list is refreshed now (not after the typing pause), so a second click straight after the first never uses an id that is gone.
+    if (showReviewRef.current) setChanges(listChanges(editorView.state.doc));
+  }, [readOnlyProp, editorView]);
+
+  const handleGoToChange = useCallback((change: ReviewChange) => {
+    editorRef.current?.goTo?.(change.from);
+  }, []);
+
   const handleRemoveSectionBreak = useCallback(() => {
     if (readOnly || !editorView) return;
     createCommands(docsSchema).removeSectionBreak()(editorView.state, editorView.dispatch);
@@ -295,11 +323,24 @@ export const DocumentEditor = memo(function DocumentEditor({
     // The walk over the whole document waits until typing pauses, so a long document is not scanned on every key.
     clearTimeout(authorsTimer.current);
     authorsTimer.current = setTimeout(() => {
-      const next = revisionAuthors(collectRevisions(state.doc, false));
+      // The colours are shared out among every author of the document (a move's other end can have another author than the change lists).
+      const everyone = documentRevisionAuthors(state.doc);
+      // A document without a tracked change has no list to build (the common case).
+      const nextChanges = everyone.length === 0 ? [] : listChanges(state.doc);
+      const next = revisionAuthors(nextChanges, everyone);
+      setPalette((prev) => (prev.length === everyone.length && prev.every((name, i) => name === everyone[i]) ? prev : everyone));
       // Keep the old list (and skip a render) when nothing in it changed.
       setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
+      // The list of changes (new ids with every edit) is only kept while the panel shows it, so typing does not render the editor.
+      if (showReviewRef.current) setChanges(nextChanges);
     }, AUTHORS_DELAY_MS);
   }, []);
+
+  // Opening the panel lists the changes as they are now; closing it stops keeping the list.
+  useEffect(() => {
+    showReviewRef.current = showReview;
+    if (showReview && editorView) setChanges(listChanges(editorView.state.doc));
+  }, [showReview, editorView]);
 
   const handleSelectionChange = useCallback((state: EditorState) => {
     const marks = activeMarksPluginKey.getState(state) as ActiveMarks | undefined;
@@ -350,6 +391,7 @@ export const DocumentEditor = memo(function DocumentEditor({
     setPendingComment({ from, to, quote });
     setActiveThreadId(null);
     setShowComments(true);
+    setShowReview(false);
   }, [editorView]);
 
   // Create the thread and apply the comment mark over the captured range.
@@ -416,6 +458,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         setActiveThreadId(threadId);
         setPendingComment(null);
         setShowComments(true);
+        setShowReview(false);
       }
     };
     root.addEventListener('click', onClick);
@@ -534,6 +577,11 @@ export const DocumentEditor = memo(function DocumentEditor({
             onAddComment={startComment}
             onInsertNote={handleInsertNote}
             onTableOfContents={handleTableOfContents}
+            onToggleReview={() => {
+              setShowReview((v) => !v);
+              setShowComments(false);
+            }}
+            reviewOpen={showReview}
             onInsertSectionBreak={handleInsertSectionBreak}
             onRemoveSectionBreak={handleRemoveSectionBreak}
             canRemoveSectionBreak={sections.length > 1}
@@ -562,6 +610,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         </div>
       )}
       
+      <RevisionViewBanner view={revisionView} onSwitchToMarkup={() => setRevisionView('markup')} />
       <RevisionLegend authors={authors} />
 
       {/* Editor area with vertical ruler */}
@@ -611,7 +660,33 @@ export const DocumentEditor = memo(function DocumentEditor({
           onFooterChange={handleFooterChange}
           onHeaderFooterLinkChange={handleHeaderFooterLinkChange}
           collabHandle={docModel.getCollabHandle()}
+          revisionView={revisionView}
         />
+
+        {/* Review panel — tracked changes, in the place of the comments sidebar */}
+        {showReview && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: 320,
+              zIndex: 30,
+              boxShadow: '-8px 0 24px -12px rgba(15, 23, 42, 0.15)',
+            }}
+          >
+            <ReviewPanel
+              changes={changes}
+              palette={palette}
+              view={revisionView}
+              onViewChange={setRevisionView}
+              onResolve={readOnlyProp ? undefined : handleResolve}
+              onGoTo={handleGoToChange}
+              onClose={() => setShowReview(false)}
+            />
+          </div>
+        )}
 
         {/* Comments sidebar — a floating overlay so the page + ruler stay put */}
         {!readOnly && showComments && (
