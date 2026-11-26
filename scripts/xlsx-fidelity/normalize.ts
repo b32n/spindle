@@ -27,7 +27,8 @@ const DATA_URL = /^data:([^;,]*)(?:;[^,]*)?;base64,([\s\S]*)$/;
 
 /**
  * Replace binary payloads (typed arrays, buffers and base64 data URLs) with their size and SHA-256, so a model
- * that carries images stays small and stable. Dates become ISO strings, maps and sets arrays. Everything else is returned unchanged.
+ * that carries images stays small and stable. Dates become ISO strings, maps and sets arrays. Everything else
+ * is returned unchanged.
  */
 export function digestBinaries(value: unknown): Json {
   if (value instanceof Uint8Array) return { bytes: value.length, sha256: sha256(value) };
