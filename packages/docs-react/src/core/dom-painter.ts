@@ -295,7 +295,8 @@ export class DomPainter {
     if (this.currentLayout.pages.some((p) => p.top !== undefined)) {
       // Pages of different heights: look the range up in the page positions instead.
       firstVisible = findPageAtY(this.currentLayout, scrollTop);
-      lastVisible = findPageAtY(this.currentLayout, scrollTop + viewportHeight);
+      // One page more than the one under the bottom edge, as the uniform formula (ceil) gives.
+      lastVisible = Math.min(this.currentLayout.pages.length - 1, findPageAtY(this.currentLayout, scrollTop + viewportHeight) + 1);
     }
     
     // Add overscan
