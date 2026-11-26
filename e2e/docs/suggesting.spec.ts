@@ -66,6 +66,11 @@ test.describe('docs: Suggesting mode', () => {
     for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+ArrowRight');
     await doc.toolbar('Bold').click();
     await expect(formats().filter({ hasText: 'Hello' })).toHaveCount(1);
+    // The selection is still "Hello": a second format reaches the same text.
+    await doc.toolbar('Italic').click();
+    await expect(formats().filter({ hasText: 'Hello' })).toHaveCount(1);
+    await expect(formats().filter({ hasText: 'Hello' })).toHaveCSS('font-style', 'italic');
+    await expect(formats().filter({ hasText: 'Hello' })).toHaveCSS('font-weight', '700');
     await expect(page.getByTestId('revision-legend')).toContainText('Alice');
 
     // Download keeps them as Word's tracked changes by the user.

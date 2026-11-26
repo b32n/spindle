@@ -375,7 +375,12 @@ lockstep.
   What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list…) is left as
   the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. Changes from collaborators, undo
   and redo, and accepting or rejecting in the review panel are never suggested. New `TrueLayoutEditor` props `suggesting`,
-  `suggestAuthor` and `onSuggestionNotice`; new `ModeSwitch` component and `EditorMode` type.
+  `suggestAuthor` and `onSuggestionNotice`; new `ModeSwitch` component and `EditorMode` type. Formatting several marks in one
+  transaction (clear formatting) records the formatting before the first of them, the selection stays a range after a format,
+  a line break typed or deleted is kept as text of the tracked run (so it syncs with its change), and notices go out after the
+  transaction was applied. Limits: only the body text is suggested (edits in headers, footers and note texts are made directly,
+  without a notice), and a change is continued by the same author name, with no time limit, so two people with one display name
+  share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses).
 
 ### Changed
 

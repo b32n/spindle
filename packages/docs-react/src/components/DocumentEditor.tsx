@@ -156,9 +156,10 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [notice, setNotice] = useState<string | null>(null);
   const handleModeChange = useCallback((next: EditorMode) => {
     setOwnMode(next);
-    setNotice(null);
     onModeChange?.(next);
   }, [onModeChange]);
+  // A notice is about the mode it came in (also when a host changes the mode itself).
+  useEffect(() => setNotice(null), [mode]);
   const handleSuggestionNotice = useCallback((notices: string[]) => setNotice(notices.join(' ')), []);
   useEffect(() => {
     if (!notice) return;
@@ -643,7 +644,7 @@ export const DocumentEditor = memo(function DocumentEditor({
       {(authors.length > 0 || notice || (showModeSwitch && !readOnlyProp)) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', borderBottom: '1px solid #e8eaed', padding: '2px 16px', minHeight: 30 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <RevisionLegend authors={authors} />
+            <RevisionLegend authors={authors} bare />
           </div>
           {notice && (
             <span role="status" data-testid="suggesting-notice" style={{ font: '12px/16px Arial, sans-serif', color: '#b06000', background: '#fef7e0', borderRadius: 4, padding: '2px 8px' }}>

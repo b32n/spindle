@@ -64,6 +64,8 @@ const doCommand = (state: EditorState, command: (s: EditorState, d?: (tr: Transa
 };
 const settleAll = (state: EditorState, action: 'accept' | 'reject') => doCommand(state, resolveAll(action));
 const head = (state: EditorState) => state.selection.head;
+/** Notices go out in a microtask: let it run. */
+const flush = () => Promise.resolve();
 
 describe('typing', () => {
   it('inserts text marked as inserted by the author, with the time, and leaves the caret after it', () => {
@@ -300,7 +302,7 @@ describe('formatting', () => {
 });
 
 describe('what is not recorded', () => {
-  it('is left as the user made it, and the host is told', () => {
+  it('is left as the user made it, and the host is told', async () => {
     const state = stateOf([para(run('abc')), para(run('def'))], 2);
     const table = docsSchema.nodeFromJSON({
       type: 'table',
@@ -308,16 +310,18 @@ describe('what is not recorded', () => {
     });
     const next = apply(state, state.tr.insert(state.doc.child(0).nodeSize, table));
     expect(next.doc.childCount).toBe(3);
+    await flush();
     expect(setup.notices.flat().join(' ')).toMatch(/structure that was inserted could not be suggested/);
     // A list made from a paragraph (wrapping) is applied directly too.
     setup.notices = [];
     const list = docsSchema.nodes.bullet_list;
     const wrapped = apply(state, state.tr.wrap(state.doc.resolve(1).blockRange()!, [{ type: list }, { type: docsSchema.nodes.list_item }]));
     expect(wrapped.doc.child(0).type.name).toBe('bullet_list');
+    await flush();
     expect(setup.notices.flat().join(' ')).toMatch(/cannot be suggested and was made directly/);
   });
 
-  it('deleting a table or a list is made directly, with a notice', () => {
+  it('deleting a table or a list is made directly, with a notice', async () => {
     const blocks: Block[] = [
       { id: 'l', type: 'list-item', listType: 'bullet', level: 0, content: [run('a')] } as Block,
       para(run('after')),
@@ -325,6 +329,7 @@ describe('what is not recorded', () => {
     const state = stateOf(blocks);
     const next = apply(state, state.tr.delete(0, state.doc.child(0).nodeSize));
     expect(texts(next.doc)).toEqual(['after']);
+    await flush();
     expect(setup.notices.flat().join(' ')).toMatch(/was deleted directly/);
   });
 });
@@ -349,10 +354,11 @@ class UnknownStep extends Step {
 }
 
 describe('when it does nothing', () => {
-  it('tells the host about a step it does not know, and changes nothing', () => {
+  it('tells the host about a step it does not know, and changes nothing', async () => {
     const state = stateOf([para(run('abc'))], 2);
     const next = apply(state, state.tr.step(new UnknownStep()));
     expect(next.doc.eq(state.doc)).toBe(true);
+    await flush();
     expect(setup.notices.flat().join(' ')).toMatch(/A change that cannot be suggested was made directly/);
   });
 
@@ -405,5 +411,135 @@ describe('when it does nothing', () => {
     const state = stateOf([para(run('abc'))], 3);
     const next = apply(state, state.tr.replaceSelectionWith(pasted.firstChild!, false));
     expect(runs(next.doc)).toEqual(['ab:', 'P:insertion', 'c:']);
+  });
+});
+
+describe('several steps in one transaction', () => {
+  const formatOf = (state: EditorState) => {
+    const found: Array<Record<string, unknown>> = [];
+    state.doc.descendants((n) => {
+      const mark = n.marks.find((m) => m.type.name === 'formatChange');
+      if (mark) found.push(mark.attrs.previous as Record<string, unknown>);
+    });
+    return found;
+  };
+  const bold = docsSchema.marks.bold;
+  const italic = docsSchema.marks.italic;
+
+  it('records the formatting before the first step, so rejecting brings back every mark that was removed (clear formatting)', () => {
+    const state = stateOf([para(run('abcd', { bold: true, italic: true }))], 1, 5);
+    const next = apply(state, state.tr.removeMark(1, 5, bold).removeMark(1, 5, italic));
+    expect(next.doc.child(0).child(0).marks.some((m) => m.type.name === 'bold' || m.type.name === 'italic')).toBe(false);
+    expect(formatOf(next)).toEqual([{ bold: true, italic: true }]);
+    const rejected = settleAll(next, 'reject');
+    const marks = rejected.doc.child(0).child(0).marks.map((m) => m.type.name);
+    expect(marks).toEqual(expect.arrayContaining(['bold', 'italic']));
+    expect(marks).not.toContain('formatChange');
+  });
+
+  it('records the formatting before the first step when marks are added one after the other, and none when they cancel out', () => {
+    const state = stateOf([para(run('abcd'))], 1, 5);
+    const next = apply(state, state.tr.addMark(1, 5, bold.create()).addMark(1, 5, italic.create()));
+    expect(formatOf(next)).toEqual([{}]);
+    const rejected = settleAll(next, 'reject');
+    expect(rejected.doc.child(0).child(0).marks.map((m) => m.type.name)).toEqual([]);
+    const cancelled = apply(state, state.tr.addMark(1, 5, bold.create()).removeMark(1, 5, bold));
+    expect(formatOf(cancelled)).toEqual([]);
+  });
+
+  it('overlapping marks added in one transaction record the text each covers with what it was', () => {
+    const state = stateOf([para(run('abcdef'))], 1, 7);
+    const next = apply(state, state.tr.addMark(1, 5, bold.create()).addMark(3, 7, italic.create()));
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['abcdef']);
+    const rejected = settleAll(next, 'reject');
+    const names: string[] = [];
+    rejected.doc.child(0).forEach((n) => names.push(n.marks.map((m) => m.type.name).join('+') || '-'));
+    expect(names).toEqual(['-']);
+  });
+});
+
+describe('the selection', () => {
+  it('stays a range after a format, so a second format reaches the same text', () => {
+    const state = stateOf([para(run('abcd'))], 2, 4);
+    const bold = apply(state, state.tr.addMark(2, 4, docsSchema.marks.bold.create()));
+    expect([bold.selection.from, bold.selection.to]).toEqual([2, 4]);
+    const italic = apply(bold, bold.tr.addMark(2, 4, docsSchema.marks.italic.create()));
+    expect([italic.selection.from, italic.selection.to]).toEqual([2, 4]);
+    expect(runs(italic.doc).join(' ')).toContain('formatChange');
+  });
+
+  it('stays a range after a paragraph is aligned', () => {
+    const state = stateOf([para(run('abcd')), para(run('efgh'))], 2, 4);
+    const aligned = apply(state, state.tr.setNodeMarkup(0, undefined, { ...state.doc.child(0).attrs, alignment: 'center' }));
+    expect([aligned.selection.from, aligned.selection.to]).toEqual([2, 4]);
+    expect(aligned.doc.child(0).attrs.revision).toMatchObject({ formatChange: { author: 'Ada' } });
+  });
+});
+
+describe('what is inserted that cannot be recorded', () => {
+  it('is not marked as inserted, as the notice says, and the paragraphs around it are not touched', async () => {
+    const state = stateOf([para(run('abc')), para(run('def'))], 2);
+    const table = docsSchema.nodeFromJSON({
+      type: 'table',
+      content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'cell' }] }] }] }],
+    });
+    const next = apply(state, state.tr.insert(state.doc.child(0).nodeSize, table));
+    expect(changeUnits(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(/inserted directly/);
+  });
+});
+
+describe('notices', () => {
+  it('go out after the transaction was applied, once', async () => {
+    const state = stateOf([para(run('abc')), para(run('def'))], 2);
+    const table = docsSchema.nodeFromJSON({ type: 'table', content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [{ type: 'paragraph' }] }] }] });
+    apply(state, state.tr.insert(state.doc.child(0).nodeSize, table));
+    expect(setup.notices).toEqual([]);
+    await flush();
+    expect(setup.notices).toHaveLength(1);
+  });
+});
+
+describe('paragraph marks in more places', () => {
+  it('Backspace in an empty paragraph the author did not insert marks its mark deleted, and keeps the caret', () => {
+    const state = stateOf([para(run('abc')), para(), para(run('def'))], 6);
+    const next = doCommand(state, joinBackward);
+    expect(next.doc.childCount).toBe(3);
+    expect(listChanges(next.doc).map((c) => c.kind)).toEqual(['paragraphDeleted']);
+    expect(texts(settleAll(next, 'accept').doc)).toEqual(['abc', 'def']);
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['abc', '', 'def']);
+  });
+
+  it('splitting a paragraph that carries a change of its mark gives the new mark to the first half and keeps the change on the second', () => {
+    const state = stateOf([{ id: 'p', type: 'paragraph', content: [run('abcd')], revision: { insertion: { id: 'x', author: 'Bo' } } } as Block], 3);
+    const next = doCommand(state, splitBlock);
+    expect(texts(next.doc)).toEqual(['ab', 'cd']);
+    const by = listChanges(next.doc).map((c) => [c.kind, c.author]);
+    expect(by).toContainEqual(['paragraphInserted', 'Ada']);
+    expect(by).toContainEqual(['paragraphInserted', 'Bo']);
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['abcd']);
+  });
+});
+
+describe('line breaks', () => {
+  const br = docsSchema.nodes.hard_break;
+
+  it('a break typed is kept in tracked text, so it is part of the insertion and goes with it when rejected', () => {
+    const state = stateOf([para(run('abcd'))], 3);
+    const next = apply(state, state.tr.replaceSelectionWith(br.create()));
+    expect(runs(next.doc)).toEqual(['ab:', '\n:insertion', 'cd:']);
+    expect(listChanges(next.doc).map((c) => [c.kind, c.text])).toEqual([['insertion', '\n']]);
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['abcd']);
+    expect(texts(settleAll(next, 'accept').doc)).toEqual(['ab\ncd']);
+  });
+
+  it('a break deleted stays, marked deleted, and rejecting gets it back', () => {
+    const state = stateOf([para(run('ab'), run('\n'), run('cd'))], 4);
+    expect(state.doc.child(0).child(1).type).toBe(br);
+    const next = apply(state, state.tr.delete(3, 4));
+    expect(runs(next.doc)).toEqual(['ab:', '\n:deletion', 'cd:']);
+    expect(texts(settleAll(next, 'accept').doc)).toEqual(['abcd']);
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['ab\ncd']);
   });
 });

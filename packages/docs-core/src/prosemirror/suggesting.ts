@@ -50,6 +50,8 @@ interface Context {
   now: () => string;
   newId: () => string;
   notices: Set<string>;
+  /** The `previous` of the formatting changes written in this call, so an earlier step of the same transaction can replace it. */
+  recorded: WeakSet<object>;
 }
 
 type StepFields = { from: number; to: number; slice: Slice };
@@ -108,6 +110,13 @@ function markInserted(ctx: Context, from: number, to: number): void {
   const meta = neighbour(ctx, from, insertionType) ?? neighbour(ctx, to, insertionType) ?? freshMeta(ctx);
   out.addMark(from, to, markOf(insertionType, meta));
   for (const { pos } of paragraphMarksIn(out.doc, from, to)) patchRevision(ctx, pos, { insertion: meta });
+  // A line break is kept in the text of a tracked run: the Y binding keeps marks on text only, not on a break node.
+  const breaks: number[] = [];
+  out.doc.nodesBetween(from, to, (node, pos) => {
+    if (node.type === docsSchema.nodes.hard_break) breaks.push(pos);
+    return true;
+  });
+  for (const pos of breaks.reverse()) out.replaceWith(pos, pos + 1, docsSchema.text('\n', out.doc.nodeAt(pos)!.marks));
 }
 
 /** The fragment with everything in it marked deleted; text this author inserted is left out. */
@@ -116,7 +125,9 @@ function markDeleted(ctx: Context, content: Fragment, meta: RevisionMeta): Fragm
   content.forEach((node) => {
     if (node.isInline) {
       if (node.marks.some((m) => m.type === insertionType && m.attrs.author === ctx.author)) return;
-      nodes.push(node.marks.some((m) => m.type === deletionType) ? node : node.mark(markOf(deletionType, meta).addToSet(node.marks)));
+      // A deleted line break is kept as text too (see `markInserted`).
+      const kept = node.type === docsSchema.nodes.hard_break ? docsSchema.text('\n', node.marks) : node;
+      nodes.push(kept.marks.some((m) => m.type === deletionType) ? kept : kept.mark(markOf(deletionType, meta).addToSet(kept.marks)));
     } else {
       nodes.push(node.copy(markDeleted(ctx, node.content, meta)));
     }
@@ -133,8 +144,9 @@ function replaceStep(ctx: Context, step: ReplaceStep, docBefore: PmNode, after: 
   let caretAt: number | null = null;
 
   if (slice.size > 0) {
-    if (!isRecordable(slice.content)) ctx.notices.add('A list, table, image or other structure that was inserted could not be suggested and was inserted directly.');
-    markInserted(ctx, start, end);
+    // Structure that cannot be recorded stays as it was inserted, unmarked, as the notice says.
+    if (isRecordable(slice.content)) markInserted(ctx, start, end);
+    else ctx.notices.add('A list, table, image or other structure that was inserted could not be suggested and was inserted directly.');
   }
 
   if (to > from) {
@@ -196,12 +208,20 @@ function markStep(ctx: Context, step: AddMarkStep | RemoveMarkStep, docBefore: P
       const nb = Math.min(nowPos + now.nodeSize, b);
       if (now.marks.some((m) => m.type === insertionType && m.attrs.author === ctx.author)) return false;
       const existing = now.marks.find((m) => m.type === formatChangeType);
-      if (existing) {
+      if (existing && !ctx.recorded.has(existing.attrs.previous as object)) {
         // Formatting that is back to what it was is no change.
         if (existing.attrs.author === ctx.author && sameFormat(existing.attrs.previous, runFormatOf(now.marks))) out.removeMark(na, nb, formatChangeType);
         return false;
       }
-      out.addMark(na, nb, markOf(formatChangeType, meta, { previous }));
+      // Steps are handled from the last to the first: when a later step of this transaction recorded the text already, the
+      // formatting before this earlier step is the older, so it replaces that record (the first record is what Reject restores).
+      if (existing && sameFormat(previous, runFormatOf(now.marks))) {
+        out.removeMark(na, nb, formatChangeType);
+        return false;
+      }
+      const attrs = { previous };
+      ctx.recorded.add(previous);
+      out.addMark(na, nb, markOf(formatChangeType, existing ? { id: String(existing.attrs.revisionId), author: ctx.author, ...(existing.attrs.date && { date: String(existing.attrs.date) }) } : meta, attrs));
       return false;
     });
     return false;
@@ -228,6 +248,16 @@ function paragraphChanged(ctx: Context, before: PmNode, pos: number): void {
   patchRevision(ctx, pos, { formatChange: { ...freshMeta(ctx), previous } });
 }
 
+/**
+ * Tell the host what was done directly. The plugin runs inside `state.apply`, where a host must not set its own state, and
+ * a transaction applied only to look at it would tell twice, so the notice goes out after the current task step.
+ */
+function notify(options: SuggestingOptions, notices: Set<string>): void {
+  if (notices.size === 0 || !options.onNotice) return;
+  const list = [...notices];
+  queueMicrotask(() => options.onNotice?.(list));
+}
+
 /** The changes a suggestion records, from the transactions the plugin was given; null when there is nothing to do. */
 export function suggestChanges(trs: readonly Transaction[], oldState: EditorState, newState: EditorState, options: SuggestingOptions): Transaction | null {
   if (!options.isActive()) return null;
@@ -242,6 +272,7 @@ export function suggestChanges(trs: readonly Transaction[], oldState: EditorStat
     now: options.now ?? (() => new Date().toISOString()),
     newId: options.newId ?? randomId,
     notices: new Set(),
+    recorded: new WeakSet(),
   };
   const all = new Mapping(steps.map(({ step }) => step.getMap()));
   const old = oldState.selection;
@@ -275,13 +306,14 @@ export function suggestChanges(trs: readonly Transaction[], oldState: EditorStat
 
   const out = ctx.out;
   if (!out.docChanged) {
-    if (ctx.notices.size > 0) options.onNotice?.([...ctx.notices]);
+    notify(options, ctx.notices);
     return null;
   }
-  const head = caretAt ?? out.mapping.map(newState.selection.head, 1);
-  out.setSelection(TextSelection.near(out.doc.resolve(Math.min(head, out.doc.content.size))));
+  // The selection stays as it was mapped through what was done (a range formatted stays selected); only a deletion, which
+  // puts the text back, says where the caret goes.
+  if (caretAt !== null) out.setSelection(TextSelection.near(out.doc.resolve(Math.min(caretAt, out.doc.content.size))));
   out.setMeta('suggesting$', true);
-  if (ctx.notices.size > 0) options.onNotice?.([...ctx.notices]);
+  notify(options, ctx.notices);
   return out;
 }
 

@@ -25,4 +25,15 @@ describe('RevisionLegend', () => {
     // The label sits outside the list, which holds list items only.
     expect(html).toMatch(/<span[^>]*>Tracked changes<\/span><div role="list"/);
   });
+
+  it('has a band of its own (padding, background, border) unless it is drawn bare', () => {
+    const authors = [{ name: 'Ada', color: '#1a73e8', count: 1 }];
+    const band = renderToStaticMarkup(<RevisionLegend authors={authors} />);
+    expect(band).toContain('padding:4px 16px');
+    expect(band).toContain('border-bottom:1px solid #e8eaed');
+    const bare = renderToStaticMarkup(<RevisionLegend authors={authors} bare />);
+    expect(bare).toContain('padding:4px 0');
+    expect(bare).not.toContain('border-bottom');
+    expect(bare).not.toContain('background:#ffffff');
+  });
 });
