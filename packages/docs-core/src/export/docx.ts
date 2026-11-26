@@ -209,7 +209,7 @@ function toBlock(
         rows: block.rows.map((row) => ({
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
-          ...(row.revision && { revision: row.revision }),
+          ...(row.revision && { revision: JSON.parse(JSON.stringify(row.revision)) }),
           cells: row.cells.map((cell) => ({
             content: toInlineContent(cell.content, title, textStylePool),
             ...(cell.blocks && { blocks: cell.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) }),
@@ -677,7 +677,7 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
           id: generateRowId(),
           ...(row.repeatHeader && { repeatHeader: true }),
           ...(row.cantSplit && { cantSplit: true }),
-          ...(row.revision && { revision: row.revision }),
+          ...(row.revision && { revision: JSON.parse(JSON.stringify(row.revision)) }),
           cells: row.cells.map((cell) => ({
             id: generateCellId(),
             content: toInlineContentFromDocx(cell.content, textStylePool),

@@ -11,11 +11,11 @@ import { docsSchema } from './prosemirror/schema';
 import { blocksToPmDoc, proseMirrorToDocument, revisionOf } from './prosemirror/sync';
 import { DocumentImpl } from './document';
 import { getCollabBlockers } from './collab/blockers';
-import { getYDocFields, hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
+import { COLLAB_SCHEMA_VERSION, CollabSchemaVersionError, assertSchemaVersion, getYDocFields, hydrateYDocFromData, serializeYDocToData } from './collab/y-schema';
 import { exportToDocx, importFromDocx } from './export/docx';
 import { REVISION_COLORS, assignAuthorColors, authorColor, collectRevisions, documentRevisionAuthors, revisionAuthors, sameRevisionAuthors } from './revisions';
 import { DEFAULT_PAGE_CONFIG } from './types';
-import type { Block, DocumentData, InlineContent, ParagraphBlock } from './types';
+import type { Block, DocumentData, InlineContent, ParagraphBlock, RunFormat } from './types';
 
 const ADA = { id: '1', author: 'Ada', date: '2024-05-06T07:08:09Z' };
 const BO = { id: '2', author: 'Bo' };
@@ -415,5 +415,53 @@ describe('moves, formatting changes, paragraph marks and rows', () => {
     const mark = formatChange.create({ revisionId: '1', author: 'A', previous: { bold: true } });
     expect(formatChange.spec.toDOM!(mark, true)).toEqual(['span', expect.objectContaining({ 'data-format-change': '1', 'data-format-previous': '{"bold":true}', class: 'revision-format-change' }), 0]);
     expect((formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => unknown)({ getAttribute: () => null })).toBe(false);
+  });
+
+  it('keep a tracked paragraph mark in a table cell of one paragraph when the document is saved', () => {
+    const cellParagraph: ParagraphBlock = { id: 'c', type: 'paragraph', content: [{ type: 'text', text: 'cell' }], revision: { insertion: { id: '4', author: 'Ada' } } };
+    const table: Block = { id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'k', content: [{ type: 'text', text: 'cell' }], blocks: [cellParagraph] }] }] } as never;
+    const saved = viaPm([table])[0] as Extract<Block, { type: 'table' }>;
+    expect(saved.rows[0].cells[0].blocks).toMatchObject([{ type: 'paragraph', revision: { insertion: { id: '4', author: 'Ada' } } }]);
+    // Without a change the cell stays the plain one it was.
+    const plainParagraph: ParagraphBlock = { id: 'c', type: 'paragraph', content: [{ type: 'text', text: 'cell' }] };
+    const plainTable: Block = { id: 't', type: 'table', rows: [{ id: 'r', cells: [{ id: 'k', content: [{ type: 'text', text: 'cell' }], blocks: [plainParagraph] }] }] } as never;
+    const plain = viaPm([plainTable])[0] as Extract<Block, { type: 'table' }>;
+    expect(plain.rows[0].cells[0].blocks).toBeUndefined();
+  });
+
+  it('keep every field of a run format through copy and paste (HTML)', () => {
+    // Typed as a record of every field, so a field added to the run format has to be added here (and to the sanitiser).
+    const everything: Required<RunFormat> = {
+      bold: true, italic: true, underline: true, strikethrough: true, superscript: true, subscript: true, smallCaps: true, allCaps: true, hidden: true,
+      fontFamily: 'Arial', fontFamilyEastAsia: 'MS Mincho', fontFamilyComplex: 'Tahoma', fontSize: 13, color: '#112233', backgroundColor: '#445566', namedStyleId: 'Strong',
+    };
+    const { formatChange } = docsSchema.marks;
+    const mark = formatChange.create({ revisionId: '1', author: 'A', previous: everything });
+    const dom = formatChange.spec.toDOM!(mark, true) as unknown as [string, Record<string, string>];
+    const read = (formatChange.spec.parseDOM![0].getAttrs as (d: unknown) => { previous: unknown })({ getAttribute: (n: string) => dom[1][n] ?? null });
+    expect(read.previous).toEqual(everything);
+  });
+});
+
+describe('the collaboration schema version', () => {
+  it('is 7: the formatChange mark and the revision attributes need a client that knows them', () => {
+    // 6 added the insertion and deletion marks; a client at 6 drops formatChange marks and the new attributes.
+    expect(COLLAB_SCHEMA_VERSION).toBe(7);
+  });
+
+  it('is what a room is written with, and a client that supports less refuses it', () => {
+    const ydoc = new Y.Doc();
+    hydrateYDocFromData(ydoc, dataWith([PARAGRAPH]));
+    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(7);
+    expect(() => assertSchemaVersion(ydoc)).not.toThrow();
+    // A build from before the formatChange mark (supporting 6) refuses the room.
+    let refused: unknown;
+    try {
+      assertSchemaVersion(ydoc, 6);
+    } catch (e) {
+      refused = e;
+    }
+    expect(refused).toBeInstanceOf(CollabSchemaVersionError);
+    expect(refused).toMatchObject({ roomVersion: 7, supportedVersion: 6 });
   });
 });

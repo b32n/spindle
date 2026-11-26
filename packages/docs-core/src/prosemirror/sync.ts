@@ -594,7 +594,8 @@ function pmCellContent(cellNode: PmNode, startIndex: number, stylePool?: TextSty
   const firstIndex = paragraphs.findIndex((b) => inline(b).some((c) => c.type !== 'bookmark'));
   // Bookmarks of the paragraphs before the first one with content stay in front of it
   const content = firstIndex < 0 ? inline(paragraphs[0]) : [...paragraphs.slice(0, firstIndex).flatMap(inline), ...inline(paragraphs[firstIndex])];
-  const plain = blocks.length === 1 && blocks[0].type === 'paragraph';
+  // A paragraph with a tracked change of its mark keeps its block, so the change is not lost on save and export.
+  const plain = blocks.length === 1 && blocks[0].type === 'paragraph' && !blocks[0].revision;
   return { content, ...(!plain && blocks.length > 0 ? { blocks } : {}) };
 }
 

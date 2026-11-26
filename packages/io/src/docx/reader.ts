@@ -145,6 +145,9 @@ function flattenInline(nodes: XmlNode[]): XmlNode[] {
   });
 }
 
+/** The numbers given to changes without an id of their own, unique within one import. */
+const anonymousRevisionId = (ctx: PartContext) => () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`;
+
 /** The tracked change a `w:ins` / `w:del` element records. A change without an id gets the next number of its import. */
 function revisionMeta(node: XmlNode, fallbackId: () => string): DocRevisionMeta {
   const attrs = attrsOf(node);
@@ -170,7 +173,7 @@ function paragraphRevision(pPr: XmlNode | undefined, ctx: PartContext): DocBlock
   const markProps = find(kids, 'w:rPr');
   const mark = (tags: string[]) => {
     const el = markProps ? childrenOf(markProps).find((k) => tags.includes(tagOf(k) ?? '')) : undefined;
-    return el ? revisionMeta(el, anonymousRevisionId) : undefined;
+    return el ? revisionMeta(el, anonymousRevisionId(ctx)) : undefined;
   };
   const insertion = mark(['w:ins', 'w:moveTo']);
   const deletion = mark(['w:del', 'w:moveFrom']);
@@ -183,7 +186,7 @@ function paragraphRevision(pPr: XmlNode | undefined, ctx: PartContext): DocBlock
     const effective = ctx.styles.paragraph(oldStyleId, parsePPr(oldPPr));
     const oldNamed = ctx.styles.namedParagraphStyle(oldStyleId);
     const previous: DocParagraphFormat = { ...toDocParagraphStyle(effective), ...(oldNamed && { namedStyleId: oldNamed }), ...(effective.headingLevel && { headingLevel: effective.headingLevel }) };
-    formatChange = { ...revisionMeta(change, anonymousRevisionId), previous };
+    formatChange = { ...revisionMeta(change, anonymousRevisionId(ctx)), previous };
   }
   if (!insertion && !deletion && !formatChange) return undefined;
   return { ...(insertion && { insertion }), ...(deletion && { deletion }), ...(formatChange && { formatChange }) };
@@ -263,7 +266,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     const characterStyle = ctx.styles.namedCharacterStyle(rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined);
     const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
     const change = rPr ? find(childrenOf(rPr), 'w:rPrChange') : undefined;
-    const runRevision: DocRevision | undefined = change ? { ...revision, formatChange: { ...revisionMeta(change, nextRevisionId), previous: previousRunFormat(change, pStyleId, ctx) } } : revision;
+    const runRevision: DocRevision | undefined = change ? { ...revision, formatChange: { ...revisionMeta(change, anonymousRevisionId(ctx)), previous: previousRunFormat(change, pStyleId, ctx) } } : revision;
     const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }), ...(runRevision && !top() && { revision: runRevision }) };
     let text = '';
     /** A reference followed by its custom mark (`w:customMarkFollows`): the text after it in the run is that mark. */
@@ -394,7 +397,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         const outer = revision;
         // The two ends of a move are a deletion (from) and an insertion (to) that share the name of the move.
         const moveId = tag === 'w:moveFrom' || tag === 'w:moveTo' ? openMove[tag === 'w:moveFrom' ? 'moveFrom' : 'moveTo'] : undefined;
-        const meta = { ...revisionMeta(child, () => `r${++(ctx.anonymousRevisions ??= { next: 0 }).next}`), ...(moveId && { moveId }) };
+        const meta = { ...revisionMeta(child, anonymousRevisionId(ctx)), ...(moveId && { moveId }) };
         revision = { ...outer, ...(tag === 'w:ins' || tag === 'w:moveTo' ? { insertion: meta } : { deletion: meta }) };
         consumeRuns(childrenOf(child), target);
         revision = outer;
@@ -908,7 +911,7 @@ function parseTable(tblNode: XmlNode, outerCtx: PartContext, numbering: Numberin
     const cantSplit = isOnEl(find(trPrKids, 'w:cantSplit'));
     const rowChange = (tag: string) => {
       const el = find(trPrKids, tag);
-      return el ? revisionMeta(el, anonymousRevisionId) : undefined;
+      return el ? revisionMeta(el, anonymousRevisionId(ctx)) : undefined;
     };
     const rowInsertion = rowChange('w:ins');
     const rowDeletion = rowChange('w:del');
@@ -1290,7 +1293,6 @@ async function readZipText(zip: JSZip, path: string): Promise<string | undefined
 }
 
 export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResult> {
-  anonymousRevisions = 0;
   const warnings: string[] = [];
   const zip = await JSZip.loadAsync(bytes);
 

@@ -238,7 +238,11 @@ interface RevisionLosses {
   formatting: Map<string, number>;
 }
 
-/** The `w:p` that is the only block of its table cell: its paragraph mark and formatting changes are not kept (the cell holds just its inline content). */
+/**
+ * The `w:p` that is the only block of its table cell: its paragraph mark and formatting changes are not kept (the cell holds
+ * just its inline content). A cell whose only paragraph turns out to be a heading or a list item keeps its blocks, and so the
+ * change; those are counted here all the same (the scan does not read styles and numbering to tell).
+ */
 function lonelyCellParagraphs(root: XmlNode[]): Set<XmlNode> {
   const lonely = new Set<XmlNode>();
   walk(root, (cell, tag) => {
@@ -259,11 +263,9 @@ function revisionLosses(root: XmlNode[]): RevisionLosses {
   const out: RevisionLosses = { insertions: 0, deletions: 0, moves: 0, formatting: new Map() };
   const lonely = lonelyCellParagraphs(root);
   let lonelyParagraph = false;
-  let paragraph: XmlNode | undefined;
   walk(root, (node, tag, path) => {
     if (path.includes('w:txbxContent')) return;
     if (tag === 'w:p') {
-      paragraph = node;
       lonelyParagraph = lonely.has(node);
       return;
     }
@@ -273,7 +275,7 @@ function revisionLosses(root: XmlNode[]): RevisionLosses {
     }
     const inParagraphMark = path[path.length - 1] === 'w:rPr' && path[path.length - 2] === 'w:pPr' && !inRevisionProps(path);
     if (tag === 'w:rPrChange' && inParagraphMark) bump(out.formatting, 'rPrChange');
-    else if (tag === 'w:pPrChange' && path[path.length - 1] === 'w:pPr' && lonelyParagraph && paragraph) bump(out.formatting, 'pPrChange');
+    else if (tag === 'w:pPrChange' && path[path.length - 1] === 'w:pPr' && lonelyParagraph) bump(out.formatting, 'pPrChange');
     else if (inParagraphMark && lonelyParagraph) {
       if (tag === 'w:ins') out.insertions++;
       else if (tag === 'w:del') out.deletions++;

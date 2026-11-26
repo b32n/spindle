@@ -338,7 +338,7 @@ lockstep.
   `TableRow.revision` in docs-core. `docsSchema` gains the `formatChange` mark (attributes `revisionId`, `author`, `date`,
   `previous`; the formatting read back from pasted HTML is limited to known fields), a `moveId` attribute on the `insertion` and
   `deletion` marks, and a `revision` attribute on paragraphs, headings and table rows; all are plain ProseMirror content that
-  syncs over Yjs, within the collaboration `schemaVersion` 6 of the previous entry. The editor draws the two ends of a move with a
+  syncs over Yjs; the collaboration `schemaVersion` is now 7 (a client at 6 would drop the `formatChange` mark and the new attributes, so it refuses to join such a room). The editor draws the two ends of a move with a
   double line, a change of formatting alone with a dotted underline (the text keeps its colour), a bar in the margin beside a
   paragraph with a change, and a tint on the cells of an inserted or deleted row.
 

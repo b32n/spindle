@@ -141,6 +141,27 @@ describe('writing', () => {
     ]);
   });
 
+  it('writes a move that something splits as two ranges of the same name, and reads both back as one move', async () => {
+    const move = { deletion: { id: '2', author: 'Ada', moveId: 'm1' } };
+    const content: DocInline[] = [
+      { type: 'text', text: 'a', bold: true, revision: move },
+      { type: 'text', text: 'b', italic: true, revision: move },
+      { type: 'bookmark', name: 'here' },
+      { type: 'text', text: 'c', revision: move },
+    ];
+    const { xml } = await exportXml([{ type: 'paragraph', content }]);
+    // Runs of different formatting stay in one range; the bookmark splits it into two (as Word does for a bookmark in a move).
+    expect([...xml.matchAll(/<w:moveFromRangeStart [^>]*w:name="m1"/g)]).toHaveLength(2);
+    const ids = [...xml.matchAll(/<w:moveFromRange(?:Start|End) w:id="(\d+)"/g)].map((m) => m[1]);
+    expect(new Set(ids).size).toBe(2);
+    const back = ((await roundTrip([{ type: 'paragraph', content }]))[0] as Paragraph).content.filter((c) => c.type === 'text');
+    expect(back).toMatchObject([
+      { text: 'a', revision: { deletion: { id: '2', moveId: 'm1' } } },
+      { text: 'b', revision: { deletion: { id: '2', moveId: 'm1' } } },
+      { text: 'c', revision: { deletion: { id: '2', moveId: 'm1' } } },
+    ]);
+  });
+
   it('writes a formatting change of a run as w:rPrChange with the old formatting, and reads it back', async () => {
     const content: DocInline[] = [{ type: 'text', text: 'now', bold: true, revision: { formatChange: { ...META, previous: { italic: true, fontSize: 14, color: '#c00000' } } } }];
     const { xml } = await exportXml([{ type: 'paragraph', content }]);

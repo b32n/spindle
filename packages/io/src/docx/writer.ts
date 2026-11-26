@@ -335,7 +335,12 @@ class DocxBuilder {
     return out;
   }
 
-  /** The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next free number. A change is identified by kind, author and id, so two authors' changes with the same id stay two changes. */
+  /**
+   * The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next
+   * free number. A change split over several elements (by a comment range, a non-text inline, or runs of different formatting
+   * for a formatting change) is written with the same `w:id` on each, so it reads back as one change; Word accepts repeated ids.
+   * A change is identified by kind, author and id, so two authors' changes with the same id stay two changes.
+   */
   private revisionId(kind: string, meta: { id: string; author?: string }): number {
     const key = `${kind}:${meta.author ?? ''}:${meta.id}`;
     const known = this.revisionIds.get(key);

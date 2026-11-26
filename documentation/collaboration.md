@@ -303,7 +303,7 @@ edits, and the inverse operations broadcast to peers like any other edit.
   Shift+Enter in tracked text, and the DOCX reader makes the same.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
   1, the layout without section breaks; 2 adds section breaks; 3 adds content
-  controls; 4 adds footnote and endnote references; 5 adds the table of contents; 6 adds tracked changes). A client that finds a newer version
+  controls; 4 adds footnote and endnote references; 5 adds the table of contents; 6 adds tracked insertions and deletions; 7 adds formatting changes, moves, and changes of paragraph marks and table rows). A client that finds a newer version
   than it supports rejects `attachCollab` with a `CollabSchemaVersionError`
   instead of editing a document whose newer nodes it would drop. Clients from
   before this check have no such guard: do not open a multi-section room with

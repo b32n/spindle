@@ -23,6 +23,7 @@ import {
   ChangeBar,
   isRunContainingBlock,
   noteKeyString,
+  DEFAULT_REVISION_COLOR,
 } from './flow-blocks';
 import { addTitle, revisionDecoration, rowRevisionTint } from './revision-decoration';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
