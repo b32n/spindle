@@ -151,6 +151,8 @@ const textDocs: FunctionDoc[] = [
   { name: 'UNICHAR', category: 'text', args: [req('number')], description: 'Returns the character for a Unicode code point.' },
   { name: 'UNICODE', category: 'text', args: [req('text')], description: 'Returns the Unicode code point of the first character.' },
   { name: 'T', category: 'text', args: [req('value')], description: 'Returns the text of a value, or empty text for anything else.' },
+  { name: 'ARRAYTOTEXT', category: 'text', args: [req('array'), opt('format')], description: 'Writes an array as text (0: concise, 1: strict with braces and quotes).' },
+  { name: 'VALUETOTEXT', category: 'text', args: [req('value'), opt('format')], description: 'Writes a value as text (0: concise, 1: strict with quotes).' },
   { name: 'FIXED', category: 'text', args: [req('number'), opt('decimals'), opt('no_commas')], description: 'Rounds a number and returns it as text, with thousands commas.' },
   { name: 'DOLLAR', category: 'text', args: [req('number'), opt('decimals')], description: 'Rounds a number and returns it as dollar-formatted text.' },
   { name: 'BASE', category: 'text', args: [req('number'), req('radix'), opt('min_length')], description: 'Writes a number as text in another base (2 to 36).' },
@@ -291,6 +293,17 @@ const arrayDocs: FunctionDoc[] = [
   { name: 'FILTER', category: 'array', args: [req('array'), req('include'), opt('if_empty')], description: 'Returns the rows of a range that meet a condition.' },
   { name: 'SPLIT', category: 'array', args: [req('text'), req('delimiter'), opt('split_by_each'), opt('remove_empty')], description: 'Splits text into an array around a delimiter.' },
   { name: 'TRANSPOSE', category: 'array', args: [req('array')], description: 'Swaps the rows and columns of an array.' },
+  { name: 'CHOOSECOLS', category: 'array', args: [req('array'), req('col_num1'), rest('col_num2')], description: 'Returns the chosen columns of an array.' },
+  { name: 'CHOOSEROWS', category: 'array', args: [req('array'), req('row_num1'), rest('row_num2')], description: 'Returns the chosen rows of an array.' },
+  { name: 'TAKE', category: 'array', args: [req('array'), opt('rows'), opt('columns')], description: 'Returns rows or columns from the start or end of an array.' },
+  { name: 'DROP', category: 'array', args: [req('array'), opt('rows'), opt('columns')], description: 'Removes rows or columns from the start or end of an array.' },
+  { name: 'HSTACK', category: 'array', args: [req('array1'), rest('array2')], description: 'Joins arrays side by side, padding with #N/A.' },
+  { name: 'VSTACK', category: 'array', args: [req('array1'), rest('array2')], description: 'Joins arrays one above the other, padding with #N/A.' },
+  { name: 'EXPAND', category: 'array', args: [req('array'), opt('rows'), opt('columns'), opt('pad_with')], description: 'Grows an array to a size, padding the new cells.' },
+  { name: 'TOCOL', category: 'array', args: [req('array'), opt('ignore'), opt('scan_by_column')], description: 'Returns an array as a single column.' },
+  { name: 'TOROW', category: 'array', args: [req('array'), opt('ignore'), opt('scan_by_column')], description: 'Returns an array as a single row.' },
+  { name: 'WRAPROWS', category: 'array', args: [req('vector'), req('wrap_count'), opt('pad_with')], description: 'Wraps a row or column of values into rows of a given length.' },
+  { name: 'WRAPCOLS', category: 'array', args: [req('vector'), req('wrap_count'), opt('pad_with')], description: 'Wraps a row or column of values into columns of a given length.' },
 ];
 
 const allDocs: FunctionDoc[] = [

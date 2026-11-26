@@ -1,10 +1,38 @@
-// Text functions, batch B: CLEAN, NUMBERVALUE, UNICHAR, UNICODE, T, FIXED, DOLLAR, BASE, DECIMAL, ROMAN and ARABIC.
+// Text functions, batch B: CLEAN, NUMBERVALUE, UNICHAR, UNICODE, T, ARRAYTOTEXT, VALUETOTEXT, FIXED, DOLLAR, BASE,
+// DECIMAL, ROMAN and ARABIC.
 //
-// Scalar functions lift over arrays like the rest of the engine. TEXTBEFORE, TEXTAFTER and TEXTSPLIT are deferred until
-// Excel-computed files exist (plan S12, D8: LibreOffice has no such function, so there is no oracle).
+// Scalar functions lift over arrays like the rest of the engine. ARRAYTOTEXT and VALUETOTEXT follow Excel's
+// documentation (LibreOffice 25.2 has neither, so their conformance rows are Excel-documented and unverified).
+// TEXTBEFORE, TEXTAFTER and TEXTSPLIT are deferred until Excel-computed files exist (plan S12, D8).
 
 import type { EagerFn } from './helpers';
-import { checkArity, isErrorValue, liftScalar, toBoolean, toNum, toText } from './helpers';
+import { checkArity, isErrorValue, liftScalar, toBoolean, toMatrix, toNum, toText } from './helpers';
+
+/** A number as Excel's General format writes it: 15 significant digits, `1E+15` from 10^15 up and `1E-05` below 10^-4. */
+function generalNumber(n: number): string {
+  const abs = Math.abs(n);
+  if (abs !== 0 && (abs >= 1e15 || abs < 1e-4)) {
+    const [mantissa, exp] = n.toExponential(14).split('e');
+    const digits = mantissa.replace(/\.?0+$/, ''); // toExponential(14) always has a point
+    return `${digits}E${exp[0]}${exp.slice(1).padStart(2, '0')}`;
+  }
+  return String(Number(n.toPrecision(15)));
+}
+
+/** One element as ARRAYTOTEXT / VALUETOTEXT writes it: strict quotes text, concise leaves it bare. */
+function valueText(v: unknown, strict: boolean): string {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string') return strict && !isErrorValue(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  if (typeof v === 'number') return generalNumber(v);
+  return v ? 'TRUE' : 'FALSE';
+}
+
+/** The 0 (concise) or 1 (strict) format argument. */
+function textFormat(arg: unknown): boolean {
+  const format = arg === undefined ? 0 : Math.trunc(toNum(arg));
+  if (format !== 0 && format !== 1) throw new Error('#VALUE!');
+  return format === 1;
+}
 
 /** A string of decimal digits plus one (`'199'` -> `'200'`, `''` -> `'1'`, `'99'` -> `'100'`). */
 function increment(digits: string): string {
@@ -147,6 +175,20 @@ export const textExtFunctions: Record<string, EagerFn> = {
       if (isErrorValue(v)) throw new Error(v);
       return v;
     });
+  },
+
+  ARRAYTOTEXT: (args) => {
+    checkArity(args, 1, 2);
+    const strict = textFormat(args[1]);
+    const texts = toMatrix(args[0]).map((row) => row.map((v) => valueText(v, strict)));
+    if (!strict) return texts.map((r) => r.join(', ')).join(', ');
+    return `{${texts.map((r) => r.join(',')).join(';')}}`;
+  },
+
+  VALUETOTEXT: (args) => {
+    checkArity(args, 1, 2);
+    const strict = textFormat(args[1]);
+    return liftScalar([args[0]], ([v]) => valueText(v, strict));
   },
 
   FIXED: (args) => {

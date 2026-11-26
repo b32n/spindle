@@ -129,6 +129,55 @@ describe('T', () => {
   });
 });
 
+describe('ARRAYTOTEXT and VALUETOTEXT', () => {
+  const grid = [
+    [1, 'x'],
+    [true, null],
+  ];
+
+  it('write an array concisely or strictly', () => {
+    expect(call('ARRAYTOTEXT', grid)).toBe('1, x, TRUE, ');
+    expect(call('ARRAYTOTEXT', grid, 0)).toBe('1, x, TRUE, ');
+    expect(call('ARRAYTOTEXT', grid, 1)).toBe('{1,"x";TRUE,}');
+    expect(call('ARRAYTOTEXT', [['a', '#N/A', 'say "hi"']], 1)).toBe('{"a",#N/A,"say ""hi"""}');
+    expect(call('ARRAYTOTEXT', 'x')).toBe('x');
+    expect(call('ARRAYTOTEXT', 'x', 1)).toBe('{"x"}');
+    expect(call('ARRAYTOTEXT', [1, 2, 3])).toBe('1, 2, 3');
+    expect(call('ARRAYTOTEXT', [1.5, 'a'], 1)).toBe('{1.5,"a"}');
+  });
+
+  it('write a single value, lifting over arrays', () => {
+    expect(call('VALUETOTEXT', 'a')).toBe('a');
+    expect(call('VALUETOTEXT', 'a', 1)).toBe('"a"');
+    expect(call('VALUETOTEXT', 5, 1)).toBe('5');
+    expect(call('VALUETOTEXT', false)).toBe('FALSE');
+    expect(call('VALUETOTEXT', '#N/A', 1)).toBe('#N/A');
+    expect(call('VALUETOTEXT', null, 1)).toBe('');
+    expect(call('VALUETOTEXT', [['p'], [7]], 1)).toEqual([['"p"'], ['7']]);
+  });
+
+  it('write numbers as General does: 15 significant digits, E notation for the very large and small', () => {
+    expect(call('VALUETOTEXT', 0.1 + 0.2)).toBe('0.3');
+    expect(call('VALUETOTEXT', 1e21)).toBe('1E+21');
+    expect(call('VALUETOTEXT', 1.5e-7)).toBe('1.5E-07');
+    expect(call('VALUETOTEXT', 123456789012345680000)).toBe('1.23456789012346E+20');
+    expect(call('VALUETOTEXT', 1e15)).toBe('1E+15');
+    expect(call('VALUETOTEXT', 123456789012345)).toBe('123456789012345');
+    expect(call('VALUETOTEXT', 0.0001)).toBe('0.0001');
+    expect(call('VALUETOTEXT', 0.00001)).toBe('1E-05');
+    expect(call('VALUETOTEXT', 0)).toBe('0');
+    expect(call('ARRAYTOTEXT', [[1e21, -2.5e-10]])).toBe('1E+21, -2.5E-10');
+    expect(call('VALUETOTEXT', -12.5)).toBe('-12.5');
+  });
+
+  it('reject a format other than 0 and 1 and a wrong argument count', () => {
+    expect(err('ARRAYTOTEXT', grid, 2)).toBe('#VALUE!');
+    expect(err('VALUETOTEXT', 'a', -1)).toBe('#VALUE!');
+    expect(err('ARRAYTOTEXT')).toBe('#VALUE!');
+    expect(err('VALUETOTEXT', 'a', 0, 0)).toBe('#VALUE!');
+  });
+});
+
 describe('FIXED and DOLLAR', () => {
   it('round half away from zero on the decimal value, with thousands commas', () => {
     expect(call('FIXED', 1234.5678, 2)).toBe('1,234.57');
