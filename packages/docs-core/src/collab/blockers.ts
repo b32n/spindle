@@ -40,6 +40,7 @@ const KNOWN_BLOCK_TYPES: ReadonlySet<string> = new Set([
   'horizontal-rule',
   'page-break',
   'content-control',
+  'toc',
 ]);
 
 const KNOWN_INLINE_TYPES: ReadonlySet<string> = new Set(['text', 'image', 'link', 'dynamicField', 'field', 'bookmark', 'contentControl', 'noteRef']);
@@ -62,7 +63,7 @@ function countBlocks(blocks: readonly Block[] | undefined, tally: Tally): void {
       tally.unknownBlocks++;
       continue;
     }
-    if (block.type === 'content-control') {
+    if (block.type === 'content-control' || block.type === 'toc') {
       countBlocks(block.blocks, tally);
     } else if (block.type === 'table') {
       for (const row of block.rows ?? []) {

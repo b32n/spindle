@@ -391,6 +391,18 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       { type: 'content_control_inline', attrs: { controlType: 'comboBox', items: [{ text: 'a', value: 'b' }] }, content: [{ type: 'content_control_inline', attrs: { controlType: 'richText' }, content: [t('nested')] }] },
     ]),
   ],
+  // A table of contents: its entries (with a link to a heading bookmark, a tab and the page number) and its instruction.
+  toc: [
+    {
+      type: 'toc',
+      attrs: { instruction: 'TOC \\o "1-2" \\h \\z' },
+      content: [
+        p([t('Intro', [{ type: 'link', attrs: { href: '#_Toc100000001', title: null, target: '_blank' } }]), t('\t'), t('1')], { namedStyleId: 'TOC1' }),
+        p([t('Detail', [{ type: 'link', attrs: { href: '#_Toc100000002', title: null, target: '_blank' } }]), t('\t'), t('2')], { namedStyleId: 'TOC2', leftIndent: 24 }),
+      ],
+    },
+    { type: 'toc', attrs: { instruction: 'TOC \\o "1-3"' }, content: [] },
+  ],
   // Note references hold the text of the note, with formatting, a link, a line break, an image, a bookmark and a field.
   note_ref: [
     p([

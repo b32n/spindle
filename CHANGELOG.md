@@ -270,6 +270,30 @@ lockstep.
   `TrueLayoutEditorHandle.insertNote(kind)` and, in docs-core, `insertNoteReference`, `findNoteRef`, `noteOrdinalAt`,
   `nextNoteId` and `noteTextFragment`.
 
+- **Table of contents.** The editor has a Table of contents menu in the toolbar (Insert, Update, Remove; shown when
+  `Toolbar` gets `onTableOfContents`, which `DocumentEditor` wires). Insert puts a table of contents after the block the caret is
+  in; it lists the headings of the levels its instruction asks for (`TOC \o "1-3" \h \z \u` by default: levels 1 to 3, with
+  links, page numbers shown) with a dotted leader and the page number at the right, an entry per heading, each linking to a
+  `_Toc` bookmark that the heading gets when it has none (an imported heading keeps the bookmark it has). The page numbers are
+  the ones the layout gives, in the format of the page (so a section with roman page numbers lists roman numerals). Update writes
+  every table again from the headings and the pages they are on, as one undoable step; nothing changes a table on its own, so a
+  table in a file keeps its numbers until it is updated. Remove deletes the table at the caret (the nearest one). Clicking an
+  entry goes to its heading (the internal link of the bookmark). Not acted on yet: switches other than `\o`, `\h` and `\n`
+  (`\t` styles, `\b`, `\f`, `\p`) stay in the instruction, headings are the only source (not paragraphs with an outline level
+  or custom styles), and nothing lists headings of levels 7 to 9.
+- **Table of contents in the model, in the ProseMirror document and in collaboration.** Additive block type `TocBlock`
+  (`type: 'toc'`: `instruction` and the entries as `blocks`, one paragraph each, with the style `TOC1` to `TOC6`) and `docsSchema`
+  gains a `toc` node (an atom holding its entry paragraphs; at the top level and in content controls, not in cells or list
+  items), plain ProseMirror content that syncs over Yjs; `getCollabBlockers` knows it. The collaboration `schemaVersion` is now 5.
+  New commands `insertTableOfContents`, `updateTableOfContents` and `removeTableOfContents`, `parseTocInstruction`, and
+  `TrueLayoutEditorHandle.tableOfContents(action)`. Until the table of contents is read from and written to files as a field
+  (the next change), a table in a document is written to DOCX as Word writes the block around it, a Table of Contents building
+  block control around the entry paragraphs, with the `_Toc` bookmarks on the headings and the entries as links to them.
+- **Layout: a tab with a leader, and measuring a tab.** A paragraph can ask for a tab to be drawn as a dotted leader up to the text
+  after it at the right (`ParagraphAttrs.tabLeader`; used by the entries of a table of contents), and `LinkRun.plain` draws a link
+  like the text around it. The measurer treated a tab and the text after it as two pieces on the same line and gave the text twice;
+  it is one piece now (this also affects tabs in imported text).
+
 ### Changed
 
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,

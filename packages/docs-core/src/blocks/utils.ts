@@ -65,7 +65,7 @@ export function isBlockEmpty(block: Block): boolean {
   if (block.type === 'table') {
     return block.rows.length === 0;
   }
-  if (block.type === 'content-control') {
+  if (block.type === 'content-control' || block.type === 'toc') {
     return block.blocks.every(isBlockEmpty);
   }
   return false;

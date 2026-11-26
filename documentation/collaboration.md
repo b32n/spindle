@@ -292,9 +292,12 @@ edits, and the inverse operations broadcast to peers like any other edit.
   attach. The footnotes at the bottom of the pages and the endnotes area are drawn from the references, not stored. A note's text is
   edited in a small editor of its own and written back into the reference when the edit
   ends, so two people editing the same note at once is last-writer-wins on its text.
+- **Table of contents.** A table of contents is a ProseMirror node (`toc`) holding its entries, so it syncs like
+  other content and does not block attach. Updating it writes the entries and adds bookmarks to the headings in one
+  transaction; two people updating it at once is last-writer-wins on its entries.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
   1, the layout without section breaks; 2 adds section breaks; 3 adds content
-  controls; 4 adds footnote and endnote references). A client that finds a newer version
+  controls; 4 adds footnote and endnote references; 5 adds the table of contents). A client that finds a newer version
   than it supports rejects `attachCollab` with a `CollabSchemaVersionError`
   instead of editing a document whose newer nodes it would drop. Clients from
   before this check have no such guard: do not open a multi-section room with

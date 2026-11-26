@@ -51,10 +51,10 @@ import type { DocsCommentThread } from '../comments';
 /**
  * The Y document layout this build reads and writes. 1 is the layout without section breaks (the key is then absent),
  * 2 adds `section_break` nodes, 3 adds the `content_control` and `content_control_inline` nodes, 4 adds the `note_ref`
- * node (a footnote or endnote reference holding the note's text). Raised by any later change an older client could not
- * read.
+ * node (a footnote or endnote reference holding the note's text), 5 adds the `toc` node (a table of contents with its
+ * entries). Raised by any later change an older client could not read.
  */
-export const COLLAB_SCHEMA_VERSION = 4;
+export const COLLAB_SCHEMA_VERSION = 5;
 
 /** Thrown when a room was written with a newer Y document layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

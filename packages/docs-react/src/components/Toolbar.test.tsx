@@ -76,3 +76,20 @@ describe('docs Toolbar footnote control', () => {
     expect(render({ onInsertNote: () => {} })).toContain('Footnote');
   });
 });
+
+describe('docs Toolbar table of contents control', () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('is hidden unless a handler is given', () => {
+    expect(render({})).not.toContain('Table of contents');
+  });
+
+  it('is shown when onTableOfContents is given', () => {
+    expect(render({ onTableOfContents: () => {} })).toContain('Table of contents');
+  });
+});

@@ -638,7 +638,16 @@ export class DomMeasurer {
         range.setStart(node, startIndex);
         range.setEnd(node, Math.min(endIndex, text.length));
         
-        const rects = range.getClientRects();
+        // A range can have several boxes on one line (a tab and the text after it, for instance): they are one piece of that line.
+        const rects: DOMRect[] = [];
+        for (const box of Array.from(range.getClientRects())) {
+          const same = rects.find((known) => Math.abs(known.top - box.top) < 2);
+          if (same) {
+            rects[rects.indexOf(same)] = new DOMRect(Math.min(same.left, box.left), same.top, Math.max(same.right, box.right) - Math.min(same.left, box.left), Math.max(same.height, box.height));
+          } else {
+            rects.push(box);
+          }
+        }
         if (rects.length === 0) {
           startIndex = endIndex;
           continue;

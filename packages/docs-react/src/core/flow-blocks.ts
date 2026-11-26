@@ -90,6 +90,8 @@ export interface LinkRun {
   kind: 'link';
   text: string;
   href: string;
+  /** Drawn as the text around it, with no link colour or underline (the entries of a table of contents). */
+  plain?: boolean;
   /** The content control the run is in, if any. */
   control?: RunControl;
   bold?: boolean;
@@ -118,6 +120,8 @@ export type TextAlignment = 'left' | 'center' | 'right' | 'justify';
  * Paragraph attributes
  */
 export interface ParagraphAttrs {
+  /** A tab in the text is filled with a dotted leader up to the text after it, which is right-aligned (the entries of a table of contents). */
+  tabLeader?: 'dot';
   alignment?: TextAlignment;
   lineHeight?: number;
   spaceBefore?: number;

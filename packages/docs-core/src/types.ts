@@ -304,7 +304,7 @@ export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun
 // Block Types
 // ============================================================================
 
-export type BlockType = 'paragraph' | 'heading' | 'list-item' | 'table' | 'image' | 'horizontal-rule' | 'page-break' | 'content-control';
+export type BlockType = 'paragraph' | 'heading' | 'list-item' | 'table' | 'image' | 'horizontal-rule' | 'page-break' | 'content-control' | 'toc';
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type ListType = 'bullet' | 'numbered';
 
@@ -470,6 +470,18 @@ export interface ContentControlBlock extends BaseBlock {
   blocks: Block[];
 }
 
+/**
+ * A table of contents: the entries it shows (`blocks`, one paragraph per heading, with a link to the heading, a tab and
+ * the page number) and the instruction it is generated from (`TOC \o "1-3" \h \z \u`). The entries are as they were
+ * when the table was last updated; the editor does not change them on its own.
+ */
+export interface TocBlock extends BaseBlock {
+  type: 'toc';
+  /** The field instruction, e.g. `TOC \o "1-3" \h \z \u`. */
+  instruction: string;
+  blocks: Block[];
+}
+
 export type Block =
   | ParagraphBlock
   | HeadingBlock
@@ -478,7 +490,8 @@ export type Block =
   | ImageBlock
   | HorizontalRuleBlock
   | PageBreakBlock
-  | ContentControlBlock;
+  | ContentControlBlock
+  | TocBlock;
 
 // ============================================================================
 // Headers and Footers

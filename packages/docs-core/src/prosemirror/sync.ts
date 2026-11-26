@@ -285,6 +285,14 @@ function blockToPmNode(block: Block, stylePool?: TextStylePool): PmNodeJSON | nu
         content: content.length > 0 ? content : [{ type: 'paragraph', content: [] }],
       };
     }
+
+    case 'toc':
+      // The entries are paragraphs (anything else a hand-made table of contents holds is not an entry).
+      return {
+        type: 'toc',
+        attrs: { instruction: block.instruction },
+        content: blocksToPmContent(block.blocks.filter((b) => b.type === 'paragraph'), stylePool),
+      };
       
     default:
       return null;
@@ -703,6 +711,14 @@ function pmNodeToBlocks(node: PmNode, startIndex: number, stylePool?: TextStyleP
       return [{
         id: `block_${startIndex}_${Date.now()}`,
         type: 'page-break',
+      }];
+
+    case 'toc':
+      return [{
+        id: `block_${startIndex}_${Date.now()}`,
+        type: 'toc',
+        instruction: String(node.attrs.instruction ?? ''),
+        blocks: pmChildrenToBlocks(node, startIndex + 1, stylePool),
       }];
 
     case 'content_control':

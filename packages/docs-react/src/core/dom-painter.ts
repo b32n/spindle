@@ -962,7 +962,7 @@ export class DomPainter {
       
       if (hasSegments) {
         // Render only the text for these specific lines with PM position tracking
-        this.renderLinesContentWithPmPositions(para, block.runs, lines, measure.lines, fragment.fromLine, pmPos);
+        this.renderLinesContentWithPmPositions(para, block.runs, lines, measure.lines, fragment.fromLine, pmPos, attrs.tabLeader === 'dot');
       } else {
         // Fallback: render all runs with PM positions (will be clipped)
         this.renderRuns(para, block.runs, pmPos);
@@ -987,7 +987,8 @@ export class DomPainter {
     fragmentLines: LineMeasure[],
     allLines: LineMeasure[],
     fromLineIndex: number,
-    pmPos?: BlockPmPosition
+    pmPos?: BlockPmPosition,
+    tabLeader = false
   ): void {
     if (fragmentLines.length === 0) {
       container.innerHTML = '&#8203;';
@@ -1043,7 +1044,35 @@ export class DomPainter {
         const spanEnd = spanCharOffset + segment.text.length;
         spanCharOffset = spanEnd;
         
-        if (run.kind === 'text') {
+        if (run.kind === 'text' && tabLeader && segment.text.includes('\t')) {
+          // A tab becomes a dotted leader that fills the line up to the text after it, which ends up at the right.
+          lineDiv.style.display = 'flex';
+          lineDiv.style.alignItems = 'baseline';
+          let offset = spanStart;
+          for (const [i, part] of segment.text.split('\t').entries()) {
+            if (i > 0) {
+              const leader = document.createElement('span');
+              leader.className = 'tab-leader';
+              leader.style.cssText = 'flex: 1 1 auto; min-width: 16px; margin: 0 4px; border-bottom: 1px dotted #5f6368; align-self: flex-end; height: 0.35em;';
+              if (pmPos) {
+                leader.dataset.pmStart = String(pmPos.start + 1 + offset);
+                leader.dataset.pmEnd = String(pmPos.start + 1 + offset + 1);
+              }
+              lineDiv.appendChild(leader);
+              offset += 1;
+            }
+            if (part.length === 0) continue;
+            const piece = document.createElement('span');
+            piece.textContent = part;
+            piece.style.cssText = this.getRunStyles(run);
+            if (pmPos) {
+              piece.dataset.pmStart = String(pmPos.start + 1 + offset);
+              piece.dataset.pmEnd = String(pmPos.start + 1 + offset + part.length);
+            }
+            offset += part.length;
+            lineDiv.appendChild(piece);
+          }
+        } else if (run.kind === 'text') {
           const span = document.createElement('span');
           span.textContent = segment.text;
           span.style.cssText = this.getRunStyles(run);
@@ -1061,7 +1090,9 @@ export class DomPainter {
           const a = document.createElement('a');
           a.textContent = segment.text;
           a.href = sanitizeHref(run.href);
-          a.style.cssText = `
+          a.style.cssText = run.plain
+            ? 'color: inherit; text-decoration: none;'
+            : `
             color: ${safeCssColor(run.color) || '#1a73e8'};
             text-decoration: underline;
             ${run.bold ? 'font-weight: bold;' : ''}
@@ -1569,7 +1600,9 @@ export class DomPainter {
         const a = document.createElement('a');
         a.textContent = run.text;
         a.href = sanitizeHref(run.href);
-        a.style.cssText = `
+        a.style.cssText = run.plain
+          ? 'color: inherit; text-decoration: none;'
+          : `
           color: ${safeCssColor(run.color) || '#1a73e8'};
           text-decoration: underline;
           ${run.bold ? 'font-weight: bold;' : ''}

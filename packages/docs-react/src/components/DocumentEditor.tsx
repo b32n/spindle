@@ -211,6 +211,11 @@ export const DocumentEditor = memo(function DocumentEditor({
     editorRef.current?.insertNote(kind);
   }, [readOnly]);
 
+  const handleTableOfContents = useCallback((action: 'insert' | 'update' | 'remove') => {
+    if (readOnly) return;
+    editorRef.current?.tableOfContents(action);
+  }, [readOnly]);
+
   const handleRemoveSectionBreak = useCallback(() => {
     if (readOnly || !editorView) return;
     createCommands(docsSchema).removeSectionBreak()(editorView.state, editorView.dispatch);
@@ -506,6 +511,7 @@ export const DocumentEditor = memo(function DocumentEditor({
             selectedCell={selectedCell}
             onAddComment={startComment}
             onInsertNote={handleInsertNote}
+            onTableOfContents={handleTableOfContents}
             onInsertSectionBreak={handleInsertSectionBreak}
             onRemoveSectionBreak={handleRemoveSectionBreak}
             canRemoveSectionBreak={sections.length > 1}
