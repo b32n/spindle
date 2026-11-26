@@ -219,4 +219,36 @@ test.describe('docs: tracked changes between collaborators', () => {
     await alice.context.close();
     await bob.context.close();
   });
+
+  test('D-COL-14 an author’s changes are drawn in their cursor colour while they are in the room, and in the page’s own colour once they have left', async ({
+    browser,
+  }, info) => {
+    test.setTimeout(100_000);
+    const room = roomName('docs', info.testId);
+    const alice = await peer(browser, room, 'Alice', '#d93025');
+    await waitForRoomSeed(room);
+    const bob = await peer(browser, room, 'Bob', '#1a73e8');
+    await suggesting(bob);
+    await bob.doc.clickLine('Welcome to Spindle Docs');
+    await bob.doc.press('End');
+    await bob.doc.typeText(' (Bob)');
+    await expect.poll(() => insertionsOf(alice).count()).toBeGreaterThan(0);
+    const bobsChange = insertionsOf(alice).first();
+    await expect(bobsChange).toHaveAttribute('data-revision-author', 'Bob');
+    await expect(bobsChange).toHaveCSS('color', 'rgb(26, 115, 232)');
+    const swatch = alice.page
+      .getByTestId('revision-legend')
+      .locator('[data-revision-author="Bob"] span[aria-hidden]');
+    await expect(swatch).toHaveCSS('background-color', 'rgb(26, 115, 232)');
+
+    // Bob leaves: his colour was the cursor's, so once the room forgets him (awareness drops a silent peer after 30 seconds)
+    // his changes take the colour the page gives them.
+    await bob.context.close();
+    await expect(bobsChange).not.toHaveCSS('color', 'rgb(26, 115, 232)', { timeout: 50_000 });
+    await expect(swatch).not.toHaveCSS('background-color', 'rgb(26, 115, 232)');
+    // The legend and the text agree.
+    const legendColour = await swatch.evaluate((el) => getComputedStyle(el).backgroundColor);
+    await expect(bobsChange).toHaveCSS('color', legendColour);
+    await alice.context.close();
+  });
 });

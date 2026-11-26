@@ -308,6 +308,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-COL-11 | a suggestion typed in Suggesting mode is one undo step for its author only | covered |  |  | `e2e/docs/revisions-collab.spec.ts` |
 | D-COL-12 | one person splits a paragraph while another marks its mark deleted, both offline: both suggestions survive and are settled one by one | covered |  |  | `e2e/docs/revisions-collab.spec.ts` |
 | D-COL-13 | a collaborator’s edit lays the page out again in the view the reader chose, not in All markup | covered |  |  | `e2e/docs/revisions-collab.spec.ts` |
+| D-COL-14 | an author’s changes are drawn in their cursor colour while they are in the room, and in the page’s own colour once they have left | covered |  |  | `e2e/docs/revisions-collab.spec.ts` |
 | D-REV-01 | a .docx with tracked changes shows insertions underlined and deletions struck through in each author’s colour, with a legend of the authors | covered | yes |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-02 | the tracked changes are kept when the document is downloaded | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-03 | moves, formatting changes, paragraph changes and inserted or deleted rows are marked, and kept in the download | covered |  |  | `e2e/docs/revisions.spec.ts` |
@@ -488,7 +489,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 420
+- covered: 422
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

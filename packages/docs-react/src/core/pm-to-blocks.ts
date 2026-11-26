@@ -93,6 +93,7 @@ function authorColorOf(author: string): string {
 /** Lets go of the document and the colours of the conversion that ended, so they are not kept alive (nor leak into another editor's conversion). */
 function releaseConversion(): void {
   convertedDoc = null;
+  convertedView = 'markup';
   preferredColors = undefined;
   authorColors = null;
 }

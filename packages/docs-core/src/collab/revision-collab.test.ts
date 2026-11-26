@@ -15,6 +15,11 @@ import { assignAuthorColors } from '../revisions';
 import { DEFAULT_PAGE_CONFIG } from '../types';
 import type { Block, DocumentData } from '../types';
 
+/**
+ * A model of the editor, not the real y-sync binding: every edit is pushed with a fresh `updateYFragment` mapping, so item
+ * identity under concurrent edits can differ from the browser's. The E2E scenarios D-COL-10..13 (two or three real
+ * browser contexts) cover the real binding.
+ */
 class Client {
   readonly ydoc = new Y.Doc();
   private ids = 0;
@@ -75,6 +80,10 @@ function data(blocks: Block[]): DocumentData {
 }
 function room(names: string[], blocks: Block[]): Client[] {
   const [first, ...rest] = names.map((n) => new Client(n));
+  // Fixed client ids (in the order of the names), so which edit wins a tie is the same on every run.
+  [first, ...rest].forEach((client, i) => {
+    client.ydoc.clientID = i + 1;
+  });
   hydrateYDocFromData(first.ydoc, data(blocks));
   const clients = [first, ...rest];
   sync(...clients);
@@ -182,10 +191,22 @@ describe('settling at the same time', () => {
     d.review('reject');
     sync(a, b, c, d);
     same([a, b, c, d]);
-    // One of the two wins, for everybody, and no mark or text of the change is left behind.
-    expect(['one two three', 'oneXY two three']).toContain(a.text()[0]);
+    // One of the two wins, for everybody, and no mark or text of the change is left behind. With the client ids fixed the
+    // winner is the same on every run: the rejection of an inserted run deletes its text, and a deletion outweighs the
+    // accepting client's removal of the mark whichever client has the higher id (the swapped test below).
+    expect(a.text()).toEqual(['one two three']);
     expect(changesOf(a)).toEqual([]);
     expect(changesOf(d)).toEqual([]);
+  });
+
+  it('with the roles swapped the rejection of an insertion still wins: removing the text outweighs removing the mark', () => {
+    const [a, b, c, d] = setup();
+    c.review('reject');
+    d.review('accept');
+    sync(a, b, c, d);
+    same([a, b, c, d]);
+    expect(a.text()).toEqual(['one two three']);
+    expect(changesOf(a)).toEqual([]);
   });
 
   it('settling a change while its author types next to it converges', () => {
