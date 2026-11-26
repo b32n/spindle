@@ -8,15 +8,6 @@
       "label": "automatic hyphenation setting"
     },
     {
-      "count": 1,
-      "effect": "not imported",
-      "id": "docx.sectionProperties",
-      "label": "section(s) with page-number format/restart or vertical alignment",
-      "where": [
-        "page numbering ×1"
-      ]
-    },
-    {
       "count": 6,
       "effect": "applied (the deleted text is gone)",
       "id": "docx.trackedDeletions",

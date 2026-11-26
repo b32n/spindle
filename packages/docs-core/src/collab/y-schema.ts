@@ -3,7 +3,8 @@
 // Layout:
 //   meta:               Y.Map<string, JSON>  — id, title, defaultPageConfig, timestamps
 //   content:            Y.XmlFragment        — body text (ProseMirror-compatible, bound via y-prosemirror)
-//   sectionsMeta:       Y.Array<Y.Map>       — per-section metadata (id, pageConfig, header, footer)
+//   sectionsMeta:       Y.Array<Y.Map>       — per-section metadata (id, pageConfig (with columns), header, footer,
+//                                              pageNumbering, verticalAlign)
 //   namedStyles:        Y.Map<string, JSON>  — DOCX named style id → NamedStyle (additive)
 //   textStylePool:      Y.Map<string, JSON>  — styleId → TextStyle
 //   paragraphStylePool: Y.Map<string, JSON>  — styleId → ParagraphStyle
@@ -31,7 +32,9 @@ import type {
   HeaderFooterContent,
   NamedStyle,
   PageConfig,
+  PageNumbering,
   ParagraphStyle,
+  SectionVerticalAlign,
   SectionData,
   TextStyle,
 } from '../types';
@@ -115,6 +118,8 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
       sectionMap.set('pageConfig', section.pageConfig);
       if (section.header) sectionMap.set('header', section.header);
       if (section.footer) sectionMap.set('footer', section.footer);
+      if (section.pageNumbering) sectionMap.set('pageNumbering', section.pageNumbering);
+      if (section.verticalAlign) sectionMap.set('verticalAlign', section.verticalAlign);
       fields.sectionsMeta.push([sectionMap]);
     }
 
@@ -179,12 +184,16 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
     const pageConfig = sectionMap.get('pageConfig') as PageConfig;
     const header = sectionMap.get('header') as HeaderFooterContent | undefined;
     const footer = sectionMap.get('footer') as HeaderFooterContent | undefined;
+    const pageNumbering = sectionMap.get('pageNumbering') as PageNumbering | undefined;
+    const verticalAlign = sectionMap.get('verticalAlign') as SectionVerticalAlign | undefined;
     sections.push({
       id: sectionId,
       pageConfig,
       blocks: [], // filled in below from the PM tree
       header,
       footer,
+      ...(pageNumbering && { pageNumbering }),
+      ...(verticalAlign && { verticalAlign }),
     });
   });
 

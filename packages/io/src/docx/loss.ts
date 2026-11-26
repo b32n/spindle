@@ -51,7 +51,7 @@ export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossO
   add('docx.embeddedObjects', 'embedded object(s)', countMatches(doc, /<w:object[\s>/]/g), 'not imported');
 
   const columns = [...doc.matchAll(/<w:cols\b[^>]*\bw:num="(\d+)"/g)].filter((m) => Number(m[1]) > 1).length;
-  add('docx.columns', 'multi-column section(s)', columns, 'laid out as a single column');
+  add('docx.columns', 'multi-column section(s)', columns, 'kept for export; laid out as a single column');
 
   // Constructs that need element context (styles, tables, sections, fields…) are counted on the parsed XML.
   items.push(

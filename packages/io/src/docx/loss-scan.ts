@@ -154,55 +154,21 @@ function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
   );
 }
 
-function sectionDetectors(root: XmlNode[], evenAndOdd: boolean): Item[] {
-  const variantKinds = new Map<string, number>();
-  const propKinds = new Map<string, number>();
-  let variantSections = 0;
-  let propSections = 0;
+/** Section properties still not kept: chapter numbers in page numbers (page number start and format, vertical alignment, headers and footers of every variant are imported). */
+function sectionDetectors(root: XmlNode[]): Item[] {
+  let sections = 0;
   walk(root, (sectPr, tag, path) => {
     if (tag !== 'w:sectPr' || inRevisionProps(path)) return;
-    const kids = childrenOf(sectPr);
-    const reasons: string[] = [];
-    const titlePg = find(kids, 'w:titlePg');
-    if (titlePg && isOn(titlePg)) reasons.push('first-page header/footer (titlePg)');
-    const refs = kids.filter((k) => tagOf(k) === 'w:headerReference' || tagOf(k) === 'w:footerReference');
-    for (const ref of refs) {
-      const type = attr(ref, 'w:type');
-      if (type === 'first' && !titlePg) reasons.push('first-page reference');
-      if (type === 'even') reasons.push('even-page reference');
-    }
-    if (evenAndOdd && refs.length > 0) reasons.push('even/odd headers setting');
-    if (reasons.length > 0) {
-      variantSections++;
-      for (const r of new Set(reasons)) bump(variantKinds, r);
-    }
-
-    const props: string[] = [];
-    const pgNum = find(kids, 'w:pgNumType');
-    if (pgNum && (attr(pgNum, 'w:start') || attr(pgNum, 'w:fmt') || attr(pgNum, 'w:chapStyle'))) props.push('page numbering');
-    const vAlign = find(kids, 'w:vAlign');
-    if (vAlign && attr(vAlign, 'w:val') && attr(vAlign, 'w:val') !== 'top') props.push('vertical alignment');
-    if (props.length > 0) {
-      propSections++;
-      for (const p of props) bump(propKinds, p);
-    }
+    const pgNum = find(childrenOf(sectPr), 'w:pgNumType');
+    if (pgNum && attr(pgNum, 'w:chapStyle')) sections++;
   });
-  return [
-    ...item(
-      'docx.headerFooterVariants',
-      'section(s) with first-page or even/odd headers and footers',
-      variantSections,
-      'only the first header/footer reference of each section is used, as its default header/footer',
-      variantKinds
-    ),
-    ...item(
-      'docx.sectionProperties',
-      'section(s) with page-number format/restart or vertical alignment',
-      propSections,
-      'not imported',
-      propKinds
-    ),
-  ];
+  return item(
+    'docx.sectionProperties',
+    'section(s) with chapter numbers in the page numbers',
+    sections,
+    'the chapter number is not part of the page number',
+    new Map(sections ? [['chapter numbering', sections] as const] : [])
+  );
 }
 
 /** Field instructions in document order: complex fields (begin..end, nested ones included) and fldSimple. */
@@ -405,15 +371,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
   } catch {
     return [];
   }
-  const evenAndOdd = (() => {
-    try {
-      const settings = input.settings ? find(parseXml(input.settings), 'w:settings') : undefined;
-      const el = settings ? find(childrenOf(settings), 'w:evenAndOddHeaders') : undefined;
-      return !!el && isOn(el);
-    } catch {
-      return false;
-    }
-  })();
   const safe = (fn: () => Item[]): Item[] => {
     try {
       return fn();
@@ -430,7 +387,7 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     ...drawings,
     ...safe(() => extraSections(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
-    ...safe(() => sectionDetectors(root, evenAndOdd)),
+    ...safe(() => sectionDetectors(root)),
     ...safe(() => fields(root)),
     ...safe(() => trackedMoves(root)),
     ...safe(() => formattingRevisions(root)),

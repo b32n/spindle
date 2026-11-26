@@ -3693,6 +3693,10 @@
             "h": 1056,
             "w": 816
           }
+        },
+        "pageNumbering": {
+          "format": "lowerRoman",
+          "start": 1
         }
       },
       {
@@ -5510,6 +5514,9 @@
             "h": 1056,
             "w": 816
           }
+        },
+        "pageNumbering": {
+          "start": 1
         }
       },
       {
@@ -26642,6 +26649,11 @@
         },
         "id": "section-15",
         "pageConfig": {
+          "columns": {
+            "count": 2,
+            "separator": true,
+            "spacing": 36
+          },
           "margins": {
             "bottom": 96,
             "left": 96,
