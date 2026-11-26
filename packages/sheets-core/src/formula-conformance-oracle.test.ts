@@ -43,9 +43,6 @@ const KNOWN_FAILING: Record<string, string> = {
   'probe-066': 'deferred until Excel-computed files (D8), plan S12: LibreOffice has no TEXTBEFORE',
   'probe-067': 'deferred until Excel-computed files (D8), plan S12: LibreOffice has no TEXTSPLIT',
   'probe-132': 'LET is post-launch (LET and the LAMBDA family)',
-  'probe-133': 'HSTACK is a post-launch dynamic-array function',
-  'probe-134': 'VSTACK is a post-launch dynamic-array function',
-  'probe-135': 'TAKE is a post-launch dynamic-array function',
   'probe-152':
     'the file stores a legacy (implicit intersection) formula that Excel shows as #VALUE! in row 152; the engine always evaluates it as a dynamic array (import policy, S4)',
 };
@@ -156,7 +153,24 @@ describe('conformance oracle table', () => {
   });
 
   it('marks every Excel-documented row of a function LibreOffice lacks as unverified', () => {
-    const lacking = new Set(['TEXTBEFORE', 'TEXTAFTER', 'TEXTSPLIT']);
+    const lacking = new Set([
+      'TEXTBEFORE',
+      'TEXTAFTER',
+      'TEXTSPLIT',
+      'ARRAYTOTEXT',
+      'VALUETOTEXT',
+      'CHOOSECOLS',
+      'CHOOSEROWS',
+      'TAKE',
+      'DROP',
+      'HSTACK',
+      'VSTACK',
+      'EXPAND',
+      'TOCOL',
+      'TOROW',
+      'WRAPROWS',
+      'WRAPCOLS',
+    ]);
     for (const r of oracle.rows.filter((row) => lacking.has(row.function))) {
       expect(r.excel).toBe(true);
       expect(r.unverified).toBe(true);
@@ -262,6 +276,19 @@ const BATCH_B = [
   'ISPMT',
   'FVSCHEDULE',
   'TRANSPOSE',
+  'ARRAYTOTEXT',
+  'VALUETOTEXT',
+  'CHOOSECOLS',
+  'CHOOSEROWS',
+  'TAKE',
+  'DROP',
+  'HSTACK',
+  'VSTACK',
+  'EXPAND',
+  'TOCOL',
+  'TOROW',
+  'WRAPROWS',
+  'WRAPCOLS',
 ];
 
 describe('conformance rows the engine passes', () => {
