@@ -14,7 +14,7 @@ import { EditorView } from 'prosemirror-view';
 import { TextSelection } from 'prosemirror-state';
 import { FlowBlock } from './flow-blocks';
 import { Measure, hasLineData } from './measurer';
-import { DocumentLayout, PageConfig, findPageAtY, getPageY } from './true-layout-engine';
+import { DocumentLayout, PageConfig, findPageAtY, getPageContentOrigin } from './true-layout-engine';
 import { createBlockPositionMap } from './pm-to-blocks';
 import { Node as PmNode } from 'prosemirror-model';
 import { constrainSelectionToIsolatingBlock } from './selection-constraint';
@@ -1504,13 +1504,10 @@ export class InputBridge {
     const page = this.layout.pages[pageIndex];
     if (!page) return null;
     
-    // Get page position
-    const pageY = getPageY(this.layout, pageIndex);
-    const margins = this.pageConfig.margins;
-    
     // Convert to coordinates within page content area
-    const contentX = relX - margins.left * this.scale;
-    const contentY = relY - pageY - margins.top * this.scale;
+    const origin = getPageContentOrigin(this.layout, pageIndex);
+    const contentX = relX - origin.x;
+    const contentY = relY - origin.y;
     
     // Find which fragment contains this position
     for (const fragment of page.fragments) {

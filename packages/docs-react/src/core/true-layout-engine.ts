@@ -94,7 +94,9 @@ export interface PageLayout {
   pageNumber?: number;
   /** DOCX number format name of `pageNumber` (e.g. `lowerRoman`); absent for decimal. */
   pageNumberFormat?: string;
-  /** Which header/footer variant of the section the page shows. */
+  /** True for the first page that starts its section (a page a continuous section merely shares does not count). */
+  startsSection?: boolean;
+  /** Which header/footer variant the section's switches give the page (a header and a footer may switch differently: the painter picks per content). */
   headerFooterVariant?: HeaderFooterVariant;
   /** True for a page added only so that the next section starts on an even or odd page. */
   isBlank?: boolean;
@@ -590,6 +592,27 @@ export function getPageY(layout: DocumentLayout, pageIndex: number): number {
 /** The page setup of a page: its own when the layout has sections, else the document's. */
 export function getPageConfig(layout: DocumentLayout, pageIndex: number): PageConfig {
   return layout.pages[pageIndex]?.pageConfig ?? layout.pageConfig;
+}
+
+/** The widest page of the layout, unscaled: pages of a narrower section are centred within it. */
+export function getMaxPageWidth(layout: DocumentLayout): number {
+  let max = layout.pageConfig.width;
+  for (const page of layout.pages) if (page.pageConfig && page.pageConfig.width > max) max = page.pageConfig.width;
+  return max;
+}
+
+/** Distance from the left edge of the page stack to the left edge of a page, scaled (0 when all pages are as wide). */
+export function getPageX(layout: DocumentLayout, pageIndex: number): number {
+  return ((getMaxPageWidth(layout) - getPageConfig(layout, pageIndex).width) / 2) * layout.scale;
+}
+
+/** Where the content area of a page starts in the page stack (scaled): the page's position plus its margins. */
+export function getPageContentOrigin(layout: DocumentLayout, pageIndex: number): { x: number; y: number } {
+  const margins = getPageConfig(layout, pageIndex).margins;
+  return {
+    x: getPageX(layout, pageIndex) + margins.left * layout.scale,
+    y: getPageY(layout, pageIndex) + margins.top * layout.scale,
+  };
 }
 
 /**

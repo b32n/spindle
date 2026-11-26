@@ -3,6 +3,7 @@ import {
   canContinueOnPage,
   computeSectionedLayout,
   formatPageNumber,
+  matchSectionsToBreaks,
   pickHeaderFooterVariant,
   resolveInheritedContent,
   type LayoutSection,
@@ -210,6 +211,12 @@ describe('computeSectionedLayout — page numbers and header/footer variants', (
     expect(layout.pages.map((p) => p.headerFooterVariant)).toEqual(['default', 'default']);
   });
 
+  it('marks the pages that start a section', () => {
+    const { blocks, measures, ranges } = build([[500, 500], [100], [100, 600]]);
+    const layout = computeSectionedLayout(blocks, measures, sectionsOf(ranges, [{ pageConfig: portrait }, { pageConfig: portrait, breakType: 'continuous' }, { pageConfig: portrait }]));
+    expect(layout.pages.map((p) => p.startsSection)).toEqual([true, false, true, false]);
+  });
+
   it('pickHeaderFooterVariant uses the page number, not the position', () => {
     const s = { differentFirstPage: false, differentOddEven: true };
     expect(pickHeaderFooterVariant(s, false, 7)).toBe('default');
@@ -258,5 +265,20 @@ describe('page lookups on a layout with pages of different heights', () => {
     expect(findPageAtY(layout, 800)).toBe(1);
     expect(getPageConfig(layout, 0)).toBe(portrait);
     expect(getPageConfig(layout, 99)).toBe(portrait);
+  });
+});
+
+describe('matchSectionsToBreaks', () => {
+  const setups = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+  it('pairs each section with the setup its break names and the last with the one no break names', () => {
+    expect(matchSectionsToBreaks(['a', 'b', null], setups)).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
+  });
+  it('lets the later section stand when a break was deleted', () => {
+    expect(matchSectionsToBreaks(['a', null], setups)).toEqual([{ id: 'a' }, { id: 'c' }]);
+    expect(matchSectionsToBreaks([null], setups)).toEqual([{ id: 'c' }]);
+  });
+  it('falls back to the first setup for an unknown id or when every setup is named', () => {
+    expect(matchSectionsToBreaks(['x', null], setups)[0]).toBe(setups[0]);
+    expect(matchSectionsToBreaks(['a', 'b', 'c', null], setups)[3]).toBe(setups[2]);
   });
 });

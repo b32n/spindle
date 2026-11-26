@@ -271,13 +271,12 @@ edits, and the inverse operations broadcast to peers like any other edit.
 
 ## Known limitations (v1)
 
-- **Multi-section documents attach, but the editor still shows one flow.** The
-  shared document carries every section (a `section_break` node ends each
-  section but the last, and `sectionsMeta` holds each section's page setup,
-  header and footer). The editor does not lay the sections out yet, so under
-  collab a multi-section document is drawn as one continuous run with the first
-  section's setup; page setup per section and the Insert → Section break UI
-  come with the section editing work.
+- **Multi-section documents attach.** The shared document carries every
+  section (a `section_break` node ends each section but the last, and
+  `sectionsMeta` holds each section's page setup, header and footer) and the
+  editor shows them section by section. A section's setup is read from the
+  local document, so changing page setup in one client is not propagated to
+  peers yet; the Insert → Section break UI comes with the section editing work.
 - **Content the shared layout cannot hold blocks attach.** `getCollabBlockers(document)`
   lists it (no sections, two sections with one id, block or inline types this
   version does not know) and `attachCollab` rejects with a `CollabBlockedError`

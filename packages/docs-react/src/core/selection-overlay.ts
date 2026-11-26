@@ -14,7 +14,7 @@ import { EditorView } from 'prosemirror-view';
 import { EditorState } from 'prosemirror-state';
 import { FlowBlock } from './flow-blocks';
 import { Measure, hasLineData } from './measurer';
-import { DocumentLayout, getPageY } from './true-layout-engine';
+import { DocumentLayout, getPageConfig, getPageContentOrigin } from './true-layout-engine';
 import { createBlockPositionMap } from './pm-to-blocks';
 import { Node as PmNode } from 'prosemirror-model';
 
@@ -990,9 +990,10 @@ export class SelectionOverlayManager {
     const endCaret = this.estimateCaretPosition(to);
     
     if (startCaret && endCaret) {
-      const contentWidth = (this.layout.pageConfig.width - 
-        this.layout.pageConfig.margins.left - 
-        this.layout.pageConfig.margins.right) * this.layout.scale;
+      const startPageConfig = getPageConfig(this.layout, startCaret.pageIndex);
+      const contentWidth = (startPageConfig.width - 
+        startPageConfig.margins.left - 
+        startPageConfig.margins.right) * this.layout.scale;
       
       if (startCaret.pageIndex === endCaret.pageIndex) {
         // Same page - use actual x positions for single-line, or full width for multi-line
@@ -1228,13 +1229,10 @@ export class SelectionOverlayManager {
   private renderCaret(pos: CaretPosition): void {
     if (!this.caretElement || !this.layout) return;
     
-    const { pageConfig, scale } = this.layout;
-    const margins = pageConfig.margins;
-    
     // Calculate absolute position
-    const pageY = getPageY(this.layout, pos.pageIndex);
-    const absoluteX = margins.left * scale + pos.x;
-    const absoluteY = pageY + margins.top * scale + pos.y;
+    const origin = getPageContentOrigin(this.layout, pos.pageIndex);
+    const absoluteX = origin.x + pos.x;
+    const absoluteY = origin.y + pos.y;
     
     // Use transform for GPU-accelerated positioning
     this.caretElement.style.transform = `translate(${absoluteX}px, ${absoluteY}px)`;
@@ -1305,16 +1303,13 @@ export class SelectionOverlayManager {
   private renderSelectionRectsPooled(rects: SelectionRect[]): void {
     if (!this.overlayContainer || !this.layout) return;
     
-    const { pageConfig, scale } = this.layout;
-    const margins = pageConfig.margins;
-    
     for (const rect of rects) {
       const el = this.getRectFromPool();
       
       // Calculate absolute position
-      const pageY = getPageY(this.layout, rect.pageIndex);
-      const absoluteX = margins.left * scale + rect.x;
-      const absoluteY = pageY + margins.top * scale + rect.y;
+      const origin = getPageContentOrigin(this.layout, rect.pageIndex);
+      const absoluteX = origin.x + rect.x;
+      const absoluteY = origin.y + rect.y;
       
       // Use transform for GPU-accelerated positioning
       el.style.transform = `translate(${absoluteX}px, ${absoluteY}px)`;

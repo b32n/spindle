@@ -105,6 +105,18 @@ export function formatPageNumber(n: number, format?: string): string {
   }
 }
 
+/**
+ * Pair the sections of a document's body with the setup of the document's sections. `breakIds` has one entry per
+ * section in body order: the id of the `section_break` that ends it, or null for the last section. A section takes the
+ * setup with its id; the last takes the last setup that no break names (so deleting a break leaves the later section's
+ * setup standing). An id with no setup, or no setup left for the last section, falls back to the first setup.
+ */
+export function matchSectionsToBreaks<T extends { id: string }>(breakIds: ReadonlyArray<string | null>, setups: readonly T[]): T[] {
+  const named = new Set(breakIds.filter((id): id is string => id !== null));
+  const trailing = [...setups].reverse().find((s) => !named.has(s.id)) ?? setups[setups.length - 1];
+  return breakIds.map((id) => (id === null ? trailing : setups.find((s) => s.id === id)) ?? setups[0]);
+}
+
 /** The header/footer of a section is its own, or the one of the previous section when it has none ("link to previous"). */
 export function resolveInheritedContent<T>(contents: ReadonlyArray<T | undefined>): Array<T | undefined> {
   const out: Array<T | undefined> = [];
@@ -230,6 +242,7 @@ function stamp(page: PageLayout, sectionIndex: number, section: LayoutSection, i
     sectionIndex,
     pageConfig: section.pageConfig,
     pageNumber,
+    startsSection: isFirstPageOfSection,
     ...(section.pageNumbering?.format && { pageNumberFormat: section.pageNumbering.format }),
     headerFooterVariant: pickHeaderFooterVariant(section, isFirstPageOfSection, pageNumber),
   };

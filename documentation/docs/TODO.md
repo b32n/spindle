@@ -28,10 +28,11 @@ Verified absent in code.
       comments round-trip with replies, resolved state and anchors.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
-- [ ] **Multi-section documents in the UI** — the model supports `sections[]`
-      (add/insert/delete), but the editor renders only `sections[0]`
-      (`DocumentEditor.tsx`), and collaboration hard-rejects >1 section
-      (`collab/y-schema.ts`). Section breaks are effectively unavailable.
+- [ ] **Section editing UI** — the editor shows every section (own page size,
+      orientation, margins, header/footer variants, page numbers; columns and
+      vertical alignment are not laid out) and edits in any section reach the
+      model, and collaboration carries all sections. There is no Insert →
+      Section break, delete/merge command or per-section page setup scope yet.
 - [ ] **Table cell merge / split** — `colspan`/`rowspan` exist in the type and
       schema (parsed from pasted DOM), but there's no merge/split command or UI
       — only column/row resize.
@@ -63,9 +64,8 @@ Verified absent in code.
       `UndoManager` is wired (`document.ts` notes it's "shadowed by Yjs
       UndoManager once we wire that in"). Undo/redo semantics under
       collaboration are unresolved.
-- [ ] **Multi-section under collab is carried, not laid out** — sections travel
-      as `section_break` nodes and `sectionsMeta`, but the editor still shows
-      one flow with the first section's setup (see the section editing work).
+- [ ] **Multi-section under collab** — sections travel as `section_break`
+      nodes and `sectionsMeta`; the shared document is shown by section.
       `setData` is disallowed while attached, and IndexedDB persistence is
       browser-only (`collab/binding.ts`, `collab/y-schema.ts`).
 

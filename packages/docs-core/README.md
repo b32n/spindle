@@ -81,8 +81,8 @@ Everything runs locally; there are no network calls.
 ## Limitations
 
 - Single-section editing: multi-section documents live in the data model and are
-  carried by collaboration (`section_break` nodes), but the editor UI renders
-  only the first section for now
+  carried by collaboration (`section_break` nodes) and shown by the editor; the
+  UI to insert or delete section breaks is not there yet
 - No PDF/HTML/Markdown export or import, and no find & replace (DOCX import/export is supported — see below)
 
 Real-time collaboration (Yjs, via `attachCollab` / the `/collab` subpath) and

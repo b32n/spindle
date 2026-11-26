@@ -19,22 +19,24 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   forwardRef,
   useImperativeHandle,
 } from 'react';
 import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
-import { docsSchema, createPlugins, blocksToPmDoc, proseMirrorToDocument, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
+import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
 import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
 
 import { FlowBlock } from './flow-blocks';
-import { proseMirrorToFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
+import { proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks, createBlockPositionMap } from './pm-to-blocks';
 import { DomMeasurer, Measure } from './measurer';
 import { findBookmarkPos, findElementAtPos, internalLinkTarget } from './internal-links';
-import { computeTrueLayout, DocumentLayout, PageConfig } from './true-layout-engine';
+import { computeTrueLayout, DocumentLayout, PageConfig, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
+import { computeSectionedLayout, matchSectionsToBreaks, resolveInheritedContent, type LayoutSection, type LayoutSectionBreak } from './section-layout';
 import { DomPainter, HeaderFooterContent } from './dom-painter';
 import { InputBridge, createInputBridge, CellSelection } from './input-bridge';
 import { SelectionOverlayManager, getSelectionOverlayStyles } from './selection-overlay';
@@ -54,6 +56,25 @@ export interface ActivePageInfo {
   totalPages: number;
   /** Height of the active page */
   pageHeight: number;
+  /** Index of the section the active page belongs to (0 for a document of one section). */
+  sectionIndex?: number;
+  /** Id of that section, when the editor was given `sections`. */
+  sectionId?: string;
+}
+
+/** One section of a document shown by the editor: its page setup, content and what it shows in the margins. */
+export interface TrueLayoutSection {
+  /** Section id: the `section_break` that ends the section names it; the last section has no break. */
+  id: string;
+  /** Page setup as rendered (width and height already swapped for landscape). */
+  pageConfig: PageConfig;
+  /** The blocks the editor starts with (read once, like `initialBlocks`). */
+  blocks: Block[];
+  header?: HeaderFooterContent;
+  footer?: HeaderFooterContent;
+  /** How the section starts; default a new page. */
+  breakType?: LayoutSectionBreak;
+  pageNumbering?: { start?: number; format?: string };
 }
 
 export interface TrueLayoutEditorProps {
@@ -67,6 +88,18 @@ export interface TrueLayoutEditorProps {
   editable?: boolean;
   /** Called when the document changes */
   onDocChange?: (blocks: Block[]) => void;
+  /**
+   * The sections of the document, in order. When given, the editor shows all of them (each with its own page setup,
+   * header and footer), `initialBlocks`, `pageConfig`, `header` and `footer` are ignored, and changes are reported to
+   * `onSectionsChange` instead of `onDocChange`. Page setup, headers and footers are read on every render; the blocks
+   * only when the editor mounts.
+   */
+  sections?: TrueLayoutSection[];
+  /**
+   * Called when the content changes while `sections` is set: one entry per section of the document now, in order. A
+   * section whose break was deleted is no longer listed.
+   */
+  onSectionsChange?: (sections: Array<{ id: string; blocks: Block[] }>) => void;
   /** Called when selection changes */
   onSelectionChange?: (state: EditorState) => void;
   /** Called when cell selection changes (for table cell formatting) */
@@ -91,10 +124,13 @@ export interface TrueLayoutEditorProps {
   footer?: HeaderFooterContent;
   /** Document title (used for dynamic field resolution in headers/footers) */
   documentTitle?: string;
-  /** Called when header content changes */
-  onHeaderChange?: (content: HeaderFooterContent) => void;
-  /** Called when footer content changes */
-  onFooterChange?: (content: HeaderFooterContent) => void;
+  /**
+   * Called when header content changes. With `sections`, `sectionId` is the section whose header it is: the one that
+   * has the header shown on the edited page (a section with none edits the nearest earlier one that has).
+   */
+  onHeaderChange?: (content: HeaderFooterContent, sectionId?: string) => void;
+  /** Called when footer content changes (`sectionId` as for `onHeaderChange`) */
+  onFooterChange?: (content: HeaderFooterContent, sectionId?: string) => void;
   /** Whether headers/footers are editable (default: true when editable is true) */
   headerFooterEditable?: boolean;
   /**
@@ -128,14 +164,25 @@ export interface TrueLayoutEditorHandle {
 // Component
 // ============================================================================
 
+/** For each section, the index of the section whose content it shows: itself, or the nearest earlier one that has some. */
+function ownersOf(contents: ReadonlyArray<unknown>): number[] {
+  let owner = 0;
+  return contents.map((content, i) => {
+    if (content !== undefined) owner = i;
+    return owner;
+  });
+}
+
 export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEditorProps>(
   function TrueLayoutEditor(
     {
       initialBlocks,
-      pageConfig,
+      pageConfig: pageConfigProp,
       zoom = 1,
       editable = true,
       onDocChange,
+      sections,
+      onSectionsChange,
       onSelectionChange,
       onCellSelectionChange,
       onActivePageChange,
@@ -145,8 +192,8 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       pageGap = 24,
       minLinesAtBreak = 2,
       textStylePool,
-      header,
-      footer,
+      header: headerProp,
+      footer: footerProp,
       documentTitle,
       onHeaderChange,
       onFooterChange,
@@ -155,6 +202,26 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     },
     ref
   ) {
+    // With several sections the first one's setup stands for the document where one setup is needed (the painter's
+    // default, the hidden editor's width); each page uses its own section's setup.
+    // (Kept referentially stable: a new object on every render of the host would re-lay the document out and repaint
+    // the pages between a mouse press and its release, losing the click.)
+    const pageConfigKey = JSON.stringify(sections?.[0]?.pageConfig ?? pageConfigProp);
+     
+    const pageConfig = useMemo<PageConfig>(() => JSON.parse(pageConfigKey), [pageConfigKey]);
+    const header = sections ? undefined : headerProp;
+    const footer = sections ? undefined : footerProp;
+    const sectionsRef = useRef(sections);
+    sectionsRef.current = sections;
+    const onSectionsChangeRef = useRef(onSectionsChange);
+    onSectionsChangeRef.current = onSectionsChange;
+    // What re-lays the document out when it changes: the page setup, header, footer, break type and numbering of every
+    // section (not the blocks, which the editor owns once mounted).
+    const sectionsKey = useMemo(
+      () => (sections ? JSON.stringify(sections.map((s) => [s.id, s.pageConfig, s.header, s.footer, s.breakType, s.pageNumbering])) : ''),
+      [sections],
+    );
+
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
@@ -191,6 +258,26 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const blocksRef = useRef<FlowBlock[]>([]);
     const performLayoutRef = useRef<((doc: PmNode, view: EditorView) => void) | null>(null);
     const measuresRef = useRef<Measure[]>([]);
+    // For each section of the last layout: its id, and the index of the section that owns the header and the footer it shows.
+    const sectionOwnersRef = useRef<{
+      ids: string[];
+      headers: Array<HeaderFooterContent | undefined>;
+      footers: Array<HeaderFooterContent | undefined>;
+      headerOwners: number[];
+      footerOwners: number[];
+    } | null>(null);
+    // The active page as reported to the host: its height and the section it belongs to.
+    const activePageInfo = (current: DocumentLayout, pageIndex: number): ActivePageInfo => {
+      const sectionIndex = current.pages[pageIndex]?.sectionIndex;
+      return {
+        pageIndex,
+        totalPages: current.pages.length,
+        pageHeight: Math.floor(getPageConfig(current, pageIndex).height * zoom),
+        ...(sectionIndex !== undefined && { sectionIndex, sectionId: sectionOwnersRef.current?.ids[sectionIndex] }),
+      };
+    };
+    const activePageInfoRef = useRef(activePageInfo);
+    activePageInfoRef.current = activePageInfo;
     const blockPositionMapRef = useRef<Map<string, { start: number; end: number }>>(new Map());
     
     // Track currently hovered table/image for showing resize handles
@@ -224,7 +311,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     // After that, the editor manages its own state via transactions
     const initialDocRef = useRef<PmNode | null>(null);
     if (!initialDocRef.current) {
-      initialDocRef.current = blocksToPmDoc(initialBlocks, textStylePool);
+      initialDocRef.current = sections ? sectionsToPmDoc(sections, textStylePool) : blocksToPmDoc(initialBlocks, textStylePool);
     }
     
     // Calculate dimensions
@@ -399,7 +486,21 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
             });
             
             // Notify parent of doc change (use ref to avoid stale closure)
-            if (onDocChangeRef.current) {
+            if (sectionsRef.current && onSectionsChangeRef.current) {
+              const known = sectionsRef.current;
+              const docModel = proseMirrorToDocument(
+                newState.doc,
+                // Stand-in document: only the section ids (to find the last section) and the blocks are used.
+                {
+                  id: '',
+                  title: '',
+                  sections: known.map((s) => ({ id: s.id, pageConfig: DEFAULT_PAGE_CONFIG, blocks: [] })),
+                  defaultPageConfig: DEFAULT_PAGE_CONFIG,
+                },
+                textStylePoolRef.current
+              );
+              onSectionsChangeRef.current(docModel.sections.map((s) => ({ id: s.id, blocks: s.blocks })));
+            } else if (onDocChangeRef.current) {
               const docModel = proseMirrorToDocument(
                 newState.doc,
                 // Minimal stand-in document — only its blocks are read back.
@@ -449,11 +550,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
               // If page changed, update ref and notify
               if (newActivePageIndex !== activePageIndexRef.current) {
                 activePageIndexRef.current = newActivePageIndex;
-                onActivePageChangeRef.current?.({
-                  pageIndex: newActivePageIndex,
-                  totalPages: layoutRef.current.pages.length,
-                  pageHeight,
-                });
+                onActivePageChangeRef.current?.(activePageInfoRef.current(layoutRef.current, newActivePageIndex));
               }
             }
           }
@@ -549,7 +646,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
             return !!info && pos >= info.start && pos <= info.end;
           })
         );
-        if (page !== undefined && page >= 0) viewport.scrollTop = page * (pageHeight + pageGap * zoom);
+        if (page !== undefined && page >= 0 && current) viewport.scrollTop = getPageY(current, page);
         const { state } = editorView;
         editorView.dispatch(state.tr.setSelection(TextSelection.near(state.doc.resolve(pos))));
         let tries = 0;
@@ -562,15 +659,17 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       };
       container.addEventListener('click', onClick);
       return () => container.removeEventListener('click', onClick);
-    }, [editorView, pageHeight, pageGap, zoom]);
+    }, [editorView]);
 
     // Perform layout calculation
     const performLayout = useCallback((doc: PmNode, view: EditorView) => {
       // Removed logging for production
       if (!measurerRef.current || !painterRef.current || !pagesContainerRef.current) return;
       
-      // 1. Convert ProseMirror doc to FlowBlocks
-      const blocks = proseMirrorToFlowBlocks(doc, { resetIds: true });
+      // 1. Convert ProseMirror doc to FlowBlocks (and, with sections, find where each section's blocks are)
+      const known = sectionsRef.current;
+      const sectioned = known ? proseMirrorToSectionedFlowBlocks(doc, { resetIds: true }) : null;
+      const blocks = sectioned ? sectioned.blocks : proseMirrorToFlowBlocks(doc, { resetIds: true });
       blocksRef.current = blocks;
       
       // 2. Create PM position map for blocks
@@ -579,16 +678,42 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       
       // 3. Measure all blocks (clear cache first to ensure fresh measurements)
       measurerRef.current.clearCache();
-      const measures = measurerRef.current.measureBlocks(blocks);
+      let measures: Measure[];
+      let newLayout: DocumentLayout;
+      if (known && sectioned) {
+        // Each section is measured at its own content width and laid out with its own page setup.
+        const matched = matchSectionsToBreaks(sectioned.sections.map((s) => s.sectionId), known);
+        const headers = resolveInheritedContent(matched.map((s) => s.header));
+        const footers = resolveInheritedContent(matched.map((s) => s.footer));
+        measures = [];
+        const layoutSections: LayoutSection[] = sectioned.sections.map((range, i) => {
+          const setup = matched[i];
+          const width = setup.pageConfig.width - setup.pageConfig.margins.left - setup.pageConfig.margins.right;
+          measurerRef.current!.updateContentWidth(Math.floor(width));
+          measures.push(...measurerRef.current!.measureBlocks(blocks.slice(range.blockStart, range.blockEnd)));
+          return {
+            pageConfig: setup.pageConfig,
+            blockStart: range.blockStart,
+            blockEnd: range.blockEnd,
+            ...(i > 0 && setup.breakType && { breakType: setup.breakType }),
+            ...(setup.pageNumbering && { pageNumbering: setup.pageNumbering }),
+            differentFirstPage: !!(headers[i]?.differentFirstPage || footers[i]?.differentFirstPage),
+            differentOddEven: !!(headers[i]?.differentOddEven || footers[i]?.differentOddEven),
+          };
+        });
+        newLayout = computeSectionedLayout(blocks, measures, layoutSections, { scale: zoom, pageGap, minLinesAtBreak });
+        painterRef.current.updateConfig({ pageConfig: matched[0].pageConfig, sectionHeaders: headers, sectionFooters: footers });
+        sectionOwnersRef.current = { ids: matched.map((s) => s.id), headers, footers, headerOwners: ownersOf(matched.map((s) => s.header)), footerOwners: ownersOf(matched.map((s) => s.footer)) };
+      } else {
+        measures = measurerRef.current.measureBlocks(blocks);
+        newLayout = computeTrueLayout(blocks, measures, {
+          pageConfig,
+          scale: zoom,
+          pageGap,
+          minLinesAtBreak,
+        });
+      }
       measuresRef.current = measures;
-      
-      // 4. Compute layout
-      const newLayout = computeTrueLayout(blocks, measures, {
-        pageConfig,
-        scale: zoom,
-        pageGap,
-        minLinesAtBreak,
-      });
       
       setLayout(newLayout);
       
@@ -627,7 +752,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       }
       // Note: We use performLayoutRef to avoid adding performLayout to deps
       // which would cause infinite loops. The ref is always up-to-date.
-    }, [pageConfig, zoom, pageGap, minLinesAtBreak, editorView, header, footer]);
+    }, [pageConfig, zoom, pageGap, minLinesAtBreak, editorView, header, footer, sectionsKey]);
     
     // Initialize table interaction manager
     useEffect(() => {
@@ -834,13 +959,9 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       const last = lastNotifiedRef.current;
       if (!last || last.pageIndex !== activePageIndex || last.totalPages !== totalPages) {
         lastNotifiedRef.current = { pageIndex: activePageIndex, totalPages };
-        onActivePageChange?.({
-          pageIndex: activePageIndex,
-          totalPages,
-          pageHeight,
-        });
+        onActivePageChange?.(activePageInfoRef.current(layoutRef.current, activePageIndex));
       }
-    }, [layout, pageHeight, onActivePageChange]);
+    }, [layout, zoom, onActivePageChange]);
     
     // Expose methods via ref
     useImperativeHandle(ref, () => ({
@@ -862,6 +983,21 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     
     // Calculate total height
     const totalHeight = layout?.totalHeight ?? pageHeight;
+
+    // The page whose header or footer is being edited: its setup, and the header/footer content it shows (with the
+    // id of the section that owns it, which is the one an edit goes to).
+    const editedPage = hfEditState && layout ? layout.pages[hfEditState.pageIndex] : undefined;
+    const editedPageConfig = hfEditState && layout ? getPageConfig(layout, hfEditState.pageIndex) : pageConfig;
+    const owners = sectionOwnersRef.current;
+    const editedSection =
+      sections && owners && editedPage?.sectionIndex !== undefined
+        ? {
+            header: owners.headers[editedPage.sectionIndex],
+            footer: owners.footers[editedPage.sectionIndex],
+            headerOwnerId: owners.ids[owners.headerOwners[editedPage.sectionIndex]],
+            footerOwnerId: owners.ids[owners.footerOwners[editedPage.sectionIndex]],
+          }
+        : undefined;
     
     return (
       <div
@@ -912,7 +1048,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
             className="true-layout-pages-wrapper"
             style={{
               position: 'relative',
-              width: pageWidth,
+              width: layout ? Math.floor(getMaxPageWidth(layout) * zoom) : pageWidth,
               height: totalHeight,
               flexShrink: 0,
               contain: 'layout style',
@@ -1086,14 +1222,12 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
         {hfEditState && pagesContainerRef.current && viewportRef.current && (
           <HeaderFooterEditor
             type={hfEditState.type}
-            content={hfEditState.type === 'header' 
-              ? (header ?? { blocks: [] }) 
-              : (footer ?? { blocks: [] })}
+            content={(hfEditState.type === 'header' ? editedSection?.header ?? header : editedSection?.footer ?? footer) ?? { blocks: [] }}
             onChange={(newContent) => {
               if (hfEditState.type === 'header') {
-                onHeaderChange?.(newContent);
+                onHeaderChange?.(newContent, editedSection?.headerOwnerId);
               } else {
-                onFooterChange?.(newContent);
+                onFooterChange?.(newContent, editedSection?.footerOwnerId);
               }
             }}
             isEditing={hfEditState.isEditing}
@@ -1101,34 +1235,32 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
             pageIndex={hfEditState.pageIndex}
             totalPages={layout?.pages.length ?? 1}
             documentTitle={documentTitle}
-            contentWidth={contentWidth}
+            contentWidth={Math.floor((editedPageConfig.width - editedPageConfig.margins.left - editedPageConfig.margins.right) * zoom)}
             scale={zoom}
             position={(() => {
               // Calculate the position of the header/footer area
               const containerRect = pagesContainerRef.current!.getBoundingClientRect();
               const viewportRect = viewportRef.current!.getBoundingClientRect();
               const scrollTop = viewportRef.current!.scrollTop;
-              const pageGapPx = pageGap * zoom;
-              const pageHeightPx = pageHeight;
               
               // Calculate page Y position in the document
-              const pageY = hfEditState.pageIndex * (pageHeightPx + pageGapPx);
+              const pageY = layout ? getPageY(layout, hfEditState.pageIndex) : 0;
               // Convert to viewport position
               const pageTop = containerRect.top + pageY - scrollTop + viewportRect.top - containerRect.top;
               
               const margins = {
-                top: pageConfig.margins.top * zoom,
-                bottom: pageConfig.margins.bottom * zoom,
-                left: pageConfig.margins.left * zoom,
-                right: pageConfig.margins.right * zoom,
-                header: (pageConfig.margins.header ?? 48) * zoom,
-                footer: (pageConfig.margins.footer ?? 48) * zoom,
+                top: editedPageConfig.margins.top * zoom,
+                bottom: editedPageConfig.margins.bottom * zoom,
+                left: editedPageConfig.margins.left * zoom,
+                right: editedPageConfig.margins.right * zoom,
+                header: (editedPageConfig.margins.header ?? 48) * zoom,
+                footer: (editedPageConfig.margins.footer ?? 48) * zoom,
               };
               
               return {
                 top: hfEditState.type === 'header' ? margins.header : undefined,
                 bottom: hfEditState.type === 'footer' ? margins.footer : undefined,
-                left: containerRect.left + margins.left,
+                left: containerRect.left + (layout ? getPageX(layout, hfEditState.pageIndex) : 0) + margins.left,
                 pageY: pageTop,
               };
             })()}

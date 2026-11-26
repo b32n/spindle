@@ -12,7 +12,7 @@
 
 // Main component
 export { TrueLayoutEditor } from './TrueLayoutEditor';
-export type { TrueLayoutEditorProps, TrueLayoutEditorHandle, ActivePageInfo } from './TrueLayoutEditor';
+export type { TrueLayoutEditorProps, TrueLayoutEditorHandle, ActivePageInfo, TrueLayoutSection } from './TrueLayoutEditor';
 
 // FlowBlocks - Abstract content representation
 export * from './flow-blocks';
@@ -53,6 +53,7 @@ export {
   formatPageNumber,
   pickHeaderFooterVariant,
   resolveInheritedContent,
+  matchSectionsToBreaks,
 } from './section-layout';
 export type { LayoutSection, LayoutSectionBreak, SectionedLayoutOptions } from './section-layout';
 export type {
