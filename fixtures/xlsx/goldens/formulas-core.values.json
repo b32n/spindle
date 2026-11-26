@@ -4,25 +4,25 @@
     {
       "actual": "\"#NAME? Function SIN not found\"",
       "cell": "I14",
-      "expected": "0.841470984807897",
+      "expected": "0.841470984808",
       "sheet": "Data"
     },
     {
       "actual": "\"#NAME? Function COS not found\"",
       "cell": "I15",
-      "expected": "0.54030230586814",
+      "expected": "0.540302305868",
       "sheet": "Data"
     },
     {
       "actual": "\"#NAME? Function PI not found\"",
       "cell": "I16",
-      "expected": "3.14159265358979",
+      "expected": "3.14159265359",
       "sheet": "Data"
     },
     {
       "actual": "\"#NAME? Function RADIANS not found\"",
       "cell": "I17",
-      "expected": "3.14159265358979",
+      "expected": "3.14159265359",
       "sheet": "Data"
     },
     {

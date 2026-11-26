@@ -213,6 +213,7 @@ describe('comparing values', () => {
       'FALSE',
       '1.5',
     ]);
+    expect(show(772.1734929184817)).toBe(show(772.1734929184818));
   });
 });
 

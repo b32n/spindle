@@ -7,7 +7,7 @@
 import { relationshipTargets, type OoxmlParts } from '../fidelity-core/ooxml-package';
 import type { Json, ValuesTotals } from '../fidelity-core/types';
 import { isObj } from '../fidelity-core/diff';
-import { cellAddress } from './normalize';
+import { cellAddress, stableNumber } from './normalize';
 
 export type Scalar = string | number | boolean | null;
 
@@ -183,7 +183,7 @@ export const show = (v: Scalar): string =>
         ? v
           ? 'TRUE'
           : 'FALSE'
-        : String(v);
+        : String(stableNumber(v));
 
 export interface ValuesSnapshot extends ValuesTotals {
   /** `ok`, or why nothing was compared. */

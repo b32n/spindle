@@ -5,6 +5,7 @@ import {
   countWorkbook,
   diffField,
   digestBinaries,
+  stableNumber,
   normalizeWorkbook,
   resolvePools,
   scrubMessage,
@@ -29,6 +30,27 @@ describe('addresses', () => {
   it('joins column and 1-based row', () => {
     expect(cellAddress(0, 0)).toBe('A1');
     expect(cellAddress(9, 27)).toBe('AB10');
+  });
+});
+
+describe('stableNumber', () => {
+  it('keeps 12 significant digits so last-digit differences between Node versions vanish', () => {
+    // PV(0.05,10,-100) as computed on Node 24 and Node 22
+    expect(stableNumber(772.1734929184817)).toBe(stableNumber(772.1734929184818));
+    expect(stableNumber(0.08896339469334992)).toBe(stableNumber(0.08896339469334985));
+    expect(stableNumber(1257.789253554884)).toBe(stableNumber(1257.7892535548842));
+    expect(stableNumber(0.1 + 0.2)).toBe(0.3);
+    expect(stableNumber(1.5)).toBe(1.5);
+    expect(stableNumber(0)).toBe(0);
+    expect(stableNumber(123456789012345680000)).toBe(1.23456789012e20);
+  });
+  it('is applied to every number in a model', () => {
+    expect(digestBinaries({ v: [772.1734929184817, 1e-20 + 1] })).toEqual({
+      v: [772.173492918, 1],
+    });
+  });
+  it('does not make different values equal at visible precision', () => {
+    expect(stableNumber(1.0000001)).not.toBe(stableNumber(1.0000002));
   });
 });
 

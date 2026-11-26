@@ -20,6 +20,13 @@ export function colName(index: number): string {
 
 export const cellAddress = (row: number, col: number): string => `${colName(col)}${row + 1}`;
 
+/**
+ * Numbers are kept to 12 significant digits. The last one or two digits of results such as `PV` or `RATE` depend on the
+ * V8 build's `Math.pow` and `Math.exp` (Node 22 and 24 differ), and a golden must be identical on both. Cached values in
+ * files carry at most 15 digits and `values` compares to 9, so nothing a user could see changes.
+ */
+export const stableNumber = (n: number): number => Number(n.toPrecision(12));
+
 const sha256 = (data: Uint8Array | string): string =>
   createHash('sha256').update(data).digest('hex');
 
@@ -49,7 +56,8 @@ export function digestBinaries(value: unknown): Json {
     for (const [k, v] of Object.entries(value)) if (v !== undefined) out[k] = digestBinaries(v);
     return out;
   }
-  if (typeof value === 'number' && !Number.isFinite(value)) return `#number:${String(value)}`;
+  if (typeof value === 'number')
+    return Number.isFinite(value) ? stableNumber(value) : `#number:${String(value)}`;
   return (value ?? null) as Json;
 }
 
