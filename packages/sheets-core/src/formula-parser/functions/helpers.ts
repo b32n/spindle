@@ -43,10 +43,14 @@ export function isErrorValue(v: unknown): boolean {
 /** Recursively flatten range values (`unknown[][]`) and nested args into a flat list. */
 export function flatten(args: unknown[]): unknown[] {
   const out: unknown[] = [];
-  for (const a of args) {
-    if (Array.isArray(a)) out.push(...flatten(a as unknown[]));
-    else out.push(a);
-  }
+  // Pushed one by one: spreading a million-element column into push() overflows the stack.
+  const walk = (list: unknown[]): void => {
+    for (const a of list) {
+      if (Array.isArray(a)) walk(a as unknown[]);
+      else out.push(a);
+    }
+  };
+  walk(args);
   return out;
 }
 
