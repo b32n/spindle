@@ -513,11 +513,20 @@ describe('header/footer variants and section properties under collab', () => {
     expect(out.verticalAlign).toBe('center');
   });
 
+  it('how a section starts survives a Y round trip', () => {
+    const data = dataWith([para('p', [text('body')])]);
+    data.sections[0].breakType = 'evenPage';
+    const a = new Y.Doc();
+    hydrateYDocFromData(a, data);
+    expect(serializeYDocToData(a).sections[0].breakType).toBe('evenPage');
+  });
+
   it('a section without them reads back without the fields', () => {
     const a = new Y.Doc();
     hydrateYDocFromData(a, dataWith([para('p', [text('body')])]));
     const out = serializeYDocToData(a).sections[0];
     expect(out).not.toHaveProperty('pageNumbering');
     expect(out).not.toHaveProperty('verticalAlign');
+    expect(out).not.toHaveProperty('breakType');
   });
 });

@@ -74,6 +74,41 @@ export function proseMirrorToFlowBlocks(
   return blocks;
 }
 
+/** The flow blocks of a document and which blocks belong to which section. */
+export interface SectionedFlowBlocks {
+  blocks: FlowBlock[];
+  /**
+   * One entry per section in document order: `sectionId` is the id of the `section_break` that ends it (null for the
+   * last section, which has none) and `blockStart`..`blockEnd` the slice of `blocks` it owns (possibly empty).
+   */
+  sections: Array<{ sectionId: string | null; blockStart: number; blockEnd: number }>;
+}
+
+/**
+ * Convert a ProseMirror document to FlowBlocks and split them into sections at its `section_break` nodes. A document
+ * without breaks is one section holding every block, and `blocks` is what `proseMirrorToFlowBlocks` returns.
+ */
+export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: ConversionOptions = {}): SectionedFlowBlocks {
+  if (options.resetIds) {
+    resetBlockIdCounter();
+  }
+  const blocks: FlowBlock[] = [];
+  const sections: SectionedFlowBlocks['sections'] = [];
+  let blockStart = 0;
+  doc.forEach((node) => {
+    if (node.type.name === 'section_break') {
+      sections.push({ sectionId: String(node.attrs.sectionId ?? ''), blockStart, blockEnd: blocks.length });
+      blockStart = blocks.length;
+      return;
+    }
+    const block = nodeToFlowBlock(node);
+    if (Array.isArray(block)) blocks.push(...block);
+    else if (block) blocks.push(block);
+  });
+  sections.push({ sectionId: null, blockStart, blockEnd: blocks.length });
+  return { blocks, sections };
+}
+
 /**
  * Convert a single ProseMirror node to a FlowBlock (or array of blocks for lists)
  */

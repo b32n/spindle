@@ -4,7 +4,7 @@
 //   meta:               Y.Map<string, JSON>  — id, title, defaultPageConfig, timestamps, schemaVersion
 //   content:            Y.XmlFragment        — body text (ProseMirror-compatible, bound via y-prosemirror)
 //   sectionsMeta:       Y.Array<Y.Map>       — per-section metadata (id, pageConfig (with columns), header, footer,
-//                                              pageNumbering, verticalAlign)
+//                                              pageNumbering, verticalAlign, breakType)
 //   namedStyles:        Y.Map<string, JSON>  — DOCX named style id → NamedStyle (additive)
 //   textStylePool:      Y.Map<string, JSON>  — styleId → TextStyle
 //   paragraphStylePool: Y.Map<string, JSON>  — styleId → ParagraphStyle
@@ -41,6 +41,7 @@ import type {
   PageConfig,
   PageNumbering,
   ParagraphStyle,
+  SectionBreakType,
   SectionVerticalAlign,
   SectionData,
   TextStyle,
@@ -153,6 +154,7 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DocumentData): void {
       if (section.footer) sectionMap.set('footer', section.footer);
       if (section.pageNumbering) sectionMap.set('pageNumbering', section.pageNumbering);
       if (section.verticalAlign) sectionMap.set('verticalAlign', section.verticalAlign);
+      if (section.breakType) sectionMap.set('breakType', section.breakType);
       fields.sectionsMeta.push([sectionMap]);
     }
 
@@ -220,6 +222,7 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
     const footer = sectionMap.get('footer') as HeaderFooterContent | undefined;
     const pageNumbering = sectionMap.get('pageNumbering') as PageNumbering | undefined;
     const verticalAlign = sectionMap.get('verticalAlign') as SectionVerticalAlign | undefined;
+    const breakType = sectionMap.get('breakType') as SectionBreakType | undefined;
     sections.push({
       id: sectionId,
       pageConfig,
@@ -228,6 +231,7 @@ export function serializeYDocToData(ydoc: Y.Doc): DocumentData {
       footer,
       ...(pageNumbering && { pageNumbering }),
       ...(verticalAlign && { verticalAlign }),
+      ...(breakType && { breakType }),
     });
   });
 

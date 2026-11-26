@@ -102,6 +102,16 @@ describe('section properties (import)', () => {
     expect(await section('<w:pgNumType w:fmt="a&quot;b"/>')).not.toHaveProperty('pageNumbering');
   });
 
+  it('reads how the section starts, keeping only what differs from a new page', async () => {
+    expect((await section('<w:type w:val="continuous"/>')).breakType).toBe('continuous');
+    expect((await section('<w:type w:val="evenPage"/>')).breakType).toBe('evenPage');
+    expect((await section('<w:type w:val="oddPage"/>')).breakType).toBe('oddPage');
+    expect(await section('<w:type w:val="nextPage"/>')).not.toHaveProperty('breakType');
+    expect(await section('<w:type w:val="nextColumn"/>')).not.toHaveProperty('breakType');
+    expect(await section('<w:type w:val="bogus"/>')).not.toHaveProperty('breakType');
+    expect(await section('')).not.toHaveProperty('breakType');
+  });
+
   it('reads vertical alignment other than top', async () => {
     expect((await section('<w:vAlign w:val="center"/>')).verticalAlign).toBe('center');
     expect((await section('<w:vAlign w:val="both"/>')).verticalAlign).toBe('both');
@@ -227,6 +237,14 @@ describe('header, footer and section properties (export and round trip)', () => 
   it('does not write a page number format Word does not know', async () => {
     const { imported } = await roundTrip(base({ pageNumbering: { start: 2, format: 'notAFormat' } }));
     expect(imported.sections[0].pageNumbering).toEqual({ start: 2 });
+  });
+
+  it('writes and reads back the break type of each section', async () => {
+    const { imported, xml } = await roundTrip(base(), base({ breakType: 'continuous' }), base({ breakType: 'evenPage' }), base({ breakType: 'oddPage' }), base());
+    expect(imported.sections.map((s) => s.breakType)).toEqual([undefined, 'continuous', 'evenPage', 'oddPage', undefined]);
+    expect(xml).toContain('<w:type w:val="continuous"/>');
+    expect(xml).toContain('<w:type w:val="evenPage"/>');
+    expect(xml).toContain('<w:type w:val="oddPage"/>');
   });
 
   it('keeps the properties of each section apart', async () => {

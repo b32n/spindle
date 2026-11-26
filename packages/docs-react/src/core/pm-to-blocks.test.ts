@@ -1,5 +1,5 @@
 import { Schema, Node as PmNode } from 'prosemirror-model';
-import { createBlockPositionMap, proseMirrorToFlowBlocks } from './pm-to-blocks';
+import { createBlockPositionMap, proseMirrorToFlowBlocks, proseMirrorToSectionedFlowBlocks } from './pm-to-blocks';
 import type { ParagraphBlock, LinkRun } from './flow-blocks';
 
 // Minimal schema: enough to build a paragraph containing a linked text run.
@@ -193,5 +193,38 @@ describe('section_break nodes in the flow', () => {
       if (n.type.name !== 'section_break') expected.push(offset);
     });
     expect(starts).toEqual(expected);
+  });
+});
+
+describe('proseMirrorToSectionedFlowBlocks', () => {
+  const para = (t: string) => ({ type: 'paragraph', content: [text(t)] });
+  const list = { type: 'bullet_list', content: [{ type: 'list_item', content: [para('a')] }, { type: 'list_item', content: [para('b')] }] };
+
+  it('is one section holding every block when the document has no break', () => {
+    const doc = j([para('x'), list]);
+    const out = proseMirrorToSectionedFlowBlocks(doc, { resetIds: true });
+    expect(out.blocks).toEqual(proseMirrorToFlowBlocks(doc, { resetIds: true }));
+    expect(out.sections).toEqual([{ sectionId: null, blockStart: 0, blockEnd: out.blocks.length }]);
+  });
+
+  it('splits at breaks, counting the flow blocks a list expands to', () => {
+    const doc = j([para('one'), list, { type: 'section_break', attrs: { sectionId: 'a' } }, para('two'), { type: 'section_break', attrs: { sectionId: 'b' } }, para('three')]);
+    const out = proseMirrorToSectionedFlowBlocks(doc);
+    expect(out.blocks.map((b) => b.kind)).toEqual(['paragraph', 'listItem', 'listItem', 'paragraph', 'paragraph']);
+    expect(out.sections).toEqual([
+      { sectionId: 'a', blockStart: 0, blockEnd: 3 },
+      { sectionId: 'b', blockStart: 3, blockEnd: 4 },
+      { sectionId: null, blockStart: 4, blockEnd: 5 },
+    ]);
+  });
+
+  it('keeps empty sections: adjacent breaks and a break at the end', () => {
+    const doc = j([{ type: 'section_break', attrs: { sectionId: 'a' } }, { type: 'section_break', attrs: { sectionId: 'b' } }, para('x'), { type: 'section_break', attrs: { sectionId: 'c' } }]);
+    expect(proseMirrorToSectionedFlowBlocks(doc).sections).toEqual([
+      { sectionId: 'a', blockStart: 0, blockEnd: 0 },
+      { sectionId: 'b', blockStart: 0, blockEnd: 0 },
+      { sectionId: 'c', blockStart: 0, blockEnd: 1 },
+      { sectionId: null, blockStart: 1, blockEnd: 1 },
+    ]);
   });
 });

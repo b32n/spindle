@@ -31,6 +31,7 @@ import {
   UnderlineType,
   WidthType,
   NumberFormat,
+  SectionType,
   VerticalAlignSection,
   type IBorderOptions,
   type IRunOptions,
@@ -97,6 +98,8 @@ function tableBorders(b: DocBorders): ITableBordersOptions {
     insideVertical: borderOptions(b.insideV),
   };
 }
+
+const BREAK_TYPES = { continuous: SectionType.CONTINUOUS, evenPage: SectionType.EVEN_PAGE, oddPage: SectionType.ODD_PAGE } as const;
 
 function ptToTwips(pt: number): number {
   return Math.round(pt * PT_TO_TWIPS);
@@ -552,6 +555,7 @@ class DocxBuilder {
           }),
         },
         titlePage: titlePage || undefined,
+        ...(section.breakType && { type: BREAK_TYPES[section.breakType] }),
         ...(section.verticalAlign && { verticalAlign: VerticalAlignSection[section.verticalAlign.toUpperCase() as 'CENTER' | 'BOTTOM' | 'BOTH'] }),
         ...(columns && columns.count > 1 && {
           column: {

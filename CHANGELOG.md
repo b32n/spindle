@@ -42,6 +42,18 @@ lockstep.
 - **Collaboration schema version.** The shared document records `meta.schemaVersion` (`COLLAB_SCHEMA_VERSION`, now 2;
   a missing value means 1). `attachCollab` rejects with a `CollabSchemaVersionError` when the room was written with a
   newer version than the client supports, before seeding or editing anything.
+- **Layout across sections (engine).** `computeSectionedLayout` (`@b32nio/spindle-docs-react`) paginates a document of
+  several sections: each section is laid out with its own page size, orientation and margins, starts on a new page, on
+  the same page (continuous, when the page setup is the same) or on the next even or odd page (a blank page is added
+  when needed), restarts or continues the page number and carries its number format, and each page records which header
+  and footer variant (first page, even page, default) it shows. `PageLayout` gains the optional `sectionIndex`,
+  `pageConfig`, `top`, `pageNumber`, `pageNumberFormat`, `headerFooterVariant` and `isBlank`, `getPageY` and
+  `findPageAtY` follow pages of different heights, and `formatPageNumber`, `resolveInheritedContent` (a section with no
+  header or footer shows the previous section's) and `proseMirrorToSectionedFlowBlocks` are exported. A layout of one
+  section is the same as before. The editor does not use it yet.
+- **DOCX: how a section starts is kept.** `w:type` of a section (continuous, even page, odd page; a new page is the
+  default and is not kept) is imported into the additive `DocSection.breakType` / `Section.breakType` and written back,
+  and travels through `getData`/`setData` and the shared document.
 - **DOCX comments are imported.** `importDocx` reads `word/comments.xml`, `commentsExtended.xml` (replies and the
   resolved state) and `people.xml` (author ids), anchors each thread to its commented text across runs, links,
   paragraphs and table cells, and returns the threads in the additive `DocumentImportResult.comments`
