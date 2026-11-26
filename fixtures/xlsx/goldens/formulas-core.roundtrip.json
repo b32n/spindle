@@ -1,0 +1,240 @@
+{
+  "diff": {
+    "added": 168,
+    "after": {
+      "cells": 356,
+      "formats": 0,
+      "formulas": 159,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "before": {
+      "cells": 356,
+      "formats": 0,
+      "formulas": 159,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 9,
+      "added sheets[].config.rowHeights.*": 159,
+      "changed sheets[].cells.*.formula": 1,
+      "changed sheets[].cells.*.value": 3
+    },
+    "changed": 4,
+    "entries": [
+      {
+        "after": "\"=SUM(\\\"Data!A1:Data!A3\\\")\"",
+        "before": "\"=SUM(Data!A1:Data!A3)\"",
+        "kind": "changed",
+        "path": "sheets[0].cells.I159.formula"
+      },
+      {
+        "after": "0",
+        "before": "6",
+        "kind": "changed",
+        "path": "sheets[0].cells.I159.value"
+      },
+      {
+        "after": "\"#VALUE!\"",
+        "before": "\"_xlfn.TEXTBEFORE(\\\"a-b\\\",\\\"-\\\")\"",
+        "kind": "changed",
+        "path": "sheets[0].cells.I66.value"
+      },
+      {
+        "after": "\"#VALUE!\"",
+        "before": "\"_xlfn.TEXTSPLIT(\\\"a-b\\\",\\\"-\\\")\"",
+        "kind": "changed",
+        "path": "sheets[0].cells.I67.value"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.B"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.C"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.D"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.E"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.F"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.G"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.H"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.I"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.1"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.10"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.100"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.101"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.102"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.103"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.104"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.105"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.106"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.107"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.108"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.109"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.11"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.110"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.111"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.112"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.113"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.114"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.115"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.116"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.117"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.118"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.119"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.12"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.120"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.121"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.122"
+      }
+    ],
+    "removed": 0,
+    "total": 172,
+    "truncated": true
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

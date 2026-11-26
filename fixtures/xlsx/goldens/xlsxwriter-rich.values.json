@@ -1,0 +1,33 @@
+{
+  "compared": 4,
+  "firstMismatches": [
+    {
+      "actual": "\"_xlfn.XLOOKUP(\\\"S\\\",A2:A3,B2:B3)\"",
+      "cell": "F1",
+      "expected": "3",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.LET(_xlpm.x,2,_xlpm.x*3)\"",
+      "cell": "F2",
+      "expected": "6",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.SORT(A2:A3)\"",
+      "cell": "F4",
+      "expected": "0",
+      "sheet": "Data"
+    }
+  ],
+  "formulaCells": 4,
+  "matched": 1,
+  "mismatchClasses": {
+    "number -> text": 3
+  },
+  "mismatched": 3,
+  "status": "ok",
+  "uncached": 0,
+  "unreadableSheets": 0,
+  "volatile": 0
+}

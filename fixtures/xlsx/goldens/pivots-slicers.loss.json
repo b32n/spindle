@@ -1,0 +1,26 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "not imported; formulas using them break",
+      "id": "xlsx.definedNames",
+      "label": "named range(s)/name(s)",
+      "where": [
+        "Slicer_Region"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "only the last computed values are kept",
+      "id": "xlsx.pivotTables",
+      "label": "pivot table(s)"
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.slicers",
+      "label": "slicer(s)"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 5,
+      "effect": "groups are flattened",
+      "id": "xlsx.outline",
+      "label": "grouped (outlined) row/column(s)",
+      "where": [
+        "Layout"
+      ]
+    }
+  ]
+}

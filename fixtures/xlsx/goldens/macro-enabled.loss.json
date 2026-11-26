@@ -1,0 +1,11 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "macros are dropped",
+      "id": "xlsx.macros",
+      "label": "macro project"
+    }
+  ]
+}

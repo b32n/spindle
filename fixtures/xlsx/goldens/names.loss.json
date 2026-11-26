@@ -1,0 +1,18 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 6,
+      "effect": "not imported; formulas using them break",
+      "id": "xlsx.definedNames",
+      "label": "named range(s)/name(s)",
+      "where": [
+        "Quarter1",
+        "Local",
+        "TaxRate",
+        "Greeting",
+        "Lookup"
+      ]
+    }
+  ]
+}

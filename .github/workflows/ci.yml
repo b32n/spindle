@@ -47,6 +47,18 @@ jobs:
           path: docx-fidelity-report.json
           if-no-files-found: ignore
           retention-days: 14
+      # XLSX fidelity corpus against the built packages (goldens in fixtures/xlsx/goldens): same contract as
+      # the DOCX step above, plus the launch-bar scoreboard at the top of the job summary.
+      - name: XLSX fidelity corpus
+        run: npm run sheets:xlsx-fidelity -- --report md --report-out "$GITHUB_STEP_SUMMARY" --report json --report-out xlsx-fidelity-report.json
+      - name: Upload XLSX fidelity report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: xlsx-fidelity-report-node${{ matrix.node }}
+          path: xlsx-fidelity-report.json
+          if-no-files-found: ignore
+          retention-days: 14
       - run: npm run lint
       # Library source must not fetch anything or hard-code third-party hosts (docs/testing: privacy).
       - run: npm run check:network

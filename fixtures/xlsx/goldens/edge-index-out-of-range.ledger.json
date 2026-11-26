@@ -1,0 +1,58 @@
+{
+  "importError": true,
+  "package": "zip",
+  "parts": [
+    {
+      "name": "[Content_Types].xml",
+      "rule": "package.contentTypes",
+      "status": "unaccounted"
+    },
+    {
+      "name": "_rels/.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/app.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/core.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/_rels/workbook.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/sharedStrings.xml",
+      "rule": "sharedStrings",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/styles.xml",
+      "rule": "styles",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/workbook.xml",
+      "rule": "workbook",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/worksheets/sheet1.xml",
+      "rule": "worksheet",
+      "status": "unaccounted"
+    }
+  ],
+  "totals": {
+    "dropped": 0,
+    "mapped": 0,
+    "opaque": 0,
+    "total": 9,
+    "unaccounted": 9
+  }
+}

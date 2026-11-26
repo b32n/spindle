@@ -390,6 +390,16 @@ lockstep.
   sort; a pivot table with a slicer; sparklines; x14 conditional formatting; sheet and workbook protection with
   password hashes; print setup; rich-text cells; and an `.xlsm` with an inert dummy macro part. The construct
   registry grows from 85 to 128 probes.
+- **Generic fidelity core and the XLSX runner.** `scripts/fidelity-core/` holds the format-neutral modules (CLI
+  arguments and runner, snapshot compare with orphan detection, structured diff with a cap, report model with
+  markdown and JSON and a launch-bar scoreboard, manifest schema, claims, coverage matrix); the DOCX harness is
+  untouched. `npm run sheets:xlsx-fidelity[:update]` and `npm run fidelity` (DOCX, then XLSX) run the 43 committed
+  files against the built sheets-core and record five goldens each in `fixtures/xlsx/goldens/`: `model`, `loss`,
+  `roundtrip`, `ledger` (every package part as mapped, opaque, dropped or unaccounted) and `values` (engine
+  recalculation against the file's cached values). The goldens record today's behaviour, including the ten files
+  whose import throws. CI gains an "XLSX fidelity corpus" step in the `packages` job (job summary plus a
+  `xlsx-fidelity-report-node<version>` artifact). The cached values of `formulas-core.xlsx` are now the
+  LibreOffice-computed results instead of zeros. No importer, exporter or runtime behaviour changes.
 
 ## [0.4.0] - 2026-10-26
 

@@ -1,0 +1,92 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {
+      "f1": {
+        "dateFormat": "YYYY-MM-DD",
+        "type": "date"
+      }
+    },
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Serial"
+          },
+          "A2": {
+            "value": 0
+          },
+          "A3": {
+            "value": 1
+          },
+          "A4": {
+            "value": 366
+          },
+          "A5": {
+            "value": 42004
+          },
+          "A6": {
+            "value": 44562
+          },
+          "B1": {
+            "value": "Date (1904 system)"
+          },
+          "B2": {
+            "format": "f1",
+            "style": "s1",
+            "value": 1462
+          },
+          "B3": {
+            "format": "f1",
+            "style": "s1",
+            "value": 1463
+          },
+          "B4": {
+            "format": "f1",
+            "style": "s1",
+            "value": 1828
+          },
+          "B5": {
+            "format": "f1",
+            "style": "s1",
+            "value": 43466
+          },
+          "B6": {
+            "format": "f1",
+            "style": "s1",
+            "value": 46024
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {
+            "A": 145,
+            "B": 145
+          },
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Dates1904",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {
+      "s1": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      }
+    }
+  }
+}

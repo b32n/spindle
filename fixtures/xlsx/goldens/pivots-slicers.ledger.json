@@ -1,0 +1,118 @@
+{
+  "importError": false,
+  "package": "zip",
+  "parts": [
+    {
+      "name": "[Content_Types].xml",
+      "rule": "package.contentTypes",
+      "status": "mapped"
+    },
+    {
+      "name": "_rels/.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "name": "docProps/app.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/core.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/_rels/workbook.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "loss": [
+        "xlsx.pivotTables"
+      ],
+      "name": "xl/pivotCache/pivotCacheDefinition1.xml",
+      "rule": "pivot",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.pivotTables"
+      ],
+      "name": "xl/pivotCache/pivotCacheRecords1.xml",
+      "rule": "pivot",
+      "status": "dropped"
+    },
+    {
+      "name": "xl/pivotTables/_rels/pivotTable1.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "loss": [
+        "xlsx.pivotTables"
+      ],
+      "name": "xl/pivotTables/pivotTable1.xml",
+      "rule": "pivot",
+      "status": "dropped"
+    },
+    {
+      "name": "xl/sharedStrings.xml",
+      "rule": "sharedStrings",
+      "status": "mapped"
+    },
+    {
+      "loss": [
+        "xlsx.slicers"
+      ],
+      "name": "xl/slicerCaches/slicerCache1.xml",
+      "rule": "slicer",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.slicers"
+      ],
+      "name": "xl/slicers/slicer1.xml",
+      "rule": "slicer",
+      "status": "dropped"
+    },
+    {
+      "name": "xl/styles.xml",
+      "rule": "styles",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/workbook.xml",
+      "rule": "workbook",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/worksheets/_rels/sheet2.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/worksheets/sheet1.xml",
+      "rule": "worksheet",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/worksheets/sheet2.xml",
+      "rule": "worksheet",
+      "status": "mapped"
+    }
+  ],
+  "totals": {
+    "dropped": 5,
+    "mapped": 11,
+    "opaque": 0,
+    "total": 18,
+    "unaccounted": 2
+  }
+}

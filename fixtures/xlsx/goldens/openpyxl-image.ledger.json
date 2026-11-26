@@ -1,0 +1,84 @@
+{
+  "importError": true,
+  "package": "zip",
+  "parts": [
+    {
+      "name": "[Content_Types].xml",
+      "rule": "package.contentTypes",
+      "status": "unaccounted"
+    },
+    {
+      "name": "_rels/.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/app.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/core.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/_rels/workbook.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/drawings/_rels/drawing1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "loss": [
+        "xlsx.images"
+      ],
+      "name": "xl/drawings/drawing1.xml",
+      "rule": "drawing",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.images"
+      ],
+      "name": "xl/media/image1.png",
+      "rule": "media",
+      "status": "dropped"
+    },
+    {
+      "name": "xl/styles.xml",
+      "rule": "styles",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/theme/theme1.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/workbook.xml",
+      "rule": "workbook",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/worksheets/_rels/sheet1.xml.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/worksheets/sheet1.xml",
+      "rule": "worksheet",
+      "status": "unaccounted"
+    }
+  ],
+  "totals": {
+    "dropped": 2,
+    "mapped": 0,
+    "opaque": 0,
+    "total": 13,
+    "unaccounted": 11
+  }
+}

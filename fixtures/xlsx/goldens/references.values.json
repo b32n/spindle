@@ -1,0 +1,46 @@
+{
+  "compared": 6,
+  "firstMismatches": [
+    {
+      "actual": "0",
+      "cell": "F8",
+      "expected": "27",
+      "sheet": "Data"
+    },
+    {
+      "actual": "0",
+      "cell": "F9",
+      "expected": "60",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#REF!\"",
+      "cell": "F11",
+      "expected": "110",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#VALUE!\"",
+      "cell": "F12",
+      "expected": "0",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#REF!\"",
+      "cell": "F13",
+      "expected": "42",
+      "sheet": "Data"
+    }
+  ],
+  "formulaCells": 6,
+  "matched": 1,
+  "mismatchClasses": {
+    "number -> error": 3,
+    "number -> number": 2
+  },
+  "mismatched": 5,
+  "status": "ok",
+  "uncached": 0,
+  "unreadableSheets": 0,
+  "volatile": 0
+}

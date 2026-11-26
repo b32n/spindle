@@ -1,0 +1,128 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 2,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "First"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "First",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Second"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Second",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Third (active)"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Third (active)",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Hidden"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Hidden",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Very hidden"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Very hidden",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

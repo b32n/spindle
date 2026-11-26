@@ -2,7 +2,7 @@
 import datetime
 
 import xlsxbuilder as X
-from probe_data import DYNAMIC, FORMULAS, NUMBER_FORMATS, SYNTAX
+from probe_data import DYNAMIC, FORMULAS, FORMULA_EXPECTED, NUMBER_FORMATS, SYNTAX
 
 
 def _props(wb, title):
@@ -25,9 +25,9 @@ def formulas_core(path):
     for i, f in enumerate(FORMULAS):
         ws.write_string(i, 7, f)
         if f.split("(")[0] in DYNAMIC:
-            ws.write_dynamic_array_formula(i, 8, i, 8, "=" + f)
+            ws.write_dynamic_array_formula(i, 8, i, 8, "=" + f, None, FORMULA_EXPECTED[i])
         else:
-            ws.write_formula(i, 8, "=" + f)
+            ws.write_formula(i, 8, "=" + f, None, FORMULA_EXPECTED[i])
     wb.close()
     X.normalise(path)
 

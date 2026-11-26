@@ -1,0 +1,95 @@
+{
+  "compared": 24,
+  "firstMismatches": [
+    {
+      "actual": "\"_xlfn.SEQUENCE(3)\"",
+      "cell": "J1",
+      "expected": "1",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "\"_xlfn.SINGLE(A1:A3)\"",
+      "cell": "G2",
+      "expected": "2",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G3",
+      "expected": "15",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G4",
+      "expected": "32",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "\"#VALUE!\"",
+      "cell": "G5",
+      "expected": "1.5",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "\"#REF!\"",
+      "cell": "G6",
+      "expected": "101",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "2",
+      "cell": "G7",
+      "expected": "6",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G8",
+      "expected": "10",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G9",
+      "expected": "6",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "\"#VALUE!\"",
+      "cell": "G10",
+      "expected": "1",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G11",
+      "expected": "6",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G18",
+      "expected": "5",
+      "sheet": "Sheet1"
+    },
+    {
+      "actual": "0",
+      "cell": "G20",
+      "expected": "7",
+      "sheet": "Sheet1"
+    }
+  ],
+  "formulaCells": 24,
+  "matched": 11,
+  "mismatchClasses": {
+    "number -> error": 3,
+    "number -> number": 8,
+    "number -> text": 2
+  },
+  "mismatched": 13,
+  "status": "ok",
+  "uncached": 0,
+  "unreadableSheets": 0,
+  "volatile": 0
+}

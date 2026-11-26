@@ -1,0 +1,28 @@
+{
+  "compared": 2,
+  "firstMismatches": [
+    {
+      "actual": "0",
+      "cell": "B8",
+      "expected": "27",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#VALUE!\"",
+      "cell": "B9",
+      "expected": "32.4",
+      "sheet": "Data"
+    }
+  ],
+  "formulaCells": 2,
+  "matched": 0,
+  "mismatchClasses": {
+    "number -> error": 1,
+    "number -> number": 1
+  },
+  "mismatched": 2,
+  "status": "ok",
+  "uncached": 0,
+  "unreadableSheets": 0,
+  "volatile": 0
+}

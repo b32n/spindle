@@ -1,0 +1,42 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "&lol3;"
+          },
+          "A2": {
+            "value": "&ext;"
+          },
+          "A3": {
+            "value": "plain"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Entities",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

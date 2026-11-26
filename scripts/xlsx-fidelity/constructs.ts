@@ -1,6 +1,6 @@
-import { isWellFormed, relationshipTargets } from './ooxml-package';
-import type { OoxmlParts } from './ooxml-package';
-import type { Construct } from './types';
+import { isWellFormed, relationshipTargets } from '../fidelity-core/ooxml-package';
+import type { OoxmlParts } from '../fidelity-core/ooxml-package';
+import type { Construct } from '../fidelity-core/types';
 
 /** XLSX construct registry: each probe counts one construct in the package XML (0 = absent). */
 export type XlsxConstruct = Construct<OoxmlParts>;

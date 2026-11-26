@@ -1,0 +1,119 @@
+{
+  "diff": {
+    "added": 17,
+    "after": {
+      "cells": 66,
+      "formats": 0,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "before": {
+      "cells": 66,
+      "formats": 0,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 6,
+      "added sheets[].config.rowHeights.*": 11
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.B"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.C"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.D"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.E"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.F"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.1"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.10"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.11"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.2"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.3"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.4"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.5"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.6"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.7"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.8"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.9"
+      }
+    ],
+    "removed": 0,
+    "total": 17,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

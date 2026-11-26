@@ -1,0 +1,11 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.images",
+      "label": "image(s)/drawing(s)"
+    }
+  ]
+}

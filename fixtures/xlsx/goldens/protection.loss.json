@@ -1,0 +1,22 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 3,
+      "effect": "protection is dropped",
+      "id": "xlsx.sheetProtection",
+      "label": "protected sheet(s)",
+      "where": [
+        "Legacy hash",
+        "SHA-512 hash",
+        "No password"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "protection is dropped",
+      "id": "xlsx.workbookProtection",
+      "label": "workbook protection"
+    }
+  ]
+}

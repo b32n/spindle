@@ -1,0 +1,217 @@
+{
+  "importError": null,
+  "warnings": [
+    "Modern!G20: shared formula without a resolvable expression; imported as a plain value",
+    "Modern!G21: shared formula without a resolvable expression; imported as a plain value",
+    "Modern!G22: shared formula without a resolvable expression; imported as a plain value",
+    "Modern!G23: shared formula without a resolvable expression; imported as a plain value"
+  ],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Region"
+          },
+          "A2": {
+            "value": "North"
+          },
+          "A3": {
+            "value": "South"
+          },
+          "A4": {
+            "value": "East"
+          },
+          "A5": {
+            "value": "West"
+          },
+          "A6": {
+            "value": "Centre"
+          },
+          "B1": {
+            "value": "Q1"
+          },
+          "B2": {
+            "value": 10
+          },
+          "B3": {
+            "value": 5
+          },
+          "B4": {
+            "value": 7
+          },
+          "B5": {
+            "value": 1
+          },
+          "B6": {
+            "value": 4
+          },
+          "C1": {
+            "value": "Q2"
+          },
+          "C2": {
+            "value": 20
+          },
+          "C3": {
+            "value": 15
+          },
+          "C4": {
+            "value": 8
+          },
+          "C5": {
+            "value": 2
+          },
+          "C6": {
+            "value": 6
+          },
+          "D1": {
+            "value": "Q3"
+          },
+          "D2": {
+            "value": 30
+          },
+          "D3": {
+            "value": 25
+          },
+          "D4": {
+            "value": 9
+          },
+          "D5": {
+            "value": 3
+          },
+          "D6": {
+            "value": 8
+          },
+          "F1": {
+            "value": "Formula"
+          },
+          "F11": {
+            "value": "SORT (dynamic array)"
+          },
+          "F17": {
+            "value": "legacy array (CSE)"
+          },
+          "F19": {
+            "value": "shared formula"
+          },
+          "F2": {
+            "value": "IFS"
+          },
+          "F3": {
+            "value": "XLOOKUP"
+          },
+          "F4": {
+            "value": "CONCAT"
+          },
+          "F5": {
+            "value": "TEXTJOIN"
+          },
+          "F6": {
+            "value": "STDEV.S"
+          },
+          "F7": {
+            "value": "LET"
+          },
+          "F8": {
+            "value": "LAMBDA"
+          },
+          "F9": {
+            "value": "MAXIFS"
+          },
+          "G1": {
+            "value": "Result"
+          },
+          "G11": {
+            "formula": "=\"_xlfn._xlws.SORT(B2:B6)\"",
+            "value": "_xlfn._xlws.SORT(B2:B6)"
+          },
+          "G12": {
+            "value": 4
+          },
+          "G13": {
+            "value": 5
+          },
+          "G14": {
+            "value": 7
+          },
+          "G15": {
+            "value": 10
+          },
+          "G17": {
+            "formula": "=SUM(B2:B6*C2:C6)",
+            "value": 357
+          },
+          "G19": {
+            "formula": "=B2*2",
+            "value": 20
+          },
+          "G2": {
+            "formula": "=\"_xlfn.IFS(B2>5,\"big\",TRUE,\"small\")\"",
+            "value": "_xlfn.IFS(B2>5,\"big\",TRUE,\"small\")"
+          },
+          "G20": {
+            "value": 10
+          },
+          "G21": {
+            "value": 14
+          },
+          "G22": {
+            "value": 2
+          },
+          "G23": {
+            "value": 8
+          },
+          "G3": {
+            "formula": "=\"_xlfn.XLOOKUP(\"East\",A2:A6,B2:B6)\"",
+            "value": "_xlfn.XLOOKUP(\"East\",A2:A6,B2:B6)"
+          },
+          "G4": {
+            "formula": "=\"_xlfn.CONCAT(A2,\"-\",A3)\"",
+            "value": "_xlfn.CONCAT(A2,\"-\",A3)"
+          },
+          "G5": {
+            "formula": "=\"_xlfn.TEXTJOIN(\",\",TRUE,A2:A4)\"",
+            "value": "_xlfn.TEXTJOIN(\",\",TRUE,A2:A4)"
+          },
+          "G6": {
+            "formula": "=\"_xlfn.STDEV.S(B2:B6)\"",
+            "value": "_xlfn.STDEV.S(B2:B6)"
+          },
+          "G7": {
+            "formula": "=\"_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)\"",
+            "value": "_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)"
+          },
+          "G8": {
+            "formula": "=\"_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)\"",
+            "value": "_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)"
+          },
+          "G9": {
+            "formula": "=\"_xlfn.MAXIFS(B2:B6,A2:A6,\"?o*\")\"",
+            "value": "_xlfn.MAXIFS(B2:B6,A2:A6,\"?o*\")"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Modern",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

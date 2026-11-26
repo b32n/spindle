@@ -20,7 +20,8 @@ from `@b32nio/spindle-io/{xlsx,docx}` (XLSX/DOCX) and `@b32nio/spindle-shared/ex
 
 `ImportLossReport` is `{ format, items: ImportLossItem[] }`; an item is `{ id, label, count, where?, effect }` with a stable `id` such as
 `xlsx.conditionalFormatting`. An empty `items` list means nothing detectable is lost. The scan is a cheap pre-pass over the zip (no workbook
-model is built) and never throws on a malformed file; the import itself reports that error.
+model is built) and never throws on a malformed file; the import itself reports that error. The XLSX fidelity harness (`fixtures/xlsx/`,
+`npm run sheets:xlsx-fidelity`) records this report for every corpus file next to a package ledger that accounts for each part of the file.
 
 ## What is reported
 

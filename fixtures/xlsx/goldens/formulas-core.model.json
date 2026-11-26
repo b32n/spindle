@@ -1,0 +1,1260 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": 1
+          },
+          "A10": {
+            "value": 10
+          },
+          "A2": {
+            "value": 2
+          },
+          "A3": {
+            "value": 3
+          },
+          "A4": {
+            "value": 4
+          },
+          "A5": {
+            "value": 5
+          },
+          "A6": {
+            "value": 6
+          },
+          "A7": {
+            "value": 7
+          },
+          "A8": {
+            "value": 8
+          },
+          "A9": {
+            "value": 9
+          },
+          "B1": {
+            "value": "x"
+          },
+          "B10": {
+            "value": "y"
+          },
+          "B2": {
+            "value": "y"
+          },
+          "B3": {
+            "value": "x"
+          },
+          "B4": {
+            "value": "y"
+          },
+          "B5": {
+            "value": "x"
+          },
+          "B6": {
+            "value": "y"
+          },
+          "B7": {
+            "value": "x"
+          },
+          "B8": {
+            "value": "y"
+          },
+          "B9": {
+            "value": "x"
+          },
+          "C1": {
+            "value": 10
+          },
+          "C10": {
+            "value": 100
+          },
+          "C2": {
+            "value": 20
+          },
+          "C3": {
+            "value": 30
+          },
+          "C4": {
+            "value": 40
+          },
+          "C5": {
+            "value": 50
+          },
+          "C6": {
+            "value": 60
+          },
+          "C7": {
+            "value": 70
+          },
+          "C8": {
+            "value": 80
+          },
+          "C9": {
+            "value": 90
+          },
+          "D1": {
+            "value": -100
+          },
+          "D2": {
+            "value": 30
+          },
+          "D3": {
+            "value": 40
+          },
+          "D4": {
+            "value": 50
+          },
+          "E1": {
+            "value": 46023
+          },
+          "E2": {
+            "value": 46100
+          },
+          "E3": {
+            "value": 46200
+          },
+          "E4": {
+            "value": 46300
+          },
+          "H1": {
+            "value": "SUM(A1:A10)"
+          },
+          "H10": {
+            "value": "SQRT(A3)"
+          },
+          "H100": {
+            "value": "FV(0.05,10,-100)"
+          },
+          "H101": {
+            "value": "PV(0.05,10,-100)"
+          },
+          "H102": {
+            "value": "NPV(0.1,A1:A3)"
+          },
+          "H103": {
+            "value": "IRR(D1:D4)"
+          },
+          "H104": {
+            "value": "XNPV(0.1,D1:D4,E1:E4)"
+          },
+          "H105": {
+            "value": "XIRR(D1:D4,E1:E4)"
+          },
+          "H106": {
+            "value": "SLN(1000,100,5)"
+          },
+          "H107": {
+            "value": "NPER(0.05,-100,1000)"
+          },
+          "H108": {
+            "value": "RATE(10,-100,800)"
+          },
+          "H109": {
+            "value": "ISBLANK(Z1)"
+          },
+          "H11": {
+            "value": "INT(A2/3)"
+          },
+          "H110": {
+            "value": "ISNUMBER(A1)"
+          },
+          "H111": {
+            "value": "ISTEXT(B1)"
+          },
+          "H112": {
+            "value": "ISERROR(1/0)"
+          },
+          "H113": {
+            "value": "ISNA(NA())"
+          },
+          "H114": {
+            "value": "TYPE(A1)"
+          },
+          "H115": {
+            "value": "N(5)"
+          },
+          "H116": {
+            "value": "ROW(A5)"
+          },
+          "H117": {
+            "value": "COLUMN(C1)"
+          },
+          "H118": {
+            "value": "ROWS(A1:A10)"
+          },
+          "H119": {
+            "value": "COLUMNS(A1:C1)"
+          },
+          "H12": {
+            "value": "CEILING(A2,2)"
+          },
+          "H120": {
+            "value": "ADDRESS(2,3)"
+          },
+          "H121": {
+            "value": "OFFSET(A1,2,1)"
+          },
+          "H122": {
+            "value": "INDIRECT(\"A2\")"
+          },
+          "H123": {
+            "value": "XLOOKUP(3,A1:A10,A1:A10)"
+          },
+          "H124": {
+            "value": "XMATCH(3,A1:A10)"
+          },
+          "H125": {
+            "value": "LOOKUP(3,A1:A10)"
+          },
+          "H126": {
+            "value": "TRANSPOSE(A1:B2)"
+          },
+          "H127": {
+            "value": "FILTER(A1:A10,A1:A10>8)"
+          },
+          "H128": {
+            "value": "SORT(A1:A3,1,-1)"
+          },
+          "H129": {
+            "value": "UNIQUE(B1:B10)"
+          },
+          "H13": {
+            "value": "FLOOR(A2,2)"
+          },
+          "H130": {
+            "value": "SEQUENCE(3)"
+          },
+          "H131": {
+            "value": "SORTBY(A1:A3,A1:A3,-1)"
+          },
+          "H132": {
+            "value": "LET(x,2,x*3)"
+          },
+          "H133": {
+            "value": "HSTACK(A1:A2,B1:B2)"
+          },
+          "H134": {
+            "value": "VSTACK(A1:A2,B1:B2)"
+          },
+          "H135": {
+            "value": "TAKE(A1:A10,2)"
+          },
+          "H136": {
+            "value": "COUNTA(A1:C10)"
+          },
+          "H137": {
+            "value": "COUNTBLANK(A1:C10)"
+          },
+          "H138": {
+            "value": "SUBTOTAL(9,A1:A10)"
+          },
+          "H139": {
+            "value": "PRODUCT(A1:A3)"
+          },
+          "H14": {
+            "value": "SIN(1)"
+          },
+          "H140": {
+            "value": "MROUND(7,5)"
+          },
+          "H141": {
+            "value": "TRUNC(2.7)"
+          },
+          "H142": {
+            "value": "SIGN(-2)"
+          },
+          "H143": {
+            "value": "LOG(100,10)"
+          },
+          "H144": {
+            "value": "LN(1)"
+          },
+          "H145": {
+            "value": "EXP(1)"
+          },
+          "H146": {
+            "value": "GCD(12,18)"
+          },
+          "H147": {
+            "value": "LCM(4,6)"
+          },
+          "H148": {
+            "value": "ROUNDUP(2.1,0)"
+          },
+          "H149": {
+            "value": "ROUNDDOWN(2.9,0)"
+          },
+          "H15": {
+            "value": "COS(1)"
+          },
+          "H150": {
+            "value": "A1^2"
+          },
+          "H151": {
+            "value": "-2^2"
+          },
+          "H152": {
+            "value": "A1:A3*2"
+          },
+          "H153": {
+            "value": "\"a\"&1"
+          },
+          "H154": {
+            "value": "(1+2)*3"
+          },
+          "H155": {
+            "value": "1=1"
+          },
+          "H156": {
+            "value": "\"a\"<\"b\""
+          },
+          "H157": {
+            "value": "50%"
+          },
+          "H158": {
+            "value": "SUM(A1:A3,10)"
+          },
+          "H159": {
+            "value": "SUM(Data!A1:A3)"
+          },
+          "H16": {
+            "value": "PI()"
+          },
+          "H17": {
+            "value": "RADIANS(180)"
+          },
+          "H18": {
+            "value": "FACT(5)"
+          },
+          "H19": {
+            "value": "COMBIN(5,2)"
+          },
+          "H2": {
+            "value": "AVERAGE(A1:A10)"
+          },
+          "H20": {
+            "value": "SUMSQ(A1:A3)"
+          },
+          "H21": {
+            "value": "EVEN(3)"
+          },
+          "H22": {
+            "value": "ODD(2)"
+          },
+          "H23": {
+            "value": "ISEVEN(4)"
+          },
+          "H24": {
+            "value": "MAXIFS(A1:A10,B1:B10,\"x\")"
+          },
+          "H25": {
+            "value": "AGGREGATE(9,6,A1:A10)"
+          },
+          "H26": {
+            "value": "VLOOKUP(3,A1:C10,2,FALSE)"
+          },
+          "H27": {
+            "value": "HLOOKUP(1,A1:C3,2,FALSE)"
+          },
+          "H28": {
+            "value": "INDEX(A1:C10,2,2)"
+          },
+          "H29": {
+            "value": "MATCH(3,A1:A10,0)"
+          },
+          "H3": {
+            "value": "COUNT(A1:C10)"
+          },
+          "H30": {
+            "value": "CHOOSE(2,\"a\",\"b\")"
+          },
+          "H31": {
+            "value": "IF(A1>1,\"y\",\"n\")"
+          },
+          "H32": {
+            "value": "IFS(A1>5,\"a\",TRUE,\"b\")"
+          },
+          "H33": {
+            "value": "SWITCH(A1,1,\"one\",\"other\")"
+          },
+          "H34": {
+            "value": "IFERROR(1/0,\"e\")"
+          },
+          "H35": {
+            "value": "AND(TRUE,FALSE)"
+          },
+          "H36": {
+            "value": "XOR(TRUE,FALSE)"
+          },
+          "H37": {
+            "value": "SUMIF(B1:B10,\"x\",A1:A10)"
+          },
+          "H38": {
+            "value": "SUMIFS(A1:A10,B1:B10,\"x\",A1:A10,\">1\")"
+          },
+          "H39": {
+            "value": "COUNTIF(B1:B10,\"x\")"
+          },
+          "H4": {
+            "value": "MAX(A1:A10)"
+          },
+          "H40": {
+            "value": "COUNTIFS(B1:B10,\"x\",A1:A10,\">1\")"
+          },
+          "H41": {
+            "value": "AVERAGEIF(B1:B10,\"x\",A1:A10)"
+          },
+          "H42": {
+            "value": "SUMPRODUCT(A1:A3,A1:A3)"
+          },
+          "H43": {
+            "value": "SUMPRODUCT((A1:A10>3)*1)"
+          },
+          "H44": {
+            "value": "LEFT(B1,1)"
+          },
+          "H45": {
+            "value": "RIGHT(B1,1)"
+          },
+          "H46": {
+            "value": "MID(\"abcdef\",2,3)"
+          },
+          "H47": {
+            "value": "LEN(\"abc\")"
+          },
+          "H48": {
+            "value": "UPPER(\"a\")"
+          },
+          "H49": {
+            "value": "LOWER(\"A\")"
+          },
+          "H5": {
+            "value": "MIN(A1:A10)"
+          },
+          "H50": {
+            "value": "PROPER(\"ab cd\")"
+          },
+          "H51": {
+            "value": "TRIM(\"  a  b \")"
+          },
+          "H52": {
+            "value": "CONCAT(\"a\",\"b\")"
+          },
+          "H53": {
+            "value": "TEXTJOIN(\",\",TRUE,B1:B3)"
+          },
+          "H54": {
+            "value": "SUBSTITUTE(\"aab\",\"a\",\"c\")"
+          },
+          "H55": {
+            "value": "FIND(\"b\",\"abc\")"
+          },
+          "H56": {
+            "value": "SEARCH(\"B\",\"abc\")"
+          },
+          "H57": {
+            "value": "REPT(\"a\",3)"
+          },
+          "H58": {
+            "value": "TEXT(1234.5,\"#,##0.00\")"
+          },
+          "H59": {
+            "value": "TEXT(DATE(2026,1,2),\"yyyy-mm-dd\")"
+          },
+          "H6": {
+            "value": "ROUND(A1/3,2)"
+          },
+          "H60": {
+            "value": "TEXT(DATE(2026,1,2),\"dddd\")"
+          },
+          "H61": {
+            "value": "TEXT(0.256,\"0.0%\")"
+          },
+          "H62": {
+            "value": "VALUE(\"12\")"
+          },
+          "H63": {
+            "value": "CLEAN(\"a\")"
+          },
+          "H64": {
+            "value": "EXACT(\"a\",\"a\")"
+          },
+          "H65": {
+            "value": "NUMBERVALUE(\"1,5\",\",\")"
+          },
+          "H66": {
+            "value": "TEXTBEFORE(\"a-b\",\"-\")"
+          },
+          "H67": {
+            "value": "TEXTSPLIT(\"a-b\",\"-\")"
+          },
+          "H68": {
+            "value": "DATE(2026,2,3)"
+          },
+          "H69": {
+            "value": "YEAR(DATE(2026,2,3))"
+          },
+          "H7": {
+            "value": "ABS(-3)"
+          },
+          "H70": {
+            "value": "MONTH(DATE(2026,2,3))"
+          },
+          "H71": {
+            "value": "DAY(DATE(2026,2,3))"
+          },
+          "H72": {
+            "value": "WEEKDAY(DATE(2026,2,3))"
+          },
+          "H73": {
+            "value": "EDATE(DATE(2026,1,31),1)"
+          },
+          "H74": {
+            "value": "EOMONTH(DATE(2026,1,31),1)"
+          },
+          "H75": {
+            "value": "DATEDIF(DATE(2025,1,1),DATE(2026,3,1),\"m\")"
+          },
+          "H76": {
+            "value": "NETWORKDAYS(DATE(2026,1,1),DATE(2026,1,31))"
+          },
+          "H77": {
+            "value": "WORKDAY(DATE(2026,1,1),5)"
+          },
+          "H78": {
+            "value": "DAYS(DATE(2026,2,1),DATE(2026,1,1))"
+          },
+          "H79": {
+            "value": "YEARFRAC(DATE(2026,1,1),DATE(2026,7,1))"
+          },
+          "H8": {
+            "value": "MOD(A2,3)"
+          },
+          "H80": {
+            "value": "ISOWEEKNUM(DATE(2026,1,5))"
+          },
+          "H81": {
+            "value": "WEEKNUM(DATE(2026,1,5))"
+          },
+          "H82": {
+            "value": "DATEVALUE(\"2026-01-02\")"
+          },
+          "H83": {
+            "value": "MEDIAN(A1:A10)"
+          },
+          "H84": {
+            "value": "STDEV(A1:A10)"
+          },
+          "H85": {
+            "value": "STDEV.S(A1:A10)"
+          },
+          "H86": {
+            "value": "VAR.S(A1:A10)"
+          },
+          "H87": {
+            "value": "PERCENTILE(A1:A10,0.9)"
+          },
+          "H88": {
+            "value": "PERCENTILE.INC(A1:A10,0.9)"
+          },
+          "H89": {
+            "value": "QUARTILE(A1:A10,1)"
+          },
+          "H9": {
+            "value": "POWER(A2,3)"
+          },
+          "H90": {
+            "value": "RANK(3,A1:A10)"
+          },
+          "H91": {
+            "value": "RANK.EQ(3,A1:A10)"
+          },
+          "H92": {
+            "value": "LARGE(A1:A10,2)"
+          },
+          "H93": {
+            "value": "SMALL(A1:A10,2)"
+          },
+          "H94": {
+            "value": "MODE(A1:A10)"
+          },
+          "H95": {
+            "value": "CORREL(A1:A10,A1:A10)"
+          },
+          "H96": {
+            "value": "SLOPE(A1:A10,A1:A10)"
+          },
+          "H97": {
+            "value": "FORECAST(2,A1:A10,A1:A10)"
+          },
+          "H98": {
+            "value": "GEOMEAN(A1:A3)"
+          },
+          "H99": {
+            "value": "PMT(0.05/12,60,-10000)"
+          },
+          "I1": {
+            "formula": "=SUM(A1:A10)",
+            "value": 55
+          },
+          "I10": {
+            "formula": "=SQRT(A3)",
+            "value": 1.732050807569
+          },
+          "I100": {
+            "formula": "=FV(0.05,10,-100)",
+            "value": 1257.789253555
+          },
+          "I101": {
+            "formula": "=PV(0.05,10,-100)",
+            "value": 772.1734929185
+          },
+          "I102": {
+            "formula": "=NPV(0.1,A1:A3)",
+            "value": 4.815927873779
+          },
+          "I103": {
+            "formula": "=IRR(D1:D4)",
+            "value": 0.08896339469335
+          },
+          "I104": {
+            "formula": "=XNPV(0.1,D1:D4,E1:E4)",
+            "value": "#NAME? Function XNPV not found"
+          },
+          "I105": {
+            "formula": "=XIRR(D1:D4,E1:E4)",
+            "value": "#NAME? Function XIRR not found"
+          },
+          "I106": {
+            "formula": "=SLN(1000,100,5)",
+            "value": "#NAME? Function SLN not found"
+          },
+          "I107": {
+            "formula": "=NPER(0.05,-100,1000)",
+            "value": 14.20669908289
+          },
+          "I108": {
+            "formula": "=RATE(10,-100,800)",
+            "value": 0.04277497803511
+          },
+          "I109": {
+            "formula": "=ISBLANK(Z1)",
+            "value": true
+          },
+          "I11": {
+            "formula": "=INT(A2/3)",
+            "value": 0
+          },
+          "I110": {
+            "formula": "=ISNUMBER(A1)",
+            "value": true
+          },
+          "I111": {
+            "formula": "=ISTEXT(B1)",
+            "value": true
+          },
+          "I112": {
+            "formula": "=ISERROR(1/0)",
+            "value": true
+          },
+          "I113": {
+            "formula": "=ISNA(NA())",
+            "value": true
+          },
+          "I114": {
+            "formula": "=TYPE(A1)",
+            "value": 1
+          },
+          "I115": {
+            "formula": "=N(5)",
+            "value": 5
+          },
+          "I116": {
+            "formula": "=ROW(A5)",
+            "value": 5
+          },
+          "I117": {
+            "formula": "=COLUMN(C1)",
+            "value": 3
+          },
+          "I118": {
+            "formula": "=ROWS(A1:A10)",
+            "value": 10
+          },
+          "I119": {
+            "formula": "=COLUMNS(A1:C1)",
+            "value": 3
+          },
+          "I12": {
+            "formula": "=CEILING(A2,2)",
+            "value": 2
+          },
+          "I120": {
+            "formula": "=ADDRESS(2,3)",
+            "value": "$C$2"
+          },
+          "I121": {
+            "formula": "=OFFSET(A1,2,1)",
+            "value": "x"
+          },
+          "I122": {
+            "formula": "=INDIRECT(\"A2\")",
+            "value": 2
+          },
+          "I123": {
+            "formula": "=\"_xlfn.XLOOKUP(3,A1:A10,A1:A10)\"",
+            "value": "_xlfn.XLOOKUP(3,A1:A10,A1:A10)"
+          },
+          "I124": {
+            "formula": "=\"_xlfn.XMATCH(3,A1:A10)\"",
+            "value": "_xlfn.XMATCH(3,A1:A10)"
+          },
+          "I125": {
+            "formula": "=LOOKUP(3,A1:A10)",
+            "value": 3
+          },
+          "I126": {
+            "formula": "=TRANSPOSE(A1:B2)",
+            "value": "#NAME? Function TRANSPOSE not found"
+          },
+          "I127": {
+            "formula": "=\"_xlfn._xlws.FILTER(A1:A10,A1:A10>8)\"",
+            "value": "_xlfn._xlws.FILTER(A1:A10,A1:A10>8)"
+          },
+          "I128": {
+            "formula": "=\"_xlfn._xlws.SORT(A1:A3,1,-1)\"",
+            "value": "_xlfn._xlws.SORT(A1:A3,1,-1)"
+          },
+          "I129": {
+            "formula": "=\"_xlfn.UNIQUE(B1:B10)\"",
+            "value": "_xlfn.UNIQUE(B1:B10)"
+          },
+          "I13": {
+            "formula": "=FLOOR(A2,2)",
+            "value": 2
+          },
+          "I130": {
+            "formula": "=\"_xlfn.SEQUENCE(3)\"",
+            "value": "_xlfn.SEQUENCE(3)"
+          },
+          "I131": {
+            "formula": "=\"_xlfn.SORTBY(A1:A3,A1:A3,-1)\"",
+            "value": "_xlfn.SORTBY(A1:A3,A1:A3,-1)"
+          },
+          "I132": {
+            "formula": "=\"_xlfn.LET(x,2,x*3)\"",
+            "value": "_xlfn.LET(x,2,x*3)"
+          },
+          "I133": {
+            "formula": "=\"_xlfn.HSTACK(A1:A2,B1:B2)\"",
+            "value": "_xlfn.HSTACK(A1:A2,B1:B2)"
+          },
+          "I134": {
+            "formula": "=\"_xlfn.VSTACK(A1:A2,B1:B2)\"",
+            "value": "_xlfn.VSTACK(A1:A2,B1:B2)"
+          },
+          "I135": {
+            "formula": "=\"_xlfn.TAKE(A1:A10,2)\"",
+            "value": "_xlfn.TAKE(A1:A10,2)"
+          },
+          "I136": {
+            "formula": "=COUNTA(A1:C10)",
+            "value": 30
+          },
+          "I137": {
+            "formula": "=COUNTBLANK(A1:C10)",
+            "value": 0
+          },
+          "I138": {
+            "formula": "=SUBTOTAL(9,A1:A10)",
+            "value": 55
+          },
+          "I139": {
+            "formula": "=PRODUCT(A1:A3)",
+            "value": 6
+          },
+          "I14": {
+            "formula": "=SIN(1)",
+            "value": "#NAME? Function SIN not found"
+          },
+          "I140": {
+            "formula": "=MROUND(7,5)",
+            "value": 5
+          },
+          "I141": {
+            "formula": "=TRUNC(2.7)",
+            "value": 2
+          },
+          "I142": {
+            "formula": "=SIGN(-2)",
+            "value": -1
+          },
+          "I143": {
+            "formula": "=LOG(100,10)",
+            "value": 2
+          },
+          "I144": {
+            "formula": "=LN(1)",
+            "value": 0
+          },
+          "I145": {
+            "formula": "=EXP(1)",
+            "value": 2.718281828459
+          },
+          "I146": {
+            "formula": "=GCD(12,18)",
+            "value": 6
+          },
+          "I147": {
+            "formula": "=LCM(4,6)",
+            "value": 12
+          },
+          "I148": {
+            "formula": "=ROUNDUP(2.1,0)",
+            "value": 3
+          },
+          "I149": {
+            "formula": "=ROUNDDOWN(2.9,0)",
+            "value": 2
+          },
+          "I15": {
+            "formula": "=COS(1)",
+            "value": "#NAME? Function COS not found"
+          },
+          "I150": {
+            "formula": "=A1^2",
+            "value": 1
+          },
+          "I151": {
+            "formula": "=-2^2",
+            "value": 4
+          },
+          "I152": {
+            "formula": "=A1:A3*2",
+            "value": "#SPILL!"
+          },
+          "I153": {
+            "formula": "=\"a\"&1",
+            "value": "a1"
+          },
+          "I154": {
+            "formula": "=(1+2)*3",
+            "value": 9
+          },
+          "I155": {
+            "formula": "=1=1",
+            "value": true
+          },
+          "I156": {
+            "formula": "=\"a\"<\"b\"",
+            "value": true
+          },
+          "I157": {
+            "formula": "=\"50%\"",
+            "value": "50%"
+          },
+          "I158": {
+            "formula": "=SUM(A1:A3,10)",
+            "value": 16
+          },
+          "I159": {
+            "formula": "=SUM(Data!A1:Data!A3)",
+            "value": 6
+          },
+          "I16": {
+            "formula": "=PI()",
+            "value": "#NAME? Function PI not found"
+          },
+          "I17": {
+            "formula": "=RADIANS(180)",
+            "value": "#NAME? Function RADIANS not found"
+          },
+          "I18": {
+            "formula": "=FACT(5)",
+            "value": "#NAME? Function FACT not found"
+          },
+          "I19": {
+            "formula": "=COMBIN(5,2)",
+            "value": "#NAME? Function COMBIN not found"
+          },
+          "I2": {
+            "formula": "=AVERAGE(A1:A10)",
+            "value": 5.5
+          },
+          "I20": {
+            "formula": "=SUMSQ(A1:A3)",
+            "value": "#NAME? Function SUMSQ not found"
+          },
+          "I21": {
+            "formula": "=EVEN(3)",
+            "value": "#NAME? Function EVEN not found"
+          },
+          "I22": {
+            "formula": "=ODD(2)",
+            "value": "#NAME? Function ODD not found"
+          },
+          "I23": {
+            "formula": "=ISEVEN(4)",
+            "value": "#NAME? Function ISEVEN not found"
+          },
+          "I24": {
+            "formula": "=\"_xlfn.MAXIFS(A1:A10,B1:B10,\"x\")\"",
+            "value": "_xlfn.MAXIFS(A1:A10,B1:B10,\"x\")"
+          },
+          "I25": {
+            "formula": "=\"_xlfn.AGGREGATE(9,6,A1:A10)\"",
+            "value": "_xlfn.AGGREGATE(9,6,A1:A10)"
+          },
+          "I26": {
+            "formula": "=VLOOKUP(3,A1:C10,2,FALSE())",
+            "value": "x"
+          },
+          "I27": {
+            "formula": "=HLOOKUP(1,A1:C3,2,FALSE())",
+            "value": 2
+          },
+          "I28": {
+            "formula": "=INDEX(A1:C10,2,2)",
+            "value": "y"
+          },
+          "I29": {
+            "formula": "=MATCH(3,A1:A10,0)",
+            "value": 3
+          },
+          "I3": {
+            "formula": "=COUNT(A1:C10)",
+            "value": 20
+          },
+          "I30": {
+            "formula": "=CHOOSE(2,\"a\",\"b\")",
+            "value": "b"
+          },
+          "I31": {
+            "formula": "=IF(A1>1,\"y\",\"n\")",
+            "value": "n"
+          },
+          "I32": {
+            "formula": "=\"_xlfn.IFS(A1>5,\"a\",TRUE,\"b\")\"",
+            "value": "_xlfn.IFS(A1>5,\"a\",TRUE,\"b\")"
+          },
+          "I33": {
+            "formula": "=\"_xlfn.SWITCH(A1,1,\"one\",\"other\")\"",
+            "value": "_xlfn.SWITCH(A1,1,\"one\",\"other\")"
+          },
+          "I34": {
+            "formula": "=IFERROR(1/0,\"e\")",
+            "value": "e"
+          },
+          "I35": {
+            "formula": "=AND(TRUE(),FALSE())",
+            "value": false
+          },
+          "I36": {
+            "formula": "=\"_xlfn.XOR(TRUE,FALSE)\"",
+            "value": "_xlfn.XOR(TRUE,FALSE)"
+          },
+          "I37": {
+            "formula": "=SUMIF(B1:B10,\"x\",A1:A10)",
+            "value": 25
+          },
+          "I38": {
+            "formula": "=SUMIFS(A1:A10,B1:B10,\"x\",A1:A10,\">1\")",
+            "value": 24
+          },
+          "I39": {
+            "formula": "=COUNTIF(B1:B10,\"x\")",
+            "value": 5
+          },
+          "I4": {
+            "formula": "=MAX(A1:A10)",
+            "value": 10
+          },
+          "I40": {
+            "formula": "=COUNTIFS(B1:B10,\"x\",A1:A10,\">1\")",
+            "value": 4
+          },
+          "I41": {
+            "formula": "=AVERAGEIF(B1:B10,\"x\",A1:A10)",
+            "value": 5
+          },
+          "I42": {
+            "formula": "=SUMPRODUCT(A1:A3,A1:A3)",
+            "value": 14
+          },
+          "I43": {
+            "formula": "=SUMPRODUCT((A1:A10>3)*1)",
+            "value": 7
+          },
+          "I44": {
+            "formula": "=LEFT(B1,1)",
+            "value": "x"
+          },
+          "I45": {
+            "formula": "=RIGHT(B1,1)",
+            "value": "x"
+          },
+          "I46": {
+            "formula": "=MID(\"abcdef\",2,3)",
+            "value": "bcd"
+          },
+          "I47": {
+            "formula": "=LEN(\"abc\")",
+            "value": 3
+          },
+          "I48": {
+            "formula": "=UPPER(\"a\")",
+            "value": "A"
+          },
+          "I49": {
+            "formula": "=LOWER(\"A\")",
+            "value": "a"
+          },
+          "I5": {
+            "formula": "=MIN(A1:A10)",
+            "value": 1
+          },
+          "I50": {
+            "formula": "=PROPER(\"ab cd\")",
+            "value": "Ab Cd"
+          },
+          "I51": {
+            "formula": "=TRIM(\"  a  b \")",
+            "value": "a b"
+          },
+          "I52": {
+            "formula": "=\"_xlfn.CONCAT(\"a\",\"b\")\"",
+            "value": "_xlfn.CONCAT(\"a\",\"b\")"
+          },
+          "I53": {
+            "formula": "=\"_xlfn.TEXTJOIN(\",\",TRUE,B1:B3)\"",
+            "value": "_xlfn.TEXTJOIN(\",\",TRUE,B1:B3)"
+          },
+          "I54": {
+            "formula": "=SUBSTITUTE(\"aab\",\"a\",\"c\")",
+            "value": "ccb"
+          },
+          "I55": {
+            "formula": "=FIND(\"b\",\"abc\")",
+            "value": 2
+          },
+          "I56": {
+            "formula": "=SEARCH(\"B\",\"abc\")",
+            "value": 2
+          },
+          "I57": {
+            "formula": "=REPT(\"a\",3)",
+            "value": "aaa"
+          },
+          "I58": {
+            "formula": "=TEXT(1234.5,\"#,##0.00\")",
+            "value": "1,234.50"
+          },
+          "I59": {
+            "formula": "=TEXT(DATE(2026,1,2),\"yyyy-mm-dd\")",
+            "value": "46024"
+          },
+          "I6": {
+            "formula": "=ROUND(A1/3,2)",
+            "value": 0.33
+          },
+          "I60": {
+            "formula": "=TEXT(DATE(2026,1,2),\"dddd\")",
+            "value": "46024"
+          },
+          "I61": {
+            "formula": "=TEXT(0.256,\"0.0%\")",
+            "value": "25.6%"
+          },
+          "I62": {
+            "formula": "=VALUE(\"12\")",
+            "value": 12
+          },
+          "I63": {
+            "formula": "=CLEAN(\"a\")",
+            "value": "#NAME? Function CLEAN not found"
+          },
+          "I64": {
+            "formula": "=EXACT(\"a\",\"a\")",
+            "value": true
+          },
+          "I65": {
+            "formula": "=\"_xlfn.NUMBERVALUE(\"1,5\",\",\")\"",
+            "value": "_xlfn.NUMBERVALUE(\"1,5\",\",\")"
+          },
+          "I66": {
+            "formula": "=\"_xlfn.TEXTBEFORE(\"a-b\",\"-\")\"",
+            "value": "_xlfn.TEXTBEFORE(\"a-b\",\"-\")"
+          },
+          "I67": {
+            "formula": "=\"_xlfn.TEXTSPLIT(\"a-b\",\"-\")\"",
+            "value": "_xlfn.TEXTSPLIT(\"a-b\",\"-\")"
+          },
+          "I68": {
+            "formula": "=DATE(2026,2,3)",
+            "value": 46056
+          },
+          "I69": {
+            "formula": "=YEAR(DATE(2026,2,3))",
+            "value": 2026
+          },
+          "I7": {
+            "formula": "=ABS(-3)",
+            "value": 3
+          },
+          "I70": {
+            "formula": "=MONTH(DATE(2026,2,3))",
+            "value": 2
+          },
+          "I71": {
+            "formula": "=DAY(DATE(2026,2,3))",
+            "value": 3
+          },
+          "I72": {
+            "formula": "=WEEKDAY(DATE(2026,2,3))",
+            "value": 3
+          },
+          "I73": {
+            "formula": "=EDATE(DATE(2026,1,31),1)",
+            "value": 46081
+          },
+          "I74": {
+            "formula": "=EOMONTH(DATE(2026,1,31),1)",
+            "value": 46081
+          },
+          "I75": {
+            "formula": "=DATEDIF(DATE(2025,1,1),DATE(2026,3,1),\"m\")",
+            "value": 14
+          },
+          "I76": {
+            "formula": "=NETWORKDAYS(DATE(2026,1,1),DATE(2026,1,31))",
+            "value": 22
+          },
+          "I77": {
+            "formula": "=WORKDAY(DATE(2026,1,1),5)",
+            "value": 46030
+          },
+          "I78": {
+            "formula": "=\"_xlfn.DAYS(DATE(2026,2,1),DATE(2026,1,1))\"",
+            "value": "_xlfn.DAYS(DATE(2026,2,1),DATE(2026,1,1))"
+          },
+          "I79": {
+            "formula": "=YEARFRAC(DATE(2026,1,1),DATE(2026,7,1))",
+            "value": "#NAME? Function YEARFRAC not found"
+          },
+          "I8": {
+            "formula": "=MOD(A2,3)",
+            "value": 2
+          },
+          "I80": {
+            "formula": "=\"_xlfn.ISOWEEKNUM(DATE(2026,1,5))\"",
+            "value": "_xlfn.ISOWEEKNUM(DATE(2026,1,5))"
+          },
+          "I81": {
+            "formula": "=WEEKNUM(DATE(2026,1,5))",
+            "value": 2
+          },
+          "I82": {
+            "formula": "=DATEVALUE(\"2026-01-02\")",
+            "value": 46024
+          },
+          "I83": {
+            "formula": "=MEDIAN(A1:A10)",
+            "value": 5.5
+          },
+          "I84": {
+            "formula": "=STDEV(A1:A10)",
+            "value": 3.027650354097
+          },
+          "I85": {
+            "formula": "=\"_xlfn.STDEV.S(A1:A10)\"",
+            "value": "_xlfn.STDEV.S(A1:A10)"
+          },
+          "I86": {
+            "formula": "=\"_xlfn.VAR.S(A1:A10)\"",
+            "value": "_xlfn.VAR.S(A1:A10)"
+          },
+          "I87": {
+            "formula": "=PERCENTILE(A1:A10,0.9)",
+            "value": 9.1
+          },
+          "I88": {
+            "formula": "=\"_xlfn.PERCENTILE.INC(A1:A10,0.9)\"",
+            "value": "_xlfn.PERCENTILE.INC(A1:A10,0.9)"
+          },
+          "I89": {
+            "formula": "=QUARTILE(A1:A10,1)",
+            "value": 3.25
+          },
+          "I9": {
+            "formula": "=POWER(A2,3)",
+            "value": 8
+          },
+          "I90": {
+            "formula": "=RANK(3,A1:A10)",
+            "value": 8
+          },
+          "I91": {
+            "formula": "=\"_xlfn.RANK.EQ(3,A1:A10)\"",
+            "value": "_xlfn.RANK.EQ(3,A1:A10)"
+          },
+          "I92": {
+            "formula": "=LARGE(A1:A10,2)",
+            "value": 9
+          },
+          "I93": {
+            "formula": "=SMALL(A1:A10,2)",
+            "value": 2
+          },
+          "I94": {
+            "formula": "=MODE(A1:A10)",
+            "value": "#N/A"
+          },
+          "I95": {
+            "formula": "=CORREL(A1:A10,A1:A10)",
+            "value": 1
+          },
+          "I96": {
+            "formula": "=SLOPE(A1:A10,A1:A10)",
+            "value": "#NAME? Function SLOPE not found"
+          },
+          "I97": {
+            "formula": "=FORECAST(2,A1:A10,A1:A10)",
+            "value": "#NAME? Function FORECAST not found"
+          },
+          "I98": {
+            "formula": "=GEOMEAN(A1:A3)",
+            "value": "#NAME? Function GEOMEAN not found"
+          },
+          "I99": {
+            "formula": "=PMT(0.05/12,60,-10000)",
+            "value": 188.7123364401
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Data",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

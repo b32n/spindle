@@ -1,0 +1,240 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {
+      "f1": {
+        "dateFormat": "YYYY-MM-DD",
+        "type": "date"
+      },
+      "f2": {
+        "dateFormat": "YYYY-MM-DD",
+        "timeFormat": "HH:mm",
+        "type": "datetime"
+      },
+      "f3": {
+        "timeFormat": "h:mm AM/PM",
+        "type": "time"
+      }
+    },
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Kind"
+          },
+          "A10": {
+            "value": "numeric text"
+          },
+          "A11": {
+            "value": "true"
+          },
+          "A12": {
+            "value": "false"
+          },
+          "A13": {
+            "value": "#DIV/0!"
+          },
+          "A14": {
+            "value": "#N/A"
+          },
+          "A15": {
+            "value": "#NAME?"
+          },
+          "A16": {
+            "value": "#NULL!"
+          },
+          "A17": {
+            "value": "#NUM!"
+          },
+          "A18": {
+            "value": "#REF!"
+          },
+          "A19": {
+            "value": "#VALUE!"
+          },
+          "A2": {
+            "value": "integer"
+          },
+          "A20": {
+            "value": "date 1900"
+          },
+          "A21": {
+            "value": "date-time"
+          },
+          "A22": {
+            "value": "time"
+          },
+          "A23": {
+            "value": "serial 60 (1900-02-29, never existed)"
+          },
+          "A24": {
+            "value": "serial 1"
+          },
+          "A25": {
+            "value": "inline string"
+          },
+          "A26": {
+            "value": "unicode"
+          },
+          "A27": {
+            "value": "RTL Hebrew"
+          },
+          "A28": {
+            "value": "RTL Arabic"
+          },
+          "A29": {
+            "value": "formula with cache"
+          },
+          "A3": {
+            "value": "negative"
+          },
+          "A4": {
+            "value": "decimal"
+          },
+          "A5": {
+            "value": "large"
+          },
+          "A6": {
+            "value": "tiny"
+          },
+          "A7": {
+            "value": "text"
+          },
+          "A8": {
+            "value": "spaces"
+          },
+          "A9": {
+            "value": "multi-line"
+          },
+          "B1": {
+            "value": "Value"
+          },
+          "B10": {
+            "value": "00123"
+          },
+          "B11": {
+            "value": true
+          },
+          "B12": {
+            "value": false
+          },
+          "B13": {
+            "value": "#DIV/0!"
+          },
+          "B14": {
+            "value": "#N/A"
+          },
+          "B15": {
+            "value": "#NAME?"
+          },
+          "B16": {
+            "value": "#NULL!"
+          },
+          "B17": {
+            "value": "#NUM!"
+          },
+          "B18": {
+            "value": "#REF!"
+          },
+          "B19": {
+            "value": "#VALUE!"
+          },
+          "B2": {
+            "value": 42
+          },
+          "B20": {
+            "format": "f1",
+            "style": "s1",
+            "value": 45292
+          },
+          "B21": {
+            "format": "f2",
+            "style": "s1",
+            "value": 46024.75
+          },
+          "B22": {
+            "format": "f3",
+            "style": "s1",
+            "value": 0.5
+          },
+          "B23": {
+            "format": "f1",
+            "style": "s1",
+            "value": 60
+          },
+          "B24": {
+            "format": "f1",
+            "style": "s1",
+            "value": 1
+          },
+          "B25": {
+            "value": "stored inline"
+          },
+          "B26": {
+            "value": "Grüße, Ελληνικά, 日本語, 한국어, emoji 😀 and é́"
+          },
+          "B27": {
+            "value": "שלום עולם"
+          },
+          "B28": {
+            "value": "مرحبا بالعالم"
+          },
+          "B29": {
+            "formula": "=B2+B3",
+            "value": 25
+          },
+          "B3": {
+            "value": -17
+          },
+          "B4": {
+            "value": 3.14159265358979
+          },
+          "B5": {
+            "value": 1.5e+300
+          },
+          "B6": {
+            "value": 2.5e-300
+          },
+          "B7": {
+            "value": "Hello, world"
+          },
+          "B8": {
+            "value": "  padded  "
+          },
+          "B9": {
+            "value": "line one\nline two"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {
+            "A": 257,
+            "B": 285
+          },
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Types",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {
+      "s1": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      }
+    }
+  }
+}

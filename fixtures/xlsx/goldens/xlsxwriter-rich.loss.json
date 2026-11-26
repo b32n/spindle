@@ -1,0 +1,50 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.charts",
+      "label": "chart(s)"
+    },
+    {
+      "count": 1,
+      "effect": "comments are dropped",
+      "id": "xlsx.comments",
+      "label": "sheet(s) with comments/notes"
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.conditionalFormatting",
+      "label": "conditional formatting rule(s)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.dataValidation",
+      "label": "data validation rule(s) (dropdowns, limits)",
+      "where": [
+        "Data"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "not imported; formulas using them break",
+      "id": "xlsx.definedNames",
+      "label": "named range(s)/name(s)",
+      "where": [
+        "Tot"
+      ]
+    },
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.images",
+      "label": "image(s)/drawing(s)"
+    }
+  ]
+}

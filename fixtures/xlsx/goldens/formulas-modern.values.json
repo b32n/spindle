@@ -1,0 +1,70 @@
+{
+  "compared": 15,
+  "firstMismatches": [
+    {
+      "actual": "\"_xlfn.IFS(B2>5,\\\"big\\\",TRUE,\\\"small\\\")\"",
+      "cell": "G2",
+      "expected": "\"big\"",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.XLOOKUP(\\\"East\\\",A2:A6,B2:B6)\"",
+      "cell": "G3",
+      "expected": "7",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.CONCAT(A2,\\\"-\\\",A3)\"",
+      "cell": "G4",
+      "expected": "\"North-South\"",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.TEXTJOIN(\\\",\\\",TRUE,A2:A4)\"",
+      "cell": "G5",
+      "expected": "\"North,South,East\"",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.STDEV.S(B2:B6)\"",
+      "cell": "G6",
+      "expected": "3.361547262794322",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)\"",
+      "cell": "G7",
+      "expected": "15",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)\"",
+      "cell": "G8",
+      "expected": "20",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn.MAXIFS(B2:B6,A2:A6,\\\"?o*\\\")\"",
+      "cell": "G9",
+      "expected": "10",
+      "sheet": "Modern"
+    },
+    {
+      "actual": "\"_xlfn._xlws.SORT(B2:B6)\"",
+      "cell": "G11",
+      "expected": "1",
+      "sheet": "Modern"
+    }
+  ],
+  "formulaCells": 15,
+  "matched": 6,
+  "mismatchClasses": {
+    "number -> text": 6,
+    "text -> text": 3
+  },
+  "mismatched": 9,
+  "status": "ok",
+  "uncached": 0,
+  "unreadableSheets": 0,
+  "volatile": 0
+}

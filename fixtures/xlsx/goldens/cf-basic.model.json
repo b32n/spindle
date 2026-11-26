@@ -1,0 +1,231 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Value"
+          },
+          "A10": {
+            "value": 8
+          },
+          "A11": {
+            "value": 0
+          },
+          "A2": {
+            "value": 6
+          },
+          "A3": {
+            "value": 9
+          },
+          "A4": {
+            "value": 1
+          },
+          "A5": {
+            "value": 4
+          },
+          "A6": {
+            "value": 7
+          },
+          "A7": {
+            "value": 10
+          },
+          "A8": {
+            "value": 2
+          },
+          "A9": {
+            "value": 5
+          },
+          "B1": {
+            "value": "Text"
+          },
+          "B10": {
+            "value": "grape"
+          },
+          "B11": {
+            "value": "#N/A"
+          },
+          "B2": {
+            "value": "apple"
+          },
+          "B3": {
+            "value": "banana"
+          },
+          "B4": {
+            "value": "cherry"
+          },
+          "B5": {
+            "value": "apple"
+          },
+          "B6": {
+            "value": ""
+          },
+          "B7": {
+            "value": "date"
+          },
+          "B8": {
+            "value": "apple"
+          },
+          "B9": {
+            "value": "fig"
+          },
+          "C1": {
+            "value": "Date"
+          },
+          "C10": {
+            "value": 46090
+          },
+          "C11": {
+            "value": 46099
+          },
+          "C2": {
+            "value": 46018
+          },
+          "C3": {
+            "value": 46027
+          },
+          "C4": {
+            "value": 46036
+          },
+          "C5": {
+            "value": 46045
+          },
+          "C6": {
+            "value": 46054
+          },
+          "C7": {
+            "value": 46063
+          },
+          "C8": {
+            "value": 46072
+          },
+          "C9": {
+            "value": 46081
+          },
+          "D1": {
+            "value": "Scale"
+          },
+          "D10": {
+            "value": 70
+          },
+          "D11": {
+            "value": 77
+          },
+          "D2": {
+            "value": 14
+          },
+          "D3": {
+            "value": 21
+          },
+          "D4": {
+            "value": 28
+          },
+          "D5": {
+            "value": 35
+          },
+          "D6": {
+            "value": 42
+          },
+          "D7": {
+            "value": 49
+          },
+          "D8": {
+            "value": 56
+          },
+          "D9": {
+            "value": 63
+          },
+          "E1": {
+            "value": "Bar"
+          },
+          "E10": {
+            "value": 50
+          },
+          "E11": {
+            "value": 55
+          },
+          "E2": {
+            "value": 10
+          },
+          "E3": {
+            "value": 15
+          },
+          "E4": {
+            "value": 20
+          },
+          "E5": {
+            "value": 25
+          },
+          "E6": {
+            "value": 30
+          },
+          "E7": {
+            "value": 35
+          },
+          "E8": {
+            "value": 40
+          },
+          "E9": {
+            "value": 45
+          },
+          "F1": {
+            "value": "Icons"
+          },
+          "F10": {
+            "value": 40
+          },
+          "F11": {
+            "value": 44
+          },
+          "F2": {
+            "value": 8
+          },
+          "F3": {
+            "value": 12
+          },
+          "F4": {
+            "value": 16
+          },
+          "F5": {
+            "value": 20
+          },
+          "F6": {
+            "value": 24
+          },
+          "F7": {
+            "value": 28
+          },
+          "F8": {
+            "value": 32
+          },
+          "F9": {
+            "value": 36
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "CF",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

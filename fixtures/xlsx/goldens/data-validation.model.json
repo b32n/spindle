@@ -1,0 +1,66 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "List"
+          },
+          "A10": {
+            "value": "Yes"
+          },
+          "B1": {
+            "value": "Whole"
+          },
+          "B10": {
+            "value": "No"
+          },
+          "C1": {
+            "value": "Decimal"
+          },
+          "D1": {
+            "value": "Date"
+          },
+          "E1": {
+            "value": "Time"
+          },
+          "F1": {
+            "value": "Text length"
+          },
+          "G1": {
+            "value": "Custom"
+          },
+          "H1": {
+            "value": "Range list"
+          },
+          "I1": {
+            "value": "Messages"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Validation",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

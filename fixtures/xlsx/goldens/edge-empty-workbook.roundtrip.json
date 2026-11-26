@@ -1,0 +1,44 @@
+{
+  "diff": {
+    "added": 2,
+    "after": {
+      "cells": 0,
+      "formats": 0,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "before": {
+      "cells": 0,
+      "formats": 0,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 1,
+      "added sheets[].config.rowHeights.*": 1
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.1"
+      }
+    ],
+    "removed": 0,
+    "total": 2,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}
