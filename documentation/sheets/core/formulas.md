@@ -5,7 +5,8 @@ a parser, a library of **146 built-in functions**, a dependency graph with
 **topological recalculation**, **dynamic arrays (spill)**, and the metadata
 that powers **formula autocomplete**. Everything lives under
 `packages/sheets-core/src/formula-parser/` (plus `formula-graph.ts` and
-`spill.ts` alongside `workbook.ts`).
+`spill.ts` alongside `workbook.ts`). The syntax it understands, and what each
+form does under structural edits, is described in [Formula syntax](#formula-syntax).
 
 ## Function library
 
@@ -34,8 +35,10 @@ evaluator must call the function:
   short-circuit and catch errors from a branch it does not take
   (`IF`, `IFS`, `SWITCH`, `IFERROR`, `IFNA`, the `IS*` predicates).
 - **`refFunctions`** — the function receives the argument's *AST* rather than
-  its value, because it needs the reference itself (`ROW`, `COLUMN`,
-  `OFFSET`, `INDIRECT`, `ISREF`, `ISFORMULA`, `CELL`).
+  its value, because it needs the reference itself (`ROW`, `COLUMN`, `ROWS`,
+  `COLUMNS`, `COUNTBLANK`, `OFFSET`, `INDIRECT`, `INDEX`, `ISREF`, `ISFORMULA`,
+  `CELL`). `INDEX` is registered here (over a computed array it falls back to the
+  ordinary lookup `INDEX`) so that `INDEX(...)` can end a range.
 
 `volatileFunctions` is the set of functions whose result can change with no
 input change (`RAND`, `RANDBETWEEN`, `NOW`, `TODAY`, `OFFSET`, `INDIRECT`).
@@ -62,15 +65,110 @@ public API and drives formula autocomplete in the React editors.
 ## Parser
 
 `FormulaParser` (`parser.ts`) turns a formula string into a
-`ParsedFormulaNode` AST and collects the cells it depends on. The workbook
-then converts that numeric AST into a **stable AST** (`stable-ast.ts`) in
-which every reference is a `(rowId, colId)` stable-ID pair instead of a
-numeric coordinate. Because inserts, deletes and sorts only renumber the
-sheet's order maps, stable-ID references keep pointing at the same logical
-cells; the displayed `A1` text is regenerated from the AST on each evaluation.
+`ParsedFormulaNode` AST and collects a best-effort set of the cells it reads.
+Syntax is handled by two modules: `tokenizer.ts` (references are recognised
+as single tokens, because their meaning depends on their neighbours: `A:A`,
+`1:1`, `Sheet1:Sheet3!`, `A1#`) and `syntax.ts` (a precedence-climbing parser
+with Excel's operator order, see [Formula syntax](#formula-syntax)). A formula
+that does not parse is reported with an `#ERROR! <message>` value that names the
+offending token and its position; the engine no longer reads unparseable text
+as a string.
+
+The workbook then converts the numeric AST into a **stable AST**
+(`stable-ast.ts`) in which every reference is a `(rowId, colId)` stable-ID pair
+instead of a numeric coordinate. Because inserts, deletes and sorts only
+renumber the sheet's order maps, stable-ID references keep pointing at the same
+logical cells; the displayed `A1` text is regenerated from the AST on each
+evaluation (so the text you typed is normalised: spacing, case of function
+names and column letters, quoting of sheet names).
 
 Evaluation walks the AST and dispatches each function call down one of the
 three paths above (reference → lazy → eager).
+
+## Formula syntax
+
+Operators, loosest to tightest binding:
+
+| Level | Operators | Notes |
+|---|---|---|
+| comparison | `=` `<>` `<` `>` `<=` `>=` | |
+| concatenation | `&` | |
+| additive | `+` `-` | |
+| multiplicative | `*` `/` | |
+| power | `^` | left-associative: `2^3^2` is 64 |
+| percent | postfix `%` | `50%`, `10%^2` is 0.01, `A1+50%`; applies to a number, a range or an array element-wise |
+| sign | prefix `-` `+` | binds tighter than `^`: `-2^2` is 4 |
+| intersection | a space between two references | `A1:C3 B2:D4` |
+| range | `:` | `A1:B2`, `A1:INDEX(A1:A5,3)` |
+
+Reference and literal forms:
+
+| Form | Example | Meaning |
+|---|---|---|
+| Whole column / row | `A:A`, `$A:$C`, `1:1`, `$2:$4`, `Sheet2!A:A` | See [whole-column and whole-row references](#whole-column-and-whole-row-references) |
+| 3D reference | `Sheet1:Sheet3!A1`, `Sheet1:Sheet3!A1:B2`, `'Sheet 1:Sheet 3'!A:A` | The same cells on every sheet from the first to the last, in workbook order; valid as a function argument only (`SUM`, `AVERAGE`, `COUNT`, `MAX`, …): anywhere else it is `#VALUE!` |
+| Range between computed references | `A1:INDEX(A1:A5,3)`, `INDEX(…):INDEX(…)`, `OFFSET(A1,1,0):C5`, `INDIRECT("A1"):INDIRECT("B3")` | The bounding box of both ends; both must be on the same sheet (else `#VALUE!`) |
+| Union | `(A1:A2,C1)` | A `,` inside parentheses; valid as a function argument (`SUM((A1:A2,C1))`), otherwise `#VALUE!` |
+| Intersection | `A1:A3 A2:A4` | The overlap; a single cell collapses to a value, no overlap is `#NULL!` |
+| Implicit intersection | `@A1:A3` | The cell of the range in the formula's own row (vertical range) or column (horizontal range), both for a 2-D range; `#VALUE!` when the formula lies outside the range; the top-left value of a computed array |
+| Spill reference | `A1#`, `Sheet2!B2#` | The whole spill range anchored at that cell (`SUM(A1#)`, `ROWS(A1#)`); `#REF!` when the cell anchors no spill |
+| Array constant | `{1,2,3}`, `{1,2;3,4}`, `{"a",TRUE,#N/A,-1.5}` | `,` separates columns and `;` rows; numbers (optionally signed), text, `TRUE`/`FALSE` and errors only; every row must have the same length, otherwise a parse error (`#ERROR! Array constant at position 0 is ragged: row 2 has 1 elements, row 1 has 2`) |
+| Error literal | `#NULL!` `#DIV/0!` `#VALUE!` `#REF!` `#NAME?` `#NUM!` `#N/A` `#SPILL!` `#CALC!` | Evaluates to that error; `ISERROR`, `IFERROR`, `ISNA`, `ERROR.TYPE` see it as one |
+| Defined name | `Quarter1` | Not resolved yet: evaluates to `#NAME?` (the text is kept as typed, so a save does not corrupt it) |
+
+Malformed input is rejected with a message, never read as text: `A:` (a
+half-open range), `1:A`, `Sheet1:!A1`, `{1,2;3}` (ragged array), `{}`,
+`{A1}` (an array constant holds no references), `SUM(1`, `1+`, `(A1,2)` (a union
+needs references), `2 A1` (an intersection needs references), `Sales[Q1]`
+(table references are not supported yet), and nesting deeper than 256 levels.
+
+### Whole-column and whole-row references
+
+`A:A`, `A:C`, `1:1` and `1:3` are stored **unbounded** in the AST: a
+whole-column range holds the ids of its columns and the sentinel id `*` for the
+row axis, a whole-row range the ids of its rows and `*` for the column axis. For
+evaluation the unbounded axis is **bounded to the used range**: the last row (or
+column) inside the referenced columns (rows) that holds a value, a formula or a
+spilled value. `SUM(A:A)` therefore reads only the used part of column A, and an
+empty column gives an empty range, not an error. Shape functions use the
+nominal size: `ROWS(A:A)` is 1,048,576, `COLUMNS(1:1)` is 16,384, `COUNTBLANK`
+counts blanks out of the nominal size, and `INDEX(A:A,500)` indexes the full
+column (a blank, not `#REF!`, past the data).
+
+**Dependencies.** A whole-column range is one rectangle bounded on one axis
+(`RangeDependency.axis`); it is never expanded into cells. An edit anywhere in
+the referenced columns, and only there, dirties the formula. `SUM(A:A)` over a
+column of a million rows evaluates in about two seconds on a laptop (one pass
+over the stored cells), and an edit recomputes only the formulas whose columns
+it touches.
+
+### What a structural edit does to each form
+
+| Edit | `A:A` / `A:C` | `1:1` / `1:3` | `A1:B2`, `A1`, `@`, `A1#`, `:` over refs | 3D (`Sheet1:Sheet3!A1`) |
+|---|---|---|---|---|
+| Insert rows | unchanged (text and value stay valid; new rows count) | follows its rows (`1:1` becomes `3:3` after two rows are inserted above); grows when rows are inserted inside `1:3` | follow their ids as before | not moved: it names positions |
+| Delete rows | unchanged | `#REF!` when a row that is a corner of the range is deleted (printed `#REF!`) | as before: a deleted corner row gives `#REF!` | not moved |
+| Insert columns | follows its columns (`A:A` becomes `C:C`); grows when inserted inside `A:C` | unchanged | follow their ids | not moved |
+| Delete columns | `#REF!` when a corner column is deleted | unchanged | as before | not moved |
+| Copy / fill | relative columns move (`A:A` one column right is `B:B`), `$A:$A` stays, rows never change | relative rows move (`1:1` one row down is `2:2`), `$1:$1` stays | as before (`@` and `#` operands move with the cell) | relative positions move with the copy; sheets stay |
+| Rename a sheet | the prefix follows | the prefix follows | the prefix follows | both end names follow; the span is quoted when needed (`'First one:Last'!A1`) |
+| Delete a sheet | `#REF!` if it is the referenced sheet | `#REF!` | `#REF!` | an end sheet moves **inward** (Excel's rule); deleting a sheet inside the span just drops it from the total; a span left with only the deleted sheet is `#REF!` |
+| Reorder sheets | | | | the span is read from the live order |
+| Add a sheet | | | | included only if it lands between the end sheets (a new sheet is appended after the last) |
+
+Deleting a *corner* of a multi-row or multi-column range gives `#REF!` for every
+range form, plain or whole (Excel shrinks the range instead): this is the
+engine's existing rule for ranges and it is applied unchanged to `A:C` and
+`1:3`. The whole-column and whole-row forms are valid again as soon as the
+formula is re-entered.
+
+A 3D reference is **positional**: it stores the cell positions (not ids) and the
+two end sheet names, so inserting or deleting rows on one sheet of the span does
+not move it, and its span follows the workbook sheet order. Its formula is
+**volatile** (recomputed on every pass), as is any formula with a `:` between
+computed references (`A1:INDEX(…)`), because the cells either depend on are only
+known when the formula is evaluated. A formula with a deleted reference prints
+it as the single token `#REF!` (`=SUM(#REF!)`), which parses back.
 
 ## Dependency graph and recalculation
 
@@ -82,7 +180,8 @@ which cells:
   covers value cells too, changing a plain value correctly recalculates the
   formulas above it.
 - **Range dependencies** are stored as **rectangles** of two stable corner
-  keys, not expanded cell-by-cell. Containment is tested at recalc time, so
+  keys, not expanded cell-by-cell (a whole-column or whole-row range is a
+  rectangle bounded on one axis). Containment is tested at recalc time, so
   a cell that is empty when the formula is entered — or a row/column
   inserted into the range later — is still tracked.
 

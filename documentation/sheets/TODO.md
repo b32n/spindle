@@ -18,8 +18,23 @@ statistical, date/time, information, financial, reference and array categories
       `FILTER`, `SPLIT`; a spilling formula fills a block, with `#SPILL!` on a
       blocked target (`spill.ts`)
 - [x] **Formula autocomplete + parameter help** while editing a formula
+- [x] **Reference syntax** — whole-column and whole-row references (`A:A`, `1:3`,
+      bounded to the used range, one rectangle in the dependency graph), postfix
+      `%`, array constants (`{1,2;3,4}`), 3D references (`Sheet1:Sheet3!A1`),
+      ranges ending in `INDEX` / `OFFSET` / `INDIRECT`, union `(A1,B1)`,
+      intersection (space), `@`, the spill operator `A1#` and the `#NULL!` literal
+      (`formula-parser/tokenizer.ts`, `syntax.ts`; semantics in
+      [`core/formulas.md`](core/formulas.md#formula-syntax)). A formula that does
+      not parse now shows `#ERROR! <message>` instead of being read as text.
 
 ### Remaining formula items
+
+- [ ] **Defined names and table references** — `Quarter1` evaluates to `#NAME?` and
+      `Sales[Q1]` does not parse (the text of an imported formula is kept; plan S8).
+- [ ] **Shrinking ranges on a corner delete** — deleting the first or last row or
+      column of a range (`A1:A5`, and now `A:C` / `1:3` too) gives `#REF!`; Excel
+      shrinks the range. 3D references are positional and do not follow row or
+      column edits on their sheets.
 
 - [ ] **`AGGREGATE`** — 19 sub-functions plus the ignore-hidden / ignore-errors
       option matrix (absent from the catalog).
