@@ -460,7 +460,7 @@ function convertTable(node: PmNode): TableBlock {
         cells,
         ...(rowNode.attrs.repeatHeader ? { repeatHeader: true } : {}),
         ...(rowNode.attrs.cantSplit ? { cantSplit: true } : {}),
-        ...rowRevision(readBlockRevision(rowNode.attrs, false)),
+        ...rowRevision(readBlockRevision(rowNode.attrs)),
       });
     }
   });
@@ -759,7 +759,7 @@ function extractParagraphAttrs(node: PmNode): ParagraphAttrs {
     if (node.attrs.rightIndent !== undefined) {
       attrs.rightIndent = node.attrs.rightIndent as number;
     }
-    const changeBar = changeBarOf(readBlockRevision(node.attrs, false));
+    const changeBar = changeBarOf(readBlockRevision(node.attrs));
     if (changeBar) attrs.changeBar = changeBar;
   }
   

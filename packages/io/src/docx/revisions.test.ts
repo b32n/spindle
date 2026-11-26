@@ -217,6 +217,21 @@ describe('a formatting change in a footer', () => {
   });
 });
 
+describe('a paragraph change in a footer', () => {
+  it('is counted with the other changes in headers and footers', async () => {
+    const exported = await exportDocx({
+      title: 'T',
+      sections: [{ ...BASE, blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }], footer: { paragraphs: [{ content: [{ type: 'text', text: 'F' }] }] } }],
+    });
+    const zip = await JSZip.loadAsync(exported.bytes);
+    const name = Object.keys(zip.files).find((n) => /^word\/footer\d*\.xml$/.test(n))!;
+    const xml = await zip.file(name)!.async('string');
+    zip.file(name, xml.replace(/<w:p>[\s\S]*?<\/w:p>|<w:p [^>]*>[\s\S]*?<\/w:p>/, `<w:p><w:pPr><w:jc w:val="center"/><w:pPrChange w:id="1" w:author="Ada"><w:pPr/></w:pPrChange></w:pPr>${r(t('F'))}</w:p>`));
+    const bytes = await zip.generateAsync({ type: 'uint8array' });
+    expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedHeaderFooterChanges')).toMatchObject({ count: 1 });
+  });
+});
+
 describe('writing tracked changes', () => {
   const content: DocInline[] = [
     { type: 'text', text: 'keep ' },
@@ -477,5 +492,53 @@ describe('loss report for changes around whole blocks', () => {
   it('is a change the importer really does not keep: the paragraph inside is not imported', async () => {
     const { result } = await importBody(`<w:ins ${W} w:id="1" w:author="A"><w:p>${r(t('wrapped text'))}</w:p></w:ins>`);
     expect(JSON.stringify(result.sections)).not.toContain('wrapped text');
+  });
+});
+
+describe('a paragraph that would be a structural block, with a tracked change of its mark', () => {
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==';
+  const markIns = '<w:pPr><w:rPr><w:ins w:id="5" w:author="Ada"/></w:rPr></w:pPr>';
+  const markDel = '<w:pPr><w:rPr><w:del w:id="6" w:author="Bo"/></w:rPr></w:pPr>';
+  const formatChange = '<w:pPr><w:jc w:val="center"/><w:pPrChange w:id="7" w:author="Cy"><w:pPr/></w:pPrChange></w:pPr>';
+  const pageBreak = '<w:r><w:br w:type="page"/></w:r>';
+
+  it('keeps an image paragraph as a paragraph with its image and its change', async () => {
+    const out = await exportDocx({
+      title: 'T',
+      sections: [{ ...BASE, blocks: [{ type: 'paragraph', content: [{ type: 'image', src: PNG, width: 10, height: 10 }], revision: { insertion: { id: '5', author: 'Ada' } } }] }],
+    });
+    const result = await importDocx(out.bytes);
+    expect(result.sections[0].blocks[0]).toMatchObject({ type: 'paragraph', content: [{ type: 'image' }], revision: { insertion: { author: 'Ada' } } });
+    const again = await exportDocx({ title: 'T', sections: result.sections });
+    expect(await (await JSZip.loadAsync(again.bytes)).file('word/document.xml')!.async('string')).toMatch(/<w:rPr><w:ins [^>]*w:author="Ada"/);
+  });
+
+  it.each([
+    ['an insertion', markIns],
+    ['a deletion', markDel],
+    ['a formatting change', formatChange],
+  ])('reports %s on a page-break paragraph as lost, in the warnings and the loss report', async (_name, pPr) => {
+    const { result, bytes } = await importBody(`<w:p ${W}>${pPr}${pageBreak}</w:p>`);
+    expect(result.sections[0].blocks[0]).toEqual({ type: 'pageBreak' });
+    expect(result.warnings.some((w) => /paragraph mark of a page break was not kept/.test(w))).toBe(true);
+    expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedStructureChanges')).toMatchObject({ count: 1 });
+  });
+
+  it.each([
+    ['an insertion', markIns.replace('</w:pPr>', '').replace('<w:pPr>', '<w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="000000"/></w:pBdr>') + '</w:pPr>'],
+    ['a formatting change', '<w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="000000"/></w:pBdr><w:pPrChange w:id="7" w:author="Cy"><w:pPr/></w:pPrChange></w:pPr>'],
+  ])('reports %s on a horizontal rule paragraph as lost', async (_name, pPr) => {
+    const { result, bytes } = await importBody(`<w:p ${W}>${pPr}</w:p>`);
+    expect(result.sections[0].blocks[0]).toEqual({ type: 'horizontalRule' });
+    expect(result.warnings.some((w) => /paragraph mark of a horizontal rule was not kept/.test(w))).toBe(true);
+    expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedStructureChanges')).toMatchObject({ count: 1 });
+  });
+
+  it('reports nothing for a page break or a rule without a change, or for an ordinary paragraph with one', async () => {
+    const plain = await importBody(`<w:p ${W}>${pageBreak}</w:p>`);
+    expect(plain.result.warnings).toEqual([]);
+    expect((await detectDocxLoss(plain.bytes)).items.some((i) => i.id === 'docx.trackedStructureChanges')).toBe(false);
+    const text = await importBody(`<w:p ${W}>${markIns}${r(t('hello'))}</w:p>`);
+    expect((await detectDocxLoss(text.bytes)).items.some((i) => i.id === 'docx.trackedStructureChanges')).toBe(false);
   });
 });

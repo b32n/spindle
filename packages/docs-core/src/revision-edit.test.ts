@@ -119,6 +119,20 @@ describe('freshRevisionIds', () => {
     expect(marked.attrs.revisionInsertion.id).toBe('7');
   });
 
+  it('renews a move name when only one end of the move is in the slice', () => {
+    const out = freshRevisionIds(sliceOf(text('x', deletion.create({ ...BO, moveId: 'mv' }))), () => 'f1');
+    const attrs = out.content.firstChild!.firstChild!.marks[0].attrs;
+    expect(attrs.moveId).toBe('f1');
+    expect(attrs.revisionId).toBe('f1');
+  });
+
+  it('renews a record on a paragraph whose id is a number (as another client can write it)', () => {
+    const para = docsSchema.nodes.paragraph.create({ revisionInsertion: { id: 7, author: 'Ada' } }, [text('x')]);
+    const out = freshRevisionIds(new Slice(Fragment.from(para), 0, 0), () => 'f1');
+    expect(out.content.firstChild!.attrs.revisionInsertion).toEqual({ id: 'f1', author: 'Ada' });
+    expect(para.attrs.revisionInsertion.id).toBe(7);
+  });
+
   it('makes ids that differ from call to call', () => {
     expect(newRevisionId()).not.toBe(newRevisionId());
   });

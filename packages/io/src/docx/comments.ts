@@ -21,7 +21,7 @@ function paragraphText(node: XmlNode): string {
     for (const child of childrenOf(n)) {
       const tag = tagOf(child);
       if (tag === '#text') out += String((child as Record<string, unknown>)['#text'] ?? '');
-      else if (tag === 'w:del' || tag === 'w:instrText' || tag === 'w:delText') continue;
+      else if (tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:instrText' || tag === 'w:delText') continue;
       else if (tag === 'w:tab') out += '\t';
       else if (tag === 'w:br' || tag === 'w:cr') out += '\n';
       else visit(child);

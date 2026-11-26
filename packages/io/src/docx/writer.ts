@@ -276,6 +276,8 @@ class DocxBuilder {
   /** `w:id` written for each tracked change (by kind and id in the model), the ids taken, and the next free number. */
   private readonly revisionIds = new Map<string, number>();
   readonly usedRevisionIds = new Set<number>();
+  /** The numeric ids the model's changes ask for: a number handed out freshly (a move's range markers) skips them, so no change is renumbered. */
+  readonly wantedRevisionIds = new Set<number>();
   private nextRevisionId = 1;
   /** Width of the content area of the section being built, in twips: where the right tab of a table of contents entry goes. */
   private contentWidthTwips = 9360;
@@ -354,7 +356,7 @@ class DocxBuilder {
 
   /** The next `w:id` nobody has used, for the markers of a move's range. */
   private freshRevisionId(): number {
-    while (this.usedRevisionIds.has(this.nextRevisionId)) this.nextRevisionId++;
+    while (this.usedRevisionIds.has(this.nextRevisionId) || this.wantedRevisionIds.has(this.nextRevisionId)) this.nextRevisionId++;
     this.usedRevisionIds.add(this.nextRevisionId);
     return this.nextRevisionId++;
   }
@@ -943,6 +945,25 @@ function truncate(s: string, max = 60): string {
   return s.length > max ? `${s.slice(0, max)}…` : s;
 }
 
+/** The numeric ids of every tracked change in `value` (runs, links, notes, paragraph marks, rows, headers and footers). */
+function collectWantedRevisionIds(value: unknown, into: Set<number>, depth = 0): void {
+  if (!value || typeof value !== 'object' || depth > 64) return;
+  if (Array.isArray(value)) {
+    for (const item of value) collectWantedRevisionIds(item, into, depth + 1);
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key === 'revision' && child && typeof child === 'object') {
+      for (const meta of Object.values(child as Record<string, unknown>)) {
+        const id = (meta as { id?: unknown } | undefined)?.id;
+        if (typeof id === 'string' && /^\d{1,9}$/.test(id)) into.add(Number(id));
+      }
+    } else {
+      collectWantedRevisionIds(child, into, depth + 1);
+    }
+  }
+}
+
 export async function exportDocx(input: DocumentExportInput): Promise<DocumentExportResult> {
   return exportDocxPart(input, new Set());
 }
@@ -953,6 +974,7 @@ async function exportDocxPart(input: DocumentExportInput, reservedRevisionIds: S
   const namedStyles = usableNamedStyles(input.namedStyles);
   const builder = new DocxBuilder(comments, namedStyles);
   for (const id of reservedRevisionIds) builder.usedRevisionIds.add(id);
+  collectWantedRevisionIds(input.sections, builder.wantedRevisionIds);
   builder.evenAndOdd = input.sections.some((s) => s.header?.differentOddEven || s.footer?.differentOddEven);
   const doc = new Document({
     title: input.title,

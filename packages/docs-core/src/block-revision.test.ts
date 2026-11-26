@@ -60,7 +60,7 @@ describe('block revision attributes', () => {
     expect(readBlockRevision({ revisionInsertion: { id: '1', author: long, moveId: long } })).toEqual({ insertion: { id: '1', author: 'Unknown' } });
     // Reading does not hand out the node's own objects.
     const attrs = { revisionInsertion: ADA, revisionFormat: CY };
-    const read = readBlockRevision(attrs, false)!;
+    const read = readBlockRevision(attrs)!;
     expect(read.insertion).toEqual(ADA);
     expect(read.insertion).not.toBe(ADA);
     expect(read.formatChange!.previous).not.toBe(CY.previous);

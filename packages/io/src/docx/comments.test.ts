@@ -218,6 +218,12 @@ describe('importDocx: comments', () => {
     expect(result.comments![0].comments[0].text).toBe('one\ttwo\nthree\nsecond');
   });
 
+  it('skips text moved away (w:moveFrom) like deleted text', async () => {
+    const body = '<w:comment w:id="1" w:author="A" w:date="2026-01-01T00:00:00Z"><w:p><w:r><w:t>kept</w:t></w:r><w:moveFrom w:id="9"><w:r><w:delText>moved</w:delText></w:r></w:moveFrom></w:p></w:comment>';
+    const result = await importDocx(await docx(p(start(1), run('x'), end(1)), { 'word/comments.xml': comments(body) }));
+    expect(result.comments![0].comments[0].text).toBe('kept');
+  });
+
   it('defaults a missing author, id and date', async () => {
     const result = await importDocx(
       await docx(p(start(1), run('x'), end(1)), {

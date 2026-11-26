@@ -69,9 +69,11 @@ export function freshRevisionIds(slice: Slice, makeId: () => string = newRevisio
     let out: Record<string, unknown> | null = null;
     for (const [kind, attr] of BLOCK_KINDS) {
       const record = node.attrs[attr];
-      if (!record || typeof record !== 'object' || typeof (record as { id?: unknown }).id !== 'string') continue;
+      const id = record && typeof record === 'object' ? (record as { id?: unknown }).id : undefined;
+      // `readBlockRevision` accepts a number id from another client's document, so a number is renewed too.
+      if (typeof id !== 'string' && typeof id !== 'number') continue;
       out ??= { ...node.attrs };
-      out[attr] = { ...(record as object), id: freshId(kind, (record as { id: string }).id) };
+      out[attr] = { ...(record as object), id: freshId(kind, String(id)) };
     }
     return out;
   };

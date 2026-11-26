@@ -235,14 +235,15 @@ interface RevisionLosses {
   formatting: Map<string, number>;
 }
 
+/** Paragraph properties a paragraph change does not carry the old value of. */
+const PPR_NOT_PREVIOUS = ['w:numPr', 'w:tabs', 'w:pBdr', 'w:shd'];
+
 /**
  * The tracked changes that are lost. Insertions, deletions and moves around runs, on paragraph marks (also of a table
  * cell's only paragraph) and on table rows, and formatting changes of runs and paragraphs are kept. What is left:
  * formatting changes of a paragraph mark's own formatting, and changes of tables, table rows and cells, and sections.
  * Text boxes are reported as such and not counted here.
  */
-/** Paragraph properties a paragraph change does not carry the old value of. */
-const PPR_NOT_PREVIOUS = ['w:numPr', 'w:tabs', 'w:pBdr', 'w:shd'];
 
 function revisionLosses(root: XmlNode[]): RevisionLosses {
   const out: RevisionLosses = { formatting: new Map() };
@@ -317,14 +318,29 @@ function trackedChangesElsewhere(root: XmlNode[], headerFooters: string[]): Item
     const parent = path[path.length - 1];
     if (parent === 'w:body' || parent === 'w:tc') blocks++;
   });
+  // A paragraph that is read as a page break or a horizontal rule has no place for a change of its paragraph mark.
+  let structural = 0;
+  walk(root, (node, tag, path) => {
+    if (tag !== 'w:p' || path.includes('w:tc') || path.includes('w:txbxContent')) return;
+    const pPr = find(childrenOf(node), 'w:pPr');
+    if (!pPr) return;
+    const pPrKids = childrenOf(pPr);
+    const markProps = find(pPrKids, 'w:rPr');
+    const tracked = !!find(pPrKids, 'w:pPrChange') || (!!markProps && childrenOf(markProps).some((k) => ['w:ins', 'w:del', 'w:moveFrom', 'w:moveTo'].includes(tagOf(k) ?? '')));
+    if (!tracked || ['w:t', 'w:drawing', 'w:pict', 'mc:AlternateContent', 'w:fldChar', 'w:fldSimple', 'w:tab'].some((t) => findDeep(node, t))) return;
+    const pageBreak = findAll(childrenOf(node), 'w:r').some((r) => childrenOf(r).some((k) => tagOf(k) === 'w:br' && attrsOf(k)['@_w:type'] === 'page'));
+    const pBdr = find(pPrKids, 'w:pBdr');
+    if (pageBreak || (pBdr && find(childrenOf(pBdr), 'w:bottom'))) structural++;
+  });
   let headers = 0;
   for (const xml of headerFooters) {
     walk(parseXml(xml), (_n, tag, path) => {
-      if ((tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo' || tag === 'w:rPrChange') && !inRevisionProps(path)) headers++;
+      if ((tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo' || tag === 'w:rPrChange' || tag === 'w:pPrChange') && !inRevisionProps(path)) headers++;
     });
   }
   return [
     ...item('docx.trackedBlockChanges', 'tracked change(s) around whole paragraphs or tables', blocks, 'the paragraphs or tables inside are not imported'),
+    ...item('docx.trackedStructureChanges', 'tracked change(s) of the paragraph mark of a page break or horizontal rule', structural, 'the page break or rule is imported without the change'),
     ...item('docx.trackedHeaderFooterChanges', 'tracked change(s) in headers and footers', headers, 'deleted text is dropped and inserted text is kept as ordinary text; the change is not recorded'),
   ];
 }

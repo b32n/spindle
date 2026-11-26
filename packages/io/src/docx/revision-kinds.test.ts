@@ -154,6 +154,13 @@ describe('reading changes of paragraph marks and table rows', () => {
   });
 });
 
+describe('page breaks after moved text', () => {
+  it('count moved text as content before the break, so the break follows the paragraph', async () => {
+    const blocks = await blocksOf(paragraph(`<w:moveFrom ${who('2')}>${r('<w:delText>moved</w:delText>')}</w:moveFrom><w:r><w:br w:type="page"/></w:r>`));
+    expect(blocks.map((b) => b.type)).toEqual(['paragraph', 'pageBreak']);
+  });
+});
+
 describe('writing', () => {
   it('writes the two ends of a move with their range markers and reads them back', async () => {
     const content: DocInline[] = [
@@ -169,6 +176,31 @@ describe('writing', () => {
       { text: 'from', revision: { deletion: { id: '2', moveId: 'm1' } } },
       { text: 'to', revision: { insertion: { id: '4', moveId: 'm1' } } },
     ]);
+  });
+
+  it('keeps the w:id of every change when a move needs range markers (ids 1 and 3 are not handed to the markers first)', async () => {
+    const content: DocInline[] = [
+      { type: 'text', text: 'from', revision: { deletion: { id: '1', author: 'Ada', moveId: 'm1' } } },
+      { type: 'text', text: 'to', revision: { insertion: { id: '3', author: 'Ada', moveId: 'm1' } } },
+      { type: 'text', text: 'new', revision: { insertion: { id: '2', author: 'Bo' } } },
+    ];
+    const { xml } = await exportXml([{ type: 'paragraph', content }]);
+    expect(xml).toMatch(/<w:moveFrom w:id="1"/);
+    expect(xml).toMatch(/<w:moveTo w:id="3"/);
+    expect(xml).toMatch(/<w:ins w:id="2"/);
+    const ids = [...xml.matchAll(/<w:(?:moveFrom|moveTo|ins|del)(?:RangeStart)? w:id="(\d+)"/g)].map((m) => m[1]);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('writes no w:date for a paragraph mark or a row whose change has none', async () => {
+    const blocks: DocBlock[] = [
+      { type: 'paragraph', content: [{ type: 'text', text: 'p' }], revision: { insertion: { id: '1', author: 'Ada' } } },
+      { type: 'table', rows: [{ cells: [{ blocks: [{ type: 'paragraph', content: [{ type: 'text', text: 'c' }] }] }], revision: { deletion: { id: '2', author: 'Bo' } } }] } as DocBlock,
+    ];
+    const { xml } = await exportXml(blocks);
+    expect(xml).toMatch(/<w:ins w:id="1" w:author="Ada"\/>/);
+    expect(xml).toMatch(/<w:del w:id="2" w:author="Bo"\/>/);
+    expect(xml).not.toContain('w:date');
   });
 
   it('writes a move that something splits as two ranges of the same name, and reads both back as one move', async () => {

@@ -645,7 +645,7 @@ function pageBreakPlacement(pNode: XmlNode): 'before' | 'after' | null {
       const br = find(runKids, 'w:br');
       if (br && attrsOf(br)['@_w:type'] === 'page') return sawContent ? 'after' : 'before';
       if (runKids.some((k) => ['w:t', 'w:drawing', 'w:pict', 'w:tab'].includes(tagOf(k) ?? ''))) sawContent = true;
-    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:del' || tag === 'w:sdt' || tag === 'w:smartTag') {
+    } else if (tag === 'w:hyperlink' || tag === 'w:ins' || tag === 'w:del' || tag === 'w:moveFrom' || tag === 'w:moveTo' || tag === 'w:sdt' || tag === 'w:smartTag') {
       sawContent = true;
     }
   }
@@ -721,17 +721,21 @@ function parseParagraph(
   // bottom-border (our own writer's idiom for a horizontal rule) maps back
   // to the corresponding structural block rather than an empty paragraph.
   const onlyBookmarks = content.every((c) => c.type === 'bookmark');
+  // Those blocks have no place for a tracked change of their paragraph mark, so the change is reported as lost.
   if (!plain && onlyBookmarks && hasPageBreakRun(pNode)) {
+    if (markRevision) warnings.push('A tracked change of the paragraph mark of a page break was not kept.');
     return { type: 'pageBreak' };
   }
   if (!plain && content.length === 0 && hasBottomBorder(pPrKids)) {
+    if (markRevision) warnings.push('A tracked change of the paragraph mark of a horizontal rule was not kept.');
     return { type: 'horizontalRule' };
   }
 
   // A paragraph whose only content is a single image is how our own writer
   // (and most producers) represents a block-level image — promote it
   // rather than returning a "paragraph" block wrapping one inline image.
-  if (!plain && content.length === 1 && content[0].type === 'image') {
+  // A tracked change of the paragraph mark keeps the paragraph (an image block has no place for it).
+  if (!plain && !markRevision && content.length === 1 && content[0].type === 'image') {
     const image = content[0];
     return {
       type: 'image',

@@ -56,7 +56,7 @@ export function documentRevisionAuthors(doc: PmNode): string[] {
       for (const mark of node.marks) if (mark.type.name === 'insertion' || mark.type.name === 'deletion' || mark.type.name === 'formatChange') authors.add(String(mark.attrs.author));
       return true;
     }
-    const revision = readBlockRevision(node.attrs, false);
+    const revision = readBlockRevision(node.attrs);
     if (revision) {
       for (const kind of ['insertion', 'deletion', 'formatChange'] as const) {
         const author = revision[kind]?.author;

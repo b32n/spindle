@@ -84,10 +84,9 @@ function sanitizeMeta(raw: unknown): RevisionMeta | undefined {
 /**
  * The model revision of a node's attributes, or undefined when it has none. The attributes may come from another client's
  * Y document, so each record is rebuilt from the fields it should have (an id, an author, a date, a move name, the
- * formatting before); a record without a usable id is ignored, and one without `previous` has an empty one. Always a copy:
- * `copy` is kept for callers that pass false and means nothing now that the records are rebuilt.
+ * formatting before); a record without a usable id is ignored, and one without `previous` has an empty one. Always a copy.
  */
-export function readBlockRevision(attrs: Record<string, unknown>, _copy = true): BlockRevision | undefined {
+export function readBlockRevision(attrs: Record<string, unknown>): BlockRevision | undefined {
   const revision: BlockRevision = {};
   const insertion = sanitizeMeta(attrs.revisionInsertion);
   const deletion = sanitizeMeta(attrs.revisionDeletion);
