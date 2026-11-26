@@ -56,20 +56,10 @@ describe('detectDocxLoss: XML-based detectors', () => {
     expect(ids).not.toContain('docx.sections');
   });
 
-  describe('docx.sections', () => {
+  describe('sections', () => {
     const sect = '<w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr>';
-    it('counts sections beyond the first', async () => {
+    it('are shown and edited, so extra sections are no longer reported as lost', async () => {
       const bytes = await docx(`${p('a', sect)}${p('b', sect)}${p('c')}${sect}`);
-      expect(await item(bytes, 'docx.sections')).toMatchObject({ count: 2 });
-    });
-    it('is silent for a single section', async () => {
-      expect(await item(await docx(p('a') + sect), 'docx.sections')).toBeUndefined();
-    });
-    it('ignores sectPrChange and sectPr outside the body flow', async () => {
-      const bytes = await docx(
-        `${p('a')}<w:tbl><w:tr><w:tc><w:p><w:pPr>${sect}</w:pPr></w:p></w:tc></w:tr></w:tbl>` +
-          `${sect.replace('</w:sectPr>', '<w:sectPrChange w:id="1"><w:sectPr/></w:sectPrChange></w:sectPr>')}`
-      );
       expect(await item(bytes, 'docx.sections')).toBeUndefined();
     });
   });

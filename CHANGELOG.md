@@ -63,6 +63,15 @@ lockstep.
   rulers and page setup act on the section of the active page, and editing a header or footer edits the section that owns
   it (`onHeaderChange`/`onFooterChange` get the section id as a second argument). Not laid out yet: columns, vertical
   alignment, and per-fragment margins for continuous sections.
+- **Sections can be inserted, removed and set up in the editor.** The toolbar has a Section break menu (next page,
+  continuous, remove): a break ends the section before it (the content before it becomes a new section with a copy of the
+  setup, the section after keeps its own and starts the way the break says and inherits the header and footer). New
+  `insertSectionBreak(sectionId)` and `removeSectionBreak()` commands (`createCommands`) and
+  `DocumentImpl.splitSection(sectionId, newSectionId, breakType?)`, which also adds the new section to the shared document
+  while collaboration is attached. Page setup asks whether it applies to this section or the whole document (the modal's
+  `onConfirm` gets the scope as a second argument), and the header/footer editor of a later section has "Link to
+  previous" (`onHeaderFooterLinkChange`). `docx.sections` is removed from the full loss report, since sections are now
+  shown and editable.
 - **DOCX comments are imported.** `importDocx` reads `word/comments.xml`, `commentsExtended.xml` (replies and the
   resolved state) and `people.xml` (author ids), anchors each thread to its commented text across runs, links,
   paragraphs and table cells, and returns the threads in the additive `DocumentImportResult.comments`

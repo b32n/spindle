@@ -106,23 +106,6 @@ function numberingLookup(xml: string): NumberingLookup {
 // Detectors
 // ---------------------------------------------------------------------------
 
-/** Sections beyond the first: kept in the model and exported, but the editor shows and edits only the first. */
-function extraSections(root: XmlNode[]): Item[] {
-  let sectPrs = 0;
-  // Only body-level and paragraph-level section properties end a section (as in the reader).
-  walk(root, (_n, tag, path) => {
-    if (tag !== 'w:sectPr') return;
-    const p = path.join('/');
-    if (p === 'w:document/w:body' || p === 'w:document/w:body/w:p/w:pPr') sectPrs++;
-  });
-  return item(
-    'docx.sections',
-    'extra section(s)',
-    sectPrs - 1,
-    'kept in the document and exported, but the editor shows and edits only the first section'
-  );
-}
-
 function listFormatting(root: XmlNode[], numbering: NumberingLookup): Item[] {
   const kinds = new Map<string, number>();
   let total = 0;
@@ -385,7 +368,6 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
   if (!full) return [...drawings, ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
-    ...safe(() => extraSections(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),
     ...safe(() => sectionDetectors(root)),
     ...safe(() => fields(root)),

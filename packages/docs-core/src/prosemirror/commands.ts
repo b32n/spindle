@@ -1,6 +1,6 @@
 import { toggleMark, setBlockType } from 'prosemirror-commands';
 import { liftListItem, sinkListItem, wrapInList } from 'prosemirror-schema-list';
-import type { Schema, MarkType, NodeType, Attrs, Mark } from 'prosemirror-model';
+import type { Schema, MarkType, NodeType, Attrs, Mark, Node } from 'prosemirror-model';
 import { TextSelection } from 'prosemirror-state';
 import type { Command, EditorState, Transaction } from 'prosemirror-state';
 
@@ -359,6 +359,70 @@ export function insertPageBreak(schema: Schema): Command {
 }
 
 /**
+ * Command to insert a section break with the given id. A break ends a section, so the content before it becomes a new
+ * section named `sectionId` and the content after it keeps the section the caret was in. A paragraph at the top level is
+ * split at the caret; in a table or list the break goes after it. The caret ends up in a paragraph after the break
+ * (one is added if the break would be last).
+ */
+export function insertSectionBreak(schema: Schema, sectionId: string): Command {
+  return (state, dispatch) => {
+    const breakType = schema.nodes.section_break;
+    if (!breakType || !sectionId) return false;
+
+    if (dispatch) {
+      let tr = state.tr;
+      if (!tr.selection.empty) tr = tr.deleteSelection();
+      const $from = tr.selection.$from;
+      let at: number;
+      if ($from.depth === 1 && $from.parent.isTextblock) {
+        // Split the paragraph (or heading) at the caret; the break goes between the halves.
+        tr = tr.split($from.pos);
+        at = tr.mapping.map($from.pos) - 1; // end of the first half
+        at = tr.doc.resolve(at).after(1);
+      } else if ($from.depth >= 1) {
+        at = $from.after(1);
+      } else {
+        at = $from.pos;
+      }
+      tr = tr.insert(at, breakType.create({ sectionId }));
+      const after = at + 1;
+      const next = tr.doc.nodeAt(after);
+      if (!next || !next.isTextblock) tr = tr.insert(after, schema.nodes.paragraph.create());
+      tr = tr.setSelection(TextSelection.create(tr.doc, after + 1));
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
+}
+
+/** The position and node of every `section_break` at the top level of a document. */
+function sectionBreaks(doc: Node): Array<{ pos: number; node: Node }> {
+  const out: Array<{ pos: number; node: Node }> = [];
+  doc.forEach((node, offset) => {
+    if (node.type.name === 'section_break') out.push({ pos: offset, node });
+  });
+  return out;
+}
+
+/**
+ * Command to remove the break that ends the section the caret is in, merging it into the next section (which keeps its
+ * own setup). In the last section it removes the break that starts it instead. False when the document has no break.
+ */
+export function removeSectionBreak(): Command {
+  return (state, dispatch) => {
+    const breaks = sectionBreaks(state.doc);
+    if (breaks.length === 0) return false;
+    const caret = state.selection.from;
+    const target = breaks.find((b) => b.pos >= caret) ?? breaks[breaks.length - 1];
+    if (dispatch) {
+      const tr = state.tr.delete(target.pos, target.pos + target.node.nodeSize);
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
+}
+
+/**
  * Command to insert an image
  */
 export function insertImage(schema: Schema, attrs: { src: string; alt?: string; width?: number; height?: number }): Command {
@@ -597,6 +661,8 @@ export function createCommands(schema: Schema) {
     // Insert
     insertHorizontalRule: () => insertHorizontalRule(schema),
     insertPageBreak: () => insertPageBreak(schema),
+    insertSectionBreak: (sectionId: string) => insertSectionBreak(schema, sectionId),
+    removeSectionBreak: () => removeSectionBreak(),
     insertImage: (attrs: { src: string; alt?: string; width?: number; height?: number }) => insertImage(schema, attrs),
     insertLink: (attrs: { href: string; title?: string }) => insertLink(schema, attrs),
     removeLink: () => removeLink(schema),

@@ -60,6 +60,8 @@ export interface HeaderFooterEditorProps {
   };
   /** Main editor view (for toolbar integration, if needed) */
   mainEditorView?: EditorView | null;
+  /** For a section after the first: whether it shows the previous section's content, and the switch. */
+  linkToPrevious?: { linked: boolean; onChange: (linked: boolean) => void };
 }
 
 // ============================================================================
@@ -868,6 +870,7 @@ export const HeaderFooterEditor = memo(function HeaderFooterEditor({
   contentWidth,
   scale,
   position,
+  linkToPrevious,
 }: HeaderFooterEditorProps) {
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null);
@@ -1157,6 +1160,21 @@ export const HeaderFooterEditor = memo(function HeaderFooterEditor({
           Different first page
         </label>
         
+        {linkToPrevious && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#5f6368', cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={linkToPrevious.linked}
+              onChange={(e) => {
+                linkToPrevious.onChange(e.target.checked);
+                onClose();
+              }}
+              style={{ margin: 0, width: 14, height: 14 }}
+            />
+            Link to previous
+          </label>
+        )}
+
         {/* Info badge */}
         {differentFirstPage && (
           <div style={{

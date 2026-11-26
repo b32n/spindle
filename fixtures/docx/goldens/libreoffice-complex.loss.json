@@ -45,12 +45,6 @@
       "effect": "not applied (lines are broken without hyphenation)",
       "id": "docx.hyphenation",
       "label": "automatic hyphenation setting"
-    },
-    {
-      "count": 3,
-      "effect": "kept in the document and exported, but the editor shows and edits only the first section",
-      "id": "docx.sections",
-      "label": "extra section(s)"
     }
   ]
 }

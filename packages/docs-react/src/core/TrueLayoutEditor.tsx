@@ -131,6 +131,11 @@ export interface TrueLayoutEditorProps {
   onHeaderChange?: (content: HeaderFooterContent, sectionId?: string) => void;
   /** Called when footer content changes (`sectionId` as for `onHeaderChange`) */
   onFooterChange?: (content: HeaderFooterContent, sectionId?: string) => void;
+  /**
+   * Called when the user links a section's header or footer to the previous section (`linked`: the section shows the
+   * previous one's and keeps none of its own) or unlinks it (it gets its own copy, `content`, to edit).
+   */
+  onHeaderFooterLinkChange?: (type: 'header' | 'footer', sectionId: string, linked: boolean, content: HeaderFooterContent) => void;
   /** Whether headers/footers are editable (default: true when editable is true) */
   headerFooterEditable?: boolean;
   /**
@@ -197,6 +202,7 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       documentTitle,
       onHeaderChange,
       onFooterChange,
+      onHeaderFooterLinkChange,
       headerFooterEditable,
       collabHandle = null,
     },
@@ -992,6 +998,8 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const editedSection =
       sections && owners && editedPage?.sectionIndex !== undefined
         ? {
+            index: editedPage.sectionIndex,
+            id: owners.ids[editedPage.sectionIndex],
             header: owners.headers[editedPage.sectionIndex],
             footer: owners.footers[editedPage.sectionIndex],
             headerOwnerId: owners.ids[owners.headerOwners[editedPage.sectionIndex]],
@@ -1232,6 +1240,20 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
             }}
             isEditing={hfEditState.isEditing}
             onClose={() => setHfEditState(null)}
+            linkToPrevious={
+              editedSection && editedSection.index > 0 && onHeaderFooterLinkChange
+                ? {
+                    linked: (hfEditState.type === 'header' ? owners!.headerOwners : owners!.footerOwners)[editedSection.index] !== editedSection.index,
+                    onChange: (linked) =>
+                      onHeaderFooterLinkChange(
+                        hfEditState.type,
+                        editedSection.id,
+                        linked,
+                        (hfEditState.type === 'header' ? editedSection.header : editedSection.footer) ?? { blocks: [] },
+                      ),
+                  }
+                : undefined
+            }
             pageIndex={hfEditState.pageIndex}
             totalPages={layout?.pages.length ?? 1}
             documentTitle={documentTitle}
