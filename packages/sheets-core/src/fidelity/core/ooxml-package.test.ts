@@ -5,7 +5,7 @@ import {
   readParts,
   relationshipTargets,
   zipEntrySizes,
-} from '../../../../scripts/xlsx-fidelity/ooxml-package';
+} from '../../../../../scripts/fidelity-core/ooxml-package';
 
 const zipOf = async (files: Record<string, string>, comment?: string) => {
   const z = new JSZip();

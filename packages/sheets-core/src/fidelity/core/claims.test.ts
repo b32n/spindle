@@ -6,9 +6,9 @@ import {
   detectConstructs,
   unverifiedClaims,
   verifyClaims,
-} from '../../../../scripts/xlsx-fidelity/claims';
-import type { OoxmlParts } from '../../../../scripts/xlsx-fidelity/ooxml-package';
-import type { Construct, Manifest } from '../../../../scripts/xlsx-fidelity/types';
+} from '../../../../../scripts/fidelity-core/claims';
+import type { OoxmlParts } from '../../../../../scripts/fidelity-core/ooxml-package';
+import type { Construct, Manifest } from '../../../../../scripts/fidelity-core/types';
 
 const registry: Array<Construct<OoxmlParts>> = [
   { id: 'has.a', label: 'A', count: (p) => (p.names.includes('a.xml') ? 2 : 0) },

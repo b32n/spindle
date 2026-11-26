@@ -3,6 +3,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
+  // The fidelity runner (scripts/xlsx-fidelity) imports the built package by name; tests bind the source instead.
+  moduleNameMapper: { '^@b32nio/spindle-sheets-core$': '<rootDir>/src/index.ts' },
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
@@ -25,6 +27,7 @@ module.exports = {
             '@b32nio/spindle-shared/export/csv': ['../shared/src/export/csv/index.ts'],
             '@b32nio/spindle-shared/export/xlsx': ['../shared/src/export/xlsx/index.ts'],
             '@b32nio/spindle-io/xlsx': ['../io/src/xlsx/index.ts'],
+            '@b32nio/spindle-sheets-core': ['./src/index.ts'],
           },
         },
       },

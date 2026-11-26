@@ -10,7 +10,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { unverifiedClaims } from '../../../../scripts/xlsx-fidelity/claims';
+import { unverifiedClaims } from '../../../../scripts/fidelity-core/claims';
 import { CONSTRUCTS } from '../../../../scripts/xlsx-fidelity/constructs';
 import {
   XLSX_FIXTURES_DIR,
@@ -24,7 +24,7 @@ import {
   isWellFormed,
   readParts,
   relationshipTargets,
-} from '../../../../scripts/xlsx-fidelity/ooxml-package';
+} from '../../../../scripts/fidelity-core/ooxml-package';
 
 const MAX_BYTES = 300 * 1024;
 const manifest = loadXlsxManifest();

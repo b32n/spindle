@@ -1,5 +1,5 @@
 import { CONSTRUCTS, findConstruct } from '../../../../scripts/xlsx-fidelity/constructs';
-import type { OoxmlParts } from '../../../../scripts/xlsx-fidelity/ooxml-package';
+import type { OoxmlParts } from '../../../../scripts/fidelity-core/ooxml-package';
 
 type Xml = Record<string, string>;
 const mk = (xml: Xml = {}, extra: Partial<OoxmlParts> = {}): OoxmlParts => ({

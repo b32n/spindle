@@ -5,8 +5,8 @@ import {
   ManifestError,
   loadManifest,
   validateManifest,
-} from '../../../../scripts/xlsx-fidelity/manifest';
-import type { ManifestOptions } from '../../../../scripts/xlsx-fidelity/types';
+} from '../../../../../scripts/fidelity-core/manifest';
+import type { ManifestOptions } from '../../../../../scripts/fidelity-core/types';
 
 const opts: ManifestOptions = {
   extensions: ['.xlsx', '.xls'],

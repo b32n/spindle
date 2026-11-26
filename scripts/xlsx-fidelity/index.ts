@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { verifyClaims } from './claims';
+import { verifyClaims } from '../fidelity-core/claims';
+import { injectMatrix, buildMatrix, uncoveredConstructs } from '../fidelity-core/matrix';
+import { loadManifest } from '../fidelity-core/manifest';
+import type { Manifest, ManifestOptions } from '../fidelity-core/types';
 import { CONSTRUCTS } from './constructs';
-import { loadManifest } from './manifest';
-import { buildMatrix, injectMatrix, uncoveredConstructs } from './matrix';
-import type { Manifest, ManifestOptions } from './types';
 
 /** The XLSX binding of the generic modules: the registry, the file extensions and the README markers. */
 export const XLSX_FIXTURES_DIR = path.resolve(__dirname, '../../fixtures/xlsx');

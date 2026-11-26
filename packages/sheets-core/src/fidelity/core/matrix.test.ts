@@ -2,7 +2,7 @@ import {
   buildMatrix,
   injectMatrix,
   uncoveredConstructs,
-} from '../../../../scripts/xlsx-fidelity/matrix';
+} from '../../../../../scripts/fidelity-core/matrix';
 
 const registry = [
   { id: 'a.one', label: 'One' },
