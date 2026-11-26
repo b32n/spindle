@@ -1,6 +1,6 @@
 // Format utilities for advanced cell formatting
 import type { CellFormat, FormatType } from '../types';
-import { formatDisplay, formatGeneral } from '../number-format';
+import { formatDisplay, formatGeneral, hasDatePart } from '../number-format';
 import { toExcelNumberFormatCode } from '../export/xlsx-number-format';
 
 /**
@@ -216,6 +216,11 @@ export function formatDateTime(value: number, format: CellFormat): string {
  */
 export function formatDuration(value: number, format: CellFormat): string {
   return viaEngine(value, { ...format, type: 'duration' });
+}
+
+/** True for the date and datetime types and for a custom code that shows a year, month or day (an imported `d-mmm-yy`; not `h:mm` or `[h]:mm`): month and year autofill series apply. */
+export function isDateFormat(format: CellFormat | undefined): boolean {
+  return format?.type === 'date' || format?.type === 'datetime' || (format?.type === 'custom' && !!format.pattern && hasDatePart(format.pattern));
 }
 
 /**

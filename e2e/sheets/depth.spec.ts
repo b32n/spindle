@@ -74,8 +74,7 @@ test.describe('sheets: Format Cells dialog, colours, borders, font', () => {
       .toMatchObject({ type: 'custom', pattern: '#,##0.00' });
   });
 
-  // Bug: Custom number formats are a stub: only #,##0.00, 0.0% and MM/DD/YYYY are recognised, any other pattern prints the pattern with every 0 replaced by the value, e.g. 7.77" pts" (https://github.com/b32n/spindle/issues/83).
-  test.fixme('S-FMC-04b Custom category: a pattern with a literal suffix renders 7.00 pts', async ({
+  test('S-FMC-04b Custom category: a pattern with a literal suffix renders 7.00 pts', async ({
     page,
   }) => {
     await sheet.enter(5, 0, '7');

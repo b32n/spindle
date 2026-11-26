@@ -16,7 +16,8 @@ import type { WorkbookImpl } from '../workbook';
 import { StylePool } from '../style-pool';
 import { FormatPool } from '../format-pool';
 import { generateId } from '../utils/id';
-import { toExcelNumberFormatCode, fromExcelNumberFormatCode } from './xlsx-number-format';
+import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
+import { isFaithfulFormatCode } from '../number-format';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
 
 export async function exportToXlsx(workbook: WorkbookImpl): Promise<Uint8Array> {
@@ -182,13 +183,13 @@ export async function importFromXlsx(
 }
 
 /**
- * True when a number format code survives import and export unchanged and displays as the file intends:
- * it maps to a structured format (not the raw `custom` fallback, whose renderer is a simple stand-in) and
- * the structured format writes the same code back.
+ * True when a number format code survives import and export unchanged (a structured type or `custom` with the
+ * verbatim code, see `fromExcelNumberFormatCode`) and the engine displays it the way Excel does. Only codes the
+ * engine cannot read (an Excel-invalid code, a non-Gregorian calendar, `[DBNum1]`) or would show with another
+ * language's month and day names are left: they are kept verbatim but shown in General or in English.
  */
 function isNumberFormatExact(code: string): boolean {
-  const format = fromExcelNumberFormatCode(code);
-  return format.type !== 'custom' && toExcelNumberFormatCode(format) === code.trim();
+  return isFaithfulFormatCode(normalizeExcelNumberFormatCode(code));
 }
 
 /** What the detector needs to know about this editor: its function catalog and its number-format mapping. */

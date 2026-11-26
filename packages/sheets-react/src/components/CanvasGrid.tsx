@@ -11,7 +11,7 @@ import {
 import type { Selection, Range, Cell, CellValue } from '@b32nio/spindle-sheets-core';
 import { formatSelectionLabel } from './selectionLabel';
 import { extractFormulaRanges, columnIndexToLabel, adjustFormula, type FormulaRange } from '@b32nio/spindle-sheets-core';
-import { detectSeries, extrapolate } from '@b32nio/spindle-sheets-core';
+import { detectSeries, extrapolate, isDateFormat } from '@b32nio/spindle-sheets-core';
 import { encodeTsv, parseTsv } from './tsv';
 import { FilterManager } from '@b32nio/spindle-sheets-core';
 import { RemoteSelectionOverlay } from './RemoteSelectionOverlay';
@@ -784,8 +784,7 @@ export const CanvasGrid = memo(function CanvasGrid({
           !hasFormula &&
           sourceCells.length > 0 &&
           sourceCells.every((c) => {
-            const fmt = c?.formatId ? formatPool.get(c.formatId) : undefined;
-            return fmt?.type === 'date' || fmt?.type === 'datetime';
+            return isDateFormat(c?.formatId ? formatPool.get(c.formatId) : undefined);
           });
         const series = hasFormula
           ? { kind: 'copy' as const }

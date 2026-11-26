@@ -1,18 +1,4 @@
 {
   "format": "xlsx",
-  "items": [
-    {
-      "count": 46,
-      "effect": "approximated: shown with the closest format the editor has; the original code may not survive a save",
-      "id": "xlsx.numberFormats.approximated",
-      "label": "number format(s) the editor cannot reproduce exactly",
-      "where": [
-        "##0.0E+0",
-        "# ?/?",
-        "# ??/??",
-        "# ???/???",
-        "m/d/yyyy"
-      ]
-    }
-  ]
+  "items": []
 }

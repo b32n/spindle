@@ -614,7 +614,7 @@ describe('styles and number formats', () => {
     expect(item(report, 'xlsx.styles.themeColors')).toMatchObject({ count: 2 });
   });
 
-  it('reports number formats the editor cannot reproduce, by code, through the predicate', async () => {
+  it('reports number formats the editor cannot show like Excel, by code, through the predicate', async () => {
     const bytes = await build({ styles, sheets: [{ rows: used(5, 6, 7, 8, 5) }] });
     const asked: string[] = [];
     const report = await detectXlsxLoss(bytes, {

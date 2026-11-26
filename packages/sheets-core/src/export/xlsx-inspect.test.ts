@@ -91,22 +91,38 @@ describe('inspectXlsx', () => {
       return inspectXlsx(bytes);
     }
 
-    it.each(['0.00', '#,##0.00', '0%', '0.0%', 'yyyy-mm-dd', 'mm/dd/yyyy', 'hh:mm:ss', '"$"#,##0.00', '0.00E+00', 'General'])(
-      'accepts %s: it survives an import and an export unchanged',
+    it.each([
+      '0.00', '#,##0.00', '0%', '0.0%', 'yyyy-mm-dd', 'mm/dd/yyyy', 'hh:mm:ss', '"$"#,##0.00', '0.00E+00', 'General',
+      '0.0,,"M"', '@', '[h]:mm:ss', '# ?/?', 'd-mmm-yy', '[>100]"big";"small"', '0.0 "kg"', '000-00', '[$€-407] #,##0.00', '[$-409]mmmm d, yyyy',
+      '[$-F800]dddd, mmmm dd, yyyy', '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)',
+    ])(
+      'accepts %s: it survives an import and an export unchanged and the engine shows it like Excel',
       async (code) => {
         expect(ids(await withCode(code))).toEqual([]);
       }
     );
 
-    it.each(['0.0,,"M"', '@', '[h]:mm:ss', '# ?/?', 'd-mmm-yy', '[>100]"big";"small"', '0.0 "kg"', '000-00', '[$€-407] #,##0.00'])(
-      'reports %s as approximated',
+    it.each(['[DBNum1]0', '[$-411]ge.m.d', '[$-407]dddd, d. mmmm yyyy', '0 abc', 'yyyy 0', '0;0;0;0;0'])(
+      'reports %s as approximated: the code is kept, but the engine cannot show it like Excel',
       async (code) => {
         expect(item(await withCode(code), 'xlsx.numberFormats.approximated')).toMatchObject({ count: 1, where: [code] });
       }
     );
 
-    it('reports a built-in date id, whose code the editor shows with other padding', async () => {
-      expect(item(await withCode(undefined), 'xlsx.numberFormats.approximated')).toMatchObject({ count: 1, where: ['m/d/yyyy'] });
+    it('accepts a built-in date id: its en-US code is kept as a custom format', async () => {
+      expect(ids(await withCode(undefined))).toEqual([]);
+    });
+
+    it('still reports a built-in id that has no code (27: an era date of the Asian locales)', async () => {
+      const wb = new WorkbookImpl('wb', 'WB');
+      wb.setCellValue(undefined, 0, 0, 1);
+      const bytes = await patched(wb, async (zip) => {
+        const styles = await zip.file('xl/styles.xml')!.async('string');
+        zip.file('xl/styles.xml', styles.replace(/<cellXfs[\s\S]*?<\/cellXfs>/, () => '<cellXfs count="2"><xf numFmtId="0"/><xf numFmtId="27"/></cellXfs>'));
+        const sheet = await zip.file('xl/worksheets/sheet1.xml')!.async('string');
+        zip.file('xl/worksheets/sheet1.xml', sheet.replace('<c r="A1"', '<c r="A1" s="1"'));
+      });
+      expect(item(await inspectXlsx(bytes), 'xlsx.numberFormats.approximated')).toMatchObject({ count: 1, where: ['built-in format 27'] });
     });
   });
 

@@ -512,6 +512,23 @@ lockstep.
   `TEXT(x,"General")` gives 15 significant digits and `TEXT` reads `"$5"`, `"1,234"`, `"50%"`, `"(5)"` and date text like Excel.
   The `formulas-core` XLSX goldens record the two `TEXT` formulas that now match (probe values 110 to 112 of 159).
   Mapping imported codes onto the model follows in the next change.
+- **Number formats survive XLSX import and export exactly (S3, mapping part).** An imported number-format code that maps
+  exactly onto a structured type (the type writes the very same code back) keeps it; every other code is stored verbatim as
+  `custom` with the original text, so `d-mmm-yy`, `dddd, mmmm d, yyyy`, `0.0,,"M"`, `# ?/?`, `[h]:mm:ss`, `[$€-407] #,##0.00`,
+  `[>100]"big";"small"`, `0.0 "kg"` and the rest of the 60-code corpus now round-trip unchanged (probe 5: 16 of 33 codes survived,
+  now 33 of 33; corpus 60 of 60). The old fallback of any date-looking code to `MM/DD/YYYY` (and of `#,##0.0" kg"` to a plain number)
+  is removed. `fromExcelNumberFormatCode`, `toExcelNumberFormatCode`, `normalizeExcelNumberFormatCode` and the en-US table of the
+  built-in ids (`BUILTIN_NUMBER_FORMAT_CODES`, 0 to 22, 27 to 58) are exported; `CellFormat` and the collab format pool are unchanged.
+  The loss predicate behind `xlsx.numberFormats.approximated` now means "the engine cannot read the code or would show another
+  language's month names", so the id drops from 66 occurrences in 3 corpus files to 0 (`number-formats` 46 to 0, the probe 19 to 0,
+  `cell-types` 1 to 0). The XLSX model goldens of those three files show `custom` formats with the original codes, and their
+  round-trip goldens lose the `currencyCode` differences. The Format Cells dialog gains accessible markup, test ids,
+  Excel codes as common patterns and an inline message plus a disabled Apply for a code Excel would reject; autofill treats a custom
+  code with a year, month or day as a date (`isDateFormat`; not `h:mm` or `[h]:mm`), and the dialog applies the code untrimmed. The
+  loss label and effect for `xlsx.numberFormats.approximated` now say the code is kept and saved unchanged but shown in General or
+  with English names (`packages/io/src/xlsx/loss.ts`, text only). E2E `S-FMC-06` opens a workbook with currency, date, time, elapsed, scaled and conditional
+  formats and reads the dialog's sample; `S-FMC-04b` (custom suffix, issue 83) is no longer `fixme`, and `S-FIO-01` now expects the
+  verbatim `$#,##0.00` and `#,##0.0" kg"` codes.
 
 ## [0.4.0] - 2026-10-26
 

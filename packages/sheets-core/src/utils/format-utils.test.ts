@@ -1,4 +1,4 @@
-import { parseDateString, excelDateToJS, formatNumber, formatCustomPattern, formatDate, formatTime, formatDateTime, formatScientific, formatFraction, formatDuration, formatPlainNumber, formatCurrency, formatAccounting, formatPercentage, dateStringToExcelSerial, dateTimeStringToExcelSerial, jsToExcelDate, formatJSDate, areFormatsEqual, getDefaultFormatForType } from './format-utils';
+import { parseDateString, excelDateToJS, formatNumber, formatCustomPattern, formatDate, formatTime, formatDateTime, formatScientific, formatFraction, formatDuration, formatPlainNumber, formatCurrency, formatAccounting, formatPercentage, dateStringToExcelSerial, dateTimeStringToExcelSerial, jsToExcelDate, formatJSDate, areFormatsEqual, getDefaultFormatForType, isDateFormat } from './format-utils';
 
 function ymd(serial: number | null): [number, number, number] | null {
   if (serial === null) return null;
@@ -148,6 +148,16 @@ describe('structured formats', () => {
   });
 });
 
+describe('a negative number that rounds to zero keeps its sign, as Excel does', () => {
+  it('in the number, currency and percentage types', () => {
+    expect(formatPlainNumber(-0.256, { decimalPlaces: 0 })).toBe('-0');
+    expect(formatPlainNumber(-0.001, { decimalPlaces: 2, negativeFormat: 'parentheses' })).toBe('(0.00)');
+    expect(formatCurrency(-0.001, { decimalPlaces: 2 })).toBe('-$0.00');
+    expect(formatPercentage(-0.00001, { decimalPlaces: 1 })).toBe('-0.0%');
+    expect(formatNumber(-0.256, { type: 'number', decimalPlaces: 0 })).toBe('-0');
+  });
+});
+
 describe('date helpers', () => {
   it('converts between serials and dates in UTC', () => {
     expect(dateStringToExcelSerial('2026-01-02')).toBe(46024);
@@ -164,6 +174,23 @@ describe('date helpers', () => {
     expect(formatJSDate(d, 'YYYY-MM-DD')).toBe('2026-01-02');
     expect(formatJSDate(d, 'Month DD YYYY')).toBe('January 2 2026');
     expect(typeof formatJSDate(d, 'other')).toBe('string');
+  });
+});
+
+describe('isDateFormat', () => {
+  it('is true for date types and custom date codes only', () => {
+    expect(isDateFormat({ type: 'date' })).toBe(true);
+    expect(isDateFormat({ type: 'datetime' })).toBe(true);
+    expect(isDateFormat({ type: 'custom', pattern: 'd-mmm-yy' })).toBe(true);
+    expect(isDateFormat({ type: 'custom', pattern: 'yyyy-mm-dd hh:mm' })).toBe(true);
+    expect(isDateFormat({ type: 'custom', pattern: '[h]:mm' })).toBe(false); // elapsed time and times of day are not dates
+    expect(isDateFormat({ type: 'custom', pattern: 'h:mm:ss' })).toBe(false);
+    expect(isDateFormat({ type: 'custom', pattern: 'bad code' })).toBe(false);
+    expect(isDateFormat({ type: 'custom', pattern: '0.00' })).toBe(false);
+    expect(isDateFormat({ type: 'custom' })).toBe(false);
+    expect(isDateFormat({ type: 'time' })).toBe(false);
+    expect(isDateFormat({ type: 'number' })).toBe(false);
+    expect(isDateFormat(undefined)).toBe(false);
   });
 });
 

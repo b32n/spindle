@@ -35,6 +35,24 @@ export function isDateTimeFormatCode(code: string): boolean {
   return compiled.ok && compiled.sections[0].kind === 'date';
 }
 
+/** The language of a `[$-LCID]` tag is the low 16 bits; every English variant ends in 09 (0409 en-US, 0809 en-GB ...). */
+const isEnglishLocale = (lcid: string): boolean => lcid === 'F800' || lcid === 'F400' || (parseInt(lcid, 16) & 0xff) === 0x09;
+
+/**
+ * True when the engine shows this code the way Excel does: it is valid and no date or time section is tagged with
+ * a language other than English (the engine only has English month and day names).
+ */
+export function isFaithfulFormatCode(code: string): boolean {
+  const compiled = compileFormat(code);
+  return compiled.ok && compiled.sections.every((s) => s.kind !== 'date' || !s.locale || isEnglishLocale(s.locale));
+}
+
+/** True when the code shows a year, month or day (not only a time): what makes a number in it a date to fill a series from. */
+export function hasDatePart(code: string): boolean {
+  const compiled = compileFormat(code);
+  return compiled.ok && compiled.sections[0].kind === 'date' && compiled.sections[0].needsDate;
+}
+
 const ERROR_TEXT = /^#(NULL!|DIV\/0!|VALUE!|REF!|NAME\?|NUM!|N\/A|SPILL!|CALC!|ERROR!)/;
 
 /** The text of a number in General format (also what text-only sections show for a number). */

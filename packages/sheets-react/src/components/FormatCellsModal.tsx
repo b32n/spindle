@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
 import type { CellFormat, FormatType } from '@b32nio/spindle-sheets-core';
-import { formatNumber, getDefaultFormatForType } from '@b32nio/spindle-sheets-core';
+import { formatNumber, getDefaultFormatForType, isValidFormatCode } from '@b32nio/spindle-sheets-core';
 
 interface FormatCellsModalProps {
   isOpen: boolean;
@@ -84,7 +84,10 @@ export const FormatCellsModal = memo(function FormatCellsModal({
     }
   }, [isOpen, currentFormat]);
 
+  const customInvalid = activeCategory === 'custom' && customPattern.trim() !== '' && !isValidFormatCode(customPattern);
+
   const handleApply = () => {
+    if (customInvalid) return; // an Excel-invalid code would only show as General
     let finalFormat = { ...format };
 
     // Handle custom pattern
@@ -92,7 +95,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
       finalFormat = {
         ...finalFormat,
         type: 'custom',
-        pattern: customPattern.trim(),
+        pattern: customPattern, // verbatim: a code may need its spaces
       };
     }
 
@@ -150,7 +153,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
   const getSampleFormattedValue = (): string => {
     try {
       const testFormat = activeCategory === 'custom' && customPattern.trim()
-        ? { ...format, type: 'custom' as const, pattern: customPattern.trim() }
+        ? { ...format, type: 'custom' as const, pattern: customPattern }
         : format;
 
       return formatNumber(sampleValue, testFormat as CellFormat);
@@ -187,6 +190,10 @@ export const FormatCellsModal = memo(function FormatCellsModal({
       onKeyDown={handleKeyDown}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="format-cells-title"
+        data-testid="format-cells-dialog"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '8px',
@@ -200,6 +207,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2
+          id="format-cells-title"
           style={{
             margin: '0 0 20px 0',
             fontSize: '18px',
@@ -220,6 +228,9 @@ export const FormatCellsModal = memo(function FormatCellsModal({
           ].map((category) => (
             <button
               key={category.key}
+              type="button"
+              data-testid={`format-tab-${category.key}`}
+              aria-pressed={activeCategory === category.key}
               onClick={() => handleCategoryChange(category.key as FormatCategory)}
               style={{
                 padding: '8px 16px',
@@ -240,7 +251,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
         {/* Format Preview */}
         <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
           <div style={{ fontSize: '12px', color: '#5f6368', marginBottom: '4px' }}>Sample:</div>
-          <div style={{ fontSize: '16px', fontFamily: 'monospace', color: '#202124' }}>
+          <div data-testid="format-sample" aria-live="polite" style={{ fontSize: '16px', fontFamily: 'monospace', color: '#202124', whiteSpace: 'pre' }}>
             {getSampleFormattedValue()}
           </div>
         </div>
@@ -271,6 +282,7 @@ export const FormatCellsModal = memo(function FormatCellsModal({
           {activeCategory === 'custom' && (
             <CustomFormatOptions
               pattern={customPattern}
+              invalid={customInvalid}
               onPatternChange={setCustomPattern}
             />
           )}
@@ -308,14 +320,17 @@ export const FormatCellsModal = memo(function FormatCellsModal({
           </button>
           <button
             type="button"
+            data-testid="format-apply"
             onClick={handleApply}
+            disabled={customInvalid}
             style={{
               padding: '8px 16px',
               border: 'none',
               borderRadius: '4px',
               backgroundColor: '#1a73e8',
               color: '#ffffff',
-              cursor: 'pointer',
+              cursor: customInvalid ? 'not-allowed' : 'pointer',
+              opacity: customInvalid ? 0.5 : 1,
               fontSize: '13px',
               fontWeight: 500,
             }}
@@ -713,30 +728,43 @@ const DateTimeFormatOptions = memo(function DateTimeFormatOptions({
 // Custom Format Options Component
 const CustomFormatOptions = memo(function CustomFormatOptions({
   pattern,
+  invalid,
   onPatternChange,
 }: {
   pattern: string;
+  invalid: boolean;
   onPatternChange: (pattern: string) => void;
 }) {
+  // Excel number-format codes (the same codes an .xlsx file holds); the sample above updates as you type.
   const commonPatterns = [
     { pattern: '#,##0.00', description: 'Number with commas and 2 decimals' },
     { pattern: '0.0%', description: 'Percentage with 1 decimal' },
-    { pattern: 'MM/DD/YYYY', description: 'Date format' },
-    { pattern: '$#,##0.00', description: 'Currency format' },
+    { pattern: 'yyyy-mm-dd', description: 'Date, 2026-01-02' },
+    { pattern: 'dddd, mmmm d, yyyy', description: 'Long date, Friday, January 2, 2026' },
+    { pattern: '$#,##0.00', description: 'Currency (a custom code, not the Currency type)' },
+    { pattern: '#,##0.00;[Red](#,##0.00)', description: 'Negative numbers in red parentheses' },
+    { pattern: '[h]:mm:ss', description: 'Elapsed time' },
+    { pattern: '# ?/?', description: 'Fraction' },
     { pattern: '0.00E+00', description: 'Scientific notation' },
   ];
 
   return (
     <div>
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>
+        <label htmlFor="format-custom-pattern" style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>
           Custom Format Pattern
         </label>
         <input
+          id="format-custom-pattern"
+          data-testid="format-custom-pattern"
           type="text"
           value={pattern}
           onChange={(e) => onPatternChange(e.target.value)}
           placeholder="Enter format pattern (e.g., #,##0.00)"
+          spellCheck={false}
+          autoComplete="off"
+          aria-invalid={invalid}
+          aria-describedby={invalid ? 'format-custom-error' : undefined}
           style={{
             width: '100%',
             padding: '8px 12px',
@@ -746,12 +774,17 @@ const CustomFormatOptions = memo(function CustomFormatOptions({
             fontFamily: 'monospace',
           }}
         />
+        {invalid && (
+          <div id="format-custom-error" data-testid="format-custom-error" role="alert" style={{ marginTop: '6px', fontSize: '12px', color: '#d93025' }}>
+            Not a valid Excel number format: it would show as General.
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>
+        <div style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>
           Common Patterns
-        </label>
+        </div>
         <div style={{ display: 'grid', gap: '4px' }}>
           {commonPatterns.map((item) => (
             <button

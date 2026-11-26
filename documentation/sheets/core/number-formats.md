@@ -81,3 +81,23 @@ the generator (same author as the engine, so not independent evidence), never fr
 - `[$-409]`-style language ids only record the locale; month and day names are English. Separators are `.` and `,`.
   Calendars other than Gregorian (`[$-...]` calendar bits, `B1`/`B2`, `e`, `g`) are invalid.
 - A format with only literal text and an `@` shows a number in General (LibreOffice does the same).
+
+## XLSX import and export
+
+`fromExcelNumberFormatCode(code)` (`export/xlsx-number-format.ts`) turns a code from a file into a `CellFormat`; the rule is
+additive and keeps the round trip exact: **a code that maps exactly onto a structured type keeps that type, every other code is
+stored verbatim as `custom` with the original text**. "Exactly" means the structured type writes the very same code back
+(`toExcelNumberFormatCode(candidate) === code`), so `"$"#,##0.00` is a currency format and `$#,##0.00`, `0.0,,"M"`, `d-mmm-yy`,
+`# ?/?;-# ?/?` or `#,##0.00 "kg"` are custom. The old behaviour (falling back to `MM/DD/YYYY` for any date-looking code, `0.00` for a
+number with literal text) is gone. Export writes the stored code (`custom` writes `pattern`). `CellFormat` and the Yjs format pool are unchanged. The mapping functions and the built-in table are exported from the package root.
+
+- Built-in ids: `BUILTIN_NUMBER_FORMAT_CODES` holds the en-US code of ids 0 to 22, 27 to 49 and 50 to 58 (ECMA-376 18.8.30; the CJK era formats of
+  27 to 36 and 50 to 58 as the short date `m/d/yyyy`, the long date `mmmm d, yyyy` or the time they correspond to). The reader library resolves ids
+  itself and reports `mm-dd-yy` for id 14 and `m/d/yy "h":mm` for id 22; both are replaced by `m/d/yyyy` and `m/d/yyyy h:mm`
+  (`normalizeExcelNumberFormatCode`), which is what Excel shows in en-US.
+- Limits until the XLSX reader is replaced (plan S2): the reader library drops the backslashes of a code on import (`0\.0` becomes `0.0`, `\(` becomes `(`),
+  and gives no code for ids 5 to 8, 23 to 26, 27 to 36, 41 to 44 and 50 to 58 unless the file defines them (those cells show General; Excel files usually do define 5 to 8 and 41 to 44).
+- The editor shows a custom date code in the formula bar and cell editor as the serial number (a date type shows a date and a date picker); autofill
+  recognises a custom code with a year, month or day as a date (not `h:mm` or `[h]:mm`).
+- The Format Cells dialog's Custom tab edits the code with a live sample (`data-testid` `format-custom-pattern`, `format-sample`), refuses a code Excel
+  would reject and offers Excel codes as common patterns.

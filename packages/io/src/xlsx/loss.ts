@@ -404,7 +404,7 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
     add('xlsx.formulas.unsupported', 'formula(s) using functions the editor does not have', t.unsupported.total, 'lost: cannot be calculated (the cells show #NAME?)', scan.unsupportedNames);
   if (options.isNumberFormatExact) {
     const inexact = styles.numberFormats(scan.usedStyles).filter((f) => !f.code || !options.isNumberFormatExact?.(f.code));
-    add('xlsx.numberFormats.approximated', 'number format(s) the editor cannot reproduce exactly', inexact.length, 'approximated: shown with the closest format the editor has; the original code may not survive a save', inexact.map((f) => f.label));
+    add('xlsx.numberFormats.approximated', 'number format(s) the editor cannot show like Excel', inexact.length, 'approximated: kept as written and saved unchanged, but shown in General or with English month and day names because the editor cannot render the code like Excel', inexact.map((f) => f.label));
   }
 
   if (!full) return;

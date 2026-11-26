@@ -16,8 +16,8 @@
         "type": "datetime"
       },
       "f3": {
-        "timeFormat": "h:mm AM/PM",
-        "type": "time"
+        "pattern": "h:mm:ss",
+        "type": "custom"
       }
     },
     "sheets": [

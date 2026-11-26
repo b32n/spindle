@@ -74,13 +74,9 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(costs.cells.B3).toMatchObject({ value: 80, formula: '=B1-B2' });
     expect(notes.cells.A1.value).toBe('Café — naïve 日本語');
 
-    // number formats: currency, percentage, date, custom number with suffix
-    expect(sales.cells.C2.format).toMatchObject({
-      type: 'currency',
-      currencyCode: 'USD',
-      decimalPlaces: 2,
-      useThousandsSeparator: true,
-    });
+    // number formats: a code that maps exactly onto a structured type keeps it (percentage, date); the others are
+    // stored verbatim as custom, so `$#,##0.00` (no quotes round the $) and `#,##0.0" kg"` survive a save unchanged
+    expect(sales.cells.C2.format).toEqual({ type: 'custom', pattern: '$#,##0.00' });
     expect(sales.cells.E2.format).toMatchObject({ type: 'percentage', decimalPlaces: 1 });
     expect(sales.cells.F2).toMatchObject({
       value: 45366,
@@ -88,7 +84,7 @@ test.describe('sheets: file open / download round-trips', () => {
     });
     expect(sales.cells.G2).toMatchObject({
       value: 1234.5,
-      format: { type: 'number', decimalPlaces: 1, useThousandsSeparator: true },
+      format: { type: 'custom', pattern: '#,##0.0" kg"' },
     });
 
     // styles: bold/fill/font colour/borders/alignment on the header, italic+fill on the banner, underline+colour
