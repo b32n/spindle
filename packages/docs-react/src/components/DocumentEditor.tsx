@@ -198,6 +198,28 @@ export const DocumentEditor = memo(function DocumentEditor({
     }
   }, [docModel, sections, readOnly]);
 
+  const handleInsertSectionBreak = useCallback((type: 'nextPage' | 'continuous') => {
+    if (readOnly || !editorView) return;
+    const id = `section_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    pendingBreaks.current.set(id, type);
+    createCommands(docsSchema).insertSectionBreak(id)(editorView.state, editorView.dispatch);
+    editorRef.current?.focus();
+  }, [readOnly, editorView]);
+
+  const handleRemoveSectionBreak = useCallback(() => {
+    if (readOnly || !editorView) return;
+    createCommands(docsSchema).removeSectionBreak()(editorView.state, editorView.dispatch);
+    editorRef.current?.focus();
+  }, [readOnly, editorView]);
+
+  const handleHeaderFooterLinkChange = useCallback((type: 'header' | 'footer', sectionId: string, linked: boolean, content: HeaderFooterContent) => {
+    if (readOnly) return;
+    const value = linked ? undefined : content;
+    if (type === 'header') docModel.setSectionHeader(sectionId, value);
+    else docModel.setSectionFooter(sectionId, value);
+    docModel.recordHistory(linked ? 'Link to previous' : 'Unlink from previous');
+  }, [docModel, readOnly]);
+
   // Handle margins change from ruler
   const handleMarginsChange = useCallback((margins: PageMargins) => {
     if (readOnly) return;
@@ -211,19 +233,37 @@ export const DocumentEditor = memo(function DocumentEditor({
   }, [docModel, activeSection, readOnly]);
 
   // Handle page setup confirmation
-  const handlePageSetupConfirm = useCallback((config: PageConfig) => {
+  const handlePageSetupConfirm = useCallback((config: PageConfig, scope: 'section' | 'document') => {
     if (readOnly) return;
-    if (activeSection) {
+    if (scope === 'document') {
+      // Every section gets the size, orientation and margins (each keeps its own columns).
+      for (const s of sections) {
+        docModel.setSectionPageConfig(s.id, { ...config, columns: s.pageConfig.columns });
+      }
+      docModel.recordHistory('Update page setup');
+    } else if (activeSection) {
       docModel.setSectionPageConfig(activeSection.id, config);
       docModel.recordHistory('Update page setup');
     }
     docModel.setDefaultPageConfig(config);
-  }, [docModel, activeSection, readOnly]);
+  }, [docModel, activeSection, sections, readOnly]);
 
   // Handle document changes from the editor
+  // Break types chosen in the toolbar, by the id of the section the new break ends (read when the model learns of it).
+  const pendingBreaks = useRef(new Map<string, 'nextPage' | 'continuous'>());
+
   const handleSectionsChange = useCallback((next: Array<{ id: string; blocks: Block[] }>) => {
     if (readOnly) return;
     const ids = new Set(next.map((s) => s.id));
+    // A section the model does not know yet was split off by a new section break (here or in a peer's editor).
+    next.forEach((s, i) => {
+      if (docModel.getSection(s.id)) return;
+      const later = next[i + 1];
+      if (later && docModel.getSection(later.id)) {
+        docModel.splitSection(later.id, s.id, pendingBreaks.current.get(s.id));
+        pendingBreaks.current.delete(s.id);
+      }
+    });
     for (const s of next) docModel.setSectionBlocks(s.id, s.blocks);
     // A section whose break was deleted has merged into the one after it.
     for (const s of [...docModel.getSections()]) if (!ids.has(s.id)) docModel.deleteSection(s.id);
@@ -460,6 +500,9 @@ export const DocumentEditor = memo(function DocumentEditor({
             activeMarks={activeMarks}
             selectedCell={selectedCell}
             onAddComment={startComment}
+            onInsertSectionBreak={handleInsertSectionBreak}
+            onRemoveSectionBreak={handleRemoveSectionBreak}
+            canRemoveSectionBreak={sections.length > 1}
             onOpenFile={fileActions ? handleOpenFile : undefined}
             onDownload={fileActions ? handleDownload : undefined}
             downloadFormats={downloadFormats}
@@ -530,6 +573,7 @@ export const DocumentEditor = memo(function DocumentEditor({
           documentTitle={documentTitle}
           onHeaderChange={handleHeaderChange}
           onFooterChange={handleFooterChange}
+          onHeaderFooterLinkChange={handleHeaderFooterLinkChange}
           collabHandle={docModel.getCollabHandle()}
         />
 
@@ -572,6 +616,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         pageConfig={currentPageConfig}
         onClose={() => setShowPageSetup(false)}
         onConfirm={handlePageSetupConfirm}
+        sectionCount={sections.length}
       />
       {importDialog}
     </div>

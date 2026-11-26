@@ -6,8 +6,13 @@ interface PageSetupModalProps {
   isOpen: boolean;
   pageConfig: PageConfig;
   onClose: () => void;
-  onConfirm: (config: PageConfig) => void;
+  /** `scope` is `'section'` (the section the caret is in) or `'document'` (every section). */
+  onConfirm: (config: PageConfig, scope: PageSetupScope) => void;
+  /** Number of sections in the document: with more than one, the modal asks what the setup applies to. */
+  sectionCount?: number;
 }
+
+export type PageSetupScope = 'section' | 'document';
 
 /**
  * Modal for configuring page settings
@@ -17,8 +22,10 @@ export const PageSetupModal = memo(function PageSetupModal({
   pageConfig,
   onClose,
   onConfirm,
+  sectionCount = 1,
 }: PageSetupModalProps) {
   const [config, setConfig] = useState<PageConfig>(pageConfig);
+  const [scope, setScope] = useState<PageSetupScope>('section');
   const [selectedSize, setSelectedSize] = useState<PageSizeKey | 'custom'>('LETTER');
   
   // Determine current page size name
@@ -70,7 +77,7 @@ export const PageSetupModal = memo(function PageSetupModal({
   };
   
   const handleConfirm = () => {
-    onConfirm(config);
+    onConfirm(config, sectionCount > 1 ? scope : 'section');
     onClose();
   };
   
@@ -416,6 +423,20 @@ export const PageSetupModal = memo(function PageSetupModal({
           </div>
         </div>
         
+        {sectionCount > 1 && (
+          <fieldset
+            style={{ margin: '0 24px 16px', padding: '8px 12px', border: '1px solid #e8eaed', borderRadius: 4, fontSize: 14, color: '#202124' }}
+          >
+            <legend style={{ padding: '0 4px', color: '#5f6368' }}>Apply to</legend>
+            <label style={{ marginRight: 16 }}>
+              <input type="radio" name="page-setup-scope" checked={scope === 'section'} onChange={() => setScope('section')} /> This section
+            </label>
+            <label>
+              <input type="radio" name="page-setup-scope" checked={scope === 'document'} onChange={() => setScope('document')} /> Whole document
+            </label>
+          </fieldset>
+        )}
+
         {/* Footer */}
         <div
           style={{

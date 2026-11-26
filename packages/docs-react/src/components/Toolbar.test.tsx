@@ -42,3 +42,20 @@ describe('docs Toolbar file actions', () => {
     expect(html).not.toContain('type="file"');
   });
 });
+
+describe('docs Toolbar section break control', () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('is hidden unless a handler is given', () => {
+    expect(render({})).not.toContain('Section break');
+  });
+
+  it('is shown when onInsertSectionBreak is given', () => {
+    expect(render({ onInsertSectionBreak: () => {} })).toContain('Section break');
+  });
+});

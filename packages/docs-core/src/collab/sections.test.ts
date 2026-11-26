@@ -457,3 +457,30 @@ describe('getCollabBlockers', () => {
     expect(doc.getCollabHandle()).toBeNull();
   });
 });
+
+describe('splitSection under collaboration', () => {
+  it('adds the new section to the shared document before the later one, and a peer that already wrote it is followed', async () => {
+    __resetInMemoryRooms();
+    const a = new DocumentImpl('room', 'Doc');
+    a.setData(fourSections());
+    const ha = await a.attachCollab(new InMemoryProvider(), identity('A'), { roomId: 'room' });
+    a.splitSection('s2', 'mid', 'continuous');
+    const ids = getYDocFields(ha.ydoc).sectionsMeta.toArray().map((m) => m.get('id'));
+    expect(ids).toEqual(['s1', 'mid', 's2', 's3', 's4']);
+    const later = getYDocFields(ha.ydoc).sectionsMeta.get(2);
+    expect(later.get('breakType')).toBe('continuous');
+    expect(later.has('footer')).toBe(false);
+    expect(getYDocFields(ha.ydoc).sectionsMeta.get(1).get('footer')).toEqual(fourSections().sections[1].footer);
+
+    // A second client's model learns of the section from the room and follows the writer's start type.
+    const b = new DocumentImpl('room', 'Doc');
+    b.setData(fourSections());
+    const hb = await b.attachCollab(new InMemoryProvider(), identity('B'), { roomId: 'room' });
+    const split = b.splitSection('s2', 'mid', 'evenPage');
+    expect(split?.id).toBe('mid');
+    expect(b.getSection('s2')?.breakType).toBe('continuous');
+    expect(getYDocFields(hb.ydoc).sectionsMeta.length).toBe(5);
+    ha.detach();
+    hb.detach();
+  });
+});

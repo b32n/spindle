@@ -21,12 +21,6 @@
       "effect": "not imported",
       "id": "docx.footnotes",
       "label": "footnote(s)"
-    },
-    {
-      "count": 14,
-      "effect": "kept in the document and exported, but the editor shows and edits only the first section",
-      "id": "docx.sections",
-      "label": "extra section(s)"
     }
   ]
 }

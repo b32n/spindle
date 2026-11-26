@@ -111,12 +111,6 @@
       "label": "ruby annotation(s)"
     },
     {
-      "count": 3,
-      "effect": "kept in the document and exported, but the editor shows and edits only the first section",
-      "id": "docx.sections",
-      "label": "extra section(s)"
-    },
-    {
       "count": 9,
       "effect": "not imported (tabs use default stops)",
       "id": "docx.tabStops",

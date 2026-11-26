@@ -31,8 +31,7 @@ model is built) and never throws on a malformed file; the import itself reports 
 | CSV | semicolon- or tab-separated files (they import into one column) |
 
 `inspectDocx(bytes)` / `detectDocxLoss(bytes)` return the table above (the report the confirmation dialog uses). Pass `{ detail: 'full' }` for the
-complete measurement, which adds ids for things the importer flattens or ignores rather than drops: `docx.sections` (sections after the first are kept
-but not shown or edited), `docx.listFormatting` (other number formats) and `docx.sectionProperties` (chapter numbers in page numbers), and a `where` breakdown by field kind on
+complete measurement, which adds ids for things the importer flattens or ignores rather than drops: `docx.listFormatting` (other number formats) and `docx.sectionProperties` (chapter numbers in page numbers), and a `where` breakdown by field kind on
 `docx.fields`. The full report also lists a long tail: `docx.trackedMoves`, `docx.formattingRevisions` (`rPrChange`, `pPrChange`, `tblPrChange`,
 `sectPrChange`), `docx.dropCaps`, `docx.watermarks`, `docx.pageBorders`, `docx.lineNumbers`, `docx.hyphenation`, `docx.tabStops` (custom stops and
 leaders), `docx.rtl`, `docx.ruby` (base text kept, reading marks lost), `docx.embeddedFonts`, `docx.altChunk` and `docx.legacyForms` (`FORMTEXT`/`FORMCHECKBOX`/`FORMDROPDOWN`,

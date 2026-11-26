@@ -109,3 +109,52 @@ describe('DocumentImpl — getData / setData round-trip', () => {
     expect(new DocumentImpl().getData().sections[0]).not.toHaveProperty('breakType');
   });
 });
+
+describe('splitSection', () => {
+  const header = { blocks: [{ type: 'paragraph' as const, content: [{ type: 'text' as const, text: 'H' }] }] };
+  function docWithSetup(): DocumentImpl {
+    const d = new DocumentImpl('s', 'Split');
+    const id = d.getSections()[0].id;
+    d.setSectionHeader(id, header);
+    d.setSectionFooter(id, header);
+    const data = d.getData();
+    data.sections[0] = { ...data.sections[0], pageNumbering: { start: 3 }, verticalAlign: 'center', breakType: 'oddPage' };
+    d.setData(data);
+    return d;
+  }
+
+  it('puts a copy of the setup before the section, which then starts as asked and inherits the header', () => {
+    const d = docWithSetup();
+    const id = d.getSections()[0].id;
+    const earlier = d.splitSection(id, 'new_s', 'continuous')!;
+    expect(d.getSections().map((s) => s.id)).toEqual(['new_s', id]);
+    expect(earlier).toMatchObject({ id: 'new_s', header, footer: header, pageNumbering: { start: 3 }, verticalAlign: 'center', breakType: 'oddPage', blocks: [] });
+    const later = d.getSections()[1];
+    expect(later.breakType).toBe('continuous');
+    expect(later).not.toHaveProperty('header');
+    expect(later).not.toHaveProperty('footer');
+    expect(later).not.toHaveProperty('pageNumbering');
+    expect(later.verticalAlign).toBe('center');
+    expect(earlier.pageConfig).toEqual(later.pageConfig);
+    expect(earlier.pageConfig).not.toBe(later.pageConfig);
+  });
+
+  it('a next-page break (or none) clears the later section’s start type', () => {
+    const d = docWithSetup();
+    const id = d.getSections()[0].id;
+    d.splitSection(id, 'a', 'nextPage');
+    expect(d.getSections()[1]).not.toHaveProperty('breakType');
+  });
+
+  it('refuses an unknown section or a taken id, and emits a change', () => {
+    const d = new DocumentImpl('s', 'Split');
+    const id = d.getSections()[0].id;
+    const seen: unknown[] = [];
+    d.on('documentChange', (e) => seen.push(e));
+    expect(d.splitSection('nope', 'x')).toBeUndefined();
+    expect(d.splitSection(id, id)).toBeUndefined();
+    expect(seen).toEqual([]);
+    d.splitSection(id, 'x');
+    expect(seen).toEqual([{ type: 'documentChange', payload: { action: 'splitSection', sectionId: 'x' } }]);
+  });
+});

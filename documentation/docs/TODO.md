@@ -28,11 +28,14 @@ Verified absent in code.
       comments round-trip with replies, resolved state and anchors.
 - [ ] **Find & replace** — none.
 - [ ] **Word / character count** — none.
-- [ ] **Section editing UI** — the editor shows every section (own page size,
-      orientation, margins, header/footer variants, page numbers; columns and
-      vertical alignment are not laid out) and edits in any section reach the
-      model, and collaboration carries all sections. There is no Insert →
-      Section break, delete/merge command or per-section page setup scope yet.
+- [ ] **Sections: remaining gaps** — the editor shows and edits every section
+      (Insert → Section break next page/continuous, remove, page setup for
+      this section or the whole document, link-to-previous headers/footers).
+      Not done: columns and vertical alignment are not laid out, a continuous
+      section only shares a page when page size and margins match, there is no
+      visible marker for a break, undoing the deletion of a break restores the
+      section with the setup of the next one, and a section's setup changes are
+      not synced to peers under collaboration.
 - [ ] **Table cell merge / split** — `colspan`/`rowspan` exist in the type and
       schema (parsed from pasted DOM), but there's no merge/split command or UI
       — only column/row resize.

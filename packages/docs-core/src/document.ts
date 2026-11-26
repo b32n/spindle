@@ -5,6 +5,7 @@ import type {
   DocumentData,
   Section,
   SectionData,
+  SectionBreakType,
   Block,
   NamedStyle,
   PageConfig,
@@ -19,6 +20,7 @@ import { TextStylePoolImpl, ParagraphStylePoolImpl } from './style-pool';
 import { createParagraphFromText } from './blocks/paragraph';
 import { attachCollabToYDoc } from './collab/binding';
 import { CollabBlockedError, getCollabBlockers } from './collab/blockers';
+import * as Y from 'yjs';
 import { getYDocFields, readNamedStyles } from './collab/y-schema';
 import { DocsCommentStore, type DocsCommentEvent, type DocsCommentThread } from './comments';
 
@@ -218,6 +220,74 @@ export class DocumentImpl {
     this.document.updatedAt = new Date().toISOString();
     this.emit('documentChange', { action: 'insertSection', sectionId: section.id, index });
     return section;
+  }
+
+  /**
+   * Split a section in two at a section break that was just inserted in the body: a new section `newSectionId` is
+   * placed before `sectionId` with a copy of its page setup, header, footer, numbering and vertical alignment (and the way
+   * it started), and `sectionId` (the later part) now starts the way `breakType` says and shows the new section's header
+   * and footer (it has none of its own, so it inherits them) and continues its page numbers. While collaboration is
+   * attached the new section's setup is added to the shared document too. Returns the new section, or undefined when
+   * `sectionId` is unknown or `newSectionId` is already taken.
+   */
+  splitSection(sectionId: string, newSectionId: string, breakType?: SectionBreakType): Section | undefined {
+    const index = this.document.sections.findIndex((s) => s.id === sectionId);
+    if (index === -1 || this.getSection(newSectionId)) return undefined;
+    const later = this.document.sections[index];
+    const earlier: Section = {
+      id: newSectionId,
+      pageConfig: { ...later.pageConfig },
+      blocks: [],
+      ...(later.header && { header: later.header }),
+      ...(later.footer && { footer: later.footer }),
+      ...(later.pageNumbering && { pageNumbering: later.pageNumbering }),
+      ...(later.verticalAlign && { verticalAlign: later.verticalAlign }),
+      ...(later.breakType && { breakType: later.breakType }),
+    };
+    delete later.header;
+    delete later.footer;
+    delete later.pageNumbering;
+    // A peer that inserted the break already wrote both entries to the shared document: follow what it wrote.
+    const meta = this.collabHandle ? getYDocFields(this.collabHandle.ydoc).sectionsMeta : undefined;
+    const shared = new Map<string, Y.Map<unknown>>();
+    meta?.forEach((m) => shared.set(m.get('id') as string, m));
+    const sharedLater = shared.get(sectionId);
+    const fromPeer = shared.has(newSectionId);
+    const startType = fromPeer ? (sharedLater?.get('breakType') as SectionBreakType | undefined) : breakType;
+    if (startType && startType !== 'nextPage') later.breakType = startType;
+    else delete later.breakType;
+    this.document.sections.splice(index, 0, earlier);
+    this.document.updatedAt = new Date().toISOString();
+
+    const handle = this.collabHandle;
+    if (handle && meta && !fromPeer) {
+      handle.ydoc.transact(() => {
+        // The new entry goes before the later section's, so the last section stays the last entry.
+        let at = -1;
+        meta.forEach((m, i) => {
+          if (m.get('id') === sectionId) at = i;
+        });
+        const entry = new Y.Map<unknown>();
+        entry.set('id', earlier.id);
+        entry.set('pageConfig', earlier.pageConfig);
+        if (earlier.header) entry.set('header', earlier.header);
+        if (earlier.footer) entry.set('footer', earlier.footer);
+        if (earlier.pageNumbering) entry.set('pageNumbering', earlier.pageNumbering);
+        if (earlier.verticalAlign) entry.set('verticalAlign', earlier.verticalAlign);
+        if (earlier.breakType) entry.set('breakType', earlier.breakType);
+        meta.insert(at === -1 ? meta.length : at, [entry]);
+        const laterEntry = at === -1 ? undefined : meta.get(at + 1);
+        if (laterEntry) {
+          laterEntry.delete('header');
+          laterEntry.delete('footer');
+          laterEntry.delete('pageNumbering');
+          if (later.breakType) laterEntry.set('breakType', later.breakType);
+          else laterEntry.delete('breakType');
+        }
+      });
+    }
+    this.emit('documentChange', { action: 'splitSection', sectionId: newSectionId });
+    return earlier;
   }
 
   deleteSection(sectionId: string): boolean {

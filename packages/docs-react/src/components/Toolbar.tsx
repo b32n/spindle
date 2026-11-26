@@ -44,6 +44,7 @@ import {
   Palette,
   Highlighter,
   SeparatorHorizontal,
+  SplitSquareVertical,
   FileDown,
   MessageSquarePlus,
   Type,
@@ -279,6 +280,12 @@ export interface ToolbarProps {
   selectedCell?: CellSelection | null;
   /** Start a comment on the current selection. */
   onAddComment?: () => void;
+  /** Insert a section break at the caret; providing this shows the Section break menu. */
+  onInsertSectionBreak?: (type: 'nextPage' | 'continuous') => void;
+  /** Remove the section break that ends the caret's section (merging it into the next one). */
+  onRemoveSectionBreak?: () => void;
+  /** Whether the document has a section break to remove (default: true). */
+  canRemoveSectionBreak?: boolean;
 }
 
 interface ToolbarButtonProps {
@@ -477,6 +484,9 @@ export const Toolbar = memo(function Toolbar({
   downloadFormats = DOCS_EXPORT_FORMATS,
   onPageSetup,
   onAddComment,
+  onInsertSectionBreak,
+  onRemoveSectionBreak,
+  canRemoveSectionBreak = true,
   editorView,
   activeMarks,
   selectedCell,
@@ -838,6 +848,21 @@ export const Toolbar = memo(function Toolbar({
       <ToolbarButton onClick={() => runCommand(commands.insertPageBreak())} tooltip="Page break">
         <FileDown size={18} strokeWidth={2} />
       </ToolbarButton>
+      {onInsertSectionBreak && (
+        <OverflowDropdown triggerIcon={<SplitSquareVertical size={18} strokeWidth={2} />} menuLabel="Section break" width={230}>
+          <DropdownItemStandalone onClick={() => onInsertSectionBreak('nextPage')} style={{ justifyContent: 'flex-start' }}>
+            Section break (next page)
+          </DropdownItemStandalone>
+          <DropdownItemStandalone onClick={() => onInsertSectionBreak('continuous')} style={{ justifyContent: 'flex-start' }}>
+            Section break (continuous)
+          </DropdownItemStandalone>
+          {onRemoveSectionBreak && canRemoveSectionBreak && (
+            <DropdownItemStandalone onClick={onRemoveSectionBreak} style={{ justifyContent: 'flex-start' }}>
+              Remove section break
+            </DropdownItemStandalone>
+          )}
+        </OverflowDropdown>
+      )}
       
       <Divider />
       
