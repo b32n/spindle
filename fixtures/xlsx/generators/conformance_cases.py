@@ -9,6 +9,8 @@ Every case is (function, formula in editor syntax, input cells, options). The fo
     excel=<value>       LibreOffice differs from Excel here: the documented Excel value is used, the row is tagged
                         `excel: true, unverified: true` and LibreOffice's value is kept in `libreoffice`
     note=<text>         why (required with `excel`)
+    unverified=<text>   LibreOffice's value is kept, but whether Excel agrees is not known: the row is tagged `unverified` with this note
+    group=<name>        the row's group in the table: "batch-a" (default) or "batch-b" (conformance_cases_b.py)
 """
 
 NOTE_502 = "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
