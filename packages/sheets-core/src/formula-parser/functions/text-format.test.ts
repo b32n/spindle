@@ -32,3 +32,42 @@ describe('TEXT respects positive;negative;zero format sections', () => {
     expect(ev('=TEXT(-0.6,"0")')).toBe('-1');
   });
 });
+
+describe('TEXT date and time codes', () => {
+  it('formats dates with Excel codes', () => {
+    expect(ev('=TEXT(DATE(2026,1,2),"yyyy-mm-dd")')).toBe('2026-01-02');
+    expect(ev('=TEXT(DATE(2026,1,2),"dddd")')).toBe('Friday');
+    expect(ev('=TEXT(DATE(2026,1,2),"mmm d, yyyy")')).toBe('Jan 2, 2026');
+    expect(ev('=TEXT(DATE(2026,1,2),"dddd d mmmm")')).toBe('Friday 2 January');
+    expect(ev('=TEXT(46024.75,"h:mm AM/PM")')).toBe('6:00 PM');
+    expect(ev('=TEXT(46024.75,"m/d/yyyy hh:mm")')).toBe('1/2/2026 18:00');
+    expect(ev('=TEXT(1.5,"[h]:mm")')).toBe('36:00');
+    expect(ev('=TEXT(60,"yyyy-mm-dd")')).toBe('1900-02-29');
+  });
+
+  it('formats numbers with sections, conditions, scaling and fractions', () => {
+    expect(ev('=TEXT(1234567,"#,##0.0,,""M""")')).toBe('1.2M');
+    expect(ev('=TEXT(150,"[>100]""big"";""small""")')).toBe('big');
+    expect(ev('=TEXT(0.75,"# ?/?")')).toBe(' 3/4');
+    expect(ev('=TEXT(5,"000-00")')).toBe('000-05');
+    expect(ev('=TEXT(1234.5,"$#,##0.00")')).toBe('$1,234.50');
+    expect(ev('=TEXT(0,"0;-0;""zero""")')).toBe('zero');
+    expect(ev('=TEXT(1234.5678,"General")')).toBe('1234.5678');
+  });
+
+  it('an empty code gives an empty string and an invalid code #VALUE!', () => {
+    expect(ev('=TEXT(5,"")')).toBe('');
+    expect(() => ev('=TEXT(5,"yyyy 0")')).toThrow('#VALUE!');
+    expect(() => ev('=TEXT(5,"0 abc")')).toThrow('#VALUE!');
+    expect(() => ev('=TEXT(5,"""open")')).toThrow('#VALUE!');
+  });
+
+  it('text, numeric text, booleans and blanks', () => {
+    expect(ev('=TEXT("12.5","0.00")')).toBe('12.50');
+    expect(ev('=TEXT("abc","0.00")')).toBe('abc');
+    expect(ev('=TEXT("abc","@@")')).toBe('abcabc');
+    expect(ev('=TEXT("","0.00")')).toBe('');
+    expect(ev('=TEXT(TRUE,"0")')).toBe('TRUE');
+    expect(ev('=TEXT(A1,"0.00")')).toBe('0.00');
+  });
+});

@@ -104,34 +104,33 @@
       "sheet": "Data"
     },
     {
-      "actual": "\"46024\"",
-      "cell": "I59",
-      "expected": "\"2026-01-02\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"46024\"",
-      "cell": "I60",
-      "expected": "\"Friday\"",
-      "sheet": "Data"
-    },
-    {
       "actual": "\"#NAME? Function CLEAN not found\"",
       "cell": "I63",
+      "expected": "\"a\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function _XLFN.NUMBERVALUE not found\"",
+      "cell": "I65",
+      "expected": "1.5",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function _XLFN.TEXTBEFORE not found\"",
+      "cell": "I66",
       "expected": "\"a\"",
       "sheet": "Data"
     }
   ],
   "formulaCells": 159,
-  "matched": 110,
+  "matched": 112,
   "mismatchClasses": {
     "boolean -> error": 2,
     "error -> error": 1,
     "number -> error": 36,
-    "text -> error": 8,
-    "text -> text": 2
+    "text -> error": 8
   },
-  "mismatched": 49,
+  "mismatched": 47,
   "passthrough": 0,
   "status": "ok",
   "uncached": 0,

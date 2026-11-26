@@ -10,6 +10,17 @@ export { EventEmitter } from './event-emitter';
 export * from './utils/cell-key';
 export * from './utils/range';
 export * from './utils/format-utils';
+export {
+  compileFormat,
+  dateToSerial,
+  formatDisplay,
+  formatGeneral,
+  formatValue,
+  isDateTimeFormatCode,
+  isValidFormatCode,
+  serialToDate,
+} from './number-format';
+export type { CalendarDate, CompiledFormat, DateSystem, FormatOptions as NumberFormatOptions, FormatResult } from './number-format';
 export * from './export';
 
 // Canvas rendering module

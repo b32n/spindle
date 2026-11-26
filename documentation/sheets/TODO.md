@@ -40,9 +40,11 @@ statistical, date/time, information, financial, reference and array categories
       option matrix (absent from the catalog).
 - [ ] **`ARRAYFORMULA`** — not implemented at all (no catalog entry, zero
       references); needs full elementwise scalar broadcast.
-- [ ] **`TEXT()` date format codes** — `TEXT()` formats numbers only (decimals,
-      grouping, percent, scientific, currency); date/time patterns are not
-      supported (`functions/text.ts`).
+- [x] **`TEXT()` date format codes** — `TEXT()` uses the Excel number-format
+      engine (`number-format/`): date and time codes, sections, conditions,
+      scaling commas, fractions. Remaining gaps are listed in
+      `documentation/sheets/core/number-formats.md` (en-US names only, no
+      locale separators, no non-Gregorian calendars, `*x` fill not repeated).
 - [ ] **`#SPILL!` auto-recovery** — a blocked anchor does not re-spill when the
       blocking cell is cleared; the anchor isn't a dependency of the blocker, so
       it's never marked dirty. The formula must be re-entered (`workbook.ts`).
