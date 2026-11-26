@@ -22,7 +22,8 @@ import {
 } from './flow-blocks';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
-import { DocumentLayout, PageLayout, PageFragment, PageConfig } from './true-layout-engine';
+import { DocumentLayout, PageLayout, PageFragment, PageConfig, findPageAtY, getMaxPageWidth, getPageConfig, getPageX, getPageY } from './true-layout-engine';
+import { formatPageNumber, pickHeaderFooterVariant } from './section-layout';
 import {
   sanitizeHref,
   sanitizeImageSrc,
@@ -56,6 +57,8 @@ import type {
 export interface DynamicFieldContext {
   /** Current page number (1-based) */
   pageNumber: number;
+  /** DOCX number format name of the page number (e.g. `lowerRoman`); absent for decimal */
+  pageNumberFormat?: string;
   /** Total number of pages */
   totalPages: number;
   /** Document title */
@@ -92,6 +95,13 @@ export interface PainterConfig {
   header?: HeaderFooterContent;
   /** Footer content configuration */
   footer?: HeaderFooterContent;
+  /**
+   * Header and footer of each section of a document with several sections, indexed by `PageLayout.sectionIndex`
+   * (already resolved, so a section that inherits shows the previous one's). When set, they replace `header` and
+   * `footer` on pages that know their section.
+   */
+  sectionHeaders?: Array<HeaderFooterContent | undefined>;
+  sectionFooters?: Array<HeaderFooterContent | undefined>;
   /** Document title (for dynamic field resolution) */
   documentTitle?: string;
   /** Callback when header/footer is clicked (for editing) */
@@ -152,6 +162,8 @@ interface ResolvedPainterConfig {
   pageGap: number;
   header?: HeaderFooterContent;
   footer?: HeaderFooterContent;
+  sectionHeaders?: Array<HeaderFooterContent | undefined>;
+  sectionFooters?: Array<HeaderFooterContent | undefined>;
   documentTitle?: string;
   onHeaderFooterClick?: HeaderFooterClickHandler;
   headerFooterEditable?: boolean;
@@ -191,6 +203,8 @@ export class DomPainter {
       pageGap: config.pageGap ?? 24,
       header: config.header,
       footer: config.footer,
+      sectionHeaders: config.sectionHeaders,
+      sectionFooters: config.sectionFooters,
       documentTitle: config.documentTitle,
       onHeaderFooterClick: config.onHeaderFooterClick,
       headerFooterEditable: config.headerFooterEditable,
@@ -273,11 +287,16 @@ export class DomPainter {
     const viewportHeight = this.scrollContainer.clientHeight;
     
     // Calculate visible page range
-    const firstVisible = Math.max(0, Math.floor(scrollTop / pageWithGap));
-    const lastVisible = Math.min(
+    let firstVisible = Math.max(0, Math.floor(scrollTop / pageWithGap));
+    let lastVisible = Math.min(
       this.currentLayout.pages.length - 1,
       Math.ceil((scrollTop + viewportHeight) / pageWithGap)
     );
+    if (this.currentLayout.pages.some((p) => p.top !== undefined)) {
+      // Pages of different heights: look the range up in the page positions instead.
+      firstVisible = findPageAtY(this.currentLayout, scrollTop);
+      lastVisible = findPageAtY(this.currentLayout, scrollTop + viewportHeight);
+    }
     
     // Add overscan
     const start = Math.max(0, firstVisible - this.virtualOverscan);
@@ -372,7 +391,7 @@ export class DomPainter {
     this.stackContainer.className = 'page-stack';
     this.stackContainer.style.cssText = `
       position: relative;
-      width: ${this.getPageWidth()}px;
+      width: ${getMaxPageWidth(layout) * this.config.scale}px;
       height: ${layout.totalHeight}px;
     `;
     
@@ -425,13 +444,16 @@ export class DomPainter {
    * Paint a single page
    */
   paintPage(page: PageLayout, _layout: DocumentLayout): RenderedPage {
-    const pageWidth = this.getPageWidth();
-    const pageHeight = this.getPageHeight();
-    const margins = this.getScaledMargins();
+    // A page of a document with sections knows its own setup, position and centring.
+    const pageConfig = getPageConfig(_layout, page.pageIndex);
+    const pageWidth = pageConfig.width * this.config.scale;
+    const pageHeight = pageConfig.height * this.config.scale;
+    const margins = this.scaledMargins(pageConfig);
     const contentWidth = pageWidth - margins.left - margins.right;
     
-    // Calculate page Y position
-    const pageY = page.pageIndex * (pageHeight + this.config.pageGap * this.config.scale);
+    // Calculate page position
+    const pageY = getPageY(_layout, page.pageIndex);
+    const pageX = getPageX(_layout, page.pageIndex);
     
     // Create page container
     const pageEl = document.createElement('div');
@@ -439,7 +461,7 @@ export class DomPainter {
     pageEl.dataset.pageIndex = String(page.pageIndex);
     pageEl.style.cssText = `
       position: absolute;
-      left: 0;
+      left: ${pageX}px;
       top: ${pageY}px;
       width: ${pageWidth}px;
       height: ${pageHeight}px;
@@ -488,26 +510,33 @@ export class DomPainter {
     pageEl.appendChild(contentArea);
     
     // Create dynamic field context for header/footer
+    const pageNumber = page.pageNumber ?? page.pageIndex + 1;
     const fieldContext: DynamicFieldContext = {
-      pageNumber: page.pageIndex + 1,
+      pageNumber,
+      pageNumberFormat: page.pageNumberFormat,
       totalPages: _layout.pages.length,
       title: this.config.documentTitle,
       date: new Date(),
     };
     
     // Get header/footer margins (default to 48px / 0.5 inch if not specified)
-    const headerMargin = (this.config.pageConfig.margins.header ?? 48) * this.config.scale;
-    const footerMargin = (this.config.pageConfig.margins.footer ?? 48) * this.config.scale;
+    const headerMargin = (pageConfig.margins.header ?? 48) * this.config.scale;
+    const footerMargin = (pageConfig.margins.footer ?? 48) * this.config.scale;
     
     // Render header if configured or editable
     const isEditable = this.config.headerFooterEditable ?? false;
     const emptyContent: HeaderFooterContent = { blocks: [] };
     
-    if (this.config.header || isEditable) {
+    // With sections, a page shows the (inherited) header and footer of its section.
+    const bySection = page.sectionIndex !== undefined;
+    const header = bySection && this.config.sectionHeaders ? this.config.sectionHeaders[page.sectionIndex!] : this.config.header;
+    const footer = bySection && this.config.sectionFooters ? this.config.sectionFooters[page.sectionIndex!] : this.config.footer;
+    
+    if (header || isEditable) {
       const headerEl = this.renderHeaderFooter(
         'header',
-        this.config.header ?? emptyContent,
-        page.pageIndex,
+        header ?? emptyContent,
+        page,
         fieldContext,
         contentWidth,
         headerMargin,
@@ -519,11 +548,11 @@ export class DomPainter {
     }
     
     // Render footer if configured or editable
-    if (this.config.footer || isEditable) {
+    if (footer || isEditable) {
       const footerEl = this.renderHeaderFooter(
         'footer',
-        this.config.footer ?? emptyContent,
-        page.pageIndex,
+        footer ?? emptyContent,
+        page,
         fieldContext,
         contentWidth,
         footerMargin,
@@ -534,10 +563,10 @@ export class DomPainter {
       }
     } else {
       // Fallback: Add simple page number if no footer is configured and not editable
-      const pageNumber = document.createElement('div');
-      pageNumber.className = 'page-number';
-      pageNumber.textContent = String(page.pageIndex + 1);
-      pageNumber.style.cssText = `
+      const pageNumberEl = document.createElement('div');
+      pageNumberEl.className = 'page-number';
+      pageNumberEl.textContent = formatPageNumber(pageNumber, page.pageNumberFormat);
+      pageNumberEl.style.cssText = `
         position: absolute;
         bottom: ${Math.max(8, margins.bottom / 2 - 8)}px;
         left: 0;
@@ -547,7 +576,7 @@ export class DomPainter {
         color: #5f6368;
         pointer-events: none;
       `;
-      pageEl.appendChild(pageNumber);
+      pageEl.appendChild(pageNumberEl);
     }
     
     return {
@@ -563,18 +592,23 @@ export class DomPainter {
   private renderHeaderFooter(
     type: 'header' | 'footer',
     content: HeaderFooterContent,
-    pageIndex: number,
+    page: PageLayout,
     fieldContext: DynamicFieldContext,
     contentWidth: number,
     areaMargin: number,
     margins: { top: number; bottom: number; left: number; right: number }
   ): HTMLElement | null {
-    const isFirstPage = pageIndex === 0;
+    const pageIndex = page.pageIndex;
     const isEditable = this.config.headerFooterEditable ?? false;
     
-    // Determine which blocks to use based on first page setting
+    // Determine which blocks to use: the variant the layout chose for the page, else the first-page setting
     let blocks = content.blocks;
-    if (content.differentFirstPage && isFirstPage) {
+    if (page.startsSection !== undefined) {
+      // Each header or footer has its own switches, so the variant is picked from its own content.
+      const variant = pickHeaderFooterVariant(content, page.startsSection, page.pageNumber ?? pageIndex + 1);
+      if (variant === 'first') blocks = content.firstPageBlocks ?? [];
+      else if (variant === 'even') blocks = content.evenPageBlocks ?? [];
+    } else if (content.differentFirstPage && pageIndex === 0) {
       blocks = content.firstPageBlocks ?? [];
     }
     
@@ -728,7 +762,7 @@ export class DomPainter {
   ): string {
     switch (field.fieldType) {
       case 'pageNumber':
-        return String(context.pageNumber);
+        return formatPageNumber(context.pageNumber, context.pageNumberFormat);
       
       case 'totalPages':
         return String(context.totalPages);
@@ -1577,13 +1611,6 @@ export class DomPainter {
   }
   
   /**
-   * Get scaled page width
-   */
-  private getPageWidth(): number {
-    return this.config.pageConfig.width * this.config.scale;
-  }
-  
-  /**
    * Get scaled page height
    */
   private getPageHeight(): number {
@@ -1591,10 +1618,10 @@ export class DomPainter {
   }
   
   /**
-   * Get scaled margins
+   * Scaled margins of a page setup
    */
-  private getScaledMargins(): { top: number; bottom: number; left: number; right: number } {
-    const m = this.config.pageConfig.margins;
+  private scaledMargins(pageConfig: PageConfig): { top: number; bottom: number; left: number; right: number } {
+    const m = pageConfig.margins;
     const s = this.config.scale;
     return {
       top: m.top * s,

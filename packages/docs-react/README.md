@@ -109,7 +109,7 @@ const { canUndo, canRedo, undo, redo } = useHistory();
 - No track changes / suggestions mode (comment threads are supported)
 - Tables support column & row resize but not cell merge/split
 - No find & replace, word count, or PDF export (DOCX import/export is supported)
-- Multi-section documents render only the first section in the UI
+- Multi-section documents are shown section by section (own page setup, headers, page numbers); columns are laid out as one column, and there is no UI yet to insert or delete a section break
 
 Real-time collaboration, comments, and image upload (file / drag-drop / URL)
 **are** supported. See

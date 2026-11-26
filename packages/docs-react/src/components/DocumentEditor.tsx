@@ -22,7 +22,7 @@ import { CommentsSidebar } from './CommentsSidebar';
 import { Ruler } from './Ruler';
 import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
-import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle } from '../core';
+import { TrueLayoutEditor, CellSelection, ActivePageInfo, TrueLayoutEditorHandle, type TrueLayoutSection } from '../core';
 import type { ActiveMarks } from './ProseMirrorEditor';
 import type { ImportLossReport } from '@b32nio/spindle-shared';
 import { downloadFile, useImportConfirm, ImageHooksContext, type FontSource, type ImageHooks, type ImportConfirmation } from '@b32nio/spindle-shared/react';
@@ -142,13 +142,9 @@ export const DocumentEditor = memo(function DocumentEditor({
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<TrueLayoutEditorHandle>(null);
   
-  // Get the first section's page config for the ruler
-  const currentPageConfig = sections[0]?.pageConfig || docModel.getDefaultPageConfig();
-  const initialBlocks = sections[0]?.blocks || [];
-  
-  // Get header/footer from the document model (first section)
-  const header = sections[0]?.header;
-  const footer = sections[0]?.footer;
+  // The section the active page belongs to (the first one until the editor reports a page): rulers and page setup act on it.
+  const activeSection = sections.find((s) => s.id === activePageInfo?.sectionId) ?? sections[0];
+  const currentPageConfig = activeSection?.pageConfig || docModel.getDefaultPageConfig();
   const documentTitle = docModel.getTitle();
   
   // ---- File open / download (toolbar, opt-in via `fileActions`) ----
@@ -183,19 +179,21 @@ export const DocumentEditor = memo(function DocumentEditor({
   }, [docModel, fileName, onFileError]);
 
   // Handle header changes - update document model
-  const handleHeaderChange = useCallback((content: HeaderFooterContent) => {
+  const handleHeaderChange = useCallback((content: HeaderFooterContent, sectionId?: string) => {
     if (readOnly) return;
-    if (sections[0]) {
-      docModel.setSectionHeader(sections[0].id, content);
+    const target = sections.find((s) => s.id === sectionId) ?? sections[0];
+    if (target) {
+      docModel.setSectionHeader(target.id, content);
       docModel.recordHistory('Update header');
     }
   }, [docModel, sections, readOnly]);
 
   // Handle footer changes - update document model
-  const handleFooterChange = useCallback((content: HeaderFooterContent) => {
+  const handleFooterChange = useCallback((content: HeaderFooterContent, sectionId?: string) => {
     if (readOnly) return;
-    if (sections[0]) {
-      docModel.setSectionFooter(sections[0].id, content);
+    const target = sections.find((s) => s.id === sectionId) ?? sections[0];
+    if (target) {
+      docModel.setSectionFooter(target.id, content);
       docModel.recordHistory('Update footer');
     }
   }, [docModel, sections, readOnly]);
@@ -203,33 +201,34 @@ export const DocumentEditor = memo(function DocumentEditor({
   // Handle margins change from ruler
   const handleMarginsChange = useCallback((margins: PageMargins) => {
     if (readOnly) return;
-    if (sections[0]) {
-      docModel.setSectionPageConfig(sections[0].id, {
-        ...sections[0].pageConfig,
+    if (activeSection) {
+      docModel.setSectionPageConfig(activeSection.id, {
+        ...activeSection.pageConfig,
         margins,
       });
       docModel.recordHistory('Update margins');
     }
-  }, [docModel, sections, readOnly]);
+  }, [docModel, activeSection, readOnly]);
 
   // Handle page setup confirmation
   const handlePageSetupConfirm = useCallback((config: PageConfig) => {
     if (readOnly) return;
-    if (sections[0]) {
-      docModel.setSectionPageConfig(sections[0].id, config);
+    if (activeSection) {
+      docModel.setSectionPageConfig(activeSection.id, config);
       docModel.recordHistory('Update page setup');
     }
     docModel.setDefaultPageConfig(config);
-  }, [docModel, sections, readOnly]);
+  }, [docModel, activeSection, readOnly]);
 
   // Handle document changes from the editor
-  const handleDocChange = useCallback((blocks: Block[]) => {
+  const handleSectionsChange = useCallback((next: Array<{ id: string; blocks: Block[] }>) => {
     if (readOnly) return;
-    if (sections[0]) {
-      docModel.setSectionBlocks(sections[0].id, blocks);
-      docModel.recordHistory('Edit content');
-    }
-  }, [docModel, sections, readOnly]);
+    const ids = new Set(next.map((s) => s.id));
+    for (const s of next) docModel.setSectionBlocks(s.id, s.blocks);
+    // A section whose break was deleted has merged into the one after it.
+    for (const s of [...docModel.getSections()]) if (!ids.has(s.id)) docModel.deleteSection(s.id);
+    docModel.recordHistory('Edit content');
+  }, [docModel, readOnly]);
   
   // Handle selection changes from the editor
   const handleSelectionChange = useCallback((state: EditorState) => {
@@ -375,36 +374,29 @@ export const DocumentEditor = memo(function DocumentEditor({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [docModel, readOnly]);
   
-  // Convert PageConfig to the format expected by TrueLayoutEditor
-  // When orientation is landscape, swap width and height
-  // Memoize to prevent unnecessary re-renders of TrueLayoutEditor
-  // Note: We list individual margin properties to ensure proper reactivity
-  const presentationPageConfig = useMemo(() => ({
-    width: currentPageConfig.orientation === 'landscape' 
-      ? currentPageConfig.size.h 
-      : currentPageConfig.size.w,
-    height: currentPageConfig.orientation === 'landscape' 
-      ? currentPageConfig.size.w 
-      : currentPageConfig.size.h,
-    margins: currentPageConfig.margins,
-  }), [
-    currentPageConfig.orientation,
-    currentPageConfig.size.w,
-    currentPageConfig.size.h,
-    currentPageConfig.margins.top,
-    currentPageConfig.margins.bottom,
-    currentPageConfig.margins.left,
-    currentPageConfig.margins.right,
-    currentPageConfig.margins.header,
-    currentPageConfig.margins.footer,
-  ]);
-  
+  // Convert a PageConfig to the format TrueLayoutEditor expects: for landscape, swap width and height.
+  const toPresentation = (config: PageConfig) => ({
+    width: config.orientation === 'landscape' ? config.size.h : config.size.w,
+    height: config.orientation === 'landscape' ? config.size.w : config.size.h,
+    margins: config.margins,
+  });
+  const layoutSections: TrueLayoutSection[] = sections.map((s) => ({
+    id: s.id,
+    pageConfig: toPresentation(s.pageConfig),
+    blocks: s.blocks,
+    header: s.header,
+    footer: s.footer,
+    ...(s.breakType && { breakType: s.breakType }),
+    ...(s.pageNumbering && { pageNumbering: s.pageNumbering }),
+  }));
+  const presentationPageConfig = layoutSections[0]?.pageConfig ?? toPresentation(currentPageConfig);
+
   // Fit the page to the viewport width on narrow screens. The page is a fixed
   // pixel width (Letter ≈ 816px); on a phone it's wider than the screen, and
   // because the viewport centres it, the leading edge becomes unreachable —
   // content spills off both sides. When it can't fit at 100% we scale zoom down
   // to fit; when it fits (desktop) we leave the user's chosen zoom alone.
-  const pageWidthPx = presentationPageConfig.width;
+  const pageWidthPx = Math.max(presentationPageConfig.width, ...layoutSections.map((s) => s.pageConfig.width));
   // True while we're actively overriding zoom to fit a narrow screen — so when
   // the screen widens again we can restore 100%, but a manual zoom on a screen
   // that always fit (desktop) is never touched.
@@ -522,11 +514,12 @@ export const DocumentEditor = memo(function DocumentEditor({
         <TrueLayoutEditor
           key={loadVersion}
           ref={editorRef}
-          initialBlocks={initialBlocks}
+          initialBlocks={[]}
+          sections={layoutSections}
+          onSectionsChange={handleSectionsChange}
           pageConfig={presentationPageConfig}
           zoom={zoom / 100}
           editable={!readOnly}
-          onDocChange={handleDocChange}
           onSelectionChange={handleSelectionChange}
           onCellSelectionChange={handleCellSelectionChange}
           onActivePageChange={handleActivePageChange}
@@ -534,8 +527,6 @@ export const DocumentEditor = memo(function DocumentEditor({
           pageGap={24}
           minLinesAtBreak={2}
           textStylePool={docModel.getTextStylePool()}
-          header={header}
-          footer={footer}
           documentTitle={documentTitle}
           onHeaderChange={handleHeaderChange}
           onFooterChange={handleFooterChange}

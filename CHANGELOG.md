@@ -54,6 +54,15 @@ lockstep.
 - **DOCX: how a section starts is kept.** `w:type` of a section (continuous, even page, odd page; a new page is the
   default and is not kept) is imported into the additive `DocSection.breakType` / `Section.breakType` and written back,
   and travels through `getData`/`setData` and the shared document.
+- **Editor: every section of a document is shown.** `DocumentEditor` passes all sections to `TrueLayoutEditor`
+  (new `sections` and `onSectionsChange` props, `TrueLayoutSection`), which lays them out with
+  `computeSectionedLayout`: each page has its own size, orientation and margins (pages of different widths are centred),
+  each section is measured at its own content width, and headers and footers follow the section (a section with none
+  shows the previous one's) including first-page and even-page variants and the page number restart and format. Edits in
+  any section are written back to that section, and deleting a section break merges the section into the next one. The
+  rulers and page setup act on the section of the active page, and editing a header or footer edits the section that owns
+  it (`onHeaderChange`/`onFooterChange` get the section id as a second argument). Not laid out yet: columns, vertical
+  alignment, and per-fragment margins for continuous sections.
 - **DOCX comments are imported.** `importDocx` reads `word/comments.xml`, `commentsExtended.xml` (replies and the
   resolved state) and `people.xml` (author ids), anchors each thread to its commented text across runs, links,
   paragraphs and table cells, and returns the threads in the additive `DocumentImportResult.comments`

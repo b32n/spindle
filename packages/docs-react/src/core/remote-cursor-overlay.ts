@@ -20,7 +20,7 @@ import { Awareness } from 'y-protocols/awareness';
 import { EditorView } from 'prosemirror-view';
 import { relativePositionToAbsolutePosition, ySyncPluginKey } from 'y-prosemirror';
 
-import { getPageY } from './true-layout-engine';
+import { getPageContentOrigin } from './true-layout-engine';
 import type { CaretPosition, SelectionOverlayManager } from './selection-overlay';
 
 interface RemoteUser {
@@ -224,11 +224,9 @@ export class RemoteCursorOverlay {
   ): void {
     const layout = this.localOverlay.getLayout();
     if (!layout) return;
-    const { pageConfig, scale } = layout;
-    const margins = pageConfig.margins;
-    const pageY = getPageY(layout, pos.pageIndex);
-    const absX = margins.left * scale + pos.x;
-    const absY = pageY + margins.top * scale + pos.y;
+    const origin = getPageContentOrigin(layout, pos.pageIndex);
+    const absX = origin.x + pos.x;
+    const absY = origin.y + pos.y;
     el.style.transform = `translate(${absX}px, ${absY}px)`;
     el.style.height = `${pos.height}px`;
     el.style.color = color;
@@ -240,11 +238,9 @@ export class RemoteCursorOverlay {
     color: string,
     layout: NonNullable<ReturnType<SelectionOverlayManager['getLayout']>>,
   ): void {
-    const { pageConfig, scale } = layout;
-    const margins = pageConfig.margins;
-    const pageY = getPageY(layout, rect.pageIndex);
-    const absX = margins.left * scale + rect.x;
-    const absY = pageY + margins.top * scale + rect.y;
+    const origin = getPageContentOrigin(layout, rect.pageIndex);
+    const absX = origin.x + rect.x;
+    const absY = origin.y + rect.y;
     el.style.transform = `translate(${absX}px, ${absY}px)`;
     el.style.width = `${rect.width}px`;
     el.style.height = `${rect.height}px`;

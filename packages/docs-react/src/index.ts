@@ -57,6 +57,7 @@ export {
 export type {
   TrueLayoutEditorProps,
   TrueLayoutEditorHandle,
+  TrueLayoutSection,
   // FlowBlocks
   FlowBlock,
   Run,
