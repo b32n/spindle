@@ -253,17 +253,52 @@ describe('offline suggestions', () => {
     b.suggest((tr) => tr.join(9));
     sync(a, b, c);
     same([a, b, c]);
-    // The paragraph mark keeps one record of its change, so of two people's suggestions on the same mark one stays (which one
-    // depends on the order Yjs settles concurrent writes in); the document is the same everywhere and no text is lost.
-    const open = changesOf(c).map((x) => [x[0], x[1]]);
-    expect(open).toHaveLength(1);
-    expect([['paragraphInserted', 'Ada'], ['paragraphDeleted', 'Bo']]).toContainEqual(open[0]);
+    // A paragraph mark keeps one record per kind of change, so both people's suggestions survive; the document is the same
+    // everywhere and no text is lost. Yjs keeps the element of the original paragraph for its first half, so Bo's record
+    // (made on the whole paragraph) lands next to Ada's on the first half: the documented residual limit.
+    expect(changesOf(c).map((x) => [x[0], x[1]])).toEqual([['paragraphInserted', 'Ada'], ['paragraphDeleted', 'Bo']]);
+    expect(c.text()).toEqual(['one', ' two', 'three']);
+    // Each can be rejected alone: Bo's deletion rejected, Ada's split stays suggested.
+    c.review('reject', 'Bo');
+    sync(a, b, c);
+    same([a, b, c]);
+    expect(changesOf(a).map((x) => [x[0], x[1]])).toEqual([['paragraphInserted', 'Ada']]);
+    expect(a.text()).toEqual(['one', ' two', 'three']);
+    // Accepting what is left keeps the split; nothing is open any more.
     c.review('accept');
     sync(a, b, c);
     same([a, b, c]);
     expect(changesOf(a)).toEqual([]);
-    // (A record that stays with the paragraph element when another person splits it ends up on the first half.)
-    expect([['one', ' two', 'three'], ['one two', 'three'], ['one twothree']]).toContainEqual(a.text());
+    expect(a.text()).toEqual(['one', ' two', 'three']);
+  });
+
+  it('accepting both the split and the join cancels them: the mark inserted by Ada and deleted by Bo is gone', () => {
+    const [a, b, c] = room(['Ada', 'Bo', 'Cy'], [para('one two'), para('three')]);
+    a.suggest((tr) => tr.split(4));
+    b.suggest((tr) => tr.join(9));
+    sync(a, b, c);
+    c.review('accept');
+    sync(a, b, c);
+    same([a, b, c]);
+    expect(changesOf(a)).toEqual([]);
+    expect(a.text()).toEqual(['one two', 'three']);
+  });
+
+  it('a change of paragraph formatting and the deletion of its mark by another person both survive and settle alone', () => {
+    const [a, b, c] = room(['Ada', 'Bo', 'Cy'], [para('one'), para('two')]);
+    a.suggest((tr) => tr.setNodeAttribute(0, 'alignment', 'center'));
+    b.suggest((tr) => tr.join(5));
+    sync(a, b, c);
+    same([a, b, c]);
+    expect(changesOf(c).map((x) => [x[0], x[1]]).sort()).toEqual([['paragraphDeleted', 'Bo'], ['paragraphFormat', 'Ada']]);
+    c.review('reject', 'Ada');
+    sync(a, b, c);
+    same([a, b, c]);
+    expect(changesOf(a).map((x) => [x[0], x[1]])).toEqual([['paragraphDeleted', 'Bo']]);
+    c.review('accept', 'Bo');
+    sync(a, b, c);
+    same([a, b, c]);
+    expect(a.text()).toEqual(['onetwo']);
   });
 });
 
@@ -297,6 +332,15 @@ describe('the room’s version and people’s colours', () => {
     expect(first.revision).toMatchObject({ insertion: { author: 'Ada' } });
     expect(JSON.stringify(first.content)).toContain('"formatChange":{');
     expect(JSON.stringify(first.content)).toContain('"previous":{}');
+  });
+
+  it('two people under one name with invalid colours get the same one whatever order the room lists them in', () => {
+    const room = (...colors: string[]) => ({ awareness: { getStates: () => new Map(colors.map((color, i) => [i, { user: { name: 'Ann', color } }])) } }) as never;
+    expect(collabAuthorColors(room('red', 'blue')).get('Ann')).toBe('blue');
+    expect(collabAuthorColors(room('blue', 'red')).get('Ann')).toBe('blue');
+    // A valid colour beats an invalid one in either order.
+    expect(collabAuthorColors(room('blue', '#112233')).get('Ann')).toBe('#112233');
+    expect(collabAuthorColors(room('#112233', 'blue')).get('Ann')).toBe('#112233');
   });
 
   it('people in the room are drawn in the colour of their cursor, and nobody else takes that colour', () => {

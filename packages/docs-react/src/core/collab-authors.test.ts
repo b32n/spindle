@@ -1,6 +1,7 @@
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { sameAuthorColors, suggestionAuthor, watchAuthorColors } from './collab-authors';
+import { authorsWithColors, sameAuthorColors, suggestionAuthor, watchAuthorColors } from './collab-authors';
+import { assignAuthorColors } from '@b32nio/spindle-docs-core';
 
 describe('suggestionAuthor', () => {
   it('is the name the user joined the room under, else the current user', () => {
@@ -8,6 +9,10 @@ describe('suggestionAuthor', () => {
     expect(suggestionAuthor(null, 'Alice')).toBe('Alice');
     expect(suggestionAuthor(undefined, 'Alice')).toBe('Alice');
     expect(suggestionAuthor({ identity: {} } as never, 'Alice')).toBe('Alice');
+    // A blank or whitespace name would write suggestions with no author.
+    expect(suggestionAuthor({ identity: { displayName: '' } } as never, 'Alice')).toBe('Alice');
+    expect(suggestionAuthor({ identity: { displayName: '   ' } } as never, 'Alice')).toBe('Alice');
+    expect(suggestionAuthor({ identity: { displayName: ' Ada ' } } as never, 'Alice')).toBe('Ada');
   });
 });
 
@@ -55,5 +60,31 @@ describe('watchAuthorColors', () => {
     aw.setLocalStateField('user', { name: 'Ada', color: '#0000aa' });
     expect(renders).toBe(1);
     aw.destroy();
+  });
+});
+
+describe('authorsWithColors', () => {
+  const counts = [
+    { name: 'Ada', color: '#000000', count: 2 },
+    { name: 'Bo', color: '#000000', count: 1 },
+  ];
+
+  it('draws people in the room in their cursor colour, and the others in a colour the document’s authors share out', () => {
+    const present = authorsWithColors(counts, ['Ada', 'Bo'], new Map([['Ada', '#00AA00']]));
+    expect(present.map((a) => a.color)[0]).toBe('#00aa00');
+    expect(present[1].color).toBe(assignAuthorColors(['Ada', 'Bo'], new Map([['Ada', '#00AA00']])).get('Bo'));
+    expect(present.map((a) => a.count)).toEqual([2, 1]);
+  });
+
+  it('gives an author a colour from the palette once they have left the room, so the colour can change', () => {
+    const inRoom = authorsWithColors(counts, ['Ada', 'Bo'], new Map([['Bo', '#00AA00']]));
+    const left = authorsWithColors(counts, ['Ada', 'Bo'], new Map());
+    expect(inRoom[1].color).toBe('#00aa00');
+    expect(left[1].color).toBe(assignAuthorColors(['Ada', 'Bo']).get('Bo'));
+    expect(left[1].color).not.toBe(inRoom[1].color);
+  });
+
+  it('keeps the colour it was given for an author the palette does not list', () => {
+    expect(authorsWithColors([{ name: 'Cy', color: '#123456', count: 1 }], [], new Map())[0].color).toBe('#123456');
   });
 });

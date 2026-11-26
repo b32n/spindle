@@ -651,7 +651,7 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(adaAgain).not.toBe('#112233');
     expect(adaAgain).toBe(assignAuthorColors(['Ada', 'Bo']).get('Ada'));
     // The colour reaches the change bar of an author who only changed a paragraph mark.
-    const bar = proseMirrorToFlowBlocks(j([{ type: 'paragraph', attrs: { revision: { insertion: { id: '4', author: 'Ada' } } }, content: [text('x')] }]), { authorColors: new Map([['Ada', '#112233']]) })[0] as ParagraphBlock;
+    const bar = proseMirrorToFlowBlocks(j([{ type: 'paragraph', attrs: { revisionInsertion: { id: '4', author: 'Ada' } }, content: [text('x')] }]), { authorColors: new Map([['Ada', '#112233']]) })[0] as ParagraphBlock;
     expect(bar.attrs?.changeBar?.color).toBe('#112233');
   });
 });

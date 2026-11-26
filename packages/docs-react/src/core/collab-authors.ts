@@ -3,15 +3,25 @@
  * people in the room are drawn in (the colour of their cursor).
  */
 
-import { collabAuthorColors } from '@b32nio/spindle-docs-core';
+import { assignAuthorColors, collabAuthorColors } from '@b32nio/spindle-docs-core';
 
 /** What of a collaboration handle presence is read from (its awareness). */
 type Presence = Parameters<typeof collabAuthorColors>[0];
 
 /** The author of a suggestion: the name the user joined the room under, else the current user's name. */
 export function suggestionAuthor(handle: { identity: { displayName?: string } } | null | undefined, fallback: string): string {
-  // An empty name would write `w:author=""` and match the next empty-name author, so it is never used.
-  return handle?.identity.displayName || fallback || 'Unknown';
+  // A blank display name would write suggestions with no author.
+  return handle?.identity.displayName?.trim() || fallback;
+}
+
+/**
+ * The authors of the changes with the colour the markup shows them in: the colours are shared out among every author of the
+ * document (`palette`), those who are in the room keep their cursor colour (`presence`). An author who left the room has
+ * no cursor colour any more and gets one from the palette, so a colour can change when somebody leaves.
+ */
+export function authorsWithColors<T extends { name: string; color: string }>(counts: readonly T[], palette: readonly string[], presence: ReadonlyMap<string, string>): T[] {
+  const colors = assignAuthorColors(palette, presence);
+  return counts.map((a) => ({ ...a, color: colors.get(a.name) ?? a.color }));
 }
 
 /** True when two maps of author colours are the same. */

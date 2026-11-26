@@ -1,16 +1,17 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { DocsPage } from '../support/docs';
 import { roomName, waitForRoomSeed } from '../support/collab';
+import { NetworkProxy, killAllRelays } from '../support/relay';
 
 const WS = 'ws://127.0.0.1:1234';
 
 /** A collaborator joining a room under a name, with the colour of their cursor. */
-async function peer(browser: Browser, room: string, user: string, color: string) {
+async function peer(browser: Browser, room: string, user: string, color: string, wsUrl = WS) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await context.newPage();
   const doc = new DocsPage(page);
   await doc.goto(
-    `?ws=${encodeURIComponent(WS)}&room=${room}&user=${user}&color=${encodeURIComponent(color)}`
+    `?ws=${encodeURIComponent(wsUrl)}&room=${room}&user=${user}&color=${encodeURIComponent(color)}`
   );
   await expect(page.getByText(/· connected$/)).toBeVisible();
   return { context, page, doc };
@@ -38,6 +39,8 @@ const firstLine = (p: Peer) =>
     });
 
 test.describe('docs: tracked changes between collaborators', () => {
+  test.afterEach(() => killAllRelays());
+
   test('D-COL-10 two people suggest, a third accepts one person’s change and rejects the other’s, and all three end with the same document @smoke', async ({
     browser,
   }, info) => {
@@ -110,5 +113,78 @@ test.describe('docs: tracked changes between collaborators', () => {
     await expect.poll(() => firstLine(bob)).toBe('Welcome to Spindle Docs');
     await alice.context.close();
     await bob.context.close();
+  });
+  test('D-COL-12 one person splits a paragraph while another marks its mark deleted, both offline: both suggestions survive and are settled one by one', async ({
+    browser,
+  }, info) => {
+    const proxy = new NetworkProxy();
+    await proxy.start();
+    const room = roomName('docs', info.testId);
+    const alice = await peer(browser, room, 'Alice', '#d93025', proxy.url);
+    await waitForRoomSeed(room);
+    const bob = await peer(browser, room, 'Bob', '#1a73e8', proxy.url);
+    await suggesting(alice);
+    await suggesting(bob);
+    const line = 'Welcome to Spindle Docs';
+    const lines = (p: Peer) => p.doc.pages.locator('.line').filter({ hasText: line });
+
+    await proxy.stop();
+    await expect(alice.page.getByText(/· (offline|connecting)$/)).toBeVisible();
+    await expect(bob.page.getByText(/· (offline|connecting)$/)).toBeVisible();
+    // Alice presses Enter at the end of the line; Bob, who knows nothing of it, deletes the paragraph mark there.
+    await alice.doc.clickLine(line);
+    await alice.doc.press('End');
+    await alice.doc.press('Enter');
+    await bob.doc.clickLine(line);
+    await bob.doc.press('End');
+    await bob.page.keyboard.press('Delete');
+    await bob.doc.settle();
+
+    await proxy.start();
+    await expect(alice.page.getByText(/· connected$/)).toBeVisible({ timeout: 15_000 });
+    await expect(bob.page.getByText(/· connected$/)).toBeVisible({ timeout: 15_000 });
+
+    // Both suggestions survive, for both people.
+    for (const p of [alice, bob]) {
+      await p.doc.toolbar('Review changes').click();
+      const panel = p.page.getByTestId('review-panel');
+      await expect(
+        panel.getByTestId('review-change').filter({ hasText: 'Inserted paragraph break' })
+      ).toHaveCount(1, { timeout: 15_000 });
+      await expect(
+        panel.getByTestId('review-change').filter({ hasText: 'Deleted paragraph break' })
+      ).toHaveCount(1);
+      await expect(
+        panel.getByTestId('review-change').filter({ hasText: 'Inserted paragraph break' })
+      ).toHaveAttribute('data-author', 'Alice');
+      await expect(
+        panel.getByTestId('review-change').filter({ hasText: 'Deleted paragraph break' })
+      ).toHaveAttribute('data-author', 'Bob');
+    }
+
+    // Alice rejects Bob's deletion alone: it goes away for both, Alice's split stays suggested.
+    const panelA = alice.page.getByTestId('review-panel');
+    await panelA.getByLabel('Author').selectOption('Bob');
+    await panelA.getByRole('button', { name: 'Reject all by Bob' }).click();
+    for (const p of [alice, bob]) {
+      const panel = p.page.getByTestId('review-panel');
+      await expect(panel.getByTestId('review-change')).toHaveCount(1);
+      await expect(panel.getByTestId('review-change')).toContainText('Inserted paragraph break');
+    }
+    // Bob accepts Alice's split: nothing is left to review, and the line is still its own paragraph for both.
+    await bob.page
+      .getByTestId('review-panel')
+      .getByRole('button', { name: 'Accept all', exact: true })
+      .click();
+    for (const p of [alice, bob]) {
+      await expect(p.page.getByTestId('review-panel')).toContainText('No tracked changes.');
+      await expect(lines(p)).toHaveCount(1);
+      await expect(
+        p.doc.pages.locator('[data-revision-insertion], [data-revision-deletion]')
+      ).toHaveCount(0);
+    }
+    await alice.context.close();
+    await bob.context.close();
+    await proxy.stop();
   });
 });

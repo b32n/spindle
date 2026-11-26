@@ -13,7 +13,7 @@
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor, ReviewChange } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, assignAuthorColors, createCommands, docsSchema, documentRevisionAuthors, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, createCommands, docsSchema, documentRevisionAuthors, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
@@ -21,7 +21,7 @@ import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
 import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
-import { sameAuthorColors, suggestionAuthor, watchAuthorColors } from '../core/collab-authors';
+import { authorsWithColors, sameAuthorColors, suggestionAuthor, watchAuthorColors } from '../core/collab-authors';
 import { ReviewPanel } from './ReviewPanel';
 import { ModeSwitch, headerFooterNotice, type EditorMode } from './ModeSwitch';
 import { Ruler } from './Ruler';
@@ -207,10 +207,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   // The authors of the changes and how many each has (kept while the list of changes is not), then in the colour the markup
   // shows them in: shared out among every author of the document, with the cursor colours of those who are in the room first.
   const [authorCounts, setAuthorCounts] = useState<RevisionAuthor[]>([]);
-  const authors = useMemo(() => {
-    const colors = assignAuthorColors(palette, presence);
-    return authorCounts.map((a) => ({ ...a, color: colors.get(a.name) ?? a.color }));
-  }, [authorCounts, palette, presence]);
+  const authors = useMemo(() => authorsWithColors(authorCounts, palette, presence), [authorCounts, palette, presence]);
   const [showReview, setShowReview] = useState(false);
   const showReviewRef = useRef(false);
   const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
