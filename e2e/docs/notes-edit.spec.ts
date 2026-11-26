@@ -52,8 +52,12 @@ test.describe('docs: inserting and editing footnotes and endnotes', () => {
     await expect(reference).toHaveText(/^1/);
     const note = doc.pages.locator('[data-note-target="footnote:1"]');
     await expect(note).toContainText('1 The proof is in the ledger.');
-    await expect(doc.pages.getByText('Footnotes', { exact: true })).toBeVisible();
     await expect(doc.pages.first()).toContainText('A claim');
+    // It is at the bottom of the page the reference is on, under a separator.
+    await expect(page.locator('.footnote-separator')).toHaveCount(1);
+    const pageBox = await doc.pages.first().boundingBox();
+    const noteBox = await note.boundingBox();
+    expect(noteBox!.y).toBeGreaterThan(pageBox!.y + pageBox!.height - 200);
   });
 
   test('D-NOT-05 a second footnote placed earlier renumbers the first, and deleting a reference removes its note and renumbers', async ({
@@ -116,6 +120,42 @@ test.describe('docs: inserting and editing footnotes and endnotes', () => {
     expect(xml).toContain('<w:b/>');
     expect(xml).toContain('<w:i/>');
     expect(xml).toContain('<w:hyperlink');
+  });
+
+  test('D-NOT-08 a footnote near the end of a page makes the text above it make room, and later text moves to the next page', async ({
+    page,
+  }) => {
+    await doc.clearAndFocus();
+    for (let i = 1; i <= 45; i++) {
+      await page.keyboard.type(`Line ${i}`);
+      await page.keyboard.press('Enter');
+    }
+    await doc.settle();
+    const pages = page.locator('.page');
+    await expect(pages).toHaveCount(2);
+    const lastOnFirstPage = async () => {
+      const lines = pages.first().locator('.fragment:not(:has([data-note-target])) .line');
+      return (await lines.last().innerText()).trim();
+    };
+    const before = await lastOnFirstPage();
+
+    // A three-line note on a line a few lines above the end of the first page.
+    const target = `Line ${Number(before.replace('Line ', '')) - 3}`;
+    await doc.clickText(target);
+    await doc.press('End');
+    await insertNote(page, 'footnote', 'one\ntwo\nthree');
+    await expect(pages.first().locator('[data-note-target="footnote:1"]')).toBeVisible();
+
+    // Nothing of the text overlaps the notes' area, and the page now ends earlier.
+    const separator = await pages.first().locator('.footnote-separator').boundingBox();
+    const lines = pages.first().locator('.fragment:not(:has([data-note-target])) .line');
+    for (let i = 0; i < (await lines.count()); i++) {
+      const box = await lines.nth(i).boundingBox();
+      expect(box!.y + box!.height).toBeLessThanOrEqual(separator!.y + 1);
+    }
+    expect(await lastOnFirstPage()).not.toBe(before);
+    // The last line that was on the first page moved to the second.
+    await expect(pages.nth(1)).toContainText(before);
   });
 
   test('D-NOT-07 notes inserted in the editor survive the download and the file opens with the same notes', async ({

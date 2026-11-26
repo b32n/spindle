@@ -406,3 +406,41 @@ describe('notes', () => {
     expect(noteLabel({ kind: 'footnote', ordinal: 12 })).toBe('12');
   });
 });
+
+describe('footnotes at the bottom of the page', () => {
+  const para = (...content: unknown[]) => ({ type: 'paragraph', content });
+  const note = (kind: 'footnote' | 'endnote', body: unknown[]) => ({ type: 'note_ref', attrs: { kind, noteId: '1' }, content: body });
+
+  it('returns the footnotes separately, one block each in document order with their section, and keeps the endnotes area', () => {
+    const doc = j([
+      para(text('a'), note('footnote', [text('one')]), note('endnote', [text('end')])),
+      { type: 'section_break', attrs: { sectionId: 'a' } },
+      para(note('footnote', [text('two')]), note('footnote', [text('three')])),
+    ]);
+    const out = proseMirrorToSectionedFlowBlocks(doc, { footnotesAtPageBottom: true });
+    expect(out.footnotes.map((f) => [f.block.noteTarget, f.sectionIndex])).toEqual([
+      [{ kind: 'footnote', ordinal: 1 }, 0],
+      [{ kind: 'footnote', ordinal: 2 }, 1],
+      [{ kind: 'footnote', ordinal: 3 }, 1],
+    ]);
+    expect(out.footnotes[0].block).toMatchObject({ synthetic: true });
+    const labels = out.footnotes.map((f) => (f.block.runs[0] as TextRun).text);
+    expect(labels).toEqual(['1', '2', '3']);
+    // The flow holds the body and the endnotes area, no footnote text.
+    const texts = out.blocks.map((b) => ((b as ParagraphBlock).runs ?? []).map((r) => (r as TextRun).text ?? '').join('').replace(/\u200B/g, ''));
+    expect(texts).toContain('Endnotes');
+    expect(texts).not.toContain('Footnotes');
+    expect(texts.some((t) => t.includes('one') || t.includes('two'))).toBe(false);
+    expect(out.sections).toEqual([
+      { sectionId: 'a', blockStart: 0, blockEnd: 3 },
+      { sectionId: null, blockStart: 3, blockEnd: 4 },
+    ]);
+  });
+
+  it('is the notes area as before without the option, and has no separate footnotes', () => {
+    const doc = j([para(note('footnote', [text('one')]))]);
+    const out = proseMirrorToSectionedFlowBlocks(doc);
+    expect(out.footnotes).toEqual([]);
+    expect(out.blocks.some((b) => (b as ParagraphBlock).noteTarget)).toBe(true);
+  });
+});
