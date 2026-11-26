@@ -60,6 +60,7 @@ describe('order statistics', () => {
     expect(call('LARGE', [[[3, 1, 4, 1, 5]], 2])).toBe(4);
     expect(call('SMALL', [[[3, 1, 4, 1, 5]], 2])).toBe(1);
     expect(() => call('LARGE', [[[1, 2]], 9])).toThrow('#NUM!');
+    expect(() => call('SMALL', [[[1, 2]], 9])).toThrow('#NUM!');
   });
 
   it('RANK ranks descending by default, ascending on request', () => {
@@ -80,5 +81,20 @@ describe('correlation', () => {
 
   it('CORREL errors when the series differ in length', () => {
     expect(() => call('CORREL', [[[1, 2, 3]], [[1, 2]]])).toThrow('#N/A');
+  });
+
+  it('CORREL and COVAR: numeric text counts, text pairs drop, degenerate series are #DIV/0!', () => {
+    expect(call('CORREL', [[['1', 'x', 3, 2]], [[1, 9, 3, 2]]])).toBeCloseTo(1);
+    expect(call('CORREL', [[[NaN, 1, 2]], [[5, 1, 2]]])).toBeCloseTo(1);
+    expect(() => call('CORREL', [[['x']], [['y']]])).toThrow('#DIV/0!');
+    expect(() => call('CORREL', [[[2, 2, 2]], [[1, 2, 3]]])).toThrow('#DIV/0!');
+    expect(() => call('CORREL', [[[1, 2, 3]], [[2, 2, 2]]])).toThrow('#DIV/0!');
+    expect(() => call('COVAR', [[['x']], [['y']]])).toThrow('#DIV/0!');
+    expect(() => call('CORREL', [[[1, '#N/A']], [[1, 2]]])).toThrow('#N/A');
+  });
+
+  it('MODE returns the first of the most frequent values', () => {
+    expect(call('MODE', [[[1, 2, 2, 1]]])).toBe(1);
+    expect(() => call('MODE', [[[1, 2, 3]]])).toThrow('#N/A');
   });
 });
