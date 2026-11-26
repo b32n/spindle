@@ -241,10 +241,12 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (readOnlyProp || !editorView) return;
     const command = 'change' in target ? resolveChange(target.change.id, action) : resolveAll(action, target.author);
     command(editorView.state, editorView.dispatch);
+    // The list is refreshed now (not after the typing pause), so a second click straight after the first never uses an id that is gone.
+    if (showReviewRef.current) setChanges(listChanges(editorView.state.doc));
   }, [readOnlyProp, editorView]);
 
   const handleGoToChange = useCallback((change: ReviewChange) => {
-    editorRef.current?.goTo(change.from);
+    editorRef.current?.goTo?.(change.from);
   }, []);
 
   const handleRemoveSectionBreak = useCallback(() => {

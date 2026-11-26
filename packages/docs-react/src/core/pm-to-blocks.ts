@@ -6,7 +6,7 @@
  * presentation layer (layout engine + painter).
  */
 
-import { assignAuthorColors, authorColor, documentRevisionAuthors, readBlockRevision } from '@b32nio/spindle-docs-core';
+import { assignAuthorColors, authorColor, documentRevisionAuthors, readBlockRevision, sanitizeRunFormat } from '@b32nio/spindle-docs-core';
 import { Node as PmNode, Mark } from 'prosemirror-model';
 import { sanitizeHref } from './sanitize';
 
@@ -811,7 +811,7 @@ function revisionInfo(mark: Mark): RevisionInfo {
     author: String(mark.attrs.author),
     color: authorColorOf(String(mark.attrs.author)),
     ...(typeof moveId === 'string' && moveId && { moveId }),
-    ...(mark.type.name === 'formatChange' && mark.attrs.previous && typeof mark.attrs.previous === 'object' && { previous: mark.attrs.previous as Record<string, unknown> }),
+    ...(mark.type.name === 'formatChange' && mark.attrs.previous && typeof mark.attrs.previous === 'object' && { previous: sanitizeRunFormat(mark.attrs.previous) }),
   };
 }
 

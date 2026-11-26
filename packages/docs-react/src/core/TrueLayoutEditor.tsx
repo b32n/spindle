@@ -183,7 +183,7 @@ export interface TrueLayoutEditorHandle {
    */
   tableOfContents: (action: 'insert' | 'update' | 'remove') => boolean;
   /** Put the caret at a position of the document and scroll it into view (the pages outside the window are brought in first). */
-  goTo: (pos: number) => void;
+  goTo?: (pos: number) => void;
 }
 
 // ============================================================================

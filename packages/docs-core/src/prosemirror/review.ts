@@ -10,7 +10,7 @@
 import { type Mark, type MarkType, type Node as PmNode, type NodeType } from 'prosemirror-model';
 import type { Command, EditorState, Transaction } from 'prosemirror-state';
 import type { BlockRevision, ParagraphFormat, RunFormat } from '../types';
-import { docsSchema } from './schema';
+import { docsSchema, sanitizeRunFormat } from './schema';
 import { readBlockRevision, withBlockRevision, withBlockRevisionKind } from './block-revision';
 import { paragraphFormatAttrs, runFormatMarks } from './sync';
 
@@ -241,7 +241,8 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
     }
     case 'format': {
       if (!accept) {
-        const previous = (unit.mark?.attrs.previous ?? {}) as RunFormat;
+        // The record may come from another client: only known fields of the right type are put back.
+        const previous = sanitizeRunFormat(unit.mark?.attrs.previous) as RunFormat;
         for (const name of FORMAT_MARKS) {
           const type: MarkType | undefined = docsSchema.marks[name];
           if (type) tr.removeMark(unit.from, unit.to, type);

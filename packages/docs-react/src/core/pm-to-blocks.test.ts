@@ -605,6 +605,17 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(runs[3].bold).toBeUndefined();
   });
 
+  it('carries the formatting before a change with known fields of the right type only', () => {
+    const evil = { type: 'formatChange', attrs: { revisionId: '3', author: 'Cy', date: null, previous: { italic: true, fontSize: 'big', color: 'url(x)', evil: 1 } } };
+    const blocks = proseMirrorToFlowBlocks(j([{ type: 'paragraph', content: [text('fmt', [{ type: 'bold' }, evil])] }]), { revisionView: 'original' });
+    const run = (blocks[0] as ParagraphBlock).runs[0] as TextRun;
+    expect(run.italic).toBe(true);
+    expect(run.fontSize).toBeUndefined();
+    expect(run.color).toBeUndefined();
+    const marked = proseMirrorToFlowBlocks(j([{ type: 'paragraph', content: [text('fmt', [evil])] }]))[0] as ParagraphBlock;
+    expect(((marked.runs[0] as TextRun).revision?.formatChange as { previous?: object }).previous).toEqual({ italic: true });
+  });
+
   it('keeps a paragraph that holds only hidden text as an empty line of placeholders, with no change bar', () => {
     const only = () => j([{ type: 'paragraph', attrs: { revisionDeletion: { id: '6', author: 'Bo' } }, content: [text('gone', [deletion])] }]);
     const first = (view: 'markup' | 'final' | 'original') => proseMirrorToFlowBlocks(only(), { revisionView: view })[0] as ParagraphBlock;

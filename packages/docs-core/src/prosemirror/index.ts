@@ -1,7 +1,7 @@
 // ProseMirror integration for docs-core
 
 // Schema
-export { docsSchema, nodeSpecs, markSpecs } from './schema';
+export { docsSchema, nodeSpecs, markSpecs, sanitizeRunFormat } from './schema';
 
 // Plugins
 export { 

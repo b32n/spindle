@@ -154,6 +154,13 @@ describe('formatting changes of text', () => {
     expect(next.doc.firstChild!.firstChild!.marks.find((m) => m.type.name === 'textStyle')!.attrs.color).toBe('#00ff00');
   });
 
+  it('are rejected with known fields of the right type only when the record is not trusted', () => {
+    const evil = [para([run('now', { formatChange: { id: '7', author: 'Di', previous: { italic: true, fontSize: 'big', color: 'url(x)', fontFamily: 7, evil: 1 } } }, { bold: true })])];
+    const next = apply(stateOf(evil), resolveAll('reject'));
+    expect(markNames(next)).toEqual(['italic']);
+    expect(next.doc.firstChild!.firstChild!.marks.some((m) => m.type.name === 'textStyle' && (m.attrs.fontSize === 'big' || m.attrs.color === 'url(x)'))).toBe(false);
+  });
+
   it('are rejected by putting the old formatting back', () => {
     const next = apply(stateOf(blocks), resolveAll('reject'));
     expect(markNames(next)).toEqual(['italic', 'textStyle']);
@@ -409,7 +416,8 @@ describe('listing changes', () => {
   });
 
   it('ignores a revision attribute that is not an object, and nodes that cannot carry one', () => {
-    const doc = docsSchema.nodes.doc.create(null, [docsSchema.nodes.paragraph.create({ revision: 'nope' }, [docsSchema.text('x')])]);
+    const doc = docsSchema.nodes.doc.create(null, [docsSchema.nodes.paragraph.create({ revisionInsertion: 'nope', revisionDeletion: 7, revisionFormat: [] }, [docsSchema.text('x')])]);
+    expect(doc.firstChild!.attrs).toMatchObject({ revisionInsertion: 'nope', revisionDeletion: 7, revisionFormat: [] }); // the attributes exist: the test is not vacuous
     expect(changeUnits(doc)).toEqual([]);
   });
 });
