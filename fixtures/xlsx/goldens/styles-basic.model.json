@@ -1,0 +1,143 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {
+      "f1": {
+        "currencyCode": "USD",
+        "currencySymbolPosition": "prefix",
+        "decimalPlaces": 2,
+        "negativeFormat": "minus",
+        "type": "currency",
+        "useThousandsSeparator": true
+      },
+      "f2": {
+        "decimalPlaces": 1,
+        "type": "percentage"
+      },
+      "f3": {
+        "decimalPlaces": 2,
+        "type": "scientific"
+      },
+      "f4": {
+        "decimalPlaces": 0,
+        "negativeFormat": "red",
+        "type": "number",
+        "useThousandsSeparator": true
+      }
+    },
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "style": "s1",
+            "value": "Header"
+          },
+          "A2": {
+            "format": "f1",
+            "style": "s6",
+            "value": 1234.5
+          },
+          "B1": {
+            "style": "s2",
+            "value": "struck italic"
+          },
+          "B2": {
+            "format": "f2",
+            "style": "s6",
+            "value": 0.256
+          },
+          "C1": {
+            "style": "s3",
+            "value": "boxed"
+          },
+          "C2": {
+            "format": "f3",
+            "style": "s6",
+            "value": 12345.678
+          },
+          "D1": {
+            "style": "s4",
+            "value": "centred wrapped text that is long"
+          },
+          "D2": {
+            "format": "f4",
+            "style": "s6",
+            "value": -1234
+          },
+          "E1": {
+            "style": "s5",
+            "value": "rotated"
+          },
+          "F1": {
+            "style": "s6",
+            "value": "shrink to fit this text"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {
+            "A": 131
+          },
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {
+            "1": 60
+          },
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Styles",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {
+      "s1": {
+        "backgroundColor": "#1f4e78",
+        "bold": true,
+        "fontColor": "#ffffff",
+        "fontFamily": "Arial",
+        "fontSize": 12
+      },
+      "s2": {
+        "fontFamily": "Times New Roman",
+        "fontSize": 10,
+        "italic": true,
+        "textDecoration": "underline"
+      },
+      "s3": {
+        "borderBottom": "3px double #000000",
+        "borderLeft": "1px solid #000000",
+        "borderRight": "1px solid #000000",
+        "borderTop": "3px solid #ff0000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s4": {
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "textAlign": "center",
+        "textWrap": true,
+        "verticalAlign": "middle"
+      },
+      "s5": {
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "textAlign": "left",
+        "textRotation": 45
+      },
+      "s6": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      }
+    }
+  }
+}

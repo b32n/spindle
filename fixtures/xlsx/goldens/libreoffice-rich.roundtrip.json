@@ -1,0 +1,100 @@
+{
+  "diff": {
+    "added": 8,
+    "after": {
+      "cells": 28,
+      "formats": 0,
+      "formulas": 5,
+      "merges": 1,
+      "sheets": 2,
+      "styles": 1
+    },
+    "before": {
+      "cells": 28,
+      "formats": 0,
+      "formulas": 5,
+      "merges": 1,
+      "sheets": 2,
+      "styles": 1
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 6,
+      "added sheets[].config.rowHeights.*": 2,
+      "removed sheets[].cells.*.style.textRotation": 5
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "0",
+        "kind": "removed",
+        "path": "sheets[0].cells.A1.style.textRotation"
+      },
+      {
+        "before": "0",
+        "kind": "removed",
+        "path": "sheets[0].cells.B1.style.textRotation"
+      },
+      {
+        "before": "0",
+        "kind": "removed",
+        "path": "sheets[0].cells.C1.style.textRotation"
+      },
+      {
+        "before": "0",
+        "kind": "removed",
+        "path": "sheets[0].cells.D1.style.textRotation"
+      },
+      {
+        "before": "0",
+        "kind": "removed",
+        "path": "sheets[0].cells.E1.style.textRotation"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.B"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.C"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.D"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.E"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.6"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.7"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[1].config.colWidths.A"
+      }
+    ],
+    "removed": 5,
+    "total": 13,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

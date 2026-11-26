@@ -1,0 +1,271 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": 1
+          },
+          "A2": {
+            "value": 2
+          },
+          "A3": {
+            "value": 3
+          },
+          "A4": {
+            "value": 4
+          },
+          "A5": {
+            "value": 5
+          },
+          "B1": {
+            "value": 10
+          },
+          "C1": {
+            "value": 20
+          },
+          "G10": {
+            "formula": "=ROW(1:1)",
+            "value": "#VALUE!"
+          },
+          "G11": {
+            "formula": "=SUM(\"_xlfn.ANCHORARRAY(J1)\")",
+            "value": 0
+          },
+          "G12": {
+            "formula": "=SUMPRODUCT(A1:A3*2)",
+            "value": 12
+          },
+          "G13": {
+            "formula": "=-2^2",
+            "value": 4
+          },
+          "G14": {
+            "formula": "=2^3^2",
+            "value": 64
+          },
+          "G15": {
+            "formula": "=\"a\"&1",
+            "value": "a1"
+          },
+          "G16": {
+            "formula": "=1=1",
+            "value": true
+          },
+          "G17": {
+            "formula": "=\"a\"<\"b\"",
+            "value": true
+          },
+          "G18": {
+            "formula": "=SUM(\"A1:A3 A2:A4\")",
+            "value": 0
+          },
+          "G19": {
+            "formula": "=SUM(A1:A3,A5)",
+            "value": 11
+          },
+          "G2": {
+            "formula": "=\"_xlfn.SINGLE(A1:A3)\"",
+            "value": "_xlfn.SINGLE(A1:A3)"
+          },
+          "G20": {
+            "formula": "=SUM(\"A1:A2,A4\")",
+            "value": 0
+          },
+          "G21": {
+            "formula": "='Q1 Data'!A1",
+            "value": 7
+          },
+          "G22": {
+            "formula": "=$A$1+A$1+$A1",
+            "value": 3
+          },
+          "G23": {
+            "formula": "=SUM(A1:A5)/COUNT(A1:A5)",
+            "value": 3
+          },
+          "G24": {
+            "formula": "=IF(A1=1,\"y\",\"n\")",
+            "value": "y"
+          },
+          "G3": {
+            "formula": "=SUM(\"A:A\")",
+            "value": 0
+          },
+          "G4": {
+            "formula": "=SUM(\"1:1\")",
+            "value": 0
+          },
+          "G5": {
+            "formula": "=A1+50%",
+            "value": "#VALUE!"
+          },
+          "G6": {
+            "formula": "=SUM(Sheet1:Sheet2!A1)",
+            "value": "#REF!"
+          },
+          "G7": {
+            "formula": "=SUM(\"{1\",2,\"3}\")",
+            "value": 2
+          },
+          "G8": {
+            "formula": "=SUM(\"{1\",\"2;3\",\"4}\")",
+            "value": 0
+          },
+          "G9": {
+            "formula": "=SUM(\"A1:INDEX(A1:A5,3)\")",
+            "value": 0
+          },
+          "I10": {
+            "value": "row range argument"
+          },
+          "I11": {
+            "value": "spill operator (J1#)"
+          },
+          "I12": {
+            "value": "array arithmetic"
+          },
+          "I13": {
+            "value": "unary minus binds first"
+          },
+          "I14": {
+            "value": "left-associative power"
+          },
+          "I15": {
+            "value": "concatenation"
+          },
+          "I16": {
+            "value": "comparison"
+          },
+          "I17": {
+            "value": "text comparison"
+          },
+          "I18": {
+            "value": "range intersection"
+          },
+          "I19": {
+            "value": "argument list"
+          },
+          "I2": {
+            "value": "implicit intersection (@): the formula is in row 2"
+          },
+          "I20": {
+            "value": "union operator"
+          },
+          "I21": {
+            "value": "quoted sheet name"
+          },
+          "I22": {
+            "value": "mixed anchors"
+          },
+          "I23": {
+            "value": "division of aggregates"
+          },
+          "I24": {
+            "value": "text result"
+          },
+          "I3": {
+            "value": "whole column"
+          },
+          "I4": {
+            "value": "whole row (includes J1)"
+          },
+          "I5": {
+            "value": "percent literal"
+          },
+          "I6": {
+            "value": "3D reference"
+          },
+          "I7": {
+            "value": "array constant"
+          },
+          "I8": {
+            "value": "2D array constant"
+          },
+          "I9": {
+            "value": "range ending in INDEX"
+          },
+          "J1": {
+            "formula": "=\"_xlfn.SEQUENCE(3)\"",
+            "value": "_xlfn.SEQUENCE(3)"
+          },
+          "J2": {
+            "value": 2
+          },
+          "J3": {
+            "value": 3
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Sheet1",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": 100
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Sheet2",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": 7
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Q1 Data",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

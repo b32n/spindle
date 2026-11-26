@@ -1,0 +1,11 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 5,
+      "effect": "not imported",
+      "id": "xlsx.charts",
+      "label": "chart(s)"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "comments are dropped",
+      "id": "xlsx.comments",
+      "label": "sheet(s) with comments/notes"
+    }
+  ]
+}

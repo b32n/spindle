@@ -1,0 +1,63 @@
+{
+  "diff": {
+    "added": 6,
+    "after": {
+      "cells": 12,
+      "formats": 1,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 1
+    },
+    "before": {
+      "cells": 12,
+      "formats": 1,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 1
+    },
+    "byField": {
+      "added sheets[].config.rowHeights.*": 6
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.1"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.2"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.3"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.4"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.5"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.6"
+      }
+    ],
+    "removed": 0,
+    "total": 6,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

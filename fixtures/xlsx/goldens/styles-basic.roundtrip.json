@@ -1,0 +1,64 @@
+{
+  "diff": {
+    "added": 6,
+    "after": {
+      "cells": 10,
+      "formats": 4,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 6
+    },
+    "before": {
+      "cells": 10,
+      "formats": 4,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 6
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 5,
+      "added sheets[].config.rowHeights.*": 1
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.B"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.C"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.D"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.E"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.F"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.2"
+      }
+    ],
+    "removed": 0,
+    "total": 6,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

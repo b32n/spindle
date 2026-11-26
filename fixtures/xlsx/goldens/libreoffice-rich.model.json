@@ -1,0 +1,165 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "style": "s1",
+            "value": "Region"
+          },
+          "A2": {
+            "value": "North"
+          },
+          "A3": {
+            "value": "South"
+          },
+          "A4": {
+            "value": "East"
+          },
+          "A5": {
+            "value": "West"
+          },
+          "A8": {
+            "value": "Lookup"
+          },
+          "B1": {
+            "style": "s1",
+            "value": "Q1"
+          },
+          "B2": {
+            "value": 10
+          },
+          "B3": {
+            "value": 5
+          },
+          "B4": {
+            "value": 7
+          },
+          "B5": {
+            "value": 1
+          },
+          "B8": {
+            "formula": "=VLOOKUP(\"South\",A2:E5,5,FALSE())",
+            "value": 45
+          },
+          "C1": {
+            "style": "s1",
+            "value": "Q2"
+          },
+          "C2": {
+            "value": 20
+          },
+          "C3": {
+            "value": 15
+          },
+          "C4": {
+            "value": 8
+          },
+          "C5": {
+            "value": 2
+          },
+          "D1": {
+            "style": "s1",
+            "value": "Q3"
+          },
+          "D2": {
+            "value": 30
+          },
+          "D3": {
+            "value": 25
+          },
+          "D4": {
+            "value": 9
+          },
+          "D5": {
+            "value": 3
+          },
+          "E1": {
+            "style": "s1",
+            "value": "Total"
+          },
+          "E2": {
+            "formula": "=SUM(B2:D2)",
+            "value": 60
+          },
+          "E3": {
+            "formula": "=SUM(B3:D3)",
+            "value": 45
+          },
+          "E4": {
+            "formula": "=SUM(B4:D4)",
+            "value": 24
+          },
+          "E5": {
+            "formula": "=SUM(B5:D5)",
+            "value": 6
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 1,
+          "frozenRows": 1,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [
+            "H1:J2"
+          ],
+          "rowHeights": {
+            "1": 20,
+            "2": 20,
+            "3": 20,
+            "4": 20,
+            "5": 20,
+            "8": 20
+          },
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Data",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": 5
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {
+            "1": 20
+          },
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Hidden",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {
+      "s1": {
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "textRotation": 0,
+        "verticalAlign": "bottom"
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "compared": 159,
+  "firstMismatches": [
+    {
+      "actual": "\"#NAME? Function SIN not found\"",
+      "cell": "I14",
+      "expected": "0.841470984807897",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function COS not found\"",
+      "cell": "I15",
+      "expected": "0.54030230586814",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function PI not found\"",
+      "cell": "I16",
+      "expected": "3.14159265358979",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function RADIANS not found\"",
+      "cell": "I17",
+      "expected": "3.14159265358979",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function FACT not found\"",
+      "cell": "I18",
+      "expected": "120",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function COMBIN not found\"",
+      "cell": "I19",
+      "expected": "10",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function SUMSQ not found\"",
+      "cell": "I20",
+      "expected": "14",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function EVEN not found\"",
+      "cell": "I21",
+      "expected": "4",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function ODD not found\"",
+      "cell": "I22",
+      "expected": "3",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function ISEVEN not found\"",
+      "cell": "I23",
+      "expected": "TRUE",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.MAXIFS(A1:A10,B1:B10,\\\"x\\\")\"",
+      "cell": "I24",
+      "expected": "9",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.AGGREGATE(9,6,A1:A10)\"",
+      "cell": "I25",
+      "expected": "55",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.IFS(A1>5,\\\"a\\\",TRUE,\\\"b\\\")\"",
+      "cell": "I32",
+      "expected": "\"b\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.SWITCH(A1,1,\\\"one\\\",\\\"other\\\")\"",
+      "cell": "I33",
+      "expected": "\"one\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.XOR(TRUE,FALSE)\"",
+      "cell": "I36",
+      "expected": "TRUE",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.CONCAT(\\\"a\\\",\\\"b\\\")\"",
+      "cell": "I52",
+      "expected": "\"ab\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"_xlfn.TEXTJOIN(\\\",\\\",TRUE,B1:B3)\"",
+      "cell": "I53",
+      "expected": "\"x,y,x\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"46024\"",
+      "cell": "I59",
+      "expected": "\"2026-01-02\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"46024\"",
+      "cell": "I60",
+      "expected": "\"Friday\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function CLEAN not found\"",
+      "cell": "I63",
+      "expected": "\"a\"",
+      "sheet": "Data"
+    }
+  ],
+  "formulaCells": 159,
+  "matched": 109,
+  "mismatchClasses": {
+    "boolean -> error": 1,
+    "boolean -> text": 1,
+    "error -> error": 1,
+    "number -> error": 17,
+    "number -> text": 20,
+    "text -> error": 1,
+    "text -> text": 9
+  },
+  "mismatched": 50,
+  "status": "ok",
+  "uncached": 0,
+  "unreadableSheets": 0,
+  "volatile": 0
+}

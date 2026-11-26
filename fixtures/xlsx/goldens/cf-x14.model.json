@@ -1,0 +1,69 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Bar"
+          },
+          "A2": {
+            "value": -5
+          },
+          "A3": {
+            "value": 3
+          },
+          "A4": {
+            "value": 8
+          },
+          "A5": {
+            "value": -2
+          },
+          "A6": {
+            "value": 10
+          },
+          "B1": {
+            "value": "Icons"
+          },
+          "B2": {
+            "value": -15
+          },
+          "B3": {
+            "value": 9
+          },
+          "B4": {
+            "value": 24
+          },
+          "B5": {
+            "value": -6
+          },
+          "B6": {
+            "value": 30
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "CFx14",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

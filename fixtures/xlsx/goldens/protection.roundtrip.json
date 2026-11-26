@@ -1,0 +1,94 @@
+{
+  "diff": {
+    "added": 12,
+    "after": {
+      "cells": 9,
+      "formats": 1,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 3,
+      "styles": 1
+    },
+    "before": {
+      "cells": 9,
+      "formats": 1,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 3,
+      "styles": 1
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 6,
+      "added sheets[].config.rowHeights.*": 6
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.B"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.1"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.2"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[1].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[1].config.colWidths.B"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[1].config.rowHeights.1"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[1].config.rowHeights.2"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[2].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[2].config.colWidths.B"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[2].config.rowHeights.1"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[2].config.rowHeights.2"
+      }
+    ],
+    "removed": 0,
+    "total": 12,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

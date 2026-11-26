@@ -1,0 +1,14 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "not imported",
+      "id": "xlsx.conditionalFormatting",
+      "label": "conditional formatting rule(s)",
+      "where": [
+        "CFx14"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Region"
+          },
+          "A2": {
+            "value": "N"
+          },
+          "A3": {
+            "value": "S"
+          },
+          "A6": {
+            "value": "merged"
+          },
+          "A8": {
+            "value": "a b c"
+          },
+          "B1": {
+            "value": "Q1"
+          },
+          "B2": {
+            "value": 1
+          },
+          "B3": {
+            "value": 3
+          },
+          "C1": {
+            "value": "Q2"
+          },
+          "C2": {
+            "value": 2
+          },
+          "C3": {
+            "value": 4
+          },
+          "F1": {
+            "formula": "=\"_xlfn.XLOOKUP(\"S\",A2:A3,B2:B3)\"",
+            "value": "_xlfn.XLOOKUP(\"S\",A2:A3,B2:B3)"
+          },
+          "F2": {
+            "formula": "=\"_xlfn.LET(_xlpm.x,2,_xlpm.x*3)\"",
+            "value": "_xlfn.LET(_xlpm.x,2,_xlpm.x*3)"
+          },
+          "F4": {
+            "formula": "=\"_xlfn.SORT(A2:A3)\"",
+            "value": "_xlfn.SORT(A2:A3)"
+          },
+          "F5": {
+            "value": 0
+          },
+          "F8": {
+            "formula": "=IFERROR(1/0,0)",
+            "value": 0
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {
+            "A": 150
+          },
+          "filters": {},
+          "frozenCols": 1,
+          "frozenRows": 1,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [
+            "A6:B6"
+          ],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Data",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

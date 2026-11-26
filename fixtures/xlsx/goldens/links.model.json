@@ -1,0 +1,66 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Kind"
+          },
+          "A2": {
+            "value": "https"
+          },
+          "A3": {
+            "value": "mailto"
+          },
+          "A4": {
+            "value": "internal"
+          },
+          "A5": {
+            "value": "javascript"
+          },
+          "B1": {
+            "value": "Link"
+          },
+          "B2": {
+            "hyperlink": "https://example.com/spindle-fixture",
+            "value": "https link"
+          },
+          "B3": {
+            "hyperlink": "mailto:someone@example.com?subject=Fixture",
+            "value": "mailto link"
+          },
+          "B4": {
+            "value": "internal link"
+          },
+          "B5": {
+            "hyperlink": "javascript:alert(1)",
+            "value": "javascript link"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Links",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

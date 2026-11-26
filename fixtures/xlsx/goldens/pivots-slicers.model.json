@@ -1,0 +1,128 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Region"
+          },
+          "A2": {
+            "value": "North"
+          },
+          "A3": {
+            "value": "South"
+          },
+          "A4": {
+            "value": "North"
+          },
+          "A5": {
+            "value": "East"
+          },
+          "A6": {
+            "value": "South"
+          },
+          "B1": {
+            "value": "Product"
+          },
+          "B2": {
+            "value": "Pen"
+          },
+          "B3": {
+            "value": "Pen"
+          },
+          "B4": {
+            "value": "Ink"
+          },
+          "B5": {
+            "value": "Pen"
+          },
+          "B6": {
+            "value": "Ink"
+          },
+          "C1": {
+            "value": "Units"
+          },
+          "C2": {
+            "value": 3
+          },
+          "C3": {
+            "value": 2
+          },
+          "C4": {
+            "value": 1
+          },
+          "C5": {
+            "value": 9
+          },
+          "C6": {
+            "value": 4
+          },
+          "D1": {
+            "value": "Sales"
+          },
+          "D2": {
+            "value": 30
+          },
+          "D3": {
+            "value": 20
+          },
+          "D4": {
+            "value": 15
+          },
+          "D5": {
+            "value": 90
+          },
+          "D6": {
+            "value": 60
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Data",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Sales by region"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Pivot",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
+}

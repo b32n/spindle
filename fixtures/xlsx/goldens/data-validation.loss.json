@@ -1,0 +1,14 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 9,
+      "effect": "not imported",
+      "id": "xlsx.dataValidation",
+      "label": "data validation rule(s) (dropdowns, limits)",
+      "where": [
+        "Validation"
+      ]
+    }
+  ]
+}

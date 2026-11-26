@@ -1,0 +1,33 @@
+{
+  "importError": true,
+  "package": "zip",
+  "parts": [
+    {
+      "name": "[Content_Types].xml",
+      "rule": "package.contentTypes",
+      "status": "unaccounted"
+    },
+    {
+      "name": "_rels/.rels",
+      "rule": "package.relationships",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/app.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/core.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    }
+  ],
+  "totals": {
+    "dropped": 0,
+    "mapped": 0,
+    "opaque": 0,
+    "total": 4,
+    "unaccounted": 4
+  }
+}

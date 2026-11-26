@@ -1,0 +1,116 @@
+{
+  "importError": false,
+  "package": "zip",
+  "parts": [
+    {
+      "name": "[Content_Types].xml",
+      "rule": "package.contentTypes",
+      "status": "mapped"
+    },
+    {
+      "name": "_rels/.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "name": "docProps/app.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "docProps/core.xml",
+      "rule": "none",
+      "status": "unaccounted"
+    },
+    {
+      "name": "xl/_rels/workbook.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "loss": [
+        "xlsx.charts"
+      ],
+      "name": "xl/charts/chart1.xml",
+      "rule": "chart",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.charts"
+      ],
+      "name": "xl/charts/chart2.xml",
+      "rule": "chart",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.charts"
+      ],
+      "name": "xl/charts/chart3.xml",
+      "rule": "chart",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.charts"
+      ],
+      "name": "xl/charts/chart4.xml",
+      "rule": "chart",
+      "status": "dropped"
+    },
+    {
+      "loss": [
+        "xlsx.charts"
+      ],
+      "name": "xl/charts/chart5.xml",
+      "rule": "chart",
+      "status": "dropped"
+    },
+    {
+      "name": "xl/drawings/_rels/drawing1.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "loss": [
+        "xlsx.charts"
+      ],
+      "name": "xl/drawings/drawing1.xml",
+      "rule": "drawing",
+      "status": "dropped"
+    },
+    {
+      "name": "xl/sharedStrings.xml",
+      "rule": "sharedStrings",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/styles.xml",
+      "rule": "styles",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/workbook.xml",
+      "rule": "workbook",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/worksheets/_rels/sheet1.xml.rels",
+      "rule": "package.relationships",
+      "status": "mapped"
+    },
+    {
+      "name": "xl/worksheets/sheet1.xml",
+      "rule": "worksheet",
+      "status": "mapped"
+    }
+  ],
+  "totals": {
+    "dropped": 6,
+    "mapped": 9,
+    "opaque": 0,
+    "total": 17,
+    "unaccounted": 2
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 1,
+      "effect": "not imported",
+      "id": "xlsx.autoFilter",
+      "label": "filter(s)",
+      "where": [
+        "Filters"
+      ]
+    }
+  ]
+}

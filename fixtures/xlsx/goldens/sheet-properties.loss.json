@@ -1,0 +1,15 @@
+{
+  "format": "xlsx",
+  "items": [
+    {
+      "count": 2,
+      "effect": "become visible",
+      "id": "xlsx.hiddenSheets",
+      "label": "hidden sheet(s)",
+      "where": [
+        "Hidden",
+        "Very hidden"
+      ]
+    }
+  ]
+}

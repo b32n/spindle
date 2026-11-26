@@ -1,0 +1,224 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "style": "s1",
+            "value": "theme colour + tint"
+          },
+          "A10": {
+            "style": "s1",
+            "value": "darkDown"
+          },
+          "A11": {
+            "style": "s1",
+            "value": "darkUp"
+          },
+          "A12": {
+            "style": "s1",
+            "value": "darkGrid"
+          },
+          "A13": {
+            "style": "s1",
+            "value": "darkTrellis"
+          },
+          "A14": {
+            "style": "s1",
+            "value": "lightHorizontal"
+          },
+          "A15": {
+            "style": "s1",
+            "value": "lightVertical"
+          },
+          "A16": {
+            "style": "s1",
+            "value": "lightGrid"
+          },
+          "A19": {
+            "style": "s1",
+            "value": "diagonal borders"
+          },
+          "A2": {
+            "style": "s1",
+            "value": "indexed colour"
+          },
+          "A3": {
+            "style": "s2",
+            "value": "named style (Good)"
+          },
+          "A4": {
+            "style": "s1",
+            "value": "gradient fill"
+          },
+          "A5": {
+            "style": "s1",
+            "value": "darkGray"
+          },
+          "A6": {
+            "style": "s1",
+            "value": "mediumGray"
+          },
+          "A7": {
+            "style": "s1",
+            "value": "lightGray"
+          },
+          "A8": {
+            "style": "s1",
+            "value": "darkHorizontal"
+          },
+          "A9": {
+            "style": "s1",
+            "value": "darkVertical"
+          },
+          "C10": {
+            "style": "s9",
+            "value": "double"
+          },
+          "C11": {
+            "style": "s4",
+            "value": "hair"
+          },
+          "C12": {
+            "style": "s4",
+            "value": "mediumDashed"
+          },
+          "C13": {
+            "style": "s4",
+            "value": "dashDot"
+          },
+          "C14": {
+            "style": "s4",
+            "value": "mediumDashDot"
+          },
+          "C15": {
+            "style": "s4",
+            "value": "dashDotDot"
+          },
+          "C16": {
+            "style": "s4",
+            "value": "mediumDashDotDot"
+          },
+          "C17": {
+            "style": "s4",
+            "value": "slantDashDot"
+          },
+          "C4": {
+            "style": "s3",
+            "value": "named style (Spindle Emphasis)"
+          },
+          "C5": {
+            "style": "s4",
+            "value": "thin"
+          },
+          "C6": {
+            "style": "s5",
+            "value": "medium"
+          },
+          "C7": {
+            "style": "s6",
+            "value": "dashed"
+          },
+          "C8": {
+            "style": "s7",
+            "value": "dotted"
+          },
+          "C9": {
+            "style": "s8",
+            "value": "thick"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {
+            "A": 187,
+            "C": 145
+          },
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Theme",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {
+      "s1": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s2": {
+        "backgroundColor": "#c6efce",
+        "fontColor": "#006100",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s3": {
+        "bold": true,
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s4": {
+        "borderBottom": "1px solid #000000",
+        "borderLeft": "1px solid #000000",
+        "borderRight": "1px solid #000000",
+        "borderTop": "1px solid #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s5": {
+        "borderBottom": "2px solid #000000",
+        "borderLeft": "2px solid #000000",
+        "borderRight": "2px solid #000000",
+        "borderTop": "2px solid #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s6": {
+        "borderBottom": "1px dashed #000000",
+        "borderLeft": "1px dashed #000000",
+        "borderRight": "1px dashed #000000",
+        "borderTop": "1px dashed #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s7": {
+        "borderBottom": "1px dotted #000000",
+        "borderLeft": "1px dotted #000000",
+        "borderRight": "1px dotted #000000",
+        "borderTop": "1px dotted #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s8": {
+        "borderBottom": "3px solid #000000",
+        "borderLeft": "3px solid #000000",
+        "borderRight": "3px solid #000000",
+        "borderTop": "3px solid #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s9": {
+        "borderBottom": "3px double #000000",
+        "borderLeft": "3px double #000000",
+        "borderRight": "3px double #000000",
+        "borderTop": "3px double #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      }
+    }
+  }
+}

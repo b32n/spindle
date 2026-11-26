@@ -1,0 +1,118 @@
+{
+  "importError": null,
+  "warnings": [],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {
+      "f1": {
+        "decimalPlaces": 2,
+        "negativeFormat": "minus",
+        "type": "number",
+        "useThousandsSeparator": false
+      }
+    },
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "Locked cell"
+          },
+          "A2": {
+            "format": "f1",
+            "style": "s1",
+            "value": 5
+          },
+          "B2": {
+            "value": "unlocked input"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Legacy hash",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Locked cell"
+          },
+          "A2": {
+            "format": "f1",
+            "style": "s1",
+            "value": 5
+          },
+          "B2": {
+            "value": "unlocked input"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "SHA-512 hash",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "Locked cell"
+          },
+          "A2": {
+            "format": "f1",
+            "style": "s1",
+            "value": 5
+          },
+          "B2": {
+            "value": "unlocked input"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "No password",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {
+      "s1": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      }
+    }
+  }
+}
