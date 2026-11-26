@@ -14,6 +14,7 @@ import { updateYFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirro
 import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
 import { docsSchema } from '../prosemirror/schema';
 import { sectionsToPmDoc } from '../prosemirror/sync';
+import { listChanges, settle } from '../prosemirror/review';
 import { DocumentImpl } from '../document';
 import { createParagraphFromText } from '../blocks/paragraph';
 import { getYDocFields, hydrateYDocFromData, serializeYDocToData } from './y-schema';
@@ -664,6 +665,57 @@ describe('concurrent suggestions on one paragraph mark or table row', () => {
     // (made on the whole paragraph) lands there next to Ada's: the residual limit documented in collaboration.md.
     expect(blocks[0].revision).toEqual({ insertion: ADA, deletion: BO });
     expect(blocks[1].revision).toBeUndefined();
+  });
+
+  /** What the review panel does on one client: accept or reject the change of `author` and push the result into Y. */
+  const settleBy = (c: Client, author: string, action: 'accept' | 'reject') => {
+    const state = EditorState.create({ doc: c.pm() });
+    const change = listChanges(state.doc).find((ch) => ch.author === author)!;
+    const tr = settle(state, change.units, action)!;
+    updateYFragment(c.ydoc, c.fragment, tr.doc, { mapping: new Map(), isOMark: new Map() });
+  };
+  const paragraphTexts = (c: Client) => (c.blocks() as ParagraphBlock[]).map((blk) => blk.content.map((x) => (x as { text: string }).text).join(''));
+
+  it('can be accepted and rejected independently after a concurrent split and mark deletion', () => {
+    const make = () => {
+      const [a, b] = pair([para('p', [text('hello world')])]);
+      a.edit((tr) => {
+        tr.split(7);
+        tr.setNodeMarkup(0, undefined, { ...tr.doc.child(0).attrs, revisionInsertion: ADA });
+      });
+      markParagraph(b, { revisionDeletion: BO });
+      sync(a, b);
+      return [a, b] as const;
+    };
+    // Bo's record is rejected by one client: Ada's split stays suggested, then Ada's is accepted by the other.
+    let [a, b] = make();
+    settleBy(b, 'Bo', 'reject');
+    sync(a, b);
+    for (const c of [a, b]) {
+      expect(revisionOfBlock(c)).toEqual({ insertion: ADA });
+      expect(paragraphTexts(c)).toEqual(['hello ', 'world']);
+    }
+    settleBy(a, 'Ada', 'accept');
+    sync(a, b);
+    for (const c of [a, b]) {
+      expect(revisionOfBlock(c)).toBeUndefined();
+      expect(paragraphTexts(c)).toEqual(['hello ', 'world']);
+    }
+    // Ada's record is rejected (the split goes), Bo's stays pending on the joined paragraph.
+    [a, b] = make();
+    settleBy(a, 'Ada', 'reject');
+    sync(a, b);
+    for (const c of [a, b]) expect(paragraphTexts(c)).toEqual(['hello world']);
+    for (const c of [a, b]) expect(revisionOfBlock(c)).toBeUndefined();
+    // Accepting Bo's deletion: the mark (inserted by Ada, deleted by Bo) is gone and the paragraphs are joined; nothing is left of Ada's record.
+    [a, b] = make();
+    settleBy(a, 'Bo', 'accept');
+    sync(a, b);
+    for (const c of [a, b]) {
+      expect(paragraphTexts(c)).toEqual(['hello world']);
+      expect(revisionOfBlock(c)).toBeUndefined();
+    }
+    expect(a.pm().toJSON()).toEqual(b.pm().toJSON());
   });
 
   it('keep both kinds on a table row', () => {

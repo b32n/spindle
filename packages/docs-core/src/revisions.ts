@@ -122,9 +122,13 @@ export function collectRevisions(doc: PmNode, withText = true): RevisionSummary[
   return found;
 }
 
-/** The authors of the given changes, in order of first appearance, each with the colour `assignAuthorColors` gives them. */
-export function revisionAuthors(revisions: ReadonlyArray<{ author: string }>): RevisionAuthor[] {
-  const colors = assignAuthorColors(revisions.map((r) => r.author));
+/**
+ * The authors of the given changes, in order of first appearance, each with the colour `assignAuthorColors` gives them.
+ * `palette` is every author of the document, when that is more than the authors of these changes (the colours are shared
+ * out among all of them, so they match the page).
+ */
+export function revisionAuthors(revisions: ReadonlyArray<{ author: string }>, palette?: Iterable<string>): RevisionAuthor[] {
+  const colors = assignAuthorColors(palette ?? revisions.map((r) => r.author));
   const byName = new Map<string, RevisionAuthor>();
   for (const r of revisions) {
     const entry = byName.get(r.author) ?? { name: r.author, color: colors.get(r.author) as string, count: 0 };

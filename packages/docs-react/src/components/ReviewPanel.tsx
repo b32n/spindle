@@ -18,6 +18,8 @@ export interface ReviewPanelProps {
   /** Go to a change in the document. */
   onGoTo: (change: ReviewChange) => void;
   onClose: () => void;
+  /** Every author of the document, whose colours are shared out (default: the authors of `changes`). */
+  palette?: readonly string[];
 }
 
 const FONT = '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif';
@@ -72,13 +74,14 @@ export function neighbourChange(changes: readonly ReviewChange[], from: number |
   return (from === null ? undefined : [...changes].reverse().find((c) => c.from < from)) ?? changes[changes.length - 1];
 }
 
-export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChange, onResolve, onGoTo, onClose }: ReviewPanelProps) {
+export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChange, onResolve, onGoTo, onClose, palette }: ReviewPanelProps) {
   const [author, setAuthor] = useState<string>('');
   const [currentId, setCurrentId] = useState<string | null>(null);
   // Where the last change gone to was: next and previous go on from here even after the document changed.
   const [currentFrom, setCurrentFrom] = useState<number | null>(null);
   const authors = useMemo(() => [...new Set(changes.map((c) => c.author))], [changes]);
-  const colors = useMemo(() => assignAuthorColors(authors), [authors]);
+  // The colours are shared out among all authors of the document (a move's other end can have another author), as on the page.
+  const colors = useMemo(() => assignAuthorColors(palette ?? authors), [palette, authors]);
   // A filter on an author who has no changes left shows everybody again.
   useEffect(() => {
     if (author && !authors.includes(author)) setAuthor('');
@@ -115,7 +118,7 @@ export const ReviewPanel = memo(function ReviewPanel({ changes, view, onViewChan
               type="button"
               aria-pressed={view === v.id}
               onClick={() => onViewChange(v.id)}
-              style={{ ...button, ...(view === v.id ? { background: '#e8f0fe', borderColor: '#aecbfa', color: '#1967d2' } : {}) }}
+              style={{ ...button, ...(view === v.id ? { background: '#e8f0fe', border: '1px solid #aecbfa', color: '#1967d2' } : {}) }}
             >
               {v.label}
             </button>

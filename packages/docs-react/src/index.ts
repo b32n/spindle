@@ -10,6 +10,8 @@ export { Toolbar } from './components/Toolbar';
 export { CommentsSidebar } from './components/CommentsSidebar';
 export { RevisionLegend } from './components/RevisionLegend';
 export { ReviewPanel } from './components/ReviewPanel';
+export { RevisionViewBanner } from './components/RevisionViewBanner';
+export type { RevisionViewBannerProps } from './components/RevisionViewBanner';
 export type { ReviewPanelProps } from './components/ReviewPanel';
 export type { RevisionLegendProps } from './components/RevisionLegend';
 export { Ruler } from './components/Ruler';

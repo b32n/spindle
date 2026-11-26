@@ -312,6 +312,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-REV-04 | the review panel lists the changes; accept an insertion, reject a deletion, accept all, and check the text | covered | yes |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-05 | the Final and Original views show the text as if every change were accepted or rejected, and filtering by author limits Accept all | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-REV-06 | next and previous go through the changes, scrolling to each | covered |  |  | `e2e/docs/revisions.spec.ts` |
+| D-REV-07 | the Final and Original views are read-only, with a banner that switches back to All markup | covered |  |  | `e2e/docs/revisions.spec.ts` |
 | D-SEC-01 | a .docx with four sections shows each with its own page size and headers | covered | yes |  | `e2e/docs/sections.spec.ts` |
 | D-SEC-02 | a next-page section break starts a new page and downloads as a second section | covered | yes |  | `e2e/docs/sections.spec.ts` |
 | D-SEC-03 | a continuous section break keeps the text on the page and is written as a continuous section | covered |  |  | `e2e/docs/sections.spec.ts` |
@@ -474,7 +475,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 407
+- covered: 408
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

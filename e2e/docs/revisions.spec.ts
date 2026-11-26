@@ -307,4 +307,51 @@ test.describe('docs: tracked changes in a .docx', () => {
     await expect(items.last()).toHaveAttribute('aria-current', 'true');
     await expect(doc.pages.locator('td[data-revision-row="deletion"]').first()).toBeInViewport();
   });
+  test('D-REV-07 the Final and Original views are read-only, with a banner that switches back to All markup', async ({
+    page,
+  }) => {
+    await openPanel(page);
+    const view = panel(page).getByRole('group', { name: 'Show changes as' });
+    const banner = page.getByTestId('revision-view-banner');
+    // A read-only editor takes no focus (so `clickText` cannot be used): click the text and send the keys anyway.
+    const tryTyping = async () => {
+      await doc.pages.getByText('Total tonnage handled in').first().click();
+      await page.keyboard.press('Home');
+      await page.keyboard.type('ZZ');
+    };
+    await expect(banner).toHaveCount(0);
+
+    // Final: banner, and typing changes nothing.
+    await view.getByRole('button', { name: 'Final' }).click();
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText('Showing final text: switch to All markup to edit');
+    await tryTyping();
+    await expect(doc.pages.first()).not.toContainText('ZZ');
+    await expect(markup(doc)).toHaveCount(0);
+
+    // Original: the same.
+    await view.getByRole('button', { name: 'Original' }).click();
+    await expect(banner).toContainText('Showing original text: switch to All markup to edit');
+    await tryTyping();
+    await expect(doc.pages.first()).not.toContainText('ZZ');
+
+    // Accepting a change from the panel is an explicit command and still works in these views.
+    const items = panel(page).getByTestId('review-change');
+    const before = await items.count();
+    await panel(page).getByRole('button', { name: 'Accept change' }).first().click();
+    await expect(items).toHaveCount(before - 1);
+
+    // One click on the banner goes back to All markup, where the document can be edited again.
+    await banner.getByRole('button', { name: 'Switch to All markup' }).click();
+    await expect(banner).toHaveCount(0);
+    await expect(view.getByRole('button', { name: 'All markup' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    await expect(markup(doc).first()).toBeVisible();
+    await doc.clickText('Total tonnage handled in');
+    await doc.press('Home');
+    await doc.typeText('ZZ');
+    await expect(doc.pages.first()).toContainText('ZZTotal tonnage');
+  });
 });

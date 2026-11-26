@@ -43,6 +43,16 @@ describe('ReviewPanel', () => {
     expect(html).toContain('<option value="Bo">Bo</option>');
   });
 
+  it('draws an author in the colour the page gives them when the palette lists every author of the document', () => {
+    // Bo and Di share a first colour; Bo is only in the other end of a move, so no change of Bo's is in the list.
+    const changes = [change({ id: 'a', author: 'Ada' }), change({ id: 'b', author: 'Di' })];
+    const page = assignAuthorColors(['Ada', 'Bo', 'Di']);
+    const html = render({ changes, palette: ['Ada', 'Bo', 'Di'] }).toLowerCase();
+    expect(html).toContain(`border-left:3px solid ${page.get('Di')!.toLowerCase()}`);
+    expect(page.get('Di')).not.toBe(assignAuthorColors(['Ada', 'Di']).get('Di'));
+    expect(render({ changes }).toLowerCase()).toContain(`border-left:3px solid ${assignAuthorColors(['Ada', 'Di']).get('Di')!.toLowerCase()}`);
+  });
+
   it('shortens a long text and names every kind of change', () => {
     const kinds: ReviewChange['kind'][] = ['insertion', 'deletion', 'move', 'format', 'paragraphInserted', 'paragraphDeleted', 'paragraphFormat', 'rowInserted', 'rowDeleted'];
     const html = render({ changes: kinds.map((kind, i) => change({ id: String(i), kind, text: 'x'.repeat(200) })) });

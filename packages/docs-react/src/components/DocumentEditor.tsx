@@ -13,12 +13,13 @@
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor, ReviewChange } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, createCommands, docsSchema, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, createCommands, docsSchema, documentRevisionAuthors, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
 import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
+import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
 import { ReviewPanel } from './ReviewPanel';
 import { Ruler } from './Ruler';
@@ -120,7 +121,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   height,
   showToolbar = true,
   showRuler = true,
-  readOnly = false,
+  readOnly: readOnlyProp = false,
   fileActions = false,
   exportFormats,
   fileName,
@@ -145,9 +146,12 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [showComments, setShowComments] = useState(false);
   const [authors, setAuthors] = useState<RevisionAuthor[]>([]);
   const [changes, setChanges] = useState<ReviewChange[]>([]);
+  const [palette, setPalette] = useState<string[]>([]);
   const [showReview, setShowReview] = useState(false);
   const showReviewRef = useRef(false);
   const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
+  // The Final and Original views hide text, so they cannot be edited (the banner offers the way back to All markup).
+  const readOnly = isEditLocked(readOnlyProp, revisionView);
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   
@@ -233,10 +237,11 @@ export const DocumentEditor = memo(function DocumentEditor({
   }, [readOnly]);
 
   const handleResolve = useCallback((action: 'accept' | 'reject', target: { change: ReviewChange } | { author?: string }) => {
-    if (readOnly || !editorView) return;
+    // An explicit command by the reader: allowed in the Final and Original views too, not when the host made the editor read-only.
+    if (readOnlyProp || !editorView) return;
     const command = 'change' in target ? resolveChange(target.change.id, action) : resolveAll(action, target.author);
     command(editorView.state, editorView.dispatch);
-  }, [readOnly, editorView]);
+  }, [readOnlyProp, editorView]);
 
   const handleGoToChange = useCallback((change: ReviewChange) => {
     editorRef.current?.goTo(change.from);
@@ -317,7 +322,10 @@ export const DocumentEditor = memo(function DocumentEditor({
     clearTimeout(authorsTimer.current);
     authorsTimer.current = setTimeout(() => {
       const nextChanges = listChanges(state.doc);
-      const next = revisionAuthors(nextChanges);
+      // The colours are shared out among every author of the document (a move's other end can have another author than the change lists).
+      const everyone = documentRevisionAuthors(state.doc);
+      const next = revisionAuthors(nextChanges, everyone);
+      setPalette((prev) => (prev.length === everyone.length && prev.every((name, i) => name === everyone[i]) ? prev : everyone));
       // Keep the old list (and skip a render) when nothing in it changed.
       setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
       // The list of changes (new ids with every edit) is only kept while the panel shows it, so typing does not render the editor.
@@ -599,6 +607,7 @@ export const DocumentEditor = memo(function DocumentEditor({
         </div>
       )}
       
+      <RevisionViewBanner view={revisionView} onSwitchToMarkup={() => setRevisionView('markup')} />
       <RevisionLegend authors={authors} />
 
       {/* Editor area with vertical ruler */}
@@ -666,9 +675,10 @@ export const DocumentEditor = memo(function DocumentEditor({
           >
             <ReviewPanel
               changes={changes}
+              palette={palette}
               view={revisionView}
               onViewChange={setRevisionView}
-              onResolve={readOnly ? undefined : handleResolve}
+              onResolve={readOnlyProp ? undefined : handleResolve}
               onGoTo={handleGoToChange}
               onClose={() => setShowReview(false)}
             />

@@ -573,10 +573,10 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     j([
       {
         type: 'paragraph',
-        attrs: { revision: { insertion: { id: '4', author: 'Ada' } } },
+        attrs: { revisionInsertion: { id: '4', author: 'Ada' } },
         content: [text('keep '), text('new', [insertion]), text('old', [deletion]), text('fmt', [{ type: 'bold' }, format]), text('go', [{ type: 'link', attrs: { href: 'https://example.com/' } }, deletion])],
       },
-      { type: 'table', content: [{ type: 'table_row', attrs: { revision: { insertion: { id: '5', author: 'Ada' } } }, content: [{ type: 'table_cell', content: [{ type: 'paragraph', content: [text('c')] }] }] }] },
+      { type: 'table', content: [{ type: 'table_row', attrs: { revisionInsertion: { id: '5', author: 'Ada' } }, content: [{ type: 'table_cell', content: [{ type: 'paragraph', content: [text('c')] }] }] }] },
     ]);
   const runsOf = (revisionView?: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(doc(), { revisionView })[0] as ParagraphBlock).runs as TextRun[];
 
@@ -603,6 +603,15 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(runs.every((r) => r.revision === undefined)).toBe(true);
     expect(runs[3]).toMatchObject({ italic: true, fontSize: 14 });
     expect(runs[3].bold).toBeUndefined();
+  });
+
+  it('keeps a paragraph that holds only hidden text as an empty line of placeholders, with no change bar', () => {
+    const only = () => j([{ type: 'paragraph', attrs: { revisionDeletion: { id: '6', author: 'Bo' } }, content: [text('gone', [deletion])] }]);
+    const first = (view: 'markup' | 'final' | 'original') => proseMirrorToFlowBlocks(only(), { revisionView: view })[0] as ParagraphBlock;
+    expect((first('final').runs as TextRun[]).map((r) => r.text)).toEqual(['\u200B\u200B\u200B\u200B']);
+    expect(first('final').attrs?.changeBar).toBeUndefined();
+    expect((first('original').runs as TextRun[]).map((r) => r.text)).toEqual(['gone']);
+    expect(first('markup').attrs?.changeBar).toBeDefined();
   });
 
   it('breaks lines at the line break of tracked text that a view shows, and nowhere in text a view leaves out', () => {

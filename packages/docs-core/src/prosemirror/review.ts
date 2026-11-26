@@ -11,6 +11,7 @@ import { type Mark, type MarkType, type Node as PmNode, type NodeType } from 'pr
 import type { Command, EditorState, Transaction } from 'prosemirror-state';
 import type { BlockRevision, ParagraphFormat, RunFormat } from '../types';
 import { docsSchema } from './schema';
+import { readBlockRevision, withBlockRevision, withBlockRevisionKind } from './block-revision';
 import { paragraphFormatAttrs, runFormatMarks } from './sync';
 
 /** What one unit of change is: text (an insertion, a deletion, a change of formatting), a paragraph mark, a paragraph's formatting, a table row. */
@@ -31,7 +32,7 @@ export interface ChangeUnit {
   to: number;
   /** The text covered (text units). */
   text: string;
-  /** The mark (text units) or node attrs revision (block units) the unit comes from. */
+  /** The mark (text units) the unit comes from. */
   mark?: Mark;
 }
 
@@ -77,8 +78,8 @@ export function changeUnits(doc: PmNode): ChangeUnit[] {
       }
       return false;
     }
-    const revision = node.attrs.revision as BlockRevision | null | undefined;
-    if (revision && typeof revision === 'object' && (isTextblock(node) || node.type.name === 'table_row')) {
+    const revision = isTextblock(node) || node.type.name === 'table_row' ? readBlockRevision(node.attrs, false) : undefined;
+    if (revision) {
       const add = (kind: ChangeUnitKind, meta: { id?: string; author?: string; date?: string; moveId?: string } | undefined) => {
         if (!meta) return;
         const id = String(meta.id ?? '');
@@ -191,12 +192,6 @@ export function listChanges(doc: PmNode): ReviewChange[] {
 
 const FORMAT_MARKS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden', 'textStyle', 'namedStyle'];
 
-/** `revision` without what is being settled; null when nothing is left. */
-function withoutChange(revision: BlockRevision, kind: 'insertion' | 'deletion' | 'formatChange'): BlockRevision | null {
-  const { [kind]: _settled, ...rest } = revision;
-  return Object.keys(rest).length > 0 ? rest : null;
-}
-
 /**
  * Join the node at `pos` with the one after it, when both are paragraphs or headings of one parent: the mark between them
  * goes. The paragraph that results ends with the second one's mark, so it takes that mark's changes (inserted, deleted) and
@@ -208,8 +203,8 @@ function joinWithNext(tr: Transaction, pos: number): void {
   const end = pos + node.nodeSize;
   const next = tr.doc.resolve(end).nodeAfter;
   if (!next || !isTextblock(node) || !isTextblock(next)) return;
-  const first = (node.attrs.revision ?? {}) as BlockRevision;
-  const second = (next.attrs.revision ?? {}) as BlockRevision;
+  const first = readBlockRevision(node.attrs, false) ?? {};
+  const second = readBlockRevision(next.attrs, false) ?? {};
   const revision: BlockRevision = {
     ...(second.insertion && { insertion: second.insertion }),
     ...(second.deletion && { deletion: second.deletion }),
@@ -217,7 +212,7 @@ function joinWithNext(tr: Transaction, pos: number): void {
   };
   tr.join(end);
   const joined = tr.doc.nodeAt(pos);
-  if (joined) tr.setNodeMarkup(pos, undefined, { ...joined.attrs, revision: Object.keys(revision).length > 0 ? revision : null });
+  if (joined) tr.setNodeMarkup(pos, undefined, withBlockRevision(joined.attrs, revision));
 }
 
 /** The type and attrs a paragraph gets back when its formatting change is rejected. */
@@ -261,27 +256,27 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
       const kind = unit.kind === 'markInsertion' ? 'insertion' : 'deletion';
       // The mark is accepted when it stays: an inserted mark stays when accepted, a deleted one when rejected.
       const stays = (kind === 'insertion') === accept;
-      tr.setNodeMarkup(unit.from, undefined, { ...node.attrs, revision: withoutChange((node.attrs.revision ?? {}) as BlockRevision, kind) });
+      tr.setNodeMarkup(unit.from, undefined, withBlockRevisionKind(node.attrs, kind, null));
       if (!stays) joinWithNext(tr, unit.from);
       return;
     }
     case 'paragraphFormat': {
       const node = tr.doc.nodeAt(unit.from);
       if (!node) return;
-      const revision = (node.attrs.revision ?? {}) as BlockRevision;
+      const revision = readBlockRevision(node.attrs, false) ?? {};
       if (accept || !revision.formatChange) {
-        tr.setNodeMarkup(unit.from, undefined, { ...node.attrs, revision: withoutChange(revision, 'formatChange') });
+        tr.setNodeMarkup(unit.from, undefined, withBlockRevisionKind(node.attrs, 'formatChange', null));
         return;
       }
       const previous = previousParagraph(revision.formatChange);
-      const rest = withoutChange(revision, 'formatChange');
       // A list item holds a paragraph first: a paragraph that was a heading before stays a paragraph there, with its other formatting back.
       const $pos = tr.doc.resolve(unit.from);
       const fits = $pos.parent.canReplaceWith($pos.index(), $pos.index() + 1, previous.type);
       const type = fits ? previous.type : docsSchema.nodes.paragraph;
       const attrs = fits ? previous.attrs : previousParagraph({ ...revision.formatChange, previous: { ...revision.formatChange.previous, headingLevel: undefined } }).attrs;
-      // The node's own revision attrs outlive the restoring (its mark may still be inserted or deleted).
-      tr.setNodeMarkup(unit.from, type, { ...attrs, revision: rest });
+      // The node's own record of an inserted or deleted mark outlives the restoring, and so does its indent level (not part of the formatting).
+      const kept = { ...attrs, ...(node.attrs.indent !== undefined && 'indent' in type.spec.attrs! && { indent: node.attrs.indent }) };
+      tr.setNodeMarkup(unit.from, type, withBlockRevisionKind({ ...kept, revisionInsertion: node.attrs.revisionInsertion, revisionDeletion: node.attrs.revisionDeletion }, 'formatChange', null));
       return;
     }
     case 'rowInsertion':
@@ -291,7 +286,7 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
       const kind = unit.kind === 'rowInsertion' ? 'insertion' : 'deletion';
       const stays = (kind === 'insertion') === accept;
       if (stays) {
-        tr.setNodeMarkup(unit.from, undefined, { ...node.attrs, revision: withoutChange((node.attrs.revision ?? {}) as BlockRevision, kind) });
+        tr.setNodeMarkup(unit.from, undefined, withBlockRevisionKind(node.attrs, kind, null));
         return;
       }
       const $row = tr.doc.resolve(unit.from);

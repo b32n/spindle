@@ -300,7 +300,7 @@ edits, and the inverse operations broadcast to peers like any other edit.
   row's change is an attribute of the node, so they sync like other content and do not block attach. Two people editing inside the same change merge
   as for text. Accepting or rejecting a change in the review panel is an ordinary edit (text deleted, marks removed, attributes set)
   that syncs like any other; the coordination of two people settling the same change at once is not done yet, and the
-  Final / Original view is local to each client. A paragraph mark or row keeps one attribute per kind of
+  Final / Original view is local to each client. A change in the panel is found by its position, so a remote edit that moves it between rendering the panel and clicking Accept makes that click do nothing (the panel shows the new list right after). A paragraph mark or row keeps one attribute per kind of
   change (`revisionInsertion`, `revisionDeletion`, `revisionFormat`), each a Yjs key of its own, so two people suggesting
   different things on the same paragraph mark or row at once (one presses Enter, the other deletes the mark) both keep
   theirs, and each can be accepted or rejected alone. Two people suggesting the same kind on the same mark at once is

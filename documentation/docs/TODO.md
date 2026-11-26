@@ -63,7 +63,8 @@ Verified absent in code.
       `#name` link scrolls to it); there is no UI to insert bookmarks or cross-references, and `REF` fields are not recalculated.
 - [ ] **Track changes / suggestions mode** — a review panel accepts and rejects changes (one, all, one author's) and
       shows All markup / Final / Original. Not done: Suggesting mode (typing as tracked changes), the Final and Original
-      views do not remove deleted rows or show the old paragraph formatting, and accepting a change in a shared document is
+      views (read-only, with a banner to switch back) do not remove deleted rows or show the old paragraph formatting, a paragraph whose
+      text is hidden stays as an empty line, and the zero-width placeholders can change where a long hidden run wraps, and accepting a change in a shared document is
       not coordinated between collaborators yet. Tracked insertions, deletions, moves, formatting changes and paragraph and row changes are read
       from a file, shown (underlined / struck through in the author's colour, with a legend) and written back. Not done: accepting and
       a Suggesting mode, changes of cells, tables and sections, and a change around a field, image or note

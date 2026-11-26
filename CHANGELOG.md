@@ -347,10 +347,10 @@ lockstep.
   one author's (a filter), a next and a previous change (the caret goes there and the page scrolls to it), and a choice of how
   changes show: **All markup**, **Final** (as if every change were accepted: deleted text left out, no markup) and **Original**
   (as if every change were rejected: inserted text left out, the formatting before a change back). The panel has no Accept or
-  Reject in a read-only editor. New prop `DocumentEditor.revisionView` (the view to begin with) and `TrueLayoutEditor.revisionView`;
+  Reject in a read-only editor. **The Final and Original views are read-only**: a banner ("Showing final text: switch to All markup to edit" / "Showing original text: ...") offers a one-click switch back to All markup (`RevisionViewBanner`, `isEditLocked`), and the toolbar and rulers are hidden while a view is showing, as in a read-only editor; Accept and Reject in the panel still work there (they are explicit commands). The colours in the panel and the legend are shared out among every author of the document, as on the page (also for the author of the other end of a move). New prop `DocumentEditor.revisionView` (the view to begin with) and `TrueLayoutEditor.revisionView`;
   `proseMirrorToFlowBlocks` takes `revisionView` in its options (text a view leaves out keeps its length as zero-width spaces,
-  so positions stay in step; in the Final and Original views the editor can still be edited, and rows and paragraph formatting
-  are not shown as they were, only text and character formatting). New `TrueLayoutEditorHandle.goTo(pos)`; new components
+  so positions stay in step; in the Final and Original views rows and paragraph formatting are not shown as they were, only text and
+  character formatting, and a paragraph whose text a view hides stays as an empty line). New `TrueLayoutEditorHandle.goTo(pos)`; new components
   `ReviewPanel` and `RevisionLegend`. In docs-core: `listChanges` (the changes of a document, runs of one change joined, the two
   ends of a move as one), `changeUnits`, and the commands `resolveChange`, `resolveAll` (all, or one author's) and
   `resolveSelection`, plus `settle`. Accepting keeps an inserted run, drops a deleted one, keeps new formatting, keeps an inserted
