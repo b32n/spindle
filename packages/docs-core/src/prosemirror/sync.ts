@@ -54,14 +54,23 @@ export interface PmMarkJSON {
  * Convert our document model to ProseMirror JSON format
  */
 export function documentToProseMirror(doc: Document): PmNodeJSON {
-  const content = doc.sections
-    .flatMap(section => section.blocks.map(block => blockToPmNode(block)))
-    .filter((node): node is PmNodeJSON => node !== null);
+  const content = doc.sections.flatMap((section, index) => {
+    const nodes = section.blocks
+      .map(block => blockToPmNode(block))
+      .filter((node): node is PmNodeJSON => node !== null);
+    // Every section but the last ends with a break that names it.
+    return index < doc.sections.length - 1 ? [...nodes, sectionBreakNode(section.id)] : nodes;
+  });
 
   return {
     type: 'doc',
     content: content.length > 0 ? content : [{ type: 'paragraph', content: [] }],
   };
+}
+
+/** The `section_break` node that ends the section with this id. */
+function sectionBreakNode(sectionId: string): PmNodeJSON {
+  return { type: 'section_break', attrs: { sectionId } };
 }
 
 /**
@@ -379,6 +388,13 @@ function inlineContentToPm(content: InlineContent[], stylePool?: TextStylePool):
 
 /**
  * Convert ProseMirror document back to our document model
+ *
+ * A document without `section_break` nodes becomes one section: `existingDoc.sections[0]` with the new blocks. With
+ * breaks, each break ends the section whose id it names (looked up in `existingDoc.sections`, so page setup, header and
+ * footer carry over) and the blocks after the last break form the last section, which is the last of
+ * `existingDoc.sections` that no break names. A break naming an id that `existingDoc` does not have gets a section
+ * that copies the page setup of the first one, and a repeated id is renamed `<id>_2`, `<id>_3`, ... so section ids
+ * stay unique.
  * @param pmDoc - The ProseMirror document
  * @param existingDoc - The existing document to update
  * @param stylePool - Optional style pool for deduplicating styles (recommended for large documents)
@@ -388,32 +404,64 @@ export function proseMirrorToDocument(
   existingDoc: Document,
   stylePool?: TextStylePool
 ): Document {
-  const blocks: Block[] = [];
+  const groups: { breakId: string | null; blocks: Block[] }[] = [];
+  let blocks: Block[] = [];
   let blockIndex = 0;
   
   let previous: PmNode | undefined;
   pmDoc.forEach((node) => {
-    const convertedBlocks = pmNodeToBlocks(node, blockIndex, stylePool, previous?.type.name === 'ordered_list');
-    blocks.push(...convertedBlocks);
-    blockIndex += convertedBlocks.length;
+    if (node.type.name === 'section_break') {
+      groups.push({ breakId: String(node.attrs.sectionId ?? ''), blocks });
+      blocks = [];
+    } else {
+      const convertedBlocks = pmNodeToBlocks(node, blockIndex, stylePool, previous?.type.name === 'ordered_list');
+      blocks.push(...convertedBlocks);
+      blockIndex += convertedBlocks.length;
+    }
     previous = node;
   });
-  
-  // Ensure at least one paragraph
-  if (blocks.length === 0) {
-    blocks.push({
-      id: `block_${Date.now()}`,
-      type: 'paragraph',
-      content: [],
-    });
+  groups.push({ breakId: null, blocks });
+
+  const existing = existingDoc.sections;
+  if (groups.length === 1) {
+    // Ensure at least one paragraph
+    if (groups[0].blocks.length === 0) {
+      groups[0].blocks.push({
+        id: `block_${Date.now()}`,
+        type: 'paragraph',
+        content: [],
+      });
+    }
+    return {
+      ...existingDoc,
+      sections: [{
+        ...existing[0],
+        blocks: groups[0].blocks,
+      }],
+      updatedAt: new Date().toISOString(),
+    };
   }
-  
+
+  // Several sections (a section may hold no blocks: two breaks in a row, or a break at the very end).
+  const named = new Set(groups.flatMap(g => (g.breakId === null ? [] : [g.breakId])));
+  const trailing = [...existing].reverse().find(s => !named.has(s.id));
+  const used = new Set<string>();
+  const sections = groups.map((group): Section => {
+    const base = group.breakId === null
+      ? trailing
+      : existing.find(s => s.id === group.breakId);
+    let id = group.breakId ?? base?.id ?? `section_${groups.length}`;
+    for (let n = 2; used.has(id); n++) id = `${group.breakId ?? base?.id ?? 'section'}_${n}`;
+    used.add(id);
+    return {
+      ...(base ?? { pageConfig: existing[0].pageConfig }),
+      id,
+      blocks: group.blocks,
+    };
+  });
   return {
     ...existingDoc,
-    sections: [{
-      ...existingDoc.sections[0],
-      blocks,
-    }],
+    sections,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -766,6 +814,23 @@ export function blocksToPmDoc(blocks: Block[], stylePool?: TextStylePool): PmNod
   };
   
   return docsSchema.nodeFromJSON(json);
+}
+
+/**
+ * Convert the sections of a document to one ProseMirror document: the blocks of each section, and after every section
+ * but the last a `section_break` that names it. A single section gives the same document as `blocksToPmDoc`.
+ * @param sections - The sections, in document order
+ * @param stylePool - Optional style pool for looking up styles by ID
+ */
+export function sectionsToPmDoc(sections: ReadonlyArray<{ id: string; blocks: Block[] }>, stylePool?: TextStylePool): PmNode {
+  const content = sections.flatMap((section, index) => {
+    const nodes = blocksToPmContent(section.blocks, stylePool);
+    return index < sections.length - 1 ? [...nodes, sectionBreakNode(section.id)] : nodes;
+  });
+  return docsSchema.nodeFromJSON({
+    type: 'doc',
+    content: content.length > 0 ? content : [{ type: 'paragraph', content: [] }],
+  });
 }
 
 /** Blocks as ProseMirror node JSON, with consecutive list items grouped into lists (the content of a document or of a table cell). */

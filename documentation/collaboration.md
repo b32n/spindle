@@ -271,8 +271,24 @@ edits, and the inverse operations broadcast to peers like any other edit.
 
 ## Known limitations (v1)
 
-- **Documents must be single-section** to attach collab. Multi-section
-  support needs section-boundary nodes in the editor schema.
+- **Multi-section documents attach, but the editor still shows one flow.** The
+  shared document carries every section (a `section_break` node ends each
+  section but the last, and `sectionsMeta` holds each section's page setup,
+  header and footer). The editor does not lay the sections out yet, so under
+  collab a multi-section document is drawn as one continuous run with the first
+  section's setup; page setup per section and the Insert → Section break UI
+  come with the section editing work.
+- **Content the shared layout cannot hold blocks attach.** `getCollabBlockers(document)`
+  lists it (no sections, two sections with one id, block or inline types this
+  version does not know) and `attachCollab` rejects with a `CollabBlockedError`
+  carrying that list, instead of silently dropping it. The list is empty for
+  every document the importers produce today.
+- **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
+  1, the layout without section breaks). A client that finds a newer version
+  than it supports rejects `attachCollab` with a `CollabSchemaVersionError`
+  instead of editing a document whose newer nodes it would drop. Clients from
+  before this check have no such guard: do not open a multi-section room with
+  them. Existing single-section rooms need no migration.
 - **Same-cell concurrent edits are last-writer-wins.** Edits to
   *different* cells always merge cleanly.
 - The reference relay server keeps room state only in connected peers'

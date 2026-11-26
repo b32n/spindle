@@ -13,7 +13,7 @@ import { Node as PmNode } from 'prosemirror-model';
 import { updateYFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror';
 import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
 import { docsSchema } from '../prosemirror/schema';
-import { blocksToPmDoc } from '../prosemirror/sync';
+import { sectionsToPmDoc } from '../prosemirror/sync';
 import { DocumentImpl } from '../document';
 import { createParagraphFromText } from '../blocks/paragraph';
 import { getYDocFields, hydrateYDocFromData, serializeYDocToData } from './y-schema';
@@ -369,6 +369,7 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       { type: 'field', attrs: { instruction: 'SEQ Table', kind: 'SEQ', result: [{ type: 'text', text: '2', bold: true }], dirty: true } },
     ]),
   ],
+  section_break: [{ type: 'section_break', attrs: { sectionId: 'sec_a' } }],
   dynamic_field: [p([{ type: 'dynamic_field', attrs: { fieldType: 'date', format: 'YYYY' } }, t(' / '), { type: 'dynamic_field', attrs: { fieldType: 'pageNumber' } }])],
 };
 
@@ -438,7 +439,7 @@ describe.each(nodeNames.filter((n) => n !== 'doc'))('node type %s: two-client co
     };
     const [a] = pair([]);
     a.edit((tr) => tr.replaceWith(0, tr.doc.content.size, original.content));
-    const viaModel = blocksToPmDoc(a.blocks());
+    const viaModel = sectionsToPmDoc(a.data().sections);
     expect(count(viaModel)).toBe(count(original));
     expect(viaModel.toJSON()).toEqual(original.toJSON());
   });
@@ -463,7 +464,7 @@ describe.each(markNames)('mark type %s: two-client convergence', (name) => {
     const original = docOf(markedDoc(name));
     const [a] = pair([]);
     a.edit((tr) => tr.replaceWith(0, tr.doc.content.size, original.content));
-    const viaModel = blocksToPmDoc(a.blocks());
+    const viaModel = sectionsToPmDoc(a.data().sections);
     expect(viaModel.toJSON()).toEqual(original.toJSON());
   });
 });

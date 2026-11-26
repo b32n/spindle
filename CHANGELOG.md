@@ -26,6 +26,22 @@ lockstep.
   The default report (`detail: 'summary'`), and so the import-confirmation dialog, is unchanged apart from the
   count fixes below. The new detectors parse the XML instead of matching text.
 
+- **Section breaks in the ProseMirror document and in collaboration.** `docsSchema` gains a top-level
+  `section_break` node (attribute `sectionId`) that ends a section; the last section has none, so a document without
+  breaks is one section as before. `documentToProseMirror` and the new `sectionsToPmDoc` write the breaks, and
+  `proseMirrorToDocument` reads them back into `sections` (a document without breaks still gives
+  `existingDoc.sections[0]`). The shared Yjs document now carries every section: `hydrateYDocFromData` no longer
+  rejects more than one section, and `serializeYDocToData`/`getData` under collaboration return them with their page
+  setup, header, footer, numbering and vertical alignment. Existing single-section Y documents need no migration.
+  The editor still draws one flow, so a multi-section document attached to a room shows as one run until the section
+  editing work lands.
+- **`getCollabBlockers(document)`** (`@b32nio/spindle-docs-core`) lists content the shared layout cannot hold (no
+  sections, duplicate section ids, unknown block or inline types), and `attachCollab` now rejects such a document
+  with a `CollabBlockedError` that carries the list, so nothing is dropped silently. It is empty for the documents
+  the importers produce today.
+- **Collaboration schema version.** The shared document records `meta.schemaVersion` (`COLLAB_SCHEMA_VERSION`, now 2;
+  a missing value means 1). `attachCollab` rejects with a `CollabSchemaVersionError` when the room was written with a
+  newer version than the client supports, before seeding or editing anything.
 - **DOCX comments are imported.** `importDocx` reads `word/comments.xml`, `commentsExtended.xml` (replies and the
   resolved state) and `people.xml` (author ids), anchors each thread to its commented text across runs, links,
   paragraphs and table cells, and returns the threads in the additive `DocumentImportResult.comments`

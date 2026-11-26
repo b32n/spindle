@@ -44,6 +44,7 @@ export {
   proseMirrorToDocument,
   createPmDoc,
   blocksToPmDoc,
+  sectionsToPmDoc,
   getPmPlainText,
   isDocEmpty,
 } from './sync';

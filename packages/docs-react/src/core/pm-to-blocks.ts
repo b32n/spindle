@@ -539,6 +539,8 @@ export function createBlockPositionMap(
   let blockIndex = 0;
   
   doc.forEach((node, offset) => {
+    // A section break draws nothing: it has no FlowBlock to map.
+    if (node.type.name === 'section_break') return;
     const nodeStart = offset;
     const nodeEnd = offset + node.nodeSize;
     

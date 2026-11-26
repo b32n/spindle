@@ -10,6 +10,10 @@ export * from './comments';
 // Document
 export { DocumentImpl, createDocument, createSection } from './document';
 
+// Collaboration: what a document needs to be attachable, and why attaching can fail
+export { getCollabBlockers, CollabBlockedError, type CollabBlocker } from './collab/blockers';
+export { CollabSchemaVersionError, COLLAB_SCHEMA_VERSION } from './collab/y-schema';
+
 // Blocks
 export * from './blocks';
 

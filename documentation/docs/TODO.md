@@ -63,9 +63,11 @@ Verified absent in code.
       `UndoManager` is wired (`document.ts` notes it's "shadowed by Yjs
       UndoManager once we wire that in"). Undo/redo semantics under
       collaboration are unresolved.
-- [ ] **Single-section only under collab** — `setData` is disallowed while
-      attached, and IndexedDB persistence is browser-only (`collab/binding.ts`,
-      `collab/y-schema.ts`).
+- [ ] **Multi-section under collab is carried, not laid out** — sections travel
+      as `section_break` nodes and `sectionsMeta`, but the editor still shows
+      one flow with the first section's setup (see the section editing work).
+      `setData` is disallowed while attached, and IndexedDB persistence is
+      browser-only (`collab/binding.ts`, `collab/y-schema.ts`).
 
 ## Known limitations (from code)
 
