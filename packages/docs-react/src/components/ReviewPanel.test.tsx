@@ -102,6 +102,19 @@ describe('ReviewPanel', () => {
   });
 });
 
+describe('ReviewPanel author colours', () => {
+  it('draws each author in the colour given for them, else the one the palette shares out', () => {
+    const changes = [change({ id: 'a', author: 'Ada' }), change({ id: 'b', author: 'Bo' })];
+    const own = render({ changes, authorColors: new Map([['Ada', '#112233']]) });
+    expect(own.toLowerCase()).toContain('border-left:3px solid #112233');
+    const shared = assignAuthorColors(['Ada', 'Bo'], new Map([['Ada', '#112233']]));
+    expect(own.toLowerCase()).toContain(`border-left:3px solid ${shared.get('Bo')!.toLowerCase()}`);
+    const without = render({ changes });
+    expect(without.toLowerCase()).not.toContain('#112233');
+    expect(without.toLowerCase()).toContain(`border-left:3px solid ${assignAuthorColors(['Ada', 'Bo']).get('Ada')!.toLowerCase()}`);
+  });
+});
+
 describe('neighbourChange', () => {
   const list = [change({ id: 'a', from: 5 }), change({ id: 'b', from: 20 }), change({ id: 'c', from: 40 })];
   const id = (c: ReviewChange | undefined) => c?.id;

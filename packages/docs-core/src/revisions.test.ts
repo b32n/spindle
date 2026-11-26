@@ -229,6 +229,33 @@ describe('author colours and the list of changes', () => {
     expect(documentRevisionAuthors(pm)).toEqual(['Cy', 'Di', 'Ed', 'Flo', 'Gus']);
   });
 
+  it('gives authors the colours they are preferred to have, and nobody else takes them', () => {
+    const colors = assignAuthorColors(['Ada', 'Bo', 'Cy'], new Map([['Ada', '#112233'], ['Bo', '#445566']]));
+    expect(colors.get('Ada')).toBe('#112233');
+    expect(colors.get('Bo')).toBe('#445566');
+    expect(REVISION_COLORS).toContain(colors.get('Cy'));
+    // An upper-case hex colour is written lower-case.
+    expect(assignAuthorColors(['Ada'], new Map([['Ada', '#ABCDEF']])).get('Ada')).toBe('#abcdef');
+    // Values that are not six-digit hex colours are ignored, and so is an author who is not listed.
+    for (const bad of ['red', '#fff', 'url(x)', '#12345g', '']) expect(REVISION_COLORS).toContain(assignAuthorColors(['Ada'], new Map([['Ada', bad]])).get('Ada'));
+    expect(assignAuthorColors(['Ada'], new Map([['Zed', '#112233']])).has('Zed')).toBe(false);
+    expect(assignAuthorColors(['Ada'], new Map([['Zed', '#112233']])).get('Ada')).toBe(assignAuthorColors(['Ada']).get('Ada'));
+  });
+
+  it('gives a colour wanted by two authors to the first by name, and the other the palette', () => {
+    const colors = assignAuthorColors(['Bo', 'Ada'], new Map([['Ada', '#112233'], ['Bo', '#112233']]));
+    expect(colors.get('Ada')).toBe('#112233');
+    expect(REVISION_COLORS).toContain(colors.get('Bo'));
+  });
+
+  it('does not give a palette colour to an author when a preferred author has it', () => {
+    const taken = REVISION_COLORS[2];
+    const names = ['Ada', 'Bo', 'Cy', 'Di'];
+    const colors = assignAuthorColors(names, new Map([['Ada', taken]]));
+    expect(colors.get('Ada')).toBe(taken);
+    for (const name of names.slice(1)) expect(colors.get(name)).not.toBe(taken);
+  });
+
   it('lists the authors of changes in a document\'s marks', () => {
     const pm = blocksToPmDoc([{ id: 'p', type: 'paragraph', content: [{ type: 'text', text: 'x', revision: { insertion: ADA } }, { type: 'text', text: 'y', revision: { deletion: BO } }, { type: 'text', text: 'z' }] }]);
     expect(documentRevisionAuthors(pm)).toEqual(['Ada', 'Bo']);

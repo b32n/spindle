@@ -13,7 +13,7 @@
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { PageConfig, PageMargins, Block, HeaderFooterContent, RevisionAuthor, ReviewChange } from '@b32nio/spindle-docs-core';
-import { activeMarksPluginKey, assignAuthorColors, collabAuthorColors, createCommands, docsSchema, documentRevisionAuthors, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
+import { activeMarksPluginKey, assignAuthorColors, createCommands, docsSchema, documentRevisionAuthors, listChanges, resolveAll, resolveChange, revisionAuthors, sameRevisionAuthors } from '@b32nio/spindle-docs-core';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { useDocument, useSections } from '../context/DocumentContext';
@@ -21,6 +21,7 @@ import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
 import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
+import { sameAuthorColors, suggestionAuthor, watchAuthorColors } from '../core/collab-authors';
 import { ReviewPanel } from './ReviewPanel';
 import { ModeSwitch, headerFooterNotice, type EditorMode } from './ModeSwitch';
 import { Ruler } from './Ruler';
@@ -168,16 +169,9 @@ export const DocumentEditor = memo(function DocumentEditor({
       setPresence(NO_COLORS);
       return;
     }
-    const update = () =>
-      setPresence((prev) => {
-        const next = collabAuthorColors(collabHandle);
-        return prev.size === next.size && [...next].every(([name, color]) => prev.get(name) === color) ? prev : next;
-      });
-    update();
-    collabHandle.awareness.on('change', update);
-    return () => collabHandle.awareness.off('change', update);
+    return watchAuthorColors(collabHandle, (next) => setPresence((prev) => (sameAuthorColors(prev, next) ? prev : next)));
   }, [collabHandle]);
-  const suggestionAuthor = collabHandle?.identity.displayName || currentUser.name || 'Unknown';
+  const suggestionAuthorName = suggestionAuthor(collabHandle, currentUser.name);
   const handleModeChange = useCallback((next: EditorMode) => {
     setOwnMode(next);
     onModeChange?.(next);
@@ -750,7 +744,7 @@ export const DocumentEditor = memo(function DocumentEditor({
           collabHandle={docModel.getCollabHandle()}
           revisionView={revisionView}
           suggesting={mode === 'suggesting' && !readOnly}
-          suggestAuthor={suggestionAuthor}
+          suggestAuthor={suggestionAuthorName}
           authorColors={presence}
           onSuggestionNotice={handleSuggestionNotice}
         />

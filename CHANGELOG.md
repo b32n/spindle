@@ -391,11 +391,14 @@ lockstep.
   their cursor: new `collabAuthorColors(handle)` (docs-core, also from `@b32nio/spindle-docs-core/collab`) reads it from the
   presence (awareness), `assignAuthorColors`, `revisionAuthors` take a `preferred` map of such colours (the others share out the
   palette, never a taken colour), `ConversionOptions.authorColors`, `TrueLayoutEditor.authorColors` and `ReviewPanel.authorColors`
-  carry it, and the legend, the panel and the markup agree. The collaboration `schemaVersion` stays 6 (it was raised for the
-  tracked-change marks): a client from before them refuses to join such a room. Suggestions, and accepting and rejecting them, are
-  ordinary edits of marks and attributes, so they merge, converge and survive being made offline like other edits (tests with
-  three and four clients, concurrent accepts and rejects of one change, and a person who was never part of the suggestions
-  settling them all).
+  carry it, and the legend, the panel and the markup agree. The collaboration `schemaVersion` is not raised again (7, for the
+  tracked-change marks and attributes): a client from before them refuses to join such a room. Suggestions, and accepting and
+  rejecting them, are ordinary edits of marks and attributes, so they merge, converge and survive being made offline like other
+  edits (tests with three and four clients, concurrent accepts and rejects of one change, and a person who was never part of
+  the suggestions settling them all). Limits: a paragraph mark or a table row keeps one record of its change, so when two people
+  suggest something on the same paragraph mark at once, one of the two stays (the same everywhere); text a person adds to a
+  change while someone else settles it is settled with it; two people with one display name are one author, in the smallest
+  of their cursor colours. Comments still carry the provider's `currentUser`, not the name the user joined under.
 
 ### Changed
 

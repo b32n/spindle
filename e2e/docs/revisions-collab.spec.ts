@@ -47,11 +47,12 @@ test.describe('docs: tracked changes between collaborators', () => {
     const bob = await peer(browser, room, 'Bob', '#1a73e8');
     const cy = await peer(browser, room, 'Cy', '#188038');
 
-    // Alice suggests an addition to the heading; Bob suggests deleting its last word.
+    // Alice suggests an addition to the heading; Bob, once it has reached him, suggests deleting its first letter.
     await suggesting(alice);
     await alice.doc.clickLine('Welcome to Spindle Docs');
     await alice.doc.press('End');
     await alice.doc.typeText(' (draft)');
+    await expect.poll(() => insertionsOf(bob).count()).toBeGreaterThan(0);
     await suggesting(bob);
     await bob.doc.clickLine('Welcome to Spindle Docs');
     await bob.doc.press('Home');

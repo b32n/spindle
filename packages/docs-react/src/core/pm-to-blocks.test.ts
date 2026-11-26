@@ -635,4 +635,23 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(kinds('final')).toEqual(['\u200B\u200B\u200B', 'c', 'lineBreak', 'd']);
     expect(kinds('original')).toEqual(['a', 'lineBreak', 'b', '\u200B\u200B\u200B']);
   });
+
+  it('draws an author in the colour given for them, and the others in the palette without it, for that conversion only', () => {
+    const doc = () => j([{ type: 'paragraph', content: [text('a', [insertion]), text('b', [deletion])] }]);
+    const colorsOf = (options?: Parameters<typeof proseMirrorToFlowBlocks>[1]) => {
+      const runs = (proseMirrorToFlowBlocks(doc(), options)[0] as ParagraphBlock).runs as TextRun[];
+      return [runs[0].revision?.insertion?.color, runs[1].revision?.deletion?.color];
+    };
+    const [ada, bo] = colorsOf({ authorColors: new Map([['Ada', '#112233']]) });
+    expect(ada).toBe('#112233');
+    expect(bo).not.toBe('#112233');
+    expect(bo).toBeDefined();
+    // A conversion without the colours has none of them left over from the one before.
+    const [adaAgain] = colorsOf();
+    expect(adaAgain).not.toBe('#112233');
+    expect(adaAgain).toBe(assignAuthorColors(['Ada', 'Bo']).get('Ada'));
+    // The colour reaches the change bar of an author who only changed a paragraph mark.
+    const bar = proseMirrorToFlowBlocks(j([{ type: 'paragraph', attrs: { revision: { insertion: { id: '4', author: 'Ada' } } }, content: [text('x')] }]), { authorColors: new Map([['Ada', '#112233']]) })[0] as ParagraphBlock;
+    expect(bar.attrs?.changeBar?.color).toBe('#112233');
+  });
 });

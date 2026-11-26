@@ -182,7 +182,10 @@ describe('settling at the same time', () => {
     d.review('reject');
     sync(a, b, c, d);
     same([a, b, c, d]);
+    // One of the two wins, for everybody, and no mark or text of the change is left behind.
     expect(['one two three', 'oneXY two three']).toContain(a.text()[0]);
+    expect(changesOf(a)).toEqual([]);
+    expect(changesOf(d)).toEqual([]);
   });
 
   it('settling a change while its author types next to it converges', () => {
@@ -191,8 +194,9 @@ describe('settling at the same time', () => {
     a.suggest((tr) => tr.insertText('Z', 6));
     sync(a, b, c);
     same([a, b, c]);
-    expect(a.text()[0]).toContain('XY');
-    expect(a.text()[0]).toContain('Z');
+    // Nothing is lost: the text the author added meanwhile continued the change that was settled, and is settled with it.
+    expect(a.text()).toEqual(['oneXYZ two three']);
+    expect(changesOf(a)).toEqual([]);
   });
 
   it('settling one change by its id leaves the others', () => {
@@ -249,28 +253,32 @@ describe('offline suggestions', () => {
     b.suggest((tr) => tr.join(9));
     sync(a, b, c);
     same([a, b, c]);
+    // The paragraph mark keeps one record of its change, so of two people's suggestions on the same mark one stays (which one
+    // depends on the order Yjs settles concurrent writes in); the document is the same everywhere and no text is lost.
+    const open = changesOf(c).map((x) => [x[0], x[1]]);
+    expect(open).toHaveLength(1);
+    expect([['paragraphInserted', 'Ada'], ['paragraphDeleted', 'Bo']]).toContainEqual(open[0]);
     c.review('accept');
     sync(a, b, c);
     same([a, b, c]);
     expect(changesOf(a)).toEqual([]);
+    // (A record that stays with the paragraph element when another person splits it ends up on the first half.)
+    expect([['one', ' two', 'three'], ['one two', 'three'], ['one twothree']]).toContainEqual(a.text());
   });
 });
 
 describe('the room’s version and people’s colours', () => {
-  it('rooms carry the version that introduced tracked changes, and a client that does not know it refuses to join', () => {
-    expect(COLLAB_SCHEMA_VERSION).toBeGreaterThanOrEqual(6);
+  it('rooms carry the current version, and a client that supports an older one refuses to join', () => {
+    // 7 is the version that added the formatChange mark and the revision attributes on top of the tracked insertions and deletions of 6.
+    expect(COLLAB_SCHEMA_VERSION).toBe(7);
     const ydoc = new Y.Doc();
     hydrateYDocFromData(ydoc, data([para('x')]));
     expect(readSchemaVersion(ydoc)).toBe(COLLAB_SCHEMA_VERSION);
     expect(() => assertSchemaVersion(ydoc)).not.toThrow();
-    // An older client (version 5) would drop the marks: it is told the room is newer.
-    const error = new CollabSchemaVersionError(readSchemaVersion(ydoc), 5);
-    expect(error.roomVersion).toBe(COLLAB_SCHEMA_VERSION);
-    expect(error.supportedVersion).toBe(5);
-    expect(error.message).toContain('version 5');
-    const newer = new Y.Doc();
-    newer.getMap('meta').set('schemaVersion', COLLAB_SCHEMA_VERSION + 1);
-    expect(() => assertSchemaVersion(newer)).toThrow(CollabSchemaVersionError);
+    // A build that supports 6 (it would drop the formatChange marks) is told the room is newer; one that supports 7 is not.
+    expect(() => assertSchemaVersion(ydoc, 6)).toThrow(CollabSchemaVersionError);
+    expect(() => assertSchemaVersion(ydoc, 6)).toThrow(/version 7.*up to version 6/);
+    expect(() => assertSchemaVersion(ydoc, 7)).not.toThrow();
   });
 
   it('a Y document with suggestions in it serialises to the model with them', () => {
@@ -279,6 +287,16 @@ describe('the room’s version and people’s colours', () => {
     const block = serializeYDocToData(a.ydoc).sections[0].blocks[0] as Extract<Block, { type: 'paragraph' }>;
     expect(JSON.stringify(block.content)).toContain('"revision":{"insertion":{"id"');
     expect(JSON.stringify(block.content)).toContain('"author":"Ada"');
+  });
+
+  it('paragraph marks and formatting changes that were suggested are in the model the Y document serialises to', () => {
+    const [a] = room(['Ada'], [para('abcd')]);
+    a.suggest((tr) => tr.split(3));
+    a.suggest((tr) => tr.addMark(1, 3, docsSchema.marks.bold.create()));
+    const [first] = serializeYDocToData(a.ydoc).sections[0].blocks as Array<Extract<Block, { type: 'paragraph' }>>;
+    expect(first.revision).toMatchObject({ insertion: { author: 'Ada' } });
+    expect(JSON.stringify(first.content)).toContain('"formatChange":{');
+    expect(JSON.stringify(first.content)).toContain('"previous":{}');
   });
 
   it('people in the room are drawn in the colour of their cursor, and nobody else takes that colour', () => {
@@ -295,6 +313,19 @@ describe('the room’s version and people’s colours', () => {
     const none = new Awareness(new Y.Doc());
     none.setLocalState({});
     expect(collabAuthorColors({ awareness: none }).size).toBe(0);
+    // Two people under one name are one author, in the smallest of their colours, whatever order the room lists them in.
+    const twins = new Awareness(new Y.Doc());
+    twins.setLocalStateField('user', { name: 'Ann', color: '#BB0000' });
+    const other = new Awareness(new Y.Doc());
+    other.setLocalStateField('user', { name: 'Ann', color: '#aa0000' });
+    const states = (...all: Awareness[]) => ({ awareness: { getStates: () => new Map(all.map((aw, i) => [i, aw.getLocalState() as unknown]))} as unknown as Awareness });
+    expect(collabAuthorColors(states(twins, other)).get('Ann')).toBe('#aa0000');
+    expect(collabAuthorColors(states(other, twins)).get('Ann')).toBe('#aa0000');
+    // A colour that is not a hex colour never beats one that is.
+    other.setLocalStateField('user', { name: 'Ann', color: '!!' });
+    expect(collabAuthorColors(states(other, twins)).get('Ann')).toBe('#BB0000');
+    expect(collabAuthorColors(states(twins, other)).get('Ann')).toBe('#BB0000');
+    for (const aw of [awareness, none, twins, other]) aw.destroy();
     // The same colour for two people goes to the first (by name) only.
     expect(new Set(assignAuthorColors(['A', 'B'], new Map([['A', '#112233'], ['B', '#112233']])).values()).size).toBe(2);
   });
