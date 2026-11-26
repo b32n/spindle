@@ -8,12 +8,6 @@
       "label": "embedded alternative-format chunk(s)"
     },
     {
-      "count": 13,
-      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
-      "id": "docx.contentControls",
-      "label": "content control(s)"
-    },
-    {
       "count": 1,
       "effect": "their text is not imported",
       "id": "docx.textBoxes",

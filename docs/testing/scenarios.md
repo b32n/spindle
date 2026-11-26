@@ -209,6 +209,9 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-COL-06 | list and structural edits propagate | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-COL-07 | two-pane in-process demo mounts two editors | covered |  |  | `e2e/docs/collab.spec.ts` |
 | D-CMT-03 | a .docx with comment threads shows them anchored in the text and listed in the sidebar | covered | yes |  | `e2e/docs/comments-import.spec.ts` |
+| D-CCT-01 | a .docx with content controls shows their content, with a title chip for each block control and a tooltip for each inline one | covered | yes |  | `e2e/docs/content-controls.spec.ts` |
+| D-CCT-02 | clicking a check box control toggles it, and the downloaded .docx carries the new state | covered |  |  | `e2e/docs/content-controls.spec.ts` |
+| D-CCT-03 | typing inside an inline control keeps the text in the control, and the controls survive the download | covered |  |  | `e2e/docs/content-controls.spec.ts` |
 | D-TBL-01 | table context menu inserts rows and columns where asked and deletes them | covered |  |  | `e2e/docs/depth.spec.ts` |
 | D-LNK-01 | an existing link can be edited (Update) and removed | covered |  |  | `e2e/docs/depth.spec.ts` |
 | D-PGS-03 | page size A4 changes the page dimensions | covered |  |  | `e2e/docs/depth.spec.ts` |
@@ -447,7 +450,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 381
+- covered: 384
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

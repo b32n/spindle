@@ -282,8 +282,14 @@ edits, and the inverse operations broadcast to peers like any other edit.
   version does not know) and `attachCollab` rejects with a `CollabBlockedError`
   carrying that list, instead of silently dropping it. The list is empty for
   every document the importers produce today.
+- **Content controls.** A Word content control is a ProseMirror node
+  (`content_control` around blocks, `content_control_inline` in a paragraph), so it
+  syncs like any other content and does not block attach. Concurrent edits merge as
+  for text and attributes (two people toggling the same check box is
+  last-writer-wins). A control's lock is not enforced against a collaborator.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
-  1, the layout without section breaks). A client that finds a newer version
+  1, the layout without section breaks; 2 adds section breaks; 3 adds content
+  controls). A client that finds a newer version
   than it supports rejects `attachCollab` with a `CollabSchemaVersionError`
   instead of editing a document whose newer nodes it would drop. Clients from
   before this check have no such guard: do not open a multi-section room with

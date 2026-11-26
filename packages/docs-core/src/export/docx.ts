@@ -7,6 +7,7 @@ import type {
   DocBlock,
   DocColumns,
   DocCommentThread,
+  DocContentControl,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
   DocImageRun,
@@ -23,6 +24,7 @@ import type {
 } from '@b32nio/spindle-shared/export/docx';
 import type {
   Block,
+  ContentControl,
   DocumentData,
   DynamicFieldRun,
   HeaderFooterContent,
@@ -228,6 +230,8 @@ function toBlock(
       return { type: 'horizontalRule' };
     case 'page-break':
       return { type: 'pageBreak' };
+    case 'content-control':
+      return { type: 'contentControl', control: copyControl(block.control), blocks: block.blocks.map((b) => toBlock(b, title, textStylePool, paragraphStylePool)) };
   }
 }
 
@@ -344,7 +348,14 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
       };
     case 'bookmark':
       return { type: 'bookmark', name: item.name };
+    case 'contentControl':
+      return { type: 'contentControl', control: copyControl(item.control), content: toInlineContent(item.content, title, pool) };
   }
+}
+
+/** A copy of a content control's properties (the model and the interchange types have the same shape). */
+function copyControl<T extends DocContentControl | ContentControl>(control: T): T {
+  return { ...control, ...(control.items && { items: control.items.map((i) => ({ ...i })) }) };
 }
 
 /** Either/or, matching how the ProseMirror sync layer resolves the same field (sync.ts's inlineContentToPm): styleId is authoritative when present, inline properties only apply otherwise. */
@@ -665,6 +676,8 @@ function toBlockFromDocx(block: DocBlock, textStylePool: TextStylePoolImpl): Blo
       return { id: generateBlockId(), type: 'horizontal-rule' };
     case 'pageBreak':
       return { id: generateBlockId(), type: 'page-break' };
+    case 'contentControl':
+      return { id: generateBlockId(), type: 'content-control', control: copyControl(block.control), blocks: block.blocks.map((b) => toBlockFromDocx(b, textStylePool)) };
   }
 }
 
@@ -762,7 +775,14 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
       };
     case 'bookmark':
       return { type: 'bookmark', name: item.name };
+    case 'contentControl':
+      return { type: 'contentControl', control: copyControl(item.control), content: toInlineContentFromDocx(item.content, textStylePool) };
   }
+}
+
+/** The inline content with content controls replaced by what they hold (a header or footer has no controls). */
+function withoutControls(content: DocInline[]): DocInline[] {
+  return content.flatMap((item) => (item.type === 'contentControl' ? withoutControls(item.content) : [item]));
 }
 
 function toHeaderFooterContentFromDocx(hf: DocHeaderFooter): HeaderFooterContent {
@@ -778,7 +798,7 @@ function toHeaderFooterContentFromDocx(hf: DocHeaderFooter): HeaderFooterContent
 function toHeaderFooterParagraphFromDocx(p: DocHeaderFooterParagraph): HeaderFooterParagraph {
   return {
     type: 'paragraph',
-    content: p.content.map(toHeaderFooterInlineFromDocx).filter((i): i is HeaderFooterInlineContent => i != null),
+    content: withoutControls(p.content).map(toHeaderFooterInlineFromDocx).filter((i): i is HeaderFooterInlineContent => i != null),
     alignment: p.alignment,
   };
 }
@@ -809,6 +829,7 @@ function toHeaderFooterInlineFromDocx(item: DocInline): HeaderFooterInlineConten
     // Headers and footers have no generic field or bookmark.
     case 'field':
     case 'bookmark':
+    case 'contentControl':
       return null;
   }
 }

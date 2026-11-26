@@ -622,6 +622,44 @@ export function setCellBackgroundColor(
   };
 }
 
+/** The glyphs a check box content control shows (the ones Word's own check boxes use). */
+export const CHECKBOX_CHECKED_GLYPH = '\u2612';
+export const CHECKBOX_UNCHECKED_GLYPH = '\u2610';
+
+/** The innermost check box content control that holds or starts at a position, with the position before it. */
+export function findCheckboxControl(doc: Node, pos: number): { pos: number; node: Node } | null {
+  if (pos < 0 || pos > doc.content.size) return null;
+  const isCheckbox = (node: Node | null | undefined): node is Node =>
+    !!node && node.type.name === 'content_control_inline' && node.attrs.controlType === 'checkbox';
+  const $pos = doc.resolve(pos);
+  for (let depth = $pos.depth; depth > 0; depth--) {
+    const node = $pos.node(depth);
+    if (isCheckbox(node)) return { pos: $pos.before(depth), node };
+  }
+  const after = $pos.nodeAfter;
+  return isCheckbox(after) ? { pos, node: after } : null;
+}
+
+/**
+ * Toggle the check box content control at `pos` (default: the selection start): its `checked` state and the glyph it
+ * shows, keeping the formatting of the glyph. Not applicable (false) when no check box is there.
+ */
+export function toggleCheckboxControl(pos?: number): Command {
+  return (state, dispatch) => {
+    const found = findCheckboxControl(state.doc, pos ?? state.selection.from);
+    if (!found) return false;
+    if (dispatch) {
+      const { node } = found;
+      const checked = node.attrs.checked !== true;
+      const tr = state.tr.setNodeMarkup(found.pos, undefined, { ...node.attrs, checked, showingPlaceholder: false });
+      const glyph = state.schema.text(checked ? CHECKBOX_CHECKED_GLYPH : CHECKBOX_UNCHECKED_GLYPH, node.firstChild?.marks ?? []);
+      tr.replaceWith(found.pos + 1, found.pos + node.nodeSize - 1, glyph);
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+
 /**
  * Create a commands object for the given schema
  */

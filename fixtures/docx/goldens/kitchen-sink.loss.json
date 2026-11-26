@@ -14,10 +14,16 @@
       "label": "multi-column section(s)"
     },
     {
-      "count": 21,
-      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
+      "count": 6,
+      "effect": "their content is kept; the control itself (repeating section, data binding, row or cell wrapper, ...) is lost",
       "id": "docx.contentControls",
-      "label": "content control(s)"
+      "label": "content control(s)",
+      "where": [
+        "repeating section item ×3",
+        "data-bound control ×1",
+        "repeating section ×1",
+        "row-level control ×1"
+      ]
     },
     {
       "count": 2,
@@ -44,14 +50,11 @@
       "label": "equation(s)"
     },
     {
-      "count": 4,
-      "effect": "tables of contents and indexes are kept as static text, legacy form fields lose their value",
+      "count": 1,
+      "effect": "tables of contents and indexes are kept as static text",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, index, legacy form fields)",
+      "label": "field(s) (table of contents, index)",
       "where": [
-        "FORMCHECKBOX ×1",
-        "FORMDROPDOWN ×1",
-        "FORMTEXT ×1",
         "TOC ×1"
       ]
     },
@@ -84,7 +87,7 @@
     },
     {
       "count": 3,
-      "effect": "their displayed value is dropped (also counted under docx.fields)",
+      "effect": "their displayed text is kept as plain text; the form field (checkbox state, list, text limits) is lost",
       "id": "docx.legacyForms",
       "label": "legacy form field(s)",
       "where": [

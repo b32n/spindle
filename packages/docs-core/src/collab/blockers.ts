@@ -39,9 +39,10 @@ const KNOWN_BLOCK_TYPES: ReadonlySet<string> = new Set([
   'image',
   'horizontal-rule',
   'page-break',
+  'content-control',
 ]);
 
-const KNOWN_INLINE_TYPES: ReadonlySet<string> = new Set(['text', 'image', 'link', 'dynamicField', 'field', 'bookmark']);
+const KNOWN_INLINE_TYPES: ReadonlySet<string> = new Set(['text', 'image', 'link', 'dynamicField', 'field', 'bookmark', 'contentControl']);
 
 interface Tally {
   unknownBlocks: number;
@@ -51,6 +52,7 @@ interface Tally {
 function countInlines(content: readonly InlineContent[] | undefined, tally: Tally): void {
   for (const item of content ?? []) {
     if (!KNOWN_INLINE_TYPES.has((item as { type: string }).type)) tally.unknownInlines++;
+    else if (item.type === 'contentControl') countInlines(item.content, tally);
   }
 }
 
@@ -60,7 +62,9 @@ function countBlocks(blocks: readonly Block[] | undefined, tally: Tally): void {
       tally.unknownBlocks++;
       continue;
     }
-    if (block.type === 'table') {
+    if (block.type === 'content-control') {
+      countBlocks(block.blocks, tally);
+    } else if (block.type === 'table') {
       for (const row of block.rows ?? []) {
         for (const cell of row.cells ?? []) {
           countInlines(cell.content, tally);

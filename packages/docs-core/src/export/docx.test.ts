@@ -614,7 +614,7 @@ describe('inspectDocx detail', () => {
 });
 
 describe('tabs, line breaks and wrapped text through the editor API', () => {
-  it('keeps tabs, line breaks, smart tags, tracked insertions and content controls on import, and writes tabs and breaks back', async () => {
+  it('keeps tabs, line breaks, smart tags, tracked insertions and a content control on import, and writes tabs and breaks back', async () => {
     const source = docWith({
       sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'b1', type: 'paragraph', content: [{ type: 'text', text: 'x' }] }] }],
     });
@@ -640,7 +640,7 @@ describe('tabs, line breaks and wrapped text through the editor API', () => {
     const first = blocks[0];
     expect(first.type === 'paragraph' && first.content.map((c) => ('text' in c ? c.text : '')).join('')).toBe('Chapter\t1\nnext Paris new');
     const second = blocks[1];
-    expect(second.type === 'paragraph' && second.content).toEqual([{ type: 'text', text: 'control' }]);
+    expect(second.type === 'content-control' && second.blocks).toMatchObject([{ type: 'paragraph', content: [{ type: 'text', text: 'control' }] }]);
 
     const { documentXml } = await exportAndUnzip(target);
     expect(documentXml).toContain('<w:tab/>');

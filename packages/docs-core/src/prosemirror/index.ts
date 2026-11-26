@@ -34,6 +34,10 @@ export {
   removeLink,
   insertTable,
   goToNextCell,
+  toggleCheckboxControl,
+  findCheckboxControl,
+  CHECKBOX_CHECKED_GLYPH,
+  CHECKBOX_UNCHECKED_GLYPH,
   type DocsCommands,
 } from './commands';
 

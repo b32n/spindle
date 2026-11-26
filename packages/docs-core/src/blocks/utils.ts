@@ -38,6 +38,9 @@ export function getPlainText(content: InlineContent[]): string {
     if (item.type === 'link') {
       return text + item.text;
     }
+    if (item.type === 'contentControl') {
+      return text + getPlainText(item.content);
+    }
     return text;
   }, '');
 }
@@ -61,6 +64,9 @@ export function isBlockEmpty(block: Block): boolean {
   }
   if (block.type === 'table') {
     return block.rows.length === 0;
+  }
+  if (block.type === 'content-control') {
+    return block.blocks.every(isBlockEmpty);
   }
   return false;
 }

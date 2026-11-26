@@ -26,7 +26,7 @@ import {
 import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
-import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
+import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
 import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
@@ -662,6 +662,21 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
           else if (++tries < 10) requestAnimationFrame(reveal);
         };
         requestAnimationFrame(reveal);
+      };
+      container.addEventListener('click', onClick);
+      return () => container.removeEventListener('click', onClick);
+    }, [editorView]);
+
+    // Clicking the glyph of a check box content control toggles it.
+    useEffect(() => {
+      const container = pagesContainerRef.current;
+      if (!editorView || !container) return;
+      const onClick = (e: MouseEvent) => {
+        const glyph = (e.target as Element | null)?.closest?.<HTMLElement>('[data-control-checkbox]');
+        if (!glyph || !editorView.editable) return;
+        const pos = Number(glyph.dataset.pmStart);
+        if (Number.isNaN(pos)) return;
+        if (toggleCheckboxControl(pos)(editorView.state, editorView.dispatch)) e.preventDefault();
       };
       container.addEventListener('click', onClick);
       return () => container.removeEventListener('click', onClick);

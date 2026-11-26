@@ -8,12 +8,6 @@
       "label": "multi-column section(s)"
     },
     {
-      "count": 1,
-      "effect": "their text is kept; the control (type, tag, placeholder, lock) is lost",
-      "id": "docx.contentControls",
-      "label": "content control(s)"
-    },
-    {
       "count": 6,
       "effect": "not imported",
       "id": "docx.endnotes",
@@ -21,9 +15,9 @@
     },
     {
       "count": 1,
-      "effect": "tables of contents and indexes are kept as static text, legacy form fields lose their value",
+      "effect": "tables of contents and indexes are kept as static text",
       "id": "docx.fields",
-      "label": "field(s) (table of contents, index, legacy form fields)",
+      "label": "field(s) (table of contents, index)",
       "where": [
         "TOC ×1"
       ]

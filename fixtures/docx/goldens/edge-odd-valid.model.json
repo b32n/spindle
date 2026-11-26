@@ -305,86 +305,226 @@
             "type": "paragraph"
           },
           {
-            "content": [
+            "blocks": [
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Ten controls deep, wrapping a paragraph and a table:",
-                "type": "text"
-              }
-            ],
-            "id": "block-9",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "spaceAfter": 10.666666666666666,
-            "type": "paragraph"
-          },
-          {
-            "borders": {
-              "bottom": {
-                "style": "single"
-              },
-              "insideH": {
-                "style": "single"
-              },
-              "insideV": {
-                "style": "single"
-              },
-              "left": {
-                "style": "single"
-              },
-              "right": {
-                "style": "single"
-              },
-              "top": {
-                "style": "single"
-              }
-            },
-            "colWidths": [
-              266.67,
-              266.67
-            ],
-            "id": "block-10",
-            "look": {
-              "firstColumn": true,
-              "firstRow": true,
-              "lastColumn": false,
-              "lastRow": false,
-              "noHBand": false,
-              "noVBand": true
-            },
-            "namedStyleId": "TableGrid",
-            "rows": [
-              {
-                "cells": [
+                "blocks": [
                   {
-                    "colwidth": [
-                      266.67
-                    ],
-                    "content": [],
-                    "id": "cell-1"
-                  },
-                  {
-                    "colwidth": [
-                      266.67
-                    ],
-                    "content": [
+                    "blocks": [
                       {
-                        "fontFamily": "Liberation Sans",
-                        "fontSize": 11,
-                        "text": "plain",
-                        "type": "text"
+                        "blocks": [
+                          {
+                            "blocks": [
+                              {
+                                "blocks": [
+                                  {
+                                    "blocks": [
+                                      {
+                                        "blocks": [
+                                          {
+                                            "blocks": [
+                                              {
+                                                "blocks": [
+                                                  {
+                                                    "content": [
+                                                      {
+                                                        "fontFamily": "Liberation Sans",
+                                                        "fontSize": 11,
+                                                        "text": "Ten controls deep, wrapping a paragraph and a table:",
+                                                        "type": "text"
+                                                      }
+                                                    ],
+                                                    "id": "block-19",
+                                                    "lineSpacing": {
+                                                      "type": "multiple",
+                                                      "value": 1.079
+                                                    },
+                                                    "spaceAfter": 10.666666666666666,
+                                                    "type": "paragraph"
+                                                  },
+                                                  {
+                                                    "borders": {
+                                                      "bottom": {
+                                                        "style": "single"
+                                                      },
+                                                      "insideH": {
+                                                        "style": "single"
+                                                      },
+                                                      "insideV": {
+                                                        "style": "single"
+                                                      },
+                                                      "left": {
+                                                        "style": "single"
+                                                      },
+                                                      "right": {
+                                                        "style": "single"
+                                                      },
+                                                      "top": {
+                                                        "style": "single"
+                                                      }
+                                                    },
+                                                    "colWidths": [
+                                                      266.67,
+                                                      266.67
+                                                    ],
+                                                    "id": "block-20",
+                                                    "look": {
+                                                      "firstColumn": true,
+                                                      "firstRow": true,
+                                                      "lastColumn": false,
+                                                      "lastRow": false,
+                                                      "noHBand": false,
+                                                      "noVBand": true
+                                                    },
+                                                    "namedStyleId": "TableGrid",
+                                                    "rows": [
+                                                      {
+                                                        "cells": [
+                                                          {
+                                                            "colwidth": [
+                                                              266.67
+                                                            ],
+                                                            "content": [
+                                                              {
+                                                                "content": [
+                                                                  {
+                                                                    "content": [
+                                                                      {
+                                                                        "content": [],
+                                                                        "control": {
+                                                                          "alias": "level 3",
+                                                                          "tag": "deep3",
+                                                                          "type": "richText"
+                                                                        },
+                                                                        "type": "contentControl"
+                                                                      }
+                                                                    ],
+                                                                    "control": {
+                                                                      "alias": "level 2",
+                                                                      "tag": "deep2",
+                                                                      "type": "richText"
+                                                                    },
+                                                                    "type": "contentControl"
+                                                                  }
+                                                                ],
+                                                                "control": {
+                                                                  "alias": "level 1",
+                                                                  "tag": "deep1",
+                                                                  "type": "richText"
+                                                                },
+                                                                "type": "contentControl"
+                                                              }
+                                                            ],
+                                                            "id": "cell-1"
+                                                          },
+                                                          {
+                                                            "colwidth": [
+                                                              266.67
+                                                            ],
+                                                            "content": [
+                                                              {
+                                                                "fontFamily": "Liberation Sans",
+                                                                "fontSize": 11,
+                                                                "text": "plain",
+                                                                "type": "text"
+                                                              }
+                                                            ],
+                                                            "id": "cell-2"
+                                                          }
+                                                        ],
+                                                        "id": "row-1"
+                                                      }
+                                                    ],
+                                                    "type": "table"
+                                                  }
+                                                ],
+                                                "control": {
+                                                  "alias": "level 10",
+                                                  "tag": "deep10",
+                                                  "type": "richText"
+                                                },
+                                                "id": "block-18",
+                                                "type": "content-control"
+                                              }
+                                            ],
+                                            "control": {
+                                              "alias": "level 9",
+                                              "tag": "deep9",
+                                              "type": "richText"
+                                            },
+                                            "id": "block-17",
+                                            "type": "content-control"
+                                          }
+                                        ],
+                                        "control": {
+                                          "alias": "level 8",
+                                          "tag": "deep8",
+                                          "type": "richText"
+                                        },
+                                        "id": "block-16",
+                                        "type": "content-control"
+                                      }
+                                    ],
+                                    "control": {
+                                      "alias": "level 7",
+                                      "tag": "deep7",
+                                      "type": "richText"
+                                    },
+                                    "id": "block-15",
+                                    "type": "content-control"
+                                  }
+                                ],
+                                "control": {
+                                  "alias": "level 6",
+                                  "tag": "deep6",
+                                  "type": "richText"
+                                },
+                                "id": "block-14",
+                                "type": "content-control"
+                              }
+                            ],
+                            "control": {
+                              "alias": "level 5",
+                              "tag": "deep5",
+                              "type": "richText"
+                            },
+                            "id": "block-13",
+                            "type": "content-control"
+                          }
+                        ],
+                        "control": {
+                          "alias": "level 4",
+                          "tag": "deep4",
+                          "type": "richText"
+                        },
+                        "id": "block-12",
+                        "type": "content-control"
                       }
                     ],
-                    "id": "cell-2"
+                    "control": {
+                      "alias": "level 3",
+                      "tag": "deep3",
+                      "type": "richText"
+                    },
+                    "id": "block-11",
+                    "type": "content-control"
                   }
                 ],
-                "id": "row-1"
+                "control": {
+                  "alias": "level 2",
+                  "tag": "deep2",
+                  "type": "richText"
+                },
+                "id": "block-10",
+                "type": "content-control"
               }
             ],
-            "type": "table"
+            "control": {
+              "alias": "level 1",
+              "tag": "deep1",
+              "type": "richText"
+            },
+            "id": "block-9",
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -396,7 +536,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-11",
+            "id": "block-21",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -415,7 +555,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-12",
+            "id": "block-22",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -450,7 +590,7 @@
               66.67,
               66.67
             ],
-            "id": "block-13",
+            "id": "block-23",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -549,7 +689,7 @@
           },
           {
             "borders": {},
-            "id": "block-14",
+            "id": "block-24",
             "rows": [
               {
                 "cells": [
@@ -572,7 +712,7 @@
           },
           {
             "content": [],
-            "id": "block-15",
+            "id": "block-25",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -638,7 +778,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-16",
+            "id": "block-26",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15

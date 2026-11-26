@@ -236,13 +236,59 @@ export interface InlineBookmark {
   name: string;
 }
 
-export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField | InlineBookmark;
+/** The kind of a content control (a Word structured document tag): what it holds and how it behaves. */
+export type ContentControlType = 'richText' | 'text' | 'dropDown' | 'comboBox' | 'date' | 'checkbox' | 'picture' | 'docPart';
+
+/** One choice of a drop-down list or combo box control. */
+export interface ContentControlItem {
+  text: string;
+  value: string;
+}
+
+/**
+ * The properties of a content control. The same shape is used by the block-level control (which wraps blocks) and the
+ * inline one (which wraps inline content in a paragraph).
+ */
+export interface ContentControl {
+  type: ContentControlType;
+  /** Programmatic name (DOCX `w:tag`). */
+  tag?: string;
+  /** Title shown to the user (DOCX `w:alias`). */
+  alias?: string;
+  /** The control cannot be deleted (`sdtLocked`), its content cannot be edited (`contentLocked`), or both. Kept and exported; the editor does not enforce it yet. */
+  lock?: 'sdtLocked' | 'contentLocked' | 'sdtContentLocked';
+  /** Name of the placeholder building block (DOCX `w:placeholder`). */
+  placeholder?: string;
+  /** The content is placeholder text, not a value (DOCX `w:showingPlcHdr`). */
+  showingPlaceholder?: boolean;
+  /** Choices of a `dropDown` or `comboBox`. */
+  items?: ContentControlItem[];
+  /** Display format of a `date` control. */
+  dateFormat?: string;
+  /** The date a `date` control holds, as written. */
+  dateValue?: string;
+  /** State of a `checkbox`; its content shows the matching glyph. */
+  checked?: boolean;
+  /** A `text` control that allows line breaks. */
+  multiline?: boolean;
+  /** Gallery of a `docPart` control (`Cover Pages`, `Table of Contents`, ...). */
+  gallery?: string;
+}
+
+/** A content control inside a paragraph: it wraps the inline content it holds. Controls nest. */
+export interface InlineContentControl {
+  type: 'contentControl';
+  control: ContentControl;
+  content: InlineContent[];
+}
+
+export type InlineContent = TextRun | InlineImage | InlineLink | DynamicFieldRun | InlineField | InlineBookmark | InlineContentControl;
 
 // ============================================================================
 // Block Types
 // ============================================================================
 
-export type BlockType = 'paragraph' | 'heading' | 'list-item' | 'table' | 'image' | 'horizontal-rule' | 'page-break';
+export type BlockType = 'paragraph' | 'heading' | 'list-item' | 'table' | 'image' | 'horizontal-rule' | 'page-break' | 'content-control';
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type ListType = 'bullet' | 'numbered';
 
@@ -401,6 +447,13 @@ export interface PageBreakBlock extends BaseBlock {
   type: 'page-break';
 }
 
+/** A content control around blocks (paragraphs, lists, tables, other controls). */
+export interface ContentControlBlock extends BaseBlock {
+  type: 'content-control';
+  control: ContentControl;
+  blocks: Block[];
+}
+
 export type Block =
   | ParagraphBlock
   | HeadingBlock
@@ -408,7 +461,8 @@ export type Block =
   | TableBlock
   | ImageBlock
   | HorizontalRuleBlock
-  | PageBreakBlock;
+  | PageBreakBlock
+  | ContentControlBlock;
 
 // ============================================================================
 // Headers and Footers

@@ -8659,88 +8659,111 @@
             "type": "heading"
           },
           {
-            "alignment": "justify",
-            "content": [
+            "blocks": [
               {
-                "color": "#808080",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Click here to enter a summary.",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "color": "#808080",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Click here to enter a summary.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-179",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               }
             ],
+            "control": {
+              "alias": "Summary",
+              "showingPlaceholder": true,
+              "tag": "summary",
+              "type": "richText"
+            },
             "id": "block-178",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
+            "type": "content-control"
           },
           {
-            "alignment": "justify",
-            "content": [
+            "blocks": [
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Rich text control with ",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Rich text control with ",
+                    "type": "text"
+                  },
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "bold",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": " and ",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "italic": true,
+                    "text": "italic",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": " runs.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-181",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               },
               {
-                "bold": true,
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "bold",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": " and ",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "italic": true,
-                "text": "italic",
-                "type": "text"
-              },
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": " runs.",
-                "type": "text"
+                "alignment": "justify",
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "And a second paragraph inside the same control.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-182",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.15
+                },
+                "namedStyleId": "BodyText",
+                "spaceAfter": 8,
+                "type": "paragraph"
               }
             ],
-            "id": "block-179",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
+            "control": {
+              "alias": "Notes",
+              "tag": "notes",
+              "type": "richText"
             },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "And a second paragraph inside the same control.",
-                "type": "text"
-              }
-            ],
             "id": "block-180",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -8752,10 +8775,20 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Ada Marlowe",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Ada Marlowe",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Name",
+                  "tag": "name",
+                  "type": "text"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -8764,10 +8797,34 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "East",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "East",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Berth",
+                  "items": [
+                    {
+                      "text": "North",
+                      "value": "N"
+                    },
+                    {
+                      "text": "East",
+                      "value": "E"
+                    },
+                    {
+                      "text": "South",
+                      "value": "S"
+                    }
+                  ],
+                  "tag": "berth",
+                  "type": "dropDown"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -8776,10 +8833,30 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Thornback",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "Thornback",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Vessel",
+                  "items": [
+                    {
+                      "text": "Marguerite",
+                      "value": "m"
+                    },
+                    {
+                      "text": "Thornback",
+                      "value": "t"
+                    }
+                  ],
+                  "tag": "vessel",
+                  "type": "comboBox"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -8788,10 +8865,22 @@
                 "type": "text"
               },
               {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "2 March 2026",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 11,
+                    "text": "2 March 2026",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Arrival",
+                  "dateFormat": "d MMMM yyyy",
+                  "dateValue": "2026-03-02T00:00:00Z",
+                  "tag": "arrival",
+                  "type": "date"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -8800,10 +8889,21 @@
                 "type": "text"
               },
               {
-                "fontFamily": "DejaVu Sans",
-                "fontSize": 11,
-                "text": "☒",
-                "type": "text"
+                "content": [
+                  {
+                    "fontFamily": "DejaVu Sans",
+                    "fontSize": 11,
+                    "text": "☒",
+                    "type": "text"
+                  }
+                ],
+                "control": {
+                  "alias": "Inspected",
+                  "checked": true,
+                  "tag": "inspected",
+                  "type": "checkbox"
+                },
+                "type": "contentControl"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -8812,7 +8912,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-181",
+            "id": "block-183",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -8822,12 +8922,32 @@
             "type": "paragraph"
           },
           {
-            "alt": "logo placeholder",
-            "height": 80,
-            "id": "block-182",
-            "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
-            "type": "image",
-            "width": 80
+            "content": [
+              {
+                "content": [
+                  {
+                    "alt": "logo placeholder",
+                    "height": 80,
+                    "src": "data:image/png;sha256=e2e2144e8c2eab4c;chars=364",
+                    "type": "image",
+                    "width": 80
+                  }
+                ],
+                "control": {
+                  "alias": "Logo",
+                  "tag": "logo",
+                  "type": "picture"
+                },
+                "type": "contentControl"
+              }
+            ],
+            "id": "block-184",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "spaceAfter": 10.666666666666666,
+            "type": "paragraph"
           },
           {
             "content": [
@@ -8844,7 +8964,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-183",
+            "id": "block-185",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -8870,7 +8990,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-184",
+            "id": "block-186",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -8896,7 +9016,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-185",
+            "id": "block-187",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -8932,7 +9052,7 @@
               200,
               200
             ],
-            "id": "block-186",
+            "id": "block-188",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -8966,10 +9086,20 @@
                     ],
                     "content": [
                       {
-                        "fontFamily": "Liberation Sans",
-                        "fontSize": 11,
-                        "text": "12",
-                        "type": "text"
+                        "content": [
+                          {
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 11,
+                            "text": "12",
+                            "type": "text"
+                          }
+                        ],
+                        "control": {
+                          "alias": "Qty",
+                          "tag": "qty",
+                          "type": "text"
+                        },
+                        "type": "contentControl"
                       }
                     ],
                     "id": "cell-218"
@@ -9029,72 +9159,137 @@
                 "type": "text"
               }
             ],
-            "id": "block-187",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.15
-            },
-            "namedStyleId": "BodyText",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "bold": true,
-                "fontFamily": "Liberation Serif",
-                "fontSize": 16,
-                "text": "Cover page building block",
-                "type": "text"
-              }
-            ],
-            "id": "block-188",
-            "lineSpacing": {
-              "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Title",
-            "spaceAfter": 8,
-            "type": "paragraph"
-          },
-          {
-            "content": [
-              {
-                "color": "#595959",
-                "fontFamily": "Liberation Sans",
-                "fontSize": 14,
-                "italic": true,
-                "text": "Wrapped in a docPartObj content control.",
-                "type": "text"
-              }
-            ],
             "id": "block-189",
             "lineSpacing": {
               "type": "multiple",
-              "value": 1.079
-            },
-            "namedStyleId": "Subtitle",
-            "spaceAfter": 10.666666666666666,
-            "type": "paragraph"
-          },
-          {
-            "alignment": "justify",
-            "content": [
-              {
-                "fontFamily": "Liberation Sans",
-                "fontSize": 11,
-                "text": "Innermost paragraph, 5 controls deep.",
-                "type": "text"
-              }
-            ],
-            "id": "block-190",
-            "lineSpacing": {
-              "type": "multiple",
               "value": 1.15
             },
             "namedStyleId": "BodyText",
             "spaceAfter": 8,
             "type": "paragraph"
+          },
+          {
+            "blocks": [
+              {
+                "content": [
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Serif",
+                    "fontSize": 16,
+                    "text": "Cover page building block",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-191",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Title",
+                "spaceAfter": 8,
+                "type": "paragraph"
+              },
+              {
+                "content": [
+                  {
+                    "color": "#595959",
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 14,
+                    "italic": true,
+                    "text": "Wrapped in a docPartObj content control.",
+                    "type": "text"
+                  }
+                ],
+                "id": "block-192",
+                "lineSpacing": {
+                  "type": "multiple",
+                  "value": 1.079
+                },
+                "namedStyleId": "Subtitle",
+                "spaceAfter": 10.666666666666666,
+                "type": "paragraph"
+              }
+            ],
+            "control": {
+              "gallery": "Cover Pages",
+              "type": "docPart"
+            },
+            "id": "block-190",
+            "type": "content-control"
+          },
+          {
+            "blocks": [
+              {
+                "blocks": [
+                  {
+                    "blocks": [
+                      {
+                        "blocks": [
+                          {
+                            "blocks": [
+                              {
+                                "alignment": "justify",
+                                "content": [
+                                  {
+                                    "fontFamily": "Liberation Sans",
+                                    "fontSize": 11,
+                                    "text": "Innermost paragraph, 5 controls deep.",
+                                    "type": "text"
+                                  }
+                                ],
+                                "id": "block-198",
+                                "lineSpacing": {
+                                  "type": "multiple",
+                                  "value": 1.15
+                                },
+                                "namedStyleId": "BodyText",
+                                "spaceAfter": 8,
+                                "type": "paragraph"
+                              }
+                            ],
+                            "control": {
+                              "alias": "Level 5",
+                              "tag": "nest5",
+                              "type": "richText"
+                            },
+                            "id": "block-197",
+                            "type": "content-control"
+                          }
+                        ],
+                        "control": {
+                          "alias": "Level 4",
+                          "tag": "nest4",
+                          "type": "richText"
+                        },
+                        "id": "block-196",
+                        "type": "content-control"
+                      }
+                    ],
+                    "control": {
+                      "alias": "Level 3",
+                      "tag": "nest3",
+                      "type": "richText"
+                    },
+                    "id": "block-195",
+                    "type": "content-control"
+                  }
+                ],
+                "control": {
+                  "alias": "Level 2",
+                  "tag": "nest2",
+                  "type": "richText"
+                },
+                "id": "block-194",
+                "type": "content-control"
+              }
+            ],
+            "control": {
+              "alias": "Level 1",
+              "tag": "nest1",
+              "type": "richText"
+            },
+            "id": "block-193",
+            "type": "content-control"
           },
           {
             "alignment": "justify",
@@ -9106,7 +9301,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-191",
+            "id": "block-199",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9127,6 +9322,12 @@
               {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
+                "text": "Ada Marlowe",
+                "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
                 "text": "   Cleared: ",
                 "type": "text"
               },
@@ -9135,9 +9336,15 @@
                 "fontSize": 11,
                 "text": "   Flag colour: ",
                 "type": "text"
+              },
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "Green",
+                "type": "text"
               }
             ],
-            "id": "block-192",
+            "id": "block-200",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9157,7 +9364,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-193",
+            "id": "block-201",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -9180,7 +9387,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-194",
+            "id": "block-202",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9199,7 +9406,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-195",
+            "id": "block-203",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9217,7 +9424,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-196",
+            "id": "block-204",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9235,7 +9442,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-197",
+            "id": "block-205",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9253,7 +9460,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-198",
+            "id": "block-206",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9272,7 +9479,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-199",
+            "id": "block-207",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9290,7 +9497,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-200",
+            "id": "block-208",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9308,7 +9515,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-201",
+            "id": "block-209",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9350,7 +9557,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-202",
+            "id": "block-210",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9392,7 +9599,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-203",
+            "id": "block-211",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9410,7 +9617,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-204",
+            "id": "block-212",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -9443,7 +9650,7 @@
               300,
               300
             ],
-            "id": "block-205",
+            "id": "block-213",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -9499,7 +9706,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-206",
+            "id": "block-214",
             "leftIndent": 48,
             "level": 0,
             "lineSpacing": {
@@ -9520,7 +9727,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-207",
+            "id": "block-215",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9540,7 +9747,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-208",
+            "id": "block-216",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9560,7 +9767,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-209",
+            "id": "block-217",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9580,7 +9787,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-210",
+            "id": "block-218",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9600,7 +9807,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-211",
+            "id": "block-219",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9620,7 +9827,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-212",
+            "id": "block-220",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9640,7 +9847,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-213",
+            "id": "block-221",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9672,7 +9879,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-214",
+            "id": "block-222",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9706,7 +9913,7 @@
               60,
               400
             ],
-            "id": "block-215",
+            "id": "block-223",
             "look": {
               "firstColumn": true,
               "firstRow": true,
@@ -9764,7 +9971,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-216",
+            "id": "block-224",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9783,7 +9990,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-217",
+            "id": "block-225",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9820,7 +10027,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-218",
+            "id": "block-226",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9839,7 +10046,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-219",
+            "id": "block-227",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9858,7 +10065,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-220",
+            "id": "block-228",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9878,7 +10085,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-221",
+            "id": "block-229",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -9979,7 +10186,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-222",
+            "id": "block-230",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -9998,7 +10205,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-223",
+            "id": "block-231",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10017,7 +10224,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-224",
+            "id": "block-232",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10047,7 +10254,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-225",
+            "id": "block-233",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10076,7 +10283,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-226",
+            "id": "block-234",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10105,7 +10312,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-227",
+            "id": "block-235",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10134,7 +10341,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-228",
+            "id": "block-236",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10163,7 +10370,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-229",
+            "id": "block-237",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10216,7 +10423,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-230",
+            "id": "block-238",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10234,7 +10441,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-231",
+            "id": "block-239",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10254,7 +10461,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-232",
+            "id": "block-240",
             "lineSpacing": {
               "type": "exactly",
               "value": 48
@@ -10272,7 +10479,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-233",
+            "id": "block-241",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10292,7 +10499,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-234",
+            "id": "block-242",
             "lineSpacing": {
               "type": "exactly",
               "value": 32
@@ -10310,7 +10517,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-235",
+            "id": "block-243",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10394,7 +10601,7 @@
                 "underline": true
               }
             ],
-            "id": "block-236",
+            "id": "block-244",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10413,7 +10620,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-237",
+            "id": "block-245",
             "keepTogether": true,
             "keepWithNext": true,
             "lineSpacing": {
@@ -10434,7 +10641,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-238",
+            "id": "block-246",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10454,7 +10661,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-239",
+            "id": "block-247",
             "keepTogether": true,
             "keepWithNext": true,
             "level": 1,
@@ -10470,7 +10677,7 @@
           {
             "alignment": "center",
             "content": [],
-            "id": "block-240",
+            "id": "block-248",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10490,7 +10697,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-241",
+            "id": "block-249",
             "lineSpacing": {
               "type": "single"
             },
@@ -10501,7 +10708,7 @@
           {
             "alignment": "center",
             "content": [],
-            "id": "block-242",
+            "id": "block-250",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10521,7 +10728,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-243",
+            "id": "block-251",
             "lineSpacing": {
               "type": "single"
             },
@@ -10532,7 +10739,7 @@
           {
             "alignment": "center",
             "content": [],
-            "id": "block-244",
+            "id": "block-252",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.079
@@ -10552,7 +10759,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-245",
+            "id": "block-253",
             "lineSpacing": {
               "type": "single"
             },
@@ -10570,7 +10777,7 @@
                 "type": "text"
               }
             ],
-            "id": "block-246",
+            "id": "block-254",
             "lineSpacing": {
               "type": "multiple",
               "value": 1.15
@@ -10726,9 +10933,6 @@
     "A shape or text box was not imported — shapes and text boxes are not supported yet.",
     "A shape or text box was not imported — shapes and text boxes are not supported yet.",
     "A SmartArt diagram was not imported — diagrams are not supported yet.",
-    "Unsupported field code \"FORMTEXT\" — its cached value was dropped.",
-    "Unsupported field code \"FORMCHECKBOX\" — its cached value was dropped.",
-    "Unsupported field code \"FORMDROPDOWN\" — its cached value was dropped.",
     "A chart was not imported — charts are not supported yet.",
     "A chart was not imported — charts are not supported yet.",
     "A chart was not imported — charts are not supported yet."

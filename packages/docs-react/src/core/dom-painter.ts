@@ -501,14 +501,18 @@ export class DomPainter {
     `;
     
     // Render each fragment
+    const chipEls: HTMLElement[] = [];
     for (const fragment of page.fragments) {
       const fragmentEl = this.renderFragment(fragment);
       if (fragmentEl) {
         contentArea.appendChild(fragmentEl);
+        const titles = fragment.isFirstFragment ? this.blockLookup.get(fragment.blockId)?.block.controlChips : undefined;
+        if (titles && titles.length > 0) chipEls.push(this.renderControlChips(titles, margins.left, margins.top + fragment.y));
       }
     }
     
     pageEl.appendChild(contentArea);
+    for (const chipEl of chipEls) pageEl.appendChild(chipEl);
     
     // Create dynamic field context for header/footer
     const pageNumber = page.pageNumber ?? page.pageIndex + 1;
@@ -1034,6 +1038,7 @@ export class DomPainter {
           }
 
           this.applyCommentDecoration(span, run);
+          this.applyControlDecoration(span, run);
           lineDiv.appendChild(span);
         } else if (run.kind === 'link') {
           const a = document.createElement('a');
@@ -1053,6 +1058,7 @@ export class DomPainter {
           }
 
           this.applyCommentDecoration(a, run);
+          this.applyControlDecoration(a, run);
           lineDiv.appendChild(a);
         }
       }
@@ -1528,6 +1534,7 @@ export class DomPainter {
         }
 
         this.applyCommentDecoration(span, run);
+        this.applyControlDecoration(span, run);
         container.appendChild(span);
       } else if (run.kind === 'lineBreak') {
         container.appendChild(document.createElement('br'));
@@ -1560,6 +1567,7 @@ export class DomPainter {
         }
 
         this.applyCommentDecoration(a, run);
+        this.applyControlDecoration(a, run);
         container.appendChild(a);
       }
     }
@@ -1581,6 +1589,63 @@ export class DomPainter {
     el.setAttribute('data-comment-thread', threadId);
     el.style.backgroundColor = 'rgba(99, 102, 241, 0.18)';
     el.style.cursor = 'pointer';
+  }
+
+  /**
+   * Decorate an element inside a content control: a faint tint, the control's title as a tooltip, grey text while
+   * it shows placeholder text, and for a check box a pointer cursor and an attribute the click handler keys off.
+   */
+  private applyControlDecoration(el: HTMLElement, run: Run): void {
+    if ((run.kind !== 'text' && run.kind !== 'link') || !run.control) return;
+    const { control } = run;
+    el.dataset.contentControl = control.title;
+    el.title = control.title;
+    if (!el.style.backgroundColor) el.style.backgroundColor = 'rgba(66, 133, 244, 0.08)';
+    if (control.placeholder && !el.style.color) el.style.color = '#80868b';
+    if (control.checkbox) {
+      el.dataset.controlCheckbox = 'true';
+      el.style.cursor = 'pointer';
+    }
+  }
+
+  /**
+   * The titles of the content controls that start at a block, as chips in the left margin next to its first line.
+   * They sit outside the clipped content area and take no clicks.
+   */
+  private renderControlChips(titles: string[], marginLeft: number, y: number): HTMLElement {
+    const chips = document.createElement('div');
+    chips.className = 'control-chips';
+    chips.style.cssText = `
+      position: absolute;
+      left: 4px;
+      top: ${y}px;
+      width: ${Math.max(0, marginLeft - 10)}px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      pointer-events: none;
+    `;
+    for (const title of titles) {
+      const chip = document.createElement('span');
+      chip.className = 'control-chip';
+      chip.textContent = title;
+      chip.style.cssText = `
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        box-sizing: border-box;
+        padding: 0 4px;
+        border: 1px solid #c6dafc;
+        border-radius: 3px;
+        background: #e8f0fe;
+        color: #1a56c4;
+        font: ${10 * this.config.scale}px/${14 * this.config.scale}px Arial, sans-serif;
+      `;
+      chips.appendChild(chip);
+    }
+    return chips;
   }
 
   /**

@@ -11,11 +11,14 @@ const preview = (v: Json | undefined): string => {
   return s.length > 80 ? `${s.slice(0, 77)}...` : s;
 };
 
-/** Plain text of a block (inline text, link text, table cells and the blocks inside them), used to align blocks. */
+/** Plain text of a block (inline text, link text, table cells and the blocks inside them, content controls and what they wrap), used to align blocks. */
 function blockText(block: Json): string {
   if (!isObj(block)) return '';
   const inline = (items: Json | undefined): string =>
-    Array.isArray(items) ? items.map((i) => (isObj(i) && typeof i.text === 'string' ? i.text : isObj(i) && i.type ? `[${String(i.type)}]` : '')).join('') : '';
+    Array.isArray(items)
+      ? items.map((i) => (isObj(i) && typeof i.text === 'string' ? i.text : isObj(i) && Array.isArray(i.content) ? inline(i.content) : isObj(i) && i.type ? `[${String(i.type)}]` : '')).join('')
+      : '';
+  if (Array.isArray(block.blocks)) return block.blocks.map(blockText).join('');
   if (Array.isArray(block.rows)) {
     return block.rows
       .map((row) =>

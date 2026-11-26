@@ -89,7 +89,61 @@ export interface DocBookmarkRun {
   name: string;
 }
 
-export type DocInline = DocTextRun | DocLinkRun | DocImageRun | DocPageNumberRun | DocTotalPagesRun | DocFieldRun | DocBookmarkRun;
+/** The kind of a content control (a `w:sdt`): the element of its `w:sdtPr` that gives it its behaviour. */
+export type DocContentControlType = 'richText' | 'text' | 'dropDown' | 'comboBox' | 'date' | 'checkbox' | 'picture' | 'docPart';
+
+/** One choice of a drop-down list or combo box. */
+export interface DocContentControlItem {
+  text: string;
+  value: string;
+}
+
+/**
+ * The properties of a content control (the `w:sdtPr` of a `w:sdt`). The content it wraps is the control's `content`
+ * (inline) or `blocks`; a checkbox shows its state as a glyph in that content as well as in `checked`.
+ */
+export interface DocContentControl {
+  type: DocContentControlType;
+  /** `w:tag`: the programmatic name. */
+  tag?: string;
+  /** `w:alias`: the title shown to the user. */
+  alias?: string;
+  /** `w:lock`: the control cannot be deleted (`sdtLocked`), its content cannot be edited (`contentLocked`), or both. */
+  lock?: 'sdtLocked' | 'contentLocked' | 'sdtContentLocked';
+  /** Name of the placeholder building block (`w:placeholder`); the text of the placeholder is the control's content while `showingPlaceholder`. */
+  placeholder?: string;
+  /** The content is the placeholder text, not a value (`w:showingPlcHdr`). */
+  showingPlaceholder?: boolean;
+  /** Choices of a `dropDown` or `comboBox`. */
+  items?: DocContentControlItem[];
+  /** Display format of a `date` (`w:dateFormat`, e.g. `dd/MM/yyyy`). */
+  dateFormat?: string;
+  /** The date a `date` holds (`w:fullDate`), as written. */
+  dateValue?: string;
+  /** State of a `checkbox` (`w14:checked`). */
+  checked?: boolean;
+  /** A `text` control that allows line breaks (`w:text w:multiLine`). */
+  multiline?: boolean;
+  /** Gallery of a `docPart` control (`w:docPartGallery`, e.g. `Cover Pages`, `Table of Contents`). */
+  gallery?: string;
+}
+
+/** Content wrapped by a content control inside a paragraph (a run-level `w:sdt`). Controls nest. */
+export interface DocContentControlRun {
+  type: 'contentControl';
+  control: DocContentControl;
+  content: DocInline[];
+}
+
+export type DocInline =
+  | DocTextRun
+  | DocLinkRun
+  | DocImageRun
+  | DocPageNumberRun
+  | DocTotalPagesRun
+  | DocFieldRun
+  | DocBookmarkRun
+  | DocContentControlRun;
 
 export interface DocParagraphStyle {
   alignment?: 'left' | 'center' | 'right' | 'justify';
@@ -232,7 +286,9 @@ export type DocBlock =
   | { type: 'table'; rows: DocTableRow[]; colWidthsPx?: number[]; borders?: DocBorders; look?: DocTableLook; namedStyleId?: string }
   | { type: 'image'; src: string; width: number; height: number; alt?: string; alignment?: 'left' | 'center' | 'right' }
   | { type: 'horizontalRule' }
-  | { type: 'pageBreak' };
+  | { type: 'pageBreak' }
+  /** Blocks wrapped by a content control (a block-level `w:sdt`). Controls nest. */
+  | { type: 'contentControl'; control: DocContentControl; blocks: DocBlock[] };
 
 export interface DocHeaderFooterParagraph {
   content: DocInline[];
