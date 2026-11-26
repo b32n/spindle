@@ -375,8 +375,27 @@ describe('line breaks inside tracked text', () => {
   it('are part of the change: one change for the text and its break, and the break goes with the text', () => {
     const changes = listChanges(stateOf(blocks).doc);
     expect(changes.map((c) => [c.kind, c.text])).toEqual([['deletion', 'x\ny'], ['insertion', 'zp\nq']]);
-    expect(texts(apply(stateOf(blocks), resolveAll('accept')).doc)).toEqual(['azp\nq']);
-    expect(texts(apply(stateOf(blocks), resolveAll('reject')).doc)).toEqual(['ax\ny']);
+    const flat = (doc: PmNode) => doc.child(0).textBetween(0, doc.child(0).content.size, '', '\n');
+    const accepted = apply(stateOf(blocks), resolveAll('accept'));
+    const rejected = apply(stateOf(blocks), resolveAll('reject'));
+    expect(flat(accepted.doc)).toBe('azp\nq');
+    expect(flat(rejected.doc)).toBe('ax\ny');
+    // The breaks that stay are line break nodes again, not newlines in the text.
+    for (const state of [accepted, rejected]) {
+      let newlines = 0;
+      let breaks = 0;
+      state.doc.descendants((n) => {
+        if (n.isText && n.text!.includes('\n')) newlines++;
+        if (n.type.name === 'hard_break') breaks++;
+      });
+      expect(newlines).toBe(0);
+      expect(breaks).toBe(1);
+    }
+    // Text that another change still covers keeps its newline: inserted by Ada, deleted by Bo, accepting only Ada's insertion.
+    const both = [para([run('a\nb', { insertion: ADA, deletion: BO })])];
+    const onlyAda = apply(stateOf(both), resolveAll('accept', 'Ada'));
+    expect(onlyAda.doc.child(0).textContent).toBe('a\nb');
+    expect(onlyAda.doc.child(0).child(0).marks.map((m) => m.type.name)).toEqual(['deletion']);
   });
 });
 
@@ -418,6 +437,13 @@ describe('changes of table rows', () => {
     const kept = apply(stateOf(blocks), resolveAll('reject'));
     expect(rowTexts(kept)).toEqual(['a', 'old']);
     expect(readBlockRevision(kept.doc.firstChild!.child(1).attrs)).toBeUndefined();
+  });
+
+  it('a row both inserted and deleted goes when accepted, and stays as it was before when everything is rejected', () => {
+    const blocks = table([{ text: 'a' }, { text: 'x', revision: { insertion: ADA, deletion: BO } }]);
+    expect(rowTexts(apply(stateOf(blocks), resolveAll('accept')))).toEqual(['a']);
+    expect(rowTexts(apply(stateOf(blocks), resolveAll('reject')))).toEqual(['a']);
+    expect(rowTexts(apply(stateOf(blocks), resolveAll('reject', 'Bo')))).toEqual(['a', 'x']);
   });
 
   it('removes the table when its only row goes', () => {

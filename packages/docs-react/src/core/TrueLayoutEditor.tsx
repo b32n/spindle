@@ -26,7 +26,7 @@ import {
 import { EditorState, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Node as PmNode } from 'prosemirror-model';
-import { docsSchema, createPlugins, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, findNoteRef, insertNoteReference, noteOrdinalAt, noteTextFragment, insertTableOfContents, updateTableOfContents, removeTableOfContents, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
+import { docsSchema, createPlugins, suggestingPlugin, blocksToPmDoc, sectionsToPmDoc, proseMirrorToDocument, toggleCheckboxControl, findNoteRef, insertNoteReference, noteOrdinalAt, noteTextFragment, insertTableOfContents, updateTableOfContents, removeTableOfContents, Block, DEFAULT_PAGE_CONFIG } from '@b32nio/spindle-docs-core';
 import type { CollabHandle } from '@b32nio/spindle-docs-core/collab';
 import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror';
 import { ensureCollabCursorStyles } from './collab-cursor-styles';
@@ -128,6 +128,15 @@ export interface TrueLayoutEditorProps {
    * (`final`) or rejected (`original`). The document itself is not changed.
    */
   revisionView?: RevisionView;
+  /**
+   * Suggesting mode: what the user does is recorded as tracked changes by `suggestAuthor` instead of being done (text typed
+   * is an insertion, text deleted a deletion, formatting a formatting change).
+   */
+  suggesting?: boolean;
+  /** The author written on suggestions (default: `Unknown`). */
+  suggestAuthor?: string;
+  /** Called with what had to be done directly in Suggesting mode because it cannot be suggested (a list, a table, an image…). */
+  onSuggestionNotice?: (notices: string[]) => void;
   /** Text style pool for efficient style storage (recommended for large documents) */
   textStylePool?: import('@b32nio/spindle-docs-core').TextStylePool;
   /** Header content configuration */
@@ -219,6 +228,9 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       minLinesAtBreak = 2,
       footnotesAtPageBottom = true,
       revisionView = 'markup',
+      suggesting = false,
+      suggestAuthor = 'Unknown',
+      onSuggestionNotice,
       textStylePool,
       header: headerProp,
       footer: footerProp,
@@ -328,6 +340,13 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
     const editableRef = useRef(editable);
     editableRef.current = editable;
     const onDocChangeRef = useRef(onDocChange);
+    // Suggesting mode is read by the plugin when a transaction is applied, so it takes effect without rebuilding the editor.
+    const suggestingRef = useRef(suggesting);
+    suggestingRef.current = suggesting;
+    const suggestAuthorRef = useRef(suggestAuthor);
+    suggestAuthorRef.current = suggestAuthor;
+    const suggestionNoticeRef = useRef(onSuggestionNotice);
+    suggestionNoticeRef.current = onSuggestionNotice;
     const onSelectionChangeRef = useRef(onSelectionChange);
     const onActivePageChangeRef = useRef(onActivePageChange);
     const textStylePoolRef = useRef(textStylePool);
@@ -486,6 +505,13 @@ export const TrueLayoutEditor = forwardRef<TrueLayoutEditorHandle, TrueLayoutEdi
       editorInitializedRef.current = true;
 
       const plugins = createPlugins(docsSchema, { collab: !!collabHandle });
+      plugins.push(
+        suggestingPlugin({
+          isActive: () => suggestingRef.current,
+          author: () => suggestAuthorRef.current,
+          onNotice: (notices) => suggestionNoticeRef.current?.(notices),
+        })
+      );
       let state: EditorState;
       if (collabHandle) {
         ensureCollabCursorStyles();

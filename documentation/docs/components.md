@@ -28,11 +28,33 @@ import { DocumentEditor } from '@b32nio/spindle-docs-react';
 | `showToolbar` | `boolean` | `true` | Show the formatting toolbar |
 | `showRuler` | `boolean` | `true` | Show horizontal and vertical rulers |
 | `readOnly` | `boolean` | `false` | View-only: hides the toolbar, rulers and comments |
+| `mode` | `'editing' \| 'suggesting' \| 'viewing'` | uncontrolled, starts `'editing'` | What typing does: `editing` changes the document, `suggesting` records what the user does as tracked changes (Word's Track Changes) by the current user (`currentUser` of `DocumentProvider`), `viewing` cannot change it. Give it to control the mode |
+| `onModeChange` | `(mode) => void` | — | Called when the user picks another mode in the Editing / Suggesting / Viewing switch |
+| `showModeSwitch` | `boolean` | `true` | Show the Editing / Suggesting / Viewing switch above the page (never with `readOnly`) |
+| `revisionView` | `'markup' \| 'final' \| 'original'` | `'markup'` | How tracked changes show to begin with (every change marked, as if all were accepted, as if all were rejected); the Review panel changes it |
 | `fileActions` | `boolean` | `false` | Show Open (`.docx`) and Download (DOCX) in the toolbar |
 | `exportFormats` | `'docx'[]` | all | Formats offered by Download |
 | `fileName` | `string` | document title | Base name for downloads |
 | `onFileOpened` | `(info: { fileName; warnings }) => void` | — | Called after a file was opened |
 | `onFileError` | `(error, action: 'open' \| 'download') => void` | — | Called when opening or downloading fails |
+
+#### Tracked changes
+
+A file's tracked changes (insertions, deletions, moves, formatting changes, inserted and deleted paragraph marks and table rows) are
+kept, shown in the colour of their author with a legend above the page, and written back to `.docx`. The **Review changes** button
+of the toolbar opens a panel that lists them with Accept and Reject for each, for all and for one author, goes to the next and
+previous change and shows the document as **All markup**, **Final** or **Original**. In **Suggesting** mode text typed becomes an
+insertion, text deleted stays as a deletion (text the user inserted themselves is simply removed), a paragraph break typed or
+joined away is recorded, and character and paragraph formatting changes record what the formatting was. What cannot be suggested
+(a list, table or image inserted or deleted, wrapping text in a list…) is done directly and a notice says so; changes from
+collaborators and undo and redo are not touched. The commands (`listChanges`, `resolveChange`, `resolveAll`, `resolveSelection`)
+and the plugin (`suggestingPlugin`) are exported from `@b32nio/spindle-docs-core` for hosts with their own UI. The **Final** and **Original**
+views are read-only: a banner offers the switch back to All markup. With a controlled `mode="viewing"` and `showModeSwitch={false}`
+the reader has no way to leave Viewing from the UI: the host has to change `mode`. Edits in headers and footers are made directly in
+Suggesting mode (a notice says so once); `TrueLayoutEditor` without `suggestAuthor` writes suggestions as "Unknown", while
+`DocumentEditor` uses the name of `currentUser`. Known limits: text composed with an IME is recorded like typing, but every composition update replaces the composed text (the author's own
+insertion), and this has not been tried with a real input method (CJK): test it before relying on it;
+two people with the same display name are one author to Suggesting mode (it removes text that "they" inserted, whoever typed it).
 
 #### Features
 
@@ -100,6 +122,10 @@ const editorRef = useRef<TrueLayoutEditorHandle>(null);
 | `onHeaderChange` | `(content: HeaderFooterContent) => void` | - | Called when header is edited |
 | `onFooterChange` | `(content: HeaderFooterContent) => void` | - | Called when footer is edited |
 | `headerFooterEditable` | `boolean` | `true` | Whether headers/footers are editable |
+| `suggesting` | `boolean` | `false` | Record what the user does as tracked changes (Suggesting mode) |
+| `suggestAuthor` | `string` | `'Unknown'` | The author of the suggestions |
+| `onSuggestionNotice` | `(notices: string[]) => void` | - | Called with what was done directly because it cannot be suggested |
+| `revisionView` | `'markup' \| 'final' \| 'original'` | `'markup'` | How the tracked changes show; Final and Original are read-only |
 
 #### Handle Methods
 

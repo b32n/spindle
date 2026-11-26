@@ -203,6 +203,7 @@ export function listChanges(doc: PmNode): ReviewChange[] {
 // Accepting and rejecting
 // ---------------------------------------------------------------------------
 
+const TRACKED_MARKS = new Set(['insertion', 'deletion', 'formatChange']);
 const FORMAT_MARKS = ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'smallCaps', 'allCaps', 'hidden', 'textStyle', 'namedStyle'];
 
 /**
@@ -240,6 +241,30 @@ function previousParagraph(change: NonNullable<BlockRevision['formatChange']>): 
   return { type, attrs: { ...type.create().attrs, ...paragraphFormatAttrs(level ? 'heading' : 'paragraph', format, level) } };
 }
 
+/**
+ * Text that stays after its change is settled turns its newline characters back into line breaks: a line break inside tracked
+ * text is a newline in the text (so its change survives collaboration), but untracked it is a `hard_break` node, as typing
+ * one makes. Each replacement has the size of what it replaces, so positions do not move. This relies on imported text never
+ * holding a raw newline (the DOCX reader makes every break a line break node or a tracked newline): a reader that put one in text
+ * would have it turned into a break here.
+ */
+function breaksToNodes(tr: Transaction, from: number, to: number): void {
+  const found: Array<{ at: number; marks: readonly Mark[] }> = [];
+  tr.doc.nodesBetween(from, to, (node, pos) => {
+    if (!node.isText) return true;
+    // Text another change still covers keeps its newlines (a break node would lose that change in collaboration).
+    if (node.marks.some((m) => TRACKED_MARKS.has(m.type.name))) return false;
+    const text = node.text!;
+    for (let i = 0; i < text.length; i++) {
+      const at = pos + i;
+      if (text[i] === '\n' && at >= from && at < to) found.push({ at, marks: node.marks });
+    }
+    return false;
+  });
+  // The break keeps the marks of the newline (bold, a comment's anchor) it replaces.
+  for (const { at, marks } of found.reverse()) tr.replaceWith(at, at + 1, docsSchema.nodes.hard_break.create(null, null, marks));
+}
+
 /** Accept or reject one unit in `tr`. Units must be settled from the end of the document to its start (see `settle`). */
 function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'reject'): void {
   const accept = action === 'accept';
@@ -248,8 +273,10 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
     case 'deletion': {
       // Accepting an insertion or rejecting a deletion keeps the text and drops the mark; the other two remove the text.
       const keep = (unit.kind === 'insertion') === accept;
-      if (keep) tr.removeMark(unit.from, unit.to, unit.mark);
-      else tr.delete(unit.from, unit.to);
+      if (keep) {
+        tr.removeMark(unit.from, unit.to, unit.mark);
+        breaksToNodes(tr, unit.from, unit.to);
+      } else tr.delete(unit.from, unit.to);
       return;
     }
     case 'format': {
@@ -263,6 +290,7 @@ function settleUnit(tr: Transaction, unit: ChangeUnit, action: 'accept' | 'rejec
         for (const json of runFormatMarks(previous)) tr.addMark(unit.from, unit.to, docsSchema.mark(json.type, json.attrs));
       }
       tr.removeMark(unit.from, unit.to, unit.mark);
+      breaksToNodes(tr, unit.from, unit.to);
       return;
     }
     case 'markInsertion':
@@ -347,6 +375,8 @@ export function settle(state: EditorState, units: readonly ChangeUnit[], action:
   const tr = state.tr;
   const ordered = [...units].sort((a, b) => anchorOf(b) - anchorOf(a) || rank(a, action) - rank(b, action));
   for (const unit of ordered) settleUnit(tr, unit, action);
+  // Settling a change is not itself suggested, in Suggesting mode.
+  tr.setMeta('suggesting$', 'review');
   // Nothing changed (a unit whose node is gone): no empty step on the undo history, and the command reports no success.
   return tr.docChanged ? tr.scrollIntoView() : null;
 }

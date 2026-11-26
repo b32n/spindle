@@ -2,14 +2,18 @@
  * RevisionLegend - the authors of the tracked changes in the document, each in the colour their changes are drawn in.
  */
 
-import { memo } from 'react';
+import { memo, type CSSProperties } from 'react';
 import type { RevisionAuthor } from '@b32nio/spindle-docs-core';
 
 export interface RevisionLegendProps {
   authors: readonly RevisionAuthor[];
+  /** Drawn without its own band (padding, background, border), for a host that puts it in a band of its own; `DocumentEditor` does. */
+  bare?: boolean;
 }
 
-export const RevisionLegend = memo(function RevisionLegend({ authors }: RevisionLegendProps) {
+const BAND: CSSProperties = { padding: '4px 16px', background: '#ffffff', borderBottom: '1px solid #e8eaed' };
+
+export const RevisionLegend = memo(function RevisionLegend({ authors, bare = false }: RevisionLegendProps) {
   if (authors.length === 0) return null;
   return (
     <div
@@ -21,9 +25,7 @@ export const RevisionLegend = memo(function RevisionLegend({ authors }: Revision
         flexWrap: 'wrap',
         alignItems: 'center',
         gap: 12,
-        padding: '4px 16px',
-        background: '#ffffff',
-        borderBottom: '1px solid #e8eaed',
+        ...(bare ? { padding: '4px 0' } : BAND),
         font: '12px/16px Arial, sans-serif',
         color: '#3c4043',
       }}

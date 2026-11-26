@@ -22,6 +22,7 @@ import { CommentsSidebar } from './CommentsSidebar';
 import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
 import { ReviewPanel } from './ReviewPanel';
+import { ModeSwitch, headerFooterNotice, type EditorMode } from './ModeSwitch';
 import { Ruler } from './Ruler';
 import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
@@ -90,6 +91,15 @@ interface DocumentEditorProps {
    * `original` (as if all were rejected). The review panel changes it; the document is not changed by it.
    */
   revisionView?: RevisionView;
+  /**
+   * What typing does: `editing` (default) changes the document, `suggesting` records what the user does as tracked changes
+   * (author: the current user), `viewing` cannot change it. When given, the mode is controlled: change it in `onModeChange`.
+   */
+  mode?: EditorMode;
+  /** Called when the user picks another mode in the mode switch. */
+  onModeChange?: (mode: EditorMode) => void;
+  /** Show the Editing / Suggesting / Viewing switch above the page (default: true; never shown when `readOnly`). */
+  showModeSwitch?: boolean;
 }
 
 const defaultActiveMarks: ActiveMarks = {
@@ -133,9 +143,43 @@ export const DocumentEditor = memo(function DocumentEditor({
   uploadImage,
   maxImageBytes,
   revisionView: initialRevisionView = 'markup',
+  mode: modeProp,
+  onModeChange,
+  showModeSwitch = true,
 }: DocumentEditorProps) {
   const { document: docModel, zoom, setZoom, currentUser } = useDocument();
   const sections = useSections();
+  const [ownMode, setOwnMode] = useState<EditorMode>('editing');
+  const mode = modeProp ?? ownMode;
+  // Viewing cannot change the document, like a read-only editor (which has no mode to switch).
+  const hostReadOnly = readOnlyProp || mode === 'viewing';
+  // The notice has a counter, so the same text twice in a row restarts its timer.
+  const [noticeState, setNoticeState] = useState<{ text: string; n: number } | null>(null);
+  const notice = noticeState?.text ?? null;
+  const showNotice = useCallback((text: string | null) => setNoticeState((prev) => (text === null ? null : { text, n: (prev?.n ?? 0) + 1 })), []);
+  const directNoticeShown = useRef(false);
+  const handleModeChange = useCallback((next: EditorMode) => {
+    setOwnMode(next);
+    onModeChange?.(next);
+  }, [onModeChange]);
+  // A notice is about the mode it came in (also when a host changes the mode itself).
+  useEffect(() => {
+    showNotice(null);
+    directNoticeShown.current = false;
+  }, [mode, showNotice]);
+  const handleSuggestionNotice = useCallback((notices: string[]) => showNotice(notices.join(' ')), [showNotice]);
+  useEffect(() => {
+    if (!noticeState) return;
+    const timer = setTimeout(() => showNotice(null), 8000);
+    return () => clearTimeout(timer);
+  }, [noticeState, showNotice]);
+  // Headers and footers are edited apart from the body and are not recorded as suggestions: say so (once per mode).
+  const announceDirectEdit = useCallback(() => {
+    const text = headerFooterNotice(mode, directNoticeShown.current);
+    if (!text) return;
+    directNoticeShown.current = true;
+    showNotice(text);
+  }, [mode, showNotice]);
 
   const [showPageSetup, setShowPageSetup] = useState(false);
   const [editorView, setEditorView] = useState<EditorView | null>(null);
@@ -151,7 +195,7 @@ export const DocumentEditor = memo(function DocumentEditor({
   const showReviewRef = useRef(false);
   const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
   // The Final and Original views hide text, so they cannot be edited (the banner offers the way back to All markup).
-  const readOnly = isEditLocked(readOnlyProp, revisionView);
+  const readOnly = isEditLocked(hostReadOnly, revisionView);
   const [pendingComment, setPendingComment] = useState<{ from: number; to: number; quote: string } | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   
@@ -205,8 +249,9 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (target) {
       docModel.setSectionHeader(target.id, content);
       docModel.recordHistory('Update header');
+      announceDirectEdit();
     }
-  }, [docModel, sections, readOnly]);
+  }, [docModel, sections, readOnly, announceDirectEdit]);
 
   // Handle footer changes - update document model
   const handleFooterChange = useCallback((content: HeaderFooterContent, sectionId?: string) => {
@@ -215,8 +260,9 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (target) {
       docModel.setSectionFooter(target.id, content);
       docModel.recordHistory('Update footer');
+      announceDirectEdit();
     }
-  }, [docModel, sections, readOnly]);
+  }, [docModel, sections, readOnly, announceDirectEdit]);
 
   const handleInsertSectionBreak = useCallback((type: 'nextPage' | 'continuous') => {
     if (readOnly || !editorView) return;
@@ -238,12 +284,12 @@ export const DocumentEditor = memo(function DocumentEditor({
 
   const handleResolve = useCallback((action: 'accept' | 'reject', target: { change: ReviewChange } | { author?: string }) => {
     // An explicit command by the reader: allowed in the Final and Original views too, not when the host made the editor read-only.
-    if (readOnlyProp || !editorView) return;
+    if (hostReadOnly || !editorView) return;
     const command = 'change' in target ? resolveChange(target.change.id, action) : resolveAll(action, target.author);
     command(editorView.state, editorView.dispatch);
     // The list is refreshed now (not after the typing pause), so a second click straight after the first never uses an id that is gone.
     if (showReviewRef.current) setChanges(listChanges(editorView.state.doc));
-  }, [readOnlyProp, editorView]);
+  }, [hostReadOnly, editorView]);
 
   const handleGoToChange = useCallback((change: ReviewChange) => {
     editorRef.current?.goTo?.(change.from);
@@ -261,7 +307,8 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (type === 'header') docModel.setSectionHeader(sectionId, value);
     else docModel.setSectionFooter(sectionId, value);
     docModel.recordHistory(linked ? 'Link to previous' : 'Unlink from previous');
-  }, [docModel, readOnly]);
+    announceDirectEdit();
+  }, [docModel, readOnly, announceDirectEdit]);
 
   // Handle margins change from ruler
   const handleMarginsChange = useCallback((margins: PageMargins) => {
@@ -611,7 +658,22 @@ export const DocumentEditor = memo(function DocumentEditor({
       )}
       
       <RevisionViewBanner view={revisionView} onSwitchToMarkup={() => setRevisionView('markup')} />
-      <RevisionLegend authors={authors} />
+      {(authors.length > 0 || notice || (showModeSwitch && !readOnlyProp)) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', borderBottom: '1px solid #e8eaed', padding: '2px 16px', minHeight: 30 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <RevisionLegend authors={authors} bare />
+          </div>
+          {/* The live region is always mounted: a region that appears together with its text is not announced by many screen readers. */}
+          <span role="status">
+            {notice && (
+              <span data-testid="suggesting-notice" style={{ font: '12px/16px Arial, sans-serif', color: '#b06000', background: '#fef7e0', borderRadius: 4, padding: '2px 8px' }}>
+                {notice}
+              </span>
+            )}
+          </span>
+          {showModeSwitch && !readOnlyProp && <ModeSwitch mode={mode} onModeChange={handleModeChange} />}
+        </div>
+      )}
 
       {/* Editor area with vertical ruler */}
       <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
@@ -661,6 +723,9 @@ export const DocumentEditor = memo(function DocumentEditor({
           onHeaderFooterLinkChange={handleHeaderFooterLinkChange}
           collabHandle={docModel.getCollabHandle()}
           revisionView={revisionView}
+          suggesting={mode === 'suggesting' && !readOnly}
+          suggestAuthor={currentUser.name || 'Unknown'}
+          onSuggestionNotice={handleSuggestionNotice}
         />
 
         {/* Review panel — tracked changes, in the place of the comments sidebar */}
@@ -681,7 +746,7 @@ export const DocumentEditor = memo(function DocumentEditor({
               palette={palette}
               view={revisionView}
               onViewChange={setRevisionView}
-              onResolve={readOnlyProp ? undefined : handleResolve}
+              onResolve={hostReadOnly ? undefined : handleResolve}
               onGoTo={handleGoToChange}
               onClose={() => setShowReview(false)}
             />

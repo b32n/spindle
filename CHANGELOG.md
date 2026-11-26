@@ -363,6 +363,29 @@ lockstep.
   in the document; the legend counts changes the way the panel lists them (a move once, the runs of one change as one), not runs.
   The list of changes is kept only while the panel is open. Switching between editable and read-only (these views, a host's `readOnly`) no longer rebuilds the editor from the document it was mounted with: the editor reads `editable` live, so edits and accepted or rejected changes made before the switch stay.
 
+- **Suggesting mode: typing creates tracked changes.** `DocumentEditor` has an Editing / Suggesting / Viewing mode switch
+  above the page (props `mode`, `onModeChange`, `showModeSwitch`; uncontrolled by default; Viewing is read-only; never shown with
+  `readOnly`). In Suggesting mode the author is the current user (`currentUser`). The new `suggestingPlugin` of docs-core (also
+  `suggestChanges`, `suggestingKey`) puts what the user does into the state a suggestion would have left it in, in a transaction
+  that joins the user's in the undo history: typed or pasted text gets an insertion mark (consecutive typing is one change), deleted
+  text is put back with a deletion mark (text the same author inserted themselves is just removed; backspaces and deletes move
+  the caret over the kept text), Enter marks the paragraph break inserted, joining paragraphs keeps the break marked deleted
+  (a pasted paragraph does not bring the formatting-change record of its source; Enter then Backspace leaves no trace, also after typing in the new paragraph, and the records another person had on the paragraph mark are kept; the first Backspace
+  at the start of a paragraph moves the caret before the deleted break, so the second one deletes the character before),
+  text typed in the middle of another author's deletion is an insertion of its own, never part of the deletion, a change of character formatting records the formatting before, on text only (`formatChange`; an image, field, bookmark or other object in the range keeps the formatting without a record and the notice says so; none
+  when it is put back, or on the author's own insertion), a change of a paragraph's formatting or type records the old formatting.
+  What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list, an inline image, field, bookmark, note reference or content control, which would lose a mark in collaboration because marks sync on text only; a paragraph pasted with such an object is inserted directly) is left as
+  the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. (A transaction that a host plugin appends is recorded like the user's own edit.) Changes from collaborators, undo
+  and redo, and accepting or rejecting in the review panel are never suggested. New `TrueLayoutEditor` props `suggesting`,
+  `suggestAuthor` and `onSuggestionNotice`; new `ModeSwitch` component and `EditorMode` type. Formatting several marks in one
+  transaction (clear formatting) records the formatting before the first of them, the selection stays a range after a format,
+  a line break typed or deleted is kept as text of the tracked run (so it syncs with its change), and notices go out after the
+  transaction was applied. Limits: only the body text is suggested (an edit in a header or footer is made directly, and a notice
+  says so once per mode; a note edited in place is recorded as a replacement of its whole text: the old text deleted, the new
+  text inserted; a change to the properties of a list, table, image, form control or other structure, and Increase / Decrease indent, are made directly, with a notice; Enter in a list item is recorded as an inserted paragraph mark, lifting an item out of its list with Backspace is made directly; a link or
+  a comment added inside someone's change is not recorded; text composed with an IME is recorded like typing but has not been tried with a real input method), and a change is continued by the same author name, with no time limit, so two people with one display name
+  share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses). Formatting text that carries another person's formatting change is applied directly, with a notice (rejecting their change brings back the formatting from before it). The mode switch group is labelled "Editor mode", and the notice is announced through a live region that is always present.
+
 ### Changed
 
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
@@ -400,6 +423,9 @@ lockstep.
 
 ### Fixed
 
+- **Switching an editor to read-only and back no longer resets the document.** `TrueLayoutEditor` rebuilt its ProseMirror view (and
+  seeded it again from the initial content) whenever `editable` changed, so the edits made before the switch were lost on screen.
+  It now reads `editable` live. (Needed by the Viewing mode.)
 - **DOCX loss report: `docx.namedStyles` is gone** (the style names are now imported and exported).
 - **A paragraph's `indent` is a level of 24 px, not pixels.** The DOCX importer stored pixels in `indent` (the editor's
   indent command stores levels), so an imported indent of 48 px was laid out as 48 levels. The importer now sets
