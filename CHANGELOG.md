@@ -319,7 +319,7 @@ lockstep.
   `revisionAuthors`, `documentRevisionAuthors`. Marked text takes the author's colour over its own (a link, a content-control
   placeholder), as in All Markup. Editing around changes: copying tracked text and pasting it gives the copy change ids of its own
   (author and date stay), so accepting or rejecting one place never touches the other (`freshRevisionIds`); text typed in the
-  middle of a deleted run is live text, not part of the deletion (also through the editor's own input path; IME composition is not covered, and typing over a selection that lies wholly inside a deletion replaces the struck-through text, as any edit in Editing mode that is not recorded); a line break typed in tracked
+  middle of a deleted run is live text, not part of the deletion (also through the editor's own input path; IME composition is not covered, and typing over a selection that lies wholly inside a deletion replaces the struck-through text, as any edit in Editing mode that is not recorded; pasting plain text into a deleted run is live text too, while pasted HTML keeps its own marks; cut and paste, and drag and drop, also count as a paste, so a moved tracked range gets a new id); a line break typed in tracked
   text (Shift+Enter) is a newline in the text, so its change survives collaboration. The DOCX writer no longer uses a regular
   expression look-behind (older Safari cannot parse one), writes a `w:date` without seconds with `:00` added (the file format requires the seconds) and a deleted run counts as content
   when a page break follows it. Copied tracked text now keeps its changes when pasted in the browser (the clipboard HTML was parsed as plain text style before: the parse rules of the change marks have a priority of their own). Updating a table of contents lists the final text of a heading (words in a tracked
@@ -336,7 +336,8 @@ lockstep.
   around whole paragraphs or tables are counted as `docx.trackedBlockChanges` (their content is not imported). A change without
   an id gets a number that is unique in the import. A line break inside changed text keeps the change (it stays in the text node
   in the editor, because the collaboration binding keeps marks on text only), and the export drops characters XML cannot carry
-  from an author and a date that is not a date.
+  from an author and a date that is not a date (a date out of range is dropped too, and two authors' changes with the same id get two `w:id`s). The still-lost changes around a field, an
+  image or a note reference, and deleted text in a field result, are counted as `docx.trackedChangesNotKept` in the loss report; a deleted image in `mc:AlternateContent` is dropped like a plain one.
 - **DOCX loss report: `docx.trackedInsertions` and `docx.trackedDeletions` count only what is still lost**: a change on a
   paragraph mark (`w:pPr/w:rPr`) or on a table row (`w:trPr`), whose paragraph or row is imported as ordinary content. Changes
   around runs are kept and no longer counted (32 and 22 occurrences in the corpus before).

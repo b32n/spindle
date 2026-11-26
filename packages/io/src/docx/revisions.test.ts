@@ -322,6 +322,57 @@ describe('writing the author and date of a change: edge cases', () => {
   });
 });
 
+describe('writing dates and ids of changes: ranges and authors', () => {
+  it('drops a date whose month, day, hour, minute or second is out of range', async () => {
+    for (const date of ['2024-13-45T99:99', '2024-00-10T10:00:00Z', '2024-02-32T10:00:00Z', '2024-02-03T24:00:00Z', '2024-02-03T10:60:00Z', '2024-02-03T10:00:60Z']) {
+      const { xml } = await exportXml([{ type: 'text', text: 'a', revision: { insertion: { id: '1', author: 'Ada', date } } }]);
+      expect(xml).not.toContain('w:date=');
+    }
+    const { xml } = await exportXml([{ type: 'text', text: 'a', revision: { insertion: { id: '1', author: 'Ada', date: '2024-12-31T23:59:59Z' } } }]);
+    expect(xml).toContain('w:date="2024-12-31T23:59:59Z"');
+  });
+
+  it('gives two authors changes with the same id two w:ids', async () => {
+    const { xml } = await exportXml([
+      { type: 'text', text: 'a', revision: { insertion: { id: '7', author: 'Ada' } } },
+      { type: 'text', text: 'b', revision: { insertion: { id: '7', author: 'Bo' } } },
+    ]);
+    const ids = [...xml.matchAll(/<w:ins w:id="(\d+)"/g)].map((m) => m[1]);
+    expect(ids).toHaveLength(2);
+    expect(new Set(ids).size).toBe(2);
+  });
+});
+
+describe('a deleted image in mc:AlternateContent', () => {
+  it('is dropped with a warning, like a plain deleted drawing', async () => {
+    const drawing = '<w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><wp:extent cx="9525" cy="9525"/></wp:inline></w:drawing>';
+    const alternate = `<mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="wps">${drawing}</mc:Choice><mc:Fallback><w:pict/></mc:Fallback></mc:AlternateContent>`;
+    const { result } = await importBody(`<w:p ${W}>${del('1', 'Bo', r(alternate))}${r(alternate)}</w:p>`);
+    expect(result.warnings.filter((w) => /deleted image was not kept/.test(w))).toHaveLength(1); // the live copy gives none
+  });
+});
+
+describe('loss report for changes the importer cannot keep around runs', () => {
+  const drawing = '<w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><wp:extent cx="9525" cy="9525"/></wp:inline></w:drawing>';
+  const begin = r('<w:fldChar w:fldCharType="begin"/>') + r('<w:instrText> REF a </w:instrText>') + r('<w:fldChar w:fldCharType="separate"/>');
+  const end = r('<w:fldChar w:fldCharType="end"/>');
+
+  it('counts a change around a field, an image and a note reference, and deleted text in a field result', async () => {
+    const { bytes } = await importBody(
+      `<w:p ${W}>${ins('1', 'A', begin + r(t('3')) + end)}${del('2', 'A', r(drawing))}${del('3', 'A', r('<w:footnoteReference w:id="1"/>'))}${ins('4', 'A', r(drawing))}` +
+        `${begin}${del('5', 'A', delRun('old'))}${end}${del('6', 'A', delRun('outside'))}</w:p>`
+    );
+    const found = (await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedChangesNotKept');
+    expect(found).toMatchObject({ count: 5 });
+    expect((await detectDocxLoss(bytes, { detail: 'full' })).items.find((i) => i.id === 'docx.trackedChangesNotKept')?.where).toEqual(['image ×2', 'field ×1', 'note reference ×1', 'text in a field result ×1']);
+  });
+
+  it('does not count changes around plain text, even after a field closed', async () => {
+    const { bytes } = await importBody(`<w:p ${W}>${begin}${r(t('3'))}${end}${del('1', 'A', delRun('y'))}${ins('2', 'A', r(t('z')))}</w:p>`);
+    expect((await detectDocxLoss(bytes)).items.find((i) => i.id === 'docx.trackedChangesNotKept')).toBeUndefined();
+  });
+});
+
 describe('a deleted run before a page break', () => {
   it('counts as content, so the break is after the paragraph', async () => {
     const { result } = await importBody(`<w:p ${W}>${del('1', 'Bo', delRun('gone'))}<w:r><w:br w:type="page"/></w:r></w:p>`);

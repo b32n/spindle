@@ -2,7 +2,7 @@ import type { ImportLossItem } from '@b32nio/spindle-shared';
 import { unsupportedControls } from './content-controls';
 import { findTocRanges, tocLists } from './toc-field';
 import { drawingKind } from './drawing-kind';
-import { attrsOf, childrenOf, find, findAll, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
+import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, walk, type XmlNode } from './xml-tree';
 
 /**
  * XML-based detectors for constructs the importer does not bring across. They parse the part and walk the
@@ -247,6 +247,41 @@ function trackedChanges(root: XmlNode[]): Item[] {
   ];
 }
 
+const CHANGE_NOT_KEPT_RUN_CONTENT = ['w:fldChar', 'w:fldSimple', 'w:drawing', 'mc:AlternateContent', 'w:pict', 'w:footnoteReference', 'w:endnoteReference'];
+
+/**
+ * Tracked changes around runs that the importer cannot keep as a change: a change around a field (a deleted field is dropped),
+ * a deleted image or note reference (dropped), an inserted image, field or note reference (kept as ordinary content), and
+ * deleted text inside a field's result (dropped). The reader also warns about each of these.
+ */
+function trackedChangesNotKept(root: XmlNode[]): Item[] {
+  let count = 0;
+  // Field nesting in document order: true once a field is past its separator (inside its result).
+  const fields: boolean[] = [];
+  const kinds = new Map<string, number>();
+  walk(root, (node, tag, path) => {
+    if (tag === 'w:fldChar') {
+      const type = attr(node, 'w:fldCharType');
+      if (type === 'begin') fields.push(false);
+      else if (type === 'separate' && fields.length > 0) fields[fields.length - 1] = true;
+      else if (type === 'end') fields.pop();
+      return;
+    }
+    if ((tag !== 'w:ins' && tag !== 'w:del') || inRevisionProps(path) || path.includes('w:txbxContent')) return;
+    const parent = path[path.length - 1];
+    if (parent === 'w:rPr' || parent === 'w:trPr' || parent === 'w:body' || parent === 'w:tc') return;
+    const found = CHANGE_NOT_KEPT_RUN_CONTENT.find((t) => findDeep(node, t));
+    if (found) {
+      count++;
+      bump(kinds, found === 'w:fldChar' || found === 'w:fldSimple' ? 'field' : found === 'w:footnoteReference' || found === 'w:endnoteReference' ? 'note reference' : 'image');
+    } else if (tag === 'w:del' && fields.some(Boolean) && findDeep(node, 'w:delText')) {
+      count++;
+      bump(kinds, 'text in a field result');
+    }
+  });
+  return item('docx.trackedChangesNotKept', 'tracked change(s) around a field, image or note reference, or inside a field result', count, 'a deleted field, image or note reference is dropped and an inserted one is kept as ordinary content; deleted text in a field result is dropped; the change is not recorded', kinds);
+}
+
 /**
  * Tracked changes the importer does not keep because of where they are: around whole paragraphs or tables (a direct child of
  * the body or a table cell, whose content is not imported), and in headers and footers (deleted text is dropped, inserted
@@ -425,10 +460,11 @@ export function scanDocx(input: DocxScanInput, full: boolean): Item[] {
     const { charts, floating } = drawingCounts(root);
     return [...floating, ...charts];
   });
-  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
+  if (!full) return [...drawings, ...safe(() => trackedChanges(root)), ...safe(() => trackedChangesNotKept(root)), ...safe(() => trackedChangesElsewhere(root, input.headerFooters)), ...safe(() => contentControls(root)).map(({ where: _where, ...rest }) => rest), ...safe(() => fields(root)).map(({ where: _where, ...rest }) => rest)];
   return [
     ...drawings,
     ...safe(() => trackedChanges(root)),
+    ...safe(() => trackedChangesNotKept(root)),
     ...safe(() => trackedChangesElsewhere(root, input.headerFooters)),
     ...safe(() => contentControls(root)),
     ...safe(() => listFormatting(root, numberingLookup(input.numbering))),

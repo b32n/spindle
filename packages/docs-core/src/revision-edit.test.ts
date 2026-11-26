@@ -4,7 +4,7 @@ import { EditorState, TextSelection } from 'prosemirror-state';
 import { Fragment, Slice } from 'prosemirror-model';
 import { docsSchema } from './prosemirror/schema';
 import { createPlugins } from './prosemirror/plugins';
-import { freshRevisionIds, insertTrackedLineBreak, newRevisionId, typeOutsideDeletion } from './prosemirror/revision-edit';
+import { freshRevisionIds, insertTrackedLineBreak, newRevisionId, pasteOutsideDeletion, typeOutsideDeletion } from './prosemirror/revision-edit';
 import { collectRevisions } from './revisions';
 
 const { insertion, deletion } = docsSchema.marks;
@@ -142,6 +142,35 @@ describe('typing inside a deletion', () => {
     // Stored marks without it inside a deletion: nothing to do, the default insertion is already live text.
     const plain = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 9)).setStoredMarks([]));
     expect(typeOutsideDeletion(plain, 9, 9, 'q')).toBeNull();
+  });
+
+  it('pastes plain text inside a deletion as live text, and leaves other spots alone', () => {
+    const state = at(stateOf(), 1 + 5 + 3);
+    const plain = new Slice(Fragment.from(text('PQ', deletion.create(BO))), 0, 0); // what the clipboard parser makes of plain text: the marks around the caret
+    const next = state.apply(pasteOutsideDeletion(state, plain)!);
+    const kids: { text: string; marks: string[] }[] = [];
+    next.doc.firstChild!.forEach((c) => kids.push({ text: c.text!, marks: c.marks.map((m) => m.type.name) }));
+    expect(kids.slice(0, 4)).toEqual([
+      { text: 'keep ', marks: [] },
+      { text: 'gon', marks: ['deletion'] },
+      { text: 'PQ', marks: [] },
+      { text: 'e away', marks: ['deletion'] },
+    ]);
+    expect(next.storedMarks?.some((m) => m.type.name === 'deletion') ?? false).toBe(false);
+    const outside = at(stateOf(), 1);
+    expect(pasteOutsideDeletion(outside, plain)).toBeNull();
+  });
+
+  it('is installed as a paste handler that leaves clipboard HTML alone', () => {
+    const state = at(stateOf(), 9);
+    const plugin = state.plugins.find((p) => p.props.handlePaste)!;
+    let dispatched = 0;
+    const view = { state, dispatch: () => dispatched++ } as never;
+    const slice = new Slice(Fragment.from(text('PQ')), 0, 0);
+    const clip = (html: string) => ({ clipboardData: { getData: (type: string) => (type === 'text/html' ? html : '') } }) as unknown as ClipboardEvent;
+    expect(plugin.props.handlePaste!.call(plugin, view, clip('<b>x</b>'), slice)).toBe(false);
+    expect(plugin.props.handlePaste!.call(plugin, view, clip(''), slice)).toBe(true);
+    expect(dispatched).toBe(1);
   });
 
   it('keeps text typed inside an insertion as part of it', () => {

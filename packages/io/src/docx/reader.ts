@@ -306,7 +306,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
         flush();
         const base = find(childrenOf(piece), 'w:rubyBase');
         if (base) consumeRuns(childrenOf(base), target);
-      } else if (pieceTag === 'w:drawing' && deleted()) {
+      } else if ((pieceTag === 'w:drawing' || pieceTag === 'mc:AlternateContent') && deleted()) {
         warnings.push('A deleted image was not kept as a tracked deletion; it was dropped.');
       } else if (pieceTag === 'w:drawing') {
         const image = inInstruction() ? null : parseDrawing(piece, ctx.media, warnings);

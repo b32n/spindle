@@ -245,7 +245,12 @@ const ISO_DATE = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(:\d{2}(?:\.\d+)?)?(Z|[+-]\d{2
 /** `w:date` is an xsd:dateTime, which needs the seconds: a date without them gets `:00`; anything else is dropped. */
 const wordDate = (date: string | undefined): string | undefined => {
   const match = date ? ISO_DATE.exec(date) : null;
-  return match ? `${match[1]}${match[2] ?? ':00'}${match[3] ?? ''}` : undefined;
+  if (!match) return undefined;
+  const [, day, hour, minute] = /^\d{4}-(\d{2}-\d{2})T(\d{2}):(\d{2})/.exec(match[1]) as RegExpExecArray;
+  const [month, dayOfMonth] = day.split('-').map(Number);
+  const seconds = match[2] ? Number(match[2].slice(1, 3)) : 0;
+  if (month < 1 || month > 12 || dayOfMonth < 1 || dayOfMonth > 31 || Number(hour) > 23 || Number(minute) > 59 || seconds > 59) return undefined;
+  return `${match[1]}${match[2] ?? ':00'}${match[3] ?? ''}`;
 };
 
 /** True when the run is part of a tracked insertion or deletion. */
@@ -329,9 +334,9 @@ class DocxBuilder {
     return out;
   }
 
-  /** The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next free number. */
+  /** The `w:id` a tracked change is written with: its own id when that is a number not used yet by another change, else the next free number. A change is identified by kind, author and id, so two authors' changes with the same id stay two changes. */
   private revisionId(kind: 'ins' | 'del', meta: DocRevisionMeta): number {
-    const key = `${kind}:${meta.id}`;
+    const key = `${kind}:${meta.author}:${meta.id}`;
     const known = this.revisionIds.get(key);
     if (known !== undefined) return known;
     let id = /^\d{1,9}$/.test(meta.id) ? Number(meta.id) : -1;

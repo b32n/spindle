@@ -64,6 +64,23 @@ export function typeOutsideDeletion(state: EditorState, from: number, to: number
 }
 
 /**
+ * The transaction for pasting plain text (the clipboard has no HTML) into a deleted run, or null when the default paste is
+ * right. Plain text takes the marks around the caret, so inside a deletion it would become more deleted text, as typing did;
+ * it is pasted as live text instead. Pasted HTML keeps its own marks (a copied deletion stays a deletion).
+ */
+export function pasteOutsideDeletion(state: EditorState, slice: Slice): Transaction | null {
+  const type = state.schema.marks.deletion;
+  if (!type) return null;
+  const { from, to } = state.selection;
+  const marks = state.storedMarks ?? state.doc.resolve(from).marks();
+  if (!type.isInSet(marks)) return null;
+  const tr = state.tr.replaceSelection(slice);
+  tr.removeMark(from, tr.mapping.map(to, 1), type);
+  tr.setStoredMarks(marks.filter((m) => m.type !== type));
+  return tr.scrollIntoView();
+}
+
+/**
  * Shift-Enter inside tracked text: the line break is a "\n" in the text (like the DOCX reader makes it), because a marked
  * `hard_break` node would lose its change in collaboration (marks sync on text only).
  */
@@ -79,12 +96,19 @@ export function insertTrackedLineBreak(state: EditorState, dispatch?: (tr: Trans
   return true;
 }
 
-/** Plugin: pasted tracked text gets fresh change ids, and typing inside a deletion is not part of it. */
+/** Plugin: pasted tracked text gets fresh change ids, and typing or pasting plain text inside a deletion is not part of it. */
 export function createRevisionEditPlugin(schema: Schema): Plugin | null {
   if (!schema.marks.insertion && !schema.marks.deletion) return null;
   return new Plugin({
     props: {
       transformPasted: (slice) => freshRevisionIds(slice),
+      handlePaste(view, event, slice) {
+        if (event.clipboardData?.getData('text/html')) return false;
+        const tr = pasteOutsideDeletion(view.state, slice);
+        if (!tr) return false;
+        view.dispatch(tr.setMeta('paste', true).setMeta('uiEvent', 'paste'));
+        return true;
+      },
       handleTextInput(view, from, to, text) {
         const tr = typeOutsideDeletion(view.state, from, to, text);
         if (!tr) return false;

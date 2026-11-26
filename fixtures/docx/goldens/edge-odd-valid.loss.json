@@ -12,6 +12,15 @@
       "effect": "their text is not imported",
       "id": "docx.textBoxes",
       "label": "text box(es)/shape(s)"
+    },
+    {
+      "count": 1,
+      "effect": "a deleted field, image or note reference is dropped and an inserted one is kept as ordinary content; deleted text in a field result is dropped; the change is not recorded",
+      "id": "docx.trackedChangesNotKept",
+      "label": "tracked change(s) around a field, image or note reference, or inside a field result",
+      "where": [
+        "field ×1"
+      ]
     }
   ]
 }
