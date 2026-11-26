@@ -19,36 +19,10 @@
     },
     "byField": {
       "added sheets[].config.colWidths.*": 9,
-      "added sheets[].config.rowHeights.*": 159,
-      "changed sheets[].cells.*.formula": 1,
-      "changed sheets[].cells.*.value": 3
+      "added sheets[].config.rowHeights.*": 159
     },
-    "changed": 4,
+    "changed": 0,
     "entries": [
-      {
-        "after": "\"=SUM(\\\"Data!A1:Data!A3\\\")\"",
-        "before": "\"=SUM(Data!A1:Data!A3)\"",
-        "kind": "changed",
-        "path": "sheets[0].cells.I159.formula"
-      },
-      {
-        "after": "0",
-        "before": "6",
-        "kind": "changed",
-        "path": "sheets[0].cells.I159.value"
-      },
-      {
-        "after": "\"#VALUE!\"",
-        "before": "\"_xlfn.TEXTBEFORE(\\\"a-b\\\",\\\"-\\\")\"",
-        "kind": "changed",
-        "path": "sheets[0].cells.I66.value"
-      },
-      {
-        "after": "\"#VALUE!\"",
-        "before": "\"_xlfn.TEXTSPLIT(\\\"a-b\\\",\\\"-\\\")\"",
-        "kind": "changed",
-        "path": "sheets[0].cells.I67.value"
-      },
       {
         "after": "100",
         "kind": "added",
@@ -228,10 +202,30 @@
         "after": "20",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.122"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.123"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.124"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.125"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.126"
       }
     ],
     "removed": 0,
-    "total": 172,
+    "total": 168,
     "truncated": true
   },
   "exportWarnings": [],

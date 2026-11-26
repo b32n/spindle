@@ -81,12 +81,12 @@ export const mathFunctions: Record<string, EagerFn> = {
 
   MAX: (args) => {
     const nums = strictNumbers(args);
-    return nums.length > 0 ? Math.max(...nums) : 0;
+    return nums.length > 0 ? nums.reduce((a, b) => (b > a ? b : a)) : 0;
   },
 
   MIN: (args) => {
     const nums = strictNumbers(args);
-    return nums.length > 0 ? Math.min(...nums) : 0;
+    return nums.length > 0 ? nums.reduce((a, b) => (b < a ? b : a)) : 0;
   },
 
   PRODUCT: (args) => {
@@ -184,9 +184,9 @@ export const mathFunctions: Record<string, EagerFn> = {
       case 3:
         return flatten(rest).filter((v) => v != null && v !== '').length;
       case 4:
-        return nums.length > 0 ? Math.max(...nums) : 0;
+        return nums.length > 0 ? nums.reduce((a, b) => (b > a ? b : a)) : 0;
       case 5:
-        return nums.length > 0 ? Math.min(...nums) : 0;
+        return nums.length > 0 ? nums.reduce((a, b) => (b < a ? b : a)) : 0;
       case 6:
         return nums.length > 0 ? nums.reduce((a, b) => a * b, 1) : 0;
       case 7:

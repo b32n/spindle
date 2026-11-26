@@ -34,6 +34,7 @@ const result = (over: Partial<XlsxResult> = {}): XlsxResult => ({
     mismatched: 1,
     uncached: 0,
     volatile: 0,
+    passthrough: 0,
     unreadableSheets: 0,
     mismatchClasses: { 'number -> text': 1 },
     firstMismatches: [{ sheet: 'S', cell: 'A1', expected: '1', actual: '2' }],
@@ -81,6 +82,7 @@ describe('toReportFile', () => {
       compared: 3,
       matched: 2,
       mismatched: 1,
+      passthrough: 0,
       firstMismatches: [{ sheet: 'S', cell: 'A1', expected: '1', actual: '2' }],
     });
   });

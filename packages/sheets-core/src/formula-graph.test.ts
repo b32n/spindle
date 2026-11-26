@@ -138,3 +138,71 @@ describe('volatile seeding', () => {
     expect(g.collectDirty(['x'], resolve).dirty.size).toBe(0);
   });
 });
+
+describe('collectDirty — whole-column and whole-row dependencies', () => {
+  // Keys of a whole-axis rectangle name the bounded axis only; the resolver reports 0 for the other.
+  const resolveAxis: CellResolver = (key) => {
+    const m = key.match(/^(\*|\d+):(\*|\d+)(?:@(\w+))?$/);
+    if (!m) return undefined;
+    return {
+      sheetId: m[3] ?? 'S',
+      row: m[1] === '*' ? 0 : Number(m[1]),
+      col: m[2] === '*' ? 0 : Number(m[2]),
+    };
+  };
+  const colRect = (from: number, to: number, sheet?: string) => ({
+    cells: new Set<string>(),
+    ranges: [
+      { startKey: `*:${from}${sheet ? `@${sheet}` : ''}`, endKey: `*:${to}${sheet ? `@${sheet}` : ''}`, axis: 'column' as const },
+    ],
+  });
+  const rowRect = (from: number, to: number) => ({
+    cells: new Set<string>(),
+    ranges: [{ startKey: `${from}:*`, endKey: `${to}:*`, axis: 'row' as const }],
+  });
+
+  it('matches any row of a whole-column range, and only its columns', () => {
+    const g = new FormulaGraphImpl();
+    g.addFormula('F', '=SUM(B:C)', colRect(1, 2));
+    expect([...g.collectDirty(['0:1'], resolveAxis).dirty]).toEqual(['F']);
+    expect([...g.collectDirty(['999999:2'], resolveAxis).dirty]).toEqual(['F']);
+    expect([...g.collectDirty(['5:0'], resolveAxis).dirty]).toEqual([]);
+    expect([...g.collectDirty(['5:3'], resolveAxis).dirty]).toEqual([]);
+  });
+
+  it('matches any column of a whole-row range, and only its rows', () => {
+    const g = new FormulaGraphImpl();
+    g.addFormula('F', '=SUM(2:3)', rowRect(2, 3));
+    expect([...g.collectDirty(['2:0'], resolveAxis).dirty]).toEqual(['F']);
+    expect([...g.collectDirty(['3:16000'], resolveAxis).dirty]).toEqual(['F']);
+    expect([...g.collectDirty(['1:5'], resolveAxis).dirty]).toEqual([]);
+    expect([...g.collectDirty(['4:5'], resolveAxis).dirty]).toEqual([]);
+  });
+
+  it('accepts the corners in either order', () => {
+    const g = new FormulaGraphImpl();
+    g.addFormula('F', '=SUM(C:B)', colRect(2, 1));
+    expect([...g.collectDirty(['0:1'], resolveAxis).dirty]).toEqual(['F']);
+  });
+
+  it('keeps the sheet apart: a same-position cell on another sheet does not match', () => {
+    const g = new FormulaGraphImpl();
+    g.addFormula('F', '=SUM(Other!B:B)', colRect(1, 1, 'Other'));
+    expect([...g.collectDirty(['4:1@Other'], resolveAxis).dirty]).toEqual(['F']);
+    expect([...g.collectDirty(['4:1@Third'], resolveAxis).dirty]).toEqual([]);
+  });
+
+  it('does not match when a corner no longer resolves (its column was deleted)', () => {
+    const g = new FormulaGraphImpl();
+    g.addFormula('F', '=SUM(B:B)', colRect(1, 1));
+    const gone: CellResolver = (key) => (key.startsWith('*:') ? undefined : resolveAxis(key));
+    expect([...g.collectDirty(['0:1'], gone).dirty]).toEqual([]);
+  });
+
+  it('propagates through formulas that depend on the dependent', () => {
+    const g = new FormulaGraphImpl();
+    g.addFormula('F', '=SUM(B:B)', colRect(1, 1));
+    g.addFormula('G', '=F*2', { cells: new Set(['F']), ranges: [] });
+    expect([...g.collectDirty(['7:1'], resolveAxis).dirty].sort()).toEqual(['F', 'G']);
+  });
+});

@@ -2,19 +2,19 @@
   "compared": 4,
   "firstMismatches": [
     {
-      "actual": "\"_xlfn.XLOOKUP(\\\"S\\\",A2:A3,B2:B3)\"",
+      "actual": "\"#NAME? Function _XLFN.XLOOKUP not found\"",
       "cell": "F1",
       "expected": "3",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.LET(_xlpm.x,2,_xlpm.x*3)\"",
+      "actual": "\"#NAME? Function _XLFN.LET not found\"",
       "cell": "F2",
       "expected": "6",
       "sheet": "Data"
     },
     {
-      "actual": "\"_xlfn.SORT(A2:A3)\"",
+      "actual": "\"#NAME? Function _XLFN.SORT not found\"",
       "cell": "F4",
       "expected": "0",
       "sheet": "Data"
@@ -23,9 +23,10 @@
   "formulaCells": 4,
   "matched": 1,
   "mismatchClasses": {
-    "number -> text": 3
+    "number -> error": 3
   },
   "mismatched": 3,
+  "passthrough": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

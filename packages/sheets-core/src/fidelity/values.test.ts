@@ -283,6 +283,29 @@ describe('compareValues', () => {
     ]);
   });
 
+  it('counts formulas the engine cannot parse as passthrough, outside compared, matched and mismatched', () => {
+    const result = compareValues(
+      formulas([
+        ['A1', '', 23],
+        ['A2', '', 5],
+        ['A3', '', 7],
+      ]),
+      model({
+        A1: { value: 23, formula: '=SUM(T[a])' },
+        A2: { value: 5, formula: '=1+4' },
+        A3: { value: 0, formula: '=SUM(T[b])' },
+      }),
+      false,
+      (formula) => !formula.includes('[')
+    );
+    expect(result).toMatchObject({ compared: 1, matched: 1, mismatched: 0, passthrough: 2 });
+    // Without a predicate every formula counts as parsed.
+    expect(compareValues(formulas([['A1', '', 23]]), model({ A1: { value: 23, formula: '=SUM(T[a])' } }), false)).toMatchObject({
+      matched: 1,
+      passthrough: 0,
+    });
+  });
+
   it('caps the mismatch list but counts them all', () => {
     const cells = Array.from(
       { length: MAX_MISMATCHES + 5 },

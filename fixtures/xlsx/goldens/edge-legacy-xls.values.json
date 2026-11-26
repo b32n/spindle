@@ -5,6 +5,7 @@
   "matched": 0,
   "mismatchClasses": {},
   "mismatched": 0,
+  "passthrough": 0,
   "status": "unreadable-package",
   "uncached": 0,
   "unreadableSheets": 0,

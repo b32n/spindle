@@ -62,7 +62,7 @@ class Tally {
 
 const TALLY_KEYS = [
   'cf', 'dv', 'filter', 'protect', 'outline', 'spark', 'comments', 'charts', 'images',
-  'structured', 'unsupported', 'array', 'dynamic', 'external', 'whole', 'volatile',
+  'structured', 'unsupported', 'array', 'dynamic', 'external', 'volatile',
   'columnRowStyles', 'tabColor', 'zoom', 'rtl', 'gridlines', 'customViews',
   'printSetup', 'breaks', 'headerFooter',
   'dataBarExt', 'iconSetExt', 'formulaRule', 'stopIfTrue',
@@ -192,7 +192,6 @@ interface CellFacts {
   arrays: number;
   dynamicArrays: number;
   externalRefs: number;
-  wholeColumns: number;
   volatile: number;
   unsupported: number;
   unsupportedNames: string[];
@@ -210,7 +209,6 @@ async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined
     arrays: 0,
     dynamicArrays: 0,
     externalRefs: 0,
-    wholeColumns: 0,
     volatile: 0,
     unsupported: 0,
     unsupportedNames: [],
@@ -288,7 +286,6 @@ function readCell(c: XmlElement, cells: CellFacts, known: ReadonlySet<string> | 
   if (!facts) return;
   if (facts.structuredRef) cells.structuredRefs++;
   if (facts.externalRef) cells.externalRefs++;
-  if (facts.wholeColumnOrRow) cells.wholeColumns++;
   if (facts.functions.some((fn) => VOLATILE_FUNCTIONS.has(fn))) cells.volatile++;
   if (known) {
     const missing = facts.functions.filter((fn) => !known.has(fn));
@@ -412,7 +409,6 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
   addFull('xlsx.formulas.array', 'array formula(s)', t.array.total, 'approximated: imported as an ordinary formula in the first cell; the other cells keep their saved values', t.array.where);
   addFull('xlsx.formulas.dynamicArray', 'dynamic-array formula(s)', t.dynamic.total, "approximated: imported as an ordinary formula; Excel's array metadata is dropped", t.dynamic.where);
   addFull('xlsx.formulas.externalRef', 'formula(s) referencing another workbook', t.external.total, 'lost: external references are not evaluated', t.external.where);
-  addFull('xlsx.formulas.wholeColumn', 'formula(s) with whole-column or whole-row references', t.whole.total, 'lost: calculated as empty ranges', t.whole.where);
   addFull('xlsx.formulas.volatile', 'formula(s) using volatile functions (NOW, RAND, OFFSET...)', t.volatile.total, "approximated: recalculated on import; the file's saved value is not kept", t.volatile.where);
 
   // ---- styles -------------------------------------------------------------
@@ -559,7 +555,6 @@ async function scanSheets(pkg: Package, sheets: SheetEntry[], options: DetectXls
       t.array.add(name, cells.arrays);
       t.dynamic.add(name, cells.dynamicArrays);
       t.external.add(name, cells.externalRefs);
-      t.whole.add(name, cells.wholeColumns);
       t.volatile.add(name, cells.volatile);
       t.unsupported.add(name, cells.unsupported);
       t.outline.add(name, cells.outlineRows);

@@ -9,8 +9,6 @@ export interface FormulaFacts {
   structuredRef: boolean;
   /** A reference into another workbook (`[1]Sheet1!A1`). */
   externalRef: boolean;
-  /** `A:A` or `1:1`, with or without a sheet prefix. */
-  wholeColumnOrRow: boolean;
 }
 
 /** Future-function prefixes Excel writes in front of names newer than the 2007 file format. */
@@ -67,7 +65,6 @@ function mask(text: string, quoted: boolean, brackets: boolean): string {
 }
 
 const CALL = /(?<![A-Za-z0-9_.$])([A-Za-z_\\][A-Za-z0-9_.]*)\s*\(/g;
-const WHOLE = /(?<![A-Za-z0-9_$.])(?:\$?[A-Z]{1,3}:\$?[A-Z]{1,3}|\$?\d+:\$?\d+)(?![A-Za-z0-9_(])/i;
 const STRUCTURED = /(?:[A-Za-z_\\][A-Za-z0-9_.\\]*\[|\[#|\[@)/;
 // `[1]Sheet!A1`: a number in brackets that starts a reference (followed by a sheet or name), not a table column (`Sales[2024]`, `T[[2024]]`, `T[[#This Row],[2024]]`)
 const EXTERNAL = /(?<![A-Za-z0-9_.\][])\[\d+\](?=[A-Za-z0-9_'.!\\])/;
@@ -92,6 +89,5 @@ export function scanFormula(text: string): FormulaFacts {
     functions,
     structuredRef: STRUCTURED.test(noQuoted),
     externalRef: EXTERNAL.test(noStrings),
-    wholeColumnOrRow: WHOLE.test(plain),
   };
 }

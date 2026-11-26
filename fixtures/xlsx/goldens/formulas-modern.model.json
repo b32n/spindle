@@ -126,8 +126,8 @@
             "value": "Result"
           },
           "G11": {
-            "formula": "=\"_xlfn._xlws.SORT(B2:B6)\"",
-            "value": "_xlfn._xlws.SORT(B2:B6)"
+            "formula": "=_xlfn._xlws.SORT(B2:B6)",
+            "value": "#NAME? Function _XLFN._XLWS.SORT not found"
           },
           "G12": {
             "value": 4
@@ -150,8 +150,8 @@
             "value": 20
           },
           "G2": {
-            "formula": "=\"_xlfn.IFS(B2>5,\"big\",TRUE,\"small\")\"",
-            "value": "_xlfn.IFS(B2>5,\"big\",TRUE,\"small\")"
+            "formula": "=_xlfn.IFS(B2>5,\"big\",TRUE,\"small\")",
+            "value": "#NAME? Function _XLFN.IFS not found"
           },
           "G20": {
             "value": 10
@@ -166,32 +166,32 @@
             "value": 8
           },
           "G3": {
-            "formula": "=\"_xlfn.XLOOKUP(\"East\",A2:A6,B2:B6)\"",
-            "value": "_xlfn.XLOOKUP(\"East\",A2:A6,B2:B6)"
+            "formula": "=_xlfn.XLOOKUP(\"East\",A2:A6,B2:B6)",
+            "value": "#NAME? Function _XLFN.XLOOKUP not found"
           },
           "G4": {
-            "formula": "=\"_xlfn.CONCAT(A2,\"-\",A3)\"",
-            "value": "_xlfn.CONCAT(A2,\"-\",A3)"
+            "formula": "=_xlfn.CONCAT(A2,\"-\",A3)",
+            "value": "#NAME? Function _XLFN.CONCAT not found"
           },
           "G5": {
-            "formula": "=\"_xlfn.TEXTJOIN(\",\",TRUE,A2:A4)\"",
-            "value": "_xlfn.TEXTJOIN(\",\",TRUE,A2:A4)"
+            "formula": "=_xlfn.TEXTJOIN(\",\",TRUE,A2:A4)",
+            "value": "#NAME? Function _XLFN.TEXTJOIN not found"
           },
           "G6": {
-            "formula": "=\"_xlfn.STDEV.S(B2:B6)\"",
-            "value": "_xlfn.STDEV.S(B2:B6)"
+            "formula": "=_xlfn.STDEV.S(B2:B6)",
+            "value": "#NAME? Function _XLFN.STDEV.S not found"
           },
           "G7": {
-            "formula": "=\"_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)\"",
-            "value": "_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)"
+            "formula": "=_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)",
+            "value": "#NAME? Function _XLFN.LET not found"
           },
           "G8": {
-            "formula": "=\"_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)\"",
-            "value": "_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)"
+            "formula": "=_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)",
+            "value": 20
           },
           "G9": {
-            "formula": "=\"_xlfn.MAXIFS(B2:B6,A2:A6,\"?o*\")\"",
-            "value": "_xlfn.MAXIFS(B2:B6,A2:A6,\"?o*\")"
+            "formula": "=_xlfn.MAXIFS(B2:B6,A2:A6,\"?o*\")",
+            "value": "#NAME? Function _XLFN.MAXIFS not found"
           }
         },
         "colCount": 100,

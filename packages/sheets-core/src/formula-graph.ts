@@ -109,7 +109,11 @@ export class FormulaGraphImpl implements FormulaGraph {
     }
   }
 
-  /** Is `idx` inside the rectangle, resolving its corner keys to indices now? */
+  /**
+   * Is `idx` inside the rectangle, resolving its corner keys to indices now? A
+   * whole-column / whole-row rectangle (`axis`) is bounded on one axis only: the
+   * resolver reports 0 for the unbounded axis of its keys and it is ignored here.
+   */
   private rectContains(
     rect: RangeDependency,
     idx: { sheetId: string; row: number; col: number },
@@ -121,12 +125,11 @@ export class FormulaGraphImpl implements FormulaGraph {
     // The range and the candidate cell must live on the same sheet — otherwise
     // a same-index cell on another sheet would falsely test inside the range.
     if (a.sheetId !== b.sheetId || a.sheetId !== idx.sheetId) return false;
-    return (
-      idx.row >= Math.min(a.row, b.row) &&
-      idx.row <= Math.max(a.row, b.row) &&
-      idx.col >= Math.min(a.col, b.col) &&
-      idx.col <= Math.max(a.col, b.col)
-    );
+    const inRows = idx.row >= Math.min(a.row, b.row) && idx.row <= Math.max(a.row, b.row);
+    const inCols = idx.col >= Math.min(a.col, b.col) && idx.col <= Math.max(a.col, b.col);
+    if (rect.axis === 'column') return inCols;
+    if (rect.axis === 'row') return inRows;
+    return inRows && inCols;
   }
 
   /** Formulas that directly depend on `key` — via a single ref or a range. */

@@ -9,7 +9,7 @@ import type { SpillRegion } from './spill';
 import { StylePool } from './style-pool';
 import { FormatPool } from './format-pool';
 import { SortManager } from './features/sort';
-import { getCellKey, getStableCellKey, parseCellKey } from './utils/cell-key';
+import { getCellKey, getStableCellKey, parseCellKey, parseStableCellKey } from './utils/cell-key';
 import { FormulaParser } from './formula-parser';
 import type { RangeReference, StableFormulaNode, SheetResolver } from './formula-parser';
 import * as Y from 'yjs';
@@ -29,8 +29,14 @@ import {
   renderStableAst,
   collectStableDependencies,
   formulaIsVolatile,
+  renameSheetInAst,
+  shrinkThreeDSpansForDelete,
   StableRefDeletedError,
+  WHOLE_AXIS_ID,
 } from './formula-parser/stable-ast';
+
+/** A whole-column/row range spanning more rows or columns than this is trimmed to the used range on its bounded axis too. */
+const WHOLE_AXIS_TRIM_SPAN = 1024;
 
 // Snapshot for undo/redo
 interface WorkbookSnapshot {
@@ -157,6 +163,15 @@ export class WorkbookImpl implements Workbook {
     if (this.sheets.size <= 1) {
       throw new Error('Cannot delete the last sheet');
     }
+    // A 3D reference whose first or last sheet is the one going away shrinks
+    // inward (Excel's rule) rather than turning to #REF!.
+    const deletedName = this.getSheet(sheetId).name;
+    const order = this.getSheetNames();
+    for (const sheet of this.sheets.values()) {
+      for (const [, , cell] of sheet.entries()) {
+        if (cell.formulaAst) shrinkThreeDSpansForDelete(cell.formulaAst, deletedName, order);
+      }
+    }
     this.sheets.delete(sheetId);
     if (this.activeSheetId === sheetId) {
       // Switch to first available sheet (local view state).
@@ -198,6 +213,11 @@ export class WorkbookImpl implements Workbook {
     this.mirrorSheetRename(sheetId, newName);
     this.recalculateAllFormulas();
     this.events.emit('sheetRename', { sheetId, oldName, newName });
+  }
+
+  /** Sheet names in workbook order (the order a 3D reference spans). */
+  getSheetNames(): string[] {
+    return Array.from(this.sheets.values(), (sheet) => sheet.name);
   }
 
   getSheetIdByName(sheetName: string): string | undefined {
@@ -363,7 +383,17 @@ export class WorkbookImpl implements Workbook {
     const parseResult = this.formulaParser.parse(formula, row, col);
 
     if (parseResult.error) {
-      this.setCell(sheetId, row, col, { formula, value: parseResult.error as CellValue });
+      // A formula that does not parse shows its error. The cell must stop being a
+      // formula of the previous text: drop the old graph node, spill and AST so a
+      // later recalculation cannot bring the previous formula back.
+      this.formulaGraph.removeFormula(cellKey);
+      this.releaseSpill(sheetId, row, col);
+      this.setCell(sheetId, row, col, {
+        formula,
+        formulaAst: undefined,
+        value: parseResult.error as CellValue,
+      });
+      this.recalculateDependents(cellKey, sheetId);
       return;
     }
 
@@ -501,10 +531,12 @@ export class WorkbookImpl implements Workbook {
       if (!stableAst) {
         const parsed = this.formulaParser.parse(cell.formula, row, col);
         if (parsed.error) {
+          // An imported formula the engine cannot parse keeps the value the file saved
+          // for it (and its text); a formula typed in already holds its error as its value.
           this.evaluatingCells.delete(cellKey);
-          this.formulaGraph.markClean(cellKey, parsed.error as CellValue);
-          this.setCell(sheetId, row, col, { value: parsed.error as CellValue });
-          return parsed.error;
+          const kept = cell.value as CellValue;
+          this.formulaGraph.markClean(cellKey, kept);
+          return kept;
         }
         stableAst = toStableAst(parsed.ast, resolver, sheet, row, col);
         // Persist the upgraded AST so future evaluations skip the re-parse.
@@ -573,6 +605,16 @@ export class WorkbookImpl implements Workbook {
           const target = this.getCell(targetSheetId, r, c);
           return !!(target && (target.formula || target.formulaAst));
         },
+        getSheetNames: () => this.getSheetNames(),
+        getSpillRegion: (r: number, c: number, sheetName?: string) => {
+          // (A sheet that no longer exists never gets this far: its reference is #REF! already.)
+          const targetSheetId = sheetName ? this.getSheetIdByName(sheetName) : sheetId;
+          // The anchor may not have been evaluated yet in this pass (a full
+          // recalculation runs in sheet order): evaluating it registers its spill.
+          this.getCellCalculatedValue(targetSheetId, r, c);
+          const region = this.getSpillIndex(targetSheetId).regionAt(r, c);
+          return region && { rows: region.rows, cols: region.cols, values: region.values };
+        },
       };
 
       let result = this.formulaParser.evaluate(numericAst, evaluationContext, row, col);
@@ -619,6 +661,61 @@ export class WorkbookImpl implements Workbook {
   }
 
   /**
+   * Values of a whole-column (`A:C`) or whole-row (`1:3`) range. The unbounded
+   * axis is bounded to the sheet's used range (the last row, or column, holding a
+   * value, a formula or a spilled value anywhere on the sheet), so two whole
+   * columns on one sheet always have the same height and `A:A*B:B` lines up. The
+   * bounded axis keeps its nominal size, except that a span of more than
+   * WHOLE_AXIS_TRIM_SPAN rows or columns (`A:XFD`, `1:1048576`) is trimmed to the
+   * used range as well, so such a range costs what the data costs, not the
+   * sheet's size. One pass over the stored cells fills the grid.
+   */
+  private getWholeRangeValues(
+    sheetId: string | undefined,
+    whole: 'column' | 'row',
+    minRow: number,
+    maxRow: number,
+    minCol: number,
+    maxCol: number
+  ): unknown[][] {
+    const hits: Array<[number, number, Cell]> = [];
+    let usedRow = 0; // sheet-wide used extent
+    let usedCol = 0;
+    for (const [r, c, cell] of this.getSheet(sheetId).entries()) {
+      if (cell.value == null && !cell.formula) continue;
+      if (r > usedRow) usedRow = r;
+      if (c > usedCol) usedCol = c;
+      if (r >= minRow && r <= maxRow && c >= minCol && c <= maxCol) hits.push([r, c, cell]);
+    }
+    const spills: SpillRegion[] = [];
+    for (const region of this.getSpillIndex(sheetId).regions()) {
+      usedRow = Math.max(usedRow, region.anchorRow + region.rows - 1);
+      usedCol = Math.max(usedCol, region.anchorCol + region.cols - 1);
+      spills.push(region);
+    }
+    const trim = (min: number, max: number, used: number): number =>
+      max - min + 1 > WHOLE_AXIS_TRIM_SPAN ? Math.max(min, Math.min(max, used)) : max;
+    const lastRow = whole === 'column' ? Math.max(minRow, Math.min(maxRow, usedRow)) : trim(minRow, maxRow, usedRow);
+    const lastCol = whole === 'row' ? Math.max(minCol, Math.min(maxCol, usedCol)) : trim(minCol, maxCol, usedCol);
+    const grid: unknown[][] = [];
+    for (let r = minRow; r <= lastRow; r++) grid.push(new Array<unknown>(lastCol - minCol + 1).fill(null));
+    for (const [r, c, cell] of hits) {
+      grid[r - minRow][c - minCol] = cell.formula ? this.getCellCalculatedValue(sheetId, r, c) : cell.value;
+    }
+    for (const region of spills) {
+      for (let dr = 0; dr < region.rows; dr++) {
+        for (let dc = 0; dc < region.cols; dc++) {
+          const r = region.anchorRow + dr;
+          const c = region.anchorCol + dc;
+          if ((dr === 0 && dc === 0) || r < minRow || r > lastRow || c < minCol || c > lastCol) continue;
+          grid[r - minRow][c - minCol] = region.values[dr][dc];
+        }
+      }
+    }
+    return grid;
+  }
+
+  /**
    * Get values from a range for formula evaluation
    * Note: Range references are already resolved to absolute positions during parsing,
    * but we keep the currentRow/currentCol parameters for consistency with the API
@@ -641,15 +738,18 @@ export class WorkbookImpl implements Workbook {
     const maxRow = Math.max(startRow, endRow);
     const minCol = Math.min(startCol, endCol);
     const maxCol = Math.max(startCol, endCol);
+    const MAX_RANGE_EVAL_CELLS = 100_000;
 
-    // Guard against an enormous range (e.g. =SUM(A1:A1048576)) freezing the main
-    // thread. Cells past the sheet's populated extent are empty and contribute
-    // nothing, so clamp the iteration to the actual data. Only pay the O(cells)
-    // extent scan for an oversized range — normal ranges iterate directly.
+    // A whole-column / whole-row range (`A:A`, `1:1`) is bounded to the used range.
+    if (range.whole) return this.getWholeRangeValues(sheetId, range.whole, minRow, maxRow, minCol, maxCol);
+
     let effMaxRow = maxRow;
     let effMaxCol = maxCol;
-    const MAX_RANGE_EVAL_CELLS = 100_000;
     if ((maxRow - minRow + 1) * (maxCol - minCol + 1) > MAX_RANGE_EVAL_CELLS) {
+      // Guard against an enormous range (e.g. =SUM(A1:A1048576)) freezing the main
+      // thread. Cells past the sheet's populated extent are empty and contribute
+      // nothing, so clamp the iteration to the actual data. Only pay the O(cells)
+      // extent scan for an oversized range — normal ranges iterate directly.
       const sheet = this.getSheet(sheetId);
       let dataMaxRow = 0;
       let dataMaxCol = 0;
@@ -808,6 +908,17 @@ export class WorkbookImpl implements Workbook {
   private resolveGlobalCell(
     key: string,
   ): { sheetId: string; row: number; col: number } | undefined {
+    // A whole-column / whole-row dependency key has the unbounded axis' id
+    // WHOLE_AXIS_ID: it resolves on the bounded axis only (0 on the other).
+    if (key.startsWith(`${WHOLE_AXIS_ID}:`) || key.endsWith(`:${WHOLE_AXIS_ID}`)) {
+      const { rowId, colId } = parseStableCellKey(key);
+      for (const [id, sheet] of this.sheets) {
+        const row = rowId === WHOLE_AXIS_ID ? 0 : sheet.getRowIndex(rowId);
+        const col = colId === WHOLE_AXIS_ID ? 0 : sheet.getColIndex(colId);
+        if (row !== undefined && col !== undefined) return { sheetId: id, row, col };
+      }
+      return undefined;
+    }
     for (const [id, sheet] of this.sheets) {
       const idx = sheet.stableKeyToIndices(key);
       if (idx) return { sheetId: id, row: idx.row, col: idx.col };
@@ -853,17 +964,9 @@ export class WorkbookImpl implements Workbook {
    * is refreshed from the AST on the next evaluation.
    */
   private rewriteSheetNameInFormulas(oldName: string, newName: string): void {
-    const rewrite = (node: StableFormulaNode): void => {
-      if (node.cellRef?.sheetName === oldName) node.cellRef.sheetName = newName;
-      if (node.rangeRef?.start.sheetName === oldName) node.rangeRef.start.sheetName = newName;
-      if (node.rangeRef?.end.sheetName === oldName) node.rangeRef.end.sheetName = newName;
-      node.args?.forEach(rewrite);
-      if (node.left) rewrite(node.left);
-      if (node.right) rewrite(node.right);
-    };
     for (const [, sheet] of this.sheets.entries()) {
       for (const [, , cell] of sheet.entries()) {
-        if (cell.formulaAst) rewrite(cell.formulaAst);
+        if (cell.formulaAst) renameSheetInAst(cell.formulaAst, oldName, newName);
       }
     }
   }

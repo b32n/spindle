@@ -1,5 +1,6 @@
 // Cell reference parsing utilities
 
+import { MAX_SHEET_COLS, MAX_SHEET_ROWS } from './types';
 import type { CellReference, RangeReference } from './types';
 
 const COLUMN_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -60,7 +61,7 @@ export function parseRangeReference(ref: string): RangeReference | null {
   const start = parseCellReference(sheetName ? `${sheetName}!${startPart}` : startPart);
   const end = parseCellReference(sheetName ? `${sheetName}!${endPart}` : endPart);
 
-  if (!start || !end) return null;
+  if (!start || !end) return parseWholeRange(startPart, endPart, sheetName);
 
   // Ensure both start and end have the same sheet name
   if (sheetName) {
@@ -69,6 +70,48 @@ export function parseRangeReference(ref: string): RangeReference | null {
   }
 
   return { start, end };
+}
+
+/**
+ * The whole-column (`A:C`, `$A:$A`) and whole-row (`1:3`, `$1:$1`) range forms.
+ * The unbounded axis carries the nominal sheet extent as absolute positions.
+ */
+function parseWholeRange(startPart: string, endPart: string, sheetName?: string): RangeReference | null {
+  const cols = [/^(\$?)([A-Za-z]{1,3})$/.exec(startPart), /^(\$?)([A-Za-z]{1,3})$/.exec(endPart)];
+  if (cols[0] && cols[1]) {
+    const [c1, c2] = [columnLabelToIndex(cols[0][2]), columnLabelToIndex(cols[1][2])];
+    if (c1 >= MAX_SHEET_COLS || c2 >= MAX_SHEET_COLS) return null;
+    const bound = (row: number, col: number, abs: string): CellReference => ({
+      row,
+      col,
+      rowAbsolute: true,
+      colAbsolute: abs === '$',
+      sheetName,
+    });
+    return {
+      start: bound(0, c1, cols[0][1]),
+      end: bound(MAX_SHEET_ROWS - 1, c2, cols[1][1]),
+      whole: 'column',
+    };
+  }
+  const rows = [/^(\$?)(\d+)$/.exec(startPart), /^(\$?)(\d+)$/.exec(endPart)];
+  if (rows[0] && rows[1]) {
+    const [r1, r2] = [parseInt(rows[0][2], 10) - 1, parseInt(rows[1][2], 10) - 1];
+    if (r1 < 0 || r2 < 0 || r1 >= MAX_SHEET_ROWS || r2 >= MAX_SHEET_ROWS) return null;
+    const bound = (row: number, col: number, abs: string): CellReference => ({
+      row,
+      col,
+      rowAbsolute: abs === '$',
+      colAbsolute: true,
+      sheetName,
+    });
+    return {
+      start: bound(r1, 0, rows[0][1]),
+      end: bound(r2, MAX_SHEET_COLS - 1, rows[1][1]),
+      whole: 'row',
+    };
+  }
+  return null;
 }
 
 export function columnLabelToIndex(label: string): number {

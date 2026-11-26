@@ -433,7 +433,7 @@ describe('formulas', () => {
       cell('B2', '<f t="shared" si="1"/><v>1</v>') +
       '</row>';
     const report = await full(await build({ sheets: [{ name: 'S', rows }] }), { knownFunctions: KNOWN });
-    for (const id of ['structuredRefs', 'externalRef', 'wholeColumn', 'volatile', 'unsupported']) expect(item(report, `xlsx.formulas.${id}`)?.count).toBe(3);
+    for (const id of ['structuredRefs', 'externalRef', 'volatile', 'unsupported']) expect(item(report, `xlsx.formulas.${id}`)?.count).toBe(3);
   });
 
   it('scans cells written with single-quoted attributes', async () => {
@@ -467,7 +467,7 @@ describe('formulas', () => {
     expect(item(report, 'xlsx.formulas.structuredRefs')).toMatchObject({ count: 2, where: ['T'] });
   });
 
-  it('reports array, dynamic-array, external, whole-column and volatile formulas at the full level', async () => {
+  it('reports array, dynamic-array, external and volatile formulas at the full level, and no longer reports whole-column references', async () => {
     const rows =
       '<row r="1">' +
       cell('A1', '<f t="array" ref="A1:A2">SUM(B1:B2)</f><v>1</v>') +
@@ -484,7 +484,9 @@ describe('formulas', () => {
     expect(item(report, 'xlsx.formulas.array')).toMatchObject({ count: 1, where: ['F'] });
     expect(item(report, 'xlsx.formulas.dynamicArray')).toMatchObject({ count: 1 });
     expect(item(report, 'xlsx.formulas.externalRef')).toMatchObject({ count: 1 });
-    expect(item(report, 'xlsx.formulas.wholeColumn')).toMatchObject({ count: 1 });
+    // A:A and 1:1 (cells A4) are calculated by the engine now, so they are not a loss and have no id.
+    expect(item(report, 'xlsx.formulas.wholeColumn')).toBeUndefined();
+    expect(report.items.some((i) => /whole/i.test(i.id))).toBe(false);
     expect(item(report, 'xlsx.formulas.volatile')).toMatchObject({ count: 2 });
     expect(ids(await detectXlsxLoss(bytes))).toEqual([]);
   });
@@ -1211,7 +1213,7 @@ describe('package level', () => {
 
 describe('full id coverage', () => {
   const FULL_IDS = [
-    'xlsx.formulas.array', 'xlsx.formulas.dynamicArray', 'xlsx.formulas.externalRef', 'xlsx.formulas.wholeColumn', 'xlsx.formulas.volatile',
+    'xlsx.formulas.array', 'xlsx.formulas.dynamicArray', 'xlsx.formulas.externalRef', 'xlsx.formulas.volatile',
     'xlsx.styles.themeColors', 'xlsx.styles.patternFill', 'xlsx.styles.gradientFill', 'xlsx.styles.diagonalBorder', 'xlsx.styles.namedStyles', 'xlsx.styles.columnRowStyles',
     'xlsx.sheet.tabColor', 'xlsx.sheet.zoom', 'xlsx.sheet.rtl', 'xlsx.sheet.gridlines', 'xlsx.sheet.veryHidden', 'xlsx.sheet.customViews',
     'xlsx.print.setup', 'xlsx.print.areas', 'xlsx.print.titles', 'xlsx.print.breaks', 'xlsx.print.headersFooters',

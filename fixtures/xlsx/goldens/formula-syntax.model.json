@@ -32,11 +32,11 @@
           },
           "G10": {
             "formula": "=ROW(1:1)",
-            "value": "#VALUE!"
+            "value": 1
           },
           "G11": {
-            "formula": "=SUM(\"_xlfn.ANCHORARRAY(J1)\")",
-            "value": 0
+            "formula": "=SUM(_xlfn.ANCHORARRAY(J1))",
+            "value": "#NAME? Function _XLFN.ANCHORARRAY not found"
           },
           "G12": {
             "formula": "=SUMPRODUCT(A1:A3*2)",
@@ -63,20 +63,20 @@
             "value": true
           },
           "G18": {
-            "formula": "=SUM(\"A1:A3 A2:A4\")",
-            "value": 0
+            "formula": "=SUM(A1:A3 A2:A4)",
+            "value": 5
           },
           "G19": {
             "formula": "=SUM(A1:A3,A5)",
             "value": 11
           },
           "G2": {
-            "formula": "=\"_xlfn.SINGLE(A1:A3)\"",
-            "value": "_xlfn.SINGLE(A1:A3)"
+            "formula": "=_xlfn.SINGLE(A1:A3)",
+            "value": "#NAME? Function _XLFN.SINGLE not found"
           },
           "G20": {
-            "formula": "=SUM(\"A1:A2,A4\")",
-            "value": 0
+            "formula": "=SUM((A1:A2,A4))",
+            "value": 7
           },
           "G21": {
             "formula": "='Q1 Data'!A1",
@@ -95,32 +95,32 @@
             "value": "y"
           },
           "G3": {
-            "formula": "=SUM(\"A:A\")",
-            "value": 0
+            "formula": "=SUM(A:A)",
+            "value": 15
           },
           "G4": {
-            "formula": "=SUM(\"1:1\")",
-            "value": 0
+            "formula": "=SUM(1:1)",
+            "value": 31
           },
           "G5": {
             "formula": "=A1+50%",
-            "value": "#VALUE!"
+            "value": 1.5
           },
           "G6": {
             "formula": "=SUM(Sheet1:Sheet2!A1)",
-            "value": "#REF!"
+            "value": 101
           },
           "G7": {
-            "formula": "=SUM(\"{1\",2,\"3}\")",
-            "value": 2
+            "formula": "=SUM({1,2,3})",
+            "value": 6
           },
           "G8": {
-            "formula": "=SUM(\"{1\",\"2;3\",\"4}\")",
-            "value": 0
+            "formula": "=SUM({1,2;3,4})",
+            "value": 10
           },
           "G9": {
-            "formula": "=SUM(\"A1:INDEX(A1:A5,3)\")",
-            "value": 0
+            "formula": "=SUM(A1:INDEX(A1:A5,3))",
+            "value": 6
           },
           "I10": {
             "value": "row range argument"
@@ -192,8 +192,8 @@
             "value": "range ending in INDEX"
           },
           "J1": {
-            "formula": "=\"_xlfn.SEQUENCE(3)\"",
-            "value": "_xlfn.SEQUENCE(3)"
+            "formula": "=_xlfn.SEQUENCE(3)",
+            "value": "#NAME? Function _XLFN.SEQUENCE not found"
           },
           "J2": {
             "value": 2

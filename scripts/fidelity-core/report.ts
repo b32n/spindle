@@ -30,6 +30,8 @@ export interface ValueMismatch {
 
 export interface ValuesSummary extends ValuesTotals {
   status: string;
+  /** Formulas the engine could not parse, which keep the file's value: not part of the totals above. */
+  passthrough?: number;
   firstMismatches: ValueMismatch[];
 }
 

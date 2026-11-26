@@ -46,12 +46,14 @@ a function counts as supported when the editor's formula catalog has it after th
 `knownFunctions`, as `inspectXlsx` does), `xlsx.formulas.structuredRefs` and `xlsx.numberFormats.approximated` (`where` = the codes; a code counts as exact when
 it maps to a structured format and the export writes the same code back; only reported when the caller passes `isNumberFormatExact`, as `inspectXlsx` does).
 `xlsx.formulas.cachedOnly` is not reported yet: it needs the cached-value fallback of the formula work (plan S4).
+`xlsx.formulas.wholeColumn` (whole-column and whole-row references, `A:A`, `1:1`) is no longer reported: the engine evaluates them (plan S5), so they are not a
+loss. A formula using one still appears under `xlsx.formulas.unsupported` if it calls a function the engine lacks.
 
 Full-only ids:
 
 | Group | Ids (what is counted) |
 |---|---|
-| Formulas | `xlsx.formulas.array` (`t="array"`), `.dynamicArray` (array formula with `cm` metadata), `.externalRef` (`[1]Sheet!A1`), `.wholeColumn` (`A:A`, `1:1`; calculate as empty until plan S5), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
+| Formulas | `xlsx.formulas.array` (`t="array"`), `.dynamicArray` (array formula with `cm` metadata), `.externalRef` (`[1]Sheet!A1`), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
 | Styles | `xlsx.styles.themeColors` (cell formats in use with a theme or indexed colour; plain black text excluded), `.patternFill`, `.gradientFill`, `.diagonalBorder`, `.namedStyles` (named styles in use), `.columnRowStyles` (column and row default formats) |
 | Sheet | `xlsx.sheet.tabColor`, `.zoom` (other than 100), `.rtl`, `.gridlines` (turned off), `.veryHidden`, `.customViews` |
 | Print | `xlsx.print.setup` (a sheet whose orientation, paper size, scale, fit to page, print options or margins differ from Excel's defaults), `.areas`, `.titles`, `.breaks`, `.headersFooters` |

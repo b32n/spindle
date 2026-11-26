@@ -52,12 +52,12 @@
             "value": 4
           },
           "B8": {
-            "formula": "=SUM(QUARTER1)",
-            "value": 0
+            "formula": "=SUM(Quarter1)",
+            "value": "#NAME? Name Quarter1 not found"
           },
           "B9": {
             "formula": "=B8*(1+TaxRate)",
-            "value": "#VALUE!"
+            "value": "#NAME? Name TaxRate not found"
           },
           "C1": {
             "value": "Q2"

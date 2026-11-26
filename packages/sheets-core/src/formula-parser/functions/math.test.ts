@@ -142,3 +142,30 @@ describe('arithmetic', () => {
     expect(Number.isInteger(n)).toBe(true);
   });
 });
+
+describe('aggregates over very large ranges (a whole column)', () => {
+  // 300,000 values: spreading that many arguments into Math.max / Array.push overflows the stack.
+  const column: number[][] = Array.from({ length: 300_000 }, (_, i) => [i % 1000]);
+
+  it('MAX, MIN and SUBTOTAL(4/5) do not overflow the call stack', () => {
+    expect(call('MAX', [column])).toBe(999);
+    expect(call('MIN', [column])).toBe(0);
+    expect(call('SUBTOTAL', [4, column])).toBe(999);
+    expect(call('SUBTOTAL', [5, column])).toBe(0);
+    expect(call('SUM', [column])).toBe(300 * (999 * 1000) / 2);
+  });
+
+  it('MIN / MAX / SUBTOTAL return 0 for no numbers', () => {
+    expect(call('MIN', [[['a']]])).toBe(0);
+    expect(call('MAX', [[['a']]])).toBe(0);
+    expect(call('SUBTOTAL', [4, [['a']]])).toBe(0);
+    expect(call('SUBTOTAL', [5, [['a']]])).toBe(0);
+  });
+
+  it('MIN and MAX pick the extreme of mixed values', () => {
+    expect(call('MIN', [3, [[1, 2]], -4])).toBe(-4);
+    expect(call('MAX', [3, [[1, 2]], -4])).toBe(3);
+    expect(call('SUBTOTAL', [5, [[3], [1], [2]]])).toBe(1);
+    expect(call('SUBTOTAL', [4, [[3], [1], [2]]])).toBe(3);
+  });
+});

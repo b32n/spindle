@@ -334,6 +334,12 @@ export interface SheetData {
 export interface RangeDependency {
   startKey: string; // "rowId:colId"
   endKey: string; // "rowId:colId"
+  /**
+   * Set for a whole-column (`A:C`) or whole-row (`1:3`) range, which is bounded
+   * on one axis only: `'column'` keys are "*:colId" (rows unbounded) and `'row'`
+   * keys "rowId:*". The rectangle is never expanded into cells.
+   */
+  axis?: 'column' | 'row';
 }
 
 /** The dependencies a formula reads: single cells, plus ranges as rectangles. */
