@@ -8,8 +8,10 @@ import type { Node as PmNode } from 'prosemirror-model';
 import { Step, StepMap, StepResult } from 'prosemirror-transform';
 import { docsSchema } from './prosemirror/schema';
 import { blocksToPmDoc } from './prosemirror/sync';
+import { readBlockRevision } from './prosemirror/block-revision';
 import { changeUnits, listChanges, resolveAll } from './prosemirror/review';
 import { suggestingPlugin, type SuggestingOptions } from './prosemirror/suggesting';
+import { createPlugins } from './prosemirror/plugins';
 import type { Block, InlineContent } from './types';
 
 const T0 = '2024-06-01T10:00:00Z';
@@ -170,8 +172,8 @@ describe('paragraph marks', () => {
     let state = stateOf([para(run('abcd'))], 3);
     state = doCommand(state, splitBlock);
     expect(texts(state.doc)).toEqual(['ab', 'cd']);
-    expect(state.doc.child(0).attrs.revision).toMatchObject({ insertion: { author: 'Ada', id: 'n1' } });
-    expect(state.doc.child(1).attrs.revision).toBeNull();
+    expect(readBlockRevision(state.doc.child(0).attrs)).toMatchObject({ insertion: { author: 'Ada', id: 'n1' } });
+    expect(readBlockRevision(state.doc.child(1).attrs)).toBeUndefined();
     expect(texts(settleAll(state, 'accept').doc)).toEqual(['ab', 'cd']);
     expect(texts(settleAll(state, 'reject').doc)).toEqual(['abcd']);
   });
@@ -190,11 +192,11 @@ describe('paragraph marks', () => {
     state = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 6)));
     state = doCommand(state, joinBackward);
     expect(texts(state.doc)).toEqual(['one', 'two']);
-    expect(state.doc.child(0).attrs.revision).toMatchObject({ deletion: { author: 'Ada' } });
+    expect(readBlockRevision(state.doc.child(0).attrs)).toMatchObject({ deletion: { author: 'Ada' } });
     expect(texts(settleAll(state, 'accept').doc)).toEqual(['onetwo']);
     const rejected = settleAll(state, 'reject');
     expect(texts(rejected.doc)).toEqual(['one', 'two']);
-    expect(rejected.doc.child(0).attrs.revision).toBeNull();
+    expect(readBlockRevision(rejected.doc.child(0).attrs)).toBeUndefined();
   });
 
   it('Delete at the end of a paragraph does the same, and moves the caret on', () => {
@@ -202,7 +204,7 @@ describe('paragraph marks', () => {
     state = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 4)));
     state = doCommand(state, joinForward);
     expect(texts(state.doc)).toEqual(['one', 'two']);
-    expect(state.doc.child(0).attrs.revision).toMatchObject({ deletion: { author: 'Ada' } });
+    expect(readBlockRevision(state.doc.child(0).attrs)).toMatchObject({ deletion: { author: 'Ada' } });
     expect(texts(settleAll(state, 'accept').doc)).toEqual(['onetwo']);
   });
 
@@ -211,8 +213,8 @@ describe('paragraph marks', () => {
     const next = doCommand(state, deleteSelection);
     expect(texts(next.doc)).toEqual(['one', 'two', 'three']);
     expect(runs(next.doc, 0)).toEqual(['on:', 'e:deletion']);
-    expect(next.doc.child(0).attrs.revision).toMatchObject({ deletion: { author: 'Ada' } });
-    expect(next.doc.child(1).attrs.revision).toMatchObject({ deletion: { author: 'Ada' } });
+    expect(readBlockRevision(next.doc.child(0).attrs)).toMatchObject({ deletion: { author: 'Ada' } });
+    expect(readBlockRevision(next.doc.child(1).attrs)).toMatchObject({ deletion: { author: 'Ada' } });
     expect(texts(settleAll(next, 'accept').doc)).toEqual(['onree']);
     expect(texts(settleAll(next, 'reject').doc)).toEqual(['one', 'two', 'three']);
   });
@@ -228,7 +230,7 @@ describe('paragraph marks', () => {
     });
     const next = apply(state, state.tr.replaceSelection(pasted.slice(1, pasted.content.size - 1)));
     expect(texts(next.doc)).toEqual(['abX', 'Ycd']);
-    expect(next.doc.child(0).attrs.revision).toMatchObject({ insertion: { author: 'Ada' } });
+    expect(readBlockRevision(next.doc.child(0).attrs)).toMatchObject({ insertion: { author: 'Ada' } });
     expect(texts(settleAll(next, 'reject').doc)).toEqual(['abcd']);
     expect(texts(settleAll(next, 'accept').doc)).toEqual(['abX', 'Ycd']);
   });
@@ -279,25 +281,25 @@ describe('formatting', () => {
   it('records the old formatting of a paragraph whose alignment or type was changed, and keeps the first record', () => {
     let state = stateOf([para(run('title'))], 2);
     state = apply(state, state.tr.setNodeMarkup(0, undefined, { ...state.doc.child(0).attrs, alignment: 'center' }));
-    expect(state.doc.child(0).attrs.revision).toMatchObject({ formatChange: { author: 'Ada', previous: {} } });
-    state = apply(state, state.tr.setNodeMarkup(0, docsSchema.nodes.heading, { ...docsSchema.nodes.heading.create().attrs, level: 2, alignment: 'center', revision: state.doc.child(0).attrs.revision }));
+    expect(readBlockRevision(state.doc.child(0).attrs)).toMatchObject({ formatChange: { author: 'Ada', previous: {} } });
+    state = apply(state, state.tr.setNodeMarkup(0, docsSchema.nodes.heading, { ...docsSchema.nodes.heading.create().attrs, level: 2, alignment: 'center', revisionFormat: state.doc.child(0).attrs.revisionFormat }));
     expect(state.doc.child(0).type.name).toBe('heading');
-    expect(state.doc.child(0).attrs.revision.formatChange.previous).toEqual({});
+    expect(state.doc.child(0).attrs.revisionFormat.previous).toEqual({});
     const rejected = settleAll(state, 'reject');
     expect(rejected.doc.child(0).type.name).toBe('paragraph');
     expect(rejected.doc.child(0).attrs.alignment).toBe('left');
     // No record when nothing the format records changed.
     const same = stateOf([para(run('x'))]);
     const none = apply(same, same.tr.setNodeMarkup(0, undefined, { ...same.doc.child(0).attrs }));
-    expect(none.doc.child(0).attrs.revision).toBeNull();
+    expect(readBlockRevision(none.doc.child(0).attrs)).toBeUndefined();
   });
 
   it('records a paragraph attribute set one at a time', () => {
     const state = stateOf([para(run('x'))]);
     const next = apply(state, state.tr.setNodeAttribute(0, 'alignment', 'right'));
-    expect(next.doc.child(0).attrs.revision).toMatchObject({ formatChange: { author: 'Ada' } });
-    const ignored = apply(state, state.tr.setNodeAttribute(0, 'revision', { insertion: { id: 'a', author: 'Bo' } }));
-    expect(ignored.doc.child(0).attrs.revision).toEqual({ insertion: { id: 'a', author: 'Bo' } });
+    expect(readBlockRevision(next.doc.child(0).attrs)).toMatchObject({ formatChange: { author: 'Ada' } });
+    const ignored = apply(state, state.tr.setNodeAttribute(0, 'revisionInsertion', { id: 'a', author: 'Bo' }));
+    expect(readBlockRevision(ignored.doc.child(0).attrs)).toEqual({ insertion: { id: 'a', author: 'Bo' } });
   });
 });
 
@@ -472,7 +474,7 @@ describe('the selection', () => {
     const state = stateOf([para(run('abcd')), para(run('efgh'))], 2, 4);
     const aligned = apply(state, state.tr.setNodeMarkup(0, undefined, { ...state.doc.child(0).attrs, alignment: 'center' }));
     expect([aligned.selection.from, aligned.selection.to]).toEqual([2, 4]);
-    expect(aligned.doc.child(0).attrs.revision).toMatchObject({ formatChange: { author: 'Ada' } });
+    expect(readBlockRevision(aligned.doc.child(0).attrs)).toMatchObject({ formatChange: { author: 'Ada' } });
   });
 });
 
@@ -531,7 +533,11 @@ describe('line breaks', () => {
     expect(runs(next.doc)).toEqual(['ab:', '\n:insertion', 'cd:']);
     expect(listChanges(next.doc).map((c) => [c.kind, c.text])).toEqual([['insertion', '\n']]);
     expect(texts(settleAll(next, 'reject').doc)).toEqual(['abcd']);
-    expect(texts(settleAll(next, 'accept').doc)).toEqual(['ab\ncd']);
+    // Accepting equals typing the break directly: a hard_break node, not a newline in the text.
+    const accepted = settleAll(next, 'accept');
+    const direct = EditorState.create({ doc: state.doc, selection: state.selection });
+    expect(accepted.doc.eq(direct.apply(direct.tr.replaceSelectionWith(br.create())).doc)).toBe(true);
+    expect(accepted.doc.child(0).child(1).type).toBe(br);
   });
 
   it('a break deleted stays, marked deleted, and rejecting gets it back', () => {
@@ -540,6 +546,144 @@ describe('line breaks', () => {
     const next = apply(state, state.tr.delete(3, 4));
     expect(runs(next.doc)).toEqual(['ab:', '\n:deletion', 'cd:']);
     expect(texts(settleAll(next, 'accept').doc)).toEqual(['abcd']);
-    expect(texts(settleAll(next, 'reject').doc)).toEqual(['ab\ncd']);
+    // Rejecting brings the break back as the node it was.
+    const rejected = settleAll(next, 'reject');
+    expect(rejected.doc.eq(state.doc)).toBe(true);
+    expect(rejected.doc.child(0).child(1).type).toBe(br);
+  });
+});
+
+describe('another author’s changes under the caret', () => {
+  it('typing in the middle of another author’s deletion is this author’s insertion only, not part of the deletion', () => {
+    const state = stateOf([para(run('ab'), run('cdef', { revision: { deletion: { id: 'x', author: 'Bo' } } }), run('gh'))], 5);
+    expect(state.doc.resolve(5).marks().map((m) => m.type.name)).toContain('deletion'); // what plain typing would inherit
+    const next = type(state, 'ZZ');
+    expect(runs(next.doc)).toEqual(['ab:', 'cd:deletion', 'ZZ:insertion', 'ef:deletion', 'gh:']);
+    const ins = next.doc.child(0).child(2).marks.find((m) => m.type.name === 'insertion')!;
+    expect(ins.attrs.author).toBe('Ada');
+    // Bo's deletion is still one change by Bo; accepting everything keeps ZZ and drops Bo's text, rejecting the reverse.
+    expect(listChanges(next.doc).map((c) => [c.kind, c.author])).toEqual([['deletion', 'Bo'], ['insertion', 'Ada'], ['deletion', 'Bo']]);
+    expect(texts(settleAll(next, 'accept').doc)).toEqual(['abZZgh']);
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['abcdefgh']);
+  });
+
+  it('typing into a deletion through the editor input path is no part of the deletion either', () => {
+    const base = stateOf([para(run('ab'), run('cdef', { revision: { deletion: { id: 'x', author: 'Bo' } } }))], 5);
+    const state = EditorState.create({ doc: base.doc, selection: base.selection, plugins: [...createPlugins(docsSchema), suggestingPlugin(options)] });
+    const plugin = state.plugins.find((p) => p.props.transformPasted && p.props.handleTextInput)!;
+    let next = state;
+    const view = { state, dispatch: (tr: Transaction) => (next = state.apply(tr)) } as never;
+    expect(plugin.props.handleTextInput!.call(plugin, view, 5, 5, 'Q', () => ({}) as never)).toBe(true);
+    expect(runs(next.doc)).toEqual(['ab:', 'cd:deletion', 'Q:insertion', 'ef:deletion']);
+  });
+
+  it('pasting tracked text from the same document makes the pasting author’s insertion, with an id of its own', () => {
+    const source = stateOf([para(run('keep'), run('copy', { revision: { insertion: { id: 'src', author: 'Bo' } } }))], 5);
+    const plugin = createPlugins(docsSchema).find((p) => p.props.transformPasted)!;
+    const slice = plugin.props.transformPasted!.call(plugin, source.doc.slice(5, 9), undefined as never, false);
+    const target = stateOf([para(run('x'))], 2);
+    const next = apply(target, target.tr.replaceSelection(slice));
+    expect(texts(next.doc)).toEqual(['xcopy']);
+    const mark = next.doc.child(0).child(1).marks.find((m) => m.type.name === 'insertion')!;
+    expect(mark.attrs.author).toBe('Ada');
+    expect(mark.attrs.revisionId).not.toBe('src');
+    expect(listChanges(next.doc).map((c) => c.author)).toEqual(['Ada']);
+  });
+
+  it('Backspace twice at the start of a paragraph: the first marks the break deleted and the caret goes before it, the second deletes the character before', () => {
+    let state = stateOf([para(run('one')), para(run('two'))], 6);
+    state = doCommand(state, joinBackward);
+    const mark = readBlockRevision(state.doc.child(0).attrs)!.deletion!;
+    expect(head(state)).toBe(4); // at the end of "one", before the deleted break
+    // The second Backspace is an ordinary one: it deletes "e" (its deletion starts a change of its own).
+    state = doCommand(state, (s, d) => {
+      d?.(s.tr.delete(3, 4));
+      return true;
+    });
+    expect(runs(state.doc, 0)).toEqual(['on:', 'e:deletion']);
+    expect(readBlockRevision(state.doc.child(0).attrs)!.deletion).toEqual(mark);
+    expect(listChanges(state.doc).map((c) => c.kind).sort()).toEqual(['deletion', 'paragraphDeleted']);
+  });
+
+  it('deleting a paragraph mark that is already deleted keeps its record, whoever made it', () => {
+    const state = stateOf([{ id: 'p', type: 'paragraph', content: [run('one')], revision: { deletion: { id: 'bo1', author: 'Bo' } } } as Block, para(run('two'))], 6);
+    const next = doCommand(state, joinBackward);
+    expect(texts(next.doc)).toEqual(['one', 'two']);
+    expect(readBlockRevision(next.doc.child(0).attrs)!.deletion).toEqual({ id: 'bo1', author: 'Bo' });
+  });
+});
+
+describe('paragraph marks with changes of other people', () => {
+  const bo = (kind: 'insertion' | 'deletion' | 'formatChange') =>
+    ({ id: 'p', type: 'paragraph', content: [run('abcd')], revision: { [kind]: kind === 'formatChange' ? { id: 'f', author: 'Bo', previous: { alignment: 'right' } } : { id: 'bo1', author: 'Bo' } } }) as Block;
+
+  it('splitting a paragraph whose mark Bo deleted: the new mark is Ada’s alone, Bo’s deletion stays with the old mark on the second half', () => {
+    const next = doCommand(stateOf([bo('deletion'), para(run('next'))], 3), splitBlock);
+    expect(readBlockRevision(next.doc.child(0).attrs)).toMatchObject({ insertion: { author: 'Ada' } });
+    expect(readBlockRevision(next.doc.child(0).attrs)!.deletion).toBeUndefined();
+    expect(readBlockRevision(next.doc.child(1).attrs)).toMatchObject({ deletion: { author: 'Bo' } });
+  });
+
+  it('Enter then Backspace in a paragraph that carries Bo’s change leaves Bo’s change as it was', () => {
+    for (const kind of ['insertion', 'deletion', 'formatChange'] as const) {
+      let state = stateOf([bo(kind), para(run('next'))], 3);
+      state = doCommand(state, splitBlock);
+      state = doCommand(state, joinBackward);
+      expect(texts(state.doc)).toEqual(['abcd', 'next']);
+      expect(readBlockRevision(state.doc.child(0).attrs)).toEqual(readBlockRevision(stateOf([bo(kind)]).doc.child(0).attrs));
+      expect(listChanges(state.doc).map((c) => c.author)).toEqual(['Bo']);
+    }
+  });
+
+  it('Enter then Backspace in a paragraph with Bo’s insertion and formatting change keeps both records', () => {
+    const both = { id: 'p', type: 'paragraph', content: [run('abcd')], revision: { insertion: { id: 'a', author: 'Bo' }, formatChange: { id: 'f', author: 'Cy', previous: { alignment: 'right' } } } } as Block;
+    let state = stateOf([both, para(run('next'))], 3);
+    state = doCommand(state, splitBlock);
+    state = doCommand(state, joinBackward);
+    expect(readBlockRevision(state.doc.child(0).attrs)).toMatchObject({ insertion: { author: 'Bo' }, formatChange: { author: 'Cy' } });
+  });
+});
+
+describe('edits that are made directly', () => {
+  it('a change to the properties of a list, an image or a form control is made directly, with a notice', async () => {
+    const list = docsSchema.nodeFromJSON({
+      type: 'ordered_list',
+      attrs: { start: 1 },
+      content: [{ type: 'list_item', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'item' }] }] }],
+    });
+    const state = EditorState.create({ doc: docsSchema.nodes.doc.create(null, [list]), plugins: [suggestingPlugin(options)] });
+    const next = apply(state, state.tr.setNodeAttribute(0, 'start', 3));
+    expect(next.doc.child(0).attrs.start).toBe(3);
+    expect(changeUnits(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(/properties of a list, table, image or form control cannot be suggested/);
+    // Outside Suggesting mode there is nothing to tell.
+    setup.notices = [];
+    setup.active = false;
+    apply(state, state.tr.setNodeAttribute(0, 'start', 5));
+    await flush();
+    expect(setup.notices).toEqual([]);
+  });
+
+  it('does not tell about the attributes the plugin and the review commands set themselves', async () => {
+    const state = stateOf([para(run('x'))]);
+    apply(state, state.tr.setNodeAttribute(0, 'revisionInsertion', { id: 'a', author: 'Bo' }));
+    await flush();
+    expect(setup.notices).toEqual([]);
+  });
+});
+
+describe('a note edited in place', () => {
+  it('is recorded as a replacement of the note text: the old text deleted, the new text inserted', () => {
+    const doc = docsSchema.nodeFromJSON({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a' }, { type: 'note_ref', attrs: { kind: 'footnote' }, content: [{ type: 'text', text: 'old note' }] }] }] });
+    const state = EditorState.create({ doc, plugins: [suggestingPlugin(options)] });
+    let pos = -1;
+    doc.descendants((n, p) => {
+      if (n.type.name === 'note_ref') pos = p;
+    });
+    const next = apply(state, state.tr.replaceWith(pos + 1, pos + 9, docsSchema.text('new note')));
+    expect(listChanges(next.doc).map((c) => [c.kind, c.text])).toEqual([['deletion', 'old note'], ['insertion', 'new note']]);
+    expect(texts(settleAll(next, 'accept').doc)).toEqual(['anew note']);
+    expect(texts(settleAll(next, 'reject').doc)).toEqual(['aold note']);
   });
 });

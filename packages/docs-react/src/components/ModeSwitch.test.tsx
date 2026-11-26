@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ModeSwitch, type EditorMode } from './ModeSwitch';
+import { ModeSwitch, HEADER_FOOTER_NOTICE, headerFooterNotice, type EditorMode } from './ModeSwitch';
 
 const render = (mode: EditorMode) => renderToStaticMarkup(<ModeSwitch mode={mode} onModeChange={() => {}} />);
 
@@ -20,5 +20,15 @@ describe('ModeSwitch', () => {
     expect(html).toContain('Edit the document directly');
     expect(html).toContain('Track Changes');
     expect(html).toContain('Read the document without changing it');
+  });
+});
+
+describe('headerFooterNotice', () => {
+  it('tells once in Suggesting mode that a header or footer edit is made directly, and never in the other modes', () => {
+    expect(headerFooterNotice('suggesting', false)).toBe(HEADER_FOOTER_NOTICE);
+    expect(headerFooterNotice('suggesting', true)).toBeNull();
+    expect(headerFooterNotice('editing', false)).toBeNull();
+    expect(headerFooterNotice('viewing', false)).toBeNull();
+    expect(HEADER_FOOTER_NOTICE).toMatch(/headers and footers.*directly, not as suggestions/);
   });
 });

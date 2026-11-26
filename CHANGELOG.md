@@ -370,7 +370,9 @@ lockstep.
   that joins the user's in the undo history: typed or pasted text gets an insertion mark (consecutive typing is one change), deleted
   text is put back with a deletion mark (text the same author inserted themselves is just removed; backspaces and deletes move
   the caret over the kept text), Enter marks the paragraph break inserted, joining paragraphs keeps the break marked deleted
-  (Enter then Backspace leaves no trace), a change of character formatting records the formatting before (`formatChange`, and none
+  (Enter then Backspace leaves no trace, and the records another person had on the paragraph mark are kept; the first Backspace
+  at the start of a paragraph moves the caret before the deleted break, so the second one deletes the character before),
+  text typed in the middle of another author's deletion is an insertion of its own, never part of the deletion, a change of character formatting records the formatting before (`formatChange`, and none
   when it is put back, or on the author's own insertion), a change of a paragraph's formatting or type records the old formatting.
   What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list…) is left as
   the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. Changes from collaborators, undo
@@ -378,8 +380,10 @@ lockstep.
   `suggestAuthor` and `onSuggestionNotice`; new `ModeSwitch` component and `EditorMode` type. Formatting several marks in one
   transaction (clear formatting) records the formatting before the first of them, the selection stays a range after a format,
   a line break typed or deleted is kept as text of the tracked run (so it syncs with its change), and notices go out after the
-  transaction was applied. Limits: only the body text is suggested (edits in headers, footers and note texts are made directly,
-  without a notice), and a change is continued by the same author name, with no time limit, so two people with one display name
+  transaction was applied. Limits: only the body text is suggested (an edit in a header or footer is made directly, and a notice
+  says so once per mode; a note edited in place is recorded as a replacement of its whole text: the old text deleted, the new
+  text inserted; a change to the properties of a list, table, image or form control is made directly, with a notice; a link or
+  a comment added inside someone's change is not recorded), and a change is continued by the same author name, with no time limit, so two people with one display name
   share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses).
 
 ### Changed

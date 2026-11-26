@@ -22,7 +22,7 @@ import { CommentsSidebar } from './CommentsSidebar';
 import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
 import { ReviewPanel } from './ReviewPanel';
-import { ModeSwitch, type EditorMode } from './ModeSwitch';
+import { ModeSwitch, headerFooterNotice, type EditorMode } from './ModeSwitch';
 import { Ruler } from './Ruler';
 import { VerticalRuler } from './VerticalRuler';
 import { PageSetupModal } from './PageSetupModal';
@@ -153,19 +153,33 @@ export const DocumentEditor = memo(function DocumentEditor({
   const mode = modeProp ?? ownMode;
   // Viewing cannot change the document, like a read-only editor (which has no mode to switch).
   const hostReadOnly = readOnlyProp || mode === 'viewing';
-  const [notice, setNotice] = useState<string | null>(null);
+  // The notice has a counter, so the same text twice in a row restarts its timer.
+  const [noticeState, setNoticeState] = useState<{ text: string; n: number } | null>(null);
+  const notice = noticeState?.text ?? null;
+  const showNotice = useCallback((text: string | null) => setNoticeState((prev) => (text === null ? null : { text, n: (prev?.n ?? 0) + 1 })), []);
+  const directNoticeShown = useRef(false);
   const handleModeChange = useCallback((next: EditorMode) => {
     setOwnMode(next);
     onModeChange?.(next);
   }, [onModeChange]);
   // A notice is about the mode it came in (also when a host changes the mode itself).
-  useEffect(() => setNotice(null), [mode]);
-  const handleSuggestionNotice = useCallback((notices: string[]) => setNotice(notices.join(' ')), []);
   useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(() => setNotice(null), 8000);
+    showNotice(null);
+    directNoticeShown.current = false;
+  }, [mode, showNotice]);
+  const handleSuggestionNotice = useCallback((notices: string[]) => showNotice(notices.join(' ')), [showNotice]);
+  useEffect(() => {
+    if (!noticeState) return;
+    const timer = setTimeout(() => showNotice(null), 8000);
     return () => clearTimeout(timer);
-  }, [notice]);
+  }, [noticeState, showNotice]);
+  // Headers and footers are edited apart from the body and are not recorded as suggestions: say so (once per mode).
+  const announceDirectEdit = useCallback(() => {
+    const text = headerFooterNotice(mode, directNoticeShown.current);
+    if (!text) return;
+    directNoticeShown.current = true;
+    showNotice(text);
+  }, [mode, showNotice]);
 
   const [showPageSetup, setShowPageSetup] = useState(false);
   const [editorView, setEditorView] = useState<EditorView | null>(null);
@@ -235,8 +249,9 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (target) {
       docModel.setSectionHeader(target.id, content);
       docModel.recordHistory('Update header');
+      announceDirectEdit();
     }
-  }, [docModel, sections, readOnly]);
+  }, [docModel, sections, readOnly, announceDirectEdit]);
 
   // Handle footer changes - update document model
   const handleFooterChange = useCallback((content: HeaderFooterContent, sectionId?: string) => {
@@ -245,8 +260,9 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (target) {
       docModel.setSectionFooter(target.id, content);
       docModel.recordHistory('Update footer');
+      announceDirectEdit();
     }
-  }, [docModel, sections, readOnly]);
+  }, [docModel, sections, readOnly, announceDirectEdit]);
 
   const handleInsertSectionBreak = useCallback((type: 'nextPage' | 'continuous') => {
     if (readOnly || !editorView) return;
@@ -291,7 +307,8 @@ export const DocumentEditor = memo(function DocumentEditor({
     if (type === 'header') docModel.setSectionHeader(sectionId, value);
     else docModel.setSectionFooter(sectionId, value);
     docModel.recordHistory(linked ? 'Link to previous' : 'Unlink from previous');
-  }, [docModel, readOnly]);
+    announceDirectEdit();
+  }, [docModel, readOnly, announceDirectEdit]);
 
   // Handle margins change from ruler
   const handleMarginsChange = useCallback((margins: PageMargins) => {

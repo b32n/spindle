@@ -14,8 +14,10 @@
 import { Fragment, Slice, type Mark, type Node as PmNode } from 'prosemirror-model';
 import { Plugin, PluginKey, TextSelection, type EditorState, type Transaction } from 'prosemirror-state';
 import { AddMarkStep, AttrStep, Mapping, RemoveMarkStep, ReplaceAroundStep, ReplaceStep, type Step } from 'prosemirror-transform';
-import type { BlockRevision, RevisionMeta } from '../types';
+import type { RevisionMeta } from '../types';
 import { docsSchema } from './schema';
+import { newRevisionId } from './revision-edit';
+import { readBlockRevision, withBlockRevision, withBlockRevisionKind } from './block-revision';
 import { paragraphFormatOf, runFormatOf } from './sync';
 
 export const suggestingKey = new PluginKey('suggesting');
@@ -37,12 +39,11 @@ export interface SuggestingOptions {
 const SKIPPED_META = ['y-sync$', 'history$', 'y-undo$', 'suggesting$'];
 
 const TEXTBLOCKS = new Set(['paragraph', 'heading']);
+/** The attributes that hold the changes of a paragraph mark or row: setting them is not an edit to suggest. */
+const BLOCK_REVISION_ATTR_NAMES = new Set(['revisionInsertion', 'revisionDeletion', 'revisionFormat']);
 const NOT_FORMATTING = new Set(['insertion', 'deletion', 'formatChange', 'comment', 'link']);
 
 const { insertion: insertionType, deletion: deletionType, formatChange: formatChangeType } = docsSchema.marks;
-
-let counter = 0;
-const randomId = () => `s${Date.now().toString(36)}${(counter++).toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
 interface Context {
   out: Transaction;
@@ -95,11 +96,11 @@ function paragraphMarksIn(doc: PmNode, from: number, to: number): Array<{ pos: n
   return found;
 }
 
-function patchRevision(ctx: Context, pos: number, patch: Partial<BlockRevision>): void {
+/** Sets one kind of change on the paragraph mark of the node at `pos` (its own attribute, so other people's records stay). */
+function setMarkRecord(ctx: Context, pos: number, kind: 'insertion' | 'deletion' | 'formatChange', value: unknown): void {
   const node = ctx.out.doc.nodeAt(pos);
   if (!node) return;
-  const revision = { ...((node.attrs.revision ?? {}) as BlockRevision), ...patch };
-  ctx.out.setNodeMarkup(pos, undefined, { ...node.attrs, revision });
+  ctx.out.setNodeMarkup(pos, undefined, withBlockRevisionKind(node.attrs, kind, value));
 }
 
 /** What was inserted at [from, to) of the document `ctx.out` holds is marked as inserted. */
@@ -109,7 +110,12 @@ function markInserted(ctx: Context, from: number, to: number): void {
   for (const type of [insertionType, deletionType, formatChangeType]) out.removeMark(from, to, type);
   const meta = neighbour(ctx, from, insertionType) ?? neighbour(ctx, to, insertionType) ?? freshMeta(ctx);
   out.addMark(from, to, markOf(insertionType, meta));
-  for (const { pos } of paragraphMarksIn(out.doc, from, to)) patchRevision(ctx, pos, { insertion: meta });
+  for (const { pos } of paragraphMarksIn(out.doc, from, to)) {
+    // The paragraph mark that was just made did not exist before, so no one can have deleted it: a copy of the deletion record
+    // of the mark the paragraph was split at (Enter) is not carried over. The old mark stays with the second half.
+    setMarkRecord(ctx, pos, 'deletion', null);
+    setMarkRecord(ctx, pos, 'insertion', meta);
+  }
   // A line break is kept in the text of a tracked run: the Y binding keeps marks on text only, not on a break node.
   const breaks: number[] = [];
   out.doc.nodesBetween(from, to, (node, pos) => {
@@ -158,12 +164,23 @@ function replaceStep(ctx: Context, step: ReplaceStep, docBefore: PmNode, after: 
     // A paragraph mark this author inserted and now deletes is simply gone (Enter, then Backspace).
     const lone = deleted.content.childCount === 2 && deleted.openStart === 1 && deleted.openEnd === 1 && deleted.size === 2 && deleted.content.child(0).childCount === 0 && deleted.content.child(1).childCount === 0;
     const firstParent = docBefore.resolve(from).parent;
-    const own = (firstParent.attrs.revision as BlockRevision | null)?.insertion;
+    const own = readBlockRevision(firstParent.attrs, false)?.insertion;
     if (lone && own && own.author === ctx.author && TEXTBLOCKS.has(firstParent.type.name)) {
+      // The join keeps the first paragraph's attributes, but the paragraph that results ends with the second one's mark: it takes
+      // that mark's records (inserted, deleted) and keeps the first one's formatting change, as accepting a deleted mark does.
+      const secondParent = docBefore.resolve(to).parent;
+      const first = readBlockRevision(firstParent.attrs, false) ?? {};
+      const second = readBlockRevision(secondParent.attrs, false) ?? {};
       const merged = out.doc.resolve(start);
-      const rest = { ...(merged.parent.attrs.revision as BlockRevision) };
-      delete rest.insertion;
-      ctx.out.setNodeMarkup(merged.before(), undefined, { ...merged.parent.attrs, revision: Object.keys(rest).length > 0 ? rest : null });
+      ctx.out.setNodeMarkup(
+        merged.before(),
+        undefined,
+        withBlockRevision(merged.parent.attrs, {
+          ...(second.insertion && { insertion: second.insertion }),
+          ...(second.deletion && { deletion: second.deletion }),
+          ...(first.formatChange && { formatChange: first.formatChange }),
+        })
+      );
       return start;
     }
     const meta = neighbour(ctx, start, deletionType) ?? freshMeta(ctx);
@@ -181,7 +198,10 @@ function replaceStep(ctx: Context, step: ReplaceStep, docBefore: PmNode, after: 
       ctx.notices.add('Deleted text could not be put back as a suggestion and was deleted directly.');
       return start;
     }
-    for (const { pos } of paragraphMarksIn(out.doc, start, start + size)) patchRevision(ctx, pos, { deletion: meta });
+    for (const { pos, node } of paragraphMarksIn(out.doc, start, start + size)) {
+      // A mark already deleted (by anyone) keeps its record: deleting it again is not a new change.
+      if (!node.attrs.revisionDeletion) setMarkRecord(ctx, pos, 'deletion', meta);
+    }
     // The caret stays after what was typed over the deleted text; with nothing typed it is after text deleted forward, before text backspaced.
     if (slice.size === 0) caretAt = caret.forward ? start + size : start;
   }
@@ -240,12 +260,12 @@ function sameFormat(a: unknown, b: unknown): boolean {
 function paragraphChanged(ctx: Context, before: PmNode, pos: number): void {
   const node = ctx.out.doc.nodeAt(pos);
   if (!node || !TEXTBLOCKS.has(node.type.name) || !TEXTBLOCKS.has(before.type.name)) return;
-  const revision = (node.attrs.revision ?? {}) as BlockRevision;
+  const revision = readBlockRevision(node.attrs, false) ?? {};
   if (revision.formatChange || revision.insertion?.author === ctx.author) return;
   const previous = paragraphFormatOf(before);
   const current = paragraphFormatOf(node);
   if (JSON.stringify(previous) === JSON.stringify(current)) return;
-  patchRevision(ctx, pos, { formatChange: { ...freshMeta(ctx), previous } });
+  setMarkRecord(ctx, pos, 'formatChange', { ...freshMeta(ctx), previous });
 }
 
 /**
@@ -270,13 +290,16 @@ export function suggestChanges(trs: readonly Transaction[], oldState: EditorStat
     out: newState.tr,
     author: options.author(),
     now: options.now ?? (() => new Date().toISOString()),
-    newId: options.newId ?? randomId,
+    newId: options.newId ?? newRevisionId,
     notices: new Set(),
     recorded: new WeakSet(),
   };
   const all = new Mapping(steps.map(({ step }) => step.getMap()));
   const old = oldState.selection;
-  const caret = { forward: !(old.empty && steps.length === 1 && (steps[0].step as unknown as StepFields).to === old.head) };
+  // Backspace deletes the text before the caret, or the paragraph mark before it (a join: from one before the caret to one after it).
+  const first = steps[0].step as unknown as StepFields;
+  const backspace = old.empty && steps.length === 1 && (first.to === old.head || (first.from === old.head - 1 && first.to === old.head + 1));
+  const caret = { forward: !backspace };
   let caretAt: number | null = null;
   const onlyOne = steps.length === 1;
 
@@ -292,7 +315,10 @@ export function suggestChanges(trs: readonly Transaction[], oldState: EditorStat
     } else if (step instanceof AttrStep) {
       const { pos, attr } = step as unknown as { pos: number; attr: string };
       const node = before.nodeAt(pos);
-      if (node && attr !== 'revision') paragraphChanged(ctx, node, ctx.out.mapping.map(after.map(pos, -1), -1));
+      if (node && !BLOCK_REVISION_ATTR_NAMES.has(attr)) {
+        if (TEXTBLOCKS.has(node.type.name)) paragraphChanged(ctx, node, ctx.out.mapping.map(after.map(pos, -1), -1));
+        else ctx.notices.add('A change to the properties of a list, table, image or form control cannot be suggested and was made directly.');
+      }
     } else if (step instanceof ReplaceAroundStep) {
       const { from, to, gapFrom, gapTo, slice } = step as unknown as StepFields & { gapFrom: number; gapTo: number };
       const node = before.nodeAt(from);

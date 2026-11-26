@@ -6,7 +6,6 @@ import type {
   Block,
   Section,
   InlineContent,
-  BlockRevision,
   PreviousParagraphFormat,
   RunFormat,
   RunRevision,

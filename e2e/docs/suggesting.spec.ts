@@ -164,4 +164,20 @@ test.describe('docs: Suggesting mode', () => {
     await setMode(page, 'Editing');
     await expect(page.getByTestId('suggesting-notice')).toHaveCount(0);
   });
+  test('D-SUG-06 text typed in the middle of a deletion is an insertion of its own, not part of the deletion', async ({
+    page,
+  }) => {
+    await startSuggesting(page);
+    for (let i = 0; i < 5; i++) await page.keyboard.press('Backspace');
+    await doc.settle();
+    await expect(deletions().first()).toContainText('world');
+    // The caret is before the deleted "world": move two characters into it and type.
+    await doc.press('ArrowRight');
+    await doc.press('ArrowRight');
+    await doc.typeText('ZZ');
+    await doc.settle();
+    await expect(insertions().filter({ hasText: 'ZZ' })).toHaveCount(1);
+    expect((await deletions().allTextContents()).join('')).toBe('world');
+    await expect(doc.pages.first()).toContainText('woZZrld');
+  });
 });

@@ -48,7 +48,11 @@ insertion, text deleted stays as a deletion (text the user inserted themselves i
 joined away is recorded, and character and paragraph formatting changes record what the formatting was. What cannot be suggested
 (a list, table or image inserted or deleted, wrapping text in a list…) is done directly and a notice says so; changes from
 collaborators and undo and redo are not touched. The commands (`listChanges`, `resolveChange`, `resolveAll`, `resolveSelection`)
-and the plugin (`suggestingPlugin`) are exported from `@b32nio/spindle-docs-core` for hosts with their own UI.
+and the plugin (`suggestingPlugin`) are exported from `@b32nio/spindle-docs-core` for hosts with their own UI. The **Final** and **Original**
+views are read-only: a banner offers the switch back to All markup. With a controlled `mode="viewing"` and `showModeSwitch={false}`
+the reader has no way to leave Viewing from the UI: the host has to change `mode`. Edits in headers and footers are made directly in
+Suggesting mode (a notice says so once); `TrueLayoutEditor` without `suggestAuthor` writes suggestions as "Unknown", while
+`DocumentEditor` uses the name of `currentUser`.
 
 #### Features
 

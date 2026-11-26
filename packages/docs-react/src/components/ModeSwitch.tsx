@@ -7,6 +7,14 @@ import { memo } from 'react';
 /** What typing does: `editing` changes the document, `suggesting` records tracked changes, `viewing` cannot change it. */
 export type EditorMode = 'editing' | 'suggesting' | 'viewing';
 
+/** What Suggesting mode says when an edit it cannot record is made directly in a header or footer (they are edited apart from the body). */
+export const HEADER_FOOTER_NOTICE = 'Edits in headers and footers are made directly, not as suggestions.';
+
+/** The notice for a direct edit in a header or footer: only in Suggesting mode, and once until the mode changes. */
+export function headerFooterNotice(mode: EditorMode, alreadyShown: boolean): string | null {
+  return mode === 'suggesting' && !alreadyShown ? HEADER_FOOTER_NOTICE : null;
+}
+
 export interface ModeSwitchProps {
   mode: EditorMode;
   onModeChange: (mode: EditorMode) => void;
