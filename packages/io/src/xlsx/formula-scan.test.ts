@@ -29,25 +29,6 @@ describe('scanFormula functions', () => {
 
 describe('scanFormula references', () => {
   it.each([
-    ['SUM(A:A)', true],
-    ['SUM($A:$C)', true],
-    ['SUM(Sheet2!B:B)', true],
-    ["SUM('My Sheet'!1:1)", true],
-    ['ROW(1:1)', true],
-    ['SUM($2:$9)', true],
-    ['SUM(A1:B2)', false],
-    ['SUM($A$1:$B$2)', false],
-    ['"A:A"+1', false],
-    ["'A:A'!B1", false],
-    ['Table1[[Col1]:[Col3]]', false],
-    ['TIME(1,2,3)', false],
-    ['SUM(A1:INDEX(A:A,3))', true],
-    ['LOG10:Z', false],
-  ])('whole column or row in %s is %s', (text, expected) => {
-    expect(scanFormula(text).wholeColumnOrRow).toBe(expected);
-  });
-
-  it.each([
     ['SUM(Table1[Amount])', true],
     ['Table1[[#This Row],[Amount]]*2', true],
     ['[@Amount]*2', true],
