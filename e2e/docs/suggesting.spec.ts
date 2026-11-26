@@ -182,6 +182,21 @@ test.describe('docs: Suggesting mode', () => {
     await expect(doc.pages.first()).toContainText('woZZrld');
   });
 
+  test('D-SUG-08 picking a mode keeps the caret in the document, so typing goes on straight away', async ({
+    page,
+  }) => {
+    await doc.clearAndFocus();
+    await doc.typeText('Hello');
+    await setMode(page, 'Suggesting');
+    // No click into the page: the keys go to the editor, and are a suggestion.
+    await page.keyboard.type('X');
+    await expect(insertions().filter({ hasText: 'X' })).toHaveCount(1);
+    await setMode(page, 'Editing');
+    await page.keyboard.type('Y');
+    await expect(doc.pages.first()).toContainText('HelloXY');
+    await expect(insertions().filter({ hasText: 'Y' })).toHaveCount(0);
+  });
+
   test('D-SUG-07 in the Final view nothing can be typed, also in Suggesting mode, and typing is a suggestion again in All markup', async ({
     page,
   }) => {

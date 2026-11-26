@@ -738,6 +738,56 @@ describe('paragraph marks with changes of other people', () => {
   });
 });
 
+describe('a change to the type or properties of a node that is not a paragraph', () => {
+  const item = { type: 'list_item', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'item' }] }] };
+  const NOTICE = /properties of a list, table, image or form control cannot be suggested/;
+  const stateOfNode = (json: object) =>
+    EditorState.create({ doc: docsSchema.nodes.doc.create(null, [docsSchema.nodeFromJSON(json)]), plugins: [suggestingPlugin(options)] });
+
+  it('switching a list between bullets and numbers is made directly, with a notice', async () => {
+    const state = stateOfNode({ type: 'bullet_list', content: [item] });
+    const next = apply(state, state.tr.setNodeMarkup(0, docsSchema.nodes.ordered_list, { start: 1 }));
+    expect(next.doc.child(0).type.name).toBe('ordered_list');
+    expect(changeUnits(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+  });
+
+  it('setting the attributes of a table cell or of a content control is made directly, with a notice', async () => {
+    const table = stateOfNode({
+      type: 'table',
+      content: [{ type: 'table_row', content: [{ type: 'table_cell', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'c' }] }] }] }],
+    });
+    const cellPos = 2;
+    expect(table.doc.nodeAt(cellPos)!.type.name).toBe('table_cell');
+    const shaded = apply(table, table.tr.setNodeMarkup(cellPos, undefined, { ...table.doc.nodeAt(cellPos)!.attrs, backgroundColor: '#ffff00' }));
+    expect(shaded.doc.nodeAt(cellPos)!.attrs.backgroundColor).toBe('#ffff00');
+    expect(changeUnits(shaded.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+
+    setup.notices = [];
+    const control = stateOfNode({
+      type: 'content_control',
+      attrs: { alias: 'Before' },
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'inside' }] }],
+    });
+    const retitled = apply(control, control.tr.setNodeMarkup(0, undefined, { ...control.doc.child(0).attrs, alias: 'After' }));
+    expect(retitled.doc.child(0).attrs.alias).toBe('After');
+    expect(changeUnits(retitled.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(NOTICE);
+  });
+
+  it('is not told when Suggesting mode is off', async () => {
+    const state = stateOfNode({ type: 'bullet_list', content: [item] });
+    setup.active = false;
+    apply(state, state.tr.setNodeMarkup(0, docsSchema.nodes.ordered_list, { start: 1 }));
+    await flush();
+    expect(setup.notices).toEqual([]);
+  });
+});
+
 describe('edits that are made directly', () => {
   it('a change to the properties of a list, an image or a form control is made directly, with a notice', async () => {
     const list = docsSchema.nodeFromJSON({

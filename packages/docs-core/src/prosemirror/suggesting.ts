@@ -264,7 +264,14 @@ function sameFormat(a: unknown, b: unknown): boolean {
   return FORMAT_KEYS.every((key) => (x[key] || undefined) === (y[key] || undefined));
 }
 
-/** A paragraph whose formatting or type was changed records the formatting it had. */
+/** What a change to the type or attributes of a node that is not a paragraph or heading says (made directly). */
+const ATTRIBUTE_NOTICE = 'A change to the properties of a list, table, image or form control cannot be suggested and was made directly.';
+
+/**
+ * A paragraph whose formatting or type was changed records the formatting it had. Nothing is recorded, on purpose and
+ * without a notice, when the change is already recorded (the first record keeps the formatting from before), when the
+ * paragraph is the author's own insertion (it has no earlier formatting), or when the formatting did not change.
+ */
 function paragraphChanged(ctx: Context, before: PmNode, pos: number): void {
   const node = ctx.out.doc.nodeAt(pos);
   if (!node || !TEXTBLOCKS.has(node.type.name) || !TEXTBLOCKS.has(before.type.name)) return;
@@ -329,14 +336,16 @@ export function suggestChanges(trs: readonly Transaction[], oldState: EditorStat
       const node = before.nodeAt(pos);
       if (node && !BLOCK_REVISION_ATTR_NAMES.has(attr)) {
         if (TEXTBLOCKS.has(node.type.name)) paragraphChanged(ctx, node, ctx.out.mapping.map(after.map(pos, -1), -1));
-        else ctx.notices.add('A change to the properties of a list, table, image or form control cannot be suggested and was made directly.');
+        else ctx.notices.add(ATTRIBUTE_NOTICE);
       }
     } else if (step instanceof ReplaceAroundStep) {
       const { from, to, gapFrom, gapTo, slice } = step as unknown as StepFields & { gapFrom: number; gapTo: number };
       const node = before.nodeAt(from);
       // Setting a node's type or attributes keeps its content, and is how a paragraph becomes a heading or is aligned.
-      if (node && gapFrom === from + 1 && gapTo === to - 1 && slice.size === 2) paragraphChanged(ctx, node, ctx.out.mapping.map(after.map(from, -1), -1));
-      else ctx.notices.add('A change to the structure of the document (a list, a quote, a table) cannot be suggested and was made directly.');
+      if (node && gapFrom === from + 1 && gapTo === to - 1 && slice.size === 2) {
+        if (TEXTBLOCKS.has(node.type.name)) paragraphChanged(ctx, node, ctx.out.mapping.map(after.map(from, -1), -1));
+        else ctx.notices.add(ATTRIBUTE_NOTICE);
+      } else ctx.notices.add('A change to the structure of the document (a list, a quote, a table) cannot be suggested and was made directly.');
     } else {
       ctx.notices.add('A change that cannot be suggested was made directly.');
     }

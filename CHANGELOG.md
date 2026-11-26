@@ -383,7 +383,7 @@ lockstep.
   transaction was applied. Limits: only the body text is suggested (an edit in a header or footer is made directly, and a notice
   says so once per mode; a note edited in place is recorded as a replacement of its whole text: the old text deleted, the new
   text inserted; a change to the properties of a list, table, image or form control is made directly, with a notice; a link or
-  a comment added inside someone's change is not recorded), and a change is continued by the same author name, with no time limit, so two people with one display name
+  a comment added inside someone's change is not recorded; text composed with an IME is recorded like typing but has not been tried with a real input method), and a change is continued by the same author name, with no time limit, so two people with one display name
   share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses).
 
 ### Changed

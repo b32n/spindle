@@ -52,7 +52,9 @@ and the plugin (`suggestingPlugin`) are exported from `@b32nio/spindle-docs-core
 views are read-only: a banner offers the switch back to All markup. With a controlled `mode="viewing"` and `showModeSwitch={false}`
 the reader has no way to leave Viewing from the UI: the host has to change `mode`. Edits in headers and footers are made directly in
 Suggesting mode (a notice says so once); `TrueLayoutEditor` without `suggestAuthor` writes suggestions as "Unknown", while
-`DocumentEditor` uses the name of `currentUser`.
+`DocumentEditor` uses the name of `currentUser`. Known limits: text composed with an IME is recorded like typing, but every composition update replaces the composed text (the author's own
+insertion), and this has not been tried with a real input method (CJK): test it before relying on it;
+two people with the same display name are one author to Suggesting mode (it removes text that "they" inserted, whoever typed it).
 
 #### Features
 
@@ -120,6 +122,10 @@ const editorRef = useRef<TrueLayoutEditorHandle>(null);
 | `onHeaderChange` | `(content: HeaderFooterContent) => void` | - | Called when header is edited |
 | `onFooterChange` | `(content: HeaderFooterContent) => void` | - | Called when footer is edited |
 | `headerFooterEditable` | `boolean` | `true` | Whether headers/footers are editable |
+| `suggesting` | `boolean` | `false` | Record what the user does as tracked changes (Suggesting mode) |
+| `suggestAuthor` | `string` | `'Unknown'` | The author of the suggestions |
+| `onSuggestionNotice` | `(notices: string[]) => void` | - | Called with what was done directly because it cannot be suggested |
+| `revisionView` | `'markup' \| 'final' \| 'original'` | `'markup'` | How the tracked changes show; Final and Original are read-only |
 
 #### Handle Methods
 

@@ -328,6 +328,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | D-SUG-04 | Viewing mode cannot change the document, Editing changes it directly again | covered |  |  | `e2e/docs/suggesting.spec.ts` |
 | D-SUG-05 | what cannot be suggested is done directly, with a notice | covered |  |  | `e2e/docs/suggesting.spec.ts` |
 | D-SUG-06 | text typed in the middle of a deletion is an insertion of its own, not part of the deletion | covered |  |  | `e2e/docs/suggesting.spec.ts` |
+| D-SUG-08 | picking a mode keeps the caret in the document, so typing goes on straight away | covered |  |  | `e2e/docs/suggesting.spec.ts` |
 | D-SUG-07 | in the Final view nothing can be typed, also in Suggesting mode, and typing is a suggestion again in All markup | covered |  |  | `e2e/docs/suggesting.spec.ts` |
 | D-TBL-02 | a cell with several paragraphs and a nested table is shown, and the nested table can be edited | covered |  |  | `e2e/docs/table-structure.spec.ts` |
 | D-TOC-01 | Insert -> Table of contents lists the headings with the page each is on, after the block the caret is in | covered | yes |  | `e2e/docs/toc.spec.ts` |
@@ -483,7 +484,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 416
+- covered: 417
 - fixme + bug: 8
 - not covered: 8
 - n/a: 6

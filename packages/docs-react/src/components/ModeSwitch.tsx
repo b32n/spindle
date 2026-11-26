@@ -40,6 +40,8 @@ export const ModeSwitch = memo(function ModeSwitch({ mode, onModeChange }: ModeS
           type="button"
           title={m.hint}
           aria-pressed={mode === m.id}
+          // A press must not take the focus from the editor, so typing goes on where the caret was.
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => onModeChange(m.id)}
           style={{
             border: 'none',

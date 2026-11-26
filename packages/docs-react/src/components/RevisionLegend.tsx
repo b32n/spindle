@@ -2,7 +2,7 @@
  * RevisionLegend - the authors of the tracked changes in the document, each in the colour their changes are drawn in.
  */
 
-import React, { memo } from 'react';
+import { memo, type CSSProperties } from 'react';
 import type { RevisionAuthor } from '@b32nio/spindle-docs-core';
 
 export interface RevisionLegendProps {
@@ -11,7 +11,7 @@ export interface RevisionLegendProps {
   bare?: boolean;
 }
 
-const BAND: React.CSSProperties = { padding: '4px 16px', background: '#ffffff', borderBottom: '1px solid #e8eaed' };
+const BAND: CSSProperties = { padding: '4px 16px', background: '#ffffff', borderBottom: '1px solid #e8eaed' };
 
 export const RevisionLegend = memo(function RevisionLegend({ authors, bare = false }: RevisionLegendProps) {
   if (authors.length === 0) return null;
