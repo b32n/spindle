@@ -34,23 +34,20 @@ describe('addresses', () => {
 });
 
 describe('stableNumber', () => {
-  it('keeps 12 significant digits so last-digit differences between Node versions vanish', () => {
-    // PV(0.05,10,-100) as computed on Node 24 and Node 22
+  it('keeps 13 significant digits so last-digit differences between Node versions vanish', () => {
+    // financial results as computed on Node 24 and Node 22
     expect(stableNumber(772.1734929184817)).toBe(stableNumber(772.1734929184818));
     expect(stableNumber(0.08896339469334992)).toBe(stableNumber(0.08896339469334985));
     expect(stableNumber(1257.789253554884)).toBe(stableNumber(1257.7892535548842));
+    expect(stableNumber(0.04277497803511183)).toBe(stableNumber(0.042774978035111176));
     expect(stableNumber(0.1 + 0.2)).toBe(0.3);
     expect(stableNumber(1.5)).toBe(1.5);
     expect(stableNumber(0)).toBe(0);
-    expect(stableNumber(123456789012345680000)).toBe(1.23456789012e20);
   });
-  it('is applied to every number in a model', () => {
-    expect(digestBinaries({ v: [772.1734929184817, 1e-20 + 1] })).toEqual({
-      v: [772.173492918, 1],
-    });
-  });
-  it('does not make different values equal at visible precision', () => {
+  it('does not make values that differ in the first 13 digits equal', () => {
     expect(stableNumber(1.0000001)).not.toBe(stableNumber(1.0000002));
+    expect(stableNumber(1234567890123)).not.toBe(stableNumber(1234567890124));
+    expect(stableNumber(0.1234567890123)).not.toBe(stableNumber(0.1234567890124));
   });
 });
 
@@ -296,6 +293,41 @@ describe('normalizeWorkbook', () => {
       name: 'N',
       cells: {},
       threads: [{ anchor: 'orphaned' }, { anchor: 'orphaned' }],
+    });
+  });
+
+  it('keeps literal numbers exact and rounds only formula results to 13 digits', () => {
+    const m = normalizeWorkbook({
+      sheets: [
+        {
+          id: 's',
+          name: 'S',
+          rowOrder: [[0, 'r']],
+          colOrder: [
+            [0, 'a'],
+            [1, 'b'],
+            [2, 'c'],
+            [3, 'd'],
+            [4, 'e'],
+          ],
+          cells: [
+            { key: 'r:a', cell: { value: 1234567890123 } },
+            { key: 'r:b', cell: { value: 0.123456789012345 } },
+            { key: 'r:c', cell: { value: 772.1734929184817, formula: '=PV(1)' } },
+            { key: 'r:d', cell: { value: 'text', formula: '=A1&""' } },
+            { key: 'r:e', cell: { value: 1234567890123456, formula: '=1' } },
+          ],
+          config: {},
+        },
+      ],
+    }) as { sheets: Array<{ cells: Record<string, { value: unknown }> }> };
+    const v = Object.fromEntries(Object.entries(m.sheets[0].cells).map(([k, c]) => [k, c.value]));
+    expect(v).toEqual({
+      A1: 1234567890123,
+      B1: 0.123456789012345,
+      C1: 772.1734929185,
+      D1: 'text',
+      E1: 1234567890123000,
     });
   });
 

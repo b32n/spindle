@@ -174,7 +174,8 @@ function kindOf(v: Scalar): string {
   return typeof v;
 }
 
-export const show = (v: Scalar): string =>
+/** Display form for the report; `engine` values are rounded like the model's formula results, cached values are shown exactly. */
+export const show = (v: Scalar, engine = false): string =>
   v === null
     ? '(empty)'
     : typeof v === 'string'
@@ -183,7 +184,7 @@ export const show = (v: Scalar): string =>
         ? v
           ? 'TRUE'
           : 'FALSE'
-        : String(stableNumber(v));
+        : String(engine ? stableNumber(v) : v);
 
 export interface ValuesSnapshot extends ValuesTotals {
   /** `ok`, or why nothing was compared. */
@@ -257,7 +258,7 @@ export function compareValues(
         sheet: cell.sheet,
         cell: cell.address,
         expected: show(cell.expected),
-        actual: show(actual),
+        actual: show(actual, true),
       });
   }
   return out;

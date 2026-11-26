@@ -21,11 +21,12 @@ export function colName(index: number): string {
 export const cellAddress = (row: number, col: number): string => `${colName(col)}${row + 1}`;
 
 /**
- * Numbers are kept to 12 significant digits. The last one or two digits of results such as `PV` or `RATE` depend on the
- * V8 build's `Math.pow` and `Math.exp` (Node 22 and 24 differ), and a golden must be identical on both. Cached values in
- * files carry at most 15 digits and `values` compares to 9, so nothing a user could see changes.
+ * Engine-computed numbers are kept to 13 significant digits (Excel stores 15). The last digits of iterative or
+ * power-based results such as `PV` or `RATE` (noise reaches the 15th digit of an iterative result such as RATE, so 14 would sit on a rounding boundary) depend on the V8 build's `Math.pow` and `Math.exp` (Node 22 and 24 differ), and a
+ * golden must be identical on both. Applied only to the value of a formula cell, never to literals, cached values or the
+ * round-trip comparison, so a 13-digit integer or a 15-digit literal is recorded exactly.
  */
-export const stableNumber = (n: number): number => Number(n.toPrecision(12));
+export const stableNumber = (n: number): number => Number(n.toPrecision(13));
 
 const sha256 = (data: Uint8Array | string): string =>
   createHash('sha256').update(data).digest('hex');
@@ -56,8 +57,7 @@ export function digestBinaries(value: unknown): Json {
     for (const [k, v] of Object.entries(value)) if (v !== undefined) out[k] = digestBinaries(v);
     return out;
   }
-  if (typeof value === 'number')
-    return Number.isFinite(value) ? stableNumber(value) : `#number:${String(value)}`;
+  if (typeof value === 'number' && !Number.isFinite(value)) return `#number:${String(value)}`;
   return (value ?? null) as Json;
 }
 
@@ -125,7 +125,13 @@ export function normalizeWorkbook(data: unknown): JsonObject {
     // Position order, so pool ordinals (s1, s2 ...) are assigned the same way on every run.
     placed.sort((a, b) => a.row - b.row || a.col - b.col);
     const cells = placed.map(({ row, col, cell }) => {
-      const json: JsonObject = { value: digestBinaries(cell.value) };
+      const value = digestBinaries(cell.value);
+      const json: JsonObject = {
+        value:
+          typeof cell.formula === 'string' && typeof value === 'number'
+            ? stableNumber(value)
+            : value,
+      };
       if (typeof cell.formula === 'string') json.formula = cell.formula;
       if (cell.styleId) json.style = refOf(cell.styleId, stylePool, styles, 's', outStyles);
       if (cell.formatId) json.format = refOf(cell.formatId, formatPool, formats, 'f', outFormats);
