@@ -93,6 +93,7 @@ test.describe('docs: content controls from a .docx', () => {
     await openControls(page);
     // Click just past the end of the control's text, which puts the caret at the end of the text inside the control.
     const name = doc.pages.locator('[data-content-control="Name"]', { hasText: 'Ada Marlowe' });
+    await expect(name).toBeVisible();
     const box = await name.boundingBox();
     if (!box) throw new Error('the control is not painted');
     await page.mouse.click(box.x + box.width - 1, box.y + box.height / 2);
