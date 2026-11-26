@@ -577,6 +577,17 @@ lockstep.
   error values, as Excel does. The XLSX `values` golden for `formulas-core` improves from 112 to 125 of 159
   matching and `xlsx.formulas.unsupported` shrinks (34 to 15 formulas there); `_xlfn.`-prefixed spellings still
   wait for S4.
+- **Function batch B, text and date (S12a).** 18 new functions (193 to 211): `CLEAN`, `NUMBERVALUE`, `UNICHAR`, `UNICODE`, `T`,
+  `FIXED`, `DOLLAR`, `BASE`, `DECIMAL`, `ROMAN` (five forms), `ARABIC`, `ISNONTEXT`, `DAYS`, `DAYS360`
+  (US and European), `YEARFRAC` (all five bases), `ISOWEEKNUM`, `WORKDAY.INTL` and `NETWORKDAYS.INTL` (weekend codes,
+  seven-character strings, holidays, constant time). `TEXTBEFORE`, `TEXTAFTER` and `TEXTSPLIT` are deferred until Excel-computed
+  files exist (no trustworthy oracle; plan D8). `INDEX(range,0,col)`, `INDEX(range,row,0)`, `INDEX(range,,col)` and
+  `INDEX(table,row)` return a whole column or row (also as a range endpoint); a negative index is `#VALUE!`. The parser keeps an empty
+  argument in place for the functions that take one (`INDEX(a,,2)`, `NUMBERVALUE(a,,",")`). Date functions now follow Excel's 1900
+  calendar (29 February 1900 is serial 60, `DATE(1900,1,1)` is 1, overflow such as `DATE(1900,3,0)` and `EDATE`/`EOMONTH`/`DATEDIF` follow it). 220 new conformance rows
+  (LibreOffice 25.2; the rows where it differs from Excel carry Excel's documented value, tagged unverified until real Excel files confirm it). The published list is `documentation/sheets/core/functions.md`. The XLSX `values` golden for
+  `formulas-core` improves from 125 to 127 of 159 matching and `xlsx.formulas.unsupported` shrinks (15 to 10 formulas there; the
+  `_xlfn.`-prefixed ones wait for S4).
 
 ## [0.4.0] - 2026-10-26
 

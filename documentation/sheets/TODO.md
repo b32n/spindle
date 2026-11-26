@@ -6,11 +6,11 @@ of the remaining work is **feature parity** in the non-formula feature set.
 
 ## Formula engine — shipped
 
-The engine ships **193 functions** across math, logical, text, lookup,
+The engine ships **211 functions** across math, logical, text, lookup,
 statistical, date/time, information, financial, reference and array categories
 (`packages/sheets-core/src/formula-parser/functions/`).
 
-- [x] **Standard function library** — all categories above (193 in `catalog.ts`)
+- [x] **Standard function library** — all categories above (211 in `catalog.ts`)
 - [x] **Excel-grade recalculation** — topological dirty-propagation (each cell
       computed once per pass), volatile functions, complete range-rectangle
       dependency tracking (`formula-graph.ts`, `workbook.ts`)
@@ -65,14 +65,22 @@ statistical, date/time, information, financial, reference and array categories
 - [ ] **`#SPILL!` auto-recovery** — a blocked anchor does not re-spill when the
       blocking cell is cleared; the anchor isn't a dependency of the blocker, so
       it's never marked dirty. The formula must be re-entered (`workbook.ts`).
-- [ ] **Missing functions** — `TRANSPOSE` (a `transpose` *helper* exists but isn't
-      exported as a function), `YEARFRAC`, `TEXTSPLIT`, `TEXTBEFORE` / `TEXTAFTER`,
-      `CLEAN`, `NUMBERVALUE`, `DAYS`, `ISOWEEKNUM`, `XNPV`, `XIRR`, `SLN` (batch B,
-      plan S12), and `LET` / `LAMBDA` / `HSTACK` / `VSTACK` / `TAKE` (post-launch).
-      Also `INDEX(range, 0, col)` / `INDEX(range, row, 0)` (whole-column /
-      whole-row array form) returns `#REF!` instead of the column/row
-      (`functions/lookup.ts`). The unprefixed names work; the `_xlfn.` spellings
-      Excel writes into files are mapped on import (plan S4).
+- [ ] **`TEXTBEFORE`, `TEXTAFTER`, `TEXTSPLIT`** — deferred until Excel-computed files exist (plan S12, D8): LibreOffice 25.2 has no
+      such function, so there is no trustworthy oracle. Their probe rows are in `KNOWN_FAILING`. (`omittable.ts` is where
+      `TEXTSPLIT(a,,";")` would need its blank argument kept.)
+- [ ] **Missing functions** — `TRANSPOSE`, `XNPV`, `XIRR`, `MIRR`, `SLN`, `DDB` and the dynamic-array shaping functions
+      (`HSTACK`, `VSTACK`, `TAKE`, `DROP`, `CHOOSECOLS`, ...) are batch B part 2 (plan S12); `LET` / `LAMBDA` and its helpers
+      need names in scope in the evaluator (post-launch). The unprefixed names work; the `_xlfn.` spellings Excel writes into
+      files are mapped on import (plan S4).
+- [x] **Text and date, batch B** — `CLEAN`, `NUMBERVALUE`, `UNICHAR`, `UNICODE`, `T`,
+      `FIXED`, `DOLLAR`, `BASE`, `DECIMAL`, `ROMAN`, `ARABIC`, `ISNONTEXT`, `DAYS`, `DAYS360`,
+      `YEARFRAC` (all five bases), `ISOWEEKNUM`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`, and `INDEX(range,0,col)` /
+      `INDEX(range,row,0)` (whole column or row, plan S12). Rows where LibreOffice differs from Excel are
+      Excel-documented and unverified until real Excel files confirm them (D8). Date functions use Excel's
+      1900 calendar (29 February 1900 is serial 60; `YEARFRAC` basis 1 on 1900 dates is unverified).
+- [ ] **Excel's `DAYS360` at the end of February** — the US method treats the last day of February at both ends as the 30th
+      (equal dates are 0 days apart); LibreOffice says -2 for 28 February to 28 February. The two rows are Excel-documented
+      and unverified (`functions/date-ext.ts`).
 - [x] **Math, trigonometry and statistics, batch A** — `SIN` to `ATANH`, `PI`,
       `RADIANS`, `DEGREES`, `FACT`, `FACTDOUBLE`, `COMBIN`, `PERMUT`, `SUMSQ`,
       `EVEN`, `ODD`, `ISEVEN`, `ISODD`, `CEILING.MATH`, `FLOOR.MATH`, `MAXIFS`,
@@ -122,5 +130,5 @@ alignment, wrap, rotation), number formats, hyperlinks, date-entry
 auto-detection, hide/show and insert/delete rows and columns, merged cells,
 multiple sheets, undo/redo, find & replace, autofill (numbers, dates,
 month/weekday name lists and text patterns), **CSV and XLSX import/export** (with Open/Download in the toolbar), the
-193-function formula engine with dynamic arrays, and formula autocomplete with
+211-function formula engine with dynamic arrays, and formula autocomplete with
 parameter help.

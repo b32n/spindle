@@ -1078,7 +1078,7 @@
           },
           "I63": {
             "formula": "=CLEAN(\"a\")",
-            "value": "#NAME? Function CLEAN not found"
+            "value": "a"
           },
           "I64": {
             "formula": "=EXACT(\"a\",\"a\")",
@@ -1146,7 +1146,7 @@
           },
           "I79": {
             "formula": "=YEARFRAC(DATE(2026,1,1),DATE(2026,7,1))",
-            "value": "#NAME? Function YEARFRAC not found"
+            "value": 0.5
           },
           "I8": {
             "formula": "=MOD(A2,3)",
