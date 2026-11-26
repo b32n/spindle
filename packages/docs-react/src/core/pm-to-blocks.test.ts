@@ -628,6 +628,19 @@ describe('proseMirrorToFlowBlocks: the revision view', () => {
     expect(first('markup').attrs?.changeBar).toBeDefined();
   });
 
+  it('lets go of the colours given for a conversion that threw, so the next conversion does not use them', () => {
+    const doc = () => j([{ type: 'paragraph', content: [text('a', [insertion])] }]);
+    class Throwing extends Map<string, string> {
+      get(): string | undefined {
+        throw new Error('colour lookup failed');
+      }
+    }
+    expect(() => proseMirrorToFlowBlocks(doc(), { authorColors: new Throwing([['Ada', '#112233']]) })).toThrow('colour lookup failed');
+    const run = (proseMirrorToFlowBlocks(doc())[0] as ParagraphBlock).runs[0] as TextRun;
+    expect(run.revision?.insertion?.color).toBe(assignAuthorColors(['Ada']).get('Ada'));
+    expect(run.revision?.insertion?.color).not.toBe('#112233');
+  });
+
   it('breaks lines at the line break of tracked text that a view shows, and nowhere in text a view leaves out', () => {
     const breaks = () => j([{ type: 'paragraph', content: [text('a\nb', [deletion]), text('c\nd', [insertion])] }]);
     const kinds = (view: 'markup' | 'final' | 'original') => (proseMirrorToFlowBlocks(breaks(), { revisionView: view })[0] as ParagraphBlock).runs.map((r) => (r.kind === 'text' ? r.text : r.kind));

@@ -297,23 +297,32 @@ edits, and the inverse operations broadcast to peers like any other edit.
   transaction; two people updating it at once is last-writer-wins on its entries.
 - **Tracked changes.** An insertion, deletion or formatting change is a ProseMirror mark (`insertion`, `deletion`,
   `formatChange`: revision id, author, date; a move's name; the formatting before) on the text, and a paragraph's or table
-  row's change is an attribute of the node, so they sync like other content and do not block attach. Two people editing inside the same change merge as for
-  text. Accepting or rejecting a change in the review panel is an ordinary edit (text deleted, marks removed, attributes set)
-  that syncs like any other; the coordination of two people settling the same change at once is not done yet (one of two
-  concurrent settlements wins, the same for everybody), and the Final / Original view is local to each client. A change in the
-  panel is found by its position, so a remote edit that moves it between rendering the panel and clicking Accept makes that click
-  do nothing (the panel shows the new list right after). A paragraph mark or row keeps one attribute per kind of
-  change (`revisionInsertion`, `revisionDeletion`, `revisionFormat`), each a Yjs key of its own, so two people suggesting
-  different things on the same paragraph mark or row at once (one presses Enter, the other deletes the mark) both keep
-  theirs, and each can be accepted or rejected alone. Two people suggesting the same kind on the same mark at once is
-  last-writer-wins on that attribute: one stays, the same on every client. Residual limit: when one person splits a paragraph
-  while another marks its mark, Yjs keeps the original element for the first half, so the other person's record lands on the
-  first half (next to the insertion that the split recorded there), not on the second half that holds the original mark;
-  accepted together the two cancel (the paragraphs are joined again), and each can still be rejected alone: rejecting the split joins the paragraphs and moves the other person's deletion record to the joined mark (the original one), where it is still open. The same happens outside collaboration when somebody deleted a mark that somebody else had inserted and the insertion is rejected: the deletion record cannot be told from the concurrent-split case, so it stays open on the joined mark. Pressing Enter in a paragraph that carries a record copies the record to both halves (ProseMirror copies a node's attributes on a split): both halves then show the same change, which is accepted or rejected as one. Text a person adds
-  to a change while someone else settles it is settled with it. Two people under one display name are one author, drawn in the
-  smallest of their cursor colours (the name is trimmed, as on a suggestion). A person in the room who has no change in the document keeps their cursor colour, which can equal the colour an author of a change was given from the palette, so two people can be drawn alike. A line break inside tracked text is a newline character in
-  the text (a marked `hard_break` node would lose its change, because marks sync on text only); the editor inserts that for
-  Shift+Enter in tracked text, and the DOCX reader makes the same.
+  row's change is an attribute of the node, so they sync like other content and do not block attach. Two people editing
+  inside the same change merge as for text; text a person adds to a change while someone else settles it is settled with it.
+  A line break inside tracked text is a newline character in the text (a marked `hard_break` node would lose its change,
+  because marks sync on text only); the editor inserts that for Shift+Enter in tracked text, and the DOCX reader makes the same.
+  - *Settling.* Accepting or rejecting a change in the review panel is an ordinary edit (text deleted, marks removed,
+    attributes set) that syncs like any other; the coordination of two people settling the same change at once is not done
+    yet (one of two concurrent settlements wins, the same for everybody), and the Final / Original view is local to each
+    client. A change in the panel is found by its position, so a remote edit that moves it between rendering the panel and
+    clicking Accept makes that click do nothing (the panel shows the new list right after).
+  - *Paragraph marks and rows.* A mark or row keeps one attribute per kind of change (`revisionInsertion`,
+    `revisionDeletion`, `revisionFormat`), each a Yjs key of its own, so two people suggesting different things on the same
+    paragraph mark or row at once (one presses Enter, the other deletes the mark) both keep theirs, and each can be accepted
+    or rejected alone. Two people suggesting the same kind on the same mark at once is last-writer-wins on that attribute:
+    one stays, the same on every client.
+  - *Concurrent split (residual limit).* When one person splits a paragraph while another marks its mark, Yjs keeps the
+    original element for the first half, so the other person's record lands on the first half (next to the insertion that the
+    split recorded there), not on the second half that holds the original mark. Accepted together the two cancel (the
+    paragraphs are joined again), and each can still be rejected alone: rejecting the split joins the paragraphs and moves the
+    other person's deletion record to the joined mark (the original one), where it is still open. The same happens outside
+    collaboration when somebody deleted a mark that somebody else had inserted and the insertion is rejected: the deletion
+    record cannot be told from the concurrent-split case, so it stays open on the joined mark. Pressing Enter in a paragraph
+    that carries a record copies the record to both halves (ProseMirror copies a node's attributes on a split): both halves
+    then show the same change, which is accepted or rejected as one.
+  - *Colours.* Two people under one display name are one author, drawn in the smallest of their cursor colours (the name is
+    trimmed, as on a suggestion). A person in the room who has no change in the document keeps their cursor colour, which can
+    equal the colour an author of a change was given from the palette, so two people can be drawn alike.
 - **Suggesting mode** records the local user's own edits only: changes that arrive from a collaborator, and undo and redo, are
   never turned into suggestions. A collaborator's suggestions are ordinary marks and attributes that sync as such, also when they
   were made offline. The author on a suggestion is the name the user joined the room under (`CollabIdentity.displayName`; comments still use the provider's `currentUser`), and

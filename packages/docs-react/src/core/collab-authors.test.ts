@@ -13,6 +13,9 @@ describe('suggestionAuthor', () => {
     expect(suggestionAuthor({ identity: { displayName: '' } } as never, 'Alice')).toBe('Alice');
     expect(suggestionAuthor({ identity: { displayName: '   ' } } as never, 'Alice')).toBe('Alice');
     expect(suggestionAuthor({ identity: { displayName: ' Ada ' } } as never, 'Alice')).toBe('Ada');
+    // Never an empty author: it would be written as w:author="" and shared with the next blank author.
+    expect(suggestionAuthor({ identity: { displayName: ' ' } } as never, '')).toBe('Unknown');
+    expect(suggestionAuthor(null, '  ')).toBe('Unknown');
   });
 });
 
