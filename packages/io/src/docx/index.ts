@@ -17,6 +17,7 @@ export type {
   DocContentControlItem,
   DocContentControlRun,
   DocContentControlType,
+  DocNoteRefRun,
   DocFieldRun,
   DocInline,
   DocParagraphStyle,

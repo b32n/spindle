@@ -287,9 +287,13 @@ edits, and the inverse operations broadcast to peers like any other edit.
   syncs like any other content and does not block attach. Concurrent edits merge as
   for text and attributes (two people toggling the same check box is
   last-writer-wins). A control's lock is not enforced against a collaborator.
+- **Footnotes and endnotes.** A note reference is a ProseMirror node holding the
+  text of its note (`note_ref`), so it syncs like other content and does not block
+  attach. The notes area is drawn from the references, not stored. The note text is
+  not edited in place yet.
 - **Mixed-version rooms.** Rooms record a `schemaVersion` (a missing value means
   1, the layout without section breaks; 2 adds section breaks; 3 adds content
-  controls). A client that finds a newer version
+  controls; 4 adds footnote and endnote references). A client that finds a newer version
   than it supports rejects `attachCollab` with a `CollabSchemaVersionError`
   instead of editing a document whose newer nodes it would drop. Clients from
   before this check have no such guard: do not open a multi-section room with

@@ -391,6 +391,20 @@ const NODE_SAMPLES: Record<string, Json[]> = {
       { type: 'content_control_inline', attrs: { controlType: 'comboBox', items: [{ text: 'a', value: 'b' }] }, content: [{ type: 'content_control_inline', attrs: { controlType: 'richText' }, content: [t('nested')] }] },
     ]),
   ],
+  // Note references hold the text of the note, with formatting, a link, a line break, an image, a bookmark and a field.
+  note_ref: [
+    p([
+      t('claim'),
+      {
+        type: 'note_ref',
+        attrs: { kind: 'footnote', noteId: '7' },
+        content: [t('See '), t('page 4', [{ type: 'bold' }]), t(' at '), t('link', [{ type: 'link', attrs: { href: 'https://example.com/n', title: null, target: '_blank' } }]), { type: 'hard_break' }, t('and more')],
+      },
+      t(' and'),
+      { type: 'note_ref', attrs: { kind: 'endnote', noteId: '1', customMark: '*' }, content: [{ type: 'inline_image', attrs: { src: 'data:image/png;base64,QQ==', width: 10, height: 10, alt: 'i' } }, { type: 'bookmark', attrs: { name: 'nb' } }, { type: 'field', attrs: { instruction: 'REF x', kind: 'REF', result: 'x', dirty: false } }] },
+      { type: 'note_ref', attrs: { kind: 'footnote', noteId: '8' }, content: [] },
+    ]),
+  ],
   dynamic_field: [p([{ type: 'dynamic_field', attrs: { fieldType: 'date', format: 'YYYY' } }, t(' / '), { type: 'dynamic_field', attrs: { fieldType: 'pageNumber' } }])],
 };
 

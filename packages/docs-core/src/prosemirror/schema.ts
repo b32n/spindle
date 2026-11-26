@@ -402,6 +402,33 @@ const nodes: Record<string, NodeSpec> = {
     toDOM: (node) => contentControlDom(node.attrs, 'span'),
   },
 
+  // A reference to a footnote or endnote. The note's text is its content, which the editor never edits in place: the node
+  // is an atom (a single unit for the caret) drawn as the note's number, and the text is shown in the notes area. Only the
+  // inline content a note can hold is allowed, so notes do not nest.
+  note_ref: {
+    inline: true,
+    group: 'inline',
+    atom: true,
+    selectable: true,
+    content: '(text | hard_break | inline_image | bookmark | field | dynamic_field)*',
+    attrs: { kind: { default: 'footnote' }, noteId: { default: '' }, customMark: { default: null } },
+    parseDOM: [
+      {
+        tag: 'sup[data-note-ref]',
+        getAttrs(dom: HTMLElement) {
+          const kind = dom.getAttribute('data-note-ref');
+          if (kind !== 'footnote' && kind !== 'endnote') return false;
+          return { kind, noteId: dom.getAttribute('data-note-id') || '', customMark: dom.getAttribute('data-custom-mark') };
+        },
+      },
+    ],
+    toDOM(node): DOMOutputSpec {
+      const attrs: Record<string, string> = { class: 'note-ref', 'data-note-ref': node.attrs.kind === 'endnote' ? 'endnote' : 'footnote', 'data-note-id': String(node.attrs.noteId ?? '') };
+      if (typeof node.attrs.customMark === 'string' && node.attrs.customMark) attrs['data-custom-mark'] = node.attrs.customMark;
+      return ['sup', attrs, 0];
+    },
+  },
+
   hard_break: {
     inline: true,
     group: 'inline',

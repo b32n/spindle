@@ -350,6 +350,8 @@ function toInline(item: InlineContent, title: string, pool: Record<string, TextS
       return { type: 'bookmark', name: item.name };
     case 'contentControl':
       return { type: 'contentControl', control: copyControl(item.control), content: toInlineContent(item.content, title, pool) };
+    case 'noteRef':
+      return { type: 'noteRef', kind: item.kind, id: item.id, content: toInlineContent(item.content, title, pool), ...(item.customMark && { customMark: item.customMark }) };
   }
 }
 
@@ -777,6 +779,8 @@ function toInlineFromDocx(item: DocInline, textStylePool: TextStylePoolImpl): In
       return { type: 'bookmark', name: item.name };
     case 'contentControl':
       return { type: 'contentControl', control: copyControl(item.control), content: toInlineContentFromDocx(item.content, textStylePool) };
+    case 'noteRef':
+      return { type: 'noteRef', kind: item.kind, id: item.id, content: toInlineContentFromDocx(item.content, textStylePool), ...(item.customMark && { customMark: item.customMark }) };
   }
 }
 
@@ -830,6 +834,7 @@ function toHeaderFooterInlineFromDocx(item: DocInline): HeaderFooterInlineConten
     case 'field':
     case 'bookmark':
     case 'contentControl':
+    case 'noteRef':
       return null;
   }
 }

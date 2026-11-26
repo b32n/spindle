@@ -234,6 +234,27 @@ lockstep.
   display as plain text (it was dropped, with a warning). The form behaviour is still lost and is reported as
   `docx.legacyForms`.
 
+- **DOCX footnotes and endnotes are imported, shown and written back.** A footnote or endnote reference becomes
+  an inline reference that holds the text of its note (formatting, links, pictures, line breaks and fields), with the
+  note's custom mark if it has one; the note parts (`footnotes.xml`, `endnotes.xml`, their relationships and the
+  separator settings) are written on export, with Word's separator notes. Additive interchange type `DocNoteRefRun`
+  (a `DocInline` member, `type: 'noteRef'`) and, in docs-core, `InlineNoteRef` (inline content `'noteRef'`). A note of
+  several paragraphs is read as one paragraph with line breaks between them, and a table, list or picture-only structure
+  in a note is not kept (reported as a warning for tables). Widening these unions can break a host's exhaustive `switch`
+  at compile time. The loss report no longer counts the notes it imports: `docx.footnotes` and `docx.endnotes` now only
+  count notes that nothing in the body refers to (or whose only reference is in a text box), and notes in a part that
+  cannot be read.
+- **Note references in the ProseMirror document and in collaboration.** `docsSchema` gains an inline atom `note_ref`
+  (attributes `kind`, `noteId`, `customMark`) whose content is the note's text (only content a note can hold, so notes
+  do not nest). It is a plain ProseMirror node, so it syncs over Yjs and `getCollabBlockers` knows it. The collaboration
+  `schemaVersion` (`COLLAB_SCHEMA_VERSION`) is now 4: a client from before this change refuses to join a room written
+  with it, and rooms written before it need no migration.
+- **Editor: notes area.** A reference is drawn as its number, a superscript (digits for footnotes, lower-case roman
+  numerals for endnotes, numbered per kind in document order, or the custom mark). The notes are collected in an area at the
+  end of each section, footnotes first and then endnotes, drawn in the page flow after the section's last block;
+  clicking a reference scrolls to its note and clicking a note goes back to its reference. The area is read-only for
+  now: notes are not yet inserted or edited in the editor, and are not laid out at the bottom of each page.
+
 ### Changed
 
 - **DOCX loss report: `docx.contentControls` counts only what is still lost** (repeating sections, data-bound, equation,

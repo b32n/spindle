@@ -1594,6 +1594,19 @@
                 "styleId": "text-style-1",
                 "text": "Full dataset",
                 "type": "link"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Figures are provisional until the audit closes.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-1",
+                "kind": "footnote",
+                "type": "noteRef"
               }
             ],
             "id": "block-41",

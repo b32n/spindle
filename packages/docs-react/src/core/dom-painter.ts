@@ -19,6 +19,7 @@ import {
   TableCell,
   ImageBlock,
   isRunContainingBlock,
+  noteKeyString,
 } from './flow-blocks';
 import { tableCellPlaces, cellBorderCss, cellLayoutCss, cellListIndent, cellListMarker } from './table-format';
 import { Measure, hasLineData, LineMeasure } from './measurer';
@@ -908,6 +909,7 @@ export class DomPainter {
     
     const para = document.createElement('p');
     para.className = 'paragraph-fragment';
+    if (block.noteTarget) para.dataset.noteTarget = noteKeyString(block.noteTarget);
     
     // Get paragraph styles
     const attrs = block.attrs || {};
@@ -1596,6 +1598,11 @@ export class DomPainter {
    * it shows placeholder text, and for a check box a pointer cursor and an attribute the click handler keys off.
    */
   private applyControlDecoration(el: HTMLElement, run: Run): void {
+    // The number of a note reference (or of a note in the notes area) is a button that goes to the other end.
+    if (run.kind === 'text' && run.noteRef) {
+      el.dataset.noteRef = noteKeyString(run.noteRef);
+      el.style.cursor = 'pointer';
+    }
     if ((run.kind !== 'text' && run.kind !== 'link') || !run.control) return;
     const { control } = run;
     el.dataset.contentControl = control.title;

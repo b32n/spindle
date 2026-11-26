@@ -2,12 +2,6 @@
   "format": "docx",
   "items": [
     {
-      "count": 6,
-      "effect": "not imported",
-      "id": "docx.endnotes",
-      "label": "endnote(s)"
-    },
-    {
       "count": 1,
       "effect": "tables of contents and indexes are kept as static text",
       "id": "docx.fields",
@@ -15,12 +9,6 @@
       "where": [
         "TOC ×1"
       ]
-    },
-    {
-      "count": 10,
-      "effect": "not imported",
-      "id": "docx.footnotes",
-      "label": "footnote(s)"
     }
   ]
 }

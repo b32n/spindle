@@ -1966,16 +1966,55 @@
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Source: the harbour master's annual ledger, table 4.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-1",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " A second claim needs support too.",
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Compare the 2019 survey, which counted vessels rather than tonnes.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-2",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " The third claim is contested",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Disputed by the grain exchange; see their memorandum of March.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-3",
+                "kind": "endnote",
+                "type": "noteRef"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -2003,10 +2042,85 @@
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "A longer note.",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "italic": true,
+                    "text": " With ",
+                    "type": "text"
+                  },
+                  {
+                    "bold": true,
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "bold",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": " text and a link: ",
+                    "type": "text"
+                  },
+                  {
+                    "href": "https://example.org/ledger",
+                    "styleId": "text-style-3",
+                    "text": "example.org/ledger",
+                    "type": "link"
+                  },
+                  {
+                    "text": "\n",
+                    "type": "text"
+                  },
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Second paragraph inside the same footnote.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-4",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " And an endnote right after it.",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Endnotes are collected at the end of the document.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-5",
+                "kind": "endnote",
+                "type": "noteRef"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "A second endnote with a different tone.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-6",
+                "kind": "endnote",
+                "type": "noteRef"
               }
             ],
             "id": "block-56",
@@ -2066,6 +2180,19 @@
                         "fontSize": 11,
                         "text": "Cell with note",
                         "type": "text"
+                      },
+                      {
+                        "content": [
+                          {
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 10,
+                            "text": "Footnote anchored inside a table cell.",
+                            "type": "text"
+                          }
+                        ],
+                        "id": "id-7",
+                        "kind": "footnote",
+                        "type": "noteRef"
                       }
                     ],
                     "id": "cell-1"
@@ -2110,10 +2237,36 @@
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Supporting remark number 1: The grain exchange audited three disputed boundary stones while the market was closed.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-8",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Endnote 1: Local fishing crews inspected an index of local pilots as the tide turned.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-9",
+                "kind": "endnote",
+                "type": "noteRef"
               }
             ],
             "id": "block-59",
@@ -2133,6 +2286,19 @@
                 "fontSize": 11,
                 "text": "A visiting engineer rebuilt every outstanding repair order while the market was closed. A visiting engineer approved an index of local pilots according to the standing orders. ",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Supporting remark number 2: The tide almanac reorganised the eastern jetty in the presence of two witnesses.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-10",
+                "kind": "footnote",
+                "type": "noteRef"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -2160,10 +2326,36 @@
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Supporting remark number 3: Our records office mapped the dredging contract according to the standing orders.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-11",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Endnote 3: The tide almanac approved every outstanding repair order according to the standing orders.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-12",
+                "kind": "endnote",
+                "type": "noteRef"
               }
             ],
             "id": "block-61",
@@ -2183,6 +2375,19 @@
                 "fontSize": 11,
                 "text": "The northern ferry service inspected a ledger of unpaid berth fees as the tide turned. The grain exchange approved the fog-signal schedule after several rounds of discussion. ",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Supporting remark number 4: Every lighthouse keeper relocated two dozen mooring rings after several rounds of discussion.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-13",
+                "kind": "footnote",
+                "type": "noteRef"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -2210,10 +2415,36 @@
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Supporting remark number 5: A junior surveyor repainted the ferry timetable during the long spring inspection.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-14",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": " Closing words of paragraph.",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Endnote 5: Every lighthouse keeper recorded a ledger of unpaid berth fees to the satisfaction of nobody in particular.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-15",
+                "kind": "endnote",
+                "type": "noteRef"
               }
             ],
             "id": "block-63",
@@ -2233,6 +2464,19 @@
                 "fontSize": 11,
                 "text": "The harbour committee documented the sluice gate mechanism according to the standing orders. The grain exchange approved the sluice gate mechanism to the satisfaction of nobody in particular. ",
                 "type": "text"
+              },
+              {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Supporting remark number 6: The regional council rebuilt the lamp oil inventory with unusual care.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-16",
+                "kind": "footnote",
+                "type": "noteRef"
               },
               {
                 "fontFamily": "Liberation Sans",
@@ -2935,6 +3179,19 @@
                 "type": "text"
               },
               {
+                "content": [
+                  {
+                    "fontFamily": "Liberation Sans",
+                    "fontSize": 10,
+                    "text": "Footnote reference inside a comment range.",
+                    "type": "text"
+                  }
+                ],
+                "id": "id-17",
+                "kind": "footnote",
+                "type": "noteRef"
+              },
+              {
                 "fontFamily": "Liberation Sans",
                 "fontSize": 11,
                 "text": ".",
@@ -3074,6 +3331,19 @@
                         "fontSize": 11,
                         "text": "note",
                         "type": "text"
+                      },
+                      {
+                        "content": [
+                          {
+                            "fontFamily": "Liberation Sans",
+                            "fontSize": 10,
+                            "text": "Footnote inside a table with revisions.",
+                            "type": "text"
+                          }
+                        ],
+                        "id": "id-18",
+                        "kind": "footnote",
+                        "type": "noteRef"
                       }
                     ],
                     "id": "cell-8"
@@ -10885,6 +11155,12 @@
       "text-style-2": {
         "fontFamily": "Liberation Sans",
         "fontSize": 11
+      },
+      "text-style-3": {
+        "color": "#0563c1",
+        "fontFamily": "Liberation Sans",
+        "fontSize": 10,
+        "underline": true
       }
     },
     "threads": [

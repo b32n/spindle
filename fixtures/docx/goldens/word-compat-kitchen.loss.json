@@ -41,12 +41,6 @@
       "label": "floating image(s)"
     },
     {
-      "count": 1,
-      "effect": "not imported",
-      "id": "docx.footnotes",
-      "label": "footnote(s)"
-    },
-    {
       "count": 3,
       "effect": "their displayed text is kept as plain text; the form field (checkbox state, list, text limits) is lost",
       "id": "docx.legacyForms",

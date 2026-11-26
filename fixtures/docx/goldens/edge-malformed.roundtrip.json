@@ -8,7 +8,7 @@
         "table": 1
       },
       "sections": 1,
-      "textChars": 565
+      "textChars": 580
     },
     "before": {
       "blocks": {
@@ -17,7 +17,7 @@
         "table": 1
       },
       "sections": 1,
-      "textChars": 565
+      "textChars": 580
     },
     "byField": {
       "added sections[].blocks[].content[].style": 1
