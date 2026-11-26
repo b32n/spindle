@@ -36,18 +36,6 @@
       "effect": "kept in the document and exported, but the editor shows and edits only the first section",
       "id": "docx.sections",
       "label": "extra section(s)"
-    },
-    {
-      "count": 12,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "repeating header rows ×12",
-        "shading ×12",
-        "table style ×12",
-        "widths ×12"
-      ]
     }
   ]
 }

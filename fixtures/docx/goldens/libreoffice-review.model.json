@@ -102,6 +102,38 @@
           "italic": true
         }
       },
+      "TableGrid": {
+        "basedOn": "TableNormal",
+        "kind": "table",
+        "name": "Table Grid",
+        "table": {
+          "borders": {
+            "bottom": {
+              "style": "single"
+            },
+            "insideH": {
+              "style": "single"
+            },
+            "insideV": {
+              "style": "single"
+            },
+            "left": {
+              "style": "single"
+            },
+            "right": {
+              "style": "single"
+            },
+            "top": {
+              "style": "single"
+            }
+          }
+        }
+      },
+      "TableNormal": {
+        "isDefault": true,
+        "kind": "table",
+        "name": "Normal Table"
+      },
       "Title": {
         "basedOn": "Normal",
         "kind": "paragraph",
@@ -376,11 +408,48 @@
             "type": "paragraph"
           },
           {
+            "borders": {
+              "bottom": {
+                "style": "single"
+              },
+              "insideH": {
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "style": "single"
+              }
+            },
+            "colWidths": [
+              200,
+              199.93
+            ],
             "id": "block-10",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "TableGrid",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "bold": true,
@@ -393,6 +462,10 @@
                     "id": "cell-1"
                   },
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      199.93
+                    ],
                     "content": [
                       {
                         "bold": true,
@@ -405,11 +478,15 @@
                     "id": "cell-2"
                   }
                 ],
-                "id": "row-1"
+                "id": "row-1",
+                "repeatHeader": true
               },
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -421,6 +498,9 @@
                     "id": "cell-3"
                   },
                   {
+                    "colwidth": [
+                      199.93
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -437,6 +517,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -448,6 +531,9 @@
                     "id": "cell-5"
                   },
                   {
+                    "colwidth": [
+                      199.93
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",

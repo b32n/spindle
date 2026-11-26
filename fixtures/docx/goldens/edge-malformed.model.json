@@ -133,11 +133,27 @@
             "type": "paragraph"
           },
           {
+            "borders": {},
+            "colWidths": [
+              100,
+              100
+            ],
             "id": "block-10",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
             "rows": [
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      100
+                    ],
                     "content": [
                       {
                         "text": "a",
@@ -147,6 +163,9 @@
                     "id": "cell-1"
                   },
                   {
+                    "colwidth": [
+                      100
+                    ],
                     "content": [
                       {
                         "text": "b",
@@ -156,6 +175,9 @@
                     "id": "cell-2"
                   },
                   {
+                    "colwidth": [
+                      100
+                    ],
                     "content": [
                       {
                         "text": "c-extra",
@@ -170,6 +192,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      100
+                    ],
                     "content": [
                       {
                         "text": "d",

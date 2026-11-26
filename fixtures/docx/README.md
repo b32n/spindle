@@ -14,7 +14,7 @@ snapshots under [`goldens/`](./goldens):
 | Snapshot | Contents |
 |---|---|
 | `<id>.model.json` | The imported docs-core model (generated ids normalized to `block-1`, `row-1`, `cell-1`, ... and style-pool keys to `text-style-N` / `paragraph-style-N`; image data URLs replaced by a digest), the import warnings, and `importError` when `importFromDocx` throws. |
-| `<id>.loss.json` | The import-loss report (`inspectDocx(bytes, { detail: 'full' })`): what the importer does not bring across, by loss id and count, including the formatting/structure ids (table formatting, tabs and breaks, sections, bookmarks…) and a per-kind `where` breakdown for fields. The default `detail: 'summary'` report, which drives the import-confirmation dialog, is narrower. |
+| `<id>.loss.json` | The import-loss report (`inspectDocx(bytes, { detail: 'full' })`): what the importer does not bring across, by loss id and count, including the formatting/structure ids (table structure, tabs and breaks, sections, bookmarks…) and a per-kind `where` breakdown for fields. The default `detail: 'summary'` report, which drives the import-confirmation dialog, is narrower. |
 | `<id>.roundtrip.json` | Import -> `exportToDocx` -> import again, then a structured diff of the two normalized models: totals, per-field counts, block/text counts before and after, and the first differences. |
 
 Round-trip diffs and losses are **expected** to be non-empty today. CI fails only when a snapshot
@@ -74,6 +74,13 @@ result, and the remaining `Unsupported field code` warnings are fields in header
 Bookmarks (`fields.bookmarks`) are imported as named positions and `w:hyperlink w:anchor` as `#name` links, so the loss goldens
 no longer report `docx.bookmarks`; the `model.json` goldens show `bookmark` items (one per bookmark in the source, `_GoBack`
 aside) and `href: "#name"` links, and a hyperlink wrapped around a `PAGEREF` field keeps only the field.
+
+Table formatting (`tables.borders`, `tables.shading`, `tables.headerRow`, table styles) is imported, so the loss goldens no longer
+report `docx.tableFormatting`; the `model.json` goldens show `borders`, `look` and `namedStyleId` on tables, `borders`,
+`backgroundColor`, `verticalAlign` and `colwidth` on cells (a table style's conditional formatting already applied: the shaded
+header and banded rows of `tables-advanced`), `repeatHeader` on rows, and the table styles under `namedStyles`. The round trip of
+`edge-odd-valid` shows two added entries (`colWidths` and one cell `colwidth`) for its table with an empty grid, which the writer
+gives a derived grid.
 
 When an importer change shrinks a loss or alters the model, the goldens will fail. Re-run with
 `docs:docx-fidelity:update`, read the diff, and commit the new goldens in the same PR as the importer

@@ -14,16 +14,6 @@
       "label": "content control(s)"
     },
     {
-      "count": 3,
-      "effect": "the formatting is dropped",
-      "id": "docx.tableFormatting",
-      "label": "table(s) with borders, shading, widths, header rows or styles",
-      "where": [
-        "table style ×3",
-        "widths ×3"
-      ]
-    },
-    {
       "count": 1,
       "effect": "their text is not imported",
       "id": "docx.textBoxes",

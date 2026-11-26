@@ -96,6 +96,38 @@
           "italic": true
         }
       },
+      "TableGrid": {
+        "basedOn": "TableNormal",
+        "kind": "table",
+        "name": "Table Grid",
+        "table": {
+          "borders": {
+            "bottom": {
+              "style": "single"
+            },
+            "insideH": {
+              "style": "single"
+            },
+            "insideV": {
+              "style": "single"
+            },
+            "left": {
+              "style": "single"
+            },
+            "right": {
+              "style": "single"
+            },
+            "top": {
+              "style": "single"
+            }
+          }
+        }
+      },
+      "TableNormal": {
+        "isDefault": true,
+        "kind": "table",
+        "name": "Normal Table"
+      },
       "Title": {
         "basedOn": "Normal",
         "kind": "paragraph",
@@ -426,11 +458,48 @@
             "type": "list-item"
           },
           {
+            "borders": {
+              "bottom": {
+                "style": "single"
+              },
+              "insideH": {
+                "style": "single"
+              },
+              "insideV": {
+                "style": "single"
+              },
+              "left": {
+                "style": "single"
+              },
+              "right": {
+                "style": "single"
+              },
+              "top": {
+                "style": "single"
+              }
+            },
+            "colWidths": [
+              200,
+              200
+            ],
             "id": "block-12",
+            "look": {
+              "firstColumn": true,
+              "firstRow": true,
+              "lastColumn": false,
+              "lastRow": false,
+              "noHBand": false,
+              "noVBand": true
+            },
+            "namedStyleId": "TableGrid",
             "rows": [
               {
                 "cells": [
                   {
+                    "backgroundColor": "#d9e2f3",
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -442,6 +511,9 @@
                     "id": "cell-1"
                   },
                   {
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -458,6 +530,9 @@
               {
                 "cells": [
                   {
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",
@@ -469,6 +544,9 @@
                     "id": "cell-3"
                   },
                   {
+                    "colwidth": [
+                      200
+                    ],
                     "content": [
                       {
                         "fontFamily": "Liberation Sans",

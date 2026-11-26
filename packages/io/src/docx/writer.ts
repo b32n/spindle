@@ -1,6 +1,7 @@
 import {
   AlignmentType,
   Bookmark,
+  BorderStyle,
   BuilderElement,
   CommentRangeEnd,
   CommentRangeStart,
@@ -27,11 +28,16 @@ import {
   TextRun,
   UnderlineType,
   WidthType,
+  type IBorderOptions,
   type IRunOptions,
+  type ITableBordersOptions,
+  type ITableCellBorders,
   type ParagraphChild,
 } from 'docx';
 import type {
   DocBlock,
+  DocBorder,
+  DocBorders,
   DocHeaderFooter,
   DocHeaderFooterParagraph,
   DocFieldRun,
@@ -40,7 +46,6 @@ import type {
   DocParagraphStyle,
   DocRunBase,
   DocSection,
-  DocTableRow,
   DocumentExportInput,
   DocumentExportResult,
 } from '@b32nio/spindle-shared/export/docx';
@@ -56,6 +61,37 @@ const PT_TO_HALF_POINTS = 2;
 
 function pxToTwips(px: number): number {
   return Math.round(px * PX_TO_TWIPS);
+}
+
+const BORDER_STYLES = { single: BorderStyle.SINGLE, double: BorderStyle.DOUBLE, dashed: BorderStyle.DASHED, dotted: BorderStyle.DOTTED, none: BorderStyle.NONE } as const;
+
+function borderOptions(border: DocBorder | undefined): IBorderOptions {
+  if (!border || border.style === 'none') return { style: BorderStyle.NONE, size: 0, color: 'auto' };
+  // `w:sz` is in eighths of a point (a pixel is 6); Word's range is 2 to 96.
+  const size = Math.min(96, Math.max(2, Math.round((border.widthPx ?? 1) * 6)));
+  return { style: BORDER_STYLES[border.style], size, color: border.color ? border.color.replace('#', '').toUpperCase() : 'auto' };
+}
+
+/** A cell lists only the sides it sets (the rest come from the table). */
+function cellBorders(b: DocBorders): ITableCellBorders {
+  return {
+    ...(b.top && { top: borderOptions(b.top) }),
+    ...(b.left && { left: borderOptions(b.left) }),
+    ...(b.bottom && { bottom: borderOptions(b.bottom) }),
+    ...(b.right && { right: borderOptions(b.right) }),
+  };
+}
+
+/** A table that has `borders` has exactly those lines: a side it does not list has none (the table's style borders are already in them). */
+function tableBorders(b: DocBorders): ITableBordersOptions {
+  return {
+    top: borderOptions(b.top),
+    left: borderOptions(b.left),
+    bottom: borderOptions(b.bottom),
+    right: borderOptions(b.right),
+    insideHorizontal: borderOptions(b.insideH),
+    insideVertical: borderOptions(b.insideV),
+  };
 }
 
 function ptToTwips(pt: number): number {
@@ -380,7 +416,7 @@ class DocxBuilder {
           numbering: this.listNumbering(block),
         });
       case 'table':
-        return this.buildTable(block.rows, block.colWidthsPx);
+        return this.buildTable(block);
       case 'image': {
         const run = this.buildImage(block.src, block.width, block.height, block.alt);
         return this.buildParagraph(
@@ -398,24 +434,36 @@ class DocxBuilder {
     }
   }
 
-  private buildTable(rows: DocTableRow[], colWidthsPx: number[] | undefined): Table {
+  private buildTable(block: Extract<DocBlock, { type: 'table' }>): Table {
+    const { rows, colWidthsPx } = block;
     const tableRows = rows.map(
       (row) =>
         new TableRow({
-          children: row.cells.map(
-            (cell) =>
-              new TableCell({
-                children: [this.buildParagraph({}, this.buildRuns(cell.content))],
-                columnSpan: cell.colspan && cell.colspan > 1 ? cell.colspan : undefined,
-                rowSpan: cell.rowspan && cell.rowspan > 1 ? cell.rowspan : undefined,
-              })
-          ),
+          ...(row.repeatHeader && { tableHeader: true }),
+          ...(row.cantSplit && { cantSplit: true }),
+          children: row.cells.map((cell) => {
+            const widthPx = cell.colwidthPx?.reduce((sum, w) => sum + w, 0);
+            return new TableCell({
+              children: [this.buildParagraph({}, this.buildRuns(cell.content))],
+              columnSpan: cell.colspan && cell.colspan > 1 ? cell.colspan : undefined,
+              rowSpan: cell.rowspan && cell.rowspan > 1 ? cell.rowspan : undefined,
+              ...(cell.backgroundColor && { shading: { type: ShadingType.CLEAR, color: 'auto', fill: cell.backgroundColor.replace('#', '').toUpperCase() } }),
+              ...(cell.borders && { borders: cellBorders(cell.borders) }),
+              ...(cell.verticalAlign && { verticalAlign: cell.verticalAlign }),
+              ...(widthPx && widthPx > 0 && { width: { size: pxToTwips(widthPx), type: WidthType.DXA } }),
+            });
+          }),
         })
     );
+    const style = this.namedStyle(block.namedStyleId, 'table');
+    const look = block.look;
     return new Table({
       rows: tableRows,
       columnWidths: colWidthsPx?.map(pxToTwips),
-      width: { size: 100, type: WidthType.PERCENTAGE },
+      width: colWidthsPx && colWidthsPx.length > 0 ? { size: pxToTwips(colWidthsPx.reduce((sum, w) => sum + w, 0)), type: WidthType.DXA } : { size: 100, type: WidthType.PERCENTAGE },
+      ...(style && { style }),
+      ...(block.borders && { borders: tableBorders(block.borders) }),
+      ...(look && { tableLook: { firstRow: !!look.firstRow, lastRow: !!look.lastRow, firstColumn: !!look.firstColumn, lastColumn: !!look.lastColumn, noHBand: !!look.noHBand, noVBand: !!look.noVBand } }),
     });
   }
 

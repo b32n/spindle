@@ -133,6 +133,23 @@ export interface ListItemBlock {
   listIndex?: number;
 }
 
+/** One border line of a table or cell (see docs-core `TableBorder`). */
+export interface TableBorder {
+  style: 'single' | 'double' | 'dashed' | 'dotted' | 'none';
+  widthPx?: number;
+  color?: string;
+}
+
+/** Borders of a table or cell (see docs-core `TableBorders`). */
+export interface TableBorders {
+  top?: TableBorder;
+  right?: TableBorder;
+  bottom?: TableBorder;
+  left?: TableBorder;
+  insideH?: TableBorder;
+  insideV?: TableBorder;
+}
+
 /**
  * A table cell
  */
@@ -149,6 +166,9 @@ export interface TableCell {
   pmEnd?: number;
   /** Background color (e.g., "#ff0000" or "rgba(255,0,0,0.5)") */
   backgroundColor?: string;
+  /** The cell's own borders; sides not listed take the table's line. */
+  borders?: TableBorders;
+  verticalAlign?: 'top' | 'center' | 'bottom';
 }
 
 /**
@@ -158,6 +178,8 @@ export interface TableRow {
   id: string;
   cells: TableCell[];
   height?: number;
+  repeatHeader?: boolean;
+  cantSplit?: boolean;
 }
 
 /**
@@ -168,6 +190,8 @@ export interface TableBlock {
   id: string;
   rows: TableRow[];
   colWidths?: number[];
+  /** Borders of the table; absent for the default grid, `{}` for no lines. */
+  borders?: TableBorders;
 }
 
 /**

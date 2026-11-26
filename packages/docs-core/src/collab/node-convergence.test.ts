@@ -270,6 +270,23 @@ const NODE_SAMPLES: Record<string, Json[]> = {
   table: [
     {
       type: 'table',
+      attrs: {
+        colWidths: [100, 60],
+        borders: { top: { style: 'double', widthPx: 2, color: '#ff0000' }, insideH: { style: 'none' } },
+        look: { firstRow: true, noVBand: true },
+        namedStyleId: 'Banded',
+      },
+      content: [
+        {
+          type: 'table_row',
+          content: [
+            { type: 'table_cell', attrs: { borders: { bottom: { style: 'dashed' } }, verticalAlign: 'center', colwidth: [100] }, content: [p([t('c')])] },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'table',
       attrs: { colWidths: [100, 60], styleId: 'ts' },
       content: [
         {
@@ -283,6 +300,12 @@ const NODE_SAMPLES: Record<string, Json[]> = {
     },
   ],
   table_row: [
+    {
+      type: 'table',
+      content: [
+        { type: 'table_row', attrs: { height: null, repeatHeader: true, cantSplit: true }, content: [{ type: 'table_cell', content: [p([t('r')])] }] },
+      ],
+    },
     {
       type: 'table',
       content: [

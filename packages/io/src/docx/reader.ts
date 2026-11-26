@@ -8,6 +8,8 @@ import type {
   DocParagraphStyle,
   DocSection,
   DocTextRun,
+  DocBorders,
+  DocRunBase,
   DocTableRow,
   DocumentImportResult,
 } from '@b32nio/spindle-shared/export/docx';
@@ -16,7 +18,8 @@ import { createCommentTracker, parseComments, type CommentTracker } from './comm
 import { drawingKind, type DrawingKind } from './drawing-kind';
 import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './numbering';
 import { parsePPr, StyleSheet, toDocParagraphStyle } from './styles';
-import { parseTheme } from './theme';
+import { applicableParts, parseBorders, parseLook, parseShading, parseVAlign, pxFromTwips } from './table-props';
+import { parseTheme, type Theme } from './theme';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
 /** Depth-first concatenation of every #text leaf under a node (a run's <w:t>, a field's cached-result text, ...). */
@@ -54,6 +57,10 @@ interface PartContext {
   rels: Map<string, string>;
   media: Map<string, string>;
   styles: StyleSheet;
+  /** The theme, for the colours of table borders and shading. */
+  theme?: Theme;
+  /** Text properties of the table style that reach the cell being read (under the paragraph and run formatting). */
+  tableText?: DocRunBase;
   /** Follows list numbering through the body (absent for headers/footers). */
   lists?: ListCounter;
   /** Comment ranges open at the current position of the body walk (absent for headers/footers). */
@@ -173,7 +180,7 @@ function paragraphInlineContent(pNode: XmlNode, ctx: PartContext, warnings: stri
     // `Hyperlink` on a link is Word's implicit link style, which the writer applies to every link again.
     const characterStyle = ctx.styles.namedCharacterStyle(rStyleEl ? attrsOf(rStyleEl)['@_w:val'] : undefined);
     const namedStyleId = target && characterStyle === 'Hyperlink' ? undefined : characterStyle;
-    const props = { ...ctx.styles.run(rPr, pStyleId), ...(namedStyleId && { namedStyleId }) };
+    const props = { ...ctx.styles.run(rPr, pStyleId, ctx.tableText), ...(namedStyleId && { namedStyleId }) };
     let text = '';
     const flush = () => {
       if (!text) return;
@@ -602,31 +609,77 @@ function parseParagraph(
 // Tables
 // ---------------------------------------------------------------------------
 
+const isOnEl = (el: XmlNode | undefined): boolean => {
+  if (!el) return false;
+  const v = attrsOf(el)['@_w:val'];
+  return !(v === '0' || v === 'false' || v === 'off');
+};
+
+const gridWidthPx = (el: XmlNode | undefined): number | undefined => {
+  const w = el ? Number(attrsOf(el)['@_w:w']) : NaN;
+  return Number.isFinite(w) && w > 0 ? pxFromTwips(w) : undefined;
+};
+
 function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): DocBlock {
+  const tblKids = childrenOf(tblNode);
+  const tblPr = find(tblKids, 'w:tblPr');
+  const tblPrKids = tblPr ? childrenOf(tblPr) : [];
+  const styleEl = find(tblPrKids, 'w:tblStyle');
+  const styleId = styleEl ? attrsOf(styleEl)['@_w:val'] : undefined;
+  const style = ctx.styles.tableStyle(styleId);
+  const namedStyleId = ctx.styles.namedTableStyle(styleId);
+  const look = parseLook(find(tblPrKids, 'w:tblLook'));
+  // A table with no border line anywhere has `borders: {}` (the model's way of saying "no lines"), unlike an
+  // editor-made table, which has none set and shows the default grid.
+  // A side that is not listed has no line, so sides set to none are not kept (an exported "no lines" reads back as `{}`).
+  const tableBorders = Object.fromEntries(
+    Object.entries({ ...style?.borders, ...parseBorders(find(tblPrKids, 'w:tblBorders'), ctx.theme) }).filter(([, border]) => border.style !== 'none')
+  ) as DocBorders;
+
+  const grid = findAll(childrenOf(find(tblKids, 'w:tblGrid') ?? {}), 'w:gridCol').map((g) => gridWidthPx(g) ?? 0);
+  const trNodes = flattenBlocks(tblKids).filter((n) => tagOf(n) === 'w:tr');
+  const spanOf = (tc: XmlNode): number => {
+    const pr = find(childrenOf(tc), 'w:tcPr');
+    const g = pr ? find(childrenOf(pr), 'w:gridSpan') : undefined;
+    const n = g ? Number(attrsOf(g)['@_w:val']) : 1;
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  };
+  const gridBeforeOf = (tr: XmlNode): number => {
+    const pr = find(childrenOf(tr), 'w:trPr');
+    const g = pr ? find(childrenOf(pr), 'w:gridBefore') : undefined;
+    const n = g ? Number(attrsOf(g)['@_w:val']) : 0;
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  };
+  const cols = grid.length > 0
+    ? grid.length
+    : Math.max(0, ...trNodes.map((tr) => gridBeforeOf(tr) + flattenBlocks(childrenOf(tr)).filter((n) => tagOf(n) === 'w:tc').reduce((sum, tc) => sum + spanOf(tc), 0)));
+
   const rows: DocTableRow[] = [];
   // Column index -> the DocTableCell object currently accumulating a
   // vertical merge, so a later row's continuation cell can bump its rowspan
   // instead of emitting a new cell.
   const openVMerge = new Map<number, { cell: DocTableRow['cells'][number] }>();
 
-  for (const trChild of flattenBlocks(childrenOf(tblNode))) {
+  for (const trChild of flattenBlocks(tblKids)) {
     if (tagOf(trChild) !== 'w:tr') {
-      ctx.comments?.mark(trChild);
+      if (tagOf(trChild) !== 'w:tblPr' && tagOf(trChild) !== 'w:tblGrid') ctx.comments?.mark(trChild);
       continue;
     }
     const trNode = trChild;
+    const rowIndex = trNodes.indexOf(trNode);
+    const trPr = find(childrenOf(trNode), 'w:trPr');
+    const trPrKids = trPr ? childrenOf(trPr) : [];
     const rowCells: DocTableRow['cells'] = [];
-    let col = 0;
+    let col = gridBeforeOf(trNode);
     for (const tcNode of flattenBlocks(childrenOf(trNode))) {
       if (tagOf(tcNode) !== 'w:tc') {
-        ctx.comments?.mark(tcNode);
+        if (tagOf(tcNode) !== 'w:trPr' && tagOf(tcNode) !== 'w:tblPrEx') ctx.comments?.mark(tcNode);
         continue;
       }
       const tcKids = childrenOf(tcNode);
       const tcPr = find(tcKids, 'w:tcPr');
       const tcPrKids = tcPr ? childrenOf(tcPr) : [];
-      const gridSpanEl = find(tcPrKids, 'w:gridSpan');
-      const colspan = gridSpanEl ? Number(attrsOf(gridSpanEl)['@_w:val']) : undefined;
+      const colspan = spanOf(tcNode) > 1 ? spanOf(tcNode) : undefined;
       const vMergeEl = find(tcPrKids, 'w:vMerge');
       const vMergeVal = vMergeEl ? (attrsOf(vMergeEl)['@_w:val'] ?? 'continue') : undefined;
 
@@ -638,17 +691,57 @@ function parseTable(tblNode: XmlNode, ctx: PartContext, warnings: string[]): Doc
         continue; // this cell contributes no content of its own
       }
 
-      const content = collectCellContent(tcNode, ctx, warnings);
-      const cell: DocTableRow['cells'][number] = { content, ...(colspan && colspan > 1 ? { colspan } : {}) };
+      // The parts of the table style that reach this cell (header row, banding...), lowest precedence first.
+      const parts = style ? applicableParts(style, look, { row: rowIndex, rows: trNodes.length, col, colspan: colspan ?? 1, cols }) : [];
+      const tableText = parts.reduce<DocRunBase>((acc, part) => (part.text ? { ...acc, ...part.text } : acc), {});
+      const cellCtx = Object.keys(tableText).length > 0 ? { ...ctx, tableText } : ctx;
+      const content = collectCellContent(tcNode, cellCtx, warnings);
+
+      const shading = parseShading(find(tcPrKids, 'w:shd'), ctx.theme) ?? [...parts].reverse().find((p) => p.backgroundColor)?.backgroundColor;
+      const cellBorders = [...parts.map((p) => p.borders), parseBorders(find(tcPrKids, 'w:tcBorders'), ctx.theme)].reduce<DocBorders | undefined>(
+        (acc, b) => (b ? { ...acc, ...b } : acc),
+        undefined
+      );
+      const partAlign = [...parts].reverse().find((p) => p.verticalAlign)?.verticalAlign;
+      const verticalAlign = parseVAlign(find(tcPrKids, 'w:vAlign')) ?? partAlign;
+      const span = colspan ?? 1;
+      const tcW = find(tcPrKids, 'w:tcW');
+      const widthTwips = tcW && attrsOf(tcW)['@_w:type'] !== 'pct' && attrsOf(tcW)['@_w:type'] !== 'auto' ? Number(attrsOf(tcW)['@_w:w']) : NaN;
+      const fromGrid = grid.length >= col + span ? grid.slice(col, col + span) : [];
+      const colwidthPx =
+        fromGrid.length > 0 && fromGrid.every((w) => w > 0)
+          ? fromGrid
+          : Number.isFinite(widthTwips) && widthTwips > 0
+            ? Array.from({ length: span }, () => pxFromTwips(widthTwips / span))
+            : undefined;
+
+      const cell: DocTableRow['cells'][number] = {
+        content,
+        ...(colspan && colspan > 1 ? { colspan } : {}),
+        ...(shading && { backgroundColor: shading }),
+        ...(cellBorders && { borders: cellBorders }),
+        ...(verticalAlign && (verticalAlign !== 'top' || partAlign) && { verticalAlign }),
+        ...(colwidthPx && { colwidthPx }),
+      };
       rowCells.push(cell);
       if (vMergeVal === 'restart') openVMerge.set(col, { cell });
       else openVMerge.delete(col);
       col += colspan ?? 1;
     }
-    rows.push({ cells: rowCells });
+    const repeatHeader = isOnEl(find(trPrKids, 'w:tblHeader'));
+    const cantSplit = isOnEl(find(trPrKids, 'w:cantSplit'));
+    rows.push({ cells: rowCells, ...(repeatHeader && { repeatHeader }), ...(cantSplit && { cantSplit }) });
   }
 
-  return { type: 'table', rows };
+  const colWidthsPx = grid.length > 0 && grid.every((w) => w > 0) ? grid : undefined;
+  return {
+    type: 'table',
+    rows,
+    ...(colWidthsPx && { colWidthsPx }),
+    borders: tableBorders,
+    ...(look && { look }),
+    ...(namedStyleId && { namedStyleId }),
+  };
 }
 
 /** A table cell's content is one or more paragraphs; flatten to the first non-empty paragraph's inline content (our own writer only ever emits one). */
@@ -781,9 +874,10 @@ export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResul
   const parsedComments = parseComments({ comments: commentsXml, extended: commentsExtendedXml, people: peopleXml }, warnings);
   const comments = createCommentTracker(parsedComments, documentXml);
   const themeXml = await readZipText(zip, 'word/theme/theme1.xml');
-  const styles = new StyleSheet(stylesXml, parseTheme(themeXml));
+  const theme = parseTheme(themeXml);
+  const styles = new StyleSheet(stylesXml, theme);
   const numbering = parseNumbering(numberingXml);
-  const ctx: PartContext = { rels, media, styles, lists: new ListCounter(numbering), comments };
+  const ctx: PartContext = { rels, media, styles, theme, lists: new ListCounter(numbering), comments };
 
   const root = parseXml(documentXml);
   const documentEl = find(root, 'w:document');
@@ -892,7 +986,10 @@ function usedStyleIds(sections: DocSection[]): Set<string> {
   };
   for (const section of sections) {
     for (const block of section.blocks) {
-      if (block.type === 'table') for (const row of block.rows) for (const cell of row.cells) inlines(cell.content);
+      if (block.type === 'table') {
+        if (block.namedStyleId) used.add(block.namedStyleId);
+        for (const row of block.rows) for (const cell of row.cells) inlines(cell.content);
+      }
       else if ('content' in block) {
         inlines(block.content);
         if ('namedStyleId' in block && block.namedStyleId) used.add(block.namedStyleId);
