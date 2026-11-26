@@ -23,9 +23,12 @@ runner that lifts the shared harness; until then the files and the checks below 
   `edge-huge-dimension` (a sheet declaring 17 billion cells) and `perf-100k-x-10` (one million cells).
   Write them with `python3 fixtures/xlsx/generators/build_runtime.py --out DIR [name ...]`.
 
-Every file is original content made by the scripts in [`generators/`](./generators): stdlib `zipfile`,
-fixed timestamps, no randomness, core properties normalised (no author names, fixed dates). No file is over
-300 KB. Names of people in comments are invented.
+Every file is original content made by the scripts in [`generators/`](./generators). The hand-authored and edge
+files use a stdlib `zipfile` builder (fixed timestamps, no randomness) and rebuild byte-identically; a Jest test
+checks that. The producer-variety files are written by their library and then normalised: `docProps/core.xml`
+is replaced (no author names, fixed dates), the zip is rewritten with fixed timestamps and order, and the
+producer's own `Application` name in `docProps/app.xml` is kept. No file is over 300 KB. Names of people in
+comments are invented.
 
 ## Manifest
 
@@ -53,6 +56,7 @@ probes in `scripts/xlsx-fidelity/constructs.ts`:
 npm test -w @b32nio/spindle-sheets-core -- fidelity            # run the checks
 XLSX_FIDELITY_UPDATE=1 npm test -w @b32nio/spindle-sheets-core -- fidelity   # also rewrite the matrix below
 python3 fixtures/xlsx/generators/build_all.py                  # regenerate every file and manifest.json
+python3 fixtures/xlsx/generators/build_all.py --out DIR --stdlib   # only the stdlib-built files, into DIR
 ```
 
 The producer-variety files need openpyxl, xlsxwriter and LibreOffice installed locally to regenerate; their
@@ -111,7 +115,7 @@ rebuilding gives the same bytes.
 | Cell formats beyond the default (`styles.basic`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Alignment (wrap, rotation, indent) (`styles.alignment`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Custom number formats (`styles.customNumFmts`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Indexed colours (`styles.indexedColors`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Indexed colours (other than the default pen 64) (`styles.indexedColors`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Distinct border styles (13 exist) (`styles.borderStyles`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Formulas (`formulas.basic`) |  |  |  |  | yes |  |  |  | yes |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Formulas with a cached value (`formulas.cachedValues`) | yes |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |

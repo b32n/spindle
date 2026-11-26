@@ -98,6 +98,37 @@ describe('readParts', () => {
     expect((await readParts(u8())).kind).toBe('unreadable');
   });
 
+  it('enforces the cap on the actual inflated size, not on the declared one', async () => {
+    const bytes = await zipOf({
+      'big.xml': '<a>' + 'x'.repeat(5000) + '</a>',
+      'small.xml': '<a/>',
+    });
+    const lying = bytes.slice();
+    const view = new DataView(lying.buffer);
+    const eocd = lying.length - 22;
+    let at = view.getUint32(eocd + 16, true);
+    for (let n = view.getUint16(eocd + 10, true); n > 0; n--) {
+      const nameLen = view.getUint16(at + 28, true);
+      if (new TextDecoder().decode(lying.subarray(at + 46, at + 46 + nameLen)) === 'big.xml')
+        view.setUint32(at + 24, 10, true); // declares 10 bytes
+      at += 46 + nameLen + view.getUint16(at + 30, true) + view.getUint16(at + 32, true);
+    }
+    const p = await readParts(lying, 100);
+    expect(p.sizes['big.xml'].uncompressed).toBe(10);
+    expect(p.oversized).toEqual(['big.xml']);
+    expect(Object.keys(p.xml)).toEqual(['small.xml']);
+  });
+
+  it('lists an entry that cannot be inflated instead of throwing', async () => {
+    const bytes = await zipOf({ 'bad.xml': '<a>' + 'x'.repeat(5000) + '</a>' });
+    const broken = bytes.slice();
+    const start = 30 + 'bad.xml'.length + 4; // inside the deflate stream
+    for (let i = start; i < start + 8; i++) broken[i] = 0xff;
+    const p = await readParts(broken);
+    expect(p.kind).toBe('zip');
+    expect(p.oversized).toEqual(['bad.xml']);
+  });
+
   it('treats an entry missing from the size table as readable', async () => {
     const bytes = await zipOf({ 'a.xml': '<a/>', 'b.xml': '<b/>' });
     const lying = bytes.slice();
@@ -149,6 +180,18 @@ describe('relationshipTargets', () => {
       relationshipTargets('_rels/.rels', rels('<Relationship Id="a" Target="xl/workbook.xml"/>'))[0]
         .target
     ).toBe('xl/workbook.xml');
+  });
+
+  it('treats a target that climbs out of the package root as pointing at a missing part', () => {
+    const r = relationshipTargets(
+      'xl/_rels/workbook.xml.rels',
+      rels(
+        '<Relationship Id="a" Target="../../x.xml"/>',
+        '<Relationship Id="b" Target="/../y.xml"/>',
+        '<Relationship Id="c" Target="./sheets/../z.xml"/>'
+      )
+    );
+    expect(r.map((x) => x.target)).toEqual(['../../../x.xml', '..//../y.xml', 'xl/z.xml']);
   });
 
   it('gives null for external targets and for relationships without a target', () => {

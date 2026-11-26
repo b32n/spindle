@@ -60,7 +60,7 @@ def xml_entities(path):
 
 def _ole(path, streams):
     """An OLE compound-file header plus a directory sector naming the streams: a stub, not a usable compound file."""
-    head = bytes([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]) + bytes(8) + struct.pack("<HHH", 0x3E, 3, 0xFFFE) + bytes(488)
+    head = bytes([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]) + bytes(8) + struct.pack("<HHH", 0x3E, 3, 0xFFFE) + bytes(490)
     entries = b""
     for name in ["Root Entry"] + streams:
         raw = name.encode("utf-16-le")

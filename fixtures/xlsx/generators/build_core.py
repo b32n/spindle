@@ -48,7 +48,7 @@ def styles_basic(path):
     b = X.Book(title="Basic styles")
     st = b.styles
     bold = st.xf(font='<font><b/><sz val="12"/><color rgb="FFFFFFFF"/><name val="Arial"/><family val="2"/></font>', fill=st.solid("1F4E78"))
-    ital = st.xf(font='<font><i/><u/><strike/><sz val="10"/><color rgb="FFC00000"/><name val="Times New Roman"/><family val="1"/></font>')
+    ital = st.xf(font='<font><i/><u/><strike/><sz val="10"/><color indexed="10"/><name val="Times New Roman"/><family val="1"/></font>')
     box = st.xf(border='<border><left style="thin"><color auto="1"/></left><right style="thin"><color auto="1"/></right><top style="thick"><color rgb="FFFF0000"/></top><bottom style="double"><color auto="1"/></bottom><diagonal/></border>')
     centre = st.xf(align='horizontal="center" vertical="center" wrapText="1"')
     rot = st.xf(align='horizontal="left" textRotation="45" indent="1"')

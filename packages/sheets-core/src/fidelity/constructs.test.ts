@@ -393,6 +393,40 @@ describe('XLSX construct probes', () => {
     ).toBe(1);
   });
 
+  it('recognises x14-prefixed rules, quoted 3D references, other indexed colours and any attribute order', () => {
+    const count = (id: string, p: OoxmlParts) => findConstruct(id)?.count(p);
+    expect(count('cf.dataBar', mk(sheet('<x14:cfRule type="dataBar" id="{1}"/>')))).toBe(1);
+    expect(count('dv.list', mk(sheet('<x14:dataValidation type="list"/>')))).toBe(1);
+    expect(
+      count('cf.stopIfTrue', mk(sheet('<x14:cfRule type="expression" stopIfTrue="1"/>')))
+    ).toBe(1);
+    expect(count('formulas.threeD', mk(f("SUM('Sheet 1:Sheet 3'!A1)")))).toBe(1);
+    expect(
+      count(
+        'styles.indexedColors',
+        mk(styles('<fills><fill><patternFill><bgColor indexed="64"/></patternFill></fill></fills>'))
+      )
+    ).toBe(0);
+    expect(
+      count('styles.indexedColors', mk(styles('<fonts><font><color indexed="10"/></font></fonts>')))
+    ).toBe(1);
+    const reversed = {
+      ...cells('<c r="A1" s="1"><v>1</v></c><c r="B1" s="2"><v>1</v></c>'),
+      ...styles(
+        '<numFmts><numFmt formatCode="yyyy" numFmtId="164"/><numFmt formatCode="0.0"/></numFmts><cellXfs><xf fontId="0"/><xf fontId="0" numFmtId="164"/><xf numFmtId="14"/></cellXfs>'
+      ),
+    };
+    expect(count('cells.dates', mk(reversed))).toBe(2);
+  });
+
+  it('decodes entities in the right order and ignores string literals', () => {
+    const whole = (formula: string) => findConstruct('formulas.wholeColumn')?.count(mk(f(formula)));
+    expect(whole('IF(A1=&quot;B:B&quot;,1,2)')).toBe(0);
+    expect(whole('IF(A1=&quot;a&quot;&quot;B:B&quot;,1,2)')).toBe(0);
+    expect(whole('IF(A1=&amp;quot;B:B&amp;quot;,1,2)')).toBe(1);
+    expect(whole('IF(A1=&apos;x&apos;,SUM(B:B),2)')).toBe(1);
+  });
+
   it('finds constructs by id', () => {
     expect(findConstruct('cells.numbers')?.label).toBe('Numeric cells');
     expect(findConstruct('nope')).toBeUndefined();

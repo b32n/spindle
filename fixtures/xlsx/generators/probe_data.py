@@ -39,11 +39,13 @@ NUMBER_FORMATS = [
 DYNAMIC = {"FILTER", "SORT", "UNIQUE", "SEQUENCE", "SORTBY", "LET", "HSTACK", "VSTACK", "TAKE", "TRANSPOSE", "TEXTSPLIT"}
 
 # Formula-syntax probe (plan 2.2 item 4): (formula as stored in the file, cached value Excel computes, note).
+# The first form must stay in row 2 (implicit intersection reads A2).
 # Data: A1:A5 = 1..5, B1 = 10, C1 = 20, Sheet2!A1 = 100, 'Q1 Data'!A1 = 7; formulas sit in column G (rows 2..), none in row 1.
 SYNTAX = [
+    ("_xlfn.SINGLE(A1:A3)", 2, "implicit intersection (@): the formula is in row 2"),
     ("SUM(A:A)", 15, "whole column"), ("SUM(1:1)", 32, "whole row (includes J1)"), ("A1+50%", 1.5, "percent literal"),
     ("SUM(Sheet1:Sheet2!A1)", 101, "3D reference"), ("SUM({1,2,3})", 6, "array constant"), ("SUM({1,2;3,4})", 10, "2D array constant"),
-    ("SUM(A1:INDEX(A1:A5,3))", 6, "range ending in INDEX"), ("ROW(1:1)", 1, "row range argument"), ("_xlfn.SINGLE(A1:A3)", 3, "implicit intersection (@)"),
+    ("SUM(A1:INDEX(A1:A5,3))", 6, "range ending in INDEX"), ("ROW(1:1)", 1, "row range argument"),
     ("SUM(_xlfn.ANCHORARRAY(J1))", 6, "spill operator (J1#)"), ("SUMPRODUCT(A1:A3*2)", 12, "array arithmetic"), ("-2^2", 4, "unary minus binds first"),
     ("2^3^2", 64, "left-associative power"), ('"a"&1', "a1", "concatenation"), ("1=1", True, "comparison"), ('"a"<"b"', True, "text comparison"),
     ("SUM(A1:A3 A2:A4)", 5, "range intersection"), ("SUM(A1:A3,A5)", 11, "argument list"), ("SUM((A1:A2,A4))", 7, "union operator"),

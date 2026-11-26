@@ -173,14 +173,15 @@ describe('XLSX corpus', () => {
 });
 
 describe('run-time generators', () => {
+  // Without python3 the tests fail on CI and are skipped elsewhere (never a silent pass).
   const python = spawnSync('python3', ['--version']).status === 0;
+  const itPy = python || process.env.CI ? it : it.skip;
   const dir = mkdtempSync(path.join(tmpdir(), 'xlsx-runtime-'));
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-  it.each([['edge-huge-dimension'], ['edge-zip-bomb']])(
+  itPy.each([['edge-huge-dimension'], ['edge-zip-bomb']])(
     '%s: the generator writes a file that holds its claims',
     async (id) => {
-      if (!python) return;
       const entry = runtime.find((f) => f.id === id);
       const script = path.join(XLSX_FIXTURES_DIR, entry?.generator as string);
       const run = spawnSync('python3', [script, '--out', dir, id], {
@@ -197,8 +198,7 @@ describe('run-time generators', () => {
     180_000
   );
 
-  it('perf-100k-x-10: the generator can write a smaller sheet with the same shape', async () => {
-    if (!python) return;
+  itPy('perf-100k-x-10: the generator can write a smaller sheet with the same shape', async () => {
     const script = path.join(XLSX_FIXTURES_DIR, 'generators', 'build_runtime.py');
     const code = `import sys; sys.path.insert(0, ${JSON.stringify(path.dirname(script))}); import build_runtime as B; B.perf(sys.argv[1], rows=200, cols=10)`;
     const out = path.join(dir, 'perf-small.xlsx');
@@ -207,4 +207,39 @@ describe('run-time generators', () => {
     expect(unverifiedClaims(['cells.numbers', 'cells.inlineStrings'], CONSTRUCTS, p)).toEqual([]);
     expect(p.xml['xl/worksheets/sheet1.xml']).toContain('<dimension ref="A1:J200"/>');
   });
+});
+
+describe('generators', () => {
+  const python = spawnSync('python3', ['--version']).status === 0;
+  const itPy = python || process.env.CI ? it : it.skip;
+  const dir = mkdtempSync(path.join(tmpdir(), 'xlsx-rebuild-'));
+  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+
+  itPy(
+    'rebuild the hand-authored and edge files byte for byte',
+    () => {
+      const script = path.join(XLSX_FIXTURES_DIR, 'generators', 'build_all.py');
+      const run = spawnSync('python3', [script, '--out', dir, '--stdlib'], {
+        encoding: 'utf8',
+        timeout: 120_000,
+      });
+      expect(run.status).toBe(0);
+      const rebuilt = readdirSync(dir).sort();
+      expect(rebuilt.length).toBeGreaterThan(15);
+      for (const name of rebuilt) {
+        expect({
+          name,
+          same: readFileSync(path.join(dir, name)).equals(
+            readFileSync(path.join(XLSX_FIXTURES_DIR, name))
+          ),
+        }).toEqual({ name, same: true });
+      }
+      const programmatic = committed
+        .filter((f) => f.source.tool.startsWith('programmatic'))
+        .map((f) => f.filename)
+        .sort();
+      expect(rebuilt).toEqual(programmatic);
+    },
+    180_000
+  );
 });

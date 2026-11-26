@@ -5,10 +5,11 @@ this module; there is no third-party content. Output is deterministic: fixed zip
 fixed core-properties dates, no author names, no randomness.
 """
 import io
+import re
 import struct
 import zipfile
 import zlib
-from xml.sax.saxutils import escape as _esc
+from xml.sax.saxutils import escape as _esc, unescape as _unesc
 
 STAMP = (2026, 1, 15, 9, 0, 0)
 ISO = "2026-01-15T09:00:00Z"
@@ -266,8 +267,8 @@ def core_xml(title="Fixture"):
             f'<dcterms:created xsi:type="dcterms:W3CDTF">{ISO}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">{ISO}</dcterms:modified></cp:coreProperties>')
 
 
-def app_xml():
-    return f'{HEAD}<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Spindle fixture generator</Application></Properties>'
+def app_xml(application="Spindle fixture generator"):
+    return f'{HEAD}<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>{esc(application)}</Application></Properties>'
 
 
 def content_types(parts, overrides):
@@ -296,12 +297,13 @@ def read_zip(path):
 
 
 def normalise(path):
-    """Producer-variety files: replace docProps with the fixed ones and re-zip deterministically."""
+    """Producer-variety files: replace docProps with the fixed ones (keeping the producer's Application name) and re-zip deterministically."""
     parts = read_zip(path)
     if "docProps/core.xml" in parts:
         parts["docProps/core.xml"] = core_xml("Fixture").encode()
     if "docProps/app.xml" in parts:
-        parts["docProps/app.xml"] = app_xml().encode()
+        m = re.search(rb"<Application>([^<]*)</Application>", parts["docProps/app.xml"])
+        parts["docProps/app.xml"] = app_xml(_unesc(m.group(1).decode()) if m else "Spindle fixture generator").encode()
     write_zip(path, parts)
 
 

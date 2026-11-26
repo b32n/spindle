@@ -6,7 +6,7 @@ export interface OoxmlParts {
   kind: 'zip' | 'ole' | 'unreadable';
   raw: Uint8Array;
   names: string[];
-  /** Text of every .xml / .rels part (entries over the size cap are left out and listed in `oversized`). */
+  /** Text of every .xml / .rels part. Parts that inflate past the size cap (by header or by actual size) or cannot be inflated are left out and listed in `oversized`. */
   xml: Record<string, string>;
   /** Sizes from the zip central directory, read without inflating anything. */
   sizes: Record<string, { compressed: number; uncompressed: number }>;
@@ -44,6 +44,25 @@ export function zipEntrySizes(bytes: Uint8Array): OoxmlParts['sizes'] {
   return sizes;
 }
 
+/** Inflate one entry as text, stopping as soon as the output passes `cap` bytes; null when too large or unreadable. */
+function readCapped(entry: JSZip.JSZipObject, cap: number): Promise<string | null> {
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = [];
+    let total = 0;
+    const stream = entry.nodeStream('nodebuffer');
+    stream
+      .on('data', (c: Buffer) => {
+        total += c.length;
+        if (total > cap) {
+          stream.pause();
+          resolve(null);
+        } else chunks.push(c);
+      })
+      .on('error', () => resolve(null))
+      .on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+  });
+}
+
 export async function readParts(
   bytes: Uint8Array,
   maxEntryBytes = DEFAULT_MAX_ENTRY_BYTES
@@ -69,8 +88,12 @@ export async function readParts(
   const oversized: string[] = [];
   for (const n of names) {
     if (!/\.(xml|rels)$/i.test(n)) continue;
-    if ((sizes[n]?.uncompressed ?? 0) > maxEntryBytes) oversized.push(n);
-    else xml[n] = await zip.files[n].async('string');
+    const text =
+      (sizes[n]?.uncompressed ?? 0) > maxEntryBytes
+        ? null
+        : await readCapped(zip.files[n], maxEntryBytes);
+    if (text === null) oversized.push(n);
+    else xml[n] = text;
   }
   return { kind: 'zip', raw: bytes, names, xml, sizes, oversized };
 }
@@ -96,6 +119,17 @@ export function isWellFormed(xml: string): boolean {
   return stack.length === 0 && !stripped.slice(last).includes('<');
 }
 
+/** Resolve a relationship target against the part's folder; null when it climbs out of the package root. */
+function resolveTarget(base: string, target: string): string | null {
+  const segs = target.startsWith('/') ? [] : base.split('/').filter(Boolean);
+  for (const seg of target.split('/')) {
+    if (seg === '..') {
+      if (segs.pop() === undefined) return null;
+    } else if (seg !== '.' && seg !== '') segs.push(seg);
+  }
+  return segs.join('/');
+}
+
 function safeDecode(s: string): string {
   try {
     return decodeURIComponent(s);
@@ -104,7 +138,11 @@ function safeDecode(s: string): string {
   }
 }
 
-/** Part names that a `.rels` part's internal relationships point at, resolved against the part it describes. */
+/**
+ * Part names that a `.rels` part's internal relationships point at, resolved against the part it describes.
+ * `target` is null for external targets and for relationships without one; a target that escapes the package
+ * root resolves to the unusable name `../<target>` so that it counts as a missing part.
+ */
 export function relationshipTargets(
   relsName: string,
   xml: string
@@ -118,10 +156,7 @@ export function relationshipTargets(
       out.push({ id, target: null });
       continue;
     }
-    const resolved = target.startsWith('/')
-      ? target.slice(1)
-      : new URL(target, `http://x/${base}`).pathname.slice(1);
-    out.push({ id, target: safeDecode(resolved) });
+    out.push({ id, target: safeDecode(resolveTarget(base, target) ?? `../${target}`) });
   }
   return out;
 }

@@ -2,11 +2,13 @@
 
     python3 fixtures/xlsx/generators/build_all.py                 # every committed fixture + manifest.json
     python3 fixtures/xlsx/generators/build_all.py cell-types      # one fixture (manifest untouched)
+    python3 fixtures/xlsx/generators/build_all.py --out DIR --stdlib   # the hand-authored and edge files only, elsewhere
 
 Run-time fixtures (zip bomb, huge dimension, 100k x 10 perf) are not written here: see build_runtime.py.
 The producer-variety files need openpyxl, xlsxwriter and LibreOffice (`soffice`) installed locally; they are
 authoring tools only and are committed as binaries, never rebuilt in CI.
 """
+import argparse
 import json
 import os
 import subprocess
@@ -59,15 +61,21 @@ def manifest():
 
 
 def main(argv):
-    wanted = argv or [e["id"] for e in CATALOG]
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("ids", nargs="*")
+    ap.add_argument("--out", default=OUT, help="directory to write into (default: fixtures/xlsx; the manifest is only written there)")
+    ap.add_argument("--stdlib", action="store_true", help="only the files built without openpyxl, xlsxwriter or LibreOffice (these must rebuild byte-identically)")
+    args = ap.parse_args(argv)
     files = {e["id"]: e["filename"] for e in CATALOG}
+    wanted = args.ids or [e["id"] for e in CATALOG if not args.stdlib or e["tool"] == "programmatic"]
+    os.makedirs(args.out, exist_ok=True)
     for name in wanted:
         if name not in BUILDERS:
             raise SystemExit(f"unknown fixture {name!r}; known: {', '.join(sorted(BUILDERS))}")
-        path = os.path.join(OUT, files[name])
+        path = os.path.join(args.out, files[name])
         BUILDERS[name](path)
         print(f"wrote {path} ({os.path.getsize(path)} bytes)")
-    if not argv:
+    if not args.ids and not args.stdlib and args.out == OUT:
         with open(os.path.join(OUT, "manifest.json"), "w") as f:
             json.dump(manifest(), f, indent=2, ensure_ascii=False)
             f.write("\n")

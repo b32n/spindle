@@ -36,7 +36,13 @@ function formulas(p: OoxmlParts): Formula[] {
       out.push({
         cellAttrs: m[1],
         attrs: m[2],
-        text: (m[3] ?? '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>'),
+        text: (m[3] ?? '')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'")
+          .replace(/&amp;/g, '&')
+          .replace(/"(?:[^"]|"")*"/g, '""'), // string literals are not references
       });
     }
   }
@@ -48,17 +54,18 @@ const DATE_IDS = new Set([
   14, 15, 16, 17, 18, 19, 20, 21, 22, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 45, 46, 47, 50, 51,
   52, 53, 54, 55, 56, 57, 58,
 ]);
+const attr = (tag: string, name: string) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
 /** Number of cells whose cell format is a date or time format (built-in id or a custom code with date tokens). */
 function dateCells(p: OoxmlParts): number {
   const st = styles(p);
-  const codes = new Map(
-    [...st.matchAll(/<numFmt\b[^>]*\bnumFmtId="(\d+)"[^>]*\bformatCode="([^"]*)"/g)].map((m) => [
-      Number(m[1]),
-      m[2],
-    ])
-  );
-  const xfs = [...block(st, 'cellXfs').matchAll(/<xf\b[^>]*\bnumFmtId="(\d+)"/g)].map((m) =>
-    Number(m[1])
+  const codes = new Map<number, string>();
+  for (const m of st.matchAll(/<numFmt\b[^>]*>/g)) {
+    const id = attr(m[0], 'numFmtId');
+    const code = attr(m[0], 'formatCode');
+    if (id !== undefined && code !== undefined) codes.set(Number(id), code);
+  }
+  const xfs = [...block(st, 'cellXfs').matchAll(/<xf\b[^>]*>/g)].map((m) =>
+    Number(attr(m[0], 'numFmtId') ?? 0)
   );
   const isDate = xfs.map(
     (id) =>
@@ -90,9 +97,9 @@ function maxDimension(p: OoxmlParts): { rows: number; cells: number } {
 }
 
 const cf = (type: string) => (p: OoxmlParts) =>
-  inSheets(p, new RegExp(`<cfRule\\b[^>]*\\btype="(?:${type})"`, 'g'));
+  inSheets(p, new RegExp(`<(?:x14:)?cfRule\\b[^>]*\\btype="(?:${type})"`, 'g'));
 const dv = (type: string) => (p: OoxmlParts) =>
-  inSheets(p, new RegExp(`<dataValidation\\b[^>]*\\btype="${type}"`, 'g'));
+  inSheets(p, new RegExp(`<(?:x14:)?dataValidation\\b[^>]*\\btype="${type}"`, 'g'));
 const chart = (tag: string) => (p: OoxmlParts) =>
   inParts(p, charts, new RegExp(`<(?:c:)?${tag}\\b`, 'g'));
 const media = (ext: string) => (p: OoxmlParts) =>
@@ -161,8 +168,8 @@ export const CONSTRUCTS: XlsxConstruct[] = [
   },
   {
     id: 'styles.indexedColors',
-    label: 'Indexed colours',
-    count: (p) => count(styles(p), /<(?:color|fgColor|bgColor)\b[^>]*\bindexed="/g),
+    label: 'Indexed colours (other than the default pen 64)',
+    count: (p) => count(styles(p), /<(?:color|fgColor|bgColor)\b[^>]*\bindexed="(?!64")/g),
   },
   {
     id: 'styles.borderStyles',
@@ -218,7 +225,7 @@ export const CONSTRUCTS: XlsxConstruct[] = [
   {
     id: 'formulas.threeD',
     label: '3D references (Sheet1:Sheet3!A1)',
-    count: (p) => withText(p, /[A-Za-z0-9_']+:[A-Za-z0-9_']+!/),
+    count: (p) => withText(p, /'[^']+:[^']+'!|[A-Za-z0-9_.]+:[A-Za-z0-9_.]+!/),
   },
   {
     id: 'names.defined',
@@ -347,7 +354,7 @@ export const CONSTRUCTS: XlsxConstruct[] = [
   {
     id: 'cf.stopIfTrue',
     label: 'Conditional formatting: stop if true',
-    count: (p) => inSheets(p, /<cfRule\b[^>]*\bstopIfTrue="1"/g),
+    count: (p) => inSheets(p, /<(?:x14:)?cfRule\b[^>]*\bstopIfTrue="1"/g),
   },
   { id: 'dv.list', label: 'Validation: list', count: dv('list') },
   { id: 'dv.whole', label: 'Validation: whole number', count: dv('whole') },
