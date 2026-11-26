@@ -72,11 +72,15 @@ const freshMeta = (ctx: Context): RevisionMeta => ({ id: ctx.newId(), author: ct
 const markOf = (type: typeof insertionType | typeof deletionType | typeof formatChangeType, meta: RevisionMeta, extra: Record<string, unknown> = {}): Mark =>
   type.create({ revisionId: meta.id, author: meta.author, date: meta.date ?? null, ...extra });
 
-/** True when a slice holds only text and what is inline, and paragraphs and headings: what a suggestion can record. */
+/**
+ * True when a slice holds only text (a line break counts, it is kept as text) and paragraphs and headings: what a suggestion
+ * can record. An inline image, field, bookmark, note reference or content control is not: a mark on such a node is not kept
+ * by the collaboration binding (marks sync on text only), so a collaborator would not see the change.
+ */
 function isRecordable(content: Fragment): boolean {
   let ok = true;
   content.descendants((node) => {
-    if (!node.isInline && !TEXTBLOCKS.has(node.type.name)) ok = false;
+    if (!(node.isText || node.type === docsSchema.nodes.hard_break || TEXTBLOCKS.has(node.type.name))) ok = false;
     return ok;
   });
   return ok;
@@ -104,7 +108,7 @@ function setMarkRecord(ctx: Context, pos: number, kind: 'insertion' | 'deletion'
 }
 
 /** What was inserted at [from, to) of the document `ctx.out` holds is marked as inserted. */
-function markInserted(ctx: Context, from: number, to: number): void {
+function markInserted(ctx: Context, from: number, to: number, pasted: boolean): void {
   const { out } = ctx;
   // Marks the inserted content carried with it (pasted from elsewhere in a document with changes) are not this author's.
   for (const type of [insertionType, deletionType, formatChangeType]) out.removeMark(from, to, type);
@@ -115,6 +119,9 @@ function markInserted(ctx: Context, from: number, to: number): void {
     // of the mark the paragraph was split at (Enter) is not carried over. The old mark stays with the second half.
     setMarkRecord(ctx, pos, 'deletion', null);
     setMarkRecord(ctx, pos, 'insertion', meta);
+    // A paragraph pasted from elsewhere brings the record of a formatting change someone else made there; it is not a change of
+    // this document. (An Enter copies the record of the paragraph it splits to both halves, which stays: it is the same change.)
+    if (pasted) setMarkRecord(ctx, pos, 'formatChange', null);
   }
   // A line break is kept in the text of a tracked run: the Y binding keeps marks on text only, not on a break node.
   const breaks: number[] = [];
@@ -151,7 +158,8 @@ function replaceStep(ctx: Context, step: ReplaceStep, docBefore: PmNode, after: 
 
   if (slice.size > 0) {
     // Structure that cannot be recorded stays as it was inserted, unmarked, as the notice says.
-    if (isRecordable(slice.content)) markInserted(ctx, start, end);
+    const split = slice.content.childCount === 2 && slice.size === 2 && slice.openStart === 1 && slice.openEnd === 1;
+    if (isRecordable(slice.content)) markInserted(ctx, start, end, !split);
     else ctx.notices.add('A list, table, image or other structure that was inserted could not be suggested and was inserted directly.');
   }
 
@@ -278,7 +286,11 @@ function notify(options: SuggestingOptions, notices: Set<string>): void {
   queueMicrotask(() => options.onNotice?.(list));
 }
 
-/** The changes a suggestion records, from the transactions the plugin was given; null when there is nothing to do. */
+/**
+ * The changes a suggestion records, from the transactions the plugin was given; null when there is nothing to do. A
+ * transaction another plugin of the editor appends is recorded like a user's (only the meta keys above are skipped), so a host
+ * plugin that rewrites the document in the background should be given one of them.
+ */
 export function suggestChanges(trs: readonly Transaction[], oldState: EditorState, newState: EditorState, options: SuggestingOptions): Transaction | null {
   if (!options.isActive()) return null;
   if (trs.some((tr) => SKIPPED_META.some((key) => tr.getMeta(key) !== undefined) || tr.getMeta('addToHistory') === false)) return null;

@@ -370,12 +370,12 @@ lockstep.
   that joins the user's in the undo history: typed or pasted text gets an insertion mark (consecutive typing is one change), deleted
   text is put back with a deletion mark (text the same author inserted themselves is just removed; backspaces and deletes move
   the caret over the kept text), Enter marks the paragraph break inserted, joining paragraphs keeps the break marked deleted
-  (Enter then Backspace leaves no trace, and the records another person had on the paragraph mark are kept; the first Backspace
+  (a pasted paragraph does not bring the formatting-change record of its source; Enter then Backspace leaves no trace, also after typing in the new paragraph, and the records another person had on the paragraph mark are kept; the first Backspace
   at the start of a paragraph moves the caret before the deleted break, so the second one deletes the character before),
   text typed in the middle of another author's deletion is an insertion of its own, never part of the deletion, a change of character formatting records the formatting before (`formatChange`, and none
   when it is put back, or on the author's own insertion), a change of a paragraph's formatting or type records the old formatting.
-  What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list…) is left as
-  the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. Changes from collaborators, undo
+  What cannot be recorded (a list, table, image or other structure inserted or deleted, wrapping blocks in a list, an inline image, field, bookmark, note reference or content control, which would lose a mark in collaboration because marks sync on text only; a paragraph pasted with such an object is inserted directly) is left as
+  the user made it and `TrueLayoutEditor.onSuggestionNotice` / a notice above the page says so. (A transaction that a host plugin appends is recorded like the user's own edit.) Changes from collaborators, undo
   and redo, and accepting or rejecting in the review panel are never suggested. New `TrueLayoutEditor` props `suggesting`,
   `suggestAuthor` and `onSuggestionNotice`; new `ModeSwitch` component and `EditorMode` type. Formatting several marks in one
   transaction (clear formatting) records the formatting before the first of them, the selection stays a range after a format,

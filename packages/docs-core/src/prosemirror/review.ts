@@ -247,7 +247,7 @@ function previousParagraph(change: NonNullable<BlockRevision['formatChange']>): 
  * one makes. Each replacement has the size of what it replaces, so positions do not move.
  */
 function breaksToNodes(tr: Transaction, from: number, to: number): void {
-  const found: number[] = [];
+  const found: Array<{ at: number; marks: readonly Mark[] }> = [];
   tr.doc.nodesBetween(from, to, (node, pos) => {
     if (!node.isText) return true;
     // Text another change still covers keeps its newlines (a break node would lose that change in collaboration).
@@ -255,11 +255,12 @@ function breaksToNodes(tr: Transaction, from: number, to: number): void {
     const text = node.text!;
     for (let i = 0; i < text.length; i++) {
       const at = pos + i;
-      if (text[i] === '\n' && at >= from && at < to) found.push(at);
+      if (text[i] === '\n' && at >= from && at < to) found.push({ at, marks: node.marks });
     }
     return false;
   });
-  for (const at of found.reverse()) tr.replaceWith(at, at + 1, docsSchema.nodes.hard_break.create());
+  // The break keeps the marks of the newline (bold, a comment's anchor) it replaces.
+  for (const { at, marks } of found.reverse()) tr.replaceWith(at, at + 1, docsSchema.nodes.hard_break.create(null, null, marks));
 }
 
 /** Accept or reject one unit in `tr`. Units must be settled from the end of the document to its start (see `settle`). */

@@ -336,6 +336,100 @@ describe('what is not recorded', () => {
   });
 });
 
+describe('inline objects', () => {
+  // A mark on an image, field, bookmark, note reference or content control would not survive collaboration (marks sync on text
+  // only), so these are inserted and deleted directly, with a notice, and nothing is left carrying a mark that does not sync.
+  const OBJECTS: Array<[string, () => PmNode]> = [
+    ['inline_image', () => docsSchema.nodes.inline_image.createAndFill({ src: 'data:image/png;base64,AA==', width: 10, height: 10 })!],
+    ['field', () => docsSchema.nodes.field.createAndFill({ instruction: 'REF x', fieldType: 'REF' })!],
+    ['dynamic_field', () => docsSchema.nodes.dynamic_field.createAndFill({ fieldType: 'pageNumber' })!],
+    ['bookmark', () => docsSchema.nodes.bookmark.createAndFill({ name: 'b' })!],
+    ['note_ref', () => docsSchema.nodes.note_ref.create({ kind: 'footnote', noteId: '1' }, docsSchema.text('note'))],
+    ['content_control_inline', () => docsSchema.nodes.content_control_inline.create(null, docsSchema.text('inside'))],
+  ];
+  const tracked = (doc: PmNode): string[] => {
+    const found: string[] = [];
+    doc.descendants((n) => {
+      for (const m of n.marks) if (['insertion', 'deletion', 'formatChange'].includes(m.type.name)) found.push(`${n.type.name}:${m.type.name}`);
+    });
+    return found;
+  };
+
+  it.each(OBJECTS)('inserting a %s is made directly, with a notice, and carries no mark', async (_name, make) => {
+    const state = stateOf([para(run('abc'))], 2);
+    const node = make();
+    const next = apply(state, state.tr.insert(2, node));
+    expect(next.doc.child(0).childCount).toBeGreaterThan(1);
+    expect(tracked(next.doc).filter((t) => !t.startsWith('text:'))).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(/inserted could not be suggested/);
+  });
+
+  it.each(OBJECTS)('deleting a %s is made directly, with a notice', async (name, make) => {
+    const node = make();
+    const doc = docsSchema.node('doc', null, [docsSchema.nodes.paragraph.create(null, [docsSchema.text('a'), node, docsSchema.text('b')])]);
+    const state = EditorState.create({ doc, plugins: [suggestingPlugin(options)] });
+    const next = apply(state, state.tr.delete(2, 2 + node.nodeSize));
+    expect(next.doc.child(0).textContent).toBe('ab');
+    let found = false;
+    next.doc.descendants((n) => {
+      if (n.type.name === name) found = true;
+    });
+    expect(found).toBe(false);
+    expect(tracked(next.doc)).toEqual([]);
+    await flush();
+    expect(setup.notices.flat().join(' ')).toMatch(/was deleted directly/);
+  });
+});
+
+describe('details of what is recorded and settled', () => {
+  it('keeps the marks of a line break when its change is settled', () => {
+    const state = stateOf([para(run('a\nb', { bold: true, revision: { insertion: { id: 'x', author: 'Bo' } } }))]);
+    const next = settleAll(state, 'accept');
+    let marks: string[] | null = null;
+    next.doc.descendants((n) => {
+      if (n.type.name === 'hard_break') marks = n.marks.map((m) => m.type.name);
+    });
+    expect(marks).toEqual(['bold']);
+  });
+
+  it('does not carry the formatting-change record of a pasted paragraph, and keeps the one an Enter copied', () => {
+    const record = { id: 'f', author: 'Bo', previous: { alignment: 'right' } };
+    const pastedParagraph = docsSchema.nodes.paragraph.create({ revisionFormat: record }, docsSchema.text('pasted'));
+    const state = stateOf([para(run('abc'))], 2);
+    const pasted = apply(state, state.tr.replaceWith(0, 0, pastedParagraph));
+    expect(pasted.doc.child(0).textContent).toBe('pasted');
+    expect(pasted.doc.child(0).attrs.revisionFormat).toBeNull();
+    expect(pasted.doc.child(0).attrs.revisionInsertion).toMatchObject({ author: 'Ada' });
+    // Enter inside a paragraph Bo changed the formatting of: both halves keep Bo's record (it is the one change).
+    const bo = stateOf([{ ...para(run('abcd')), revision: { formatChange: record } } as Block], 3);
+    let split = bo;
+    expect(splitBlock(bo, (tr) => (split = bo.apply(tr)))).toBe(true);
+    expect(split.doc.child(0).attrs.revisionFormat).toMatchObject({ id: 'f' });
+    expect(split.doc.child(1).attrs.revisionFormat).toMatchObject({ id: 'f' });
+  });
+
+  it('relies on a mark keeping the very `previous` object it was created with (the recorded set is by identity)', () => {
+    const previous = { bold: true };
+    const mark = docsSchema.marks.formatChange.create({ revisionId: 'a', author: 'Ada', previous });
+    expect(mark.attrs.previous).toBe(previous);
+    expect(mark.addToSet([]).find((m) => m.type.name === 'formatChange')!.attrs.previous).toBe(previous);
+  });
+
+  it('takes back the paragraph mark Enter made when Backspace joins the paragraphs again, also after typing in the new one', () => {
+    let state = stateOf([para(run('abcd'))], 3);
+    state = doCommand(state, splitBlock);
+    state = type(state, 'XY');
+    // Caret at the start of the second paragraph's text, then Backspace over the paragraph mark between the two.
+    const secondStart = state.doc.child(0).nodeSize + 1;
+    state = apply(state, state.tr.setSelection(TextSelection.create(state.doc, secondStart)));
+    const joined = doCommand(state, joinBackward);
+    expect(texts(joined.doc)).toEqual(['abXYcd']);
+    expect(runs(joined.doc).join('|')).toBe('ab:|XY:insertion|cd:');
+    expect(readBlockRevision(joined.doc.child(0).attrs)).toBeUndefined();
+  });
+});
+
 /** A step the plugin does not know: it changes nothing. */
 class UnknownStep extends Step {
   apply(doc: PmNode) {
@@ -372,7 +466,7 @@ describe('when it does nothing', () => {
 
   it('leaves changes from collaborators, undo and redo, and its own alone', () => {
     const state = stateOf([para(run('abc'))], 3);
-    for (const key of ['y-sync$', 'history$', 'y-undo$']) {
+    for (const key of ['y-sync$', 'history$', 'y-undo$', 'suggesting$']) {
       const next = apply(state, state.tr.insertText('X').setMeta(key, true));
       expect(runs(next.doc)).toEqual(['abXc:']);
     }

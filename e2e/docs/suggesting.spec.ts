@@ -164,6 +164,7 @@ test.describe('docs: Suggesting mode', () => {
     await setMode(page, 'Editing');
     await expect(page.getByTestId('suggesting-notice')).toHaveCount(0);
   });
+
   test('D-SUG-06 text typed in the middle of a deletion is an insertion of its own, not part of the deletion', async ({
     page,
   }) => {
@@ -179,5 +180,29 @@ test.describe('docs: Suggesting mode', () => {
     await expect(insertions().filter({ hasText: 'ZZ' })).toHaveCount(1);
     expect((await deletions().allTextContents()).join('')).toBe('world');
     await expect(doc.pages.first()).toContainText('woZZrld');
+  });
+
+  test('D-SUG-07 in the Final view nothing can be typed, also in Suggesting mode, and typing is a suggestion again in All markup', async ({
+    page,
+  }) => {
+    await startSuggesting(page);
+    await doc.typeText('!');
+    await expect(insertions().filter({ hasText: '!' })).toHaveCount(1);
+    await doc.toolbar('Review changes').click();
+    const view = page.getByTestId('review-panel').getByRole('group', { name: 'Show changes as' });
+    await view.getByRole('button', { name: 'Final' }).click();
+    const banner = page.getByTestId('revision-view-banner');
+    await expect(banner).toBeVisible();
+    // A read-only editor takes no focus: click the text and send the keys anyway.
+    await doc.pages.getByText('Hello world').first().click();
+    await page.keyboard.press('Home');
+    await page.keyboard.type('ZZ');
+    await expect(doc.pages.first()).not.toContainText('ZZ');
+    await banner.getByRole('button', { name: 'Switch to All markup' }).click();
+    await expect(banner).toHaveCount(0);
+    await doc.clickText('Hello world');
+    await doc.press('Home');
+    await doc.typeText('ZZ');
+    await expect(insertions().filter({ hasText: 'ZZ' })).toHaveCount(1);
   });
 });
