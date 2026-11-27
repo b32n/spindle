@@ -28,8 +28,11 @@ Not in the current scope; verified absent in code.
 - [ ] **Element animations & a slide-transition library** — present mode ships
       only a single 150 ms cross-fade; there are no per-element animations and
       no transition variety.
-- [ ] **Gradient fills & image/picture fills** — `Fill` supports only `none`
-      and `solid` (`scene/types.ts`). No gradient or picture-fill shapes.
+- [x] **Gradient fills & image/picture fills** — `Fill` has `gradient` (linear, radial, path; stops with alpha),
+      `picture` (stretch or tile, alpha; data URLs only) and `pattern` (rendered as a solid blend of its two colours)
+      next to `none` and `solid`, on shapes, text boxes, table cells and slide backgrounds. The fill controls offer
+      gradient presets and an image fill from a file picker. Still open: a gradient stop editor, a pattern picker,
+      layout backgrounds in the UI, tile offset/mirroring and picture-fill cropping (`a:srcRect`).
 - [ ] **Nested groups** — v1 groups are flat via a shared `groupId`
       (`scene/group.ts`); no group hierarchy.
 - [ ] **Master-slide editing UI** — the model supports masters/layouts and

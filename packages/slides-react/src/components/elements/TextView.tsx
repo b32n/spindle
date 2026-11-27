@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   resolveColor,
-  resolveFill,
   resolveFont,
   isRichTextEmpty,
   type TextElement,
@@ -11,6 +10,7 @@ import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
 import { useDeck, useEditingId } from '../../hooks';
 import { strokeAttrs } from './style';
+import { htmlFill } from './fill';
 
 const V_ALIGN: Record<NonNullable<TextElement['bodyStyle']>['vAlign'] & string, string> = {
   top: 'flex-start',
@@ -32,7 +32,7 @@ export function bodyDefaults(body: TextElement['bodyStyle'], theme: ThemeData): 
 export function TextView({ el, theme, interactive = false }: { el: TextElement; theme: ThemeData; interactive?: boolean }): React.ReactElement {
   const deck = useDeck();
   const body = el.bodyStyle ?? {};
-  const bg = el.fill ? resolveFill(el.fill, theme) : null;
+  const { style: fillStyle, layer: fillLayer } = htmlFill(el.fill, theme);
   const border = strokeAttrs(el.stroke, theme);
   // Only the interactive stage mounts the live editor — never the filmstrip
   // thumbnails or a read-only view (two editors on one element fight over focus).
@@ -46,7 +46,7 @@ export function TextView({ el, theme, interactive = false }: { el: TextElement; 
     height: '100%',
     boxSizing: 'border-box',
     overflow: 'hidden',
-    ...(bg ? { background: bg } : {}),
+    ...fillStyle,
     ...(border ? { border: `${border.strokeWidth}px solid ${border.stroke}` } : {}),
   };
 
@@ -64,6 +64,7 @@ export function TextView({ el, theme, interactive = false }: { el: TextElement; 
 
   return (
     <div style={container}>
+      {fillLayer}
       {editing ? (
         <RichTextEditor elementId={el.id} theme={theme} bodyStyle={body} />
       ) : (

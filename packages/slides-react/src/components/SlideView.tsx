@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { resolveFill } from '@b32nio/spindle-slides-core';
+import { htmlFill } from './elements/fill';
 import { useDeck, useSlide, useSlideElementIds, useTheme } from '../hooks';
 import { ElementView } from './elements/ElementView';
 
@@ -21,10 +22,9 @@ export function SlideView({
   const elementIds = useSlideElementIds(slideId);
   const { w, h } = deck.getSlideSize();
 
-  const background =
-    (slide?.background && resolveFill(slide.background, theme)) ??
-    resolveFill({ kind: 'solid', color: { kind: 'theme', slot: 'lt1' } }, theme) ??
-    '#ffffff';
+  const bg = htmlFill(slide?.background, theme);
+  // No usable background (absent, none, unsafe picture): the theme's light colour, as before.
+  const fallback = resolveFill({ kind: 'solid', color: { kind: 'theme', slot: 'lt1' } }, theme) ?? '#ffffff';
 
   return (
     <div
@@ -33,10 +33,12 @@ export function SlideView({
         position: 'relative',
         width: w,
         height: h,
-        background,
+        ...(bg.style.background ? bg.style : { background: fallback }),
+        ...(bg.layer ? { isolation: 'isolate' } : {}),
         overflow: 'hidden',
       }}
     >
+      {bg.layer}
       {elementIds.map((id) => (
         <ElementView key={id} elementId={id} interactive={interactive} />
       ))}

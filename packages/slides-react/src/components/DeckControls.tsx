@@ -5,11 +5,12 @@
 
 import React, { useState } from 'react';
 import { Plus, Palette, ChevronDown, SquareDashed } from 'lucide-react';
-import { BUILTIN_THEMES, getBuiltinTheme } from '@b32nio/spindle-slides-core';
+import { BUILTIN_THEMES, getBuiltinTheme, type Fill } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { useDeck, useActiveSlideId, useTheme, useSlide } from '../hooks';
 import { Popover } from './Popover';
 import { LayoutThumb } from './LayoutThumb';
+import { FillExtras } from './FillExtras';
 import { TB } from './toolbarUI';
 
 const btn: React.CSSProperties = TB.dropdownButton;
@@ -37,6 +38,7 @@ export function DeckControls(): React.ReactElement {
 
   const hover = (e: React.MouseEvent, on: boolean) => ((e.currentTarget as HTMLElement).style.background = on ? '#f1f4f8' : 'transparent');
   const addSlide = (layoutId: string) => { const s = deck.addSlide({ afterSlideId: activeSlideId, layoutId }); deck.setActiveSlide(s.id); };
+  const setBgFill = (fill: Fill) => deck.setSlideBackground(activeSlideId, fill);
   const setBg = (hex: string) => deck.setSlideBackground(activeSlideId, { kind: 'solid', color: { kind: 'rgb', hex } });
 
   const layoutGrid = (onPick: (id: string) => void) => (
@@ -78,6 +80,9 @@ export function DeckControls(): React.ReactElement {
         <input type="color" value={bgHex} onChange={(e) => setBg(e.target.value)} style={{ width: 40, height: 32, border: '1px solid #d5d9e0', borderRadius: 6, background: 'none', padding: 2, cursor: 'pointer' }} />
         Custom color
       </label>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <FillExtras onPick={(f) => { setBgFill(f); onDone(); }} testId="slide-bg" />
+      </div>
     </div>
   );
 
@@ -118,6 +123,7 @@ export function DeckControls(): React.ReactElement {
         Background
         <input type="color" value={bgHex} onChange={(e) => setBg(e.target.value)} style={{ width: 22, height: 22, border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} />
       </label>
+      <FillExtras onPick={setBgFill} testId="slide-bg" style={{ height: 28, fontSize: 12 }} />
     </div>
   );
 }

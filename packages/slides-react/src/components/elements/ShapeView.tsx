@@ -1,10 +1,11 @@
 import React from 'react';
-import { resolveFill, type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { shapeGeom } from './shapes';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
 import { useEditingId } from '../../hooks';
 import { strokeAttrs } from './style';
+import { paintId, svgFill } from './fill';
 
 export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement; theme: ThemeData; interactive?: boolean }): React.ReactElement {
   const editingId = useEditingId();
@@ -12,7 +13,7 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
   const w = Math.max(1, el.w);
   const h = Math.max(1, el.h);
   const geom = shapeGeom(el.shape, w, h, el.adjustments);
-  const fill = resolveFill(el.fill, theme) ?? 'none';
+  const { defs, fill } = svgFill(el.fill, theme, paintId(el.id), w, h);
   const stroke = strokeAttrs(el.stroke, theme);
 
   const flip = `${el.flipH ? -1 : 1}, ${el.flipV ? -1 : 1}`;
@@ -32,6 +33,7 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={svgStyle}>
+        {defs}
         {geom.type === 'ellipse' ? (
           <ellipse cx={geom.cx} cy={geom.cy} rx={geom.rx} ry={geom.ry} {...geomProps} />
         ) : (

@@ -6,11 +6,12 @@
 // cell being edited. Grid lines use the element's border stroke.
 
 import React, { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import { resolveColor, resolveFill, type Color, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { resolveColor, type Color, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../../context/DeckContext';
 import { inSelection } from '../../interactions/table-selection-store';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
+import { htmlFill } from './fill';
 
 // Translucent tint painted over a selected cell (sits above its own fill, below
 // the text) via a huge inset shadow the cell's overflow:hidden clips flat.
@@ -80,7 +81,7 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
           // A row's manual minimum height (px); content can still push it taller.
           <tr key={r} style={{ height: el.rowHeights?.[r] ? el.rowHeights[r] : undefined }}>
             {row.map((cell, c) => {
-              const bg = cell.fill ? resolveFill(cell.fill, theme) : null;
+              const { style: fillStyle, layer: fillLayer } = htmlFill(cell.fill, theme);
               const isEditing = !!editingCell && editingCell[0] === r && editingCell[1] === c;
               const isSelected = !!cellSel && !isEditing && inSelection(cellSel, r, c);
               // Fill in cell defaults so the static <td> and the live editor
@@ -99,13 +100,14 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
                     border,
                     verticalAlign: cellStyle.vAlign,
                     fontSize: cellStyle.fontSize,
-                    background: bg ?? undefined,
+                    ...fillStyle,
                     boxShadow: isSelected ? SELECT_TINT : undefined,
                     padding: isEditing ? 0 : cellStyle.padding,
                     overflow: 'hidden',
                     boxSizing: 'border-box',
                   }}
                 >
+                  {fillLayer}
                   {isEditing ? (
                     <RichTextEditor elementId={el.id} theme={theme} cell={[r, c]} bodyStyle={cellStyle} />
                   ) : (
