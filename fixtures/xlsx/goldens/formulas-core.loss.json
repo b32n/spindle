@@ -11,16 +11,16 @@
       ]
     },
     {
-      "count": 15,
+      "count": 10,
       "effect": "lost: cannot be calculated (the cells show #NAME?)",
       "id": "xlsx.formulas.unsupported",
       "label": "formula(s) using functions the editor does not have",
       "where": [
-        "CLEAN",
-        "NUMBERVALUE",
         "TEXTBEFORE",
         "TEXTSPLIT",
-        "DAYS"
+        "XNPV",
+        "XIRR",
+        "SLN"
       ]
     },
     {

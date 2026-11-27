@@ -7,7 +7,7 @@ recalculate on load"), the same method as build_syntax_oracle.py:
 
   * the 159-formula probe (fixtures/xlsx/formulas-core.xlsx, formulas from probe_data.FORMULAS, formula in column I of
     sheet "Data" next to its data), and
-  * the cases of conformance_cases.py, each authored with xlsxwriter (`use_future_functions`, so Excel's `_xlfn.`
+  * the cases of conformance_cases.py (batch A) and conformance_cases_b.py (batch B), each authored with xlsxwriter (`use_future_functions`, so Excel's `_xlfn.`
     prefixes are written) on a sheet of its own with the formula in AA1.
 
 A row's `expected` is LibreOffice's value (`oracle: "libreoffice"`). Where LibreOffice differs from Excel the row
@@ -34,6 +34,7 @@ import xlsxwriter  # noqa: E402
 from openpyxl.utils.datetime import to_excel  # noqa: E402
 from xlsxwriter.utility import xl_cell_to_rowcol  # noqa: E402
 
+import conformance_cases_b  # noqa: E402,F401  (appends the batch-B cases to CASES)
 from conformance_cases import CASES  # noqa: E402
 from probe_data import FORMULAS, FORMULA_EXPECTED  # noqa: E402
 
@@ -162,7 +163,7 @@ def case_rows(tmp):
             lo = [[clean(ws.cell(row=i + 1, column=27 + j).value) for j in range(k)] for i in range(r)]
         else:
             lo = clean(ws.cell(row=1, column=27).value)
-        row = {"id": c["id"], "function": c["function"], "formula": c["formula"], "sheet": None, "cell": "AA1", "cells": c["cells"], "group": "batch-a"}
+        row = {"id": c["id"], "function": c["function"], "formula": c["formula"], "sheet": None, "cell": "AA1", "cells": c["cells"], "group": c.get("group", "batch-a")}
         if "spill" in c:
             row["spill"] = list(c["spill"])
         if "excel" in c:
@@ -178,6 +179,9 @@ def case_rows(tmp):
             row.update(expectation="array" if isinstance(lo, list) else kind(lo), expected=lo, oracle="libreoffice")
             if c.get("note"):
                 row["note"] = c["note"]
+            if "unverified" in c:  # LibreOffice's value is kept, but Excel's behaviour is not known to agree
+                row["unverified"] = True
+                row["note"] = c["unverified"]
         rows.append(row)
     return rows
 
@@ -196,7 +200,7 @@ def main():
     with open(OUT, "w") as f:
         json.dump(table, f, indent=1, ensure_ascii=False)
         f.write("\n")
-    print(f"wrote {len(probe)} probe rows and {len(cases)} batch-A rows to {os.path.relpath(OUT, ROOT)}")
+    print(f"wrote {len(probe)} probe rows and {len(cases)} batch rows to {os.path.relpath(OUT, ROOT)}")
 
 
 if __name__ == "__main__":

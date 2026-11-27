@@ -6,7 +6,7 @@
 // change.
 
 import type { EagerFn } from './helpers';
-import { flatten, toNum, toText, toBoolean, looseEquals, wildcardEquals } from './helpers';
+import { checkArity, flatten, toNum, toText, toBoolean, looseEquals, wildcardEquals } from './helpers';
 import { columnIndexToLabel } from '../cell-reference';
 
 /** Normalise a value into a 2D matrix so table functions can index it. */
@@ -75,6 +75,53 @@ function findIndex(
   }
 
   return -1;
+}
+
+/** The part of an array INDEX selects, as half-open row and column bounds (0-based). */
+export interface IndexWindow {
+  rowStart: number;
+  rowEnd: number;
+  colStart: number;
+  colEnd: number;
+}
+
+/**
+ * Resolve INDEX's `(array, row, column, area)` against an array of `rows` x `cols`: a row or column of 0 (or one left
+ * blank, `INDEX(a,,2)`) selects the whole column or row, and a lone index into a table selects the whole row.
+ * `values` holds the evaluated arguments, `values[0]` being the array itself.
+ */
+export function indexWindow(rows: number, cols: number, values: unknown[]): IndexWindow {
+  const asIndex = (v: unknown): number => (v === undefined ? 0 : Math.trunc(toNum(v)));
+  let r: number;
+  let c: number;
+  if (values.length >= 3) {
+    if (values.length === 4 && values[3] !== undefined && asIndex(values[3]) !== 1) throw new Error('#REF!'); // only one area exists
+    r = asIndex(values[1]);
+    c = asIndex(values[2]);
+  } else if (values.length === 1) {
+    if (rows !== 1 && cols !== 1) throw new Error('#REF!');
+    r = 1;
+    c = 1;
+  } else if (rows === 1) {
+    // Single-axis form: INDEX(row_vector, n) is the n-th column, INDEX(col_vector, n) the n-th row,
+    // and INDEX(table, n) the whole n-th row.
+    r = 1;
+    c = asIndex(values[1]);
+  } else if (cols === 1) {
+    r = asIndex(values[1]);
+    c = 1;
+  } else {
+    r = asIndex(values[1]);
+    c = 0;
+  }
+  if (r < 0 || c < 0) throw new Error('#VALUE!');
+  if (r > rows || c > cols) throw new Error('#REF!');
+  return {
+    rowStart: Math.max(r - 1, 0),
+    rowEnd: r === 0 ? rows : r,
+    colStart: Math.max(c - 1, 0),
+    colEnd: c === 0 ? cols : c,
+  };
 }
 
 export const lookupFunctions: Record<string, EagerFn> = {
@@ -170,26 +217,11 @@ export const lookupFunctions: Record<string, EagerFn> = {
   },
 
   INDEX: (args) => {
+    checkArity(args, 1, 4);
     const matrix = toMatrix(args[0]);
-    const rows = matrix.length;
-    const cols = matrix[0]?.length ?? 0;
-    let r = args[1] !== undefined ? toNum(args[1]) : 1;
-    let c = args[2] !== undefined ? toNum(args[2]) : 1;
-
-    // Single-axis form: INDEX(row_vector, n) or INDEX(col_vector, n).
-    if (args[2] === undefined) {
-      if (rows === 1) {
-        c = r;
-        r = 1;
-      } else if (cols === 1) {
-        c = 1;
-      } else {
-        throw new Error('#REF!');
-      }
-    }
-
-    if (r < 1 || c < 1 || r > rows || c > cols) throw new Error('#REF!');
-    return matrix[r - 1][c - 1];
+    const w = indexWindow(matrix.length, matrix[0]?.length ?? 0, args);
+    if (w.rowEnd - w.rowStart === 1 && w.colEnd - w.colStart === 1) return matrix[w.rowStart][w.colStart];
+    return matrix.slice(w.rowStart, w.rowEnd).map((row) => row.slice(w.colStart, w.colEnd));
   },
 
   LOOKUP: (args) => {

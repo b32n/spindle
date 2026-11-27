@@ -1,5 +1,5 @@
-// The formula conformance suite (plan S11, L5): every row of formula-conformance-oracle.json (the 159-formula
-// probe plus the batch-A cases, values recalculated by LibreOffice by fixtures/xlsx/generators/build_conformance_oracle.py)
+// The formula conformance suite (plan S11/S12, L5): every row of formula-conformance-oracle.json (the 159-formula
+// probe plus the batch-A and batch-B cases, values recalculated by LibreOffice by fixtures/xlsx/generators/build_conformance_oracle.py)
 // is run through the engine. Numbers match to a relative 1e-9, text and booleans exactly, errors by code.
 //
 // Rows the engine cannot pass yet (functions of later batches, text and date functions, syntax S4 handles) are in
@@ -17,7 +17,7 @@ interface OracleRow {
   sheet: string | null;
   cell: string;
   cells: Record<string, unknown>;
-  group: 'probe' | 'batch-a';
+  group: 'probe' | 'batch-a' | 'batch-b';
   expectation: 'value' | 'error' | 'array';
   expected: unknown;
   oracle: 'libreoffice';
@@ -40,13 +40,8 @@ const oracle = JSON.parse(
 
 /** Probe rows the engine fails today, with the reason, until the PR that fixes them lands. */
 const KNOWN_FAILING: Record<string, string> = {
-  'probe-063': 'CLEAN is a batch B text function (S12)',
-  'probe-065': 'NUMBERVALUE is a batch B text function (S12)',
-  'probe-066': 'TEXTBEFORE is a batch B text function (S12)',
-  'probe-067': 'TEXTSPLIT is a batch B text function (S12)',
-  'probe-078': 'DAYS is a batch B date function (S12)',
-  'probe-079': 'YEARFRAC is a batch B date function (S12)',
-  'probe-080': 'ISOWEEKNUM is a batch B date function (S12)',
+  'probe-066': 'deferred until Excel-computed files (D8), plan S12: LibreOffice has no TEXTBEFORE',
+  'probe-067': 'deferred until Excel-computed files (D8), plan S12: LibreOffice has no TEXTSPLIT',
   'probe-104': 'XNPV is a batch B finance function (S12)',
   'probe-105': 'XIRR is a batch B finance function (S12)',
   'probe-106': 'SLN is a batch B finance function (S12)',
@@ -132,6 +127,7 @@ describe('conformance oracle table', () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const r of oracle.rows) {
       expect(r.oracle).toBe('libreoffice');
+      if (r.unverified && !r.excel) expect(r.note).toBeTruthy(); // LibreOffice's value, flagged: say why
       if (r.excel) {
         expect(r.unverified).toBe(true);
         expect(r.note).toBeTruthy();
@@ -152,6 +148,24 @@ describe('conformance oracle table', () => {
     const thin = [...perFunction].filter(([, n]) => n < 3).map(([f]) => f);
     expect(thin).toEqual([]);
     expect([...perFunction.keys()].sort()).toEqual(BATCH_A.slice().sort());
+  });
+
+  it('has at least 120 batch-B rows and three per batch-B function', () => {
+    const batchB = oracle.rows.filter((r) => r.group === 'batch-b');
+    expect(batchB.length).toBeGreaterThanOrEqual(120);
+    const perFunction = new Map<string, number>();
+    for (const r of batchB) perFunction.set(r.function, (perFunction.get(r.function) ?? 0) + 1);
+    expect([...perFunction].filter(([, n]) => n < 3).map(([f]) => f)).toEqual([]);
+    expect([...perFunction.keys()].sort()).toEqual(BATCH_B.slice().sort());
+  });
+
+  it('marks every Excel-documented row of a function LibreOffice lacks as unverified', () => {
+    const lacking = new Set(['TEXTBEFORE', 'TEXTAFTER', 'TEXTSPLIT']);
+    for (const r of oracle.rows.filter((row) => lacking.has(row.function))) {
+      expect(r.excel).toBe(true);
+      expect(r.unverified).toBe(true);
+      expect(r.note).toContain('LibreOffice 25.2 has no');
+    }
   });
 
   it('knownFailing lists only rows of the table, each with a reason', () => {
@@ -211,6 +225,29 @@ const BATCH_A = [
   'FORECAST.LINEAR',
   'GEOMEAN',
   'FREQUENCY',
+];
+
+const BATCH_B = [
+  'CLEAN',
+  'NUMBERVALUE',
+  'UNICHAR',
+  'UNICODE',
+  'T',
+  'FIXED',
+  'DOLLAR',
+  'BASE',
+  'DECIMAL',
+  'ROMAN',
+  'ARABIC',
+  'ISNONTEXT',
+  'EDATE',
+  'DAYS',
+  'DAYS360',
+  'YEARFRAC',
+  'ISOWEEKNUM',
+  'WORKDAY.INTL',
+  'NETWORKDAYS.INTL',
+  'INDEX',
 ];
 
 describe('conformance rows the engine passes', () => {

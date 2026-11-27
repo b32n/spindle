@@ -6886,6 +6886,3308 @@
     ]
    ],
    "oracle": "libreoffice"
+  },
+  {
+   "id": "clean-01",
+   "function": "CLEAN",
+   "formula": "CLEAN(\"a\"&CHAR(7)&\"b\"&CHAR(10)&\"c\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "abc",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "clean-02",
+   "function": "CLEAN",
+   "formula": "CLEAN(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x y"
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "x y",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "clean-03",
+   "function": "CLEAN",
+   "formula": "CLEAN(123)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "123",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "clean-04",
+   "function": "CLEAN",
+   "formula": "CLEAN(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "#N/A"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#N/A",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "clean-05",
+   "function": "CLEAN",
+   "formula": "CLEAN(\"a\"&CHAR(31)&CHAR(1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "a",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "clean-06",
+   "function": "CLEAN",
+   "formula": "LEN(CLEAN(\"a\"&CHAR(127)))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 2,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 1,
+   "note": "Excel removes only the 32 characters 0-31; LibreOffice also removes DEL (127)"
+  },
+  {
+   "id": "clean-07",
+   "function": "CLEAN",
+   "formula": "CLEAN(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "p",
+    "A2": "q"
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "p"
+    ],
+    [
+     "q"
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-01",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1.234,5\",\",\",\".\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1234.5,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-02",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"2.500,27\",\",\",\".\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 2500.27,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-03",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"3%%\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.0003,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-04",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\" 3 000 \")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 3000,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-05",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1,234.5\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1234.5,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "LibreOffice's NUMBERVALUE has no default separators and rejects an empty text; Excel uses the locale's separators and returns 0 for \"\""
+  },
+  {
+   "id": "numbervalue-06",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "LibreOffice's NUMBERVALUE has no default separators and rejects an empty text; Excel uses the locale's separators and returns 0 for \"\""
+  },
+  {
+   "id": "numbervalue-07",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"abc\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-08",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1.2.3\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-09",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1e3\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1000,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-10",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1,5\",\",\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1.5,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-11",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1.5\",\"..\",\",\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1.5,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel uses the first character of a multi-character separator; LibreOffice rejects it"
+  },
+  {
+   "id": "numbervalue-12",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1.5.5\",\".\",\",\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-13",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1,5.5,5\",\".\",\",\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-14",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"1\",\".\",\".\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-15",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 12.5
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 12.5,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "LibreOffice's NUMBERVALUE has no default separators and rejects an empty text; Excel uses the locale's separators and returns 0 for \"\""
+  },
+  {
+   "id": "numbervalue-16",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(\"-5%\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": -0.05,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "numbervalue-17",
+   "function": "NUMBERVALUE",
+   "formula": "NUMBERVALUE(A1:A2,\",\",\".\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "1,5",
+    "A2": "2,5"
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1.5
+    ],
+    [
+     2.5
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unichar-01",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(65)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "A",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unichar-02",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(8364)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "€",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unichar-03",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(128512)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "😀",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unichar-04",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "_x0000_",
+   "note": "LibreOffice returns the NUL character; Excel reports #VALUE!"
+  },
+  {
+   "id": "unichar-05",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(1114112)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unichar-06",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(55296)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "",
+   "note": "A surrogate half is #VALUE! in Excel; LibreOffice returns an empty text"
+  },
+  {
+   "id": "unichar-07",
+   "function": "UNICHAR",
+   "formula": "UNICHAR(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 97,
+    "A2": 98
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "a"
+    ],
+    [
+     "b"
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unicode-01",
+   "function": "UNICODE",
+   "formula": "UNICODE(\"A\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 65,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unicode-02",
+   "function": "UNICODE",
+   "formula": "UNICODE(\"€\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 8364,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unicode-03",
+   "function": "UNICODE",
+   "formula": "UNICODE(\"😀x\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 128512,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unicode-04",
+   "function": "UNICODE",
+   "formula": "UNICODE(\"\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unicode-05",
+   "function": "UNICODE",
+   "formula": "UNICODE(\"abc\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 97,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "unicode-06",
+   "function": "UNICODE",
+   "formula": "UNICODE(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "a",
+    "A2": "b"
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     97
+    ],
+    [
+     98
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-01",
+   "function": "T",
+   "formula": "T(\"abc\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "abc",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-02",
+   "function": "T",
+   "formula": "T(1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-03",
+   "function": "T",
+   "formula": "T(TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-04",
+   "function": "T",
+   "formula": "T(NA())",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#N/A",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-05",
+   "function": "T",
+   "formula": "T(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "x",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-06",
+   "function": "T",
+   "formula": "T(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 5
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "t-07",
+   "function": "T",
+   "formula": "T(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "p",
+    "A2": 7
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "p"
+    ],
+    [
+     ""
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-01",
+   "function": "FIXED",
+   "formula": "FIXED(1234.5678,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1,234.57",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-02",
+   "function": "FIXED",
+   "formula": "FIXED(1234.5678,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1,235",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-03",
+   "function": "FIXED",
+   "formula": "FIXED(1234.5678,-2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1,200",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-04",
+   "function": "FIXED",
+   "formula": "FIXED(-1234.5678,1,TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "-1234.6",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-05",
+   "function": "FIXED",
+   "formula": "FIXED(0.5,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-06",
+   "function": "FIXED",
+   "formula": "FIXED(1234.5678)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1,234.57",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-07",
+   "function": "FIXED",
+   "formula": "FIXED(1234.5678,,TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1234.57",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-08",
+   "function": "FIXED",
+   "formula": "FIXED(1.005,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1.01",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "1.00",
+   "note": "Excel rounds the decimal value (1.005 is 1.01); LibreOffice rounds the binary double (1.00)"
+  },
+  {
+   "id": "fixed-09",
+   "function": "FIXED",
+   "formula": "FIXED(-0.4,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "0",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-10",
+   "function": "FIXED",
+   "formula": "FIXED(1234567.891,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1,234,567.9",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-11",
+   "function": "FIXED",
+   "formula": "FIXED(A1,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "fixed-12",
+   "function": "FIXED",
+   "formula": "FIXED(A1:A2,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1.25,
+    "A2": 2.35
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "1.3"
+    ],
+    [
+     "2.4"
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "dollar-01",
+   "function": "DOLLAR",
+   "formula": "DOLLAR(1234.567)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "$1,234.57",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "dollar-02",
+   "function": "DOLLAR",
+   "formula": "DOLLAR(1234.567,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "$1,235",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "dollar-03",
+   "function": "DOLLAR",
+   "formula": "DOLLAR(1234.567,-2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "$1,200",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "dollar-04",
+   "function": "DOLLAR",
+   "formula": "DOLLAR(0.5,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "$1",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "dollar-05",
+   "function": "DOLLAR",
+   "formula": "DOLLAR(-1234.567)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "($1,234.57)",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "-$1,234.57",
+   "note": "Excel writes a negative amount in parentheses (its currency format); LibreOffice with a minus sign"
+  },
+  {
+   "id": "dollar-06",
+   "function": "DOLLAR",
+   "formula": "DOLLAR(-5,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "($5)",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "-$5",
+   "note": "Excel writes a negative amount in parentheses (its currency format); LibreOffice with a minus sign"
+  },
+  {
+   "id": "base-01",
+   "function": "BASE",
+   "formula": "BASE(255,16)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "FF",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "base-02",
+   "function": "BASE",
+   "formula": "BASE(255,2,10)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "0011111111",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "base-03",
+   "function": "BASE",
+   "formula": "BASE(0,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "0",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "base-04",
+   "function": "BASE",
+   "formula": "BASE(35,36)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "Z",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "base-05",
+   "function": "BASE",
+   "formula": "BASE(7,2,4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "0111",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "base-06",
+   "function": "BASE",
+   "formula": "BASE(1.9,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "base-07",
+   "function": "BASE",
+   "formula": "BASE(-1,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "base-08",
+   "function": "BASE",
+   "formula": "BASE(10,37)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "base-09",
+   "function": "BASE",
+   "formula": "BASE(255,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "base-10",
+   "function": "BASE",
+   "formula": "BASE(255,16,256)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FF",
+   "note": "Excel allows a minimum length of at most 255; LibreOffice pads further"
+  },
+  {
+   "id": "base-11",
+   "function": "BASE",
+   "formula": "BASE(A1:A2,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 5,
+    "A2": 6
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "101"
+    ],
+    [
+     "110"
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "decimal-01",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"FF\",16)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 255,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "decimal-02",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"ff\",16)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 255,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "decimal-03",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"zz\",36)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1295,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "decimal-04",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"11\",2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 3,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "decimal-05",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"\",2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "decimal-06",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"12\",2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "decimal-07",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"FF\",37)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "decimal-08",
+   "function": "DECIMAL",
+   "formula": "DECIMAL(\"1.1\",2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "roman-01",
+   "function": "ROMAN",
+   "formula": "ROMAN(499)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "CDXCIX",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-02",
+   "function": "ROMAN",
+   "formula": "ROMAN(499,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "LDVLIV",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-03",
+   "function": "ROMAN",
+   "formula": "ROMAN(499,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "XDIX",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-04",
+   "function": "ROMAN",
+   "formula": "ROMAN(499,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "VDIV",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-05",
+   "function": "ROMAN",
+   "formula": "ROMAN(499,4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "ID",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-06",
+   "function": "ROMAN",
+   "formula": "ROMAN(1994)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "MCMXCIV",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-07",
+   "function": "ROMAN",
+   "formula": "ROMAN(3999)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "MMMCMXCIX",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-08",
+   "function": "ROMAN",
+   "formula": "ROMAN(2024,TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "MMXXIV",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-09",
+   "function": "ROMAN",
+   "formula": "ROMAN(2024,FALSE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "MMXXIV",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-10",
+   "function": "ROMAN",
+   "formula": "ROMAN(0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-11",
+   "function": "ROMAN",
+   "formula": "ROMAN(4000)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-12",
+   "function": "ROMAN",
+   "formula": "ROMAN(-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-13",
+   "function": "ROMAN",
+   "formula": "ROMAN(10,5)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "roman-14",
+   "function": "ROMAN",
+   "formula": "ROMAN(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 4,
+    "A2": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "IV"
+    ],
+    [
+     "IX"
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "arabic-01",
+   "function": "ARABIC",
+   "formula": "ARABIC(\"MCMXCIX\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1999,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "arabic-02",
+   "function": "ARABIC",
+   "formula": "ARABIC(\"mmxxiv\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 2024,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "arabic-03",
+   "function": "ARABIC",
+   "formula": "ARABIC(\"\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "arabic-04",
+   "function": "ARABIC",
+   "formula": "ARABIC(\"ABC\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "arabic-05",
+   "function": "ARABIC",
+   "formula": "ARABIC(\"LVII\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 57,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "arabic-06",
+   "function": "ARABIC",
+   "formula": "ARABIC(\"-XII\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": -12,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reads a leading minus as a negative number; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "arabic-07",
+   "function": "ARABIC",
+   "formula": "ARABIC(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "IV",
+    "A2": "IX"
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     4
+    ],
+    [
+     9
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-01",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(\"a\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": false,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-02",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": true,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-03",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": true,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-04",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(\"\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": false,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-05",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": true,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-06",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "#N/A"
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": true,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isnontext-07",
+   "function": "ISNONTEXT",
+   "formula": "ISNONTEXT(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": false,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "edate-01",
+   "function": "EDATE",
+   "formula": "EDATE(60,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 60,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "edate-02",
+   "function": "EDATE",
+   "formula": "EDATE(31,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 60,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "edate-03",
+   "function": "EDATE",
+   "formula": "EDATE(61,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 32,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 33,
+   "note": "Excel's calendar has a 29 February 1900 (serial 60) that LibreOffice's does not"
+  },
+  {
+   "id": "edate-04",
+   "function": "EDATE",
+   "formula": "EDATE(DATE(2021,1,31),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44255,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "edate-05",
+   "function": "EDATE",
+   "formula": "EDATE(DATE(2020,2,29),12)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44255,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-01",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(2021,3,1),DATE(2021,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 59,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-02",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(2021,1,1),DATE(2021,3,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": -59,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-03",
+   "function": "DAYS",
+   "formula": "DAYS(\"2021-03-01\",\"2021-01-01\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 59,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-04",
+   "function": "DAYS",
+   "formula": "DAYS(A1,B1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44261.9,
+    "B1": 44201.1
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 60.8000000000029,
+   "oracle": "libreoffice",
+   "unverified": true,
+   "note": "Whether Excel truncates the time of day of numeric arguments is unverified; the engine keeps it, as LibreOffice does"
+  },
+  {
+   "id": "days-05",
+   "function": "DAYS",
+   "formula": "DAYS(5,A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-06",
+   "function": "DAYS",
+   "formula": "DAYS(-1,5)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": -6,
+   "note": "A negative date is #NUM! in Excel; LibreOffice computes with it"
+  },
+  {
+   "id": "days-07",
+   "function": "DAYS",
+   "formula": "DAYS(61,59)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 2,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-08",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(1900,3,1),DATE(1900,2,28))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 2,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 1,
+   "note": "Excel's calendar has a 29 February 1900 (serial 60) that LibreOffice's does not"
+  },
+  {
+   "id": "days-09",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(1900,3,1),DATE(1900,2,29))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 0,
+   "note": "Excel's calendar has a 29 February 1900 (serial 60) that LibreOffice's does not"
+  },
+  {
+   "id": "days-10",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(1900,3,1),DATE(1900,2,30))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": -1,
+   "note": "Excel's calendar has a 29 February 1900 (serial 60) that LibreOffice's does not: day overflow counts from the 29th"
+  },
+  {
+   "id": "days-11",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(1900,3,0),DATE(1900,2,28))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 0,
+   "note": "Excel's calendar has a 29 February 1900 (serial 60) that LibreOffice's does not"
+  },
+  {
+   "id": "days-12",
+   "function": "DAYS",
+   "formula": "DAYS(EOMONTH(1,1),59)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": -27,
+   "note": "Excel's calendar has a 29 February 1900 (serial 60) that LibreOffice's does not"
+  },
+  {
+   "id": "days-13",
+   "function": "DAYS",
+   "formula": "DAYS(DATE(2024,3,1),DATE(2024,2,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 29,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days-14",
+   "function": "DAYS",
+   "formula": "DAYS(A1:A2,DATE(2021,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44200,
+    "A2": 44300
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     3
+    ],
+    [
+     103
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-01",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,1,31),DATE(2021,2,28))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 28,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-02",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2020,1,30),DATE(2020,3,31))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 60,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-03",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,1,15),DATE(2021,2,28))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 43,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-04",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,1,31),DATE(2021,2,28),TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 28,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-05",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,2,28),DATE(2021,3,31),TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 32,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-06",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,2,28),DATE(2021,3,31))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 30,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-07",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,3,31),DATE(2021,1,31))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": -60,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-08",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,1,1),DATE(2022,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 360,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-09",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,2,28),DATE(2021,2,28))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": -2,
+   "note": "Excel's 30/360 (US) method makes a last day of February at both ends the 30th, so equal dates are 0 days apart; LibreOffice counts 28 February to 28 February as -2"
+  },
+  {
+   "id": "days360-10",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2020,2,29),DATE(2021,2,28))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 360,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 358,
+   "note": "Excel's 30/360 (US) method makes a last day of February at both ends the 30th, so equal dates are 0 days apart; LibreOffice counts 28 February to 28 February as -2"
+  },
+  {
+   "id": "days360-11",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,2,28),DATE(2021,2,28),TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-12",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,1,1),A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-13",
+   "function": "DAYS360",
+   "formula": "DAYS360(A1:A2,DATE(2021,12,31))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44200,
+    "A2": 44300
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     357
+    ],
+    [
+     257
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "days360-14",
+   "function": "DAYS360",
+   "formula": "DAYS360(DATE(2021,1,1),DATE(2021,12,31),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 359,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-01",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,1),DATE(2021,7,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.5,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-02",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,1),DATE(2021,7,1),0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.5,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-03",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2020,3,1),DATE(2020,6,1),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.251366120218579,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-04",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2019,3,1),DATE(2020,6,1),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1.2530779753762,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-05",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2020,3,1),DATE(2021,2,28),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.997260273972603,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-06",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2019,2,1),DATE(2021,5,1),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 2.24452554744526,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-07",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,1),DATE(2021,3,1),2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.163888888888889,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-08",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,1),DATE(2021,3,1),3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.161643835616438,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-09",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,31),DATE(2021,3,31),4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.166666666666667,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-10",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,3,1),DATE(2021,1,1),2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.163888888888889,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-11",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,2,28),DATE(2021,3,31),0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.0861111111111111,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-12",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,6,1),DATE(2021,6,1),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "yearfrac-13",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,1),DATE(2021,3,1),5)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "yearfrac-14",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(2021,1,1),DATE(2021,3,1),-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "Excel reports #NUM! for an argument out of range; LibreOffice reports #VALUE!"
+  },
+  {
+   "id": "yearfrac-15",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(DATE(1900,1,1),DATE(1900,12,31),1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0.9972677595628415,
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 0.997260273972603,
+   "note": "Counting 1900 as a leap year (Excel's calendar has a 29 February 1900) is unverified; LibreOffice's calendar says 364/365"
+  },
+  {
+   "id": "yearfrac-16",
+   "function": "YEARFRAC",
+   "formula": "YEARFRAC(A1:A2,DATE(2022,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44197,
+    "A2": 44378
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     0.5
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-01",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(DATE(2021,1,3))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 53,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-02",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(DATE(2021,1,4))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-03",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(DATE(2024,12,30))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-04",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(DATE(2020,12,31))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 53,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-05",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(DATE(2026,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-06",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(DATE(2023,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 52,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-07",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-08",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 52,
+   "note": "A negative date is #NUM! in Excel; LibreOffice computes with it"
+  },
+  {
+   "id": "isoweeknum-09",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(61)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 9,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "isoweeknum-10",
+   "function": "ISOWEEKNUM",
+   "formula": "ISOWEEKNUM(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44200,
+    "A2": 44300
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     15
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-01",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44211,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-02",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,11)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44209,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-03",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,17)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44209,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-04",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44211,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-05",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,\"0000011\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44211,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-06",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,\"1000001\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44211,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-07",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,15),-5)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44204,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-08",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,16),0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44212,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-09",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,1,D1:E1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "D1": 44207,
+    "D2": 44208,
+    "E1": 44214
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44215,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-10",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,,D1:E1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "D1": 44207,
+    "D2": 44208,
+    "E1": 44214
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44215,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-11",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,20),-5,1,{44207,44208,44214})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44204,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-12",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),1,1,{44200,44200,44201})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44202,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-13",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,\"1111111\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-14",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,8)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
+  },
+  {
+   "id": "workday_intl-15",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,\"1\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "unverified": true,
+   "note": "How Excel reads a weekend given as text that is no seven-character string is unverified; the engine says #VALUE!"
+  },
+  {
+   "id": "workday_intl-16",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),10,\"01\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-17",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-18",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(61,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 62,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-19",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(A1:A2,1,17)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44200,
+    "A2": 44300
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     44201
+    ],
+    [
+     44301
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "workday_intl-20",
+   "function": "WORKDAY.INTL",
+   "formula": "WORKDAY.INTL(DATE(2021,1,1),1,1,D1:D2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "D1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": 44200,
+   "note": "A text in the holidays is #VALUE! in Excel; LibreOffice ignores it"
+  },
+  {
+   "id": "networkdays_intl-01",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 21,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-02",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),11)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 26,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-03",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),7)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 21,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-04",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),\"0000011\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 21,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-05",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),\"1010101\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 13,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-06",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,31),DATE(2021,1,1))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": -21,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-07",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),1,D1:E1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "D1": 44207,
+    "D2": 44208,
+    "E1": 44214
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 19,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-08",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),,D1:E1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "D1": 44207,
+    "D2": 44208,
+    "E1": 44214
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 19,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-09",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),1,{44207,44208,44211})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 18,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-10",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,2),DATE(2021,1,3))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-11",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,4),DATE(2021,1,4))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 1,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-12",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),\"1111111\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 0,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-13",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),DATE(2021,1,31),0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#VALUE!",
+   "note": "LibreOffice reports an invalid argument (Err:502) as #VALUE!; Excel gives #NUM!"
+  },
+  {
+   "id": "networkdays_intl-14",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(DATE(2021,1,1),A1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "x"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-15",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(1,61)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 44,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "networkdays_intl-16",
+   "function": "NETWORKDAYS.INTL",
+   "formula": "NETWORKDAYS.INTL(A1:A2,DATE(2021,12,31),11)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 44200,
+    "A2": 44300
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     311
+    ],
+    [
+     225
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-01",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,0,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     2
+    ],
+    [
+     5
+    ],
+    [
+     8
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-02",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,2,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     4,
+     5,
+     6
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-03",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     3
+    ],
+    [
+     6
+    ],
+    [
+     9
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-04",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,3,)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-05",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,0,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     6
+    ],
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-06",
+   "function": "INDEX",
+   "formula": "SUM(INDEX(A1:C3,0,2))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 15,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-07",
+   "function": "INDEX",
+   "formula": "SUM(INDEX(A1:C3,2,0))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 15,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-08",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     4,
+     5,
+     6
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-09",
+   "function": "INDEX",
+   "formula": "INDEX(A1:A3,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     4
+    ],
+    [
+     7
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-10",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C1,0,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     2
+    ]
+   ],
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-11",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,4,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#REF!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-12",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,0,4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#REF!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-13",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,-1,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-14",
+   "function": "INDEX",
+   "formula": "MAX(INDEX(A1:C3,0,2))-MIN(INDEX(A1:C3,0,2))",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 6,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-15",
+   "function": "INDEX",
+   "formula": "INDEX(A1:C3,2,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": 5,
+   "oracle": "libreoffice"
+  },
+  {
+   "id": "index-16",
+   "function": "INDEX",
+   "formula": "INDEX(A:C,0,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "B2": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     2
+    ],
+    [
+     5
+    ]
+   ],
+   "oracle": "libreoffice"
   }
  ]
 }

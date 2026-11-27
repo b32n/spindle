@@ -29,6 +29,15 @@ function setup(names = ['Sheet1', 'Sheet2', 'Sheet3']) {
   return { sheets, resolver, current, stable, text, back };
 }
 
+describe('an omitted argument', () => {
+  it('renders as nothing, so the formula text survives', () => {
+    const { stable, text } = setup();
+    expect(text(stable('=NUMBERVALUE(A1,,";")'))).toBe('=NUMBERVALUE(A1,,";")');
+    expect(text(stable('=INDEX(A1:C3,,2)'))).toBe('=INDEX(A1:C3,,2)');
+    expect(text(stable('=WORKDAY.INTL(A1,2,,A2:A3)'))).toBe('=WORKDAY.INTL(A1,2,,A2:A3)');
+  });
+});
+
 describe('numeric <-> stable conversion', () => {
   it.each([
     '=1+2*3', '="a"&"b"', '=TRUE', '=#NULL!', '=Name1', '=A1', '=$B$2+C3', '=A1:B2', '=SUM(A:A)', '=SUM($B:$D)', '=SUM(1:1)',

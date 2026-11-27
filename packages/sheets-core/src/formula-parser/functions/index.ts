@@ -10,12 +10,15 @@ import { statsFunctions } from './stats';
 import { statsExtFunctions } from './stats-ext';
 import { aggregateFunctions } from './aggregate';
 import { dateFunctions } from './date';
+import { dateExtFunctions } from './date-ext';
+import { textExtFunctions } from './text-ext';
 import { informationEagerFunctions, informationLazyFunctions } from './information';
 import { financialFunctions } from './financial';
 import { referenceFunctions } from './reference';
 import { arrayFunctions } from './array';
 
 export type { EagerFn, LazyFn, RefFn } from './helpers';
+export { omittableArgFunctions } from './omittable';
 
 /** Functions whose arguments are fully evaluated before the function runs. */
 export const eagerFunctions: Record<string, EagerFn> = {
@@ -24,10 +27,12 @@ export const eagerFunctions: Record<string, EagerFn> = {
   ...aggregateFunctions,
   ...logicalEagerFunctions,
   ...textFunctions,
+  ...textExtFunctions,
   ...lookupFunctions,
   ...statsFunctions,
   ...statsExtFunctions,
   ...dateFunctions,
+  ...dateExtFunctions,
   ...informationEagerFunctions,
   ...financialFunctions,
   ...arrayFunctions,

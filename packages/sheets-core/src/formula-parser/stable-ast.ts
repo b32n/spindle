@@ -294,7 +294,7 @@ function renderNode(
   const render = (n: StableFormulaNode) => renderNode(n, resolver, currentSheet);
   switch (node.type) {
     case 'number':
-      return String(node.value);
+      return node.value === undefined ? '' : String(node.value); // an omitted argument
     case 'string':
       return quoteString(String(node.value));
     case 'variable':

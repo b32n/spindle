@@ -44,12 +44,6 @@
       "sheet": "Data"
     },
     {
-      "actual": "\"#NAME? Function CLEAN not found\"",
-      "cell": "I63",
-      "expected": "\"a\"",
-      "sheet": "Data"
-    },
-    {
       "actual": "\"#NAME? Function _XLFN.NUMBERVALUE not found\"",
       "cell": "I65",
       "expected": "1.5",
@@ -71,12 +65,6 @@
       "actual": "\"#NAME? Function _XLFN.DAYS not found\"",
       "cell": "I78",
       "expected": "31",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function YEARFRAC not found\"",
-      "cell": "I79",
-      "expected": "0.5",
       "sheet": "Data"
     },
     {
@@ -120,17 +108,29 @@
       "cell": "I105",
       "expected": "0.417886145227093",
       "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function SLN not found\"",
+      "cell": "I106",
+      "expected": "180",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function _XLFN.XLOOKUP not found\"",
+      "cell": "I123",
+      "expected": "3",
+      "sheet": "Data"
     }
   ],
   "formulaCells": 159,
-  "matched": 125,
+  "matched": 127,
   "mismatchClasses": {
     "boolean -> error": 1,
     "error -> error": 1,
-    "number -> error": 24,
-    "text -> error": 8
+    "number -> error": 23,
+    "text -> error": 7
   },
-  "mismatched": 34,
+  "mismatched": 32,
   "passthrough": 0,
   "status": "ok",
   "uncached": 0,

@@ -54,6 +54,15 @@ export const informationLazyFunctions: Record<string, LazyFn> = {
     }
   },
 
+  ISNONTEXT: (thunks) => {
+    try {
+      const v = thunks[0]();
+      return !(typeof v === 'string' && !isErrorValue(v)); // blanks, numbers, logicals and errors are not text
+    } catch {
+      return true; // an error is not text
+    }
+  },
+
   ISTEXT: (thunks) => {
     try {
       const v = thunks[0]();
