@@ -12173,6 +12173,3113 @@
    "expectation": "value",
    "expected": 45,
    "oracle": "libreoffice"
+  },
+  {
+   "id": "arraytotext-01",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT(A1:B2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": "x",
+    "B2": true
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1, 2, x, TRUE",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "arraytotext-02",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT(A1:B2,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": "x",
+    "B2": true
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "{1,2;\"x\",TRUE}",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "arraytotext-03",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT(A1:B1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "=0.1+0.2",
+    "B1": "=1E+21"
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "0.3, 1E+21",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "arraytotext-04",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT({1,2;3,4})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "1, 2, 3, 4",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "arraytotext-05",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT({\"a\",\"b\"},1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "{\"a\",\"b\"}",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "arraytotext-06",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 3,
+    "A2": "#N/A"
+   },
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "3, #N/A",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "arraytotext-07",
+   "function": "ARRAYTOTEXT",
+   "formula": "ARRAYTOTEXT(A1:A2,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no ARRAYTOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-01",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(\"a\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "a",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-02",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(\"a\",1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "\"a\"",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-03",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(0.1+0.2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "0.3",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-04",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(5,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "5",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-05",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "TRUE",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-06",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(A1,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "#N/A"
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#N/A",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-07",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(\"say \"\"hi\"\"\",1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "expectation": "value",
+   "expected": "\"say \"\"hi\"\"\"",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "valuetotext-08",
+   "function": "VALUETOTEXT",
+   "formula": "VALUETOTEXT(A1:A2,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": "p",
+    "A2": 7
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     "\"p\""
+    ],
+    [
+     "7"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no VALUETOTEXT; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "choosecols-01",
+   "function": "CHOOSECOLS",
+   "formula": "CHOOSECOLS(A1:C3,1,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     3
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     7,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSECOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "choosecols-02",
+   "function": "CHOOSECOLS",
+   "formula": "CHOOSECOLS(A1:C3,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     3
+    ],
+    [
+     6
+    ],
+    [
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSECOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "choosecols-03",
+   "function": "CHOOSECOLS",
+   "formula": "CHOOSECOLS(A1:C3,{2,2,1})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     2,
+     2,
+     1
+    ],
+    [
+     5,
+     5,
+     4
+    ],
+    [
+     8,
+     8,
+     7
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSECOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "choosecols-04",
+   "function": "CHOOSECOLS",
+   "formula": "CHOOSECOLS(A1:C3,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no CHOOSECOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "choosecols-05",
+   "function": "CHOOSECOLS",
+   "formula": "CHOOSECOLS(A1:C3,4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no CHOOSECOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "choosecols-06",
+   "function": "CHOOSECOLS",
+   "formula": "CHOOSECOLS(A1:C3,-3,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     3
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     7,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSECOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "chooserows-01",
+   "function": "CHOOSEROWS",
+   "formula": "CHOOSEROWS(A1:C3,1,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSEROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "chooserows-02",
+   "function": "CHOOSEROWS",
+   "formula": "CHOOSEROWS(A1:C3,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSEROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "chooserows-03",
+   "function": "CHOOSEROWS",
+   "formula": "CHOOSEROWS(A1:C3,{3,1})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     7,
+     8,
+     9
+    ],
+    [
+     1,
+     2,
+     3
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no CHOOSEROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "chooserows-04",
+   "function": "CHOOSEROWS",
+   "formula": "CHOOSEROWS(A1:C3,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no CHOOSEROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "chooserows-05",
+   "function": "CHOOSEROWS",
+   "formula": "CHOOSEROWS(A1:C3,-4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no CHOOSEROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-01",
+   "function": "TAKE",
+   "formula": "TAKE(A1:C3,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     6
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-02",
+   "function": "TAKE",
+   "formula": "TAKE(A1:C3,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-03",
+   "function": "TAKE",
+   "formula": "TAKE(A1:C3,,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     7,
+     8
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-04",
+   "function": "TAKE",
+   "formula": "TAKE(A1:C3,2,-2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     2,
+     3
+    ],
+    [
+     5,
+     6
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-05",
+   "function": "TAKE",
+   "formula": "TAKE(A1:C3,10,10)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     6
+    ],
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-06",
+   "function": "TAKE",
+   "formula": "TAKE(A1:C3,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#CALC!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "take-07",
+   "function": "TAKE",
+   "formula": "TAKE(A1:A5,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TAKE; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "drop-01",
+   "function": "DROP",
+   "formula": "DROP(A1:C3,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     4,
+     5,
+     6
+    ],
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no DROP; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "drop-02",
+   "function": "DROP",
+   "formula": "DROP(A1:C3,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     6
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no DROP; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "drop-03",
+   "function": "DROP",
+   "formula": "DROP(A1:C3,,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     2,
+     3
+    ],
+    [
+     5,
+     6
+    ],
+    [
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no DROP; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "drop-04",
+   "function": "DROP",
+   "formula": "DROP(A1:C3,1,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     4,
+     5
+    ],
+    [
+     7,
+     8
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no DROP; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "drop-05",
+   "function": "DROP",
+   "formula": "DROP(A1:C3,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#CALC!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no DROP; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "drop-06",
+   "function": "DROP",
+   "formula": "DROP(A1:C3,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     6
+    ],
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no DROP; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "hstack-01",
+   "function": "HSTACK",
+   "formula": "HSTACK(A1:A2,B1:B2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no HSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "hstack-02",
+   "function": "HSTACK",
+   "formula": "HSTACK(A1:A2,B1:B3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     "#N/A",
+     8
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no HSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "hstack-03",
+   "function": "HSTACK",
+   "formula": "HSTACK(A1:B1,7,A3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    4
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     7,
+     7
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no HSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "hstack-04",
+   "function": "HSTACK",
+   "formula": "HSTACK({1;2},{3,4;5,6})",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {},
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     3,
+     4
+    ],
+    [
+     2,
+     5,
+     6
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no HSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "hstack-05",
+   "function": "HSTACK",
+   "formula": "HSTACK(A1:A2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     4
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no HSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "vstack-01",
+   "function": "VSTACK",
+   "formula": "VSTACK(A1:B1,A2:B2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no VSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "vstack-02",
+   "function": "VSTACK",
+   "formula": "VSTACK(A1:C1,A2:B2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no VSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "vstack-03",
+   "function": "VSTACK",
+   "formula": "VSTACK(A1,B1,C1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no VSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "vstack-04",
+   "function": "VSTACK",
+   "formula": "VSTACK(A1:A2,B1:B2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    4,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     4
+    ],
+    [
+     2
+    ],
+    [
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no VSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "vstack-05",
+   "function": "VSTACK",
+   "formula": "VSTACK(A1:B1,\"x\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     "x",
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no VSTACK; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "expand-01",
+   "function": "EXPAND",
+   "formula": "EXPAND(A1:B2,3,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     "#N/A"
+    ],
+    [
+     4,
+     5,
+     "#N/A"
+    ],
+    [
+     "#N/A",
+     "#N/A",
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no EXPAND; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "expand-02",
+   "function": "EXPAND",
+   "formula": "EXPAND(A1:B2,3,,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no EXPAND; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "expand-03",
+   "function": "EXPAND",
+   "formula": "EXPAND(A1:B2,,3,\"x\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     "x"
+    ],
+    [
+     4,
+     5,
+     "x"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no EXPAND; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "expand-04",
+   "function": "EXPAND",
+   "formula": "EXPAND(A1:B2,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no EXPAND; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "expand-05",
+   "function": "EXPAND",
+   "formula": "EXPAND(A1:B2,2,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no EXPAND; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "expand-06",
+   "function": "EXPAND",
+   "formula": "EXPAND(A1:B2,2,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no EXPAND; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-01",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:C3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    9,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ],
+    [
+     6
+    ],
+    [
+     7
+    ],
+    [
+     8
+    ],
+    [
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-02",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:B2,,TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    4,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     4
+    ],
+    [
+     2
+    ],
+    [
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-03",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:B2,1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": null,
+    "B2": "#N/A"
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-04",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:B2,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": null,
+    "B2": "#N/A"
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     0
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-05",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:B2,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": null,
+    "B2": "#N/A"
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-06",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:B2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": null,
+    "B2": "#N/A"
+   },
+   "group": "batch-b",
+   "spill": [
+    4,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     0
+    ],
+    [
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "tocol-07",
+   "function": "TOCOL",
+   "formula": "TOCOL(A1:B2,4)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no TOCOL; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "torow-01",
+   "function": "TOROW",
+   "formula": "TOROW(A1:C3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    9
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOROW; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "torow-02",
+   "function": "TOROW",
+   "formula": "TOROW(A1:B2,,TRUE)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    4
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     4,
+     2,
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOROW; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "torow-03",
+   "function": "TOROW",
+   "formula": "TOROW(A1:B2,3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "A2": null,
+    "B2": "#N/A"
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOROW; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "torow-04",
+   "function": "TOROW",
+   "formula": "TOROW(A1:A3)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     4,
+     7
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no TOROW; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "torow-05",
+   "function": "TOROW",
+   "formula": "TOROW(A1:B1,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no TOROW; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wraprows-01",
+   "function": "WRAPROWS",
+   "formula": "WRAPROWS(A1:A5,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     5,
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wraprows-02",
+   "function": "WRAPROWS",
+   "formula": "WRAPROWS(A1:A5,2,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    3,
+    2
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     5,
+     0
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wraprows-03",
+   "function": "WRAPROWS",
+   "formula": "WRAPROWS(A1:A5,5)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    5
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3,
+     4,
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wraprows-04",
+   "function": "WRAPROWS",
+   "formula": "WRAPROWS(A1:A5,10)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    1,
+    10
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     2,
+     3,
+     4,
+     5,
+     "#N/A",
+     "#N/A",
+     "#N/A",
+     "#N/A",
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wraprows-05",
+   "function": "WRAPROWS",
+   "formula": "WRAPROWS(A1:B2,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "A2": 4,
+    "B2": 5,
+    "C2": 6,
+    "A3": 7,
+    "B3": 8,
+    "C3": 9
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#VALUE!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no WRAPROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wraprows-06",
+   "function": "WRAPROWS",
+   "formula": "WRAPROWS(A1:A5,0)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no WRAPROWS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wrapcols-01",
+   "function": "WRAPCOLS",
+   "formula": "WRAPCOLS(A1:A5,2)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     3,
+     5
+    ],
+    [
+     2,
+     4,
+     "#N/A"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPCOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wrapcols-02",
+   "function": "WRAPCOLS",
+   "formula": "WRAPCOLS(A1:E1,2,\"-\")",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "B1": 2,
+    "C1": 3,
+    "D1": 4,
+    "E1": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    2,
+    3
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1,
+     3,
+     5
+    ],
+    [
+     2,
+     4,
+     "-"
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ],
+    [
+     "#NAME?",
+     "#NAME?",
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPCOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wrapcols-03",
+   "function": "WRAPCOLS",
+   "formula": "WRAPCOLS(A1:A5,5)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "spill": [
+    5,
+    1
+   ],
+   "expectation": "array",
+   "expected": [
+    [
+     1
+    ],
+    [
+     2
+    ],
+    [
+     3
+    ],
+    [
+     4
+    ],
+    [
+     5
+    ]
+   ],
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": [
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ],
+    [
+     "#NAME?"
+    ]
+   ],
+   "note": "LibreOffice 25.2 has no WRAPCOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
+  },
+  {
+   "id": "wrapcols-04",
+   "function": "WRAPCOLS",
+   "formula": "WRAPCOLS(A1:A5,-1)",
+   "sheet": null,
+   "cell": "AA1",
+   "cells": {
+    "A1": 1,
+    "A2": 2,
+    "A3": 3,
+    "A4": 4,
+    "A5": 5
+   },
+   "group": "batch-b",
+   "expectation": "error",
+   "expected": "#NUM!",
+   "oracle": "libreoffice",
+   "excel": true,
+   "unverified": true,
+   "libreoffice": "#NAME?",
+   "note": "LibreOffice 25.2 has no WRAPCOLS; the value is Excel's documented behaviour, unverified until a real Excel file confirms it (D8)"
   }
  ]
 }

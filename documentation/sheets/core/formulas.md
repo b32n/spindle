@@ -1,7 +1,7 @@
 # Formula System
 
 The formula system gives `@b32nio/spindle-sheets-core` spreadsheet calculation:
-a parser, a library of **229 built-in functions** (the [published list](functions.md)), a dependency graph with
+a parser, a library of **242 built-in functions** (the [published list](functions.md)), a dependency graph with
 **topological recalculation**, **dynamic arrays (spill)**, and the metadata
 that powers **formula autocomplete**. Everything lives under
 `packages/sheets-core/src/formula-parser/` (plus `formula-graph.ts` and
@@ -20,7 +20,7 @@ Functions are organised by category, one module per category under
 | `aggregate.ts` | `MAXIFS`, `MINIFS`, `AGGREGATE` (batch A) | 3 |
 | `logical.ts` | logical | 11 |
 | `text.ts` | text | 21 |
-| `text-ext.ts` | `CLEAN`, `NUMBERVALUE`, `FIXED`, `DOLLAR`, `BASE`, `ROMAN`, ... (batch B) | 11 |
+| `text-ext.ts` | `CLEAN`, `NUMBERVALUE`, `FIXED`, `DOLLAR`, `BASE`, `ROMAN`, `ARRAYTOTEXT`, `VALUETOTEXT`, ... (batch B) | 13 |
 | `lookup.ts` | lookup & reference | 12 |
 | `stats.ts` | statistical | 13 |
 | `stats-ext.ts` | dotted statistics names, regression, `GEOMEAN`, `FREQUENCY` (batch A) | 17 |
@@ -31,7 +31,7 @@ Functions are organised by category, one module per category under
 | `financial-ext.ts` | `XNPV`, `XIRR`, `MIRR`, `SLN`, `SYD`, `DDB`, `EFFECT`, `NOMINAL`, `RRI`, `PDURATION`, `ISPMT`, `FVSCHEDULE` (batch B) | 12 |
 | `reference.ts` | reference-aware | 11 |
 | `array.ts` | dynamic arrays | 6 |
-| `array-ext.ts` | `TRANSPOSE` (batch B) | 1 |
+| `array-ext.ts` | `TRANSPOSE`, `CHOOSECOLS` / `CHOOSEROWS`, `TAKE` / `DROP`, `HSTACK` / `VSTACK`, `EXPAND`, `TOCOL` / `TOROW`, `WRAPROWS` / `WRAPCOLS` (batch B) | 12 |
 
 `functions/index.ts` is the registry. It exposes three maps, by how the
 evaluator must call the function:
@@ -265,14 +265,15 @@ to a relative 1e-9, text exactly, errors by code); rows the engine cannot pass y
 sit in an explicit `KNOWN_FAILING` list with a reason, and the suite asserts that
 they still fail, so the list shrinks as functions land.
 
-Where LibreOffice differs from Excel the row carries Excel's documented value, tagged `excel: true, unverified: true`, until real Excel files (plan D8) confirm it.
+LibreOffice 25.2 has no `ARRAYTOTEXT`, `VALUETOTEXT` and no array shaper but `TRANSPOSE` (`TAKE`, `DROP`, `HSTACK`, `VSTACK`, `CHOOSECOLS`, `CHOOSEROWS`, `EXPAND`, `TOCOL`, `TOROW`, `WRAPROWS`, `WRAPCOLS`; it answers `#NAME?`), so their rows carry
+the behaviour Excel's documentation gives, tagged `excel: true, unverified: true`. Where LibreOffice differs from Excel the row carries Excel's documented value, tagged `excel: true, unverified: true`, until real Excel files (plan D8) confirm it.
 `TEXTBEFORE`, `TEXTAFTER` and `TEXTSPLIT` are deferred until such files exist (plan S12 does them only with a trustworthy oracle: LibreOffice 25.2 has none); their
 probe rows are in `KNOWN_FAILING`. A row tagged `unverified` without `excel` keeps LibreOffice's value but flags that Excel's behaviour is not known to agree.
 
 ### Omitted arguments
 
 The parser skips an empty argument (`F(1,,2)`) for most functions. For the ones where Excel gives an omitted argument its default and
-the position matters (`INDEX(A1:C3,,2)`, `NUMBERVALUE(a,,",")`, `WORKDAY.INTL(a,b,,holidays)`, `XIRR(v,d,)`), the names in
+the position matters (`INDEX(A1:C3,,2)`, `TAKE(A1:C5,,2)`, `NUMBERVALUE(a,,",")`, `WORKDAY.INTL(a,b,,holidays)`, `XIRR(v,d,)`), the names in
 `functions/omittable.ts` keep a placeholder node (a `number` node whose value is `undefined`) so that the later arguments keep their
 places; the function sees `undefined`, as for an argument left off the end, and the stable AST writes it back as nothing. A leading `_xlfn.` is
 ignored when matching the name.
@@ -286,7 +287,10 @@ endpoints (`INDEX(A1:C3,0,2):INDEX(A1:C3,0,3)`). A negative index is `#VALUE!`, 
 
 ### Array and finance, batch B
 
-`TRANSPOSE` (`array-ext.ts`) is the one dynamic-array shaper with a LibreOffice oracle; an empty cell passing through reads 0, as in Excel. In the
+`array-ext.ts` returns 2D arrays for the spill engine. An empty cell that passes through (`TRANSPOSE(A1:A3)` over a blank `A2`, `HSTACK`, `TOCOL`
+without the blank-skipping mode) becomes 0, as in Excel; `HSTACK`, `VSTACK`, `EXPAND` and `WRAPROWS`/`WRAPCOLS` pad with `#N/A` unless told otherwise;
+an empty result (`TAKE(a,0)`, `DROP` of everything, `TOCOL` of nothing) is `#CALC!`. Results are limited to a million cells (`#NUM!`). Only `TRANSPOSE` has a
+LibreOffice oracle. In the
 `formulas-core` fixture `=TRANSPOSE(A1:B2)` evaluates, but its spill range is blocked by the next probe row's formula (`#SPILL!`), so that cell stays a
 mismatch.
 

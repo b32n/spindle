@@ -130,13 +130,45 @@ describe('dates around the 1900 leap-year quirk', () => {
   });
 });
 
-describe('TRANSPOSE through the workbook', () => {
-  it('spills, and a blank cell passing through becomes 0 and follows later edits', () => {
-    const s = sheetWith({ A1: 1, A3: 3, B1: 4, B2: 5, B3: 6 });
-    s.set('E1', '=TRANSPOSE(A1:B3)');
-    expect(s.block('E1', 2, 3)).toEqual([[1, 0, 3], [4, 5, 6]]);
+describe('dynamic-array shaping through the workbook', () => {
+  it('TAKE and DROP read a blank rows argument', () => {
+    const s = sheetWith(GRID);
+    s.set('E1', '=TAKE(A1:C3,,2)');
+    expect(s.block('E1', 3, 2)).toEqual([[1, 2], [4, 5], [7, 8]]);
+    s.set('H1', '=DROP(A1:C3,1,)');
+    expect(s.block('H1', 2, 3)).toEqual([[4, 5, 6], [7, 8, 9]]);
+    s.set('H5', '=TAKE(A1:C3,0)');
+    expect(s.value('H5')).toBe('#CALC!');
+  });
+
+  it('HSTACK, VSTACK, TRANSPOSE and EXPAND spill and pad with #N/A', () => {
+    const s = sheetWith(GRID);
+    s.set('E1', '=HSTACK(A1:A2,B1:B3)');
+    expect(s.block('E1', 3, 2)).toEqual([[1, 2], [4, 5], ['#N/A', 8]]);
+    s.set('H1', '=VSTACK(A1:C1,A2:B2)');
+    expect(s.block('H1', 2, 3)).toEqual([[1, 2, 3], [4, 5, '#N/A']]);
+    s.set('E6', '=TRANSPOSE(A1:C2)');
+    expect(s.block('E6', 3, 2)).toEqual([[1, 4], [2, 5], [3, 6]]);
+    s.set('H6', '=EXPAND(A1:B2,3,3,0)');
+    expect(s.block('H6', 3, 3)).toEqual([[1, 2, 0], [4, 5, 0], [0, 0, 0]]);
+  });
+
+  it('a blank cell passing through becomes 0, and the result follows later edits', () => {
+    const s = sheetWith({ A1: 1, A3: 3 });
+    s.set('C1', '=TOROW(A1:A3)');
+    expect(s.block('C1', 1, 3)).toEqual([[1, 0, 3]]);
     s.set('A2', '=7');
-    expect(s.block('E1', 2, 3)).toEqual([[1, 7, 3], [4, 5, 6]]);
+    expect(s.block('C1', 1, 3)).toEqual([[1, 7, 3]]);
+  });
+
+  it('nest: a wrapped list unwraps to the original, the #N/A pad skipped by ignore mode 2', () => {
+    const s = sheetWith({ A1: 1, A2: 2, A3: 3, A4: 4, A5: 5 });
+    s.set('C1', '=SUM(CHOOSEROWS(WRAPROWS(A1:A5,2),1,2))');
+    expect(s.value('C1')).toBe(1 + 2 + 3 + 4);
+    s.set('D1', '=SUM(TOCOL(WRAPCOLS(A1:A5,2),2))');
+    expect(s.value('D1')).toBe(15);
+    s.set('D2', '=SUM(TOCOL(WRAPCOLS(A1:A5,2),1))');
+    expect(s.value('D2')).toBe('#N/A'); // mode 1 skips blanks only: the pad reaches SUM
   });
 });
 
