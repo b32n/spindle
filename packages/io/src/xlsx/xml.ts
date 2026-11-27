@@ -39,14 +39,51 @@ const NAMESPACES: Record<string, string> = {
 const ENTITY = /&(?:#(\d+)|#x([0-9a-fA-F]+)|(lt|gt|amp|quot|apos));/g;
 const NAMED: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
-/** Decode the predefined and numeric character references; anything else (a DOCTYPE entity) stays as written. */
-export function decodeEntities(s: string): string {
+const replaceEntity = (whole: string, dec: string | undefined, hex: string | undefined, named: string | undefined): string => {
+  if (named) return NAMED[named];
+  const code = dec !== undefined ? Number(dec) : parseInt(hex as string, 16);
+  return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : whole;
+};
+
+/** Characters decoded at a time: the callback's garbage and the intermediate strings of one `replace` stay this size, whatever the text's. */
+export const ENTITY_WINDOW = 64 * 1024;
+
+/**
+ * The end of the window that starts at `from`: about `size` characters on, moved on past the `;` of a reference that the cut
+ * would split (a `&` after the last `;` of the window has no `;` yet), so decoding windows one by one gives what decoding the whole
+ * text would. Looking back is bounded by the window; a reference never ends at a `&`, so a stretch with no `;` extends the window
+ * to the next one (or the end), which is linear in the text over all windows.
+ */
+function windowEnd(s: string, from: number, size: number): number {
+  const cut = from + size;
+  if (cut >= s.length) return s.length;
+  for (let k = cut - 1; k >= from; k--) {
+    const c = s.charCodeAt(k);
+    if (c === 59 /* ; */) return cut;
+    if (c === 38 /* & */) {
+      const semicolon = s.indexOf(';', cut);
+      return semicolon < 0 ? s.length : semicolon + 1;
+    }
+  }
+  return cut;
+}
+
+/**
+ * Decode the predefined and numeric character references; anything else (a DOCTYPE entity) stays as written. The text is decoded in
+ * windows (`ENTITY_WINDOW`), so a part of 100 MB made of references costs the result and a window, not the intermediate strings of
+ * one whole-text `replace` (several times the text).
+ */
+export function decodeEntities(s: string, size: number = ENTITY_WINDOW): string {
   if (!s.includes('&')) return s;
-  return s.replace(ENTITY, (whole, dec: string | undefined, hex: string | undefined, named: string | undefined) => {
-    if (named) return NAMED[named];
-    const code = dec !== undefined ? Number(dec) : parseInt(hex as string, 16);
-    return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : whole;
-  });
+  if (s.length <= size) return s.replace(ENTITY, replaceEntity);
+  const out: string[] = [];
+  for (let from = 0; from < s.length; ) {
+    const end = windowEnd(s, from, size);
+    const piece = s.slice(from, end);
+    out.push(piece.includes('&') ? piece.replace(ENTITY, replaceEntity) : piece);
+    from = end;
+  }
+  return out.join('');
 }
 
 type RawNode = Record<string, unknown> & { ':@'?: Record<string, string> };
