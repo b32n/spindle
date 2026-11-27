@@ -979,8 +979,9 @@ lockstep.
   `GroupXfrm`) moved to `@b32nio/spindle-shared` and `slides-core` re-exports it unchanged. New additive types
   `PptxGroup`, `PptxConnector`, `PptxConnection`, `PptxCustomPath` and `PptxPathCommand`; `PptxElement` widens. The text
   parity check now covers groups at any depth (614 of 614 runs in the corpus; one `mc:Fallback`
-  copy and the two runs of the damaged slide are set aside). The loss effects of `pptx.shapes.custGeom`, `.groups.nested` and `.connectors.elbowCurved` now say what the
-  reader does. Notes and comments follow (K10c). No editor change.
+  copy and the two runs of the damaged slide are set aside). The loss effects of `pptx.shapes.custGeom`, `.groups.nested`
+  and `.connectors.elbowCurved` now say what the reader does. The box guides `ss` and `ls` and the angle constants
+  (`cd2`, `cd4`, `cd8`, `3cd4`...) are read in custom geometry. Notes and comments follow (K10c). No editor change.
 
 ## [0.4.0] - 2026-10-26
 

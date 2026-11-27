@@ -770,6 +770,16 @@ describe('custom geometry (K10b)', () => {
     expect(cmd.x).toBe({ w: 600, h: 600, r: 600, b: 600, hc: 300, wd2: 300, vc: 300, hd2: 300, wd4: 150, hd4: 150, wd8: 75, hd8: 75, wd3: 200, hd3: 200, wd6: 100, hd6: 100 }[name]);
   });
 
+  it.each([['ss', 600], ['ls', 600], ['cd2', 10800000], ['cd4', 5400000], ['cd8', 2700000], ['3cd4', 16200000], ['3cd8', 8100000], ['5cd8', 13500000], ['7cd8', 18900000]])('reads the box and angle guide %s', async (name, x) => {
+    const g = await geomOf(custom(`<a:path w="600" h="600"><a:moveTo>${pt(name, name)}</a:moveTo></a:path>`));
+    expect((g as { paths: { commands: { x: number }[] }[] }).paths[0].commands[0].x).toBe(x);
+  });
+
+  it('reads ss and ls from the shorter and longer side, and an angle guide in an arc', async () => {
+    const g = await geomOf(custom('<a:path w="600" h="200"><a:moveTo><a:pt x="ss" y="ls"/></a:moveTo><a:arcTo wR="ss" hR="ss" stAng="cd4" swAng="3cd4"/></a:path>'));
+    expect(g).toMatchObject({ paths: [{ commands: [{ x: 200, y: 600 }, { op: 'arc', wR: 200, hR: 200, stAng: 90, swAng: 270 }] }] });
+  });
+
   it.each([
     ['a guide formula coordinate', `<a:path w="10" h="10"><a:moveTo>${pt('x1', 0)}</a:moveTo></a:path>`],
     ['a coordinate that is missing', '<a:path w="10" h="10"><a:moveTo><a:pt x="1"/></a:moveTo></a:path>'],

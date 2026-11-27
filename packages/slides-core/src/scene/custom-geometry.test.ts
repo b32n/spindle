@@ -93,6 +93,19 @@ describe('parseCustGeom', () => {
     expect([g.paths[0].w, g.paths[0].h]).toEqual([BOX.w, 50]);
   });
 
+  it.each([
+    ['ss', 500], ['ls', 1000], ['cd2', 10800000], ['cd4', 5400000], ['cd8', 2700000],
+    ['3cd4', 16200000], ['3cd8', 8100000], ['5cd8', 13500000], ['7cd8', 18900000],
+  ])('resolves the box and angle guide %s', (name, x) => {
+    const g = parseCustGeom(geom(n('path', {}, [n('moveTo', {}, [pt(name, name)])])), BOX)!;
+    expect(g.paths[0].commands[0]).toEqual({ op: 'move', x, y: x });
+  });
+
+  it('resolves an angle guide in arcTo attributes', () => {
+    const g = parseCustGeom(geom(n('path', {}, [n('arcTo', { wR: 'ss', hR: 'ss', stAng: 'cd4', swAng: '3cd4' })])), BOX)!;
+    expect(g.paths[0].commands[0]).toEqual({ op: 'arc', wR: 500, hR: 500, stAng: 90, swAng: 270 });
+  });
+
   it('resolves guides in arcTo attributes', () => {
     const g = parseCustGeom(geom(n('path', {}, [n('arcTo', { wR: 'wd2', hR: 'hd2', stAng: '0', swAng: '21600000' })])), BOX)!;
     expect(g.paths[0].commands[0]).toEqual({ op: 'arc', wR: 500, hR: 250, stAng: 0, swAng: 360 });
@@ -110,7 +123,7 @@ describe('parseCustGeom', () => {
     ['a coordinate too long to be finite', geom(n('path', { w: '1', h: '1' }, [n('moveTo', {}, [pt('9'.repeat(400), 0)])])), undefined],
     ['a path size too long to be finite and no box', geom(n('path', { w: '9'.repeat(400), h: '1' })), undefined],
     ['a non-finite box', geom(n('path')), { w: Infinity, h: 5 }],
-    ['an arc with a guide angle', geom(n('path', { w: '1', h: '1' }, [n('arcTo', { wR: '1', hR: '1', stAng: 'cd4', swAng: '0' })])), undefined],
+    ['an arc with an unknown guide angle', geom(n('path', { w: '1', h: '1' }, [n('arcTo', { wR: '1', hR: '1', stAng: 'cd5', swAng: '0' })])), undefined],
     ['an arc with a missing radius', geom(n('path', { w: '1', h: '1' }, [n('arcTo', { hR: '1', stAng: '0', swAng: '0' })])), undefined],
     ['an unknown command', geom(n('path', { w: '1', h: '1' }, [n('wiggle')])), undefined],
     ['an unknown fill mode', geom(n('path', { w: '1', h: '1', fill: 'shiny' })), undefined],

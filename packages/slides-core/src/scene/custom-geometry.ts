@@ -102,6 +102,15 @@ function builtinGuide(name: string, w: number, h: number): number | undefined {
     case 'hd3': return h / 3;
     case 'wd6': return w / 6;
     case 'hd6': return h / 6;
+    case 'ss': return Math.min(w, h);
+    case 'ls': return Math.max(w, h);
+    case 'cd2': return 10800000;
+    case 'cd4': return 5400000;
+    case 'cd8': return 2700000;
+    case '3cd4': return 16200000;
+    case '3cd8': return 8100000;
+    case '5cd8': return 13500000;
+    case '7cd8': return 18900000;
     default: return undefined;
   }
 }

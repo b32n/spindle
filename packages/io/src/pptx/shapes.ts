@@ -82,7 +82,7 @@ export function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
 
   const frame = frameOf(kid(spPr, 'xfrm')) ?? match?.frame;
   const geometry = parseGeometry(spPr);
-    let fill = parseFill(spPr, ctx.map, ctx.rels);
+  let fill = parseFill(spPr, ctx.map, ctx.rels);
   // `grpFill` takes the fill of the enclosing group (none outside a group), and then no style fill applies
   if (kid(spPr, 'grpFill')) fill = ctx.groupFill ?? { kind: 'none' };
   const fillRef = styleRef(style, 'fillRef', ctx.map);

@@ -14,7 +14,7 @@ export const MAX_PATH_COMMANDS = 20000;
 const FILL_MODES: ReadonlySet<string> = new Set(['norm', 'none', 'lighten', 'lightenLess', 'darken', 'darkenLess']);
 const ANGLE_UNITS = 60000;
 
-/** The built-in guides (ECMA-376 20.1.9.11) that depend only on the path box. */
+/** The built-in guides (ECMA-376 20.1.9.11) that depend only on the path box, and its angle constants (`cd4` is 90 degrees). */
 function builtinGuide(name: string, w: number, h: number): number | undefined {
   switch (name) {
     case 'l': case 't': return 0;
@@ -30,6 +30,15 @@ function builtinGuide(name: string, w: number, h: number): number | undefined {
     case 'hd3': return h / 3;
     case 'wd6': return w / 6;
     case 'hd6': return h / 6;
+    case 'ss': return Math.min(w, h);
+    case 'ls': return Math.max(w, h);
+    case 'cd2': return 10800000;
+    case 'cd4': return 5400000;
+    case 'cd8': return 2700000;
+    case '3cd4': return 16200000;
+    case '3cd8': return 8100000;
+    case '5cd8': return 13500000;
+    case '7cd8': return 18900000;
     default: return undefined;
   }
 }
@@ -81,8 +90,9 @@ function readCommand(n: XmlElement, w: number, h: number): PptxPathCommand | und
 const flag = (v: string | undefined, dflt: boolean): boolean => (v === undefined ? dflt : isTrue(v));
 
 /**
- * The paths of an `a:custGeom`. `box` is the shape's size in EMU: the size of a path that gives no `w` and `h`, and the value
- * of the `w` and `h` guides. `undefined` when the geometry cannot be kept faithfully (a guide formula as a coordinate, a
+ * The paths of an `a:custGeom`. `box` is the shape's size in EMU: the size of a path that gives no `w` and `h`. The built-in
+ * guides (`w`, `h`, `hc`, `ss`...) are evaluated against the path's own `w` x `h` when it states them, else against `box`.
+ * `undefined` when the geometry cannot be kept faithfully (a guide formula as a coordinate, a
  * malformed command, no path, too large).
  */
 export function readCustomGeometry(geom: XmlElement, box: { w: number; h: number } | undefined): PptxCustomPath[] | undefined {
