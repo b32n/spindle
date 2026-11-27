@@ -73,6 +73,16 @@ function assertCsvSize(file: File): void {
   }
 }
 
+/** What `importWorkbookFile` takes besides the file. */
+export interface SheetsFileImportOptions {
+  /**
+   * The XLSX reader's limits (a partial `ImportLimits`: `maxTotalCells`, `maxSheets`, `maxScannedElements`, `maxRanges`...; see the
+   * type in `@b32nio/spindle-io` and `documentation/import-loss.md`) over the defaults. What a limit cuts from the file is in the
+   * `loss` the import returns (id `xlsx.package.sizeLimit`), which names the option that raises it. Not used for `.csv`.
+   */
+  limits?: NonNullable<Parameters<typeof importFromXlsx>[2]>['limits'];
+}
+
 /**
  * Replace `workbook`'s contents with the file's contents. Format is chosen by
  * extension: .xlsx and the legacy .xls go to the XLSX reader (which answers .xls
@@ -80,10 +90,10 @@ function assertCsvSize(file: File): void {
  * rejected. The file is only ever read locally. An unsafe or unreadable file
  * throws an `ImportError` (with a `code`) and leaves the workbook as it was.
  */
-export async function importWorkbookFile(workbook: WorkbookImpl, file: File): Promise<SheetsFileImportResult> {
+export async function importWorkbookFile(workbook: WorkbookImpl, file: File, options: SheetsFileImportOptions = {}): Promise<SheetsFileImportResult> {
   const ext = fileExtension(file.name);
   if (XLSX_READER_EXTENSIONS.includes(ext)) {
-    return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook);
+    return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook, options.limits ? { limits: options.limits } : {});
   }
   if (ext === 'csv') {
     // "Open" semantics: build a fresh single-sheet workbook from the CSV and
