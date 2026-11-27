@@ -106,6 +106,11 @@ statistical, date/time, information, financial, reference and array categories
       host should lower `maxTotalCells` and `maxSheets` and/or import in a worker (`documentation/import-loss.md`). Related, not a defect: a table of
       two million shared strings peaks at 2.8 GB of process memory in the reader (five million took 1.17 GB).
 
+- [ ] **Blank source cells in dynamic-array results** (found in the S4 review; S5 or S11). The engine spills a blank source cell as blank where Excel
+      shows 0. Repro: A1 = 1, A2 empty, A3 = 3, `B1 = A1:A3` spills `1, (blank), 3` (Excel: `1, 0, 3`), and `D1 = B2&"x"` gives `"x"` (Excel: `"0x"`).
+      A legacy (CSE) array formula read from a file already reads 0 (`fitToExtent`). Fix: coerce a null member of a plain range-reference spill to 0 in the
+      spill path, without changing `=A1:A3*1`-style results; it is an engine semantics change, so it is not part of the interchange PR.
+
 - [ ] **Textual reference shifting for cached-only formulas** (found in the S4 review; S13 or later). A cached-only formula (one the engine cannot
       evaluate) keeps no parsed form, so inserting or deleting rows or columns, sorting and moving cells do not adjust the cell references in its text.
       Repro: open a file with `B1 = _xlfn.LET(_xlpm.x,A1,_xlpm.x*2)` (saved result 4, A1 = 2), insert a row above row 1: the cell is now B2, still

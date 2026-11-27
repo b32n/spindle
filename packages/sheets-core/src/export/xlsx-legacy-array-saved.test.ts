@@ -268,8 +268,8 @@ describe('the comparison of the engine result with the saved members (oracle tab
   const over = (anchor: string, c2: string, c3: string) => xlsxWith({ 1: [ncell('A1', 1), anchor], 2: [ncell('B2', 9), c2], 3: [ncell('A3', 3), c3] });
   const table: Array<[string, () => Promise<Uint8Array>, boolean]> = [
     ['blank source, saved 0', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 0), ncell('C3', 3)), false],
-    ['blank source, saved empty t="str"', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), sc('C2', ''), ncell('C3', 3)), false],
-    ['blank source, saved t="b" false', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), bc('C2', 0), ncell('C3', 3)), false],
+    ['blank source (the engine\'s 0), saved empty t="str" (not the same result)', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), sc('C2', ''), ncell('C3', 3)), true],
+    ['blank source (the engine\'s 0), saved t="b" false (not the same result)', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), bc('C2', 0), ncell('C3', 3)), true],
     ['blank source, saved 5 (not blank)', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 5), ncell('C3', 3)), true],
     ['blank source, no saved cell at all', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A3', 1, array('C1:C3'))], 2: [ncell('B2', 9)], 3: [ncell('A3', 3), ncell('C3', 3)] }), false],
     ['saved 0 where the engine has 7', () => over(fcell('C1', 'A1:A3*0+7', 7, array('C1:C3')), ncell('C2', 0), ncell('C3', 7)), true],
@@ -293,10 +293,18 @@ describe('the comparison of the engine result with the saved members (oracle tab
     expect(cachedOnlyItem(loss) !== undefined).toBe(cachedOnly);
   });
 
-  it('keeps an evaluated array with a blank member evaluated: it follows its precedents and its saved 0 is the engine\'s blank', async () => {
+  it('keeps an evaluated array with a blank member evaluated: it follows its precedents and its saved 0 is the engine\'s 0 for the blank', async () => {
     const { wb } = await open(await over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 0), ncell('C3', 3)));
     wb.setCellValue(undefined, 1, 0, 9);
     expect(wb.getSpillRegion(undefined, 0, 2)?.values).toEqual([[1], [9], [3]]);
+  });
+
+  it('shows 0 for the blank source cell and writes it back as a number cell', async () => {
+    const { wb } = await open(await over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 0), ncell('C3', 3)));
+    expect(wb.getSpillRegion(undefined, 0, 2)?.values).toEqual([[1], [0], [3]]);
+    const sheet = await (await JSZip.loadAsync(await exportToXlsx(wb))).file('xl/worksheets/sheet1.xml')!.async('string');
+    expect(sheet).toMatch(/<c r="C2"[^>]*><v>0<\/v><\/c>/);
+    expect(sheet).not.toMatch(/<c r="C2"[^>]*t="/);
   });
 
   it('holds date-styled members to their serial numbers', async () => {

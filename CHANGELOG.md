@@ -1015,10 +1015,9 @@ lockstep.
   references in the text are not adjusted by inserting or deleting rows or columns; Excel recalculates it when the file is reopened,
   possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
   spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
-  A legacy (CSE) array formula whose engine result differs from the results the file saved (a blank source cell is the same as a saved 0,
-  an empty string or `false`; numbers are held to a relative 1e-9) becomes cached-only and keeps the file's values, counted in
+  A legacy (CSE) array formula whose engine result differs from the results the file saved (a blank source cell reads 0 in the result, as in Excel, so it is the same as a saved 0 and only that; numbers are held to a relative 1e-9) becomes cached-only and keeps the file's values, counted in
   `xlsx.formulas.cachedOnly`; with `recalculateOnLoad` the formulas that read it are recalculated from those values. A dynamic array is not
-  compared: the engine's spill replaces the saved one. Array results are cut by the export's budget in a fixed order (sheet, then row, then
+  compared: the engine's spill replaces the saved one (known divergence: it spills a blank source cell as blank where Excel shows 0, so `=C2&"x"` over it gives `"x"` instead of `"0x"`; recorded in the sheets TODO). Array results are cut by the export's budget in a fixed order (sheet, then row, then
   column; a cut array keeps its anchor), an error in a spilled result is written as an error cell (`t="e"`), and so is an error saved with a
   legacy array's members, found within the same `maxTotalArrayCells` budget (past it they stay the text of the error).
   New loss id `xlsx.formulas.cachedOnly` (state `kept`); `xlsx.formulas.unsupported`, `.structuredRefs` and `.externalRef` now say the

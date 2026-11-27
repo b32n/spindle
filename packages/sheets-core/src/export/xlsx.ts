@@ -560,16 +560,14 @@ interface LegacyArray {
   saved: Array<Array<Cell | undefined>>;
 }
 
-/** What a blank cell reads as in a result: nothing, or the 0, empty string or false a file saves for it. */
-const isBlankResult = (value: unknown): boolean => value === null || value === undefined || value === 0 || value === '' || value === false;
-
-/** Whether two results are the same value: numbers to the precision a file keeps, errors by their code (a difference is the safe answer: the file's value is kept). */
+/**
+ * Whether two results are the same value: numbers to the precision a file keeps, errors by their code (a difference is the safe answer: the file's
+ * value is kept). A blank source cell is 0 in the engine's array result (as Excel shows it), so it is the same as a saved 0 and only that: an empty
+ * string or `false` saved for it is a different result.
+ */
 function sameResult(saved: unknown, engine: unknown): boolean {
   const a = toFileValue(saved as SpreadsheetCell['value']);
   const b = toFileValue(engine as SpreadsheetCell['value']);
-  // a blank source cell is null in the engine's result and 0 (or an empty string, or false) in what Excel saved
-  if (isBlankResult(b)) return isBlankResult(a);
-  if (isBlankResult(a)) return false;
   if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
   return a === b;
 }

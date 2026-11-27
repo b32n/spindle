@@ -94,19 +94,19 @@ export class SpillIndex {
  * What a legacy (CSE) array formula shows over its extent (`span`, the rows and columns of the range it was entered over): the
  * result cut to it. As Excel does, a result of one row (or one column) is repeated down (or across) a bigger extent, so a single value fills all
  * of it; a dimension where a result of more than one row (or column) is smaller than the extent is padded with `#N/A`. For a one-cell extent
- * it is the first value.
+ * it is the first value. A blank cell of the result reads as 0, as Excel shows it for a blank cell inside the array of a range reference (`=A1:A3`).
  */
 export function fitToExtent(result: unknown, span: { rows: number; cols: number }): unknown {
   const matrix = Array.isArray(result) ? (result as unknown[][]) : [[result]];
-  // (a blank cell of the result is null: it stays blank, only what the result does not reach is `#N/A`)
-  const first = matrix[0]?.[0] === undefined ? '#N/A' : matrix[0][0];
+  // (a blank cell of the result is null and reads 0: only what the result does not reach is `#N/A`)
+  const first = matrix[0]?.[0] === undefined ? '#N/A' : (matrix[0][0] ?? 0);
   if (span.rows * span.cols === 1) return first;
   const repeatDown = matrix.length === 1;
   const repeatAcross = matrix[0]?.length === 1;
   return Array.from({ length: span.rows }, (_, r) =>
     Array.from({ length: span.cols }, (_, c) => {
       const value = matrix[repeatDown ? 0 : r]?.[repeatAcross ? 0 : c];
-      return value === undefined ? '#N/A' : value;
+      return value === undefined ? '#N/A' : (value ?? 0);
     })
   );
 }

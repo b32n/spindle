@@ -166,10 +166,11 @@ describe('#SPILL! recovery', () => {
 });
 
 describe('fitToExtent (a legacy array formula over its entered range)', () => {
-  it('keeps a blank cell of the result blank, and pads only what the result does not reach', () => {
-    expect(fitToExtent([[1], [null], [3]], { rows: 4, cols: 1 })).toEqual([[1], [null], [3], ['#N/A']]);
-    expect(fitToExtent(null, { rows: 1, cols: 1 })).toBeNull();
-    expect(fitToExtent([[null, 2]], { rows: 1, cols: 3 })).toEqual([[null, 2, '#N/A']]);
+  it('reads a blank cell of the result as 0, and pads only what the result does not reach', () => {
+    expect(fitToExtent([[1], [null], [3]], { rows: 4, cols: 1 })).toEqual([[1], [0], [3], ['#N/A']]);
+    expect(fitToExtent(null, { rows: 1, cols: 1 })).toBe(0);
+    expect(fitToExtent([[null, 2]], { rows: 1, cols: 3 })).toEqual([[0, 2, '#N/A']]);
+    expect(fitToExtent([[null]], { rows: 2, cols: 2 })).toEqual([[0, 0], [0, 0]]);
     expect(fitToExtent([], { rows: 1, cols: 1 })).toBe('#N/A');
   });
 
