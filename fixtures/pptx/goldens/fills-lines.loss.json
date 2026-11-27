@@ -16,7 +16,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the route (bent or curved preset with its adjustments), the arrow heads and the shapes the ends are glued to are stored; the editor draws the route itself, so bends may differ slightly from PowerPoint's",
       "id": "pptx.shapes.connectors.elbowCurved",
       "label": "elbow or curved connector(s)",
       "where": [

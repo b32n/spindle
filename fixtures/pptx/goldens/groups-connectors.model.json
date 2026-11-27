@@ -3963,6 +3963,497 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "children": [
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 73.49081364829397,
+                  "w": 125.98425196850394,
+                  "x": 73.49081364829397,
+                  "y": 157.48031496062993
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "Left",
+                "pptxId": "11",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "A"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              },
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 73.49081364829397,
+                  "w": 125.98425196850394,
+                  "x": 262.4671916010499,
+                  "y": 157.48031496062993
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "Right",
+                "pptxId": "12",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "B"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              }
+            ],
+            "frame": {
+              "h": 94.48818897637796,
+              "w": 314.96062992125985,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "group",
+            "name": "Simple group",
+            "pptxId": "10"
+          },
+          {
+            "children": [
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 36.74540682414698,
+                  "w": 62.99212598425197,
+                  "x": 461.9422572178478,
+                  "y": 157.48031496062993
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "Scaled left",
+                "pptxId": "21",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "C"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              },
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 36.74540682414698,
+                  "w": 62.99212598425197,
+                  "x": 619.4225721784777,
+                  "y": 157.48031496062993
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "Scaled right",
+                "pptxId": "22",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "D"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              }
+            ],
+            "frame": {
+              "h": 94.48818897637796,
+              "w": 314.96062992125985,
+              "x": 461.9422572178478,
+              "y": 157.48031496062993
+            },
+            "kind": "group",
+            "name": "Scaled group",
+            "pptxId": "20"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "frame": {
+                          "h": 73.49081364829397,
+                          "w": 125.98425196850394,
+                          "x": 104.98687664041995,
+                          "y": 430.4461942257218
+                        },
+                        "geometry": {
+                          "kind": "preset",
+                          "known": true,
+                          "prst": "rect"
+                        },
+                        "kind": "shape",
+                        "name": "Innermost",
+                        "pptxId": "34",
+                        "text": {
+                          "paragraphs": [
+                            {
+                              "level": 0,
+                              "runs": [
+                                {
+                                  "kind": "text",
+                                  "lang": "en-US",
+                                  "text": "E"
+                                }
+                              ],
+                              "style": {
+                                "align": "center",
+                                "color": {
+                                  "kind": "theme",
+                                  "slot": "dk1"
+                                },
+                                "font": "minor",
+                                "fontSize": 18,
+                                "marginLeft": 0
+                              }
+                            }
+                          ],
+                          "props": {}
+                        }
+                      }
+                    ],
+                    "frame": {
+                      "h": 62.99212598425197,
+                      "w": 167.97900262467192,
+                      "x": 104.98687664041995,
+                      "y": 430.4461942257218
+                    },
+                    "kind": "group",
+                    "name": "Level 3",
+                    "pptxId": "33"
+                  },
+                  {
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "frame": {
+                      "h": 73.49081364829397,
+                      "w": 125.98425196850394,
+                      "x": 83.98950131233596,
+                      "y": 451.4435695538058
+                    },
+                    "geometry": {
+                      "kind": "preset",
+                      "known": true,
+                      "prst": "rect"
+                    },
+                    "kind": "shape",
+                    "name": "Level 2 shape",
+                    "pptxId": "35",
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "F"
+                            }
+                          ],
+                          "style": {
+                            "align": "center",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "frame": {
+                  "h": 104.98687664041995,
+                  "w": 230.9711286089239,
+                  "x": 83.98950131233596,
+                  "y": 409.4488188976378
+                },
+                "kind": "group",
+                "name": "Level 2",
+                "pptxId": "32"
+              },
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 73.49081364829397,
+                  "w": 125.98425196850394,
+                  "x": 262.4671916010499,
+                  "y": 398.9501312335958
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "Level 1 shape",
+                "pptxId": "36",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "G"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              }
+            ],
+            "frame": {
+              "h": 136.48293963254594,
+              "w": 335.95800524934384,
+              "x": 73.49081364829397,
+              "y": 398.9501312335958
+            },
+            "kind": "group",
+            "name": "Level 1",
+            "pptxId": "31"
+          },
+          {
+            "children": [
+              {
+                "fill": {
+                  "kind": "none"
+                },
+                "frame": {
+                  "h": 41.99475065616798,
+                  "w": 377.9527559055118,
+                  "x": 482.9396325459318,
+                  "y": 409.4488188976378
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "Caption",
+                "pptxId": "41",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "A caption inside a group"
+                        }
+                      ],
+                      "style": {
+                        "align": "left",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {
+                    "autofit": {
+                      "kind": "none"
+                    },
+                    "wrap": "square"
+                  }
+                },
+                "textBox": true
+              },
+              {
+                "frame": {
+                  "h": 0,
+                  "w": 377.9527559055118,
+                  "x": 482.9396325459318,
+                  "y": 461.9422572178478
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "line"
+                },
+                "kind": "shape",
+                "line": {
+                  "fill": {
+                    "color": {
+                      "hex": "#000000",
+                      "kind": "rgb"
+                    },
+                    "kind": "solid"
+                  },
+                  "join": "round",
+                  "width": 2
+                },
+                "name": "Rule",
+                "pptxId": "42"
+              }
+            ],
+            "frame": {
+              "h": 104.98687664041995,
+              "w": 377.9527559055118,
+              "x": 482.9396325459318,
+              "y": 409.4488188976378
+            },
+            "kind": "group",
+            "name": "Group with text and a line",
+            "pptxId": "40"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4315,6 +4806,218 @@
               ],
               "props": {}
             }
+          },
+          {
+            "end": {
+              "id": "11",
+              "idx": 1
+            },
+            "frame": {
+              "h": 0,
+              "w": 293.96325459317586,
+              "x": 230.9711286089239,
+              "y": 215.2230971128609
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "straightConnector1"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "tail": {
+                "len": "med",
+                "type": "triangle",
+                "w": "med"
+              },
+              "width": 2.6666666666666665
+            },
+            "name": "Straight connector",
+            "pptxId": "20",
+            "start": {
+              "id": "10",
+              "idx": 3
+            }
+          },
+          {
+            "end": {
+              "id": "13",
+              "idx": 1
+            },
+            "frame": {
+              "flipV": true,
+              "h": 31.496062992125985,
+              "w": 293.96325459317586,
+              "x": 230.9711286089239,
+              "y": 320.20997375328085
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": false,
+              "prst": "bentConnector3"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "tail": {
+                "len": "med",
+                "type": "triangle",
+                "w": "med"
+              },
+              "width": 2.6666666666666665
+            },
+            "name": "Elbow connector",
+            "pptxId": "21",
+            "start": {
+              "id": "12",
+              "idx": 3
+            }
+          },
+          {
+            "end": {
+              "id": "15",
+              "idx": 1
+            },
+            "frame": {
+              "h": 62.99212598425197,
+              "w": 293.96325459317586,
+              "x": 230.9711286089239,
+              "y": 488.18897637795277
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": false,
+              "prst": "curvedConnector3"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "tail": {
+                "len": "med",
+                "type": "triangle",
+                "w": "med"
+              },
+              "width": 2.6666666666666665
+            },
+            "name": "Curved connector",
+            "pptxId": "22",
+            "start": {
+              "id": "14",
+              "idx": 3
+            }
+          },
+          {
+            "frame": {
+              "h": 94.48818897637796,
+              "w": 157.48031496062993,
+              "x": 787.4015748031496,
+              "y": 178.47769028871392
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": false,
+              "prst": "bentConnector2"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "tail": {
+                "len": "med",
+                "type": "oval",
+                "w": "med"
+              },
+              "width": 2
+            },
+            "name": "Unconnected elbow",
+            "pptxId": "23"
+          },
+          {
+            "frame": {
+              "h": 94.48818897637796,
+              "w": 157.48031496062993,
+              "x": 787.4015748031496,
+              "y": 335.95800524934384
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": false,
+              "prst": "curvedConnector2"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "head": {
+                "len": "med",
+                "type": "diamond",
+                "w": "med"
+              },
+              "join": "round",
+              "width": 2
+            },
+            "name": "Unconnected curve",
+            "pptxId": "24"
+          },
+          {
+            "frame": {
+              "h": 0,
+              "w": 157.48031496062993,
+              "x": 787.4015748031496,
+              "y": 482.9396325459318
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "straightConnector1"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 2
+            },
+            "name": "Unconnected line",
+            "pptxId": "25"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4348,9 +5051,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 8,
-    "outOfScope": 8,
-    "sourceRuns": 8
+    "modelRuns": 16,
+    "outOfScope": 0,
+    "sourceRuns": 16
   },
   "warnings": []
 }

@@ -969,6 +969,19 @@ lockstep.
   `pptx.images.crop`, `.svg`, `.linked`, `.unsupportedFormat`, `pptx.tables.merge`, `.styles`, `.banding`, `pptx.actions`
   and `pptx.externalLinks` now say what the reader does. Groups, connectors, custom geometry paths, notes and comments
   follow (K10b, K10c). No editor change.
+- **PPTX reader, step 4b (K10b): groups, connectors and custom geometry.** `importPptx` now reads `p:grpSp` groups
+  (`PptxGroup`: a `children` tree whose frames are already composed through the group transforms (`a:chOff` and
+  `a:chExt` scale, rotation, flips, nested groups) into slide space), `p:cxnSp` connectors (`PptxConnector`: the
+  straight, bent or curved route with its adjustments, outline and arrow heads, and the shapes the ends are glued to
+  with `stCxn` and `endCxn`) and `a:custGeom` paths (`PptxGeometry` custom gains `paths`: move, line, cubic and quad
+  curves, arcs, close, several paths, fill modes; a path that needs guide formulas stays without paths). A `grpFill`
+  shape now takes the fill of its group. The group composition (`childFrameInParent`, `composeGroupChain`,
+  `GroupXfrm`) moved to `@b32nio/spindle-shared` and `slides-core` re-exports it unchanged. New additive types
+  `PptxGroup`, `PptxConnector`, `PptxConnection`, `PptxCustomPath` and `PptxPathCommand`; `PptxElement` widens. The text
+  parity check now covers groups at any depth (614 of 614 runs in the corpus; one `mc:Fallback`
+  copy and the two runs of the damaged slide are set aside). The loss effects of `pptx.shapes.custGeom`, `.groups.nested`
+  and `.connectors.elbowCurved` now say what the reader does. The box guides `ss` and `ls` and the angle constants
+  (`cd2`, `cd4`, `cd8`, `3cd4`...) are read in custom geometry. Notes and comments follow (K10c). No editor change.
 
 ## [0.4.0] - 2026-10-26
 

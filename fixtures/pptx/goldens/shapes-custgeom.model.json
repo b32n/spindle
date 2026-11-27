@@ -3979,7 +3979,33 @@
               "y": 157.48031496062993
             },
             "geometry": {
-              "kind": "custom"
+              "kind": "custom",
+              "paths": [
+                {
+                  "commands": [
+                    {
+                      "op": "move",
+                      "x": 0,
+                      "y": 100
+                    },
+                    {
+                      "op": "line",
+                      "x": 50,
+                      "y": 0
+                    },
+                    {
+                      "op": "line",
+                      "x": 100,
+                      "y": 100
+                    },
+                    {
+                      "op": "close"
+                    }
+                  ],
+                  "h": 100,
+                  "w": 100
+                }
+              ]
             },
             "kind": "shape",
             "name": "Triangle path",
@@ -4000,7 +4026,49 @@
               "y": 157.48031496062993
             },
             "geometry": {
-              "kind": "custom"
+              "kind": "custom",
+              "paths": [
+                {
+                  "commands": [
+                    {
+                      "op": "move",
+                      "x": 0,
+                      "y": 50
+                    },
+                    {
+                      "op": "cubic",
+                      "x": 100,
+                      "x1": 40,
+                      "x2": 80,
+                      "y": 50,
+                      "y1": -20,
+                      "y2": -20
+                    },
+                    {
+                      "op": "quad",
+                      "x": 200,
+                      "x1": 150,
+                      "y": 50,
+                      "y1": 120
+                    },
+                    {
+                      "op": "line",
+                      "x": 200,
+                      "y": 100
+                    },
+                    {
+                      "op": "line",
+                      "x": 0,
+                      "y": 100
+                    },
+                    {
+                      "op": "close"
+                    }
+                  ],
+                  "h": 100,
+                  "w": 200
+                }
+              ]
             },
             "kind": "shape",
             "name": "Bezier curves",
@@ -4021,7 +4089,50 @@
               "y": 157.48031496062993
             },
             "geometry": {
-              "kind": "custom"
+              "kind": "custom",
+              "paths": [
+                {
+                  "commands": [
+                    {
+                      "op": "move",
+                      "x": 0,
+                      "y": 50
+                    },
+                    {
+                      "hR": 50,
+                      "op": "arc",
+                      "stAng": 180,
+                      "swAng": 180,
+                      "wR": 50
+                    }
+                  ],
+                  "fill": "none",
+                  "h": 100,
+                  "w": 100
+                },
+                {
+                  "commands": [
+                    {
+                      "op": "move",
+                      "x": 25,
+                      "y": 50
+                    },
+                    {
+                      "hR": 25,
+                      "op": "arc",
+                      "stAng": 180,
+                      "swAng": 180,
+                      "wR": 25
+                    },
+                    {
+                      "op": "close"
+                    }
+                  ],
+                  "h": 100,
+                  "stroke": false,
+                  "w": 100
+                }
+              ]
             },
             "kind": "shape",
             "line": {
@@ -4099,7 +4210,68 @@
               "y": 367.4540682414698
             },
             "geometry": {
-              "kind": "custom"
+              "kind": "custom",
+              "paths": [
+                {
+                  "commands": [
+                    {
+                      "op": "move",
+                      "x": 50,
+                      "y": 0
+                    },
+                    {
+                      "op": "line",
+                      "x": 62,
+                      "y": 38
+                    },
+                    {
+                      "op": "line",
+                      "x": 98,
+                      "y": 38
+                    },
+                    {
+                      "op": "line",
+                      "x": 69,
+                      "y": 60
+                    },
+                    {
+                      "op": "line",
+                      "x": 80,
+                      "y": 95
+                    },
+                    {
+                      "op": "line",
+                      "x": 50,
+                      "y": 73
+                    },
+                    {
+                      "op": "line",
+                      "x": 20,
+                      "y": 95
+                    },
+                    {
+                      "op": "line",
+                      "x": 31,
+                      "y": 60
+                    },
+                    {
+                      "op": "line",
+                      "x": 2,
+                      "y": 38
+                    },
+                    {
+                      "op": "line",
+                      "x": 38,
+                      "y": 38
+                    },
+                    {
+                      "op": "close"
+                    }
+                  ],
+                  "h": 100,
+                  "w": 100
+                }
+              ]
             },
             "kind": "shape",
             "name": "Hand-drawn star",

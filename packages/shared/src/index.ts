@@ -5,3 +5,4 @@ export * from './collaboration';
 export * from './comments';
 
 export * from './export/loss';
+export * from './group-transform';

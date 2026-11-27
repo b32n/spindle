@@ -17,6 +17,8 @@ export interface ShapeContext {
   /** The layout the shapes sit on; its placeholders give position, text style and body properties to the slide's placeholders. */
   layout?: PptxLayout;
   warn: (message: string) => void;
+  /** The fill of the innermost group the shapes sit in (`p:grpSpPr`): what a `grpFill` shape takes. Absent outside a group or when the group has no fill. */
+  groupFill?: PptxFill;
 }
 
 /** Outline widths of the Office theme's three line styles (`lnRef idx` 1 to 3: 6350, 12700 and 19050 EMU, that is 0.5, 1 and 1.5 pt), in px. */
@@ -58,6 +60,17 @@ function styleRef(style: XmlElement | undefined, name: string, map: PptxColorMap
   return { idx, ...(color ? { color } : {}) };
 }
 
+/** The outline of a shape or connector: its own `a:ln`, with what its `p:style` `lnRef` gives (width of the theme line style, colour) where `a:ln` states no fill. */
+export function shapeOutline(spPr: XmlElement | undefined, style: XmlElement | undefined, ctx: ShapeContext): PptxLine | undefined {
+  let line = parseLine(kid(spPr, 'ln'), ctx.map, ctx.rels);
+  const lnRef = styleRef(style, 'lnRef', ctx.map);
+  if (lnRef && lnRef.idx > 0 && lnRef.color && line?.fill === undefined) {
+    const idx = Math.min(3, lnRef.idx);
+    line = { width: STYLE_LINE_PX[idx], ...line, fill: { kind: 'solid', color: lnRef.color } } satisfies PptxLine;
+  }
+  return line;
+}
+
 export function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
   const nv = kid(e, 'nvSpPr');
   const cNvPr = kid(nv, 'cNvPr');
@@ -69,16 +82,12 @@ export function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
 
   const frame = frameOf(kid(spPr, 'xfrm')) ?? match?.frame;
   const geometry = parseGeometry(spPr);
-  // a `grpFill` reads as no fill here, so a style `fillRef` applies; PowerPoint takes the parent group's fill instead (groups are read in K10, which must resolve it)
   let fill = parseFill(spPr, ctx.map, ctx.rels);
+  // `grpFill` takes the fill of the enclosing group (none outside a group), and then no style fill applies
+  if (kid(spPr, 'grpFill')) fill = ctx.groupFill ?? { kind: 'none' };
   const fillRef = styleRef(style, 'fillRef', ctx.map);
   if (!fill && fillRef) fill = fillRef.idx === 0 || !fillRef.color ? undefined : styleFill(fillRef.color, fillRef.idx, ctx);
-  let line = parseLine(kid(spPr, 'ln'), ctx.map, ctx.rels);
-  const lnRef = styleRef(style, 'lnRef', ctx.map);
-  if (lnRef && lnRef.idx > 0 && lnRef.color && line?.fill === undefined) {
-    const idx = Math.min(3, lnRef.idx);
-    line = { width: STYLE_LINE_PX[idx], ...line, fill: { kind: 'solid', color: lnRef.color } } satisfies PptxLine;
-  }
+  const line = shapeOutline(spPr, style, ctx);
   const body = kid(e, 'txBody');
   // `fontRef` names a font (`idx="minor"`), not a style index, so only its colour is read
   const fontColor = parseColor(colorElement(kid(style, 'fontRef')), ctx.map);

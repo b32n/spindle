@@ -3,7 +3,7 @@
 A set of `.pptx` / `.pptm` / `.ppt` files that exercise what real presentations contain, plus a manifest that says
 exactly which constructs each file holds, plus the goldens that record what the PPTX tooling does with each file
 today. The goldens describe the loss detector (`loss`, `ledger`) and the reader (`model`: the slide list, size, theme,
-sections, layouts and the slides' `p:sp` shapes, pictures and tables with their text, with the text parity check; `roundtrip` stops at `no exporter` until the writer exists); they describe **current behaviour, not
+sections, layouts and the slides' `p:sp` shapes, pictures, tables, connectors and groups with their text, with the text parity check; `roundtrip` stops at `no exporter` until the writer exists); they describe **current behaviour, not
 correctness**, and the importer PRs (plan K9 onwards) show up as golden diffs to review. The construct probes in
 `scripts/pptx-fidelity/constructs.ts` verify the manifest against its own files, and the detector is checked against
 those claims.
