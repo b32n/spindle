@@ -956,6 +956,19 @@ lockstep.
   custom geometry paths follow (K10). No editor change; the loss report effects of the ids now read say `kept` or `approximated`
   and the rest stay `lost: not imported` until the editor can open a `.pptx` (K15), so the `loss` goldens changed
   along with the `model` goldens.
+- **PPTX reader, step 4a (K10a): pictures, tables and hyperlinks.** `importPptx` now reads `p:pic` pictures
+  (`PptxPicture`: the embedded image as a data URL typed from its bytes, crop in percent, transparency, frame, outline,
+  placeholder frame; an SVG with a PNG fallback reads as the PNG; EMF/WMF and linked pictures become labelled
+  placeholders, never fetched) and table `p:graphicFrame`s (`PptxTable`, `PptxTableCell`: spans and merge markers,
+  per-cell borders, margins and anchors, with the table style of `ppt/tableStyles.xml` resolved into each cell), and
+  hyperlinks on runs, shapes and pictures (`PptxLink`): only `http`, `https`, `mailto` and `tel` addresses are kept,
+  `ppaction://` and `file:` targets are kept inert, any other scheme is dropped with a warning. New additive types
+  `PptxElement`, `PptxPicture`, `PptxTable`, `PptxTableCell`, `PptxCellBorders` and `PptxLink` in
+  `@b32nio/spindle-shared/export/pptx`; `PptxSlide.elements` widens to `PptxElement[]`; `OoxmlPackage.bytes`. The text
+  parity check now covers pictures and table cells (603 of 603 runs in the corpus). The loss effects of
+  `pptx.images.crop`, `.svg`, `.linked`, `.unsupportedFormat`, `pptx.tables.merge`, `.styles`, `.banding`, `pptx.actions`
+  and `pptx.externalLinks` now say what the reader does. Groups, connectors, custom geometry paths, notes and comments
+  follow (K10b, K10c). No editor change.
 
 ## [0.4.0] - 2026-10-26
 

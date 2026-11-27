@@ -48,7 +48,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "approximated: the banding is resolved into each cell's fill and the switch is kept",
       "id": "pptx.tables.banding",
       "label": "table(s) with banded rows or columns",
       "where": [
@@ -57,7 +57,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: spans are stored on the origin cell and the cells it covers are marked",
       "id": "pptx.tables.merge",
       "label": "merged table cell(s)",
       "where": [
@@ -66,7 +66,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "approximated: the style is resolved into each cell (fill, borders, bold, colour) and its name kept; corner-cell rules are not applied, and a built-in style the file does not define is not resolved",
       "id": "pptx.tables.styles",
       "label": "table(s) with a table style",
       "where": [

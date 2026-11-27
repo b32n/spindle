@@ -1,6 +1,7 @@
 import type { PptxBodyProps, PptxColorMap, PptxLevelStyle, PptxLevelStyles, PptxParagraph, PptxRun, PptxTextBody } from '@b32nio/spindle-shared/export/pptx';
 import { isTrue, kid, type XmlElement } from '../xlsx/xml';
 import { colorElement, parseColor } from './color';
+import { readLink, type LinkContext } from './links';
 import { mergeLevel, parseLevel, parseLevels } from './levels';
 import { emuToPx, num, pct } from './units';
 
@@ -86,15 +87,19 @@ export function parseRunProps(r: XmlElement | undefined, map: PptxColorMap): Omi
   return out;
 }
 
-function readParagraph(p: XmlElement, base: PptxLevelStyles, shapeList: PptxLevelStyles, map: PptxColorMap): PptxParagraph {
+function readParagraph(p: XmlElement, base: PptxLevelStyles, shapeList: PptxLevelStyles, map: PptxColorMap, links: LinkContext): PptxParagraph {
   const pPr = kid(p, 'pPr');
   const lvl = num(pPr?.attrs.lvl);
   const level = lvl !== undefined && lvl >= 0 && lvl <= 8 ? Math.floor(lvl) : 0;
   const style = mergeLevel(mergeLevel(base[level], shapeList[level]), parseLevel(pPr, map));
   const runs: PptxRun[] = [];
+  const linkOf = (rPr: XmlElement | undefined): Pick<PptxRun, 'link'> => {
+    const link = readLink(kid(rPr, 'hlinkClick'), links);
+    return link ? { link } : {};
+  };
   for (const c of p.children) {
-    if (c.name === 'r') runs.push({ kind: 'text', text: kid(c, 't')?.text ?? '', ...parseRunProps(kid(c, 'rPr'), map) });
-    else if (c.name === 'fld') runs.push({ kind: 'field', text: kid(c, 't')?.text ?? '', ...(c.attrs.type ? { fieldType: c.attrs.type } : {}), ...parseRunProps(kid(c, 'rPr'), map) });
+    if (c.name === 'r') runs.push({ kind: 'text', text: kid(c, 't')?.text ?? '', ...parseRunProps(kid(c, 'rPr'), map), ...linkOf(kid(c, 'rPr')) });
+    else if (c.name === 'fld') runs.push({ kind: 'field', text: kid(c, 't')?.text ?? '', ...(c.attrs.type ? { fieldType: c.attrs.type } : {}), ...parseRunProps(kid(c, 'rPr'), map), ...linkOf(kid(c, 'rPr')) });
     else if (c.name === 'br') runs.push({ kind: 'break', text: '', ...parseRunProps(kid(c, 'rPr'), map) });
   }
   const endSize = parseRunProps(kid(p, 'endParaRPr'), map).size;
@@ -103,13 +108,13 @@ function readParagraph(p: XmlElement, base: PptxLevelStyles, shapeList: PptxLeve
 
 /**
  * `p:txBody`. `base` is what a paragraph of each level starts from (the layout placeholder's levels, or the presentation's
- * default text style), `own` the body properties the placeholder chain gives. `fontRefColor` is the colour of the shape style's `fontRef`, which sits between them and the shape's own list style.
+ * default text style), `own` the body properties the placeholder chain gives. `fontRefColor` is the colour of the shape style's `fontRef`, which sits between them and the shape's own list style. `links` (the part's relationships) is what a run's hyperlink is read against.
  */
-export function readTextBody(body: XmlElement, base: PptxLevelStyles, own: PptxBodyProps | undefined, map: PptxColorMap, fontRefColor?: PptxLevelStyle['color']): PptxTextBody {
+export function readTextBody(body: XmlElement, base: PptxLevelStyles, own: PptxBodyProps | undefined, map: PptxColorMap, fontRefColor: PptxLevelStyle['color'] | undefined, links: LinkContext): PptxTextBody {
   const withFont = fontRefColor ? base.map((l) => mergeLevel(l, { color: fontRefColor })) : base;
   const shapeList = parseLevels(kid(body, 'lstStyle'), map);
   return {
     props: mergeBodyProps(own, parseBodyProps(kid(body, 'bodyPr'))),
-    paragraphs: body.children.filter((c) => c.name === 'p').map((p) => readParagraph(p, withFont, shapeList, map)),
+    paragraphs: body.children.filter((c) => c.name === 'p').map((p) => readParagraph(p, withFont, shapeList, map, links)),
   };
 }

@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported; links are never fetched",
+      "effect": "approximated: http, https, mailto and tel links are kept and any other scheme is dropped; linked files and media are never fetched",
       "id": "pptx.externalLinks",
       "label": "external link target(s) (web pages, files, linked media)",
       "where": [

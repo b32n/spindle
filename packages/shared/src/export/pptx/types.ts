@@ -73,8 +73,8 @@ export interface PptxSlide {
   layoutPart?: string;
   /** The slide's own background (`p:bg`), when it has one. */
   background?: PptxFill;
-  /** The `p:sp` shapes in drawing order; other shape kinds arrive with the later reader steps. Absent for a slide that failed. */
-  elements?: PptxShape[];
+  /** The `p:sp` shapes, `p:pic` pictures and table `p:graphicFrame`s in drawing order; the other shape kinds arrive with the later reader steps. Absent for a slide that failed. */
+  elements?: PptxElement[];
   error?: string;
 }
 
@@ -249,6 +249,8 @@ export interface PptxRun {
   /** Character spacing in pt. */
   spacing?: number;
   lang?: string;
+  /** `a:hlinkClick` on the run. */
+  link?: PptxLink;
 }
 
 /** A paragraph: its effective level style (presentation default, layout, shape list style and its own `a:pPr` merged) and its runs. */
@@ -289,7 +291,89 @@ export interface PptxShape {
   fill?: PptxFill;
   line?: PptxLine;
   text?: PptxTextBody;
+  /** `a:hlinkClick` on the shape. */
+  link?: PptxLink;
 }
+
+/**
+ * A hyperlink (`a:hlinkClick`). Only `http`, `https`, `mailto` and `tel` addresses become a `url`; an `action`
+ * (`ppaction://` targets such as a jump to a slide or a macro, and `file:` targets) is kept inert, as written, and never
+ * followed (`pptx.actions`). An address with any other scheme (`javascript:`, `data:`...) is dropped with a warning.
+ */
+export type PptxLink = { kind: 'url'; href: string; tooltip?: string } | { kind: 'action'; target: string; slidePart?: string; tooltip?: string };
+
+/**
+ * A picture (`p:pic`). `dataUrl` holds the embedded image (never fetched from a link); it is absent when `unsupported` says
+ * why the editor cannot show it: `linked` (the file lives outside the package), `missing` (the relationship or part is
+ * absent or too large) or the format (`emf`, `wmf`, ... have no browser renderer: kept as a placeholder, the part name is
+ * in `part`). An SVG with a PNG fallback reads as the PNG. An SVG `dataUrl` is the file as it is, unsanitised: show it only
+ * through an `<img>` and never inline it into the page.
+ */
+export interface PptxPicture {
+  kind: 'picture';
+  pptxId: string;
+  name: string;
+  altText?: string;
+  hidden?: boolean;
+  placeholder?: { type: string; idx?: number };
+  frame?: PptxFrame;
+  geometry?: PptxGeometry;
+  line?: PptxLine;
+  /** The image part (`ppt/media/image1.png`). */
+  part?: string;
+  mime?: string;
+  dataUrl?: string;
+  /** Percent of the source trimmed from each edge (`a:srcRect`), only when something is cropped. */
+  crop?: { l: number; t: number; r: number; b: number };
+  /** `a:alphaModFix` as a fraction, when under 1. */
+  alpha?: number;
+  unsupported?: string;
+  link?: PptxLink;
+}
+
+/** Cell borders by side; `null` is an explicit "no line" (`a:noFill`), an absent side states nothing. */
+export type PptxCellBorders = Partial<Record<'l' | 't' | 'r' | 'b', PptxLine | null>>;
+
+/**
+ * One cell of a table. `fill`, `borders` and the text's bold, italic and colour are **resolved**: the cell's own `a:tcPr`
+ * and run properties over the table style (`ppt/tableStyles.xml`: whole table, banding, first and last row and column).
+ * A merged region is its origin cell with `gridSpan` / `rowSpan`; the cells it covers are kept (`hMerge` / `vMerge`) as in the file.
+ */
+export interface PptxTableCell {
+  text: PptxTextBody;
+  gridSpan?: number;
+  rowSpan?: number;
+  hMerge?: boolean;
+  vMerge?: boolean;
+  fill?: PptxFill;
+  borders?: PptxCellBorders;
+  /** Cell margins in px (`marL`, `marT`, `marR`, `marB`), only what the cell states. */
+  margins?: { l?: number; t?: number; r?: number; b?: number };
+  anchor?: 'top' | 'middle' | 'bottom';
+  /** `a:tcPr/@vert` as written. */
+  vert?: string;
+}
+
+/** A table (`p:graphicFrame` holding `a:tbl`): column widths and row heights in px, rows of cells. */
+export interface PptxTable {
+  kind: 'table';
+  pptxId: string;
+  name: string;
+  altText?: string;
+  hidden?: boolean;
+  frame?: PptxFrame;
+  /** Widths in px. The grid is as wide as the widest row: a column the `a:tblGrid` does not list has width 0. */
+  columns: number[];
+  rows: { height: number; cells: PptxTableCell[] }[];
+  /** The `a:tblPr` switches that are on. */
+  flags?: Partial<Record<'firstRow' | 'firstCol' | 'lastRow' | 'lastCol' | 'bandRow' | 'bandCol', true>>;
+  /** `a:tableStyleId` and the style's name, when the file defines it. */
+  styleId?: string;
+  styleName?: string;
+}
+
+/** What a slide holds, in drawing order. */
+export type PptxElement = PptxShape | PptxPicture | PptxTable;
 
 /**
  * A slide layout flattened with its master. `elements` is the static content (the master's shapes, unless the layout hides

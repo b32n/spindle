@@ -54,7 +54,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: spans are stored on the origin cell and the cells it covers are marked",
       "id": "pptx.tables.merge",
       "label": "merged table cell(s)",
       "where": [

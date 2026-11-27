@@ -8194,6 +8194,318 @@
             }
           },
           {
+            "columns": [
+              128,
+              128,
+              128
+            ],
+            "flags": {
+              "bandRow": true,
+              "firstRow": true
+            },
+            "frame": {
+              "h": 144,
+              "w": 384,
+              "x": 48,
+              "y": 153.6
+            },
+            "kind": "table",
+            "name": "Table 2",
+            "pptxId": "3",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "gridSpan": 2,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R0C0"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        },
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R0C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "hMerge": true,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R0C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 48
+              },
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R1C0"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R1C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R1C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 48
+              },
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R2C0"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R2C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "text": "R2C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 48
+              }
+            ],
+            "styleId": "{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"
+          },
+          {
+            "altText": "image.png",
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 144,
+              "w": 144,
+              "x": 480,
+              "y": 153.6
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Picture 3",
+            "part": "ppt/media/image1.png",
+            "pptxId": "4"
+          },
+          {
             "fill": {
               "color": {
                 "kind": "theme",
@@ -8513,11 +8825,12 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 13,
-    "outOfScope": 9,
-    "sourceRuns": 13
+    "modelRuns": 22,
+    "outOfScope": 0,
+    "sourceRuns": 22
   },
   "warnings": [
+    "A table uses the style {5C22544A-7EE6-4342-B048-85BDC9FD1C3A}, which the file does not define; its cells keep only their own formatting.",
     "A shape takes a gradient fill from the theme's style list; it is read as a solid colour."
   ]
 }

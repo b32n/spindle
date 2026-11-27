@@ -3963,6 +3963,1564 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "columns": [
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559
+            ],
+            "flags": {
+              "bandRow": true,
+              "firstCol": true,
+              "firstRow": true
+            },
+            "frame": {
+              "h": 176.3779527559055,
+              "w": 755.9055118110236,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "table",
+            "name": "Styled table",
+            "pptxId": "3",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Column 1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Column 2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Column 3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Column 4"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R1C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R1C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R1C3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R1C4"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "lt1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R2C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "lt1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R2C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "lt1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R2C3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "lt1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R2C4"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R3C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R3C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R3C3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "R3C4"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              }
+            ],
+            "styleId": "{7A1B2C3D-0000-4000-8000-0000000000A1}",
+            "styleName": "Spindle test style"
+          },
+          {
+            "columns": [
+              251.96850393700788,
+              251.96850393700788,
+              251.96850393700788
+            ],
+            "frame": {
+              "h": 132.28346456692913,
+              "w": 755.9055118110236,
+              "x": 73.49081364829397,
+              "y": 388.4514435695538
+            },
+            "kind": "table",
+            "name": "Unstyled table",
+            "pptxId": "4",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "A1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "B1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "A2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "B2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "A3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "B3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              }
+            ]
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4027,6 +5585,461 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "columns": [
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559
+            ],
+            "flags": {
+              "bandRow": true,
+              "firstRow": true
+            },
+            "frame": {
+              "h": 176.3779527559055,
+              "w": 755.9055118110236,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "table",
+            "name": "Merged table",
+            "pptxId": "3",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "gridSpan": 2,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Spans two columns"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "hMerge": true,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "D1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "rowSpan": 2,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Spans two rows"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "B2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "D2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    },
+                    "vMerge": true
+                  },
+                  {
+                    "gridSpan": 2,
+                    "rowSpan": 2,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Spans 2 x 2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "hMerge": true,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "D3"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "A4"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    },
+                    "vMerge": true
+                  },
+                  {
+                    "hMerge": true,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    },
+                    "vMerge": true
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "D4"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              }
+            ]
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4091,6 +6104,398 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "columns": [
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559
+            ],
+            "frame": {
+              "h": 88.18897637795276,
+              "w": 755.9055118110236,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "table",
+            "name": "Bordered table",
+            "pptxId": "3",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "anchor": "middle",
+                    "borders": {
+                      "b": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#C00000",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      },
+                      "l": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#C00000",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      },
+                      "r": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#C00000",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      },
+                      "t": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#C00000",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "hex": "#FFF2CC",
+                        "kind": "rgb"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Thick red box"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "cap": "flat",
+                        "dash": "dash",
+                        "fill": {
+                          "color": {
+                            "hex": "#0070C0",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 2.6666666666666665
+                      }
+                    },
+                    "fill": {
+                      "angle": 0,
+                      "kind": "gradient",
+                      "shape": "linear",
+                      "stops": [
+                        {
+                          "color": {
+                            "hex": "#FFFFFF",
+                            "kind": "rgb"
+                          },
+                          "pos": 0
+                        },
+                        {
+                          "color": {
+                            "hex": "#9DC3E6",
+                            "kind": "rgb"
+                          },
+                          "pos": 1
+                        }
+                      ]
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Dashed bottom"
+                            }
+                          ],
+                          "style": {
+                            "align": "center",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.4,
+                        "lumOff": 0.6,
+                        "slot": "accent2"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Diagonal"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "fill": {
+                      "kind": "none"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "No fill"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "l": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#00B050",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      }
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Left only"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "t": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#7030A0",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      }
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Top only"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "r": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#ED7D31",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 4
+                      }
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Right only"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Plain"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              }
+            ]
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4124,9 +6529,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 3,
-    "outOfScope": 44,
-    "sourceRuns": 3
+    "modelRuns": 47,
+    "outOfScope": 0,
+    "sourceRuns": 47
   },
   "warnings": []
 }

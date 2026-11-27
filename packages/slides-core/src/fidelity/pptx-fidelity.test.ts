@@ -118,6 +118,20 @@ describe('PPTX fidelity corpus (io source)', () => {
     expect(shapes('shapes-presets').some((e) => e.geometry?.known === true)).toBe(true);
   });
 
+  it('reads the pictures and tables of the image and table decks (plan K10a)', () => {
+    type Element = { kind: string; dataUrl?: { dataUrl: string; bytes: number }; unsupported?: string; crop?: unknown; rows?: { cells: { gridSpan?: number; fill?: unknown }[] }[] };
+    const elements = (id: string) => (run.fixtures.find((f) => f.entry.id === id)?.result.model.presentation as unknown as { slides: { elements?: Element[] }[] }).slides.flatMap((s) => s.elements ?? []);
+    const pictures = elements('images').filter((e) => e.kind === 'picture');
+    // embedded images are digested in the golden; the metafiles and the linked picture are placeholders
+    expect(pictures.filter((p) => p.dataUrl).map((p) => p.dataUrl?.dataUrl)).toEqual(expect.arrayContaining(['image/png', 'image/jpeg', 'image/gif']));
+    expect(pictures.filter((p) => p.unsupported).map((p) => p.unsupported).sort()).toEqual(['emf', 'linked', 'wmf']);
+    expect(pictures.some((p) => p.crop)).toBe(true);
+    const tables = elements('tables').filter((e) => e.kind === 'table');
+    expect(tables.length).toBeGreaterThan(2);
+    expect(tables.some((t) => t.rows?.some((r) => r.cells.some((c) => c.gridSpan === 2)))).toBe(true);
+    expect(tables.some((t) => t.rows?.some((r) => r.cells.some((c) => c.fill)))).toBe(true);
+  });
+
   it('names the encrypted and the legacy binary stubs, and nothing else about them', () => {
     const lossIds = (id: string) =>
       run.fixtures.find((f) => f.entry.id === id)?.result.loss.items.map((i) => i.id);

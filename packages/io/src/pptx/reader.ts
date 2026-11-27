@@ -84,7 +84,7 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
   const fonts = new Set<string>();
   const defaultStyle = kid(presentation, 'defaultTextStyle');
   const layouts = await readLayouts(pkg, await masterParts(pkg, presentation, rels, slides), defaultStyle, warn, fonts);
-  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts);
+  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts, [...rels.values()].find((r) => r.type === 'tableStyles' && !r.external)?.target);
   const sections = readSections(presentation, slides);
   for (const part of pkg.skipped) warn(`${part} was too large to read and was skipped.`);
   return {

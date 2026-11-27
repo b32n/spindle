@@ -4430,6 +4430,10 @@
                     {
                       "kind": "text",
                       "lang": "en-US",
+                      "link": {
+                        "href": "https://example.com/spindle-fixture",
+                        "kind": "url"
+                      },
                       "text": "A web link"
                     },
                     {
@@ -4440,6 +4444,10 @@
                     {
                       "kind": "text",
                       "lang": "en-US",
+                      "link": {
+                        "href": "mailto:fixture@example.com",
+                        "kind": "url"
+                      },
                       "text": "a mail link"
                     }
                   ],

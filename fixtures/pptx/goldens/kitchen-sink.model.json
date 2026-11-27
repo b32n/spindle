@@ -4218,6 +4218,10 @@
                     {
                       "kind": "text",
                       "lang": "en-US",
+                      "link": {
+                        "href": "https://example.com/spindle-fixture",
+                        "kind": "url"
+                      },
                       "text": "A link"
                     },
                     {
@@ -4608,6 +4612,531 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "columns": [
+              188.9763779527559,
+              188.9763779527559,
+              188.9763779527559
+            ],
+            "flags": {
+              "bandRow": true,
+              "firstRow": true
+            },
+            "frame": {
+              "h": 88.18897637795276,
+              "w": 566.9291338582677,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "table",
+            "name": "Table",
+            "pptxId": "3",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "gridSpan": 2,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "Spans two columns"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "hMerge": true,
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C1"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "bold": true,
+                            "color": {
+                              "kind": "theme",
+                              "slot": "lt1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              },
+              {
+                "cells": [
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "A2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "cap": "flat",
+                        "dash": "solid",
+                        "fill": {
+                          "color": {
+                            "hex": "#C00000",
+                            "kind": "rgb"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 2
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "hex": "#FFF2CC",
+                        "kind": "rgb"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "B2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  },
+                  {
+                    "borders": {
+                      "b": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "l": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "r": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      },
+                      "t": {
+                        "fill": {
+                          "color": {
+                            "kind": "theme",
+                            "slot": "accent1"
+                          },
+                          "kind": "solid"
+                        },
+                        "width": 1.3333333333333333
+                      }
+                    },
+                    "fill": {
+                      "color": {
+                        "kind": "theme",
+                        "lumMod": 0.2,
+                        "lumOff": 0.8,
+                        "slot": "accent1"
+                      },
+                      "kind": "solid"
+                    },
+                    "text": {
+                      "paragraphs": [
+                        {
+                          "level": 0,
+                          "runs": [
+                            {
+                              "kind": "text",
+                              "lang": "en-US",
+                              "text": "C2"
+                            }
+                          ],
+                          "style": {
+                            "align": "left",
+                            "color": {
+                              "kind": "theme",
+                              "slot": "dk1"
+                            },
+                            "font": "minor",
+                            "fontSize": 18,
+                            "marginLeft": 0
+                          }
+                        }
+                      ],
+                      "props": {}
+                    }
+                  }
+                ],
+                "height": 44.09448818897638
+              }
+            ],
+            "styleId": "{7A1B2C3D-0000-4000-8000-0000000000A1}",
+            "styleName": "Spindle test style"
+          },
+          {
+            "altText": "A small picture",
+            "crop": {
+              "b": 0,
+              "l": 10,
+              "r": 10,
+              "t": 0
+            },
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 713.9107611548557,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Picture",
+            "part": "ppt/media/picture.png",
+            "pptxId": "4"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -5088,9 +5617,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 24,
-    "outOfScope": 7,
-    "sourceRuns": 24
+    "modelRuns": 29,
+    "outOfScope": 2,
+    "sourceRuns": 29
   },
   "warnings": [
     "2 fonts the editor may not have (MS Gothic, MS Mincho) are used; text in them shows in a substitute and may reflow."

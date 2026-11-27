@@ -3965,6 +3965,30 @@
             }
           },
           {
+            "altText": "A small PNG picture used as a fixture",
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "PNG picture",
+            "part": "ppt/media/picture.png",
+            "pptxId": "3"
+          },
+          {
             "fill": {
               "kind": "none"
             },
@@ -4016,6 +4040,30 @@
             "textBox": true
           },
           {
+            "altText": "A small JPEG picture used as a fixture",
+            "dataUrl": {
+              "bytes": 667,
+              "dataUrl": "image/jpeg",
+              "sha256": "9bd28cdf9eedf2bdeef04c17ce9accb3b7996d7d67785bfd5fa1075f4c83f95d"
+            },
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 461.9422572178478,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/jpeg",
+            "name": "JPEG picture",
+            "part": "ppt/media/picture.jpg",
+            "pptxId": "4"
+          },
+          {
             "fill": {
               "kind": "none"
             },
@@ -4065,6 +4113,30 @@
               }
             },
             "textBox": true
+          },
+          {
+            "altText": "A small GIF picture used as a fixture",
+            "dataUrl": {
+              "bytes": 43,
+              "dataUrl": "image/gif",
+              "sha256": "693d949d8c3fdc7fd4ace7c340b5f177a9f0c5be7bafee8bc93a7d88b7523d75"
+            },
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 850.3937007874016,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/gif",
+            "name": "GIF picture",
+            "part": "ppt/media/picture.gif",
+            "pptxId": "5"
           },
           {
             "fill": {
@@ -4180,6 +4252,68 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "altText": "Vector picture with a PNG fallback",
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "0e6b7be6315f1d06d9a60f53aca48d146e3372b88ad79a771dd6228112b297f2"
+            },
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "SVG with PNG fallback",
+            "part": "ppt/media/vector-fallback.png",
+            "pptxId": "3"
+          },
+          {
+            "altText": "An empty enhanced metafile",
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 461.9422572178478,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "name": "EMF picture",
+            "part": "ppt/media/picture.emf",
+            "pptxId": "4",
+            "unsupported": "emf"
+          },
+          {
+            "altText": "An empty Windows metafile",
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 850.3937007874016,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "name": "WMF picture",
+            "part": "ppt/media/picture.wmf",
+            "pptxId": "5",
+            "unsupported": "wmf"
           },
           {
             "fill": {
@@ -4397,6 +4531,257 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "crop": {
+              "b": 40,
+              "l": 25,
+              "r": 25,
+              "t": 10
+            },
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 52.493438320209975,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Cropped",
+            "part": "ppt/media/picture.png",
+            "pptxId": "3"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "rot": 30,
+              "w": 188.9763779527559,
+              "x": 283.46456692913387,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Rotated",
+            "part": "ppt/media/picture.png",
+            "pptxId": "4"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "flipH": true,
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 514.4356955380578,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Flipped horizontally",
+            "part": "ppt/media/picture.png",
+            "pptxId": "5"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "flipV": true,
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 745.4068241469816,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Flipped vertically",
+            "part": "ppt/media/picture.png",
+            "pptxId": "6"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 976.3779527559055,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "roundRect"
+            },
+            "kind": "picture",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#C00000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 4
+            },
+            "mime": "image/png",
+            "name": "Bordered, rounded",
+            "part": "ppt/media/picture.png",
+            "pptxId": "7"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 52.493438320209975,
+              "y": 377.9527559055118
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Duotone",
+            "part": "ppt/media/picture.png",
+            "pptxId": "8"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 283.46456692913387,
+              "y": 377.9527559055118
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Brightness and contrast",
+            "part": "ppt/media/picture.png",
+            "pptxId": "9"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 514.4356955380578,
+              "y": 377.9527559055118
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Greyscale",
+            "part": "ppt/media/picture.png",
+            "pptxId": "10"
+          },
+          {
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 745.4068241469816,
+              "y": 377.9527559055118
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Colour change",
+            "part": "ppt/media/picture.png",
+            "pptxId": "11"
+          },
+          {
+            "alpha": 0.5,
+            "dataUrl": {
+              "bytes": 213,
+              "dataUrl": "image/png",
+              "sha256": "ede444d0e09b6e49928603bbe2c678592cd02251d27e5b980992870cbf03e896"
+            },
+            "frame": {
+              "h": 146.98162729658793,
+              "w": 188.9763779527559,
+              "x": 976.3779527559055,
+              "y": 377.9527559055118
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "mime": "image/png",
+            "name": "Transparency",
+            "part": "ppt/media/picture.png",
+            "pptxId": "12"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4461,6 +4846,24 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "altText": "A picture that is linked, not embedded: the target is never fetched",
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 251.96850393700788,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "picture",
+            "name": "Linked picture",
+            "pptxId": "3",
+            "unsupported": "linked"
           },
           {
             "fill": {
@@ -4548,5 +4951,8 @@
     "outOfScope": 0,
     "sourceRuns": 11
   },
-  "warnings": []
+  "warnings": [
+    "A picture is in EMF or WMF format, which browsers cannot show; it is kept as a placeholder.",
+    "A picture is linked from outside the file, which is never fetched; it is kept as a placeholder."
+  ]
 }

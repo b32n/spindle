@@ -1,11 +1,12 @@
 import type { PptxColorMap, PptxFill, PptxLayout, PptxSlide } from '@b32nio/spindle-shared/export/pptx';
 import type { OoxmlPackage } from '../common/ooxml-package';
 import { kid, type XmlElement } from '../xlsx/xml';
-import { colorElement, overrideColorMap, parseColor, parseColorMap } from './color';
+import { DEFAULT_COLOR_MAP, colorElement, overrideColorMap, parseColor, parseColorMap } from './color';
 import { parseFill, type Rels } from './fill';
 import { collectFonts } from './fonts';
 import { parseLevels } from './levels';
-import { readShapes } from './shapes';
+import { readElements, type ElementContext } from './elements';
+import { readTableStyles } from './table-styles';
 
 /** A slide's `p:bg`: the fill of `p:bgPr`, or the colour of a `p:bgRef` as a solid fill. */
 function readBackground(root: XmlElement, map: PptxColorMap, rels: Rels): PptxFill | undefined {
@@ -27,7 +28,8 @@ export async function readSlideContent(
   layouts: PptxLayout[],
   defaultStyle: XmlElement | undefined,
   warn: (m: string) => void,
-  fonts: Set<string>
+  fonts: Set<string>,
+  tableStylesPart?: string
 ): Promise<void> {
   const layoutMaps = new Map<string, PptxColorMap>();
   const layoutMap = async (part: string | undefined): Promise<PptxColorMap> => {
@@ -43,6 +45,11 @@ export async function readSlideContent(
     layoutMaps.set(key, map);
     return map;
   };
+  const images: ElementContext['images'] = new Map();
+  let styleRoot: XmlElement | undefined;
+  if (tableStylesPart) styleRoot = await pkg.xml(tableStylesPart);
+  // table styles depend on the style part and the default colour map only (style parts carry no blip fills)
+  const styles = readTableStyles(styleRoot, DEFAULT_COLOR_MAP, new Map());
   for (const [i, slide] of slides.entries()) {
     if (slide.error) continue;
     try {
@@ -52,10 +59,10 @@ export async function readSlideContent(
       const map = overrideColorMap(await layoutMap(slide.layoutPart), kid(kid(root, 'clrMapOvr'), 'overrideClrMapping'));
       const rels = await relsOf(pkg, slide.partName);
       const layout = layouts.find((l) => l.partName === slide.layoutPart);
-      const ctx = { map, rels, defaultLevels: parseLevels(defaultStyle, map), ...(layout ? { layout } : {}), warn };
+      const ctx = { map, rels, defaultLevels: parseLevels(defaultStyle, map), ...(layout ? { layout } : {}), warn, pkg, images, styles };
       const background = readBackground(root, map, rels);
       if (background) slide.background = background;
-      slide.elements = readShapes(kid(kid(root, 'cSld'), 'spTree'), ctx, true);
+      slide.elements = await readElements(kid(kid(root, 'cSld'), 'spTree'), ctx);
     } catch (e) {
       delete slide.elements;
       delete slide.background;
