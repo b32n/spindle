@@ -414,11 +414,11 @@ describe('array and dynamic-array formulas', () => {
 
   it('cuts a legacy array formula to its extent: a one-cell one shows the first value, a one-column result is repeated across a wider one', async () => {
     const bytes = await xlsxWith({
-      1: [ncell('A1', 1), ncell('A2', 2), fcell('B1', 'A1:A2*10', 10, 't="array" ref="B1"'), fcell('C1', 'A1:A2*10', 10, 't="array" ref="C1:E2"'), ncell('D2', 99)],
+      1: [ncell('A1', 1), ncell('A2', 2), fcell('B1', 'A1:A2*10', 10, 't="array" ref="B1"'), fcell('C1', 'A1:A2*10', 10, 't="array" ref="C1:E2"'), ncell('D2', 20)],
     });
     const { wb } = await open(bytes);
     expect(cellAt(wb, 0, 1)).toMatchObject({ value: 10, arraySpan: { rows: 1, cols: 1 } });
-    // C1:E2 is 2 x 3 over a 2 x 1 result: Excel repeats a one-column result across the range; the plain cell D2 inside the extent is part of the result, not kept
+    // C1:E2 is 2 x 3 over a 2 x 1 result: Excel repeats a one-column result across the range; the cell D2 inside the extent holds the result the file saved (20, as the engine's), so the engine's spill replaces it
     expect(wb.getSpillRegion(undefined, 0, 2)).toMatchObject({ rows: 2, cols: 3, values: [[10, 10, 10], [20, 20, 20]] });
     expect(cellAt(wb, 1, 3)).toBeUndefined();
   });

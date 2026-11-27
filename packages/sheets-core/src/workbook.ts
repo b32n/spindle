@@ -530,6 +530,17 @@ export class WorkbookImpl implements Workbook {
     if (rows !== span.rows || cols !== span.cols) this.setCell(sheetId, row, col, { arraySpan: { rows, cols, spill: true } });
   }
 
+  /**
+   * Gives a legacy array formula back what its file saved: the formula is a cached-only one (the file's text, the saved value at its
+   * cell, never recalculated) and the cells of its range hold the saved ones. For an import whose engine result is not the saved one.
+   */
+  keepSavedArray(sheetId: string | undefined, row: number, col: number, formula: string, anchor: Cell['value'], saved: Array<Array<Cell | undefined>>): void {
+    this.formulaGraph.removeFormula(this.graphKey(sheetId, row, col));
+    this.releaseSpill(sheetId, row, col);
+    saved.forEach((line, r) => line.forEach((cell, c) => cell && this.setCell(sheetId, row + r, col + c, { ...cell })));
+    this.setCell(sheetId, row, col, { formula, formulaAst: undefined, value: anchor, cachedOnly: true });
+  }
+
   /** The spill region a cell anchors (extent and values), or undefined when it does not spill. */
   getSpillRegion(sheetId: string | undefined, row: number, col: number): { rows: number; cols: number; values: unknown[][] } | undefined {
     const region = this.getSpillIndex(sheetId).regionAt(row, col);

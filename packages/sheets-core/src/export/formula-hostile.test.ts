@@ -47,7 +47,8 @@ describe('importing formulas of a hostile shape, in a child process with a heap 
     expect(out.error).toBeUndefined();
     expect(out.cells).toBe(20_000);
     expect(out.cachedOnly).toBeGreaterThan(19_000);
-    expect(lossOf(out, 'xlsx.package.sizeLimit')).toBe(out.cachedOnly);
+    // the ones over the budget (sizeLimit), and the legacy ones inside it that overlap each other and keep their saved values for it (cachedOnly)
+    expect(lossOf(out, 'xlsx.package.sizeLimit') + lossOf(out, 'xlsx.formulas.cachedOnly')).toBe(out.cachedOnly);
     expect(out.zipBytes).toBeLessThan(3 * 1024 * 1024);
   }, 150_000);
 

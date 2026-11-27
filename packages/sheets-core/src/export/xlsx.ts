@@ -188,6 +188,8 @@ function toSpreadsheetCell(
 
 /** A value as the file stores it: an engine error message (`#NAME? Function X not found`) is reduced to its code, a parse failure is no value. */
 function toFileValue(value: SpreadsheetCell['value']): SpreadsheetCell['value'] {
+  // the engine's result of 1/0 or SQRT(-1) inside an array is not stored as an error until it is a scalar: the file has no infinities
+  if (typeof value === 'number' && !Number.isFinite(value)) return Number.isNaN(value) ? '#NUM!' : '#DIV/0!';
   if (typeof value === 'string' && value.startsWith('#')) {
     if (value.startsWith('#ERROR!')) return null;
     if (value.includes(' ')) return value.split(' ')[0];
@@ -296,13 +298,23 @@ export async function importFromXlsx(
   const warnings = [...result.warnings];
   // one warning per array formula the file gave a range that does not start at its cell, counted after a small cap (the file chooses how many)
   let misplaced = 0;
-  const { data, sheetIds, spanBudgetCut } = toWorkbookData(result, workbook, io, maxArrayCells, (message) => {
+  const { data, sheetIds, spanBudgetCut, legacy } = toWorkbookData(result, workbook, io, maxArrayCells, (message) => {
     if (misplaced++ < MAX_ARRAY_WARNINGS) warnings.push(message);
   });
   if (misplaced > MAX_ARRAY_WARNINGS) warnings.push(`${misplaced - MAX_ARRAY_WARNINGS} more array formulas whose range does not start at their cell were read as one-cell formulas.`);
   if (spanBudgetCut > 0) loss.items.push(spanBudgetItem(spanBudgetCut, maxArrayCells));
   // the file's saved results are the values (the engine recalculates a formula when its precedents change), unless the host asks for a recalculation
   workbook.setData(data, { keepCachedValues: recalculateOnLoad !== true });
+  // a legacy array the engine does not evaluate to what the file saved keeps what the file saved (the engine's result is the worse one)
+  const unfaithful = new Set<string>();
+  let unfaithfulCount = 0;
+  for (const { sheetIndex, row, col, rows, cols, formula, anchor, saved } of legacy) {
+    if (engineMatchesSaved(workbook, sheetIds[sheetIndex], row, col, rows, cols, anchor, saved)) continue;
+    workbook.keepSavedArray(sheetIds[sheetIndex], row, col, formula, anchor, saved);
+    unfaithfulCount++;
+    unfaithful.add(result.sheets[sheetIndex].name);
+  }
+  if (unfaithfulCount > 0) addCachedOnly(loss, unfaithfulCount, [...unfaithful]);
   // all the merges of a sheet at once: one by one each looked at all the others (10,000 took 12 s, 20,000 51 s). No history: a load
   // replaces the document, and `setData` has just emptied the undo stack; one step per merge would let undo take the merges back one by one
   result.sheets.forEach((sheet, i) => {
@@ -346,14 +358,16 @@ function toWorkbookData(
   io: IoXlsx,
   maxArrayCells: number,
   warn: (message: string) => void
-): { data: WorkbookData; sheetIds: string[]; spanBudgetCut: number } {
+): { data: WorkbookData; sheetIds: string[]; spanBudgetCut: number; legacy: Array<LegacyArray & { sheetIndex: number }> } {
   const stylePool = new StylePool();
   const formatPool = new FormatPool();
   const sheetIds = result.sheets.map(() => generateId());
   let spanBudgetCut = 0;
+  const legacy: Array<LegacyArray & { sheetIndex: number }> = [];
   const sheets: SheetData[] = result.sheets.map((sheet, i) => {
     const converted = toSheetData(sheet, sheetIds[i], stylePool, formatPool, io, maxArrayCells, warn);
     spanBudgetCut += converted.spanBudgetCut;
+    for (const array of converted.legacy) legacy.push({ ...array, sheetIndex: i });
     return converted.data;
   });
 
@@ -368,7 +382,7 @@ function toWorkbookData(
     formatPool: Object.fromEntries(formatPool.getAllFormats()),
     sheets,
   };
-  return { data, sheetIds, spanBudgetCut };
+  return { data, sheetIds, spanBudgetCut, legacy };
 }
 
 /**
@@ -391,7 +405,7 @@ function toSheetData(
   io: IoXlsx,
   maxArrayCells: number,
   warn: (message: string) => void
-): { data: SheetData; spanBudgetCut: number } {
+): { data: SheetData; spanBudgetCut: number; legacy: LegacyArray[] } {
   const cells: SheetData['cells'] = [];
   let maxRow = 0;
   let maxCol = 0;
@@ -436,6 +450,8 @@ function toSheetData(
   // (the anchor keeps the saved value until it is evaluated on load). Past the budget the formula stays cached-only instead.
   let spanBudgetCut = 0;
   const cleared = new Set<string>();
+  const legacy: LegacyArray[] = [];
+  let byKey: Map<string, Cell> | undefined;
   let budget = maxArrayCells;
   for (const { row, col, rows, cols, cell } of arrays) {
     if (cell.cachedOnly || (rows === 1 && cols === 1)) continue;
@@ -448,6 +464,17 @@ function toSheetData(
       continue;
     }
     budget -= cost;
+    if (!cell.arraySpan?.spill) {
+      // what the file saved over a legacy array's range: the engine's result is held to it once the workbook has evaluated it
+      byKey ??= new Map(cells.map(({ key, cell: c }) => [key, c]));
+      const saved: Array<Array<Cell | undefined>> = [];
+      for (let r = 0; r < rows; r++) {
+        const line: Array<Cell | undefined> = [];
+        for (let c = 0; c < cols; c++) line.push(r + c === 0 ? undefined : byKey.get(`${row + r}:${col + c}`));
+        saved.push(line);
+      }
+      legacy.push({ row, col, rows, cols, formula: `=${(sheet.cells.get(`${row}:${col}`) as SpreadsheetCell).formula}`, anchor: cell.value, saved });
+    }
     if (area <= cells.length) {
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (r + c > 0) cleared.add(`${row + r}:${col + c}`);
     } else {
@@ -480,7 +507,64 @@ function toSheetData(
       colCount: Math.max(maxCol + 1, 100),
     },
     spanBudgetCut,
+    legacy,
   };
+}
+
+/** The effect the detector words for `xlsx.formulas.cachedOnly` (the same text, for the formulas the import keeps as saved by itself: a test holds the two together). */
+const CACHED_ONLY_EFFECT =
+  'kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)';
+
+/** A legacy (CSE) array formula as the file had it: its text and the results it saved over its range (the anchor's value, and the cells after it). */
+interface LegacyArray {
+  row: number;
+  col: number;
+  rows: number;
+  cols: number;
+  formula: string;
+  anchor: Cell['value'];
+  saved: Array<Array<Cell | undefined>>;
+}
+
+/** Whether two results are the same value: numbers to the precision a file keeps, an empty cell and 0 and "" alike, errors by their code. */
+function sameResult(saved: unknown, engine: unknown): boolean {
+  const a = toFileValue((saved ?? null) as SpreadsheetCell['value']);
+  const b = toFileValue((engine ?? null) as SpreadsheetCell['value']);
+  if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+  const blank = (v: unknown) => v === null || v === '' || v === 0;
+  return a === b || (blank(a) && blank(b));
+}
+
+/** Whether what the engine evaluated a legacy array formula to (its live result over the range, a scalar filled across it) is what the file saved there. */
+function engineMatchesSaved(workbook: WorkbookImpl, sheetId: string, row: number, col: number, rows: number, cols: number, anchor: Cell['value'], saved: LegacyArray['saved']): boolean {
+  const region = workbook.getSpillRegion(sheetId, row, col);
+  // no result over the range (an error, or a cell in the way): nothing the file's cells can be held against
+  if (!region || region.rows !== rows || region.cols !== cols) return false;
+  // (a cell the file does not give a result for is not held against the engine)
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const value = r + c === 0 ? anchor : saved[r][c]?.value;
+      if (value !== undefined && value !== null && !sameResult(value, region.values[r][c])) return false;
+    }
+  return true;
+}
+
+/** Counts formulas kept as saved by the import itself in the report's `xlsx.formulas.cachedOnly` item (the detector's, or one of the same wording when it found none). */
+function addCachedOnly(loss: ImportLossReport, count: number, where: string[]): void {
+  const item = loss.items.find((i) => i.id === 'xlsx.formulas.cachedOnly');
+  if (item) {
+    item.count += count;
+    item.where = [...new Set([...(item.where ?? []), ...where])].slice(0, 5);
+    return;
+  }
+  loss.items.push({
+    id: 'xlsx.formulas.cachedOnly',
+    label: 'formula(s) the editor cannot calculate (kept as saved)',
+    count,
+    effect: CACHED_ONLY_EFFECT,
+    where: where.slice(0, 5),
+    state: 'kept',
+  });
 }
 
 /** The loss item for array formulas the load budget kept as saved values (see DEFAULT_MAX_ARRAY_CELLS). */
