@@ -24,15 +24,28 @@ import { isFormulaEvaluable, parseRange, spanRef } from './xlsx-formulas';
 
 type IoXlsx = Awaited<ReturnType<typeof loadIo>>;
 
-export async function exportToXlsx(workbook: WorkbookImpl): Promise<Uint8Array> {
+/** What `exportToXlsx` takes. */
+export interface ExportToXlsxOptions {
+  /**
+   * The most cells of one array formula's result written to the file (default 1,000,000, `DEFAULT_MAX_ARRAY_CELLS`): a spilled
+   * region over it is written as its first rows only, with the formula's range cut to match, so Excel (which recalculates
+   * the formula) still spills it in full. Each region cut is reported to `onWarning`.
+   */
+  maxArrayCells?: number;
+  /** Told about what the export left out (a spilled region over `maxArrayCells`), once for each. */
+  onWarning?: (message: string) => void;
+}
+
+export async function exportToXlsx(workbook: WorkbookImpl, options: ExportToXlsxOptions = {}): Promise<Uint8Array> {
+  const maxArrayCells = options.maxArrayCells ?? DEFAULT_MAX_ARRAY_CELLS;
   const sheetIds = Array.from(workbook.sheets.keys());
-  const sheets = sheetIds.map((id) => toSpreadsheetSheet(workbook, workbook.sheets.get(id)!));
+  const sheets = sheetIds.map((id) => toSpreadsheetSheet(workbook, workbook.sheets.get(id)!, maxArrayCells, options.onWarning));
   const activeSheetIndex = sheetIds.indexOf(workbook.activeSheetId);
   const { exportXlsx } = await loadIo();
   return exportXlsx({ sheets, activeSheetIndex: activeSheetIndex >= 0 ? activeSheetIndex : undefined });
 }
 
-function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet): SpreadsheetSheet {
+function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, maxArrayCells: number, onWarning?: (message: string) => void): SpreadsheetSheet {
   const stylePool = workbook.getStylePool();
   const formatPool = workbook.getFormatPool();
   const cells = new Map<string, SpreadsheetCell>();
@@ -49,18 +62,27 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet): SpreadsheetSh
     if (cell.formula) {
       // an array formula is written as one over its extent: the file's (cached-only) or the engine's live spill region
       const region = workbook.getSpillRegion(sheet.id, row, col);
-      const span = region ?? cell.arraySpan;
+      let span = region ?? cell.arraySpan;
+      let written = region;
+      if (region && region.rows * region.cols > maxArrayCells) {
+        // a result over the cap is written as its first rows; the range says what is written, and Excel spills the rest when it recalculates
+        const cols = Math.min(region.cols, Math.max(1, maxArrayCells));
+        const rows = Math.min(region.rows, Math.max(1, Math.floor(maxArrayCells / cols)));
+        span = { rows, cols };
+        written = { ...region, rows, cols };
+        onWarning?.(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's result (${region.rows} x ${region.cols} cells) is over ${maxArrayCells} cells, so only its first ${rows} x ${cols} are written to the file.`);
+      }
       if (span) {
         out.arrayRef = spanRef(row, col, span.rows, span.cols);
         // a formula that spills (or was a dynamic array in the file) goes back as one; a legacy array formula stays legacy
         if (region || cell.arraySpan?.spill) out.dynamicArray = true;
       }
-      if (region) {
+      if (written) {
         // the spilled cells are not stored cells: they are written as the values the file keeps next to an array formula
-        for (let r = 0; r < region.rows; r++) {
-          for (let c = 0; c < region.cols; c++) {
+        for (let r = 0; r < written.rows; r++) {
+          for (let c = 0; c < written.cols; c++) {
             if (r === 0 && c === 0) continue;
-            cells.set(`${row + r}:${col + c}`, { value: toFileValue(region.values[r][c] as SpreadsheetCell['value']) });
+            cells.set(`${row + r}:${col + c}`, { value: toFileValue(written.values[r][c] as SpreadsheetCell['value']) });
             maxRow = Math.max(maxRow, row + r);
             maxCol = Math.max(maxCol, col + c);
           }
@@ -198,6 +220,12 @@ export type ImportFromXlsxOptions = ImportXlsxOptions & {
    * result either way.
    */
   recalculateOnLoad?: boolean;
+  /**
+   * The most cells the array formulas of one sheet may cover on load (default 1,000,000, `DEFAULT_MAX_ARRAY_CELLS`: the file chooses
+   * the ranges). A sheet whose array formulas would cover more keeps the rest as cached-only formulas (one cell, the saved result),
+   * reported as `xlsx.package.sizeLimit` (`array formula(s) kept as saved values`).
+   */
+  maxArrayCells?: number;
 };
 
 /**
@@ -220,7 +248,7 @@ export async function importFromXlsx(
   options: ImportFromXlsxOptions = {}
 ): Promise<{ warnings: string[]; loss: ImportLossReport }> {
   const io = await loadIo();
-  const { recalculateOnLoad, ...readerOptions } = options;
+  const { recalculateOnLoad, maxArrayCells = DEFAULT_MAX_ARRAY_CELLS, ...readerOptions } = options;
   // the importer is the one that refuses unsafe files (an `ImportError`), so it goes first: no point scanning what is refused
   const result = await io.importXlsx(bytes, readerOptions);
   const detected = await io.detectXlsxLoss(bytes, lossOptions(io));
@@ -232,11 +260,11 @@ export async function importFromXlsx(
   const warnings = [...result.warnings];
   // one warning per array formula the file gave a range that does not start at its cell, counted after a small cap (the file chooses how many)
   let misplaced = 0;
-  const { data, sheetIds, spanBudgetCut } = toWorkbookData(result, workbook, io, (message) => {
+  const { data, sheetIds, spanBudgetCut } = toWorkbookData(result, workbook, io, maxArrayCells, (message) => {
     if (misplaced++ < MAX_ARRAY_WARNINGS) warnings.push(message);
   });
   if (misplaced > MAX_ARRAY_WARNINGS) warnings.push(`${misplaced - MAX_ARRAY_WARNINGS} more array formulas whose range does not start at their cell were read as one-cell formulas.`);
-  if (spanBudgetCut > 0) loss.items.push(spanBudgetItem(spanBudgetCut));
+  if (spanBudgetCut > 0) loss.items.push(spanBudgetItem(spanBudgetCut, maxArrayCells));
   // the file's saved results are the values (the engine recalculates a formula when its precedents change), unless the host asks for a recalculation
   workbook.setData(data, { keepCachedValues: recalculateOnLoad !== true });
   // all the merges of a sheet at once: one by one each looked at all the others (10,000 took 12 s, 20,000 51 s). No history: a load
@@ -280,6 +308,7 @@ function toWorkbookData(
   result: SpreadsheetImportResult,
   workbook: WorkbookImpl,
   io: IoXlsx,
+  maxArrayCells: number,
   warn: (message: string) => void
 ): { data: WorkbookData; sheetIds: string[]; spanBudgetCut: number } {
   const stylePool = new StylePool();
@@ -287,7 +316,7 @@ function toWorkbookData(
   const sheetIds = result.sheets.map(() => generateId());
   let spanBudgetCut = 0;
   const sheets: SheetData[] = result.sheets.map((sheet, i) => {
-    const converted = toSheetData(sheet, sheetIds[i], stylePool, formatPool, io, warn);
+    const converted = toSheetData(sheet, sheetIds[i], stylePool, formatPool, io, maxArrayCells, warn);
     spanBudgetCut += converted.spanBudgetCut;
     return converted.data;
   });
@@ -309,9 +338,11 @@ function toWorkbookData(
 /**
  * What the array formulas of a sheet may cost on load, in cells: a dynamic-array formula clears the cells its saved result
  * occupies (at most as many as the sheet has), a legacy one keeps the extent the file gave it, in full. The file chooses the
- * extent (`ref="A1:XFD1048576"`), so a sheet whose array formulas would cost more keeps the rest as cached-only formulas.
+ * extent (`ref="A1:XFD1048576"`), so a sheet whose array formulas would cost more keeps the rest as cached-only formulas. A million
+ * cells is the 100,000 x 10 performance file; `ref="A1:J400000"` (4 million) cost 5 s and 1 GB to import and 44 s and 3 GB to write
+ * back at the former 5 million. A host raises or lowers it with the `maxArrayCells` option of `importFromXlsx`.
  */
-const ARRAY_CLEAR_BUDGET = 5_000_000;
+export const DEFAULT_MAX_ARRAY_CELLS = 1_000_000;
 
 /** Warnings about array ranges that do not start at their cell that an import lists before it only counts the rest. */
 const MAX_ARRAY_WARNINGS = 20;
@@ -322,6 +353,7 @@ function toSheetData(
   stylePool: StylePool,
   formatPool: FormatPool,
   io: IoXlsx,
+  maxArrayCells: number,
   warn: (message: string) => void
 ): { data: SheetData; spanBudgetCut: number } {
   const cells: SheetData['cells'] = [];
@@ -368,7 +400,7 @@ function toSheetData(
   // (the anchor keeps the saved value until it is evaluated on load). Past the budget the formula stays cached-only instead.
   let spanBudgetCut = 0;
   const cleared = new Set<string>();
-  let budget = ARRAY_CLEAR_BUDGET;
+  let budget = maxArrayCells;
   for (const { row, col, rows, cols, cell } of arrays) {
     if (cell.cachedOnly || (rows === 1 && cols === 1)) continue;
     const area = rows * cols;
@@ -415,13 +447,13 @@ function toSheetData(
   };
 }
 
-/** The loss item for array formulas the load budget kept as saved values (see ARRAY_CLEAR_BUDGET). */
-function spanBudgetItem(count: number): ImportLossItem {
+/** The loss item for array formulas the load budget kept as saved values (see DEFAULT_MAX_ARRAY_CELLS). */
+function spanBudgetItem(count: number, maxArrayCells: number): ImportLossItem {
   return {
     id: 'xlsx.package.sizeLimit',
     label: 'array formula(s) kept as saved values',
     count,
-    effect: `approximated: the cells they cover are too many to take on load (over ${ARRAY_CLEAR_BUDGET} cells of array formulas on a sheet), so they keep their saved results and are not recalculated`,
+    effect: `approximated: the cells they cover are too many to take on load (over ${maxArrayCells} cells of array formulas on a sheet; the maxArrayCells option raises it), so they keep their saved results and are not recalculated`,
   };
 }
 

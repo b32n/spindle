@@ -13,6 +13,9 @@ const PROBE = resolve(__dirname, 'hostile/formula-probe.ts');
 
 interface Out {
   ms?: number;
+  exportMs?: number;
+  exportBytes?: number;
+  exportWarnings?: string[];
   zipBytes?: number;
   cells?: number;
   cachedOnly?: number;
@@ -22,8 +25,8 @@ interface Out {
   error?: string;
 }
 
-function importInChild(shape: string, count: number, timeoutMs: number): { out: Out; status: number | null; signal: string | null; stderr: string } {
-  const child = spawnSync(process.execPath, ['--max-old-space-size=1024', '--import', 'tsx', PROBE, shape, String(count)], { cwd: resolve(__dirname, '../..'), encoding: 'utf8', timeout: timeoutMs, maxBuffer: 16 * 1024 * 1024 });
+function importInChild(shape: string, count: number, timeoutMs: number, maxArrayCells?: number, heapMb = 1024): { out: Out; status: number | null; signal: string | null; stderr: string } {
+  const child = spawnSync(process.execPath, [`--max-old-space-size=${heapMb}`, '--import', 'tsx', PROBE, shape, String(count), ...(maxArrayCells === undefined ? [] : [String(maxArrayCells)])], { cwd: resolve(__dirname, '../..'), encoding: 'utf8', timeout: timeoutMs, maxBuffer: 16 * 1024 * 1024 });
   const line = (child.stdout ?? '').trim().split('\n').pop() as string;
   let out: Out = {};
   try {
@@ -53,6 +56,30 @@ describe('importing formulas of a hostile shape, in a child process with a heap 
     expect(out).toMatchObject({ cells: 1, cachedOnly: 1 });
     expect(lossOf(out, 'xlsx.package.sizeLimit')).toBe(1);
   }, 100_000);
+
+  it('an array formula over 400,000 rows (ref A1:J400000, 4 million cells) is kept as its saved value, imported and exported', () => {
+    const { out, status, signal, stderr } = importInChild('rows400k', 1, 60_000);
+    expect({ status, signal, stderr }).toEqual({ status: 0, signal: null, stderr: '' });
+    expect(out).toMatchObject({ cells: 1, cachedOnly: 1, exportWarnings: [] });
+    expect(lossOf(out, 'xlsx.package.sizeLimit')).toBe(1);
+    expect(out.zipBytes).toBeLessThan(4 * 1024);
+    // one cell written, not 4 million
+    expect(out.exportBytes).toBeLessThan(10 * 1024);
+  }, 100_000);
+
+  it('an array formula over exactly a million cells is spilled in full, and written back in full, within the heap and time limits', () => {
+    const { out, status, signal, stderr } = importInChild('cells1m', 1, 240_000);
+    expect({ status, signal, stderr }).toEqual({ status: 0, signal: null, stderr: '' });
+    expect(out).toMatchObject({ cachedOnly: 0, exportWarnings: [] });
+    expect(lossOf(out, 'xlsx.package.sizeLimit')).toBe(0);
+  }, 300_000);
+
+  it('a 2 million cell array formula a host lets through (maxArrayCells) is written back as its first 1,000,000 cells, and the export says so', () => {
+    const { out, status, signal, stderr } = importInChild('cells2m', 1, 240_000, 2_000_000, 2048);
+    expect({ status, signal, stderr }).toEqual({ status: 0, signal: null, stderr: '' });
+    expect(out.cachedOnly).toBe(0);
+    expect(out.exportWarnings).toEqual(['S!A1: the array formula\'s result (200000 x 10 cells) is over 1000000 cells, so only its first 100000 x 10 are written to the file.']);
+  }, 300_000);
 
   it.each(['nested', 'singles'])('2,000 formulas of 8,000 characters, shape %s: no stack overflow, no timeout', (shape) => {
     const { out, status, signal, stderr } = importInChild(shape, 2_000, 120_000);

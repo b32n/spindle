@@ -1024,6 +1024,10 @@ lockstep.
   for cached-only and ordinary formulas alike. A legacy array formula whose range does not start at its own cell is read as a one-cell
   formula, with a warning; a one-row or one-column result is repeated across a bigger array-entered range, as Excel does. The `_xlfn.` table gains
   `ENCODEURL`, `VALUETOTEXT`, `IMAGE`, `STOCKHISTORY`, `GROUPBY`, `PIVOTBY` and `PERCENTOF` and loses `QUERYSTRING` (not an Excel function).
+  The array formulas of one sheet may cover 1,000,000 cells on load (`maxArrayCells` option of `importFromXlsx`; past it a formula is kept as a
+  saved value and reported as `xlsx.package.sizeLimit`), and `exportToXlsx(workbook, { maxArrayCells, onWarning })` writes at most 1,000,000 cells
+  of one spilled result (the first rows, the range cut to match, reported to `onWarning`): a file of 1.7 KB with `ref="A1:J400000"` took 44 s and 3 GB to write back.
+  A formula whose text result is an error literal (`="#N/A"`) is written as an error value: the model cannot tell them apart.
 
 ## [0.4.0] - 2026-10-26
 

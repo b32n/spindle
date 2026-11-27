@@ -342,7 +342,7 @@ describe('array and dynamic-array formulas', () => {
   });
 
   it('keeps dynamic arrays past the clearing budget as saved values and says so', async () => {
-    // 2,600 dynamic-array formulas over a huge extent each, on a sheet of 2,600 cells: each costs the cell count to clear, together past 5,000,000
+    // 2,600 dynamic-array formulas over a huge extent each, on a sheet of 2,600 cells: each costs the cell count to clear, together past 1,000,000
     const rows: Record<number, string[]> = {};
     for (let i = 0; i < 2600; i++) rows[i + 1] = [fcell(`A${i + 1}`, 'SUM(1,2)', 3, `t="array" ref="A${i + 1}:Z1000000"`, ' cm="1"')];
     const { wb, loss } = await open(await xlsxWith(rows));
@@ -351,6 +351,27 @@ describe('array and dynamic-array formulas', () => {
     expect(cut?.count).toBeLessThan(2600);
     expect(cellAt(wb, 2599, 0)).toMatchObject({ cachedOnly: true, value: 3 });
   }, 120_000);
+
+  it('reads a legacy array formula over 4 million cells (ref A1:J400000) as a saved value, with a loss item that names the limit and the option', async () => {
+    const { wb, loss } = await open(await xlsxWith({ 1: [fcell('A1', 'SUM(1,2)', 3, 't="array" ref="A1:J400000"')] }));
+    expect(cellAt(wb, 0, 0)).toMatchObject({ formula: '=SUM(1,2)', value: 3, cachedOnly: true });
+    const cut = loss.items.find((i) => i.id === 'xlsx.package.sizeLimit' && /array formula/.test(i.label));
+    expect(cut).toMatchObject({ count: 1 });
+    expect(cut?.effect).toContain('over 1000000 cells');
+    expect(cut?.effect).toContain('maxArrayCells');
+  });
+
+  it('takes the array budget from the maxArrayCells option', async () => {
+    const bytes = await xlsxWith({ 1: [fcell('A1', '1+1', 2, 't="array" ref="A1:B2"'), fcell('D1', '1+1', 2, 't="array" ref="D1:E2"')] });
+    const small = await open(bytes, { maxArrayCells: 4 });
+    expect(cellAt(small.wb, 0, 0)?.cachedOnly).toBeUndefined();
+    expect(cellAt(small.wb, 0, 3)).toMatchObject({ cachedOnly: true });
+    expect(small.loss.items.find((i) => /array formula/.test(i.label))).toMatchObject({ count: 1 });
+    expect(small.loss.items.find((i) => /array formula/.test(i.label))?.effect).toContain('over 4 cells');
+    const whole = await open(bytes);
+    expect(cellAt(whole.wb, 0, 3)?.cachedOnly).toBeUndefined();
+    expect(whole.loss.items.find((i) => /array formula/.test(i.label))).toBeUndefined();
+  });
 
   it('cuts a legacy array formula to its extent: a one-cell one shows the first value, a one-column result is repeated across a wider one', async () => {
     const bytes = await xlsxWith({
@@ -376,5 +397,40 @@ describe('array and dynamic-array formulas', () => {
     wb.setCellValue(undefined, 0, 0, 3);
     expect(wb.getSpillRegion(undefined, 0, 1)).toMatchObject({ rows: 2, cols: 1, values: [[30], [20]] });
     expect(cellAt(wb, 0, 1)?.arraySpan).toEqual({ rows: 2, cols: 1, spill: true });
+  });
+});
+
+describe('what the export writes of one array formula (maxArrayCells)', () => {
+  async function seq(rows: number, cols: number) {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setCellValue(undefined, 0, 0, 1);
+    wb.setFormula(undefined, 0, 1, `=SEQUENCE(${rows},${cols})`);
+    return wb;
+  }
+
+  it('writes a spilled region in full under the cap', async () => {
+    const warnings: string[] = [];
+    const xml = await sheetXml(await exportToXlsx(await seq(3, 2), { onWarning: (m) => warnings.push(m) }));
+    expect(warnings).toEqual([]);
+    expect(xml).toContain('ref="B1:C3"');
+    expect(xml).toContain('r="C3"');
+  });
+
+  it.each([
+    // over the cap: the first rows that fit, the range cut to match
+    [10, 3, 7, 2, 3, 'B1:D2'],
+    // a single row wider than the cap: cut to the cap's columns
+    [1, 6, 4, 1, 4, 'B1:E1'],
+  ])('cuts a %i x %i result over a cap of %i cells to %i x %i (%s) and says so', async (rows, cols, cap, wRows, wCols, ref) => {
+    const warnings: string[] = [];
+    const xml = await sheetXml(await exportToXlsx(await seq(rows, cols), { maxArrayCells: cap, onWarning: (m) => warnings.push(m) }));
+    expect(xml).toContain(`ref="${ref}"`);
+    expect(xml).not.toContain(`r="B${wRows + 1}"`);
+    expect(warnings).toEqual([`Sheet1!B1: the array formula's result (${rows} x ${cols} cells) is over ${cap} cells, so only its first ${wRows} x ${wCols} are written to the file.`]);
+  });
+
+  it('cuts without a listener, and keeps at least one cell when the cap is zero', async () => {
+    const xml = await sheetXml(await exportToXlsx(await seq(4, 4), { maxArrayCells: 0 }));
+    expect(xml).toContain('ref="B1"');
   });
 });

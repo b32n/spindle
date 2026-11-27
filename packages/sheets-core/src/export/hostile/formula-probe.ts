@@ -1,11 +1,14 @@
 import JSZip from 'jszip';
 import { WorkbookImpl } from '../../workbook';
-import { importFromXlsx } from '../xlsx';
+import { exportToXlsx, importFromXlsx } from '../xlsx';
 
 // Run by `formula-hostile.test.ts` in a child process: a one-sheet workbook whose formulas have a hostile shape (argv[2], argv[3]),
 // imported by `importFromXlsx`, and what it cost and gave as one JSON line. The test's heap and time limits on the child are the
-// assertions about memory and time; nothing is read off this process's clock for them (the figure here is for the PR's table).
+// assertions about memory and time; nothing is read off this process's clock for them (the figure here is for the PR's table). The
+// workbook is then exported by `exportToXlsx`: what it wrote is the second half of the cost. argv[4], when given, is the import's
+// `maxArrayCells` (to let a region over the export's cap through the import).
 const [shape, count] = [process.argv[2], Number(process.argv[3])];
+const maxArrayCells = process.argv[4] === undefined ? undefined : Number(process.argv[4]);
 const MAIN = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
 const RELS = 'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
 const OD = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
@@ -22,6 +25,13 @@ function cell(i: number): string {
     case 'arrays-dynamic':
       return `<c r="${ref}" cm="1"><f t="array" ref="${ref}:Z${i + 1000}">SUM(1,2)</f><v>3</v></c>`;
     // one array formula over the whole sheet
+    // the 400,000-row range of the review (4 million cells), and a million cells, and two million (for the export's cap)
+    case 'rows400k':
+      return `<c r="${ref}"><f t="array" ref="${ref}:J${i + 400000}">SUM(1,2)</f><v>3</v></c>`;
+    case 'cells1m':
+      return `<c r="${ref}"><f t="array" ref="${ref}:J${i + 100000}">SUM(1,2)</f><v>3</v></c>`;
+    case 'cells2m':
+      return `<c r="${ref}"><f t="array" ref="${ref}:J${i + 200000}">SUM(1,2)</f><v>3</v></c>`;
     case 'array-huge':
       return `<c r="${ref}"><f t="array" ref="${ref}:XFD1048576">SUM(1,2)</f><v>3</v></c>`;
     // 8,000 characters of nesting: parsed or refused, never a stack overflow
@@ -49,8 +59,12 @@ async function main(): Promise<void> {
 
   const workbook = new WorkbookImpl('wb', 'WB');
   const started = Date.now();
-  const { warnings, loss } = await importFromXlsx(bytes, workbook);
+  const { warnings, loss } = await importFromXlsx(bytes, workbook, { maxArrayCells });
   const ms = Date.now() - started;
+  const exportWarnings: string[] = [];
+  const exportStarted = Date.now();
+  const exported = await exportToXlsx(workbook, { onWarning: (m) => exportWarnings.push(m) });
+  const exportMs = Date.now() - exportStarted;
   const sheet = workbook.getSheet();
   let cachedOnly = 0;
   for (const [, , c] of sheet.entries()) if (c.cachedOnly) cachedOnly++;
@@ -59,6 +73,9 @@ async function main(): Promise<void> {
   console.log(
     JSON.stringify({
       ms,
+      exportMs,
+      exportBytes: exported.length,
+      exportWarnings: exportWarnings.slice(0, 5),
       zipBytes: bytes.length,
       cells: sheet.cells.size,
       cachedOnly,
