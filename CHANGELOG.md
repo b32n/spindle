@@ -537,6 +537,12 @@ lockstep.
   table-cell and slide-background controls get gradient presets and an image fill. **Compile-time note:** widening
   `Fill` can break a host's exhaustive `switch (fill.kind)`; `resolveFill` now returns the first stop for a gradient,
   the blend for a pattern and `null` for a picture.
+- **Slides image crop (K2).** `ImageElement` gains `crop { l, t, r, b }`: the percent (0 to 100) of the source trimmed
+  from each edge, kept in the element JSON so collaboration carries it with no Y change. A cropped picture is clipped
+  by the element box, and `fit` (stretch, fit, crop to fill) applies to the cropped region; an omitted or all-zero crop
+  renders exactly as before. An axis can never be cropped to less than 1 percent. The image format bar gets a "Crop
+  image" popover with four percent fields and a reset. New slides-core exports: `ImageCrop`, `normalizeCrop`,
+  `isCropped`, `setCropEdge`, `cropLayout`, `NO_CROP`, `MIN_CROP_VISIBLE`, `CropLayout`, `PctRect`. Additive.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

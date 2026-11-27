@@ -213,9 +213,19 @@ export interface ImageElement extends ElementBase {
   /**
    * How the image sits in its box (CSS object-fit). 'fill' stretches to the box
    * (default, back-compat); 'contain' letterboxes; 'cover' crops to fill without
-   * distortion. Free-form region crop is a separate follow-up.
+   * distortion. With a `crop`, the fit applies to the cropped region.
    */
   fit?: 'fill' | 'contain' | 'cover';
+  /** Region crop: the share of the source image trimmed from each edge. Omitted or all zero means uncropped. */
+  crop?: ImageCrop;
+}
+
+/** Percent (0-100) of the source image's width (l, r) or height (t, b) trimmed from each edge (`a:srcRect`). */
+export interface ImageCrop {
+  l: number;
+  t: number;
+  r: number;
+  b: number;
 }
 
 export interface LineElement extends ElementBase {

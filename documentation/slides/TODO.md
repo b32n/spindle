@@ -40,8 +40,10 @@ Not in the current scope; verified absent in code.
 - [ ] **Image host-upload hook** — images inline as data URLs (size-unbounded);
       no callback for a host to upload and swap in a CDN URL
       (`ImageFormatBar.tsx`, `Toolbar.tsx`).
-- [ ] **Free-form image crop** — only object-fit modes (fill/contain/cover);
-      no region crop (`scene/types.ts`).
+- [x] **Free-form image crop** — `ImageElement.crop { l, t, r, b }` (percent of the source trimmed from each edge)
+      clips the picture and the fit (fill/contain/cover) applies to what is left. Edited from the "Crop image" popover
+      in the image format bar (four percent fields and a reset). Still open: drag handles on the canvas, crop to an
+      aspect ratio or to a shape.
 - [ ] **Text autofit / shrink-to-fit** — there is no autofit anywhere in text
       layout: text that overflows its box is clipped (and with middle/bottom
       vertical alignment the overflow clips at the *top*, dropping leading
