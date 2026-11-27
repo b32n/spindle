@@ -1,5 +1,5 @@
 {
-  "importError": "Cannot read properties of undefined (reading 'richText')",
+  "importError": "The file could not be read (Cannot read properties of undefined (reading 'richText')).",
   "warnings": [],
   "workbook": null
 }

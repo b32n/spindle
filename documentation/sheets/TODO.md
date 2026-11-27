@@ -118,6 +118,8 @@ Gaps against Excel / Google Sheets in the non-formula feature set.
       with a construct manifest (`fixtures/xlsx/`) now defines what "carried over" has to cover, and the full
       loss report (`inspectXlsx(bytes, { detail: 'full' })`, ids in `documentation/import-loss.md`) lists what each
       file holds that is still not carried over (tab colour, zoom, print setup, theme colours, array formulas...).
+      An unsafe file (encrypted, legacy `.xls`, a zip bomb, over the size limits) is refused with a named `ImportError`
+      (`documentation/import-loss.md`, "Files that cannot be opened at all"); the DOCX reader does not use these limits yet.
 - [ ] **Print / page setup** for sheets (PDF output)
 
 ### Engine ready, UI missing

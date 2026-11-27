@@ -68,7 +68,7 @@ Full-only ids:
 | Comments, links | `xlsx.comments.threaded`, `.richFormatting` (notes with bold, italic, underline, strike or script runs, or runs of differing font, size or colour; the bold author line and plain run properties every note has are not counted); `xlsx.links.internal` (to a cell or name), `.unsafeScheme` (`javascript:`, `vbscript:`, `data:`, `file:` targets; state `kept:`, the target is stored as written and never opened or run by the library) |
 | Objects | `xlsx.objects.shapes` (shapes and connectors), `.textBoxes`, `.formControls` (form and ActiveX controls), `.embeddedObjects` (OLE), `.cellImages` |
 | Workbook | `xlsx.workbook.date1904` (dates are converted to the 1900 system), `.calcSettings` (manual calculation, iteration, precision as displayed, R1C1; the `calcPr` Excel writes in every file is not reported), `.externalData` (connections, query tables, data model), `.richData` (linked data types) |
-| Package | `xlsx.package.unaccountedParts` (parts nothing reads or reports, named in `where`), `.encrypted` and `.legacyBinary` (an OLE container: password-protected package, or a legacy `.xls`; also a binary `.xlsb`), `.sizeLimit` (parts over the size limit, 64 MiB each or 256 MiB in total, and cell data past 48 MiB of one sheet, are not scanned) |
+| Package | `xlsx.package.unaccountedParts` (parts nothing reads or reports, named in `where`), `.encrypted` and `.legacyBinary` (an OLE container: password-protected package, or a legacy `.xls`; also a binary `.xlsb`), `.sizeLimit` (parts over the size limit, 64 MiB each or 256 MiB in total, and cell data past 48 MiB of one sheet, are not scanned; a file over the importers' 100 MB package limit is not scanned at all) |
 
 The XLSX loss counts grow with each fidelity change that keeps a construct: a feature that becomes preserved leaves the table or changes state. The package ledger
 in `fixtures/xlsx/` maps every part of a file to a mapped, dropped or unaccounted status using these ids.
@@ -158,6 +158,26 @@ A table of contents is kept as a `toc` block: a `TOC` field that starts in the f
 Comments are imported (threads, replies, resolved state and anchors), so `docx.comments` is reported only when the comments part itself is damaged and its comments cannot be read.
 
 Parse-time problems found while importing (an unresolvable image, an unsupported field…) still arrive as `warnings`.
+
+## Files that cannot be opened at all
+
+The importers do not report these as loss: they refuse the file, with an `ImportError` (`@b32nio/spindle-io`) whose `code` hosts can switch on and
+whose `message` is fit to show a user. `importXlsx` throws nothing else. The loss ids above (`xlsx.package.encrypted`, `.legacyBinary`, `.sizeLimit`) are
+what the `full` detail level reports for the same files, so a host that inspects first can say the same thing before trying.
+
+| `code` | When |
+|---|---|
+| `encrypted` | an OLE compound file with an `EncryptedPackage` or `EncryptionInfo` stream (password to open), or a zip entry marked encrypted |
+| `legacy-binary` | any other OLE compound file (`.xls`, `.ppt`, `.doc`), or a binary workbook (`.xlsb`) |
+| `not-a-package` | empty, not a zip, an OpenDocument or Apple iWork package, or a zip without `[Content_Types].xml` |
+| `size-limit` | over a limit below |
+| `corrupt` | truncated or damaged zip, a part that cannot be inflated, a part name that is unsafe (`..`, absolute, backslash, drive letter, NUL), or a reader failure on a well-formed package |
+
+Limits (options on the importer, `limits`; defaults `DEFAULT_IMPORT_LIMITS`): package 100 MB, 20,000 entries, 1 GB uncompressed in total, 500 MB per part
+(256 MB for an XML part), compression ratio 200:1. The ratio is only judged for a part (or package) that inflates to more than 16 MB: smaller parts cannot cost more
+than that however well they compress, and legitimate files do contain tiny, very regular parts. The limits are checked from the zip's declared sizes first and then
+again while each part is inflated, so a header that lies about a size cannot get a bomb inflated. XML is parsed with entities never expanded, the DOCTYPE removed and
+nesting capped at 256. CSV: a leading byte order mark is dropped, text over 100 MB is refused (`code` `size-limit`).
 
 ## Confirmation dialog
 

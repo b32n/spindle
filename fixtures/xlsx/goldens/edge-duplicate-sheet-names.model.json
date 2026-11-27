@@ -1,5 +1,5 @@
 {
-  "importError": "Worksheet name already exists: Data",
+  "importError": "The file could not be read (Worksheet name already exists: Data).",
   "warnings": [],
   "workbook": null
 }
