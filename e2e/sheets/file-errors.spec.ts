@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import JSZip from 'jszip';
 import { SheetsPage } from '../support/sheets';
 import { collectAlerts, collectPageErrors, fixture, openViaChooser } from '../support/file-io';
@@ -117,6 +118,30 @@ test.describe('sheets: file open error states', () => {
         buffer: await zip.generateAsync({ type: 'nodebuffer' }),
       },
       /^Could not open the file: .+/
+    );
+  });
+
+  test('S-ERR-11 an encrypted workbook and a legacy .xls each get a clear notice and the workbook is untouched', async ({
+    page,
+  }) => {
+    // the committed corpus stubs (OLE compound-file headers, no content): the shape of a password-protected xlsx and of a legacy .xls
+    const stub = (file: string) =>
+      readFileSync(path.resolve(__dirname, '..', '..', 'fixtures', 'xlsx', file));
+    await openViaChooser(page, OPEN, {
+      name: 'locked.xlsx',
+      mimeType: 'application/octet-stream',
+      buffer: stub('edge-encrypted.xlsx'),
+    });
+    await expect.poll(() => alerts.length).toBe(1);
+    expect(alerts[0]).toMatch(/^Could not open the file: This file is password-protected\./);
+    await openViaChooser(page, OPEN, {
+      name: 'old.xls',
+      mimeType: 'application/vnd.ms-excel',
+      buffer: stub('edge-legacy-xls.xls'),
+    });
+    await expect.poll(() => alerts.length).toBe(2);
+    expect(alerts[1]).toMatch(
+      /^Could not open the file: This is a legacy binary Office file \(\.xls, \.ppt or \.doc\)/
     );
   });
 
