@@ -252,6 +252,23 @@ describe('formatMarkdown', () => {
       ])
     );
     expect(noCounts).toContain('No differences (nothing counted).');
+    const grouped = formatMarkdown(
+      report([
+        file('g', {
+          roundtrip: rt('ok', {
+            diff: diff({
+              total: 0,
+              before: { sections: 1, blocks: { heading: 1, paragraph: 10 }, textChars: 589 },
+              byField: {},
+              entries: [],
+            }),
+          }),
+        }),
+      ])
+    );
+    expect(grouped).toContain(
+      'No differences (1 sections, 1 heading, 10 paragraph, 589 textChars).'
+    );
     const noFields = formatMarkdown(
       report([file('y', { roundtrip: rt('ok', { diff: diff({ byField: {}, entries: [] }) }) })])
     );

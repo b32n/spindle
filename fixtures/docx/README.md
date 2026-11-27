@@ -64,8 +64,10 @@ which files were omitted; the JSON artifact always has everything. A loss or a r
 **not** a failure: only snapshot drift, a missing/orphaned golden, a false manifest claim or an
 `expectImportError` that disagrees with reality fails the job.
 
-The report code is format-neutral (`scripts/docx-fidelity/report.ts`: `FidelityReport`, `formatMarkdown`,
-`formatJson`). The XLSX and PPTX corpora can map their own harness results onto `FidelityReport` and reuse it.
+The runner, snapshot comparison, manifest checks, round-trip diff and report are the shared modules in
+`scripts/fidelity-core/` (`FidelityReport`, `formatMarkdown`, `formatJson`); `scripts/docx-fidelity/` holds only the
+DOCX adapter (`run.ts`, `api.ts`, `diff.ts` for the block alignment, `normalize.ts`, `constructs.ts`, `report.ts`
+mapping the run onto the shared report). The XLSX and PPTX corpora use the same core.
 
 Fields (`fields.*`) are imported as generic fields with their cached result, so the loss goldens count only tables of
 contents, indexes and legacy form fields under `docx.fields`; the `model.json` goldens show each field's instruction and

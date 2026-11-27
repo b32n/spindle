@@ -4,8 +4,10 @@ import path from 'node:path';
 import JSZip from 'jszip';
 import { DocumentImpl } from '../document';
 import { exportToDocx } from '../export/docx';
-import { describeOutcome, goldensDirOf, runFixture, runHarness } from '../../../../scripts/docx-fidelity/harness';
-import type { EditorApi } from '../../../../scripts/docx-fidelity/types';
+import { describeOutcome, goldensDirOf, runHarness as runCoreHarness } from '../../../../scripts/fidelity-core/harness';
+import { DOCX_MANIFEST_OPTIONS } from '../../../../scripts/docx-fidelity';
+import { crashedResult, docxAdapter, runFixture } from '../../../../scripts/docx-fidelity/run';
+import { DOCX_KINDS, type EditorApi } from '../../../../scripts/docx-fidelity/types';
 import { sourceApi } from './support';
 
 async function docxBytes(text: string): Promise<Uint8Array> {
@@ -103,7 +105,34 @@ describe('runFixture', () => {
   });
 });
 
-describe('runHarness', () => {
+/** The shared harness bound to the DOCX adapter, as the CLI runs it (a manifest that disagrees with the importer fails the run). */
+const runHarness = (options: { api: EditorApi; fixturesDir: string; update?: boolean; only?: string[] }) =>
+  runCoreHarness({ adapter: docxAdapter(options.api), manifestOptions: DOCX_MANIFEST_OPTIONS, strictImport: true, ...options });
+const describe_ = (o: Parameters<typeof describeOutcome>[0]) => describeOutcome(o, DOCX_KINDS);
+
+describe('docxAdapter', () => {
+  it('names the three snapshot kinds and reads each from the result', async () => {
+    const adapter = docxAdapter(sourceApi);
+    expect(adapter.kinds).toEqual(['model', 'loss', 'roundtrip']);
+    const result = await adapter.run(await docxBytes('Adapter'), entry('a') as never);
+    expect(adapter.snapshot(result, 'loss')).toBe(result.loss);
+    expect(adapter.snapshot(result, 'model')).toBe(result.model);
+    expect(adapter.snapshot(result, 'roundtrip')).toBe(result.roundtrip);
+    expect(adapter.importError(result)).toBeNull();
+  });
+
+  it('turns a run that did not finish into a result every kind can show', () => {
+    const adapter = docxAdapter(sourceApi);
+    const result = adapter.crashed('timed out');
+    expect(result).toEqual(crashedResult('timed out'));
+    expect(adapter.importError(result)).toBe('timed out');
+    expect(result.loss.items).toEqual([expect.objectContaining({ id: 'harness.crashed', effect: 'timed out' })]);
+    expect(result.model.document).toBeNull();
+    expect(result.roundtrip.status).toBe('skipped-import-error');
+  });
+});
+
+describe('runHarness with the DOCX adapter', () => {
   let dir: string;
   beforeEach(async () => {
     dir = mkdtempSync(path.join(tmpdir(), 'docx-harness-'));
@@ -119,7 +148,7 @@ describe('runHarness', () => {
   it('fails until goldens exist, then passes after an update, and the update is stable', async () => {
     const first = await runHarness({ api: sourceApi, fixturesDir: dir });
     expect(first.ok).toBe(false);
-    expect(first.fixtures.flatMap(describeOutcome)).toContain('good: model snapshot missing');
+    expect(first.fixtures.flatMap(describe_)).toContain('good: model snapshot missing');
 
     const created = await runHarness({ api: sourceApi, fixturesDir: dir, update: true });
     expect(created.ok).toBe(true);
@@ -144,7 +173,7 @@ describe('runHarness', () => {
     };
     const drift = await runHarness({ api: improved, fixturesDir: dir });
     expect(drift.ok).toBe(false);
-    expect(describeOutcome(drift.fixtures.find((f) => f.entry.id === 'good')!)).toEqual(['good: loss snapshot mismatch']);
+    expect(describe_(drift.fixtures.find((f) => f.entry.id === 'good')!)).toEqual(['good: loss snapshot mismatch']);
     const updated = await runHarness({ api: improved, fixturesDir: dir, update: true });
     expect(updated.fixtures.find((f) => f.entry.id === 'good')!.status.loss).toBe('updated');
   });
@@ -156,9 +185,9 @@ describe('runHarness', () => {
     );
     const report = await runHarness({ api: sourceApi, fixturesDir: dir, update: true });
     expect(report.ok).toBe(false);
-    const lines = report.fixtures.flatMap(describeOutcome);
-    expect(lines).toContain('good: manifest says importFromDocx should throw, but the import succeeded');
-    expect(lines.find((l) => l.startsWith('broken: importFromDocx threw unexpectedly'))).toBeDefined();
+    const lines = report.fixtures.flatMap(describe_);
+    expect(lines).toContain('good: manifest says the import should throw, but it succeeded');
+    expect(lines.find((l) => l.startsWith('broken: the import threw unexpectedly'))).toBeDefined();
   });
 
   it('restricts to --only ids and reports orphan goldens (deleting them on update)', async () => {

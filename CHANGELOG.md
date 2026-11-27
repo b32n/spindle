@@ -492,6 +492,11 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **DOCX fidelity harness re-pointed to the shared core.** `scripts/docx-fidelity/` now keeps only the DOCX adapter
+  and imports the generic runner, snapshot, manifest, matrix, diff and report modules from `scripts/fidelity-core/`;
+  the duplicated copies are deleted. The DOCX goldens and README coverage matrix are byte-identical. The markdown
+  report lists the block counts as part of one line ("1 sections, 1 heading, 10 paragraph, 589 textChars") and a
+  per-file run is limited to 60 seconds (`--timeout`). No library or runtime behaviour changes.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

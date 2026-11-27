@@ -1,5 +1,6 @@
-import { MAX_DIFF_ENTRIES, diffModels } from '../../../../scripts/docx-fidelity/diff';
-import type { Json } from '../../../../scripts/docx-fidelity/types';
+import { MAX_DIFF_ENTRIES } from '../../../../scripts/fidelity-core/diff';
+import type { Json } from '../../../../scripts/fidelity-core/types';
+import { diffModels } from '../../../../scripts/docx-fidelity/diff';
 
 const para = (text: string, extra: Record<string, Json> = {}): Json => ({ type: 'paragraph', content: [{ type: 'text', text }], ...extra });
 const doc = (blocks: Json[], pools: Record<string, Json> = {}): Json => ({ sections: [{ blocks }], ...pools });
@@ -30,8 +31,8 @@ describe('diffModels', () => {
     const d = diffModels(doc([para('one'), para('two'), para('three'), para('four')]), doc([para('one'), para('three'), para('four')]));
     expect(d.total).toBe(1);
     expect(d.entries[0]).toMatchObject({ kind: 'removed', path: 'sections[0].blocks[1]' });
-    expect(d.before.blocks.paragraph).toBe(4);
-    expect(d.after.blocks.paragraph).toBe(3);
+    expect((d.before.blocks as Record<string, number>).paragraph).toBe(4);
+    expect((d.after.blocks as Record<string, number>).paragraph).toBe(3);
   });
 
   it('places an added block among changes in order', () => {
@@ -100,5 +101,35 @@ describe('diffModels', () => {
     const d = diffModels({ a: 'x'.repeat(200) }, { a: 'y' });
     expect(d.entries[0].before!.length).toBe(80);
     expect(d.entries[0].before!.endsWith('...')).toBe(true);
+  });
+
+  describe('block text (drives alignment and the character count)', () => {
+    const chars = (block: Json) => (diffModels(doc([block]), doc([block])).before as { textChars: number }).textChars;
+
+    it('reads text, nested content, other inline items and non-object items', () => {
+      const inline: Json[] = [{ type: 'text', text: 'ab' }, { type: 'link', content: [{ type: 'text', text: 'cd' }] }, { type: 'image' }, { text: 7 }, 'junk'];
+      expect(chars({ type: 'paragraph', content: inline })).toBe('abcd[image]'.length);
+      expect(chars({ type: 'paragraph', content: 'not a list' })).toBe(0);
+      expect(chars({ type: 'paragraph' })).toBe(0);
+    });
+
+    it('reads table cells (inline or block content), skipping malformed rows and cells', () => {
+      const table: Json = {
+        type: 'table',
+        rows: [{ cells: [{ content: [{ type: 'text', text: 'a' }] }, { blocks: [para('b'), para('c')] }, 'junk'] }, 'junk', { cells: 'junk' }],
+      };
+      expect(chars(table)).toBe(8); // 'a\tb\nc\t' (6) + '\n' + '' + '\n' + ''
+    });
+
+    it('reads nested blocks and treats a non-object block as empty', () => {
+      expect(chars({ type: 'sdt', blocks: [para('xy'), para('z')] })).toBe(3);
+      expect(chars('junk' as unknown as Json)).toBe(0);
+      expect(diffModels({ sections: [{ blocks: ['junk', para('a')] }] }, { sections: [{ blocks: [para('a')] }] }).removed).toBe(1);
+    });
+  });
+
+  it('tolerates a model without sections or with a section without blocks', () => {
+    expect(diffModels({}, {}).before).toEqual({ sections: 0, blocks: {}, textChars: 0 });
+    expect(diffModels({ sections: [{}, 'junk'] }, { sections: [{}, 'junk'] }).before).toEqual({ sections: 2, blocks: {}, textChars: 0 });
   });
 });

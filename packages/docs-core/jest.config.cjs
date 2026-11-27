@@ -3,6 +3,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
+  // The fidelity runner (scripts/docx-fidelity) imports the built package by name; tests bind the source instead.
+  moduleNameMapper: { '^@b32nio/spindle-docs-core$': '<rootDir>/src/index.ts' },
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
@@ -21,6 +23,7 @@ module.exports = {
           paths: {
             '@b32nio/spindle-shared/export/docx': ['../shared/src/export/docx/index.ts'],
             '@b32nio/spindle-io/docx': ['../io/src/docx/index.ts'],
+            '@b32nio/spindle-docs-core': ['./src/index.ts'],
           },
         },
       },
