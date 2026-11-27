@@ -11,9 +11,11 @@ export interface TransientState {
   marquee: Rect | null;
   /** Live frames of the elements under an active gesture (for the selection box). */
   liveFrames: Map<string, Frame> | null;
+  /** Live adjustment values of the shape whose adjustment handle is being dragged. */
+  liveAdjustments: Map<string, number[]> | null;
 }
 
-const EMPTY: TransientState = { guides: [], marquee: null, liveFrames: null };
+const EMPTY: TransientState = { guides: [], marquee: null, liveFrames: null, liveAdjustments: null };
 
 export class TransientStore {
   private state: TransientState = EMPTY;

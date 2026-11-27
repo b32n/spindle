@@ -22,6 +22,7 @@ import {
   createMoveGesture,
   createResizeGesture,
   createRotateGesture,
+  createAdjustGesture,
   createMarqueeGesture,
   expandGroups,
   type GestureContext,
@@ -142,6 +143,7 @@ export function InteractiveSlide({ slideId, scale }: { slideId: string; scale: n
     const tableMoveEl = target.closest('[data-table-move]') as HTMLElement | null;
     const rotateEl = target.closest('[data-rotate]');
     const handleEl = target.closest('[data-handle]') as HTMLElement | null;
+    const adjustEl = target.closest('[data-adjust]') as HTMLElement | null;
     const elEl = target.closest('[data-element-id]') as HTMLElement | null;
 
     let gesture: Gesture;
@@ -291,6 +293,12 @@ export function InteractiveSlide({ slideId, scale }: { slideId: string; scale: n
           deck.setSelection({ slideId, elementIds: [el.id] });
         },
       };
+    } else if (adjustEl?.dataset.adjust !== undefined) {
+      // Drag a shape's adjustment handle: the preset's guide values follow the pointer.
+      const sel = deck.getSelection().elementIds;
+      const adjust = sel.length === 1 ? createAdjustGesture(ctx, sel[0], Number(adjustEl.dataset.adjust)) : null;
+      if (!adjust) return;
+      gesture = adjust;
     } else if (rotateEl) {
       gesture = createRotateGesture(ctx, deck.getSelection().elementIds, { shiftKey: e.shiftKey });
     } else if (handleEl?.dataset.handle) {

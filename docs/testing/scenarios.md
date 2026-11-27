@@ -355,6 +355,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 | ID | Scenario | Status | Smoke | Notes | Spec |
 |---|---|---|---|---|---|
+| SL-ADJ-01 | dragging the handle of a rounded rectangle changes its corner radius and undo restores it | covered |  |  | `e2e/slides/adjustment-handles.spec.ts` |
+| SL-ADJ-02 | a callout shows a handle for its tail and a plain rectangle shows none | covered |  |  | `e2e/slides/adjustment-handles.spec.ts` |
 | SL-COL-01 | an element moved by one client moves for the other | covered | yes |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-02 | inserted elements and deletions propagate | covered |  |  | `e2e/slides/collab.spec.ts` |
 | SL-COL-03 | new slides appear in both filmstrips | covered |  |  | `e2e/slides/collab.spec.ts` |
@@ -502,7 +504,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 437
+- covered: 439
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

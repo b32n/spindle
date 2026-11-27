@@ -15,6 +15,9 @@ import {
   rotateFrame,
   scaleGroup,
   rotateGroup,
+  toLocal,
+  adjustmentsAfterDrag,
+  resolveAdjustments,
   type DeckImpl,
   type SlideElement,
   type Frame,
@@ -220,6 +223,38 @@ export function createRotateGesture(ctx: GestureContext, selectedIds: string[], 
     onEnd() {
       if (last.size > 0) ctx.deck.setFrames([...last].map(([id, frame]) => ({ id, frame })));
       ctx.transient.clear();
+    },
+  };
+}
+
+// ── Adjustment handle ──────────────────────────────────────────────────────────
+
+/** Mirror a point in a shape's box for its flips (the geometry is drawn flipped, the handles live in the unflipped box). */
+export function flipInBox(p: Point, el: { w: number; h: number; flipH?: boolean; flipV?: boolean }): Point {
+  return { x: el.flipH ? el.w - p.x : p.x, y: el.flipV ? el.h - p.y : p.y };
+}
+
+/**
+ * Drag one of a shape's adjustment handles. The preview goes through the transient store (the shape redraws with the
+ * live values); the commit is one undo entry at pointerup, and only when the drag changed something.
+ */
+export function createAdjustGesture(ctx: GestureContext, elementId: string, handle: number): Gesture | null {
+  const el = ctx.deck.getElement(elementId);
+  if (!el || el.type !== 'shape') return null;
+  const frame = frameOf(el);
+  let last: number[] | null = null;
+  return {
+    onMove(p) {
+      const local = flipInBox(toLocal(p, frame), el);
+      const next = adjustmentsAfterDrag(el.shape, handle, local, el.w, el.h, el.adjustments);
+      if (!next) return;
+      last = next;
+      ctx.transient.set({ liveAdjustments: new Map([[elementId, next]]) });
+    },
+    onEnd() {
+      ctx.transient.clear();
+      const start = resolveAdjustments(el.shape, el.adjustments);
+      if (last && last.some((v, i) => v !== start[i])) ctx.deck.updateElement(elementId, { adjustments: last } as Partial<SlideElement>);
     },
   };
 }

@@ -14,6 +14,7 @@ export * from './scene/fractional-index';
 export * from './scene/geometry';
 export * from './scene/connector';
 export * from './scene/shape-presets';
+export * from './scene/adjustment-handles';
 export * from './scene/table';
 export * from './scene/transform';
 export * from './scene/snapping';

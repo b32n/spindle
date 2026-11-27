@@ -7,9 +7,10 @@
 // reads them on pointerdown to start the right gesture.
 
 import React, { useEffect, useReducer, useSyncExternalStore } from 'react';
-import { unionAABB, resolveEndpoints, type Frame, type LineElement, type Point, type Rect } from '@b32nio/spindle-slides-core';
+import { unionAABB, resolveEndpoints, adjustmentHandles, resolveAdjustments, type ShapeElement, type Frame, type LineElement, type Point, type Rect } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 import { useSelection } from '../hooks';
+import { flipInBox } from '../interactions/gesture';
 
 const ACCENT = '#2d7ff9';
 const CORNER_CURSOR: Record<string, string> = {
@@ -48,6 +49,30 @@ function Handle({ name, x, y, hs }: { name: string; x: number; y: number; hs: nu
         borderRadius: hs * 0.2,
         boxSizing: 'border-box',
         cursor: CORNER_CURSOR[name] ?? 'pointer',
+        pointerEvents: 'auto',
+      }}
+    />
+  );
+}
+
+/** A yellow diamond on a shape's adjustable feature; dragging it changes the preset's guide values. */
+function AdjustHandle({ id, x, y, hs }: { id: number; x: number; y: number; hs: number }): React.ReactElement {
+  return (
+    <div
+      data-adjust={id}
+      role="img"
+      aria-label="Adjust shape"
+      style={{
+        position: 'absolute',
+        left: x - hs / 2,
+        top: y - hs / 2,
+        width: hs,
+        height: hs,
+        background: '#ffd43b',
+        border: `${hs * 0.12}px solid #1f2933`,
+        boxSizing: 'border-box',
+        transform: 'rotate(45deg)',
+        cursor: 'pointer',
         pointerEvents: 'auto',
       }}
     />
@@ -111,6 +136,12 @@ function EndpointHandle({ end, x, y, hs }: { end: 'start' | 'end'; x: number; y:
   );
 }
 
+/** The adjustment handles of a shape in its live frame, mirrored for the shape's flips. */
+function shapeAdjustHandles(el: ShapeElement, f: Frame, live?: number[]): Array<{ id: number; x: number; y: number }> {
+  const adj = live ?? resolveAdjustments(el.shape, el.adjustments);
+  return adjustmentHandles(el.shape, f.w, f.h, adj).map((a) => ({ id: a.id, ...flipInBox(a, { w: f.w, h: f.h, flipH: el.flipH, flipV: el.flipV }) }));
+}
+
 export function SelectionOverlay({ scale }: { scale: number }): React.ReactElement | null {
   const { deck, transient, connectors } = useDeckContext();
   const selection = useSelection();
@@ -161,6 +192,7 @@ export function SelectionOverlay({ scale }: { scale: number }): React.ReactEleme
       );
     }
     const f = getFrame(ids[0]);
+    const adjust = only.type === 'shape' ? shapeAdjustHandles(only as ShapeElement, f, transientState.liveAdjustments?.get(only.id)) : [];
     return (
       <div style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }}>
         <div
@@ -182,6 +214,7 @@ export function SelectionOverlay({ scale }: { scale: number }): React.ReactEleme
             const py = name.includes('n') ? 0 : name.includes('s') ? f.h : f.h / 2;
             return <Handle key={name} name={name} x={px} y={py} hs={hs} />;
           })}
+          {adjust.map((a) => <AdjustHandle key={a.id} id={a.id} x={a.x} y={a.y} hs={hs} />)}
         </div>
       </div>
     );

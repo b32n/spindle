@@ -13,7 +13,7 @@ The document model is a single flowing sequence of blocks; a slide is a bag of a
 
 - Text, shape (76 SVG presets), image, line/connector, and **table** elements
 - Tables: per-cell rich text, cell/row/column/range selection, and pasting a spreadsheet range as a table
-- Multi-select with move / resize / rotate handles, smart guides + snapping
+- Multi-select with move / resize / rotate handles, shape adjustment handles (yellow diamonds), smart guides + snapping
 - Align & distribute, group / ungroup, z-order, filmstrip with drag reorder
 - Themes (12 symbolic color slots + major/minor fonts) and a layout gallery with placeholder materialization
 - Rich text per element via ProseMirror (a single live editor mounts on the element being edited)
