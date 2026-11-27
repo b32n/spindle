@@ -4,6 +4,8 @@
 // their types. Callers resolve their own pooled styles/formats down to
 // concrete values before calling exportXlsx.
 
+import type { XlsxStyles, XlsxWorkbookInfo } from './package-types';
+
 export type SpreadsheetCellValue = string | number | boolean | null;
 
 export interface SpreadsheetBorder {
@@ -86,6 +88,10 @@ export interface SpreadsheetImportResult {
   activeSheetIndex?: number;
   /** Non-fatal issues (unrecognized cell shape, unresolvable shared formula, etc.) — surfaced rather than silently dropped. */
   warnings: string[];
+  /** Workbook-level facts from the own reader (S2): sheet states, defined names, calculation properties, `date1904`. Absent from the `exceljs` path. */
+  workbook?: XlsxWorkbookInfo;
+  /** The style tables with theme, indexed and tint colours resolved (S2). Absent from the `exceljs` path. */
+  styles?: XlsxStyles;
 }
 
 /** Options for the loss detector (`detectXlsxLoss`, and `inspectXlsx` in sheets-core). All optional. */

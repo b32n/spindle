@@ -506,6 +506,14 @@ lockstep.
   `state: 'lost' | 'approximated' | 'kept'` (absent = lost; new `ImportLossState` type and `groupImportLoss`),
   and `ImportConfirmDialog` lists "Kept, not editable" apart from "Will be lost" when any item has a state. A
   report without states renders exactly as before. No importer emits `state` yet.
+- **Own XLSX package reader, foundation (S2a).** New internal reader layer in `packages/io/src/xlsx/read/` on `jszip` +
+  `fast-xml-parser` through the safe-import modules: package open, `[Content_Types]`, relationships (absolute and
+  relative targets, backslash and percent-encoded forms, case-insensitive types), `workbook.xml` (sheets with state,
+  `definedNames`, `calcPr`, `date1904`), shared strings (rich runs kept), styles (fonts, pattern and gradient fills,
+  borders with colours, `numFmts`, `cellXfs`, `cellStyleXfs`, `dxfs`) with theme, indexed and tint colours resolved, and
+  comment parts located. Additive types in `@b32nio/spindle-shared/export/xlsx` (`XlsxWorkbookInfo`, `XlsxStyles`, ...) and
+  optional `workbook` and `styles` fields on `SpreadsheetImportResult`; nothing populates them yet. Not wired into
+  `importXlsx` (the `exceljs` path is unchanged and import output is identical); the sheet reader and the switch are S2b.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from

@@ -8,6 +8,7 @@ import { loadIoXlsx } from '../io-loader';
 import type { DetectXlsxLossOptions, SpreadsheetExportInput, SpreadsheetImportResult } from './types';
 
 export * from './types';
+export * from './package-types';
 export * from '../loss';
 
 /** @deprecated Use `exportXlsx` from `@b32nio/spindle-io/xlsx`. */
