@@ -164,10 +164,84 @@ describe('a legacy array formula whose saved results are errors', () => {
     expect(cachedOnlyItem(loss)?.count).toBe(1);
   });
 
+  it.each(['1+1', '1/0', 'SEQUENCE(2,2)/0'])('writes {=%s} over A1:B2 back with all four error cells, members included', async (formula) => {
+    const xml = await xmlOf(await exportToXlsx((await open(await allErrors(formula))).wb));
+    expect(xml).toMatch(/<c r="A1" t="e"><f t="array" ref="A1:B2">[^<]+<\/f><v>#DIV\/0!<\/v><\/c>/);
+    for (const ref of ['B1', 'A2', 'B2']) expect(xml).toContain(`<c r="${ref}" t="e"><v>#DIV/0!</v></c>`);
+  });
+
+  it('finds the saved error cells of a range over millions of cells by the cells there are (budget-cut, kept as saved)', async () => {
+    const bytes = await xlsxWith({ 1: [errorCell('A1', '1+1', 'A1:J400000'), errorCell('B1')], 2: [ncell('A2', 5), errorCell('B2')] });
+    const { wb, loss } = await open(bytes);
+    expect(cellAt(wb, 0, 0)).toMatchObject({ cachedOnly: true, arraySpan: { rows: 400000, cols: 10 } });
+    expect(loss.items.find((i) => i.id === 'xlsx.package.sizeLimit')).toMatchObject({ count: 1 });
+    const xml = await xmlOf(await exportToXlsx(wb));
+    expect(xml).toContain('<c r="B1" t="e"><v>#DIV/0!</v></c>');
+    expect(xml).toContain('<c r="B2" t="e"><v>#DIV/0!</v></c>');
+    expect(xml).toContain('<c r="A2"><v>5</v></c>');
+  });
+
+  it('leaves the saved errors of a range as the text of the error once the export has used its budget for finding them', async () => {
+    const xml = await xmlOf(await exportToXlsx((await open(await allErrors('1+1'))).wb, { maxTotalArrayCells: 2 }));
+    expect(xml).toContain('<c r="A1" t="e">');
+    expect(xml).not.toContain('<c r="B1" t="e">');
+  });
+
   it('keeps an array of errors the engine reproduces as evaluated', async () => {
     const { wb, loss } = await open(await allErrors('SEQUENCE(2,2)/0'));
     expect(cellAt(wb, 0, 0)?.cachedOnly).toBeUndefined();
     expect(cachedOnlyItem(loss)).toBeUndefined();
     expect(wb.getSpillRegion(undefined, 0, 0)).toMatchObject({ rows: 2, cols: 2 });
+  });
+});
+
+describe('what the export writes of array results', () => {
+  const sheetOf = async (wb: WorkbookImpl, options: Parameters<typeof exportToXlsx>[1] = {}) => xmlOf(await exportToXlsx(wb, options));
+
+  it('writes the errors of a spilled result as error cells (SEQUENCE(2)/0), not as text', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(2)/0');
+    const xml = await sheetOf(wb);
+    expect(xml).toContain('<c r="A2" t="e"><v>#DIV/0!</v></c>');
+    expect(xml).toMatch(/<c r="A1"[^>]* t="e">/);
+  });
+
+  it('never prints a negative number of cells left in the warning (budget 3, six SEQUENCE(3))', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    for (let i = 0; i < 6; i++) wb.setFormula(undefined, 0, i * 2, '=SEQUENCE(3)');
+    const warnings: string[] = [];
+    await exportToXlsx(wb, { maxTotalArrayCells: 3, onWarning: (m) => warnings.push(m) });
+    expect(warnings).toHaveLength(5);
+    for (const message of warnings) expect(message).toContain('does not fit in the 0 cells left of the workbook');
+    expect(warnings.join('\n')).not.toMatch(/-\d/);
+  });
+
+  it('cuts in sheet position, not in the order the cells were entered (E1, C1, A1 with a budget of 4: A1 stays whole)', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setFormula(undefined, 0, 4, '=SEQUENCE(3)');
+    wb.setFormula(undefined, 0, 2, '=SEQUENCE(3)');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    const warnings: string[] = [];
+    const xml = await sheetOf(wb, { maxTotalArrayCells: 4, onWarning: (m) => warnings.push(m) });
+    expect(xml).toContain('ref="A1:A3"');
+    // each cut array keeps one cell, the anchor, even with nothing left of the budget
+    expect(xml).toMatch(/<f t="array" ref="C1">/);
+    expect(xml).toMatch(/<f t="array" ref="E1">/);
+    expect(warnings).toEqual([
+      "Sheet1!C1: the array formula's result (3 x 1 cells) does not fit in the 1 cells left of the workbook's budget for array formula results, so only its first 1 x 1 are written to the file.",
+      "Sheet1!E1: the array formula's result (3 x 1 cells) does not fit in the 0 cells left of the workbook's budget for array formula results, so only its first 1 x 1 are written to the file.",
+    ]);
+  });
+
+  it('takes the sheets in order and then the rows: a formula in row 2 of the first sheet comes before row 1 of the second', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    const second = wb.addSheet('Two');
+    wb.setFormula(second.id, 0, 0, '=SEQUENCE(3)');
+    wb.setFormula(undefined, 4, 0, '=SEQUENCE(3)');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3)');
+    const warnings: string[] = [];
+    await exportToXlsx(wb, { maxTotalArrayCells: 7, onWarning: (m) => warnings.push(m) });
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toMatch(/^Two!A1: .*does not fit in the 1 cells left/);
   });
 });

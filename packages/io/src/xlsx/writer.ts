@@ -133,7 +133,7 @@ function writeCell(excelCell: ExcelJS.Cell, cell: SpreadsheetCell): void {
     // both is a rare combination we don't attempt to represent.
     excelCell.value = { text: cell.value != null ? String(cell.value) : cell.hyperlink, hyperlink: cell.hyperlink };
   } else if (cell.value != null) {
-    excelCell.value = cell.value;
+    excelCell.value = cell.inArray ? toResult(cell.value) : cell.value;
   }
   if (cell.numberFormat) excelCell.numFmt = cell.numberFormat.code;
   if (cell.style) applyStyle(excelCell, cell.style);

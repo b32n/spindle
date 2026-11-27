@@ -49,6 +49,8 @@ export interface ExportToXlsxOptions {
 interface ExportArrayState {
   maxArrayCells: number;
   remaining: number;
+  /** What is left of the work the export may do to find the stored cells inside array ranges (the file chooses the ranges): the workbook's budget again. */
+  marking: number;
   cuts: number;
   onWarning?: (message: string) => void;
 }
@@ -60,6 +62,7 @@ export async function exportToXlsx(workbook: WorkbookImpl, options: ExportToXlsx
   const state: ExportArrayState = {
     maxArrayCells: options.maxArrayCells ?? DEFAULT_MAX_ARRAY_CELLS,
     remaining: options.maxTotalArrayCells ?? DEFAULT_MAX_ARRAY_CELLS,
+    marking: options.maxTotalArrayCells ?? DEFAULT_MAX_ARRAY_CELLS,
     cuts: 0,
     onWarning: options.onWarning,
   };
@@ -80,51 +83,57 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
   // row or column past the last cell with data isn't carried over.
   let maxRow = 0;
   let maxCol = 0;
+  const formulas: Array<[number, number, Cell, SpreadsheetCell]> = [];
   for (const [row, col, cell] of sheet.entries()) {
     maxRow = Math.max(maxRow, row);
     maxCol = Math.max(maxCol, col);
     const out = toSpreadsheetCell(cell, stylePool, formatPool);
     cells.set(`${row}:${col}`, out);
-    if (cell.formula) {
-      // an array formula is written as one over its extent: the file's (cached-only) or the engine's live spill region
-      const region = workbook.getSpillRegion(sheet.id, row, col);
-      let span = region ?? cell.arraySpan;
-      let written = region;
-      if (region) {
-        const allowed = Math.min(state.maxArrayCells, state.remaining);
-        let cells = region.rows * region.cols;
-        if (cells > allowed) {
-          // a result over the cap (or what is left of the workbook's budget) is written as its first rows; the range says what is written, and Excel spills the rest when it recalculates
-          const cols = Math.min(region.cols, Math.max(1, allowed));
-          const rows = Math.min(region.rows, Math.max(1, Math.floor(allowed / cols)));
-          span = { rows, cols };
-          written = { ...region, rows, cols };
-          cells = rows * cols;
-          if (state.cuts++ < MAX_EXPORT_WARNINGS) {
-            const why = region.rows * region.cols > state.maxArrayCells ? `is over ${state.maxArrayCells} cells` : `does not fit in the ${state.remaining} cells left of the workbook's budget for array formula results`;
-            state.onWarning?.(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's result (${region.rows} x ${region.cols} cells) ${why}, so only its first ${rows} x ${cols} are written to the file.`);
-          }
-        }
-        state.remaining -= cells;
-      }
-      if (span) {
-        out.arrayRef = spanRef(row, col, span.rows, span.cols);
-        // a dynamic array (one the file marked, or a formula typed here that spills) goes back as one; an array formula the file had
-        // without the dynamic mark (legacy, entered with Ctrl+Shift+Enter) stays legacy even when the engine now spills it
-        if (!cell.arraySpan || cell.arraySpan.spill) out.dynamicArray = true;
-      }
-      if (written) {
-        // the spilled cells are not stored cells: they are written as the values the file keeps next to an array formula
-        for (let r = 0; r < written.rows; r++) {
-          for (let c = 0; c < written.cols; c++) {
-            if (r === 0 && c === 0) continue;
-            cells.set(`${row + r}:${col + c}`, { value: toFileValue(written.values[r][c] as SpreadsheetCell['value']) });
-            maxRow = Math.max(maxRow, row + r);
-            maxCol = Math.max(maxCol, col + c);
-          }
+    if (cell.formula) formulas.push([row, col, cell, out]);
+  }
+
+  // The array formulas are taken in sheet position (row by row, left to right), so which of them the workbook's budget cuts does not
+  // depend on the order the cells were stored in.
+  formulas.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  for (const [row, col, cell, out] of formulas) {
+    // an array formula is written as one over its extent: the file's (cached-only) or the engine's live spill region
+    const region = workbook.getSpillRegion(sheet.id, row, col);
+    let span = region ?? cell.arraySpan;
+    let written = region;
+    if (region) {
+      const allowed = Math.min(state.maxArrayCells, state.remaining);
+      let cells = region.rows * region.cols;
+      if (cells > allowed) {
+        // a result over the cap (or what is left of the workbook's budget) is written as its first rows; the range says what is written, and Excel spills the rest when it recalculates
+        const cols = Math.min(region.cols, Math.max(1, allowed));
+        const rows = Math.min(region.rows, Math.max(1, Math.floor(allowed / cols)));
+        span = { rows, cols };
+        written = { ...region, rows, cols };
+        cells = rows * cols;
+        if (state.cuts++ < MAX_EXPORT_WARNINGS) {
+          const why = region.rows * region.cols > state.maxArrayCells ? `is over ${state.maxArrayCells} cells` : `does not fit in the ${state.remaining} cells left of the workbook's budget for array formula results`;
+          state.onWarning?.(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's result (${region.rows} x ${region.cols} cells) ${why}, so only its first ${rows} x ${cols} are written to the file.`);
         }
       }
+      state.remaining = Math.max(0, state.remaining - cells);
     }
+    if (span) {
+      out.arrayRef = spanRef(row, col, span.rows, span.cols);
+      // a dynamic array (one the file marked, or a formula typed here that spills) goes back as one; an array formula the file had
+      // without the dynamic mark (legacy, entered with Ctrl+Shift+Enter) stays legacy even when the engine now spills it
+      if (!cell.arraySpan || cell.arraySpan.spill) out.dynamicArray = true;
+    }
+    if (written) {
+      // the spilled cells are not stored cells: they are written as the values the file keeps next to an array formula
+      for (let r = 0; r < written.rows; r++) {
+        for (let c = 0; c < written.cols; c++) {
+          if (r === 0 && c === 0) continue;
+          cells.set(`${row + r}:${col + c}`, { value: toFileValue(written.values[r][c] as SpreadsheetCell['value']), inArray: true });
+          maxRow = Math.max(maxRow, row + r);
+          maxCol = Math.max(maxCol, col + c);
+        }
+      }
+    } else if (span) markArrayMembers(cells, row, col, span, state);
   }
 
   const columnWidths = new Map<number, number>();
@@ -159,6 +168,30 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
     frozenCols: sheet.getFrozenCols(),
     mergedRanges,
   };
+}
+
+/**
+ * The stored cells inside the range of an array formula that is written from the file's own cells (cached-only, or not evaluated) hold
+ * the results the file saved: an error among them goes back as an error value. The search is bounded for the whole export (a file can
+ * give thousands of formulas ranges of millions of cells), so past it such cells keep the text of the error.
+ */
+function markArrayMembers(cells: Map<string, SpreadsheetCell>, row: number, col: number, span: { rows: number; cols: number }, state: ExportArrayState): void {
+  const area = span.rows * span.cols;
+  const cost = Math.min(area, cells.size);
+  if (cost > state.marking) return;
+  state.marking -= cost;
+  const mark = (key: string) => {
+    const member = cells.get(key);
+    if (member && !member.formula) member.inArray = true;
+  };
+  if (area <= cells.size) {
+    for (let r = 0; r < span.rows; r++) for (let c = 0; c < span.cols; c++) if (r + c > 0) mark(`${row + r}:${col + c}`);
+    return;
+  }
+  for (const key of cells.keys()) {
+    const [r, c] = key.split(':').map(Number);
+    if (r >= row && r < row + span.rows && c >= col && c < col + span.cols && r + c > row + col) mark(key);
+  }
 }
 
 function toSpreadsheetCell(

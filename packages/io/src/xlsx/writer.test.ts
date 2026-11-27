@@ -157,6 +157,17 @@ describe('exportXlsx', () => {
     }
   );
 
+  it('writes an error value inside an array range as an error cell (inArray), and the text of one outside as text', async () => {
+    const JSZip = (await import('jszip')).default;
+    const bytes = await exportXlsx({
+      sheets: [{ name: 'A', cells: new Map([['0:0', { value: '#N/A', formula: '1+1', arrayRef: 'A1:A3' }], ['1:0', { value: '#N/A', inArray: true as const }], ['2:0', { value: 'x', inArray: true as const }], ['0:2', { value: '#N/A' }]]) }],
+    });
+    const xml = await (await JSZip.loadAsync(bytes)).file('xl/worksheets/sheet1.xml')!.async('string');
+    expect(xml).toContain('<c r="A2" t="e"><v>#N/A</v></c>');
+    expect(xml).toMatch(/<c r="A3" t="(s|inlineStr)"/);
+    expect(xml).toMatch(/<c r="C1" t="(s|inlineStr)"/);
+  });
+
   it('keeps a formula result that merely starts like an error as text', async () => {
     const JSZip = (await import('jszip')).default;
     const bytes = await exportXlsx({ sheets: [{ name: 'A', cells: new Map([['0:0', { value: '#N/A is text', formula: '"#N/A is text"' }], ['0:1', { value: 'x', formula: '"x"' }], ['0:2', { value: 3, formula: '1+2' }], ['0:3', { value: true, formula: 'TRUE' }]]) }] });

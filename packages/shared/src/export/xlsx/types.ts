@@ -71,6 +71,8 @@ export interface SpreadsheetCell {
   arrayRef?: string;
   /** With `arrayRef`: a dynamic-array formula (spills), written with the cell metadata (`cm`) Excel marks it with; without it a legacy (CSE) array formula. */
   dynamicArray?: true;
+  /** A cell inside the range of an array formula, not its anchor: an error literal as its value is written as an error value (`t="e"`), as the file kept it, not as text. */
+  inArray?: true;
 }
 
 export interface SpreadsheetMergedRange {

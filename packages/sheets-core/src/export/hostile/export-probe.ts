@@ -18,7 +18,6 @@ async function main(): Promise<void> {
   for (const m of xml.matchAll(/<f t="array" ref="([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?"/g)) {
     arrayCells += (col(m[3] ?? m[1]) - col(m[1]) + 1) * (Number(m[4] ?? m[2]) - Number(m[2]) + 1);
   }
-  // the JSON line on stdout is how this child process reports to its parent (formula-hostile.test.ts), so console.log is intended here
   console.log(JSON.stringify({ exportBytes: exported.length, arrayCells, warnings }));
 }
 
