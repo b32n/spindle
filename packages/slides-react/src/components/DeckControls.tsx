@@ -27,10 +27,11 @@ export function DeckControls(): React.ReactElement {
   const theme = useTheme();
   const slide = useSlide(activeSlideId);
   const menu = useToolbarMenu();
-  const [open, setOpen] = useState<null | 'layout' | 'theme'>(null);
+  const [open, setOpen] = useState<null | 'layout' | 'theme' | 'bg'>(null);
   // Callback refs into state: the Popover needs the anchor element at render time.
   const [layoutEl, setLayoutEl] = useState<HTMLButtonElement | null>(null);
   const [themeEl, setThemeEl] = useState<HTMLButtonElement | null>(null);
+  const [bgEl, setBgEl] = useState<HTMLLabelElement | null>(null);
 
   const layouts = deck.getLayouts();
   const slideSize = deck.getSlideSize();
@@ -119,11 +120,16 @@ export function DeckControls(): React.ReactElement {
         </Popover>
       )}
 
-      <label style={{ ...btn, gap: 6 }} title="Slide background">
+      {/* The label looks the same as before; the full background panel (gradient, image) opens on right-click. */}
+      <label ref={setBgEl} style={{ ...btn, gap: 6 }} title="Slide background" onContextMenu={(e) => { e.preventDefault(); setOpen('bg'); }}>
         Background
         <input type="color" value={bgHex} onChange={(e) => setBg(e.target.value)} style={{ width: 22, height: 22, border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} />
       </label>
-      <FillExtras onPick={setBgFill} testId="slide-bg" style={{ height: 28, fontSize: 12 }} />
+      {open === 'bg' && (
+        <Popover anchor={bgEl} onClose={() => setOpen(null)}>
+          <div style={{ width: 300 }}>{bgPanel(() => setOpen(null))}</div>
+        </Popover>
+      )}
     </div>
   );
 }

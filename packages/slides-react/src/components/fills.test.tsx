@@ -197,7 +197,6 @@ describe('readImageAsFill', () => {
 
 describe('FillExtras controls', () => {
   type P = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const click = jest.fn();
   const find = (node: React.ReactNode, type: string, out: P[] = []): P[] => {
     React.Children.forEach(node, (c) => {
       if (!React.isValidElement(c)) return;
@@ -209,9 +208,8 @@ describe('FillExtras controls', () => {
   };
   const build = (props: Partial<React.ComponentProps<typeof FillExtras>> = {}) => {
     const onPick = jest.fn();
-    jest.spyOn(React, 'useRef').mockReturnValue({ current: { click } });
     const tree = FillExtras({ onPick, ...props });
-    return { onPick, select: find(tree, 'select')[0], button: find(tree, 'button')[0], input: find(tree, 'input')[0] };
+    return { onPick, select: find(tree, 'select')[0], button: find(tree, 'button')[0] };
   };
   afterEach(() => jest.restoreAllMocks());
 
@@ -225,11 +223,23 @@ describe('FillExtras controls', () => {
     select.onMouseDown({ stopPropagation: jest.fn() });
   });
 
-  it('the image button opens the hidden file input', () => {
+  // The picker input is created on demand and never attached to the DOM.
+  const stubDocument = () => {
+    const input: Record<string, any> = { click: jest.fn(), files: [{}] }; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const create = jest.fn(() => input);
+    (globalThis as unknown as { document?: unknown }).document = { createElement: create };
+    return { input, create };
+  };
+  afterEach(() => delete (globalThis as unknown as { document?: unknown }).document);
+
+  it('the image button creates a detached file input and opens it', () => {
+    const { input, create } = stubDocument();
     const { button } = build();
     button.onMouseDown({ preventDefault: jest.fn() });
     button.onClick();
-    expect(click).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith('input');
+    expect(input).toMatchObject({ type: 'file', accept: 'image/*' });
+    expect(input.click).toHaveBeenCalledTimes(1);
   });
 
   it('picking a file applies an image fill; no file or a bad file applies nothing', async () => {
@@ -239,19 +249,21 @@ describe('FillExtras controls', () => {
       onload: (() => void) | null = null;
       readAsDataURL(): void { this.onload?.(); }
     };
-    const { onPick, input } = build({ disabled: true, testId: 'x', style: { height: 1 } });
-    const target = { files: [{}] as unknown as FileList, value: 'c:\\a.png' };
-    await input.onChange({ target });
-    expect(target.value).toBe('');
+    const { input } = stubDocument();
+    const { onPick, button } = build({ disabled: true, testId: 'x', style: { height: 1 } });
+    button.onClick();
+    await input.onchange();
     expect(onPick).toHaveBeenCalledWith({ kind: 'picture', src: PNG, mode: 'stretch' });
-    await input.onChange({ target: { files: [], value: '' } });
+    input.files = [];
+    await input.onchange();
     expect(onPick).toHaveBeenCalledTimes(1);
     g.FileReader = class {
       result: unknown = 'data:text/html,x';
       onload: (() => void) | null = null;
       readAsDataURL(): void { this.onload?.(); }
     };
-    await input.onChange({ target: { files: [{}], value: '' } });
+    input.files = [{}];
+    await input.onchange();
     expect(onPick).toHaveBeenCalledTimes(1);
     delete g.FileReader;
   });

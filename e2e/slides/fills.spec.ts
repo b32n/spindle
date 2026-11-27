@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SlidesPage } from '../support/slides';
 
-// The slides toolbar collapses into a "More tools" menu below ~1500px; the fill controls are asserted inline.
+// The slides toolbar collapses into a "More tools" menu below ~1500px; the shape fill controls are asserted inline.
 test.use({ viewport: { width: 1900, height: 900 } });
 
 test.describe('slides: gradient and picture fills', () => {
@@ -32,6 +32,7 @@ test.describe('slides: gradient and picture fills', () => {
     ).toBe('gradient');
 
     // Slide background: computed style of the slide box.
+    await page.getByTitle('Slide background').click({ button: 'right' });
     await page.getByTestId('slide-bg-gradient').selectOption('radial');
     await expect
       .poll(() => s.slide.evaluate((n) => getComputedStyle(n).backgroundImage))

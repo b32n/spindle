@@ -2,7 +2,7 @@
 // colour input stays with each caller. Images come from a file picker only and are stored as a data URL: nothing is
 // ever fetched from a URL.
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { GRADIENT_PRESETS, isSafePictureSrc, type Fill } from '@b32nio/spindle-slides-core';
 
 const field: React.CSSProperties = {
@@ -35,17 +35,23 @@ export function FillExtras({
   testId?: string;
   style?: React.CSSProperties;
 }): React.ReactElement {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    const fill = file ? await readImageAsFill(file) : null;
-    if (fill) onPick(fill);
+  // The picker input is created on demand and never attached, so the DOM keeps no extra persistent file input.
+  const openPicker = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      const fill = file ? await readImageAsFill(file) : null;
+      if (fill) onPick(fill);
+    };
+    input.click();
   };
   return (
     <>
       <select
         title="Gradient fill"
+        aria-label="Gradient fill"
         data-testid={`${testId}-gradient`}
         disabled={disabled}
         value=""
@@ -64,15 +70,15 @@ export function FillExtras({
       <button
         type="button"
         title="Image fill"
+        aria-label="Image fill"
         data-testid={`${testId}-image`}
         disabled={disabled}
         onMouseDown={(e) => e.preventDefault()}
-        onClick={() => fileRef.current?.click()}
+        onClick={openPicker}
         style={{ ...field, ...style, opacity: disabled ? 0.5 : 1 }}
       >
         Image…
       </button>
-      <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: 'none' }} />
     </>
   );
 }
