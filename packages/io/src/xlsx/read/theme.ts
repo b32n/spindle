@@ -1,5 +1,6 @@
 import type { XlsxTheme } from '@b32nio/spindle-shared/export/xlsx';
 import { kid, type XmlElement } from '../xml';
+import { abbreviate } from './capped';
 import { DEFAULT_THEME_COLORS, hlsToRgb, parseRgb } from './colors';
 import { PRESET_COLORS } from './preset-colors';
 import { numAttr } from './values';
@@ -62,7 +63,7 @@ export function parseTheme(root: XmlElement | undefined, warnings?: string[]): X
   const colors = SLOTS.map((slot, i) => {
     const el = kid(scheme, slot);
     const color = slotColor(el);
-    if (color === undefined && el?.children[0]) warnings?.push(`The theme colour ${slot} (${el.children[0].name}) could not be read; the Office default is used.`);
+    if (color === undefined && el?.children[0]) warnings?.push(`The theme colour ${slot} (${abbreviate(el.children[0].name)}) could not be read; the Office default is used.`);
     return color ?? DEFAULT_THEME_COLORS[i];
   });
   const theme: XlsxTheme = { colors };

@@ -23,6 +23,8 @@ interface Options {
   maxFormulaChars?: number;
   /** The package's budget for merged ranges and hyperlinks (`maxRanges`). */
   ranges?: number;
+  /** The package's budget for rows with settings (`maxRows`). */
+  rows?: number;
 }
 
 const refOf = (over: Partial<XlsxSheetRef> = {}): XlsxSheetRef => ({
@@ -51,7 +53,7 @@ function run(xml: string | undefined, ref: XlsxSheetRef, o: Options, warnings: s
     colors: { themeColors: DEFAULT_THEME_COLORS },
     date1904: o.date1904 ?? false,
     maxSheetFormulaChars: o.maxFormulaChars,
-    budget: o.ranges === undefined ? undefined : readBudget({ ...DEFAULT_IMPORT_LIMITS, maxRanges: o.ranges }),
+    budget: o.ranges === undefined && o.rows === undefined ? undefined : readBudget({ ...DEFAULT_IMPORT_LIMITS, maxRanges: o.ranges ?? DEFAULT_IMPORT_LIMITS.maxRanges, maxRows: o.rows ?? DEFAULT_IMPORT_LIMITS.maxRows }),
     warn: (m) => warnings.push(m),
   });
 }
@@ -992,5 +994,112 @@ describe('readSheet: merges and hyperlinks at scale and in overlap', () => {
     expect(sheet.mergedRanges).toHaveLength(20_000);
     expect(sheet.details?.hyperlinks).toHaveLength(20_000);
     expect(sheet.cells.size).toBeLessThan(200_000);
+  });
+});
+
+describe('readSheet: warnings quote the file\'s text shortened', () => {
+  const total = (warnings: string[]) => warnings.reduce((n, w) => n + w.length, 0);
+
+  it('quotes a 10 MB sheet name in every warning at 64 characters, not in full', () => {
+    const name = 'N'.repeat(10_000_000);
+    const body = row(1, '<c r="A1" t="s"><v>9</v></c><c r="B1" s="9"><v>1</v></c><c r="C1"><v>x</v></c><c r="D1" t="d"><v>x</v></c>');
+    const { warnings } = read(body, { name });
+    expect(warnings.length).toBeGreaterThanOrEqual(4);
+    for (const w of warnings) expect(w.length).toBeLessThan(300);
+    expect(total(warnings)).toBeLessThan(2_000);
+    expect(warnings.some((w) => w.startsWith(`${'N'.repeat(63)}…!C1: "x" is not a number`))).toBe(true);
+  });
+
+  it('quotes the name in the warnings of a damaged sheet, over-long elements, limits and link problems, shortened', () => {
+    const name = 'M'.repeat(100_000);
+    const label = `${'M'.repeat(63)}…`;
+    const big = `<sheetViews>${' '.repeat(MAX_TREE_CHARS + 1)}</sheetViews>`;
+    const links = Array.from({ length: 21 }, (_, i) => `<hyperlink ref="A${i + 1}" r:id="nope"/>`).join('');
+    const { warnings } = read('<row r="1"><c r="A1"', {
+      name,
+      head: big,
+      tail: `<hyperlinks>${links}</hyperlinks>`,
+      ranges: 0,
+    });
+    expect(warnings.some((w) => w.includes(`The sheet "${label}" is not well-formed XML`))).toBe(true);
+    expect(warnings.some((w) => w.startsWith(`${label}: the sheetViews element is over`))).toBe(true);
+    for (const w of warnings) expect(w.length).toBeLessThan(300);
+    const merges = read(row(1, '<c r="A1"><v>1</v></c>'), { name, ranges: 0, tail: '<mergeCells><mergeCell ref="A1:B2"/></mergeCells><hyperlinks><hyperlink ref="A1" r:id="rId9"/></hyperlinks>', rels: [{ id: 'rId9', type: 't', kind: 'hyperlink', target: 'http://a', external: true }] });
+    expect(merges.warnings).toEqual([`${label}: 1 merged range(s) were left out (the limit is ${MAX_MERGES} per sheet and maxRanges for the workbook).`, `${label}: 1 hyperlink(s) were left out (the limit is ${MAX_HYPERLINKS} per sheet and maxRanges for the workbook).`]);
+  });
+
+  it('quotes a 1,000,000-digit value, and an address and a row number of any length, at 64 characters', () => {
+    const digits = '9'.repeat(1_000_000);
+    const address = 'A'.repeat(100_000) + '1';
+    const body = `<row r="${'7'.repeat(50)}"><c r="A1"><v>${digits}</v></c><c r="B1" t="d"><v>${digits}</v></c><c r="${address}"><v>x</v></c></row>`;
+    const { warnings } = read(body);
+    expect(warnings).toHaveLength(4);
+    expect(warnings[0]).toBe(`S!row ${'7'.repeat(50)}: the row number is not a row of the sheet; the row follows the previous one`);
+    expect(warnings[1]).toBe(`S!A1: "${'9'.repeat(63)}…" is not a number; imported as text`);
+    expect(warnings[2]).toBe(`S!B1: "${'9'.repeat(63)}…" is not a date; imported as text`);
+    expect(warnings[3]).toBe(`S!${'A'.repeat(63)}…: "x" is not a number; imported as text`);
+    expect(total(warnings)).toBeLessThan(1_000);
+  });
+
+  it('quotes a row number past 64 characters', () => {
+    const { warnings } = read(`<row r="${'1'.repeat(100)}"/>`);
+    expect(warnings).toEqual([`S!row ${'1'.repeat(59)}…: the row number is not a row of the sheet; the row follows the previous one`]);
+  });
+
+  it('quotes a hyperlink\'s ref and relationship id shortened', () => {
+    const { warnings } = read('', { tail: `<hyperlinks><hyperlink ref="${'A'.repeat(500)}1" r:id="${'r'.repeat(500)}"/></hyperlinks>` });
+    expect(warnings).toEqual([`The hyperlink at ${'A'.repeat(63)}… names the relationship ${'r'.repeat(63)}…, which the sheet does not have.`]);
+  });
+});
+
+describe('readSheet: rows with settings are bounded by the package budget (maxRows)', () => {
+  const rows = (n: number) => Array.from({ length: n }, (_, i) => `<row r="${i + 1}" ht="20" customHeight="1"/>`).join('');
+
+  it('keeps the settings of the first rows up to the budget and counts the rest in one warning', () => {
+    const { sheet, warnings } = read(rows(10) + row(11, '<c r="A11"><v>1</v></c>'), { rows: 4 });
+    expect(sheet.details?.rows.map((r) => r.row)).toEqual([0, 1, 2, 3]);
+    expect(warnings).toEqual(['S: the settings of 6 row(s) were left out (the import limit maxRows).']);
+    // the cells are not affected, and a row with no settings costs nothing
+    expect(cell(sheet, '10:0')?.value).toBe(1);
+    expect(read(row(1, '<c r="A1"><v>1</v></c>') + row(2, '<c r="A2"><v>1</v></c>'), { rows: 0 }).warnings).toEqual([]);
+  });
+
+  it('is not over at exactly the budget, and a row given twice replaces its entry at no cost', () => {
+    expect(read(rows(4), { rows: 4 }).warnings).toEqual([]);
+    const twice = read(`<row r="1" ht="20"/><row r="1" ht="30"/><row r="2" ht="20"/>`, { rows: 2 });
+    expect(twice.warnings).toEqual([]);
+    expect(twice.sheet.details?.rows.map((r) => [r.row, r.height])).toEqual([[0, 30], [1, 20]]);
+  });
+
+  it('shares the budget over the sheets of a package', () => {
+    const budget = readBudget({ ...DEFAULT_IMPORT_LIMITS, maxRows: 5 });
+    const warnings: string[] = [];
+    const ctx = { styles: parseStyles(el(`<styleSheet ${MAIN_NS}/>`), DEFAULT_THEME_COLORS), sharedStrings: [], colors: { themeColors: DEFAULT_THEME_COLORS }, date1904: false, budget, warn: (m: string) => warnings.push(m) };
+    const xml = `<worksheet ${MAIN_NS}><sheetData>${rows(3)}</sheetData></worksheet>`;
+    expect(readSheet(xml, refOf({ name: 'A' }), ctx).details?.rows).toHaveLength(3);
+    expect(readSheet(xml, refOf({ name: 'B' }), ctx).details?.rows).toHaveLength(2);
+    expect(budget.rows).toBe(0);
+    expect(warnings).toEqual(['B: the settings of 1 row(s) were left out (the import limit maxRows).']);
+  });
+});
+
+describe('readSheet: rows and cells are read only directly in sheetData', () => {
+  it('does not read a row, or a cell, of another top-level element', () => {
+    const xml = `<worksheet ${MAIN_NS}><foo><row r="1" ht="9"><c r="A1"><v>1</v></c></row></foo><sheetData><row r="2"><c r="A2"><v>2</v></c></row></sheetData><bar><row r="3"><c r="A3"><v>3</v></c></row></bar></worksheet>`;
+    const warnings: string[] = [];
+    const sheet = readSheet(xml, refOf(), { styles: parseStyles(undefined, DEFAULT_THEME_COLORS), sharedStrings: [], colors: { themeColors: DEFAULT_THEME_COLORS }, date1904: false, warn: (m) => warnings.push(m) });
+    expect([...sheet.cells.keys()]).toEqual(['1:0']);
+    expect(sheet.details?.rows).toEqual([]);
+    expect(warnings).toEqual([]);
+  });
+
+  it('does not read a cell nested deeper than the children of a row', () => {
+    const { sheet } = read('<row r="2"><y><c r="A2"><v>2</v></c></y><c r="A3"><v>3</v></c></row>');
+    expect([...sheet.cells.keys()]).toEqual(['2:0']);
+  });
+
+  it('takes a cell\'s own address as its place, whatever row element it is in', () => {
+    const { sheet } = read('<row r="1"><c r="B5"><v>1</v></c><c><v>2</v></c></row>');
+    expect([...sheet.cells.keys()]).toEqual(['4:1', '4:2']);
   });
 });

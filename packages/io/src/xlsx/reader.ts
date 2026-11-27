@@ -1,7 +1,7 @@
 import type { SpreadsheetImportResult, SpreadsheetSheet } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError, toImportError } from '../common/import-error';
 import { resolveLimits, type ImportLimits } from '../common/safe-zip';
-import { CappedWarnings } from './read/capped';
+import { abbreviate, CappedWarnings } from './read/capped';
 import { XlsxPackage } from './read/package';
 import { readWorkbookParts, toImportExtras } from './read';
 import { readBudget, readSheet } from './read/sheet';
@@ -29,7 +29,7 @@ export async function importXlsx(bytes: Uint8Array, options: ImportXlsxOptions =
       throw new ImportError('legacy-binary', 'This is a binary Excel workbook (.xlsb), which cannot be opened. In Excel, use Save As and choose Excel Workbook (.xlsx).');
     }
     // a workbook part that is not XML leaves nothing to read (any other damaged part is a warning)
-    if ((await pkg.xml(workbookPart)) === undefined) throw new ImportError('corrupt', 'The workbook part of the file is damaged (it is not well-formed XML).');
+    if ((await pkg.xml(workbookPart)) === undefined) throw new ImportError('corrupt', 'The workbook part of the file is damaged (it is not well-formed XML, or has more elements than the import limit maxPartElements allows).');
     return await readPackage(pkg, resolveLimits(options.limits));
   } catch (e) {
     throw toImportError(e);
@@ -62,7 +62,7 @@ async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<Spre
     // each part is read once: a second sheet naming a part is how one large part is made to count many times over
     // (the part name is the package's own spelling: the workbook reader has already resolved it, case-insensitively)
     if (readParts.has(ref.part)) {
-      sheetWarnings.add(`The sheet "${ref.name}" names the part ${ref.part}, which another sheet already uses; it was not read.`);
+      sheetWarnings.add(`The sheet "${abbreviate(ref.name)}" names the part ${abbreviate(ref.part)}, which another sheet already uses; it was not read.`);
       continue;
     }
     readParts.add(ref.part);
@@ -106,7 +106,7 @@ class Names {
       do candidate = `${name} (${n++})`;
       while (this.taken.has(candidate.toLowerCase()));
       this.next.set(key, n);
-      warnings.add(`The workbook has more than one sheet named "${name}"; one was renamed "${candidate}".`);
+      warnings.add(`The workbook has more than one sheet named "${abbreviate(name)}"; one was renamed "${abbreviate(candidate)}".`);
     }
     this.taken.add(candidate.toLowerCase());
     return candidate;

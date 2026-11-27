@@ -9,7 +9,7 @@ import type {
 } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError } from '../../common/import-error';
 import { isTrue, kid, kids, type XmlElement } from '../xml';
-import { CappedWarnings } from './capped';
+import { abbreviate, CappedWarnings, truncate } from './capped';
 import { partsWithContentType } from './content-types';
 import type { XlsxPackage } from './package';
 import { relsOfKind } from './relationships';
@@ -54,6 +54,13 @@ const SHEET_KINDS: ReadonlyMap<string, string> = new Map([['worksheet', 'workshe
 /** The workbook's `<sheet>` entries read are this many times `maxSheets`: entries that are not read as worksheets (chart sheets, a part repeated, no part) count, so naming many cannot make the reader do work the sheet limit does not bound. */
 export const SHEET_ENTRY_FACTOR = 4;
 
+/**
+ * Longest sheet name kept (characters). Excel allows 31, and Excel-written names never exceed it; other producers are tolerated up to
+ * this many, which is more than any real sheet name needs, and the rest of a longer name is cut with a warning, so a name of
+ * megabytes is never carried through the import (into the result, the editor's tabs, or each message that names the sheet).
+ */
+export const MAX_SHEET_NAME_CHARS = 255;
+
 const STATES: ReadonlySet<string> = new Set<XlsxSheetState>(['visible', 'hidden', 'veryHidden']);
 
 /** `state` as the file writes it; anything else (or nothing) is visible. */
@@ -71,7 +78,7 @@ function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage, sheet
     relsOfKind(rels, kind).flatMap((r) => {
       if (r.external) return [];
       const part = pkg.resolve(r.target);
-      if (part === undefined) problems.add(`The sheet "${sheetName}" has ${kind} at ${r.target}, which the package does not contain.`);
+      if (part === undefined) problems.add(`The sheet "${abbreviate(sheetName)}" has ${kind} at ${abbreviate(r.target)}, which the package does not contain.`);
       return part ?? [];
     });
   const out: XlsxCommentParts = { threadedComments: found('threadedComment') };
@@ -81,22 +88,27 @@ function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage, sheet
 }
 
 async function readSheetRef(el: XmlElement, index: number, scan: SheetScan, pkg: XlsxPackage): Promise<XlsxSheetRef> {
+  let name = el.attrs.name ?? `Sheet${index + 1}`;
+  if (name.length > MAX_SHEET_NAME_CHARS) {
+    scan.problems.add(`The sheet name "${abbreviate(name)}" is ${name.length} characters long (Excel allows 31); it was cut to ${MAX_SHEET_NAME_CHARS}.`);
+    name = truncate(name, MAX_SHEET_NAME_CHARS);
+  }
   const relId = el.attrs.id ?? '';
   const rel = scan.byId.get(relId);
   let part: string | undefined;
   if (rel && !rel.external) {
     part = pkg.resolve(rel.target);
-    if (part === undefined) scan.problems.add(`The sheet "${el.attrs.name ?? ''}" points at ${rel.target}, which the package does not contain.`);
-  } else scan.problems.add(`The sheet "${el.attrs.name ?? ''}" has no usable relationship (${relId === '' ? 'no r:id' : relId}).`);
+    if (part === undefined) scan.problems.add(`The sheet "${abbreviate(name)}" points at ${abbreviate(rel.target)}, which the package does not contain.`);
+  } else scan.problems.add(`The sheet "${abbreviate(name)}" has no usable relationship (${relId === '' ? 'no r:id' : abbreviate(relId)}).`);
   const rels = part === undefined ? [] : await pkg.rels(part);
   let comments = part === undefined ? undefined : scan.comments.get(part);
   if (comments === undefined) {
-    comments = commentParts(rels, pkg, el.attrs.name ?? '', scan.problems);
+    comments = commentParts(rels, pkg, name, scan.problems);
     if (part !== undefined) scan.comments.set(part, comments);
   }
   const sheetId = intAttr(el.attrs.sheetId);
   return {
-    name: el.attrs.name ?? `Sheet${index + 1}`,
+    name,
     sheetId: sheetId ?? index + 1,
     state: sheetState(el.attrs.state),
     relId,

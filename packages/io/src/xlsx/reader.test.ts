@@ -280,6 +280,64 @@ describe('importXlsx: the own reader', () => {
     expect(result.warnings.filter((w) => w.includes('more than one sheet'))).toHaveLength(3);
   });
 
+  it('quotes sheet names, and the part of a repeated sheet, shortened in its warnings', async () => {
+    const long = 'L'.repeat(200);
+    const bytes = await book(
+      [long, long.toLowerCase(), 'Third'].map((n, i) => `<sheet name="${n}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join(''),
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml'], ['rId3', 'worksheet', `worksheets/${'x'.repeat(300)}.xml`]],
+      {
+        'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>'),
+        'xl/worksheets/sheet2.xml': sheetXml('<row r="1"><c r="A1"><v>2</v></c></row>'),
+        [`xl/worksheets/${'x'.repeat(300)}.xml`]: sheetXml('<row r="1"><c r="A1"><v>3</v></c></row>'),
+      }
+    );
+    const repeated = await book(
+      [`<sheet name="${long}" sheetId="1" r:id="rId1"/>`, `<sheet name="${long}2" sheetId="2" r:id="rId2"/>`].join(''),
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/SHEET1.xml']],
+      { 'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>') }
+    );
+    const result = await importXlsx(bytes);
+    expect(result.warnings).toContain(`The workbook has more than one sheet named "${'l'.repeat(63)}…"; one was renamed "${'l'.repeat(63)}…".`);
+    expect(result.sheets).toHaveLength(3);
+    expect((await importXlsx(repeated)).warnings).toEqual([`The sheet "${'L'.repeat(63)}…" names the part xl/worksheets/sheet1.xml, which another sheet already uses; it was not read.`].map((w) => w));
+  });
+
+  it('keeps the whole warning text small for a 10 MB sheet name', async () => {
+    const bytes = await book(`<sheet name="${'N'.repeat(10_000_000)}" sheetId="1" r:id="rId1"/><sheet name="${'N'.repeat(10_000_000)}" sheetId="2" r:id="rId2"/>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
+      'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" t="d"><v>x</v></c></row>'),
+      'xl/worksheets/sheet2.xml': sheetXml('<row r="1"><c r="A1" t="d"><v>y</v></c></row>'),
+    });
+    const result = await importXlsx(bytes);
+    expect(result.sheets.map((s) => s.name.length)).toEqual([255, 255 + ' (2)'.length]);
+    expect(result.warnings.reduce((n, w) => n + w.length, 0)).toBeLessThan(2_000);
+  });
+
+  it('takes the budget for rows with settings from the limits (maxRows), over all the sheets', async () => {
+    const rows = Array.from({ length: 10 }, (_, i) => `<row r="${i + 1}" ht="20"/>`).join('');
+    const bytes = await book('<sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="rId2"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
+      'xl/worksheets/sheet1.xml': sheetXml(rows),
+      'xl/worksheets/sheet2.xml': sheetXml(rows),
+    });
+    const result = await importXlsx(bytes, { limits: { maxRows: 12 } });
+    expect(result.sheets.map((s) => s.details?.rows.length)).toEqual([10, 2]);
+    expect(result.warnings).toEqual(['B: the settings of 8 row(s) were left out (the import limit maxRows).']);
+    expect((await importXlsx(bytes)).warnings).toEqual([]);
+  });
+
+  it('refuses a workbook part over the element budget with an error that says so, and reads a styles part over it as a skipped part', async () => {
+    const many = `<sheet name="S" sheetId="1" r:id="rId1"/></sheets><definedNames>${'<definedName name="n">A1</definedName>'.repeat(20)}</definedNames><sheets>`;
+    const bytes = await book(many, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>') });
+    await expect(importXlsx(bytes, { limits: { maxPartElements: 10 } })).rejects.toMatchObject({ code: 'corrupt', message: expect.stringContaining('maxPartElements') });
+    expect((await importXlsx(bytes)).sheets).toHaveLength(1);
+    const styled = await book('<sheet name="S" sheetId="1" r:id="rId1"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'styles', 'styles.xml']], {
+      'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" s="1"><v>1</v></c></row>'),
+      'xl/styles.xml': `<styleSheet ${MAIN_NS}><cellXfs>${'<xf/>'.repeat(20)}</cellXfs></styleSheet>`,
+    });
+    const result = await importXlsx(styled, { limits: { maxPartElements: 10 } });
+    expect(result.styles?.cellXfs).toEqual([]);
+    expect(result.warnings).toEqual(['The part xl/styles.xml has more than 10 elements (the import limit maxPartElements) and was skipped.', 'S: 1 cell(s) use a format the file does not have; imported unformatted.']);
+  });
+
   it.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])('a sheet named %s is an ordinary sheet', async (name) => {
     const bytes = await book(`<sheet name="${name}" sheetId="1" r:id="rId1"/><sheet name="${name}" sheetId="2" r:id="rId2"/>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
       'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>'),

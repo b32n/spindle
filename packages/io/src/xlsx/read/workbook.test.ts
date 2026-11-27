@@ -1,6 +1,6 @@
 import { ImportError } from '../../common/import-error';
 import { XlsxPackage } from './package';
-import { findWorkbookPart, isBinaryWorkbook, readWorkbook, SHEET_ENTRY_FACTOR } from './workbook';
+import { findWorkbookPart, isBinaryWorkbook, MAX_SHEET_NAME_CHARS, readWorkbook, SHEET_ENTRY_FACTOR } from './workbook';
 import { MAIN_NS, REL_NS, relsXml, workbookZip, zipOf } from './test-support';
 
 const WB_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml';
@@ -154,7 +154,8 @@ describe('readWorkbook: sheets', () => {
   });
   it('words the warning for a sheet without a name too', async () => {
     const { pkg } = await read(await workbookZip('<sheets><sheet sheetId="1"/><sheet sheetId="2" r:id="rId2"/></sheets>', [['rId2', 'worksheet', 'gone.xml']]));
-    expect(pkg.warnings).toEqual(['The sheet "" has no usable relationship (no r:id).', 'The sheet "" points at xl/gone.xml, which the package does not contain.']);
+    // the sheet is named as it will be (Sheet1, Sheet2), as the warning for a sheet with a name does
+    expect(pkg.warnings).toEqual(['The sheet "Sheet1" has no usable relationship (no r:id).', 'The sheet "Sheet2" points at xl/gone.xml, which the package does not contain.']);
   });
   it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])('a relationship type ending in the inherited key %s keeps that text as the sheet kind', async (key) => {
     const { info } = await read(
@@ -370,5 +371,58 @@ describe('readWorkbook: namespaces', () => {
     expect((await read(prefixed)).info.sheets[0]).toMatchObject({ name: 'P', part: 'xl/worksheets/s.xml' });
     const bare = await zipOf({ 'xl/workbook.xml': '<workbook><sheets><sheet name="N" sheetId="3"/></sheets></workbook>' });
     expect((await read(bare)).info.sheets[0]).toMatchObject({ name: 'N', sheetId: 3 });
+  });
+});
+
+describe('readWorkbook: sheet names and what the warnings quote', () => {
+  const one = (name: string, extra = '', rels: Array<[string, string, string]> = [['rId1', 'worksheet', 'worksheets/sheet1.xml']]) =>
+    workbookZip(`<sheets><sheet name="${name}" sheetId="1" r:id="rId1"${extra}/></sheets>`, rels, { 'xl/worksheets/sheet1.xml': '<worksheet/>' });
+
+  it('keeps a name of up to MAX_SHEET_NAME_CHARS as it is (Excel\'s 31 is not enforced), with no warning', async () => {
+    const name = 'n'.repeat(MAX_SHEET_NAME_CHARS);
+    const { info, pkg } = await read(await one(name));
+    expect(info.sheets[0].name).toBe(name);
+    expect(pkg.warnings).toEqual([]);
+  });
+
+  it('cuts a longer name to MAX_SHEET_NAME_CHARS with one warning that quotes it shortened', async () => {
+    const name = 'n'.repeat(MAX_SHEET_NAME_CHARS + 1);
+    const { info, pkg } = await read(await one(name));
+    expect(info.sheets[0].name).toBe('n'.repeat(MAX_SHEET_NAME_CHARS));
+    expect(pkg.warnings).toEqual([`The sheet name "${'n'.repeat(63)}…" is ${MAX_SHEET_NAME_CHARS + 1} characters long (Excel allows 31); it was cut to ${MAX_SHEET_NAME_CHARS}.`]);
+  });
+
+  it('cuts a 10 MB name to MAX_SHEET_NAME_CHARS, and the warnings stay small whatever the sheet has wrong', async () => {
+    const name = 'N'.repeat(10_000_000);
+    const { info, pkg } = await read(await one(name, '', [['rId2', 'worksheet', 'worksheets/gone.xml']]));
+    expect(info.sheets[0].name).toHaveLength(MAX_SHEET_NAME_CHARS);
+    expect(pkg.warnings).toHaveLength(2);
+    expect(pkg.warnings.reduce((n, w) => n + w.length, 0)).toBeLessThan(1_000);
+    expect(pkg.warnings[1]).toBe(`The sheet "${'N'.repeat(63)}…" has no usable relationship (rId1).`);
+  });
+
+  it('does not leave half a surrogate pair at the cut', async () => {
+    const name = `${'a'.repeat(MAX_SHEET_NAME_CHARS - 1)}\u{1F600}`;
+    const { info } = await read(await one(name));
+    expect(info.sheets[0].name).toBe('a'.repeat(MAX_SHEET_NAME_CHARS - 1));
+  });
+
+  it('quotes a relationship target and a relationship id of any length shortened', async () => {
+    const { pkg } = await read(await one('S', '', [['rId1', 'worksheet', `worksheets/${'x'.repeat(5_000)}.xml`]]));
+    expect(pkg.warnings).toEqual([`The sheet "S" points at xl/worksheets/${'x'.repeat(49)}…, which the package does not contain.`]);
+    const noRel = await read(await workbookZip(`<sheets><sheet name="S" sheetId="1" r:id="${'r'.repeat(5_000)}"/></sheets>`, []));
+    expect(noRel.pkg.warnings).toEqual([`The sheet "S" has no usable relationship (${'r'.repeat(63)}…).`]);
+  });
+
+  it('quotes the sheet name and the target of a comment part the package does not contain shortened', async () => {
+    const name = 'C'.repeat(200);
+    const sheetRels = relsXml([['rId1', 'comments', `../${'c'.repeat(1_000)}.xml`]]);
+    const bytes = await workbookZip(`<sheets><sheet name="${name}" sheetId="1" r:id="rId1"/></sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
+      'xl/worksheets/sheet1.xml': '<worksheet/>',
+      'xl/worksheets/_rels/sheet1.xml.rels': sheetRels,
+    });
+    const { pkg } = await read(bytes);
+    expect(pkg.warnings).toHaveLength(1);
+    expect(pkg.warnings[0]).toBe(`The sheet "${'C'.repeat(63)}…" has comments at xl/${'c'.repeat(60)}…, which the package does not contain.`);
   });
 });
