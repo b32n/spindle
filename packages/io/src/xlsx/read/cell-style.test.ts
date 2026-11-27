@@ -1,5 +1,6 @@
 import { DEFAULT_THEME_COLORS } from './colors';
 import { isDateFormat, lookOf, unescapeLiterals } from './cell-style';
+import { NUMBER_FORMAT_CASES } from './number-format-cases';
 import { parseStyles } from './styles';
 import { el, MAIN_NS } from './test-support';
 
@@ -102,6 +103,11 @@ describe('lookOf', () => {
   });
 });
 
+describe('isDateFormat in either case', () => {
+  it.each(['YYYY', 'DD', 'DDDD', 'H', 'S', 'MM', 'Y', 'B', 'hh:MM AM/PM', 'D-MMM'])('%s is a date format', (code) => expect(isDateFormat(code)).toBe(true));
+  it.each(['General', 'GENERAL', '0.00E+00', '0.00e+00', '@', '0.00 "DD"', '[H]0', '\\D 0'])('%s is not', (code) => expect(isDateFormat(code)).toBe(false));
+});
+
 describe('isDateFormat', () => {
   it.each(['yyyy-mm-dd', 'm/d/yy', 'h:mm', 'mm-dd-yy', '[$-409]mmmm d, yyyy', 'd-mmm', 'dd/mm/yyyy hh:mm:ss', 'mm:ss.0', '[h]:mm:ss', 'bb'])('%s is a date format', (code) => {
     expect(isDateFormat(code)).toBe(true);
@@ -145,58 +151,8 @@ describe('isDateFormat on hostile codes', () => {
   });
 });
 
-// The number format codes of a file as the editor gets them (`unescapeLiterals`): the backslash goes before a character Excel
-// shows without quotes and stays before everything else, and nothing in quotes is touched. The first four rows are what LibreOffice
-// writes for the S-FIO-01 file; the rest is the table of the S2b review (each of these changed meaning when every escape was dropped).
-const CODES: Array<[raw: string, editor: string, isDate: boolean, why: string]> = [
-  // S-FIO-01 and the other escapes of the plain characters
-  ['\\$#,##0.00', '$#,##0.00', false, 'LibreOffice escapes the currency sign'],
-  ['yyyy\\-mm\\-dd', 'yyyy-mm-dd', true, 'and the date separators'],
-  ['_(\\$* #,##0_)', '_($* #,##0_)', false, 'an accounting code: `_(` and `* ` are pairs'],
-  ['[$\\$-409]#,##0.00', '[$$-409]#,##0.00', false, 'a locale group is unescaped too'],
-  ['\\(0\\)', '(0)', false, 'parentheses'],
-  ['0\\+0', '0+0', false, 'plus'],
-  ['h\\:mm', 'h:mm', true, 'colon'],
-  ['d\\/m\\/yyyy', 'd/m/yyyy', true, 'slash'],
-  ['0\\!', '0!', false, 'exclamation mark'],
-  ['0\\^2', '0^2', false, 'caret'],
-  ['0\\&0', '0&0', false, 'ampersand'],
-  ["0\\'", "0'", false, 'apostrophe'],
-  ['0\\~', '0~', false, 'tilde'],
-  ['\\{0\\}', '{0}', false, 'braces'],
-  ['\\<0\\>', '<0>', false, 'angle brackets'],
-  ['0\\=0', '0=0', false, 'equals'],
-  ['0\\ kg', '0 kg', false, 'a space'],
-  // the review's table: the escape is what keeps the character literal
-  ['0.0\\"', '0.0\\"', false, 'inches: unescaping would leave an unbalanced quote'],
-  ['0\\ \\m', '0 \\m', false, '`m` would become a month token'],
-  ['0\\ \\d', '0 \\d', false, '`d` would become a day token (and a date in a 1904 workbook)'],
-  ['\\*0\\*', '\\*0\\*', false, 'would become fill syntax'],
-  ['\\@', '\\@', false, 'would become the text placeholder'],
-  ['0\\.00', '0\\.00', false, 'a literal dot, not the decimal point'],
-  ['0\\\\', '0\\\\', false, 'a literal backslash: the next character would be escaped'],
-  ['"C:\\Temp"0', '"C:\\Temp"0', false, 'a backslash in quotes is a backslash'],
-  // the others that are kept: letters, digits, `,` `%` `#` `?` `_` `E`
-  ['0\\,0', '0\\,0', false, 'a literal comma, not the thousands separator'],
-  ['0\\%', '0\\%', false, 'a literal percent sign (no scaling)'],
-  ['0\\#', '0\\#', false, 'a literal number sign'],
-  ['0\\?', '0\\?', false, 'a literal question mark'],
-  ['0\\_', '0\\_', false, 'a literal underscore'],
-  ['0\\E+0', '0\\E+0', false, 'a literal E'],
-  ['0\\5', '0\\5', false, 'a literal digit'],
-  ['\\y\\m\\d', '\\y\\m\\d', false, 'letters shown as they are, no date'],
-  ['0\\h', '0\\h', false, 'an hour sign, shown'],
-  // the pieces that are not escapes
-  ['_\\)', '_\\)', false, '`_x` takes its character as it is'],
-  ['*\\-0', '*\\-0', false, '`*x` takes its character as it is'],
-  ['"a\\"x\\-c"', '"a\\"x-c"', false, 'a backslash does not escape a quote in a run: the quote closes it, and the escape after it is read'],
-  ['"a\\-c"0', '"a\\-c"0', false, 'inside a run nothing changes'],
-  ['0\\', '0\\', false, 'a backslash at the end stays'],
-  ['[Red]\\-0', '[Red]-0', false, 'a colour group and an escape'],
-  ['[$\\\\-409]0', '[$\\\\-409]0', false, 'an escaped backslash in a group is one escape, not an escaped `-`'],
-  ['[xx \\-0', '[xx -0', false, 'an unclosed group is ordinary text'],
-  ['0 "xx \\-0', '0 "xx -0', false, 'an unclosed quote is ordinary text'],
-];
+
+const CODES = NUMBER_FORMAT_CASES;
 
 describe('number format codes: what the editor gets and what is a date', () => {
   const defined = (raw: string) => {

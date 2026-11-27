@@ -34,6 +34,10 @@ import { exportXlsx } from './writer';
 //                           must be one of ESCAPE_IMPROVEMENTS, each with its reason
 //   escapedLetterNotDate    in a 1904 workbook, a number whose format has an escaped date letter (`0\\ \\d`) is not moved by
 //                           1462 days: the old reader unescaped the code, saw a `d` and took the number for a date
+//   upperCaseDate           in a 1904 workbook, a number whose format is a date only by an upper-case letter (`DD`, `YYYY`, `H`, `S`,
+//                           `DDDD`: codes are case-insensitive, so these are the same tokens as `dd`, `yyyy`, `h`, `s`) is moved by
+//                           1462 days: the old reader looked for `y m d h M s b` only, took the number for a plain number and
+//                           left it in the 1904 system
 //   newWarning              a warning the old reader did not have, of one of the kinds listed in NEW_WARNINGS (a missing
 //                           relationship, a duplicate sheet name, a damaged sheet, a cell that is not a number or a date); any
 //                           other new warning is a difference that fails the test
@@ -63,6 +67,7 @@ type Category =
   | 'dateFloat'
   | 'escapeKept'
   | 'escapedLetterNotDate'
+  | 'upperCaseDate'
   | 'newWarning';
 
 /**
@@ -85,6 +90,9 @@ const ESCAPE_IMPROVEMENTS: Record<string, { reason: string; notDate?: boolean }>
 };
 
 const dropEscapes = (code: string): string => code.replace(/\\(.)/g, '$1');
+
+/** The old reader's test for a date format (`exceljs`'s `isDateFmt`): `y m d h M s b` outside `[...]` and quotes, case-sensitive. */
+const oldIsDate = (code: string): boolean => /[ymdhMsb]/.test(code.replace(/\[[^\]]*]/g, '').replace(/"[^"]*"/g, ''));
 
 /** Files the old reader read and the own reader refuses, by id, with why. (Empty rows are not allowed: a regression is not an exception.) */
 const REFUSED_NOW: Record<string, string> = {
@@ -194,6 +202,7 @@ function compareCell(
       isDateFormat(dropEscapes(n.numberFormat.code))
     )
       seen.push('escapedLetterNotDate');
+    else if (typeof o.value === 'number' && typeof n.value === 'number' && n.value - o.value === 1462 && n.numberFormat !== undefined && isDateFormat(n.numberFormat.code) && !oldIsDate(n.numberFormat.code)) seen.push('upperCaseDate');
     else if (o.value === null && (n.value === 0 || n.value === false || n.value === '') && o.formula === n.formula) seen.push('falsyResult');
     else return `${at}: value ${JSON.stringify(o.value)} vs ${JSON.stringify(n.value)}`;
   }
@@ -529,6 +538,46 @@ describe('differential: the escapes the own reader keeps (escapeKept)', () => {
     expect(compare(one(1463), one(1)).unexplained).toHaveLength(1);
     expect(compare(one(1464, '0 d'), one(1, '0 \\d')).unexplained.length).toBeGreaterThan(0);
     expect(compare(one(1463, '0 d'), { sheets: [{ name: 'S', cells: new Map([['0:0', { value: 1 }]]) }], warnings: [] }).unexplained.length).toBeGreaterThan(0);
+  });
+});
+
+describe('differential: upper-case date letters (upperCaseDate)', () => {
+  const NS = `xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"`;
+  const attr = (code: string): string => code.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const book = (code: string, date1904: boolean) =>
+    workbookZip(
+      '<sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets>',
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'styles', 'styles.xml']],
+      {
+        'xl/workbook.xml': `<workbook ${NS} ${REL_NS}><workbookPr${date1904 ? ' date1904="1"' : ''}/><sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets></workbook>`,
+        'xl/styles.xml': `<styleSheet ${NS}><numFmts count="1"><numFmt numFmtId="170" formatCode="${attr(code)}"/></numFmts><cellXfs><xf/><xf numFmtId="170"/></cellXfs></styleSheet>`,
+        'xl/worksheets/sheet1.xml': `<worksheet ${NS}><sheetData><row r="1"><c r="A1" s="1"><v>7</v></c></row></sheetData></worksheet>`,
+      }
+    );
+
+  it.each(['DD', 'DDDD', 'H', 'S', 'YYYY', 'YY', 'HH:SS', 'BBBB'])('%s: a date in the 1904 system by its upper-case letters only, a plain number in the 1900 system', async (code) => {
+    expect(oldIsDate(code)).toBe(false);
+    expect(isDateFormat(code)).toBe(true);
+    for (const date1904 of [false, true]) {
+      const bytes = await book(code, date1904);
+      const o = await importXlsxExceljs(bytes);
+      const n = await importXlsx(bytes);
+      const { unexplained, seen } = compare(o, n);
+      expect(unexplained).toEqual([]);
+      expect(seen).toEqual(date1904 ? ['upperCaseDate'] : []);
+      expect(o.sheets[0].cells.get('0:0')?.value).toBe(7);
+      expect(n.sheets[0].cells.get('0:0')?.value).toBe(date1904 ? 7 + 1462 : 7);
+    }
+  });
+
+  it('is no wider than its name: a code the old reader saw as a date, or that is no date, with a 1462 difference, is a difference', () => {
+    const one = (value: number, code: string): SpreadsheetImportResult => ({ sheets: [{ name: 'S', cells: new Map([['0:0', { value, numberFormat: { code } }]]) }], warnings: [] });
+    expect(compare(one(7, 'DD'), one(1469, 'DD')).seen).toEqual(['upperCaseDate']);
+    expect(compare(one(7, 'dd'), one(1469, 'dd')).unexplained).toHaveLength(1);
+    expect(compare(one(7, 'YYYY-MM'), one(1469, 'YYYY-MM')).unexplained).toHaveLength(1);
+    expect(compare(one(7, '0.00'), one(1469, '0.00')).unexplained).toHaveLength(1);
+    expect(compare(one(7, 'DD'), one(1470, 'DD')).unexplained).toHaveLength(1);
+    expect(compare(one(7, '"d"DD'), one(1469, '"d"DD')).seen).toEqual(['upperCaseDate']);
   });
 });
 

@@ -160,27 +160,57 @@ function scanFormat(code: string, visit: (kind: Piece, start: number, end: numbe
   }
 }
 
-/** The characters Excel shows without quotes: a backslash before one of them is only a spelling of the plain character. */
+/** The characters Excel shows without quotes: a backslash before one of them is only a spelling of the plain character, except where `keepsEscape` says it is not. */
 const PLAIN_LITERALS = new Set('$-+():/!^&\'~{}<>= ');
+
+/**
+ * Whether the backslash before `c` (the character at `at + 1` of `text`) must stay although `c` is one of `PLAIN_LITERALS`, because
+ * without it `c` would be syntax:
+ *   - `/` between digit placeholders (`0\/0`, `#\/#`, `00\/00\/0000`) is a fraction, so it stays in a section that has a placeholder
+ *     (`0`, `#`, `?` outside quotes and escapes; `placeholders`), and in `AM\/PM` and `A\/P`, where the slash is part of one token;
+ *   - `+` and `-` after an `E` (`0.00E\+00`) are the sign of a scientific exponent.
+ * Where it is not kept the character is the same literal either way (a date, a time, a currency).
+ */
+function keepsEscape(text: string, at: number, c: string, placeholders: boolean): boolean {
+  if (c === '/') return placeholders || (/[AaMm]/.test(text[at - 1] ?? '') && /[PpMm]/.test(text[at + 2] ?? ''));
+  if (c === '+' || c === '-') return /[Ee]/.test(text[at - 1] ?? '');
+  return false;
+}
+
+/** Whether each section of `code` (`;` outside quotes, groups and escapes ends one) has a digit placeholder (`0`, `#`, `?`). */
+function placeholderSections(code: string): boolean[] {
+  const found = [false];
+  scanFormat(code, (kind, start) => {
+    if (kind !== Piece.Char) return;
+    const ch = code[start];
+    if (ch === ';') found.push(false);
+    else if (ch === '0' || ch === '#' || ch === '?') found[found.length - 1] = true;
+  });
+  return found;
+}
 
 /**
  * `code` without the backslash before a character that needs none (`\$`, `\-`, `\ `, `\(` and the rest of `PLAIN_LITERALS`): the
  * spelling LibreOffice and others write, and the one the editor's format mapping knows. A backslash before anything else is what
- * makes that character a literal and stays (`\d`, `\m`, `\*`, `\@`, `\.`, `\"`, `\\`, a digit, `%`, `#`, `?`, `_`), and what is in
- * quotes is never touched (`"C:\Temp"0`). A group (`[$\$-409]`) is unescaped the same way.
+ * makes that character a literal and stays (`\d`, `\m`, `\*`, `\@`, `\.`, `\"`, `\\`, a digit, `%`, `#`, `?`, `_`), and so is one whose
+ * character would be syntax without it (`keepsEscape`: `0\/0` is the text, `0/0` a fraction; `E\+00`, `AM\/PM`). What is in
+ * quotes is never touched (`"C:\Temp"0`). A group (`[$\$-409]`) is unescaped the same way (a `/` in one stays).
  */
 export function unescapeLiterals(code: string): string {
   if (!code.includes('\\')) return code;
+  const placeholders = placeholderSections(code);
   const out: string[] = [];
   let from = 0;
+  let section = 0;
   scanFormat(code, (kind, start, end) => {
-    if (kind === Piece.Escape && PLAIN_LITERALS.has(code[start + 1])) {
+    if (kind === Piece.Char && code[start] === ';') section++;
+    else if (kind === Piece.Escape && PLAIN_LITERALS.has(code[start + 1]) && !keepsEscape(code, start, code[start + 1], placeholders[section])) {
       out.push(code.slice(from, start));
       from = start + 1;
     } else if (kind === Piece.Group) {
       // inside a group (`[$\\$-409]`) the same rule, with an escaped backslash read as one escape
       const group = code.slice(start, end);
-      const plain = group.replace(/\\(.)/g, (whole, c: string) => (PLAIN_LITERALS.has(c) ? c : whole));
+      const plain = group.replace(/\\(.)/g, (whole, c: string, offset: number) => (PLAIN_LITERALS.has(c) && !keepsEscape(group, offset, c, true) ? c : whole));
       if (plain !== group) {
         out.push(code.slice(from, start), plain);
         from = end;
@@ -192,9 +222,10 @@ export function unescapeLiterals(code: string): string {
 }
 
 /**
- * Whether a number format shows dates or times: the letters `y m d h s` (or `b`, the Buddhist year) in its syntax, that is
- * outside quotes, `[...]` groups, escapes (`\d`) and the `_x` and `*x` pairs. The test the `exceljs` reader used to decide
- * that a number is a date, on a correct reading of the code. Give it the code as the file writes it.
+ * Whether a number format shows dates or times: the letters `y m d h s` (or `b`, the Buddhist year), in either case, in its syntax,
+ * that is outside quotes, `[...]` groups, escapes (`\d`) and the `_x` and `*x` pairs. The test the `exceljs` reader used to decide
+ * that a number is a date (which saw only lower-case letters and `M`), on a correct reading of the code. Give it the code as the
+ * file writes it.
  */
 export function isDateFormat(code: string | undefined): boolean {
   if (!code) return false;
@@ -206,4 +237,5 @@ export function isDateFormat(code: string | undefined): boolean {
   return found;
 }
 
-const DATE_LETTER = /[ymdhMsb]/;
+/** Format codes are case-insensitive: `DD`, `YYYY`, `H` and `S` are the same tokens as their lower-case spellings (`M` is a month or, after an hour, minutes, and a date either way). */
+const DATE_LETTER = /[ymdhsb]/i;

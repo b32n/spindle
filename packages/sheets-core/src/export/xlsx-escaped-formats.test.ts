@@ -2,6 +2,8 @@ import JSZip from 'jszip';
 import { exportToXlsx, importFromXlsx } from './xlsx';
 import { fromExcelNumberFormatCode, toExcelNumberFormatCode } from './xlsx-number-format';
 import { compileFormat, formatDisplay, isValidFormatCode } from '../number-format';
+// the reader's table of codes (data only), so that every code it is tested on is also checked against the engine here
+import { NUMBER_FORMAT_CASES } from '../../../io/src/xlsx/read/number-format-cases';
 import { WorkbookImpl } from '../workbook';
 import type { CellFormat } from '../types';
 
@@ -26,6 +28,15 @@ const CASES: Array<{ raw: string; editor: string; value: number; shown: string }
   { raw: '0\\ \\k\\g', editor: '0 \\k\\g', value: 5, shown: '5 kg' },
   { raw: '0\\,0', editor: '0\\,0', value: 5, shown: '0,5' },
   { raw: '0\\%', editor: '0\\%', value: 5, shown: '5%' },
+  // the slash and the exponent sign stay escaped where, unescaped, they would be syntax (the review of round 4: 5 shows `5/1` as a
+  // fraction, a date-like literal shows `05/10/`, `AM\/PM` becomes the AM/PM token)
+  { raw: '0\\/0', editor: '0\\/0', value: 5, shown: '0/5' },
+  { raw: '#\\/#', editor: '#\\/#', value: 5, shown: '/5' },
+  { raw: '00\\/00\\/0000', editor: '00\\/00\\/0000', value: 5, shown: '00/00/0005' },
+  { raw: '0.00E\\+00', editor: '0.00E\\+00', value: 5, shown: '5' },
+  { raw: 'AM\\/PM', editor: 'AM\\/PM', value: 0.25, shown: '0.25' },
+  { raw: 'h AM\\/PM', editor: 'h AM\\/PM', value: 0.75, shown: '0.75' },
+  { raw: 'A\\/P', editor: 'A\\/P', value: 0.75, shown: '0.75' },
 ];
 
 const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
@@ -61,8 +72,8 @@ describe('number formats with backslash escapes, through the editor', () => {
     const { formats: got } = await formats(await fileWith(CASES.map((c) => c.raw)));
     CASES.forEach((c, i) => {
       expect(got[i]).toEqual({ type: 'custom', pattern: c.editor });
-      expect(isValidFormatCode(c.editor)).toBe(true);
-      expect(isValidFormatCode(c.raw)).toBe(true);
+      // the engine reads the editor's code as it reads the file's (the exponent and AM/PM rows are codes it does not accept either way)
+      expect(isValidFormatCode(c.editor)).toBe(isValidFormatCode(c.raw));
     });
   });
 
@@ -89,7 +100,7 @@ describe('number formats with backslash escapes, through the editor', () => {
     // the attribute value is escaped as XML (a quote is `&quot;`), and what it holds is the editor's code
     const written = [...styles.matchAll(/<numFmt numFmtId="\d+" formatCode="([^"]*)"/g)].map((m) => m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
     for (const c of CASES) expect(written).toContain(c.editor);
-    for (const code of written) expect(isValidFormatCode(code)).toBe(true);
+    for (const c of CASES) expect(isValidFormatCode(c.editor)).toBe(isValidFormatCode(c.raw));
     // (not through ExcelJS's reader: it drops every escape, which is what the S2b reader no longer does) a second import gives the same formats and the same values to show
     const second = new WorkbookImpl('wb2', 'WB2');
     await importFromXlsx(out, second);
@@ -99,5 +110,59 @@ describe('number formats with backslash escapes, through the editor', () => {
       expect(format).toEqual({ type: 'custom', pattern: c.editor });
       expect(formatDisplay(c.value, toExcelNumberFormatCode(format))).toBe(c.shown);
     });
+  });
+});
+
+describe('every code of the reader table: the engine shows the code as written and the code the editor gets alike', () => {
+  const PROBES = [0, 1, 5, 7, -5, 0.05, 0.25, 0.5, 0.75, 12.5, 1234.5, 12345.678, 45366, 45366.75, 1_000_000, -0.25, 0.000123];
+  const codes = NUMBER_FORMAT_CASES.map(([raw]) => raw);
+
+  const editorCodes = async (): Promise<string[]> => {
+    const workbook = new WorkbookImpl('wb', 'WB');
+    const items = codes.map((code, i) => ({ code, i }));
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');
+    const rels = (xml: string) => `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${xml}</Relationships>`;
+    zip.file('_rels/.rels', rels(`<Relationship Id="rId1" Type="${RELS}/officeDocument" Target="xl/workbook.xml"/>`));
+    zip.file('xl/workbook.xml', `<workbook ${NS} xmlns:r="${RELS}"><sheets><sheet name="F" sheetId="1" r:id="rId1"/></sheets></workbook>`);
+    zip.file('xl/_rels/workbook.xml.rels', rels(`<Relationship Id="rId1" Type="${RELS}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${RELS}/styles" Target="styles.xml"/>`));
+    zip.file(
+      'xl/styles.xml',
+      `<styleSheet ${NS}><numFmts count="${items.length}">${items.map(({ code, i }) => `<numFmt numFmtId="${170 + i}" formatCode="${attr(code)}"/>`).join('')}</numFmts>` +
+        `<cellXfs><xf/>${items.map(({ i }) => `<xf numFmtId="${170 + i}" applyNumberFormat="1"/>`).join('')}</cellXfs></styleSheet>`
+    );
+    zip.file('xl/worksheets/sheet1.xml', `<worksheet ${NS}><sheetData>${items.map(({ i }) => `<row r="${i + 1}"><c r="A${i + 1}" s="${i + 1}"><v>1</v></c></row>`).join('')}</sheetData></worksheet>`);
+    await importFromXlsx(await zip.generateAsync({ type: 'uint8array' }), workbook);
+    const pool = workbook.getFormatPool();
+    return codes.map((_, i) => toExcelNumberFormatCode(pool.get(workbook.getCell(undefined, i, 0)?.formatId as string) as CellFormat));
+  };
+
+  /**
+   * The one code of the table the engine shows differently as written: a locale group with an escaped currency sign, `[$\\$-409]`,
+   * where the engine reads the backslash as text (it shows `\\$5.00`) and Excel, and the editor's code `[$$-409]`, show `$5.00`. The
+   * reader's answer is the right one; a code that joins this list must say what is wrong with the engine, and one that the engine
+   * learns to read leaves it (the test below fails until it does).
+   */
+  const ENGINE_READS_GROUP_ESCAPE_AS_TEXT = new Set(['[$\\$-409]#,##0.00']);
+
+  it('the editor gets the code the table says, and shows every probe value as the file\'s code does', async () => {
+    const got = await editorCodes();
+    const failures: string[] = [];
+    NUMBER_FORMAT_CASES.forEach(([raw, editor, , why], i) => {
+      if (ENGINE_READS_GROUP_ESCAPE_AS_TEXT.has(raw)) {
+        expect(PROBES.some((v) => formatDisplay(v, raw) !== formatDisplay(v, editor))).toBe(true);
+        return;
+      }
+      expect(isValidFormatCode(editor)).toBe(isValidFormatCode(raw));
+      // (a structured format, a date, is written back from its parts: its code is what the editor shows, whatever it spells)
+      for (const v of PROBES) if (formatDisplay(v, raw) !== formatDisplay(v, got[i])) failures.push(`${raw} (${why}) shows ${formatDisplay(v, raw)} for ${v}, the editor code ${got[i]} shows ${formatDisplay(v, got[i])}`);
+      for (const v of PROBES) if (formatDisplay(v, raw) !== formatDisplay(v, editor)) failures.push(`${raw} -> ${editor} (${why}) differs for ${v}: ${formatDisplay(v, raw)} vs ${formatDisplay(v, editor)}`);
+    });
+    expect(failures).toEqual([]);
+  });
+
+  it('is a table of more than 70 codes, with the round 4 rows among them', () => {
+    expect(codes.length).toBeGreaterThan(70);
+    for (const raw of ['0\\/0', '#\\/#', '00\\/00\\/0000', '0.00E\\+00', 'AM\\/PM', 'h\\:mm', 'dd\\/mm\\/yyyy']) expect(codes).toContain(raw);
   });
 });
