@@ -88,6 +88,8 @@ describe('exportXlsx', () => {
             ['1:0', { value: 2 }],
             ['0:2', { value: 3, formula: 'SUM(B1:B2*B1:B2)', arrayRef: 'C1' }],
             ['0:3', { value: 4, formula: 'A1+1', arrayRef: 'A1:A2"><x' }],
+            ['0:4', { value: null, formula: 'A1+1', arrayRef: 'A1:A2"><x' }],
+            ['0:5', { value: null, formula: 'SUM(B1:B2*B1:B2)', arrayRef: 'F1' }],
           ]),
         },
       ],
@@ -97,6 +99,7 @@ describe('exportXlsx', () => {
     expect(xml).toContain('<f t="array" ref="A1:A3">_xlfn._xlws.SORT(B1:B3)</f>');
     expect(xml).toContain('<f t="array" ref="C1">SUM(B1:B2*B1:B2)</f>');
     expect(xml).toContain('<f>A1+1</f>');
+    expect(xml).toContain('<f t="array" ref="F1">SUM(B1:B2*B1:B2)</f>');
     expect(xml).not.toContain(' cm=');
     expect(zip.file('xl/metadata.xml')).toBeNull();
   });
