@@ -1,6 +1,7 @@
 import type { SpreadsheetCell, SpreadsheetSheet, XlsxRelationship, XlsxSharedString, XlsxSheetRef } from '@b32nio/spindle-shared/export/xlsx';
 import { DEFAULT_THEME_COLORS } from './colors';
-import { isoToSerial, readSheet } from './sheet';
+import { DEFAULT_IMPORT_LIMITS } from '../../common/safe-zip';
+import { isoToSerial, MAX_EXT_CHARS, MAX_HYPERLINKS, MAX_MERGES, MAX_TREE_CHARS, readBudget, readSheet } from './sheet';
 import { parseStyles } from './styles';
 import { el, MAIN_NS, REL_NS } from './test-support';
 
@@ -8,8 +9,8 @@ const STYLES =
   '<fonts><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FFFF0000"/></font></fonts>' +
   '<fills><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="solid"><fgColor theme="5"/></patternFill></fill></fills>' +
   '<borders><border/></borders>' +
-  '<numFmts count="1"><numFmt numFmtId="164" formatCode="0.0&quot; kg&quot;"/></numFmts>' +
-  '<cellXfs><xf/><xf fontId="1" fillId="1"/><xf numFmtId="14"/><xf numFmtId="164"/><xf numFmtId="22"/></cellXfs>';
+  '<numFmts count="2"><numFmt numFmtId="164" formatCode="0.0&quot; kg&quot;"/><numFmt numFmtId="165" formatCode="0\\ \\d"/></numFmts>' +
+  '<cellXfs><xf/><xf fontId="1" fillId="1"/><xf numFmtId="14"/><xf numFmtId="164"/><xf numFmtId="22"/><xf numFmtId="165"/></cellXfs>';
 
 interface Options {
   head?: string;
@@ -20,6 +21,8 @@ interface Options {
   state?: XlsxSheetRef['state'];
   name?: string;
   maxFormulaChars?: number;
+  /** The package's budget for merged ranges and hyperlinks (`maxRanges`). */
+  ranges?: number;
 }
 
 const refOf = (over: Partial<XlsxSheetRef> = {}): XlsxSheetRef => ({
@@ -48,6 +51,7 @@ function run(xml: string | undefined, ref: XlsxSheetRef, o: Options, warnings: s
     colors: { themeColors: DEFAULT_THEME_COLORS },
     date1904: o.date1904 ?? false,
     maxSheetFormulaChars: o.maxFormulaChars,
+    budget: o.ranges === undefined ? undefined : readBudget({ ...DEFAULT_IMPORT_LIMITS, maxRanges: o.ranges }),
     warn: (m) => warnings.push(m),
   });
 }
@@ -158,6 +162,12 @@ describe('readSheet: values', () => {
     expect(cell(sheet, '0:3')?.value).toBe(1472);
     expect(cell(sheet, '0:4')?.value).toBe('text');
     expect(cell(read(row(1, '<c r="A1" s="2"><v>0</v></c>')).sheet, '0:0')?.value).toBe(0);
+  });
+
+  it('does not take an escaped letter for a date token: `0\\ \\d` in a 1904 workbook stays a number', () => {
+    const { sheet } = read(row(1, '<c r="A1" s="5"><v>7</v></c>'), { date1904: true });
+    expect(cell(sheet, '0:0')?.value).toBe(7);
+    expect(cell(sheet, '0:0')?.numberFormat).toEqual({ code: '0 \\d' });
   });
 });
 
@@ -637,6 +647,129 @@ describe('readSheet: damage', () => {
     const { sheet } = read('', { head: '<dimension ref="A1"/><dimension ref="B2"/><mergeCells><mergeCell ref="A1:B1"/></mergeCells><mergeCells><mergeCell ref="A2:B2"/></mergeCells>' });
     expect(sheet.details?.dimension).toBe('A1');
     expect(sheet.mergedRanges).toEqual([{ startRow: 0, startCol: 0, endRow: 0, endCol: 1 }]);
+  });
+});
+
+describe('readSheet: counts and sizes are bounded', () => {
+  const rels: XlsxRelationship[] = [{ id: 'rId1', type: 'x/hyperlink', kind: 'hyperlink', target: 'https://example.com/a', external: true }];
+  const merge = (i: number) => `<mergeCell ref="A${i + 1}:B${i + 2}"/>`;
+  const link = (i: number, id = 'rId1') => `<hyperlink ref="A${i + 1}" r:id="${id}"/>`;
+  const one = row(1, '<c r="A1"><v>1</v></c>');
+
+  it('keeps the merged ranges up to the package budget (maxRanges) and counts the rest in one warning', () => {
+    const { sheet, warnings } = read(one, { ranges: 3, tail: `<mergeCells>${Array.from({ length: 5 }, (_, i) => merge(i)).join('')}</mergeCells>` });
+    expect(sheet.mergedRanges).toHaveLength(3);
+    expect(warnings).toEqual([`S: 2 merged range(s) were left out (the limit is ${MAX_MERGES} per sheet and maxRanges for the workbook).`]);
+  });
+
+  it('draws merges and hyperlinks on the same budget, and the budget on all the sheets that share it', () => {
+    const budget = readBudget({ ...DEFAULT_IMPORT_LIMITS, maxRanges: 4 });
+    const warnings: string[] = [];
+    const ctx = { styles: parseStyles(el(`<styleSheet ${MAIN_NS}/>`), DEFAULT_THEME_COLORS), sharedStrings: [], colors: { themeColors: DEFAULT_THEME_COLORS }, date1904: false, budget, warn: (m: string) => warnings.push(m) };
+    const xml = `<worksheet ${MAIN_NS} ${REL_NS}><sheetData/><mergeCells>${merge(0)}${merge(1)}${merge(2)}</mergeCells><hyperlinks>${link(0)}${link(1)}</hyperlinks></worksheet>`;
+    const first = readSheet(xml, refOf({ name: 'One', rels }), ctx);
+    expect(first.mergedRanges).toHaveLength(3);
+    expect(first.details?.hyperlinks).toHaveLength(1);
+    expect(budget.ranges).toBe(0);
+    const second = readSheet(xml, refOf({ name: 'Two', rels }), ctx);
+    expect(second.mergedRanges).toBeUndefined();
+    expect(second.details?.hyperlinks).toEqual([]);
+    expect(warnings).toEqual([
+      `One: 1 hyperlink(s) were left out (the limit is ${MAX_HYPERLINKS} per sheet and maxRanges for the workbook).`,
+      `Two: 3 merged range(s) were left out (the limit is ${MAX_MERGES} per sheet and maxRanges for the workbook).`,
+      `Two: 2 hyperlink(s) were left out (the limit is ${MAX_HYPERLINKS} per sheet and maxRanges for the workbook).`,
+    ]);
+  });
+
+  it('does not count an unreadable merge or a link without a ref against the budget or as left out', () => {
+    const { sheet, warnings } = read(one, {
+      ranges: 1,
+      rels,
+      tail: `<mergeCells><mergeCell ref="bad"/><mergeCell/>${merge(0)}<mergeCell ref="${'A1:'.repeat(1_000_000)}"/></mergeCells><hyperlinks><hyperlink r:id="rId1"/></hyperlinks>`,
+    });
+    expect(sheet.mergedRanges).toHaveLength(1);
+    expect(sheet.details?.hyperlinks).toEqual([]);
+    expect(warnings).toEqual([]);
+  });
+
+  it('reads at most MAX_MERGES merges from one sheet, and says how many were left out', () => {
+    const merges = Array.from({ length: MAX_MERGES + 3 }, (_, i) => `<mergeCell ref="A${(i % 1_000_000) + 1}:B${(i % 1_000_000) + 2}"/>`).join('');
+    const started = Date.now();
+    const { sheet, warnings } = read(one, { ranges: 3_000_000, tail: `<mergeCells>${merges}</mergeCells>` });
+    expect(sheet.mergedRanges).toHaveLength(MAX_MERGES);
+    expect(warnings).toEqual([`S: 3 merged range(s) were left out (the limit is ${MAX_MERGES} per sheet and maxRanges for the workbook).`]);
+    expect(Date.now() - started).toBeLessThan(10_000);
+  }, 30_000);
+
+  it('reads at most MAX_HYPERLINKS (Excel\'s own limit, 65,530) from one sheet', () => {
+    expect(MAX_HYPERLINKS).toBe(65_530);
+    const links = Array.from({ length: MAX_HYPERLINKS + 2 }, (_, i) => link(i)).join('');
+    const { sheet, warnings } = read(one, { rels, tail: `<hyperlinks>${links}</hyperlinks>` });
+    expect(sheet.details?.hyperlinks).toHaveLength(MAX_HYPERLINKS);
+    expect(cell(sheet, '0:0')?.hyperlink).toBe('https://example.com/a');
+    expect(warnings).toEqual([`S: 2 hyperlink(s) were left out (the limit is ${MAX_HYPERLINKS} per sheet and maxRanges for the workbook).`]);
+  });
+
+  it('warns about links with no relationship for the first few, then counts the rest', () => {
+    const links = Array.from({ length: 100 }, (_, i) => link(i, `rId${i + 10}`)).join('');
+    const { warnings } = read(one, { rels, tail: `<hyperlinks>${links}</hyperlinks>` });
+    expect(warnings).toHaveLength(21);
+    expect(warnings[0]).toBe('The hyperlink at A1 names the relationship rId10, which the sheet does not have.');
+    expect(warnings[19]).toBe('The hyperlink at A20 names the relationship rId29, which the sheet does not have.');
+    expect(warnings[20]).toBe('80 more S hyperlink warnings were left out.');
+  });
+
+  it('reads only the first mergeCells and hyperlinks element, and only the children they own', () => {
+    const { sheet } = read(one, {
+      rels,
+      tail:
+        `<hyperlinks>${link(0)}</hyperlinks><hyperlinks>${link(1)}</hyperlinks><mergeCells>${merge(0)}</mergeCells><mergeCells>${merge(5)}</mergeCells>` +
+        `<cols>${merge(7)}${link(8)}</cols><mergeCells/><sheetPr>${merge(9)}</sheetPr>`,
+    });
+    expect(sheet.details?.hyperlinks.map((h) => h.ref)).toEqual(['A1']);
+    expect(sheet.mergedRanges).toEqual([{ startRow: 0, startCol: 0, endRow: 1, endCol: 1 }]);
+  });
+
+  it('does not read a mergeCell or hyperlink that sits anywhere but directly in its own list', () => {
+    const { sheet } = read(one, { rels, tail: `<mergeCells><x>${merge(0)}</x></mergeCells><hyperlinks><x>${link(0)}</x></hyperlinks>` });
+    expect(sheet.mergedRanges).toBeUndefined();
+    expect(sheet.details?.hyperlinks).toEqual([]);
+  });
+
+  it.each([
+    ['sheetViews', (pad: string) => `<sheetViews><sheetView workbookViewId="0" topLeftCell="${pad}"/></sheetViews>`],
+    ['sheetPr', (pad: string) => `<sheetPr codeName="${pad}"/>`],
+    ['dimension', (pad: string) => `<dimension ref="${pad}"/>`],
+    ['sheetFormatPr', (pad: string) => `<sheetFormatPr x="${pad}"></sheetFormatPr>`],
+  ])('leaves out a %s element over MAX_TREE_CHARS, with one warning, and reads one at the limit', (tag, make) => {
+    const fixed = make('').length;
+    const atLimit = read('', { head: make('x'.repeat(MAX_TREE_CHARS - fixed)) });
+    expect(atLimit.warnings).toEqual([]);
+    const over = read('', { head: make('x'.repeat(MAX_TREE_CHARS - fixed + 1)) });
+    expect(over.warnings).toEqual([`S: the ${tag} element is over ${MAX_TREE_CHARS} characters; it was not read.`]);
+  });
+
+  it('leaves out an over-long element and reads nothing of it (here sheetViews: no views, no frozen panes)', () => {
+    const long = `<sheetViews><sheetView workbookViewId="0"><pane state="frozen" xSplit="1"/>${'<selection activeCell="A1"/>'.repeat(5_000)}</sheetView></sheetViews>`;
+    expect(long.length).toBeGreaterThan(MAX_TREE_CHARS);
+    const { sheet, warnings } = read('', { head: long });
+    expect(sheet.details?.views).toEqual([]);
+    expect(sheet.frozenCols).toBeUndefined();
+    expect(warnings).toHaveLength(1);
+    // the over-long one is said once however often it comes (a second, normal one is not read either: the first of a name counts)
+    const second = read('', { head: `${long}<sheetViews><sheetView workbookViewId="0"/></sheetViews>${long}` });
+    expect(second.sheet.details?.views).toEqual([]);
+    expect(second.warnings).toHaveLength(1);
+  });
+
+  it('keeps extLst up to MAX_EXT_CHARS, and leaves a longer one out with a warning', () => {
+    const wrap = (n: number) => `<extLst>${'a'.repeat(n - '<extLst></extLst>'.length)}</extLst>`;
+    const ok = read('', { tail: wrap(MAX_EXT_CHARS) });
+    expect(ok.sheet.details?.extLst?.length).toBe(MAX_EXT_CHARS);
+    expect(ok.warnings).toEqual([]);
+    const over = read('', { tail: wrap(MAX_EXT_CHARS + 1) });
+    expect(over.sheet.details?.extLst).toBeUndefined();
+    expect(over.warnings).toEqual([`S: the extension list (extLst) is over ${MAX_EXT_CHARS} characters; it was not kept.`]);
   });
 });
 

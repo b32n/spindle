@@ -6,7 +6,6 @@ import type {
   XlsxColumnInfo,
   XlsxFormulaInfo,
   XlsxHyperlink,
-  XlsxRelationship,
   XlsxRowInfo,
   XlsxSharedString,
   XlsxSheetDetails,
@@ -17,7 +16,8 @@ import type {
   XlsxStyles,
 } from '@b32nio/spindle-shared/export/xlsx';
 import { isOn, isTrue, kid, kids, parseXml, type XmlElement } from '../xml';
-import { lookOf, isDateFormat, type CellLook } from './cell-style';
+import { CappedWarnings } from './capped';
+import { lookOf, type CellLook } from './cell-style';
 import { countCover, indexCells, lastCover, sweepCover } from './cell-ranges';
 import { MAX_COL, MAX_ROW, parseCellRef, parseRangeRef, type RangeBounds } from './cell-ref';
 import { readColor, type ColorContext } from './colors';
@@ -29,9 +29,10 @@ import { DEFAULT_IMPORT_LIMITS, type ImportLimits } from '../../common/safe-zip'
 
 // ---------------------------------------------------------------------------
 // One worksheet part. The part's text is held as one string (the package hands it over whole); a single forward pass (`scanXml`,
-// events, no tree) walks it: `sheetData` is read cell by cell, so besides that string only the cells kept are held, and the small
-// elements around it (`sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols`, `mergeCells`, `hyperlinks`, `extLst`) are cut
-// out by offset as they close and read as little trees.
+// events, no tree) walks it: `sheetData` is read cell by cell, so besides that string only the cells kept are held. `<col>`,
+// `<mergeCell>` and `<hyperlink>` are read as events too, up to a count; the few elements around them that are cut out by offset
+// as they close and read as small trees (`sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`) are read only up to
+// `MAX_TREE_CHARS` characters each, and the raw `extLst` kept up to `MAX_EXT_CHARS`: nothing a file names is read without a bound.
 //
 // What a cell becomes:
 //   - value by type (`t`): number (plain decimals only), shared string, formula string result, boolean, error text, inline
@@ -43,11 +44,14 @@ import { DEFAULT_IMPORT_LIMITS, type ImportLimits } from '../../common/safe-zip'
 //     of expanded text (`ImportLimits.maxSheetFormulaChars`, `maxFormulaChars`; a formula costs its length plus
 //     `FORMULA_OVERHEAD`, its string's own weight): the value stays, one warning per sheet counts them. `<f/>` with no
 //     text (and no `ref`/`si` meaning) is no formula: with a value the cell is a plain value, without one it is not kept
-//   - position: a cell or row without a usable `r` follows the previous one, clamped to the sheet limits (with a warning)
-//   - hyperlink: the `hyperlinks` entry for the cell, by relationship target (a `location` link is only in `details`)
+//   - position: a cell or row without a usable `r` follows the previous one silently; only a position that has to be clamped to
+//     the sheet limits (past the last column or row) is warned about
+//   - hyperlink: the `hyperlinks` entry for the cell, by relationship target (a `location` link is only in `details`); at most
+//     `MAX_HYPERLINKS` per sheet, and a link whose relationship the sheet does not have is warned about (the first few, then one count)
 //   - cells covered by a merge but its first are dropped, as before (the merge itself is `mergedRanges`); merges and hyperlinks
 //     are applied by one sweep over the cells in row order (`cell-ranges.ts`), so a range of a million cells costs no more than
-//     one cell and a sheet with thousands of ranges stays near-linear
+//     one cell and a sheet with thousands of ranges stays near-linear; at most `MAX_MERGES` merges per sheet, and merges and
+//     hyperlinks together draw on the package's `maxRanges`, the rest being left out with one counted warning
 //   - panes: `frozen` and `frozenSplit` (ECMA-376 18.3.1.66: frozen, but split before) both freeze rows and columns
 //
 // Cells past the package's cell budget (`ImportLimits.maxTotalCells`) end the scan of the part, with one warning. `<col>` elements
@@ -72,19 +76,32 @@ export interface SheetContext {
   warn: (message: string) => void;
 }
 
-/** What a package may still spend over all its worksheets: cells kept, and cost of expanded shared-formula text. */
+/** What a package may still spend over all its worksheets: cells kept, cost of expanded shared-formula text, merged ranges and hyperlinks kept. */
 export interface ReadBudget {
   cells: number;
   formulaChars: number;
+  ranges: number;
 }
 
-export const readBudget = (limits: ImportLimits): ReadBudget => ({ cells: limits.maxTotalCells, formulaChars: limits.maxFormulaChars });
+export const readBudget = (limits: ImportLimits): ReadBudget => ({ cells: limits.maxTotalCells, formulaChars: limits.maxFormulaChars, ranges: limits.maxRanges });
 
 /** What an expanded formula costs beyond its characters: the string's own weight (about 32 bytes), counted as characters of 2 bytes. */
 export const FORMULA_OVERHEAD = 16;
 
 /** Most `<col>` elements read from one sheet (the sheet has 16,384 columns, and a valid file has no overlapping ones); the rest are left out with a warning. */
 export const MAX_COLS = MAX_COL;
+
+/** Most merged ranges read from one sheet (a sheet has 1,048,576 rows, so no sound file has more merges than that). */
+export const MAX_MERGES = MAX_ROW;
+
+/** Most hyperlinks read from one sheet: Excel's own limit (65,530 per worksheet). */
+export const MAX_HYPERLINKS = 65_530;
+
+/** Longest `sheetPr`, `dimension`, `sheetViews` or `sheetFormatPr` element (characters) that is read: real ones are a few hundred, and an element is read as a tree. A longer one is left out with a warning. */
+export const MAX_TREE_CHARS = 64 * 1024;
+
+/** Longest `extLst` (characters) kept raw in `details.extLst`: extensions of a large sheet (conditional formats, sparklines) run to hundreds of KB; a longer one is left out with a warning. */
+export const MAX_EXT_CHARS = 8 * 1024 * 1024;
 
 /** Most warnings one sheet adds for single cells; the rest are counted in one closing message. */
 const MAX_CELL_WARNINGS = 20;
@@ -244,35 +261,21 @@ function applyColumns(columns: readonly XlsxColumnInfo[], maxCol: number): { col
   return { columnWidths, hiddenCols };
 }
 
-function readHyperlinks(root: XmlElement | undefined, rels: readonly XlsxRelationship[], warn: (m: string) => void): XlsxHyperlink[] {
-  const out: XlsxHyperlink[] = [];
-  const targets = new Map<string, string>();
-  for (const rel of rels) if (!targets.has(rel.id)) targets.set(rel.id, rel.target);
-  for (const el of kids(root, 'hyperlink')) {
-    const ref = el.attrs.ref;
-    if (ref === undefined) continue;
-    const link: XlsxHyperlink = { ref };
-    const id = el.attrs.id;
-    if (id !== undefined) {
-      const target = targets.get(id);
-      if (target !== undefined) link.target = target;
-      else warn(`The hyperlink at ${ref} names the relationship ${id}, which the sheet does not have.`);
-    }
-    put(link, 'location', el.attrs.location);
-    put(link, 'display', el.attrs.display);
-    put(link, 'tooltip', el.attrs.tooltip);
-    out.push(link);
+/** One `<hyperlink>` element, or `undefined` when it has no range. A missing relationship is reported through `missing`. */
+function readLink(attrs: SaxAttrs, targets: ReadonlyMap<string, string>, missing: (message: string) => void): XlsxHyperlink | undefined {
+  const ref = attrs.ref;
+  if (ref === undefined) return undefined;
+  const link: XlsxHyperlink = { ref };
+  const id = attrs.id;
+  if (id !== undefined) {
+    const target = targets.get(id);
+    if (target !== undefined) link.target = target;
+    else missing(`The hyperlink at ${ref} names the relationship ${id}, which the sheet does not have.`);
   }
-  return out;
-}
-
-function readMerges(root: XmlElement | undefined): SpreadsheetMergedRange[] {
-  const out: SpreadsheetMergedRange[] = [];
-  for (const el of kids(root, 'mergeCell')) {
-    const bounds = el.attrs.ref === undefined ? undefined : parseRangeRef(el.attrs.ref);
-    if (bounds !== undefined) out.push(bounds);
-  }
-  return out;
+  put(link, 'location', attrs.location);
+  put(link, 'display', attrs.display);
+  put(link, 'tooltip', attrs.tooltip);
+  return link;
 }
 
 interface RawFormula {
@@ -292,7 +295,7 @@ interface Master {
 }
 
 /** The top-level elements of a worksheet that are cut out as small trees. */
-const SMALL = new Set(['sheetPr', 'dimension', 'sheetViews', 'sheetFormatPr', 'mergeCells', 'hyperlinks']);
+const SMALL = new Set(['sheetPr', 'dimension', 'sheetViews', 'sheetFormatPr']);
 
 /** Read one worksheet part. `text` is the part's text (`undefined` when it could not be read: an empty sheet and a warning from the package). */
 export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: SheetContext): SpreadsheetSheet {
@@ -305,7 +308,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   const masters = new Map<string, Master>();
   const rowInfo = new Map<number, XlsxRowInfo>();
   const trees = new Map<string, XmlElement>();
+  const tooBig = new Set<string>();
   const columns: XlsxColumnInfo[] = [];
+  const merges: SpreadsheetMergedRange[] = [];
+  const hyperlinks: XlsxHyperlink[] = [];
+  // only the first `mergeCells` and the first `hyperlinks` element are read (as for the other single elements)
+  const listsSeen = new Set<string>();
+  let targets: Map<string, string> | undefined;
+  let mergesLeftOut = 0;
+  let linksLeftOut = 0;
+  const linkWarnings = new CappedWarnings(ctx.warn, `${name} hyperlink warnings`);
   let columnsSeen = 0;
   let truncated = false;
   let extLst: string | undefined;
@@ -335,6 +347,18 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   let inInline = false;
   let phonetic = 0;
   let smallStart = -1;
+
+  /** Read a small element as a tree, unless it is over `MAX_TREE_CHARS` (then it is left out, with a warning); the first of its name counts. */
+  const keepTree = (tag: string, from: number, to: number): void => {
+    if (trees.has(tag) || tooBig.has(tag)) return;
+    if (to - from > MAX_TREE_CHARS) {
+      tooBig.add(tag);
+      ctx.warn(`${name}: the ${tag} element is over ${MAX_TREE_CHARS} characters; it was not read.`);
+      return;
+    }
+    const el = parseXml((text as string).slice(from, to));
+    if (el) trees.set(tag, el);
+  };
 
   // a shifted formula is about as long as its master (a few characters more or less where a reference gains or loses digits)
   const affordable = (cost: number): boolean => formulaChars + cost <= formulaBudget && cost <= budget.formulaChars;
@@ -390,7 +414,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     if (look === undefined && attrs.s !== undefined) missingStyles++;
 
     // the 1904 date system: dates are moved to 1900 serials, as the editor only knows that one, until it models the system
-    if (date1904 && typeof result === 'number' && isDateFormat(look?.numberFormat?.code)) result += DATE1904_OFFSET;
+    if (date1904 && typeof result === 'number' && look?.isDate) result += DATE1904_OFFSET;
 
     let formulaText: string | undefined;
     let info: XlsxFormulaInfo | undefined;
@@ -461,12 +485,35 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
             depth++;
             if (depth === 2) {
               top = tag;
+              if (tag === 'mergeCells' || tag === 'hyperlinks') {
+                if (listsSeen.has(tag)) top = '';
+                listsSeen.add(tag);
+              }
               if (SMALL.has(tag) || tag === 'extLst') smallStart = start;
               if (selfClosing && SMALL.has(tag)) {
-                const el = trees.has(tag) ? undefined : parseXml(text.slice(start, end));
-                if (el) trees.set(tag, el);
+                keepTree(tag, start, end);
                 smallStart = -1;
               }
+            } else if (depth === 3 && tag === 'mergeCell' && top === 'mergeCells') {
+              const bounds = attrs.ref === undefined ? undefined : parseRangeRef(attrs.ref);
+              if (bounds !== undefined) {
+                if (merges.length < MAX_MERGES && budget.ranges > 0) {
+                  merges.push(bounds);
+                  budget.ranges--;
+                } else mergesLeftOut++;
+              }
+            } else if (depth === 3 && tag === 'hyperlink' && top === 'hyperlinks') {
+              if (targets === undefined) {
+                targets = new Map();
+                for (const rel of ref.rels) if (!targets.has(rel.id)) targets.set(rel.id, rel.target);
+              }
+              if (hyperlinks.length < MAX_HYPERLINKS && budget.ranges > 0) {
+                const link = readLink(attrs, targets, (m) => linkWarnings.add(m));
+                if (link !== undefined) {
+                  hyperlinks.push(link);
+                  budget.ranges--;
+                }
+              } else if (attrs.ref !== undefined) linksLeftOut++;
             } else if (depth === 3 && tag === 'col' && top === 'cols') {
               const col = readColumn(attrs);
               if (col !== undefined && columnsSeen++ < MAX_COLS) columns.push(col);
@@ -520,12 +567,9 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
           },
           close(tag, end) {
             if (depth === 2 && smallStart >= 0) {
-              const xml = (text as string).slice(smallStart, end);
-              if (tag === 'extLst') extLst = xml;
-              else if (SMALL.has(tag) && !trees.has(tag)) {
-                const el = parseXml(xml);
-                if (el) trees.set(tag, el);
-              }
+              if (tag !== 'extLst') keepTree(tag, smallStart, end);
+              else if (end - smallStart > MAX_EXT_CHARS) ctx.warn(`${name}: the extension list (extLst) is over ${MAX_EXT_CHARS} characters; it was not kept.`);
+              else extLst = (text as string).slice(smallStart, end);
               smallStart = -1;
             } else if (cellAttrs !== undefined) {
               if (depth === 4 && tag === 'c') finishCell();
@@ -568,8 +612,9 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   if (missingStrings > 0) ctx.warn(`${name}: ${missingStrings} cell(s) refer to a shared string the file does not have; imported as empty.`);
   if (missingStyles > 0) ctx.warn(`${name}: ${missingStyles} cell(s) use a format the file does not have; imported unformatted.`);
 
-  const merges = readMerges(trees.get('mergeCells'));
-  const hyperlinks = readHyperlinks(trees.get('hyperlinks'), ref.rels, ctx.warn);
+  linkWarnings.close();
+  if (mergesLeftOut > 0) ctx.warn(`${name}: ${mergesLeftOut} merged range(s) were left out (the limit is ${MAX_MERGES} per sheet and maxRanges for the workbook).`);
+  if (linksLeftOut > 0) ctx.warn(`${name}: ${linksLeftOut} hyperlink(s) were left out (the limit is ${MAX_HYPERLINKS} per sheet and maxRanges for the workbook).`);
   const views = readViews(trees.get('sheetViews'));
 
   if (dropMergeCovered(cells, merges) > 0) {

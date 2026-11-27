@@ -47,8 +47,13 @@ export interface RangeBounds {
   endCol: number;
 }
 
+/** Longest text read as a range reference (blanks around it included). */
+export const MAX_REF_CHARS = 64;
+
 /** `A1` or `A1:C3` as bounds with the corners in order, or `undefined` for anything else. */
 export function parseRangeRef(ref: string): RangeBounds | undefined {
+  // the longest range is `$XFD$1048576:$XFD$1048576` (25 characters); a longer text is not split (a hostile attribute is megabytes of colons)
+  if (ref.length > MAX_REF_CHARS) return undefined;
   const [a, b, ...rest] = ref.trim().split(':');
   if (rest.length > 0) return undefined;
   const s = parseCellRef(a);

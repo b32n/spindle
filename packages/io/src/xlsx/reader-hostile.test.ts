@@ -1,5 +1,6 @@
+import JSZip from 'jszip';
 import { importXlsx } from './reader';
-import { MAIN_NS, workbookZip } from './read/test-support';
+import { MAIN_NS, REL_NS, relsXml, workbookZip } from './read/test-support';
 import { DEFAULT_IMPORT_LIMITS } from '../common/safe-zip';
 
 // ---------------------------------------------------------------------------
@@ -53,13 +54,14 @@ describe('hostile packages: many sheets that share one cost', () => {
     expect(counts[1]).toBeLessThan(60);
   });
 
-  it('200 <sheet> entries naming one 100,000-cell part: the part is read once, the others are refused with a warning each', async () => {
+  it('200 <sheet> entries naming one 100,000-cell part: the part is read once, the others are refused, with a warning for the first few and one count', async () => {
     const rows = Array.from({ length: 10_000 }, (_, r) => `<row r="${r + 1}">${Array.from({ length: 10 }, (_, c) => `<c r="${String.fromCharCode(65 + c)}${r + 1}"><v>${r}</v></c>`).join('')}</row>`).join('');
     const bytes = await workbookZip(sheetsOf(200, (i) => `S${i}`), relsOf(200, () => 1), { 'xl/worksheets/sheet1.xml': sheetXml(rows) });
     const { result, ms, heap } = await timed(() => importXlsx(bytes));
     expect(result.sheets).toHaveLength(1);
     expect(result.sheets[0].cells.size).toBe(100_000);
-    expect(result.warnings.filter((w) => /already uses; it was not read/.test(w))).toHaveLength(199);
+    expect(result.warnings.filter((w) => /already uses; it was not read/.test(w))).toHaveLength(20);
+    expect(result.warnings.filter((w) => /more sheet warnings were left out/.test(w))).toEqual(['179 more sheet warnings were left out.']);
     expect(ms).toBeLessThan(5_000);
     expect(heap).toBeLessThan(300 * MB);
   }, 30_000);
@@ -167,5 +169,116 @@ describe('hostile packages: <cols>', () => {
     // the extent is column H (7): columns 0..7
     expect([...(sheet.columnWidths as Map<number, number>)]).toEqual([[0, 75], [1, 215], [2, 145], [3, 145], [4, 145], [5, 145], [6, 145], [7, 145]]);
     expect([...(sheet.hiddenCols as Set<number>)]).toEqual([0, 1, 2, 4, 6, 7]);
+  });
+});
+
+describe('hostile packages: sheet entries that are not sheets read', () => {
+  it('300,000 <sheet> entries naming one part: the entries are capped at 4 x maxSheets, the repeats are counted, not listed (it was 299,999 warnings, 3 s and 310 MB)', async () => {
+    const part = sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>');
+    const n = 300_000;
+    const bytes = await workbookZip(sheetsOf(n, (i) => `S${i}`), relsOf(4_000, () => 1), { 'xl/worksheets/sheet1.xml': part });
+    const { result, ms, heap } = await timed(() => importXlsx(bytes));
+    expect(result.sheets).toHaveLength(1);
+    expect(result.warnings.length).toBeLessThan(60);
+    expect(result.warnings.filter((w) => w.includes('already uses'))).toHaveLength(20);
+    expect(result.warnings).toContain(`The workbook lists ${n} sheets; only the first ${4 * DEFAULT_IMPORT_LIMITS.maxSheets} entries were read (4 times the import limit maxSheets).`);
+    expect(ms).toBeLessThan(5_000);
+    expect(heap).toBeLessThan(300 * MB);
+  }, 60_000);
+
+  it('4,000 sheets naming a part that has 400,000 relationships: its comment parts are looked at once, not once per sheet', async () => {
+    const part = sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>');
+    const rels = relsXml(Array.from({ length: 400_000 }, (_, i) => [`x${i}`, 'comments', `c${i}.xml`] as [string, string, string]));
+    const bytes = await workbookZip(sheetsOf(4_000, (i) => `S${i}`), relsOf(1, () => 1), { 'xl/worksheets/sheet1.xml': part, 'xl/worksheets/_rels/sheet1.xml.rels': rels });
+    const { result, ms } = await timed(() => importXlsx(bytes));
+    expect(result.sheets).toHaveLength(1);
+    expect(result.warnings.filter((w) => w.includes('has comments at'))).toHaveLength(20);
+    expect(ms).toBeLessThan(10_000);
+  }, 60_000);
+
+  it('4,000 sheets looked up among 400,000 workbook relationships: by id, not by scanning', async () => {
+    const part = sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>');
+    const rels: Array<[string, string, string]> = [...Array.from({ length: 400_000 }, (_, i) => [`x${i}`, 'styles', `s${i}.xml`] as [string, string, string]), ['rIdLast', 'worksheet', 'worksheets/sheet1.xml']];
+    const bytes = await workbookZip(sheetsOf(4_000, (i) => `S${i}`).replace(/r:id="rId\d+"/g, 'r:id="rIdLast"'), rels, { 'xl/worksheets/sheet1.xml': part });
+    const { result, ms } = await timed(() => importXlsx(bytes));
+    expect(result.sheets).toHaveLength(1);
+    expect(ms).toBeLessThan(10_000);
+  }, 60_000);
+});
+
+describe('hostile packages: merges and hyperlinks (the shapes of the S2b review)', () => {
+  const sheetPackage = async (part: string): Promise<Uint8Array> => {
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');
+    zip.file('_rels/.rels', relsXml([['rId1', 'officeDocument', 'xl/workbook.xml']]));
+    zip.file('xl/workbook.xml', `<workbook ${MAIN_NS} ${REL_NS}><sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets></workbook>`);
+    zip.file('xl/_rels/workbook.xml.rels', relsXml([['rId1', 'worksheet', 'worksheets/sheet1.xml']]));
+    zip.file('xl/worksheets/sheet1.xml', part);
+    return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 1 } });
+  };
+  /** `n` merges of pseudo-random rows (a fixed generator): they compress about 15 to 1, as a real file of distinct ranges does, not to nothing. */
+  const mergeCells = (n: number): string => {
+    const items: string[] = new Array<string>(n);
+    let seed = 12345;
+    for (let i = 0; i < n; i++) {
+      seed = (Math.imul(seed, 1103515245) + 12345) & 0x7fffffff;
+      const row = 10_000 + (seed % 90_000);
+      items[i] = `<mergeCell ref="A${row}:B${row + 1}"/>`;
+    }
+    return `<worksheet ${MAIN_NS}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData><mergeCells count="${n}">${items.join('')}</mergeCells></worksheet>`;
+  };
+
+  it('3,000,000 <mergeCell> and one cell: capped at the sheet limit with one counted warning, in seconds and with a bounded heap (it was 13.6 s and 1.4 GB)', async () => {
+    const bytes = await sheetPackage(mergeCells(3_000_000));
+    const { result, ms, heap } = await timed(() => importXlsx(bytes));
+    const sheet = result.sheets[0];
+    expect(sheet.mergedRanges).toHaveLength(1_048_576);
+    expect(sheet.details?.hyperlinks).toEqual([]);
+    expect(result.warnings).toEqual([`S: ${3_000_000 - 1_048_576} merged range(s) were left out (the limit is 1048576 per sheet and maxRanges for the workbook).`]);
+    expect(ms).toBeLessThan(15_000);
+    expect(heap).toBeLessThan(800 * MB);
+  }, 90_000);
+
+  it('2,000,000 <hyperlink r:id> with no relationships: 65,530 kept at most, 20 warnings and one count, not two million (it was 9.3 s, 1.7 GB and 2,000,000 warnings)', async () => {
+    const links = Array.from({ length: 2_000_000 }, (_, i) => `<hyperlink ref="A${(i % 1_000_000) + 1}" r:id="rId${i + 9}"/>`).join('');
+    const bytes = await sheetPackage(`<worksheet ${MAIN_NS} ${REL_NS}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData><hyperlinks>${links}</hyperlinks></worksheet>`);
+    const { result, ms, heap } = await timed(() => importXlsx(bytes));
+    expect(result.sheets[0].details?.hyperlinks.length).toBeLessThanOrEqual(65_530);
+    expect(result.warnings.length).toBeLessThan(30);
+    expect(result.warnings.filter((w) => w.startsWith('The hyperlink at'))).toHaveLength(20);
+    expect(ms).toBeLessThan(15_000);
+    expect(heap).toBeLessThan(800 * MB);
+  }, 90_000);
+
+  it('the same links with their relationships: 65,530 are kept and 1,934,470 counted as left out', async () => {
+    const n = 100_000;
+    const links = Array.from({ length: n }, (_, i) => `<hyperlink ref="A${i + 1}" r:id="rId1"/>`).join('');
+    const zip = await JSZip.loadAsync(await sheetPackage(`<worksheet ${MAIN_NS} ${REL_NS}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData><hyperlinks>${links}</hyperlinks></worksheet>`));
+    zip.file('xl/worksheets/_rels/sheet1.xml.rels', relsXml([['rId1', 'hyperlink', 'https://example.com/', 'External']]));
+    const result = await importXlsx(await zip.generateAsync({ type: 'uint8array' }));
+    expect(result.sheets[0].details?.hyperlinks).toHaveLength(65_530);
+    expect(result.warnings).toEqual([`S: ${n - 65_530} hyperlink(s) were left out (the limit is 65530 per sheet and maxRanges for the workbook).`]);
+  }, 60_000);
+
+  it('8,000,000 <mergeCell> from a zip under the 100 MB package limit (a part of 250 MB, under every limit of X4): refused or capped within a minute, the heap bounded, never an out-of-memory', async () => {
+    const bytes = await sheetPackage(mergeCells(8_000_000));
+    expect(bytes.length).toBeLessThan(DEFAULT_IMPORT_LIMITS.maxPackageBytes);
+    const { result, ms, heap } = await timed(() => importXlsx(bytes).then((r) => ({ r }), (e: unknown) => ({ e })));
+    if ('e' in result) expect((result.e as { code: string }).code).toBe('size-limit');
+    else expect(result.r.sheets[0].mergedRanges).toHaveLength(1_048_576);
+    expect(ms).toBeLessThan(60_000);
+    expect(heap).toBeLessThan(1_200 * MB);
+  }, 180_000);
+
+  it('a package budget (maxRanges) holds over all sheets: two sheets of 400 merges and 400 links under a budget of 1,000', async () => {
+    const body = `<worksheet ${MAIN_NS} ${REL_NS}><sheetData/><mergeCells>${Array.from({ length: 400 }, (_, i) => `<mergeCell ref="A${i + 1}:B${i + 1}"/>`).join('')}</mergeCells><hyperlinks>${Array.from({ length: 400 }, (_, i) => `<hyperlink ref="C${i + 1}" location="A1"/>`).join('')}</hyperlinks></worksheet>`;
+    const bytes = await workbookZip(sheetsOf(2, (i) => `S${i}`), relsOf(2, (i) => i + 1), { 'xl/worksheets/sheet1.xml': body, 'xl/worksheets/sheet2.xml': body });
+    const result = await importXlsx(bytes, { limits: { maxRanges: 1_000 } });
+    const kept = result.sheets.map((s) => [s.mergedRanges?.length ?? 0, s.details?.hyperlinks.length ?? 0]);
+    expect(kept).toEqual([[400, 400], [200, 0]]);
+    expect(result.warnings).toEqual([
+      'S1: 200 merged range(s) were left out (the limit is 1048576 per sheet and maxRanges for the workbook).',
+      'S1: 400 hyperlink(s) were left out (the limit is 65530 per sheet and maxRanges for the workbook).',
+    ]);
   });
 });

@@ -1,4 +1,4 @@
-import { MAX_COL, MAX_ROW, columnIndex, columnLetters, parseCellRef, parseRangeRef } from './cell-ref';
+import { MAX_REF_CHARS, MAX_COL, MAX_ROW, columnIndex, columnLetters, parseCellRef, parseRangeRef } from './cell-ref';
 
 describe('columnIndex / columnLetters', () => {
   it.each([
@@ -46,6 +46,16 @@ describe('parseRangeRef', () => {
     expect(parseRangeRef('B2')).toEqual({ startRow: 1, startCol: 1, endRow: 1, endCol: 1 });
     expect(parseRangeRef('A1:C3')).toEqual({ startRow: 0, startCol: 0, endRow: 2, endCol: 2 });
     expect(parseRangeRef(' $C$3:$A$1 ')).toEqual({ startRow: 0, startCol: 0, endRow: 2, endCol: 2 });
+  });
+
+  it('does not split a text longer than any range reference (64 characters, blanks included), however many colons it has', () => {
+    expect(parseRangeRef(`${' '.repeat(20)}A1:B2${' '.repeat(20)}`)).toEqual({ startRow: 0, startCol: 0, endRow: 1, endCol: 1 });
+    expect(parseRangeRef(`${' '.repeat(MAX_REF_CHARS)}A1`)).toBeUndefined();
+    expect(parseRangeRef('A1'.padEnd(MAX_REF_CHARS, ' '))).toEqual({ startRow: 0, startCol: 0, endRow: 0, endCol: 0 });
+    expect(parseRangeRef('A1'.padEnd(MAX_REF_CHARS + 1, ' '))).toBeUndefined();
+    const t0 = Date.now();
+    expect(parseRangeRef(':'.repeat(20_000_000))).toBeUndefined();
+    expect(Date.now() - t0).toBeLessThan(500);
   });
 
   it.each(['', 'A1:B2:C3', 'A1:', ':B2', 'A:A', '1:1', 'A1:ZZZ1', 'x'])('%j is not a range', (ref) => {
