@@ -62,6 +62,11 @@ describe('group', () => {
       expect(f).toMatchObject({ w: 40, h: 30 });
     });
 
+    it('collapses the children onto the group centre when the group ext is zero', () => {
+      const f = childFrameInParent(child, { ...base, ext: { w: 0, h: 0 } });
+      expect(f).toMatchObject({ x: 100, y: 100, w: 0, h: 0 });
+    });
+
     it.each([
       ['negative child extent', { chExt: { w: -10, h: -10 } }],
       ['NaN child extent', { chExt: { w: NaN, h: NaN } }],

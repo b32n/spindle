@@ -72,7 +72,7 @@ export interface GroupXfrm {
 /** A child frame with its flips. */
 export type FlippedFrame = Frame & { flipH: boolean; flipV: boolean };
 
-/** ext/chExt, or 1 when either extent is missing, zero, negative or not finite (malformed files). */
+/** ext/chExt, or 1 when chExt is zero or negative or either extent is not finite (malformed files); a zero ext collapses to scale 0. */
 const extentScale = (ext: number, chExt: number): number =>
   Number.isFinite(ext) && Number.isFinite(chExt) && chExt > 0 && ext >= 0 ? ext / chExt : 1;
 
@@ -81,7 +81,9 @@ const normDeg = (d: number): number => ((d % 360) + 360) % 360;
 /**
  * Map a frame given in a group's child space to the group's parent space: scale by ext/chExt about the child-space
  * centre, mirror for the group flips, rotate about the group centre. A flip mirrors the child (its flip toggles and
- * its rotation changes sign once per flipped axis). A zero, negative or non-finite extent maps with scale 1.
+ * its rotation changes sign once per flipped axis). A zero or negative chExt or a non-finite extent maps with scale 1;
+ * a zero ext collapses the children onto the group centre. Known limit: a rotated child under non-uniform scale only has
+ * its w and h scaled (a 90° child gets the wrong extent), like the lossy case noted for `scaleGroup`.
  */
 export function childFrameInParent(child: Frame & { flipH?: boolean; flipV?: boolean }, g: GroupXfrm): FlippedFrame {
   const sx = extentScale(g.ext.w, g.chExt.w);
