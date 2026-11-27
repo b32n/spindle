@@ -6,8 +6,9 @@
 import React from 'react';
 import { resolveFill } from '@b32nio/spindle-slides-core';
 import { htmlFill } from './elements/fill';
-import { useDeck, useSlide, useSlideElementIds, useTheme } from '../hooks';
+import { useDeck, useSlide, useSlideElementIds, useSlideIds, useTheme } from '../hooks';
 import { ElementView } from './elements/ElementView';
+import { FieldContextValue } from './elements/StaticRichText';
 
 /**
  * Gradients and colours own the whole `background`; pictures set only longhands, so the theme colour goes under them
@@ -31,6 +32,9 @@ export function SlideView({
   const theme = useTheme();
   const elementIds = useSlideElementIds(slideId);
   const { w, h } = deck.getSlideSize();
+  // Slide-number fields show the slide's place in the deck; the date is read once per render of this slide.
+  const slideNumber = useSlideIds().indexOf(slideId) + 1;
+  const fields = React.useMemo(() => ({ slideNumber: slideNumber > 0 ? slideNumber : null, now: new Date() }), [slideNumber]);
 
   const bg = htmlFill(slide?.background, theme);
   // No usable background (absent, none, unsafe picture): the theme's light colour, as before.
@@ -49,9 +53,11 @@ export function SlideView({
       }}
     >
       {bg.layer}
-      {elementIds.map((id) => (
-        <ElementView key={id} elementId={id} interactive={interactive} />
-      ))}
+      <FieldContextValue.Provider value={fields}>
+        {elementIds.map((id) => (
+          <ElementView key={id} elementId={id} interactive={interactive} />
+        ))}
+      </FieldContextValue.Provider>
     </div>
   );
 }

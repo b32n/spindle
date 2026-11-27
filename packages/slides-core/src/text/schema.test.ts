@@ -111,3 +111,52 @@ describe('slidesSchema paragraph toDOM sanitizes untrusted align/line-height/spa
     expect(injected).not.toContain('}x');
   });
 });
+
+describe('K3c run marks and fields', () => {
+  type Spec = { toDOM: (m: unknown) => unknown[]; parseDOM?: Array<{ getAttrs: (d: unknown) => unknown }> };
+  const markDom = (type: string, attrs: Record<string, unknown>) => (slidesSchema.marks[type].spec as unknown as Spec).toDOM(slidesSchema.marks[type].create(attrs));
+
+  it('round-trips the run marks and a field through JSON', () => {
+    const doc: RichTextDoc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'x2', marks: [{ type: 'baseline', attrs: { pct: 30 } }, { type: 'caps', attrs: { kind: 'small' } }, { type: 'charSpacing', attrs: { px: 2 } }, { type: 'lang', attrs: { lang: 'fr' } }] },
+            { type: 'field', attrs: { kind: 'slidenum', format: null }, content: [{ type: 'text', text: '‹#›', marks: [{ type: 'bold' }] }] },
+          ],
+        },
+      ],
+    };
+    const json = slidesSchema.nodeFromJSON(doc).toJSON();
+    expect(json.content[0].content[0].marks.map((m: { type: string }) => m.type).sort()).toEqual(['baseline', 'caps', 'charSpacing', 'lang']);
+    expect(json.content[0].content[1]).toMatchObject({ type: 'field', attrs: { kind: 'slidenum' }, content: [{ text: '‹#›', marks: [{ type: 'bold' }] }] });
+  });
+
+  it('renders each mark as a sanitized style or attribute, and nothing for a bad value', () => {
+    expect(markDom('baseline', { pct: 30 })).toEqual(['span', { style: 'position:relative;top:-0.462em;font-size:0.65em;line-height:0' }, 0]);
+    expect(markDom('baseline', { pct: 0 })).toEqual(['span', {}, 0]);
+    expect(markDom('caps', { kind: 'all' })).toEqual(['span', { style: 'text-transform:uppercase' }, 0]);
+    expect(markDom('caps', { kind: 'small' })).toEqual(['span', { style: 'font-variant:small-caps' }, 0]);
+    expect(markDom('caps', { kind: 'x;color:red' })).toEqual(['span', {}, 0]);
+    expect(markDom('charSpacing', { px: 1.5 })).toEqual(['span', { style: 'letter-spacing:1.5px' }, 0]);
+    expect(markDom('charSpacing', { px: 'wide' })).toEqual(['span', {}, 0]);
+    expect(markDom('lang', { lang: 'de-DE' })).toEqual(['span', { lang: 'de-DE' }, 0]);
+    expect(markDom('lang', { lang: '"><script>' })).toEqual(['span', {}, 0]);
+  });
+
+  it('draws a field as a non-editable span around its text, naming the kind and format', () => {
+    const toDOM = (attrs: Record<string, unknown>) => (slidesSchema.nodes.field.spec as unknown as Spec).toDOM(slidesSchema.nodes.field.create(attrs));
+    expect(toDOM({ kind: 'slidenum' })).toEqual(['span', { 'data-field': 'slidenum', contenteditable: 'false' }, 0]);
+    expect(toDOM({ kind: 'datetime', format: 'time' })).toEqual(['span', { 'data-field': 'datetime', contenteditable: 'false', 'data-format': 'time' }, 0]);
+    expect(toDOM({ kind: 'bogus' })).toEqual(['span', { 'data-field': 'footer', contenteditable: 'false' }, 0]);
+  });
+
+  it('parses a field back from pasted HTML, degrading a crafted kind', () => {
+    const parse = (slidesSchema.nodes.field.spec as unknown as Spec).parseDOM![0].getAttrs;
+    const dom = (kind: string, format: string | null) => ({ getAttribute: (n: string) => (n === 'data-field' ? kind : format) });
+    expect(parse(dom('slidenum', null))).toEqual({ kind: 'slidenum', format: null });
+    expect(parse(dom('nope', 'date'))).toEqual({ kind: 'footer', format: 'date' });
+  });
+});

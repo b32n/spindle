@@ -31,8 +31,12 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * 2: paragraph nodes of the rich-text fragment carry K3b attributes (`bullet`, `lineHeightPx`, `spaceBeforePct`,
  * `spaceAfterPct`, `marginLeft`, `firstLineIndent`, `tabStops`) as XmlElement attributes. A v1 client's schema does not
  * know them and would drop them on its next write, so it must not join a v2 room.
+ *
+ * 3: the rich-text fragment carries K3c run marks (`baseline`, `caps`, `charSpacing`, `lang`, as text formatting
+ * attributes) and `field` nodes (slide number, date/time, footer; an XmlElement with `kind`, `text`, `format`
+ * attributes). A v2 client's schema has neither and would drop them on its next write, so it must not join a v3 room.
  */
-export const COLLAB_SCHEMA_VERSION = 2;
+export const COLLAB_SCHEMA_VERSION = 3;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

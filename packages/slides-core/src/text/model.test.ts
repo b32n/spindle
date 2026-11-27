@@ -1,5 +1,6 @@
 import {
   emptyRichText,
+  inlineText,
   richTextFromPlainText,
   richTextToPlainText,
   isRichTextEmpty,
@@ -86,5 +87,26 @@ describe('paragraph attrs & applyTextFormat', () => {
     setParagraphAttrs(input, { align: 'center' });
     expect(input.content[0].content![0].marks).toBeUndefined();
     expect(input.content[0].attrs).toBeUndefined();
+  });
+});
+
+describe('field runs', () => {
+  const doc: RichTextDoc = {
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'Page ' }, { type: 'field', attrs: { kind: 'slidenum' }, content: [{ type: 'text', text: '7' }], marks: [{ type: 'bold' }] }] },
+      { type: 'paragraph', content: [{ type: 'field', attrs: { kind: 'footer' } }] },
+    ],
+  };
+  it('a field contributes its cached text to the plain text', () => {
+    expect(richTextToPlainText(doc)).toBe('Page 7\n');
+    expect(inlineText(doc.content[1].content![0])).toBe('');
+  });
+  it('marks apply to and are removed from a field without turning it into text', () => {
+    const marked = applyMarkToDoc(doc, { type: 'baseline', attrs: { pct: 30 } });
+    expect(marked.content[0].content![1]).toMatchObject({ type: 'field', marks: [{ type: 'bold' }, { type: 'baseline' }] });
+    const cleared = removeMarkFromDoc(removeMarkFromDoc(marked, 'baseline'), 'bold');
+    expect(cleared.content[0].content![1]).toEqual({ type: 'field', attrs: { kind: 'slidenum' }, content: [{ type: 'text', text: '7' }] });
+    expect(cleared.content[0].content![0]).toEqual({ type: 'text', text: 'Page ' });
   });
 });

@@ -59,10 +59,10 @@ describe('paragraph attributes in the collaboration layout', () => {
   });
 
   it('stamps the bumped version and a client of the previous version would refuse the room', () => {
-    expect(COLLAB_SCHEMA_VERSION).toBe(2);
+    expect(COLLAB_SCHEMA_VERSION).toBeGreaterThanOrEqual(2);
     const ydoc = new Y.Doc();
     hydrateYDocFromData(ydoc, build().getData());
-    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(2);
+    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(COLLAB_SCHEMA_VERSION);
     const err = new CollabSchemaVersionError(2, 1);
     expect(err.message).toContain('version 2');
     expect(err.message).toContain('up to version 1');

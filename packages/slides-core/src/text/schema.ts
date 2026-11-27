@@ -14,6 +14,7 @@ import { Schema } from 'prosemirror-model';
 import type { Color } from '../scene/types';
 import type { ParagraphAttrs } from './model';
 import { resolveParagraph, type ResolvedParagraph } from './paragraph';
+import { baselineCss, resolveRun, safeFieldKind } from './run';
 import {
   sanitizeHref,
   safeCssColor,
@@ -86,6 +87,32 @@ export const slidesSchema = new Schema({
       },
     },
     text: { group: 'inline' },
+    // K3c: a slide-number / date / footer field (PPTX `a:fld`). It is an atom (the caret skips it, deleting removes it
+    // whole) that holds the text last shown, and that inner text carries the run's marks, because the Y layout keeps
+    // marks on text only. The editor shows the stored text (a slide number reads ‹#›); the static renderer computes the
+    // live value for the slide.
+    field: {
+      group: 'inline',
+      inline: true,
+      atom: true,
+      selectable: true,
+      content: 'text*',
+      attrs: { kind: { default: 'footer' }, format: { default: null } },
+      parseDOM: [
+        {
+          tag: 'span[data-field]',
+          getAttrs: (dom) => {
+            const el = dom as HTMLElement;
+            return { kind: safeFieldKind(el.getAttribute('data-field')), format: el.getAttribute('data-format') };
+          },
+        },
+      ],
+      toDOM(node) {
+        const attrs: Record<string, string> = { 'data-field': safeFieldKind(node.attrs.kind), contenteditable: 'false' };
+        if (typeof node.attrs.format === 'string') attrs['data-format'] = node.attrs.format;
+        return ['span', attrs, 0];
+      },
+    },
   },
   marks: {
     bold: {
@@ -154,6 +181,39 @@ export const slidesSchema = new Schema({
         const css = colorToCss(mark.attrs.color as Color | null);
         if (!css) return ['span', {}, 0];
         return ['span', { style: `background-color:${css}` }, 0];
+      },
+    },
+    // K3c run marks. The values go through resolveRun (coerced, clamped, allowlisted) before they reach a style string.
+    baseline: {
+      attrs: { pct: { default: 0 } },
+      toDOM: (mark) => {
+        const r = resolveRun([{ type: 'baseline', attrs: mark.attrs }]);
+        if (r.baselinePct === null) return ['span', {}, 0];
+        const b = baselineCss(r.baselinePct);
+        return ['span', { style: `position:${b.position};top:${b.top};font-size:${b.fontSize};line-height:${b.lineHeight}` }, 0];
+      },
+    },
+    caps: {
+      attrs: { kind: { default: 'all' } },
+      toDOM: (mark) => {
+        const r = resolveRun([{ type: 'caps', attrs: mark.attrs }]);
+        if (!r.caps) return ['span', {}, 0];
+        return ['span', { style: r.caps === 'all' ? 'text-transform:uppercase' : 'font-variant:small-caps' }, 0];
+      },
+    },
+    charSpacing: {
+      attrs: { px: { default: 0 } },
+      toDOM: (mark) => {
+        const r = resolveRun([{ type: 'charSpacing', attrs: mark.attrs }]);
+        if (r.spacingPx === null) return ['span', {}, 0];
+        return ['span', { style: `letter-spacing:${r.spacingPx}px` }, 0];
+      },
+    },
+    lang: {
+      attrs: { lang: { default: '' } },
+      toDOM: (mark) => {
+        const lang = resolveRun([{ type: 'lang', attrs: mark.attrs }]).lang;
+        return lang ? ['span', { lang }, 0] : ['span', {}, 0];
       },
     },
   },

@@ -70,7 +70,8 @@ export interface ParagraphAttrs {
 
 /**
  * A text mark. `type` is one of the schema mark names (bold, italic,
- * underline, strikethrough, link, textColor, fontFamily, fontSize); `attrs`
+ * underline, strikethrough, link, textColor, fontFamily, fontSize, highlight,
+ * baseline, caps, charSpacing, lang); `attrs`
  * carries the mark's parameters (e.g. a Color union for textColor). Kept
  * loosely typed here so the JSON model does not depend on the scene layer.
  */
@@ -79,11 +80,35 @@ export interface RichTextMark {
   attrs?: Record<string, unknown>;
 }
 
-export interface RichTextInline {
+export interface RichTextText {
   type: 'text';
   text: string;
   marks?: RichTextMark[];
 }
+
+/** What a field run shows: the slide's number, the current date or time, or fixed footer text. */
+export type FieldKind = 'slidenum' | 'datetime' | 'footer';
+export type DateFieldFormat = 'date' | 'time' | 'datetime';
+
+export interface FieldAttrs {
+  kind: FieldKind;
+  /** Date/time layout, for `datetime` (default `date`). */
+  format?: DateFieldFormat | null;
+}
+
+/**
+ * An inline field run (PPTX `a:fld`): one unit whose text is computed when drawn. Its `content` holds the text last
+ * shown (PPTX cached text, the footer's text, the fallback when it cannot be computed) and carries the run's marks:
+ * the Y layout keeps marks on text only, so the formatting lives on that inner text, not on the field node.
+ */
+export interface RichTextField {
+  type: 'field';
+  attrs: FieldAttrs;
+  content?: RichTextText[];
+  marks?: RichTextMark[];
+}
+
+export type RichTextInline = RichTextText | RichTextField;
 
 export interface RichTextParagraph {
   type: 'paragraph';
@@ -114,10 +139,15 @@ export function richTextFromPlainText(text: string, attrs?: ParagraphAttrs): Ric
   };
 }
 
+/** The text of an inline: a run's characters, or the text a field last showed (its cached text). */
+export function inlineText(inline: RichTextInline): string {
+  return inline.type === 'field' ? (inline.content ?? []).map((t) => t.text).join('') : inline.text;
+}
+
 /** Flatten a text body to plain text; paragraphs join with newlines. */
 export function richTextToPlainText(doc: RichTextDoc): string {
   return doc.content
-    .map((p) => (p.content ?? []).map((inline) => inline.text).join(''))
+    .map((p) => (p.content ?? []).map(inlineText).join(''))
     .join('\n');
 }
 
@@ -166,7 +196,10 @@ export function applyMarkToDoc(doc: RichTextDoc, mark: RichTextMark): RichTextDo
 export function removeMarkFromDoc(doc: RichTextDoc, type: string): RichTextDoc {
   return mapInlines(doc, (inline) => {
     const marks = (inline.marks ?? []).filter((m) => m.type !== type);
-    return marks.length ? { ...inline, marks } : { type: 'text', text: inline.text };
+    if (marks.length) return { ...inline, marks };
+    const bare = { ...inline };
+    delete bare.marks;
+    return bare;
   });
 }
 

@@ -25,6 +25,7 @@ export * from './scene/crop';
 export * from './text/model';
 export * from './text/body';
 export * from './text/paragraph';
+export * from './text/run';
 export { slidesSchema } from './text/schema';
 
 // Theme + layouts
