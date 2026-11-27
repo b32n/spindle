@@ -119,4 +119,24 @@ describe('pruneTiming', () => {
     // every effect of the text-range deck targets one shape
     expect(pruneTiming(deck.slides[5].opaque?.timing as string, new Set(['3']))).toBeUndefined();
   });
+
+  it('prunes a hostile sibling list in linear time and keeps the entries it does not remove', () => {
+    const n = 50000;
+    const bld = `<p:bldLst>${'<p:bldP spid="1"/>'.repeat(n)}<p:bldP spid="2"/></p:bldLst>`;
+    const start = Date.now();
+    const out = pruneTiming(timing(click(3, par(4, '2')), bld), new Set(['1'])) as string;
+    expect(Date.now() - start).toBeLessThan(1000);
+    expect(out).toContain('<p:bldLst><p:bldP spid="2"/></p:bldLst>');
+    expect(out).not.toContain('spid="1"');
+  });
+
+  it('prunes many emptied containers under one parent in linear time', () => {
+    const n = 20000;
+    const steps = Array.from({ length: n }, (_, i) => click(i * 3 + 3, par(i * 3 + 4, '1'))).join('') + click(999999, par(1000000, '2'));
+    const start = Date.now();
+    const out = pruneTiming(timing(steps), new Set(['1'])) as string;
+    expect(Date.now() - start).toBeLessThan(1000);
+    expect(ids(out)).toEqual(['2']);
+    expect(out.match(/<p:par>/g)).toHaveLength(3);
+  });
 });

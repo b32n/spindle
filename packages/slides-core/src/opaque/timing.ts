@@ -136,10 +136,6 @@ function doomed(ref: Tag): Tag | undefined {
   return behavior;
 }
 
-const detach = (t: Tag): void => {
-  (t.parent as Tag).children = (t.parent as Tag).children.filter((c) => c !== t);
-};
-
 /** The shape ids (`pptxId`s) a timing XML refers to. */
 export function timingTargets(xml: string): Set<string> {
   const out = new Set<string>();
@@ -169,18 +165,19 @@ export function pruneTiming(xml: string, removed: ReadonlySet<string>): string |
     if (d) gone.add(d);
   }
   if (gone.size === 0) return xml;
+  // removals are collected and applied in one pass per parent (a filter per removal is quadratic on a hostile sibling list)
+  const dead = new Set<Tag>(gone);
+  const live = (t: Tag): Tag[] => elementChildren(t).filter((c) => !dead.has(c));
   const touched = new Set<Tag>();
-  for (const d of gone) {
-    for (const a of ancestors(d)) touched.add(a);
-    detach(d);
-  }
+  for (const d of gone) for (const a of ancestors(d)) touched.add(a);
   // containers whose child list the removal emptied go too, innermost first (a removed container touches its own parents, so the emptiness cascades)
   const all = [...walk(root)].reverse();
   for (const t of all) {
-    if (!touched.has(t) || t.parent === undefined) continue;
+    if (!touched.has(t) || dead.has(t)) continue;
     const list = CONTAINER.has(t.local) ? child(child(t, 'cTn') ?? t, 'childTnLst') : t.local === 'bldLst' || t.local === 'tnLst' ? t : undefined;
-    if (list && elementChildren(list).length === 0) detach(t);
+    if (list && live(list).length === 0) dead.add(t);
   }
+  for (const t of [root, ...all]) if (!dead.has(t) && t.children.some((c) => isTag(c) && dead.has(c))) t.children = t.children.filter((c) => !(isTag(c) && dead.has(c)));
   const timing = elementChildren(root)[0];
   const remaining = timing && child(timing, 'tnLst');
   return remaining && elementChildren(remaining).length > 0 ? serialize(root) : undefined;
