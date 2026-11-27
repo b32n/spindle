@@ -41,6 +41,14 @@ describe('customPathD', () => {
     expect(d).toBe('M0 10 A10 10 0 0 1 20 10 A10 10 0 0 1 0 10');
   });
 
+  it('clamps a sweep of more than a turn to one turn, either way round', () => {
+    const arc = (swAng: number) => customPathD(path([{ op: 'move', x: 0, y: 10 }, { op: 'arc', wR: 10, hR: 10, stAng: 180, swAng }], 20, 20), 20, 20);
+    expect(arc(1e9)).toBe(arc(360));
+    expect(arc(720)).toBe('M0 10 A10 10 0 0 1 20 10 A10 10 0 0 1 0 10');
+    expect(arc(-720)).toBe(arc(-360));
+    expect(arc(-360)).toMatch(/^M0 10 A10 10 0 0 0 20 10 A10 10 0 0 0 0 10$/);
+  });
+
   it('skips a degenerate arc', () => {
     const base = [{ op: 'move', x: 1, y: 1 }] as CustomPath['commands'];
     for (const arc of [{ wR: 0, hR: 5, stAng: 0, swAng: 90 }, { wR: 5, hR: 0, stAng: 0, swAng: 90 }, { wR: 5, hR: 5, stAng: 0, swAng: 0 }]) {

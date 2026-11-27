@@ -153,7 +153,10 @@ export function isUnknownShape(shape: string): shape is UnknownShape {
 const PRST_OF_LEGACY: Readonly<Record<string, string>> = { rightTriangle: 'rtTriangle', arrowRight: 'rightArrow', arrowLeft: 'leftArrow' };
 const LEGACY_OF_PRST: Readonly<Record<string, ShapePreset>> = { rtTriangle: 'rightTriangle' };
 
-/** The OOXML `prst` name of a shape: the original name of an `unknown:` shape, else the preset's `prst` value. */
+/**
+ * The OOXML `prst` name of a shape: the original name of an `unknown:` shape, else the preset's `prst` value. A `path`
+ * shape has no `prst` (it is `a:custGeom`): callers write it with `serializeCustGeom` instead of calling this.
+ */
 export function shapePrst(shape: ShapeKind): string {
   if (isUnknownShape(shape)) return shape.slice(UNKNOWN_PREFIX.length);
   return PRST_OF_LEGACY[shape] ?? shape;

@@ -36,8 +36,10 @@ export function customPathD(path: CustomPath, w: number, h: number): string {
         const ry = Math.abs(c.hR);
         if (rx === 0 || ry === 0 || c.swAng === 0) break;
         const sweep = c.swAng > 0 ? 1 : 0;
-        // a sweep of a full turn or more starts and ends at one point, which SVG cannot draw as one arc: go via the half way
-        const turns = Math.abs(c.swAng) >= 360 ? [c.swAng / 2, c.swAng / 2] : [c.swAng];
+        // more than a turn only retraces the circle: clamp to one turn. A sweep of a full turn starts and ends at one
+        // point, which SVG cannot draw as one arc: go via the half way
+        const total = Math.sign(c.swAng) * Math.min(Math.abs(c.swAng), 360);
+        const turns = Math.abs(total) >= 360 ? [total / 2, total / 2] : [total];
         let from = c.stAng;
         for (const sw of turns) {
           const end = arcEndPoint(cur.x, cur.y, rx, ry, from, sw);

@@ -82,7 +82,11 @@ export function normalizeCustomGeometry(value: unknown): CustomGeometry | undefi
 
 const named = (n: GeomNode, name: string): GeomNode[] => n.children.filter((c) => c.name === name);
 
-/** The built-in guides (ECMA-376 20.1.9.11) that depend only on the path box. */
+/**
+ * The built-in guides (ECMA-376 20.1.9.11) that depend only on the path box. They are evaluated against the path's own
+ * `w` x `h` (ECMA-376 gives shape-box values): the two agree when the path has no size of its own, the normal case; in a
+ * path that has one, `r`, `b`, `hc` and the rest mean that path's edges and centre.
+ */
 function builtinGuide(name: string, w: number, h: number): number | undefined {
   switch (name) {
     case 'l': case 't': return 0;
@@ -102,10 +106,20 @@ function builtinGuide(name: string, w: number, h: number): number | undefined {
   }
 }
 
+/** A path `w`/`h` attribute: a positive finite integer, else undefined (the box size is used instead). */
+function pathSize(v: string | undefined): number | undefined {
+  if (v === undefined || !/^\d+$/.test(v)) return undefined;
+  const n = Number(v);
+  return n > 0 && Number.isFinite(n) ? n : undefined;
+}
+
 /** Reads one OOXML integer or built-in guide name; undefined when it is anything else. */
 function coord(v: string | undefined, w: number, h: number): number | undefined {
   if (v === undefined) return undefined;
-  if (/^-?\d+$/.test(v)) return Number(v);
+  if (/^-?\d+$/.test(v)) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
   return builtinGuide(v, w, h);
 }
 
@@ -158,9 +172,9 @@ export function parseCustGeom(node: GeomNode, box?: { w: number; h: number }): C
   const paths: CustomPath[] = [];
   let budget = MAX_PATH_COMMANDS;
   for (const pn of pathNodes) {
-    const w = /^\d+$/.test(pn.attrs.w ?? '') && Number(pn.attrs.w) > 0 ? Number(pn.attrs.w) : box?.w;
-    const h = /^\d+$/.test(pn.attrs.h ?? '') && Number(pn.attrs.h) > 0 ? Number(pn.attrs.h) : box?.h;
-    if (w === undefined || h === undefined || !(w > 0) || !(h > 0)) return undefined;
+    const w = pathSize(pn.attrs.w) ?? box?.w;
+    const h = pathSize(pn.attrs.h) ?? box?.h;
+    if (w === undefined || h === undefined || !(w > 0) || !(h > 0) || !Number.isFinite(w) || !Number.isFinite(h)) return undefined;
     budget -= pn.children.length;
     if (budget < 0) return undefined;
     const commands: PathCommand[] = [];

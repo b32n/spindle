@@ -34,7 +34,7 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
   };
 
   // a `path` shape with no usable geometry falls back to the rectangle `shapeGeom` gives any non-preset name
-  const custom = el.shape === 'path' ? normalizeCustomGeometry(el.path) : undefined;
+  const custom = React.useMemo(() => (el.shape === 'path' ? normalizeCustomGeometry(el.path) : undefined), [el.shape, el.path]);
 
   const geomProps = {
     fill,

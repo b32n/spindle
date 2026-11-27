@@ -88,6 +88,11 @@ describe('parseCustGeom', () => {
     expect(g.paths[0].commands[0]).toEqual({ op: 'move', x, y });
   });
 
+  it('falls back to the box for a path size too long to be finite', () => {
+    const g = parseCustGeom(geom(n('path', { w: '9'.repeat(400), h: '50' })), BOX)!;
+    expect([g.paths[0].w, g.paths[0].h]).toEqual([BOX.w, 50]);
+  });
+
   it('resolves guides in arcTo attributes', () => {
     const g = parseCustGeom(geom(n('path', {}, [n('arcTo', { wR: 'wd2', hR: 'hd2', stAng: '0', swAng: '21600000' })])), BOX)!;
     expect(g.paths[0].commands[0]).toEqual({ op: 'arc', wR: 500, hR: 250, stAng: 0, swAng: 360 });
@@ -102,6 +107,9 @@ describe('parseCustGeom', () => {
     ['too many points', geom(n('path', { w: '1', h: '1' }, [n('lnTo', {}, [pt(0, 0), pt(1, 1)])])), undefined],
     ['a short cubic', geom(n('path', { w: '1', h: '1' }, [n('cubicBezTo', {}, [pt(0, 0)])])), undefined],
     ['a short quad', geom(n('path', { w: '1', h: '1' }, [n('quadBezTo', {}, [pt(0, 0)])])), undefined],
+    ['a coordinate too long to be finite', geom(n('path', { w: '1', h: '1' }, [n('moveTo', {}, [pt('9'.repeat(400), 0)])])), undefined],
+    ['a path size too long to be finite and no box', geom(n('path', { w: '9'.repeat(400), h: '1' })), undefined],
+    ['a non-finite box', geom(n('path')), { w: Infinity, h: 5 }],
     ['an arc with a guide angle', geom(n('path', { w: '1', h: '1' }, [n('arcTo', { wR: '1', hR: '1', stAng: 'cd4', swAng: '0' })])), undefined],
     ['an arc with a missing radius', geom(n('path', { w: '1', h: '1' }, [n('arcTo', { hR: '1', stAng: '0', swAng: '0' })])), undefined],
     ['an unknown command', geom(n('path', { w: '1', h: '1' }, [n('wiggle')])), undefined],
