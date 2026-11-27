@@ -154,6 +154,17 @@ describe('probes', () => {
     expect(count('edge.brokenRels', parts({ 'word/_rels/document.xml.rels': '<Relationships><Relationship Target="media/a.png"/></Relationships>' }, ['word/media/a.png']))).toBe(0);
   });
 
+  it('detects a zip bomb by the import limit and entity declarations', () => {
+    const MB = 1024 * 1024;
+    const sized = (sizes: OoxmlParts['sizes']): OoxmlParts => ({ ...parts({}), sizes });
+    expect(count('edge.zipBomb', sized({ 'a.bin': { compressed: 24 * 1024, uncompressed: 24 * MB } }))).toBe(1);
+    expect(count('edge.zipBomb', sized({ 'a.bin': { compressed: 0, uncompressed: 24 * MB } }))).toBe(1);
+    expect(count('edge.zipBomb', sized({ 'small.bin': { compressed: 1, uncompressed: 1 * MB } }))).toBe(0); // under the 16 MiB floor
+    expect(count('edge.zipBomb', sized({ 'big.bin': { compressed: 20 * MB, uncompressed: 24 * MB } }))).toBe(0); // ordinary ratio
+    expect(count('edge.entityExpansion', parts({ 'word/document.xml': '<!DOCTYPE d [<!ENTITY a "x"><!ENTITY b "&a;&a;">]><d/>', 'word/styles.xml': '<s/>' }))).toBe(2);
+    expect(count('edge.entityExpansion', parts({ 'word/document.xml': '<d/>' }))).toBe(0);
+  });
+
   it('reports unverified claims', () => {
     const p = body('<w:sdt/>');
     expect(unverifiedClaims(['sdt', 'equations', 'unknown'], CONSTRUCTS, p)).toEqual(['equations', 'unknown']);

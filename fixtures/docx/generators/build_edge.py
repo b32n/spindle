@@ -3,6 +3,8 @@
 edge-malformed      valid main document, but broken package plumbing and corrupt optional parts
 edge-odd-valid      structurally valid but unusual markup that real files contain
 edge-no-body        a package whose main document part is missing (the import is expected to throw)
+edge-zip-bomb       a valid document plus one part that inflates 1000:1 to 24 MB (refused by the import limits)
+edge-entity-bomb    a main document with a billion-laughs and an external-entity DOCTYPE (imports, entities stay inert)
 """
 import features as F
 import features2 as F2
@@ -127,3 +129,38 @@ def edge_no_body(out):
     from ooxml import styles_xml
     write_zip(out, {"[Content_Types].xml": ct.encode(), "_rels/.rels": rels.encode(), "word/styles.xml": styles_xml().encode(),
                     "docProps/core.xml": b'<?xml version="1.0" encoding="UTF-8"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>No body</dc:title></cp:coreProperties>'})
+
+
+def edge_zip_bomb(out):
+    """~24 KB on disk, 24 MB inflated: over the 200:1 ratio limit (and the 16 MB floor below which the ratio is not judged)."""
+    doc = Doc("Zip bomb")
+    body = p(r("Zip bomb"), style="Title")
+    body += p(r("An ordinary document with one extra part that inflates a thousandfold. The import limits refuse the package before inflating it."), style="BodyText")
+    doc.parts["word/media/bomb.bin"] = bytes(24 * 1024 * 1024)
+    doc.finish(body, sect(), out)
+
+
+# Nine levels of ten references each: 10**9 "lol" if anything expanded it. The external entity points at a local file.
+ENTITY_DOCTYPE = (
+    '<!DOCTYPE w:document [<!ENTITY lol "lol">'
+    + "".join(f'<!ENTITY lol{i} "{("&lol%s;" % (i - 1 or "")) * 10}">' for i in range(1, 10))
+    + '<!ENTITY xxe SYSTEM "file:///etc/passwd">]>'
+)
+
+
+def edge_entity_bomb(out):
+    doc = Doc("XML entity expansion")
+    body = p(r("XML entity expansion"), style="Title")
+    body += p(r("The main part of this file declares a billion-laughs entity chain and an external entity. Neither may be expanded."), style="BodyText")
+    # a raw run: r() would escape the references
+    body += p('<w:r><w:t xml:space="preserve">Chain: &lol9; External: &xxe; Predefined: &amp; &lt;b&gt;.</w:t></w:r>', style="BodyText")
+    body += p(r("A paragraph after the entities, to show the import still reads the document."), style="BodyText")
+
+    def mutate(d):
+        xml = d.parts["word/document.xml"]
+        head = b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        assert xml.startswith(head), xml[:80]
+        d.parts["word/document.xml"] = head + ENTITY_DOCTYPE.encode() + xml[len(head):]
+
+    doc.mutate = mutate
+    doc.finish(body, sect(), out)
