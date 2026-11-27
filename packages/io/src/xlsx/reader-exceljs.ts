@@ -1,4 +1,5 @@
-/* istanbul ignore file -- the retired `exceljs` reader, unchanged (only renamed): it runs as the oracle of reader-differential.test.ts, and goes with `exceljs` in S14 */
+// The retired `exceljs` reader, unchanged (only renamed): it runs as the oracle of reader-differential.test.ts and goes with `exceljs` in S14.
+// It is left out of coverage by `coveragePathIgnorePatterns` in the package's jest config, not by a comment here.
 import ExcelJS from 'exceljs';
 import type {
   SpreadsheetBorder,

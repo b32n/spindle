@@ -4,6 +4,8 @@ import type { SpreadsheetCell, SpreadsheetCellStyle, SpreadsheetImportResult, Sp
 import { ImportError } from '../common/import-error';
 import { importXlsx } from './reader';
 import { importXlsxExceljs } from './reader-exceljs';
+import { isDateFormat } from './read/cell-style';
+import { numberFormatCode } from './read/styles';
 import { corpus, MAIN_NS, REL_NS, workbookZip } from './read/test-support';
 import { exportXlsx } from './writer';
 
@@ -22,12 +24,16 @@ import { exportXlsx } from './writer';
 //                           alone)
 //   builtinFormat           a built-in number format id shows its en-US code (the table of `styles-scan`, as the loss
 //                           detector uses it) where the old reader used its own table (`mm-dd-yy` for id 14) or had none
-//   dateFloat               a date serial that went through a JavaScript Date and back differs in the 10th digit; the new
-//                           reader returns the number as written
-//   newWarning              warnings the old reader did not have (a missing relationship, a duplicate sheet name, ...)
+//   dateFloat               a date serial (a cell whose number format is a date format) that went through a JavaScript Date
+//                           and back differs by under a millisecond; the new reader returns the number as written
+//   newWarning              a warning the old reader did not have, of one of the kinds listed in NEW_WARNINGS (a missing
+//                           relationship, a duplicate sheet name, a damaged sheet, a cell that is not a number or a date); any
+//                           other new warning is a difference that fails the test
 //
 // What the old reader could not read at all (it threw) is listed separately: the own reader must read it or refuse it with an
-// ImportError.
+// ImportError. The other way round is a regression: where the old reader read a file the own reader must too, and where both
+// throw the error code must be the same. A file for which that does not hold is named in REFUSED_NOW or CODE_DIFFERENCES below,
+// with the reason; nothing else is allowed, and an entry that stops being true fails the test.
 // ---------------------------------------------------------------------------
 
 interface Entry {
@@ -48,6 +54,24 @@ type Category =
   | 'builtinFormat'
   | 'dateFloat'
   | 'newWarning';
+
+/** Files the old reader read and the own reader refuses, by id, with why. (Empty rows are not allowed: a regression is not an exception.) */
+const REFUSED_NOW: Record<string, string> = {
+  'edge-no-workbook':
+    'a package whose root relationship names a workbook part that is not there: the old reader returned no sheets (the editor layer then raised "The file contains no worksheets."); the own reader refuses it as corrupt, with a message that says what is missing. A file that cannot be opened either way.',
+};
+
+/** Files both readers refuse with different codes, by id: the old code, the new one, and why. */
+const CODE_DIFFERENCES: Record<string, { old: string; new: string; reason: string }> = {};
+
+/** The kinds of warning the own reader adds. */
+const NEW_WARNINGS: RegExp[] = [
+  /^The workbook has more than one sheet named /,
+  /^The sheet ".*" has no usable relationship \(/,
+  /^The hyperlink at .* names the relationship .*, which the sheet does not have\.$/,
+  /^The sheet ".*" is not well-formed XML; it was read as far as the damage/,
+  /^[^!]+![A-Z]+\d+: ".*" is not a (number|date); imported as text$/,
+];
 
 /** The old reader's name for a built-in number format, and the code the own reader gives it. */
 const BUILTIN_RENAMES: Record<string, string> = {
@@ -111,10 +135,22 @@ function compareStyle(o: SpreadsheetCellStyle | undefined, n: SpreadsheetCellSty
   return undefined;
 }
 
-function compareCell(key: string, sheet: SpreadsheetSheet, o: SpreadsheetCell, n: SpreadsheetCell, oldWarnings: string[], seen: Category[]): string | undefined {
+/** A day, in serial units, is 86,400,000 ms: a round trip through a JavaScript Date is good to a millisecond. */
+const ONE_MS = 1 / 86_400_000;
+
+function compareCell(
+  key: string,
+  sheet: SpreadsheetSheet,
+  o: SpreadsheetCell,
+  n: SpreadsheetCell,
+  newStyleIndex: number | undefined,
+  newStyles: SpreadsheetImportResult['styles'],
+  oldWarnings: string[],
+  seen: Category[]
+): string | undefined {
   const at = `${sheet.name}!${addressOf(key)}`;
   if (o.value !== n.value) {
-    if (typeof o.value === 'number' && typeof n.value === 'number' && Math.abs(o.value - n.value) <= 1e-9 * Math.max(1, Math.abs(o.value))) seen.push('dateFloat');
+    if (typeof o.value === 'number' && typeof n.value === 'number' && isDateFormat(n.numberFormat?.code) && Math.abs(o.value - n.value) <= ONE_MS) seen.push('dateFloat');
     else if (o.value === null && (n.value === 0 || n.value === false || n.value === '') && o.formula === n.formula) seen.push('falsyResult');
     else return `${at}: value ${JSON.stringify(o.value)} vs ${JSON.stringify(n.value)}`;
   }
@@ -131,7 +167,10 @@ function compareCell(key: string, sheet: SpreadsheetSheet, o: SpreadsheetCell, n
   const oc = o.numberFormat?.code;
   const nc = n.numberFormat?.code;
   if (oc !== nc) {
-    if ((oc !== undefined && BUILTIN_RENAMES[oc] === nc) || (oc === undefined && nc !== undefined && n.styleIndex !== undefined)) seen.push('builtinFormat');
+    // a built-in id: the new code is the table's code for the id of the cell's format, and the old one was missing or its own name for it
+    const id = newStyleIndex === undefined ? undefined : newStyles?.cellXfs[newStyleIndex]?.numFmtId;
+    const builtin = id === undefined || newStyles === undefined || newStyles.numFmts.some((f) => f.id === id) ? undefined : numberFormatCode(newStyles, id);
+    if (nc !== undefined && nc === builtin && (oc === undefined || BUILTIN_RENAMES[oc] === nc)) seen.push('builtinFormat');
     else return `${at}: number format ${oc} vs ${nc}`;
   }
   const style = compareStyle(o.style, n.style, seen);
@@ -151,9 +190,10 @@ function compare(o: SpreadsheetImportResult, n: SpreadsheetImportResult): { unex
     for (const key of keys) {
       const oc = plain(os.cells.get(key));
       const nc = plain(ns.cells.get(key));
+      const newStyleIndex = ns.cells.get(key)?.styleIndex;
       if (oc === undefined || nc === undefined) unexplained.push(`${os.name}!${addressOf(key)}: ${oc === undefined ? 'only in the new reader' : 'only in the old reader'}`);
       else {
-        const problem = compareCell(key, ns, oc, nc, o.warnings, seen);
+        const problem = compareCell(key, ns, oc, nc, newStyleIndex, n.styles, o.warnings, seen);
         if (problem) unexplained.push(problem);
       }
     }
@@ -166,7 +206,10 @@ function compare(o: SpreadsheetImportResult, n: SpreadsheetImportResult): { unex
   for (const w of o.warnings) {
     if (!n.warnings.includes(w) && !/shared formula without a resolvable expression/.test(w)) unexplained.push(`old warning missing: ${w}`);
   }
-  if (n.warnings.some((w) => !o.warnings.includes(w))) seen.push('newWarning');
+  for (const w of n.warnings.filter((x) => !o.warnings.includes(x))) {
+    if (NEW_WARNINGS.some((re) => re.test(w))) seen.push('newWarning');
+    else unexplained.push(`new warning of no listed kind: ${w}`);
+  }
   return { unexplained, seen };
 }
 
@@ -187,15 +230,57 @@ describe('differential: own reader against the exceljs reader, over the corpus',
     expect(committed.length).toBeGreaterThanOrEqual(40);
   });
 
-  it.each(committed.map((f) => [f.id, f.filename]))('%s: identical output where the old reader had output, apart from the named improvements', async (_id, filename) => {
+  it.each(committed.map((f) => [f.id, f.filename]))('%s: identical output where the old reader had output, apart from the named improvements', async (id, filename) => {
     const { o, n } = await both(corpus(filename));
-    if ('e' in o || 'e' in n) {
-      // the own reader never throws anything but an ImportError
-      if ('e' in n) expect(n.e).toBeInstanceOf(ImportError);
+    // the own reader never throws anything but an ImportError
+    if ('e' in n) expect(n.e).toBeInstanceOf(ImportError);
+    if ('e' in o) {
+      // the old reader threw: the own reader reads the file, or refuses it with the same code (unless the difference is listed)
+      if ('e' in n) {
+        const listed = CODE_DIFFERENCES[id];
+        const codes = { old: (o.e as ImportError).code, new: (n.e as ImportError).code };
+        if (listed === undefined) expect(codes.new).toBe(codes.old);
+        else expect(codes).toEqual({ old: listed.old, new: listed.new });
+      } else expect(CODE_DIFFERENCES[id]).toBeUndefined();
       return;
     }
+    if ('e' in n) {
+      // the old reader read the file: the own reader must too, unless the file is listed with the reason
+      expect({ id, refused: REFUSED_NOW[id] === undefined ? (n.e as ImportError).message : REFUSED_NOW[id] }).toEqual({ id, refused: REFUSED_NOW[id] });
+      return;
+    }
+    expect(REFUSED_NOW[id]).toBeUndefined();
     const { unexplained } = compare(o.r, n.r);
     expect(unexplained).toEqual([]);
+  });
+
+  it('lists exceptions that are true: each file of REFUSED_NOW and CODE_DIFFERENCES is in the corpus and behaves as listed', async () => {
+    const ids = new Map(committed.map((f) => [f.id, f.filename]));
+    for (const id of Object.keys(REFUSED_NOW)) {
+      expect(ids.has(id)).toBe(true);
+      const { o, n } = await both(corpus(ids.get(id) as string));
+      expect('r' in o && 'e' in n).toBe(true);
+      expect(REFUSED_NOW[id].length).toBeGreaterThan(40);
+    }
+    for (const [id, listed] of Object.entries(CODE_DIFFERENCES)) {
+      expect(ids.has(id)).toBe(true);
+      const { o, n } = await both(corpus(ids.get(id) as string));
+      expect([(o as { e: ImportError }).e.code, (n as { e: ImportError }).e.code]).toEqual([listed.old, listed.new]);
+      expect(listed.reason.length).toBeGreaterThan(40);
+    }
+  });
+
+  it('compares the error code where both readers throw: the corpus has three such files and they agree', async () => {
+    const rows: Array<[string, string, string]> = [];
+    for (const f of committed) {
+      const { o, n } = await both(corpus(f.filename));
+      if ('e' in o && 'e' in n) rows.push([f.id, (o.e as ImportError).code, (n.e as ImportError).code]);
+    }
+    expect(rows).toEqual([
+      ['edge-truncated-zip', 'corrupt', 'corrupt'],
+      ['edge-encrypted', 'encrypted', 'encrypted'],
+      ['edge-legacy-xls', 'legacy-binary', 'legacy-binary'],
+    ]);
   });
 
   it('pins every named improvement over the corpus', async () => {
@@ -248,6 +333,19 @@ describe('differential: own reader against the exceljs reader, over the corpus',
     expect(tally(seen)).toEqual({ formulaKept: 1, linkOnRange: 2, falsyResult: 1 });
   });
 
+  it('reads a frozenSplit pane (ECMA-376 18.3.1.66: frozen, split before it was frozen) as frozen, as the old reader does: no difference to name', async () => {
+    const bytes = await workbookZip(
+      '<sheets><sheet name="F" sheetId="1" r:id="rId1"/></sheets>',
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml']],
+      { 'xl/worksheets/sheet1.xml': `<worksheet ${MAIN_NS} ${REL_NS}><sheetViews><sheetView workbookViewId="0"><pane xSplit="2" ySplit="3" topLeftCell="C4" activePane="bottomRight" state="frozenSplit"/></sheetView></sheetViews><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData></worksheet>` }
+    );
+    const o = await importXlsxExceljs(bytes);
+    const n = await importXlsx(bytes);
+    expect([o.sheets[0].frozenRows, o.sheets[0].frozenCols]).toEqual([3, 2]);
+    expect([n.sheets[0].frozenRows, n.sheets[0].frozenCols]).toEqual([3, 2]);
+    expect(compare(o, n)).toEqual({ unexplained: [], seen: [] });
+  });
+
   it('imports the three openpyxl files that made the old reader throw (probe 1)', async () => {
     for (const filename of ['openpyxl-image.xlsx', 'openpyxl-chart.xlsx', 'openpyxl-comment.xlsx']) {
       const { o, n } = await both(corpus(filename));
@@ -255,6 +353,53 @@ describe('differential: own reader against the exceljs reader, over the corpus',
       expect('r' in n).toBe(true);
       if ('r' in n) expect(n.r.sheets[0].cells.get('0:0')).toMatchObject({ value: 'Region' });
     }
+  });
+});
+
+describe('differential: the named improvements are no wider than their names', () => {
+  const xfs = (numFmtId: number) => ({ numFmtId } as never);
+  const styles = { numFmts: [{ id: 164, code: '0.0" kg"' }], cellXfs: [xfs(0), xfs(14), xfs(164), xfs(4)] } as unknown as NonNullable<SpreadsheetImportResult['styles']>;
+  const result = (cell: SpreadsheetCell, extra: Partial<SpreadsheetSheet> = {}, warnings: string[] = [], withStyles = true): SpreadsheetImportResult => ({
+    sheets: [{ name: 'S', cells: new Map([['0:0', cell]]), ...extra }],
+    warnings,
+    ...(withStyles ? { styles } : {}),
+  });
+  const diff = (o: SpreadsheetCell, n: SpreadsheetCell, extra: Partial<SpreadsheetSheet> = {}, ow: string[] = [], nw: string[] = []) => compare(result(o, {}, ow, false), result(n, extra, nw));
+
+  it('dateFloat: only a date-formatted cell, and only by under a millisecond', () => {
+    const date = { numberFormat: { code: 'yyyy-mm-dd' } };
+    expect(diff({ value: 45000.123456789, ...date }, { value: 45000.123456789 + 1e-9, ...date })).toEqual({ unexplained: [], seen: ['dateFloat'] });
+    expect(diff({ value: 45000.5 }, { value: 45000.5 + 1e-9 }).unexplained).toHaveLength(1);
+    expect(diff({ value: 45000.5, numberFormat: { code: '0.00' } }, { value: 45000.5 + 1e-9, numberFormat: { code: '0.00' } }).unexplained).toHaveLength(1);
+    expect(diff({ value: 45000.5, ...date }, { value: 45000.5 + 1e-6, ...date }).unexplained).toHaveLength(1);
+    expect(diff({ value: 1, ...date }, { value: 2, ...date }).unexplained).toHaveLength(1);
+  });
+
+  it('builtinFormat: only the table code of the built-in id of the cell, where the old code was missing or its own name', () => {
+    // id 14 is m/d/yyyy; the old reader said mm-dd-yy, or nothing
+    expect(diff({ value: 1, numberFormat: { code: 'mm-dd-yy' } }, { value: 1, styleIndex: 1, numberFormat: { code: 'm/d/yyyy' } })).toEqual({ unexplained: [], seen: ['builtinFormat'] });
+    expect(diff({ value: 1 }, { value: 1, styleIndex: 1, numberFormat: { code: 'm/d/yyyy' } }).seen).toEqual(['builtinFormat']);
+    // any other new code is a difference: a wrong one for the id, an old code that is not its rename, no format index, a custom format, an unknown index
+    expect(diff({ value: 1 }, { value: 1, styleIndex: 1, numberFormat: { code: 'dd/mm/yyyy' } }).unexplained).toHaveLength(1);
+    expect(diff({ value: 1, numberFormat: { code: '0.00' } }, { value: 1, styleIndex: 1, numberFormat: { code: 'm/d/yyyy' } }).unexplained).toHaveLength(1);
+    expect(diff({ value: 1 }, { value: 1, numberFormat: { code: 'm/d/yyyy' } }).unexplained).toHaveLength(1);
+    expect(diff({ value: 1 }, { value: 1, styleIndex: 2, numberFormat: { code: '0.0" kg"' } }).unexplained).toHaveLength(1);
+    expect(diff({ value: 1 }, { value: 1, styleIndex: 9, numberFormat: { code: '0' } }).unexplained).toHaveLength(1);
+    expect(compare(result({ value: 1 }, {}, [], false), result({ value: 1, styleIndex: 1, numberFormat: { code: 'm/d/yyyy' } }, {}, [], false)).unexplained).toHaveLength(1);
+  });
+
+  it('newWarning: only the listed kinds', () => {
+    const kinds = [
+      'The workbook has more than one sheet named "A"; one was renamed "A (2)".',
+      'The sheet "Dangling" has no usable relationship (rId99).',
+      'The hyperlink at A1 names the relationship rId9, which the sheet does not have.',
+      'The sheet "S" is not well-formed XML; it was read as far as the damage (3 cells).',
+      'S!B2: "12abc" is not a number; imported as text',
+      'S!B2: "2020-02-30" is not a date; imported as text',
+    ];
+    for (const w of kinds) expect(diff({ value: 1 }, { value: 1 }, {}, [], [w])).toEqual({ unexplained: [], seen: ['newWarning'] });
+    expect(diff({ value: 1 }, { value: 1 }, {}, [], ['something new']).unexplained).toEqual(['new warning of no listed kind: something new']);
+    expect(diff({ value: 1 }, { value: 1 }, {}, ['kept'], ['kept', 'S: formulas left out, their values kept: 1 over 8192 characters.']).unexplained).toHaveLength(1);
   });
 });
 
