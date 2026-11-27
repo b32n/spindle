@@ -170,9 +170,17 @@ describe('fitToExtent (a legacy array formula over its entered range)', () => {
     expect(fitToExtent([[1, 2, 3], [4, 5, 6]], { rows: 1, cols: 2 })).toEqual([[1, 2]]);
     expect(fitToExtent([[1], [2], [3]], { rows: 2, cols: 1 })).toEqual([[1], [2]]);
   });
-  it('pads a smaller result with #N/A', () => {
-    expect(fitToExtent([[1], [2]], { rows: 2, cols: 2 })).toEqual([[1, '#N/A'], [2, '#N/A']]);
-    expect(fitToExtent([[1, 2]], { rows: 2, cols: 2 })).toEqual([[1, 2], ['#N/A', '#N/A']]);
+  it('repeats a one-row result down and a one-column result across a bigger extent, as Excel does', () => {
+    expect(fitToExtent([[1, 2]], { rows: 2, cols: 2 })).toEqual([[1, 2], [1, 2]]);
+    expect(fitToExtent([[1], [2]], { rows: 2, cols: 2 })).toEqual([[1, 1], [2, 2]]);
+    expect(fitToExtent([[1, 2, 3]], { rows: 3, cols: 2 })).toEqual([[1, 2], [1, 2], [1, 2]]);
+    expect(fitToExtent([[1], [2], [3]], { rows: 2, cols: 3 })).toEqual([[1, 1, 1], [2, 2, 2]]);
+  });
+  it('pads with #N/A only where a result of several rows and columns, or a one-row result along its row, is smaller than the extent', () => {
+    expect(fitToExtent([[1, 2], [3, 4]], { rows: 3, cols: 3 })).toEqual([[1, 2, '#N/A'], [3, 4, '#N/A'], ['#N/A', '#N/A', '#N/A']]);
+    expect(fitToExtent([[1, 2], [3, 4]], { rows: 3, cols: 2 })).toEqual([[1, 2], [3, 4], ['#N/A', '#N/A']]);
+    expect(fitToExtent([[1, 2]], { rows: 2, cols: 3 })).toEqual([[1, 2, '#N/A'], [1, 2, '#N/A']]);
+    expect(fitToExtent([[1], [2]], { rows: 3, cols: 2 })).toEqual([[1, 1], [2, 2], ['#N/A', '#N/A']]);
   });
   it('fills the extent with a single value, a scalar or a one-cell array', () => {
     expect(fitToExtent(7, { rows: 2, cols: 2 })).toEqual([[7, 7], [7, 7]]);
