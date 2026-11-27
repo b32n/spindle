@@ -62,6 +62,17 @@ describe('group', () => {
       expect(f).toMatchObject({ w: 40, h: 30 });
     });
 
+    it.each([
+      ['negative child extent', { chExt: { w: -10, h: -10 } }],
+      ['NaN child extent', { chExt: { w: NaN, h: NaN } }],
+      ['negative group extent', { ext: { w: -5, h: -5 } }],
+      ['NaN group extent', { ext: { w: NaN, h: NaN } }],
+      ['infinite group extent', { ext: { w: Infinity, h: Infinity } }],
+    ])('treats a %s as scale 1', (_n, over) => {
+      const f = childFrameInParent(child, { ...base, ...over });
+      expect(f).toMatchObject({ w: 40, h: 30 });
+    });
+
     it('rotates children about the group centre and adds the group rotation', () => {
       // Group centre (200,150); child centre (130,135) is (-70,-15) from it; 180 degrees gives (+70,+15).
       const f = childFrameInParent({ ...child, rotation: 30 }, { ...base, rotation: 180 });

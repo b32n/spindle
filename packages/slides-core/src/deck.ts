@@ -585,16 +585,19 @@ export class DeckImpl {
     const el = this.elements.get(id);
     if (!el) return;
     this.recordHistory();
+    const tree = this.groupTree();
     this.events.batch(() => {
       this.elements.delete(id);
       this.emit('elementDelete', { slideId: el.containerId, elementId: id });
       this.detachConnectors(new Set([id]));
+      this.relinkOrphanedGroups(tree);
     });
   }
 
   deleteElements(ids: string[]): void {
     if (ids.length === 0) return;
     this.recordHistory();
+    const tree = this.groupTree();
     this.events.batch(() => {
       const deleted = new Set<string>();
       for (const id of ids) {
@@ -605,7 +608,24 @@ export class DeckImpl {
         deleted.add(id);
       }
       this.detachConnectors(deleted);
+      this.relinkOrphanedGroups(tree);
     });
+  }
+
+  /**
+   * A group's parent is read from its direct members, so a group left with none (its last direct member was deleted)
+   * would drop out of the chain. Hang its child groups on the nearest ancestor that still has direct members. `tree`
+   * is the group tree from before the deletion.
+   */
+  private relinkOrphanedGroups(tree: Map<string, string>): void {
+    const live = new Set<string>();
+    for (const el of this.elements.values()) if (el.groupId) live.add(el.groupId);
+    for (const el of [...this.elements.values()]) {
+      if (!el.groupId || !el.parentGroupId || live.has(el.parentGroupId)) continue;
+      const parent = groupChain(el.parentGroupId, tree).find((g) => live.has(g));
+      this.applyElementPatch(el.id, { parentGroupId: parent });
+      this.emit('elementChange', { slideId: el.containerId, elementId: el.id, keys: ['parentGroupId'] });
+    }
   }
 
   duplicateElement(id: string): SlideElement | undefined {
@@ -936,7 +956,7 @@ export class DeckImpl {
     for (const el of this.elements.values()) {
       if (!el.groupId) continue;
       if (roots.has(el.groupId)) patches.push({ id: el.id, patch: { groupId: undefined, parentGroupId: undefined } });
-      else if (el.parentGroupId && roots.has(tree.get(el.groupId) ?? '')) patches.push({ id: el.id, patch: { parentGroupId: undefined } });
+      else if (el.parentGroupId && roots.has(el.parentGroupId)) patches.push({ id: el.id, patch: { parentGroupId: undefined } });
     }
     if (patches.length) this.updateElements(patches);
   }

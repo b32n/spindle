@@ -147,6 +147,51 @@ describe('nested groups in the collaboration layout (schema v6)', () => {
     expect(b.getElement(ec)!.groupId).toBeUndefined();
   });
 
+  describe('deleting the last direct member of a group', () => {
+    function chain3() {
+      const f = build();
+      const e2 = f.d.addElement(f.s, { type: 'shape', x: 300, y: 0, w: 40, h: 40 }).id;
+      const g1 = f.d.groupElements([f.a, f.b])!;
+      const g2 = f.d.groupElements([f.a, f.c])!;
+      const g3 = f.d.groupElements([f.a, f.e])!;
+      return { ...f, e2, g1, g2, g3 };
+    }
+
+    it('keeps the nesting above an emptied group (deleteElement)', () => {
+      const { d, a, b, c, e, g1, g3 } = chain3();
+      expect(d.getGroupChain(a)).toHaveLength(3);
+      d.deleteElement(c); // g2's only direct member
+      expect(d.getGroupChain(a)).toEqual([g1, g3]);
+      expect(d.getGroupChain(b)).toEqual([g1, g3]);
+      expect(d.getRootGroupId(a)).toBe(g3);
+      expect(d.getGroupMembers(g3).sort()).toEqual([a, b, e].sort());
+    });
+
+    it('keeps the nesting above an emptied group (deleteElements, several emptied)', () => {
+      const { d, a, b, c, e, g1, g3 } = chain3();
+      d.deleteElements([c, 'missing']);
+      expect(d.getGroupChain(a)).toEqual([g1, g3]);
+      d.deleteElements([e]); // g3 now empty too: g1 becomes top level
+      expect(d.getGroupChain(a)).toEqual([g1]);
+      expect(d.getElement(b)!.parentGroupId).toBeUndefined();
+    });
+
+    it('skips over a run of emptied groups to the next live ancestor', () => {
+      const { d, a, c, e, g1, g3 } = chain3();
+      const g4 = d.groupElements([a, d.addElement(d.getActiveSlideId(), { type: 'shape', x: 0, y: 90, w: 9, h: 9 }).id])!;
+      d.deleteElements([c, e]); // g2 and g3 emptied
+      expect(d.getGroupChain(a)).toEqual([g1, g4]);
+      expect(g3).not.toBe(g4);
+    });
+
+    it('leaves intact trees alone', () => {
+      const { d, a, e, g1, g2, g3 } = chain3();
+      d.deleteElement(e);
+      expect(d.getGroupChain(a)).toEqual([g1, g2]);
+      expect(g3).toBeDefined();
+    });
+  });
+
   it('a v5 client refuses a v6 room (refuse-newer-room)', () => {
     expect(COLLAB_SCHEMA_VERSION).toBeGreaterThanOrEqual(6);
     const ydoc = new Y.Doc();

@@ -1,7 +1,7 @@
 // Group transforms. Members share a groupId (nested groups: see group-tree.ts); a group has no frame of its
 // own — its bounds are the union of member AABBs. Members always hold absolute slide frames, so a nested group
-// transforms as the flat list of its leaves; `childFrameInParent` composes a DrawingML group transform for import. Rotating a group orbits each
-// member's centre about the group pivot and adds Δθ to each member's rotation.
+// transforms as the flat list of its leaves; `childFrameInParent` composes a DrawingML group transform for import.
+// Rotating a group orbits each member's centre about the group pivot and adds Δθ to each member's rotation.
 // Scaling is lossy for rotated members under non-uniform factors, so the UI
 // aspect-locks group corner handles (documented in the plan).
 
@@ -72,16 +72,20 @@ export interface GroupXfrm {
 /** A child frame with its flips. */
 export type FlippedFrame = Frame & { flipH: boolean; flipV: boolean };
 
+/** ext/chExt, or 1 when either extent is missing, zero, negative or not finite (malformed files). */
+const extentScale = (ext: number, chExt: number): number =>
+  Number.isFinite(ext) && Number.isFinite(chExt) && chExt > 0 && ext >= 0 ? ext / chExt : 1;
+
 const normDeg = (d: number): number => ((d % 360) + 360) % 360;
 
 /**
  * Map a frame given in a group's child space to the group's parent space: scale by ext/chExt about the child-space
  * centre, mirror for the group flips, rotate about the group centre. A flip mirrors the child (its flip toggles and
- * its rotation changes sign once per flipped axis). A zero child extent maps with scale 1.
+ * its rotation changes sign once per flipped axis). A zero, negative or non-finite extent maps with scale 1.
  */
 export function childFrameInParent(child: Frame & { flipH?: boolean; flipV?: boolean }, g: GroupXfrm): FlippedFrame {
-  const sx = g.chExt.w > 0 ? g.ext.w / g.chExt.w : 1;
-  const sy = g.chExt.h > 0 ? g.ext.h / g.chExt.h : 1;
+  const sx = extentScale(g.ext.w, g.chExt.w);
+  const sy = extentScale(g.ext.h, g.chExt.h);
   const c = frameCenter(child);
   const chCx = g.chOff.x + g.chExt.w / 2;
   const chCy = g.chOff.y + g.chExt.h / 2;
