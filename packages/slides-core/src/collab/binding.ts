@@ -205,6 +205,7 @@ export async function attachCollabToDeck(
         if (slide.layoutRef) m.set('layoutRef', slide.layoutRef); else m.delete('layoutRef');
         if (slide.background) m.set('background', toPlain(slide.background)); else m.delete('background');
         if (slide.notes) m.set('notes', toPlain(slide.notes)); else m.delete('notes');
+        if (slide.hidden) m.set('hidden', true); else m.delete('hidden');
       });
     });
 

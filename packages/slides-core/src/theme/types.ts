@@ -11,8 +11,9 @@ import type {
   ThemeColorSlot,
   PlaceholderType,
   BodyStyle,
+  SlideElement,
 } from '../scene/types';
-import type { TextAlign } from '../text/model';
+import type { Bullet, TextAlign } from '../text/model';
 
 export interface ThemeData {
   name: string;
@@ -47,9 +48,35 @@ export interface PlaceholderDef {
   style?: PlaceholderStyle;
 }
 
+/**
+ * The text defaults of one paragraph level (0 to 8) of a placeholder type, flattened from the master's `p:titleStyle` /
+ * `p:bodyStyle` and the layout's `a:lstStyle` (PPTX). Used when a placeholder is materialized and kept so an importer can
+ * hand the effective values to slide text.
+ */
+export interface LevelTextStyle extends PlaceholderStyle {
+  italic?: boolean;
+  bullet?: Bullet | null;
+  /** Left margin of the level in px (`marL`). */
+  marginLeft?: number;
+  /** First-line indent in px (`indent`, negative for a hanging bullet). */
+  firstLineIndent?: number;
+  /** Line height multiplier. */
+  lineHeight?: number;
+  /** Space before in px. */
+  spaceBefore?: number;
+}
+
+/** Per placeholder type, the level styles; index = paragraph level, a missing level inherits the nearest lower one. */
+export type LayoutTextStyles = Partial<Record<PlaceholderType, LevelTextStyle[]>>;
+
 export interface LayoutData {
   id: string;
   name: string;
+  /** Name of the master the layout came from (PPTX `p:cSld/@name` of the master), for display and re-export. */
+  masterName?: string;
   background?: Fill;
   placeholders: PlaceholderDef[];
+  /** Static, non-placeholder content from the layout and its master (logos, rules, footers), drawn under slide content. */
+  elements?: SlideElement[];
+  textStyles?: LayoutTextStyles;
 }

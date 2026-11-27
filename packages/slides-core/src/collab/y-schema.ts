@@ -2,7 +2,7 @@
 //
 // Layout:
 //   meta:     Y.Map — id, title, slideSize(JSON), theme(JSON), layouts(JSON)   (LWW)
-//   slides:   Y.Map<slideId, Y.Map{ index, layoutRef?, background?(JSON), notes?(JSON) }>
+//   slides:   Y.Map<slideId, Y.Map{ index, layoutRef?, background?(JSON), notes?(JSON), hidden? }>
 //   elements: Y.Map<elId, Y.Map{ containerId, type, x, y, w, h, rotation, index,
 //                                groupId?, locked?, opacity?, placeholder?(JSON),
 //                                props(JSON), richText?: Y.XmlFragment }>
@@ -35,8 +35,12 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * 3: the rich-text fragment carries K3c run marks (`baseline`, `caps`, `charSpacing`, `lang`, as text formatting
  * attributes) and `field` nodes (slide number, date/time, footer; an XmlElement with `kind` and `format`
  * attributes whose child text is the cached text). A v2 client's schema has neither and would drop them on its next write, so it must not join a v3 room.
+ *
+ * 4: K4 layouts and slide visibility. `meta.layouts` entries carry `elements` (static layout content), `textStyles` and
+ * `masterName`, and slide maps carry `hidden`. A v3 client would show hidden slides in its presentation and drop the
+ * `hidden` key the next time it rewrites a slide, so it must not join a v4 room.
  */
-export const COLLAB_SCHEMA_VERSION = 3;
+export const COLLAB_SCHEMA_VERSION = 4;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {
@@ -166,6 +170,7 @@ export function createSlideYMap(slide: Slide): Y.Map<unknown> {
   if (slide.layoutRef) m.set('layoutRef', slide.layoutRef);
   if (slide.background) m.set('background', toPlain(slide.background));
   if (slide.notes) m.set('notes', toPlain(slide.notes));
+  if (slide.hidden) m.set('hidden', true);
   return m;
 }
 
@@ -174,6 +179,7 @@ export function yMapToSlide(id: string, m: Y.Map<unknown>): Slide {
   if (m.has('layoutRef')) slide.layoutRef = m.get('layoutRef') as string;
   if (m.has('background')) slide.background = m.get('background') as Slide['background'];
   if (m.has('notes')) slide.notes = m.get('notes') as RichTextDoc;
+  if (m.get('hidden') === true) slide.hidden = true;
   return slide;
 }
 

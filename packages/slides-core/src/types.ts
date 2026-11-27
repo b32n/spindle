@@ -17,6 +17,8 @@ export interface Slide {
   background?: Fill;
   /** Speaker notes. */
   notes?: RichTextDoc;
+  /** Skipped by present mode and drawn dimmed in the filmstrip (PPTX `show="0"`). */
+  hidden?: boolean;
 }
 
 /** A slide plus its elements — the nested form used by getData/setData. */

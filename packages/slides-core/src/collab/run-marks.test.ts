@@ -72,14 +72,14 @@ describe('run marks and fields in the collaboration layout', () => {
     hb.detach();
   });
 
-  it('stamps v3, and a client of v2 refuses the room (refuse-newer-room)', () => {
-    expect(COLLAB_SCHEMA_VERSION).toBe(3);
+  it('a v2 client refuses a room that carries run marks (refuse-newer-room)', () => {
+    expect(COLLAB_SCHEMA_VERSION).toBeGreaterThanOrEqual(3);
     const ydoc = new Y.Doc();
     hydrateYDocFromData(ydoc, build().getData());
-    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(3);
+    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(COLLAB_SCHEMA_VERSION);
     // What the previous release (supports up to 2) does with this room:
     expect(() => assertSchemaVersion(ydoc, 2)).toThrow(CollabSchemaVersionError);
-    expect(() => assertSchemaVersion(ydoc, 3)).not.toThrow();
-    expect(() => assertSchemaVersion(ydoc, 2)).toThrow(/version 3.*up to version 2/);
+    expect(() => assertSchemaVersion(ydoc, COLLAB_SCHEMA_VERSION)).not.toThrow();
+    expect(() => assertSchemaVersion(ydoc, 2)).toThrow(/up to version 2/);
   });
 });
