@@ -92,18 +92,20 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
       let written = region;
       if (region) {
         const allowed = Math.min(state.maxArrayCells, state.remaining);
-        if (region.rows * region.cols > allowed) {
+        let cells = region.rows * region.cols;
+        if (cells > allowed) {
           // a result over the cap (or what is left of the workbook's budget) is written as its first rows; the range says what is written, and Excel spills the rest when it recalculates
           const cols = Math.min(region.cols, Math.max(1, allowed));
           const rows = Math.min(region.rows, Math.max(1, Math.floor(allowed / cols)));
           span = { rows, cols };
           written = { ...region, rows, cols };
+          cells = rows * cols;
           if (state.cuts++ < MAX_EXPORT_WARNINGS) {
             const why = region.rows * region.cols > state.maxArrayCells ? `is over ${state.maxArrayCells} cells` : `does not fit in the ${state.remaining} cells left of the workbook's budget for array formula results`;
             state.onWarning?.(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's result (${region.rows} x ${region.cols} cells) ${why}, so only its first ${rows} x ${cols} are written to the file.`);
           }
         }
-        state.remaining -= (written ?? region).rows * (written ?? region).cols;
+        state.remaining -= cells;
       }
       if (span) {
         out.arrayRef = spanRef(row, col, span.rows, span.cols);
