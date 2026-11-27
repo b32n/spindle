@@ -5,18 +5,12 @@
 
 import React, { useState } from 'react';
 import { Shapes as ShapesIcon, ChevronDown } from 'lucide-react';
-import type { ShapePreset, NewElementSpec } from '@b32nio/spindle-slides-core';
+import { SHAPE_CATEGORIES, PICKER_PRESETS, SHAPE_PRESET_INFO, type ShapePreset, type NewElementSpec } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { shapeGeom } from './elements/shapes';
 import { useDeck } from '../hooks';
 import { Popover } from './Popover';
 import { TB } from './toolbarUI';
-
-const PRESETS: ShapePreset[] = [
-  'rect', 'roundRect', 'ellipse', 'triangle', 'rightTriangle', 'diamond',
-  'pentagon', 'hexagon', 'octagon', 'star5', 'arrowRight', 'arrowLeft',
-  'chevron', 'parallelogram', 'trapezoid', 'plus', 'heart', 'cloud',
-];
 
 const btn: React.CSSProperties = { ...TB.dropdownButton, gap: 2, padding: '0 6px' };
 
@@ -27,8 +21,9 @@ function ShapeIcon({ preset }: { preset: ShapePreset }): React.ReactElement {
       {g.type === 'ellipse' ? (
         <ellipse cx={g.cx} cy={g.cy} rx={g.rx} ry={g.ry} fill="#5b6673" />
       ) : (
-        <path d={g.d} fill="#5b6673" />
+        <path d={g.d} fill="#5b6673" stroke={g.strokeD ? 'none' : undefined} />
       )}
+      {g.type === 'path' && g.strokeD ? <path d={g.strokeD} fill="none" stroke="#5b6673" strokeWidth={1.5} /> : null}
     </svg>
   );
 }
@@ -55,18 +50,27 @@ export function ShapePicker(): React.ReactElement {
   };
 
   const grid = (cell: number, onPick: (p: ShapePreset) => void) => (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, ${cell}px)`, gap: 6, justifyContent: 'center' }}>
-      {PRESETS.map((p) => (
-        <button
-          key={p}
-          title={p}
-          onClick={() => onPick(p)}
-          style={{ width: cell, height: cell, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid transparent', borderRadius: 6, background: '#fff', cursor: 'pointer' }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#f1f4f8')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = '#fff')}
-        >
-          <ShapeIcon preset={p} />
-        </button>
+    <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+      {SHAPE_CATEGORIES.map((c) => (
+        <section key={c.id} aria-label={c.label}>
+          <div style={{ font: '600 11px sans-serif', color: '#5b6673', padding: '6px 4px 2px' }}>{c.label}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, ${cell}px)`, gap: 6, justifyContent: 'center' }}>
+            {PICKER_PRESETS.filter((p) => SHAPE_PRESET_INFO[p].category === c.id).map((p) => (
+              <button
+                key={p}
+                title={SHAPE_PRESET_INFO[p].label}
+                aria-label={SHAPE_PRESET_INFO[p].label}
+                data-shape={p}
+                onClick={() => onPick(p)}
+                style={{ width: cell, height: cell, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid transparent', borderRadius: 6, background: '#fff', cursor: 'pointer' }}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#f1f4f8')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = '#fff')}
+              >
+                <ShapeIcon preset={p} />
+              </button>
+            ))}
+          </div>
+        </section>
       ))}
     </div>
   );

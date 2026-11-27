@@ -177,7 +177,7 @@ function App() {
 
 ### Key Features
 
-- **Element Model**: text, shapes (~18 SVG presets), images, lines/connectors, and **tables**
+- **Element Model**: text, shapes (76 SVG presets), images, lines/connectors, and **tables**
 - **Tables**: per-cell rich text, cell/row/column/range selection, paste a spreadsheet range as a table
 - **Interactions**: drag/resize/rotate at 60fps, smart-guide snapping, align/distribute, groups, z-order
 - **Themes & Layouts**: symbolic PPTX color slots, layout gallery with placeholder materialization

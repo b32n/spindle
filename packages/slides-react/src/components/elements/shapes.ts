@@ -3,10 +3,11 @@
 // ShapeView renders inside a `viewBox="0 0 w h"`. Kept framework-free so it can
 // be unit-tested and reused by the PDF/print path.
 
-import type { ShapePreset } from '@b32nio/spindle-slides-core';
+import { isUnknownShape, isShapePreset, resolveAdjustments, type ShapeKind, type ShapePreset } from '@b32nio/spindle-slides-core';
+import { presetPath } from './preset-geom';
 
 export type ShapeGeom =
-  | { type: 'path'; d: string }
+  | { type: 'path'; d: string; /** When set, `d` is only filled and this open path is only stroked. */ strokeD?: string }
   | { type: 'ellipse'; cx: number; cy: number; rx: number; ry: number };
 
 type Point = [number, number];
@@ -44,14 +45,17 @@ function star(points: number, w: number, h: number, innerRatio: number): Point[]
   return pts;
 }
 
-export function shapeGeom(preset: ShapePreset, w: number, h: number, adjustments?: number[]): ShapeGeom {
-  const adj = adjustments?.[0];
+/** The geometry of a shape: an unknown (`unknown:<prst>`) shape is drawn as a default rounded rectangle approximation. */
+export function shapeGeom(shape: ShapeKind, w: number, h: number, adjustments?: number[]): ShapeGeom {
+  // a name that is neither a preset nor `unknown:` (hand-edited data) keeps drawing as a plain rectangle
+  const preset: ShapePreset = isUnknownShape(shape) ? 'roundRect' : isShapePreset(shape) ? shape : 'rect';
+  const adj = resolveAdjustments(preset, isUnknownShape(shape) ? undefined : adjustments)[0];
   switch (preset) {
     case 'rect':
       return { type: 'path', d: polyPath([[0, 0], [w, 0], [w, h], [0, h]]) };
 
     case 'roundRect': {
-      const r = Math.min(w, h) * (adj ?? 0.15);
+      const r = Math.min(w, h) * adj;
       const d =
         `M${round(r)} 0 H${round(w - r)} A${round(r)} ${round(r)} 0 0 1 ${round(w)} ${round(r)} ` +
         `V${round(h - r)} A${round(r)} ${round(r)} 0 0 1 ${round(w - r)} ${round(h)} ` +
@@ -164,6 +168,6 @@ export function shapeGeom(preset: ShapePreset, w: number, h: number, adjustments
     }
 
     default:
-      return { type: 'path', d: polyPath([[0, 0], [w, 0], [w, h], [0, h]]) };
+      return { type: 'path', ...presetPath(preset, w, h, adjustments) };
   }
 }

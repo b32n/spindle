@@ -46,15 +46,6 @@
     {
       "count": 1,
       "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
-      "id": "pptx.shapes.unsupportedGeometry",
-      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its 18)",
-      "where": [
-        "rightArrow"
-      ]
-    },
-    {
-      "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
       "id": "pptx.slideSize",
       "label": "slide size other than 16:9",
       "where": [

@@ -11,7 +11,7 @@ The document model is a single flowing sequence of blocks; a slide is a bag of a
 
 ## What's in the box
 
-- Text, shape (~18 SVG presets), image, line/connector, and **table** elements
+- Text, shape (76 SVG presets), image, line/connector, and **table** elements
 - Tables: per-cell rich text, cell/row/column/range selection, and pasting a spreadsheet range as a table
 - Multi-select with move / resize / rotate handles, smart guides + snapping
 - Align & distribute, group / ungroup, z-order, filmstrip with drag reorder

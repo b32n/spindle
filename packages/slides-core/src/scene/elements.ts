@@ -19,7 +19,7 @@ import type {
   LineElement,
   TableElement,
   TableCell,
-  ShapePreset,
+  ShapeKind,
   ArrowHead,
   EndpointBind,
   PlaceholderMeta,
@@ -86,7 +86,7 @@ export function createTextElement(input: TextElementInput): TextElement {
 }
 
 export interface ShapeElementInput extends BaseElementInput {
-  shape?: ShapePreset;
+  shape?: ShapeKind;
   adjustments?: number[];
   flipH?: boolean;
   flipV?: boolean;

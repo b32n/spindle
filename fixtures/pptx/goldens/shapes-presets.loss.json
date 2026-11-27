@@ -24,16 +24,16 @@
       ]
     },
     {
-      "count": 168,
+      "count": 103,
       "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
       "id": "pptx.shapes.unsupportedGeometry",
-      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its 18)",
+      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)",
       "where": [
-        "lineInv",
-        "rtTriangle",
         "nonIsoscelesTrapezoid",
-        "heptagon",
-        "decagon"
+        "star7",
+        "star10",
+        "star16",
+        "star24"
       ]
     }
   ]
