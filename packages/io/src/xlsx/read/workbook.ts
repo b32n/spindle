@@ -9,10 +9,12 @@ import type {
 } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError } from '../../common/import-error';
 import { isTrue, kid, kids, type XmlElement } from '../xml';
-import { abbreviate, CappedWarnings, truncate } from './capped';
+import { abbreviate, CappedWarnings, flat, truncate } from './capped';
 import { partsWithContentType } from './content-types';
 import type { XlsxPackage } from './package';
 import { relsOfKind } from './relationships';
+import { scanXml } from './sax';
+import { TreeBuilder, type ParsedTree } from './tree';
 import { boolAttr, intAttr, numAttr, put } from './values';
 
 // ---------------------------------------------------------------------------
@@ -92,6 +94,7 @@ async function readSheetRef(el: XmlElement, index: number, scan: SheetScan, pkg:
   if (name.length > MAX_SHEET_NAME_CHARS) {
     scan.problems.add(`The sheet name "${abbreviate(name)}" is ${name.length} characters long (Excel allows 31); it was cut to ${MAX_SHEET_NAME_CHARS}.`);
     name = truncate(name, MAX_SHEET_NAME_CHARS);
+    pkg.loss.add('sheetNames', name);
   }
   const relId = el.attrs.id ?? '';
   const rel = scan.byId.get(relId);
@@ -119,18 +122,69 @@ async function readSheetRef(el: XmlElement, index: number, scan: SheetScan, pkg:
   };
 }
 
-function readDefinedNames(root: XmlElement | undefined): XlsxDefinedName[] {
-  const out: XlsxDefinedName[] = [];
-  for (const el of kids(kid(root, 'definedNames'), 'definedName')) {
-    const name = el.attrs.name;
-    if (name === undefined || name === '') continue;
-    const dn: XlsxDefinedName = { name, ref: el.text.trim().replace(/^=/, ''), builtin: name.startsWith('_xlnm.') };
-    put(dn, 'localSheetId', intAttr(el.attrs.localSheetId));
-    put(dn, 'hidden', boolAttr(el.attrs.hidden));
-    put(dn, 'comment', el.attrs.comment);
-    out.push(dn);
-  }
-  return out;
+/** A `<definedName>` as a name: `undefined` for one without a name. */
+function toDefinedName(attrs: Readonly<Record<string, string>>, text: string): XlsxDefinedName | undefined {
+  const name = attrs.name;
+  if (name === undefined || name === '') return undefined;
+  const dn: XlsxDefinedName = { name, ref: flat(text.trim().replace(/^=/, '')), builtin: name.startsWith('_xlnm.') };
+  put(dn, 'localSheetId', intAttr(attrs.localSheetId));
+  put(dn, 'hidden', boolAttr(attrs.hidden));
+  put(dn, 'comment', attrs.comment);
+  return dn;
+}
+
+interface WorkbookParse extends ParsedTree {
+  definedNames: XlsxDefinedName[];
+  /** How many names past `maxNames` were in the part (the first ones were kept). */
+  namesLeftOut: number;
+}
+
+/**
+ * The workbook part in one pass: an element tree of everything but the first `<definedNames>` (under the element budget
+ * `maxElements`), and that element's names as a list of events (at most `maxNames` kept): a workbook of a million names is
+ * data, not a document to refuse, and its memory is the names kept.
+ */
+function parseWorkbook(text: string, maxElements: number, maxNames: number): WorkbookParse {
+  const builder = new TreeBuilder({ left: maxElements });
+  const definedNames: XlsxDefinedName[] = [];
+  let depth = 0;
+  let listSeen = false;
+  let inList = false;
+  let attrs: Readonly<Record<string, string>> | undefined;
+  let nameText = '';
+  let namesLeftOut = 0;
+  const wellFormed = scanXml(text, {
+    open(name, a) {
+      depth++;
+      if (depth === 2 && name === 'definedNames' && !listSeen) listSeen = inList = true;
+      else if (inList) {
+        if (depth === 3 && name === 'definedName') {
+          attrs = a;
+          nameText = '';
+        }
+      } else builder.start(name, a);
+    },
+    close() {
+      if (!inList) builder.end();
+      else if (depth === 3 && attrs !== undefined) {
+        const dn = toDefinedName(attrs, nameText);
+        attrs = undefined;
+        if (dn !== undefined) {
+          if (definedNames.length < maxNames) definedNames.push(dn);
+          else namesLeftOut++;
+        }
+      } else if (depth === 2) inList = false;
+      depth--;
+    },
+    text(chunk) {
+      if (inList) {
+        if (depth === 3 && attrs !== undefined) nameText += chunk;
+      } else builder.text(chunk);
+    },
+    halted: () => builder.dropped,
+  });
+  if (builder.dropped) return { root: undefined, overLimit: true, definedNames, namesLeftOut };
+  return { root: wellFormed ? builder.root : undefined, overLimit: false, definedNames, namesLeftOut };
 }
 
 const CALC_MODES = new Set(['auto', 'manual', 'autoNoTable']);
@@ -170,10 +224,26 @@ function locate(pkg: XlsxPackage, rels: readonly XlsxRelationship[], kind: strin
  * Read the workbook part and locate what it refers to. Throws only `ImportError('corrupt')` when no workbook part can be found;
  * a workbook part that cannot be parsed gives an empty workbook (no sheets) and a warning.
  */
-export async function readWorkbook(pkg: XlsxPackage): Promise<XlsxWorkbookInfo> {
+export async function readWorkbook(pkg: XlsxPackage, options: { strict?: boolean } = {}): Promise<XlsxWorkbookInfo> {
   const part = await findWorkbookPart(pkg);
-  const root = await pkg.xml(part);
-  const rels = await pkg.rels(part);
+  const text = await pkg.text(part);
+  const parsed = text === undefined ? undefined : parseWorkbook(text, pkg.limits.maxPartElements, pkg.limits.maxPartElements);
+  const root = parsed === undefined ? undefined : pkg.report(part, parsed);
+  if (root === undefined && options.strict)
+    throw new ImportError(
+      'corrupt',
+      parsed?.overLimit
+        ? `The workbook part of the file has too many elements (more than the import limit maxPartElements, ${pkg.limits.maxPartElements}; raise it with the limits option).`
+        : 'The workbook part of the file is damaged (it is not well-formed XML).'
+    );
+  if (parsed && parsed.namesLeftOut > 0) {
+    pkg.loss.add('definedNames', part, parsed.namesLeftOut);
+    pkg.warnings.push(`The workbook has more than ${pkg.limits.maxPartElements} defined names (the import limit maxPartElements); ${parsed.namesLeftOut} were not read.`);
+  }
+  const entries = kids(kid(root, 'sheets'), 'sheet');
+  const limit = pkg.limits.maxSheets * SHEET_ENTRY_FACTOR;
+  // the relationships kept are those of the kinds the reader uses and those the sheet entries name (their kind is the sheet's kind)
+  const rels = await pkg.rels(part, new Set(entries.slice(0, limit).map((el) => el.attrs.id ?? '')));
   const workbookPr = kid(root, 'workbookPr');
   const view = kid(kid(root, 'bookViews'), 'workbookView');
   const sheets: XlsxSheetRef[] = [];
@@ -183,18 +253,19 @@ export async function readWorkbook(pkg: XlsxPackage): Promise<XlsxWorkbookInfo> 
   for (const r of rels) if (!byId.has(r.id)) byId.set(r.id, r);
   const problems = new CappedWarnings((m) => pkg.warnings.push(m), 'sheet warnings');
   const scan: SheetScan = { byId, comments: new Map(), problems };
-  const entries = kids(kid(root, 'sheets'), 'sheet');
-  const limit = pkg.limits.maxSheets * SHEET_ENTRY_FACTOR;
   for (const [i, el] of entries.slice(0, limit).entries()) sheets.push(await readSheetRef(el, i, scan, pkg));
   problems.close();
-  if (entries.length > limit) pkg.warnings.push(`The workbook lists ${entries.length} sheets; only the first ${limit} entries were read (${SHEET_ENTRY_FACTOR} times the import limit maxSheets).`);
+  if (entries.length > limit) {
+    pkg.loss.add('sheets', 'the sheet entries of the workbook', entries.length - limit);
+    pkg.warnings.push(`The workbook lists ${entries.length} sheets; only the first ${limit} entries were read (${SHEET_ENTRY_FACTOR} times the import limit maxSheets).`);
+  }
 
   const info: XlsxWorkbookInfo = {
     part,
     date1904: isTrue(workbookPr?.attrs.date1904),
     calc: readCalc(kid(root, 'calcPr')),
     sheets,
-    definedNames: readDefinedNames(root),
+    definedNames: root === undefined ? [] : (parsed as WorkbookParse).definedNames,
     parts: {},
   };
   put(info, 'codeName', workbookPr?.attrs.codeName);

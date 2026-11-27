@@ -69,6 +69,10 @@ describe('limits', () => {
       maxRanges: 1_048_576,
       maxRows: 2_097_152,
       maxPartElements: 1_000_000,
+      maxColumns: 1_048_576,
+      maxExtensionChars: 64 * MB,
+      maxRelationships: 1_048_576,
+      maxScannedElements: 16_777_216,
     });
     expect(resolveLimits()).toEqual(DEFAULT_IMPORT_LIMITS);
     expect(resolveLimits({ maxEntries: 3 })).toEqual({ ...DEFAULT_IMPORT_LIMITS, maxEntries: 3 });

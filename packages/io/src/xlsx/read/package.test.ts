@@ -56,17 +56,57 @@ describe('XlsxPackage: the element budget and the entry budget', () => {
     expect(pkg.warnings).toEqual([`The part xl/${'p'.repeat(60)}… is not well-formed XML and was skipped.`]);
   });
 
-  it('keeps the first relationships up to the budget, with one warning', async () => {
-    const rels = `<Relationships ${NS}>${Array.from({ length: 5 }, (_, i) => `<Relationship Id="r${i}" Target="t${i}.xml"/>`).join('')}</Relationships>`;
-    const pkg = await pkgWith({ '_rels/.rels': rels, 'xl/workbook.xml': '<workbook/>' }, 3);
+  const OD = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const relsOf = (n: number, kind = 'worksheet') => relsXml(Array.from({ length: n }, (_, i) => [`r${i}`, kind, `t${i}.xml`] as [string, string, string]));
+
+  it('keeps the first relationships up to the budget, with one warning and a loss item', async () => {
+    const pkg = await pkgWith({ '_rels/.rels': relsOf(5), 'xl/workbook.xml': '<workbook/>' }, 3);
     expect((await pkg.rels('')).map((r) => r.id)).toEqual(['r0', 'r1', 'r2']);
     expect(pkg.warnings).toEqual(['The part _rels/.rels has more than 3 entries (the import limit maxPartElements); the rest were not read.']);
+    expect(pkg.loss.items()).toMatchObject([{ id: 'xlsx.package.sizeLimit', label: 'part(s) over the element limit', where: ['_rels/.rels'] }]);
   });
 
   it('reads the relationships that precede damage, with one warning', async () => {
-    const pkg = await pkgWith({ '_rels/.rels': `<Relationships ${NS}><Relationship Id="r0" Target="t.xml"/><Relationship Id="r1"` }, 10);
+    const pkg = await pkgWith({ '_rels/.rels': `<Relationships ${NS}><Relationship Id="r0" Type="${OD}/worksheet" Target="t.xml"/><Relationship Id="r1"` }, 10);
     expect((await pkg.rels('')).map((r) => r.id)).toEqual(['r0']);
     expect(pkg.warnings).toEqual(['The part _rels/.rels is not well-formed XML; it was read as far as the damage.']);
+  });
+
+  it('keeps only the relationships the reader uses (by kind, any case) and those named by id: the rest are read, counted and dropped', async () => {
+    const kinds = ['officeDocument', 'worksheet', 'sharedStrings', 'styles', 'theme', 'person', 'hyperlink', 'comments', 'vmlDrawing', 'threadedComment', 'drawing', 'CHARTSHEET', 'image', 'printerSettings', 'table', 'externalLink'];
+    const rels = relsXml(kinds.map((k, i) => [`r${i}`, k, `t${i}.xml`] as [string, string, string]));
+    const pkg = await pkgWith({ 'xl/_rels/workbook.xml.rels': rels, 'xl/workbook.xml': '<workbook/>' }, 100);
+    expect((await pkg.rels('xl/workbook.xml')).map((r) => r.kind)).toEqual(kinds.slice(0, 12));
+    // the sheet entries name theirs: whatever kind a sheet is, its relationship is kept
+    const named = await pkgWith({ 'xl/_rels/workbook.xml.rels': rels, 'xl/workbook.xml': '<workbook/>' }, 100);
+    expect((await named.rels('xl/workbook.xml', new Set(['r14', 'r15']))).map((r) => r.id)).toEqual([...kinds.slice(0, 12).map((_, i) => `r${i}`), 'r14', 'r15']);
+  });
+
+  it('draws every relationship read (kept or not) on one budget for the package: the part it runs out in is read as far as it goes, the next ones not at all, one warning and one loss item', async () => {
+    const bytes = await zipOf({
+      'xl/workbook.xml': '<workbook/>',
+      'xl/_rels/workbook.xml.rels': relsOf(2),
+      'xl/worksheets/_rels/sheet1.xml.rels': relsOf(3, 'image'),
+      'xl/worksheets/_rels/sheet2.xml.rels': relsOf(3, 'hyperlink'),
+      'xl/worksheets/_rels/sheet3.xml.rels': relsOf(3, 'hyperlink'),
+    });
+    const pkg = await XlsxPackage.open(bytes, { limits: { maxRelationships: 6 } });
+    expect(await pkg.rels('xl/workbook.xml')).toHaveLength(2);
+    expect(await pkg.rels('xl/worksheets/sheet1.xml')).toHaveLength(0);
+    expect(pkg.warnings).toEqual([]);
+    expect((await pkg.rels('xl/worksheets/sheet2.xml')).map((r) => r.id)).toEqual(['r0']);
+    expect(await pkg.rels('xl/worksheets/sheet3.xml')).toEqual([]);
+    expect(pkg.warnings).toEqual(['The package has more than 6 relationships (the import limit maxRelationships); the rest, from xl/worksheets/_rels/sheet2.xml.rels on, were not read.']);
+    expect(pkg.loss.items()).toMatchObject([{ id: 'xlsx.package.sizeLimit', label: 'part(s) with relationships not read', count: 2, where: ['xl/worksheets/_rels/sheet2.xml.rels', 'xl/worksheets/_rels/sheet3.xml.rels'] }]);
+  });
+
+  it('reports a tree over the element budget as a loss, and a damaged one only as a warning (report)', async () => {
+    const pkg = await pkgWith({ 'xl/a.xml': '<a><b/><b/><b/></a>', 'xl/b.xml': '<a><' }, 3);
+    expect(await pkg.xml('xl/a.xml')).toBeUndefined();
+    expect(await pkg.xml('xl/b.xml')).toBeUndefined();
+    expect(pkg.loss.items()).toMatchObject([{ label: 'part(s) over the element limit', where: ['xl/a.xml'] }]);
+    expect(pkg.report('xl/c.xml', { root: undefined, overLimit: false })).toBeUndefined();
+    expect(pkg.warnings).toHaveLength(3);
   });
 
   it('keeps the first content types up to the budget, with one warning', async () => {

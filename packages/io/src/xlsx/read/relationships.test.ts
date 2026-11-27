@@ -94,3 +94,36 @@ describe('parseRelationships: problems and the entry limit', () => {
     expect(() => parseRelationships(text, 'xl/workbook.xml')).not.toThrow();
   });
 });
+
+describe('parseRelationships: the kinds kept and the package budget', () => {
+  const OD = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const text = relsXml([['a', 'hyperlink', 'https://x/', 'External'], ['b', 'image', 'i.png'], ['c', 'hyperlink', 'https://y/', 'External'], ['b', 'hyperlink', 'again.xml'], ['d', 'comments', 'c.xml']]);
+
+  it('keeps what `keep` names by kind and id, and the others are read (they count for the part limit) but not kept; a repeated id keeps the first, whatever it was', () => {
+    const asked: Array<[string, string]> = [];
+    const keep = (kind: string, id: string) => {
+      asked.push([kind, id]);
+      return kind === 'hyperlink' || id === 'd';
+    };
+    expect(parseRelationships(text, 'xl/worksheets/sheet1.xml', { keep }).map((r) => r.id)).toEqual(['a', 'c', 'd']);
+    // the repeated `b` is not asked again: the first `b` (an image, not kept) stands
+    expect(asked).toEqual([['hyperlink', 'a'], ['image', 'b'], ['hyperlink', 'c'], ['comments', 'd']]);
+    expect(parseRelationships(text, 'xl/worksheets/sheet1.xml', { max: 2, keep, problem: () => undefined }).map((r) => r.id)).toEqual(['a']);
+  });
+
+  it('draws each entry read on the budget it is given, shared with the next part, and ends the read with problem("budget") when it is spent', () => {
+    const budget = { left: 4 };
+    const problems: string[] = [];
+    expect(parseRelationships(text, 'x.xml', { budget, keep: (k) => k === 'hyperlink', problem: (w) => problems.push(w) }).map((r) => r.id)).toEqual(['a', 'c']);
+    expect(problems).toEqual([]);
+    expect(budget.left).toBe(0);
+    expect(parseRelationships(text, 'x.xml', { budget, problem: (w) => problems.push(w) })).toEqual([]);
+    expect(problems).toEqual(['budget']);
+  });
+
+  it('gives the entries of one type URI the same string, and keeps the kind as the last segment of it', () => {
+    const [a, b] = parseRelationships(relsXml([['a', 'hyperlink', 'https://x/', 'External'], ['b', 'hyperlink', 'https://y/', 'External']]), 'x.xml');
+    expect([a.type, a.kind]).toEqual([`${OD}/hyperlink`, 'hyperlink']);
+    expect(b.type).toBe(a.type);
+  });
+});

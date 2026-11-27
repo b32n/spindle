@@ -4,6 +4,7 @@
 // their types. Callers resolve their own pooled styles/formats down to
 // concrete values before calling exportXlsx.
 
+import type { ImportLossItem } from '../loss';
 import type { XlsxFormulaInfo, XlsxSharedString, XlsxSheetDetails, XlsxStyles, XlsxTheme, XlsxWorkbookInfo } from './package-types';
 
 export type SpreadsheetCellValue = string | number | boolean | null;
@@ -104,6 +105,13 @@ export interface SpreadsheetImportResult {
   sharedStrings?: XlsxSharedString[];
   /** The theme: its 12 colours in a cell colour's `theme` order, and the major/minor fonts (S2). Always set by `importXlsx` (the own reader). */
   theme?: XlsxTheme;
+  /**
+   * What the import limits (`ImportLimits`) cut from this file, as loss items (id `xlsx.package.sizeLimit`) a host can show with the
+   * rest of the import report: cells past `maxTotalCells`, sheets past `maxSheets`, ranges, rows, columns, extension lists, formulas,
+   * parts past `maxPartElements`... Each says what was cut and the option that raises the limit. Empty (and always set by the own
+   * reader) when nothing was cut. `importFromXlsx` appends them to the loss report it returns.
+   */
+  limitLoss?: ImportLossItem[];
 }
 
 /** Options for the loss detector (`detectXlsxLoss`, and `inspectXlsx` in sheets-core). All optional. */

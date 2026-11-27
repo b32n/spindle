@@ -4,7 +4,7 @@ import { resolveLimits, type ImportLimits } from '../common/safe-zip';
 import { abbreviate, CappedWarnings } from './read/capped';
 import { XlsxPackage } from './read/package';
 import { readWorkbookParts, toImportExtras } from './read';
-import { readBudget, readSheet } from './read/sheet';
+import { readBudget, readFormats, readSheet } from './read/sheet';
 import { findWorkbookPart, isBinaryWorkbook } from './read/workbook';
 
 export interface ImportXlsxOptions {
@@ -28,8 +28,6 @@ export async function importXlsx(bytes: Uint8Array, options: ImportXlsxOptions =
     if (isBinaryWorkbook(pkg, workbookPart)) {
       throw new ImportError('legacy-binary', 'This is a binary Excel workbook (.xlsb), which cannot be opened. In Excel, use Save As and choose Excel Workbook (.xlsx).');
     }
-    // a workbook part that is not XML leaves nothing to read (any other damaged part is a warning)
-    if ((await pkg.xml(workbookPart)) === undefined) throw new ImportError('corrupt', 'The workbook part of the file is damaged (it is not well-formed XML, or has more elements than the import limit maxPartElements allows).');
     return await readPackage(pkg, resolveLimits(options.limits));
   } catch (e) {
     throw toImportError(e);
@@ -37,26 +35,25 @@ export async function importXlsx(bytes: Uint8Array, options: ImportXlsxOptions =
 }
 
 async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<SpreadsheetImportResult> {
-  const parts = await readWorkbookParts(pkg);
+  // a workbook part that is not XML (or has too many elements) leaves nothing to read (any other damaged part is a warning)
+  const parts = await readWorkbookParts(pkg, { strict: true });
   const warnings: string[] = [];
   const sheets: SpreadsheetSheet[] = [];
   // warnings about single sheets (a repeated part, a repeated name) are given for the first few, then counted
   const sheetWarnings = new CappedWarnings((m) => warnings.push(m), 'sheet warnings');
   const names = new Names();
   // what the whole package may still spend, shared by all its sheets, and the parts read so far (a part is read once)
-  const budget = readBudget(limits);
+  const budget = readBudget(limits, pkg.loss);
   const readParts = new Set<string>();
+  const formats = readFormats(parts.styles, budget, (message) => warnings.push(message));
   // where each workbook sheet (by its place in the workbook) went in `sheets`, for the active tab
   const placed = new Map<number, number>();
   for (const [position, ref] of parts.workbook.sheets.entries()) {
     // only worksheets are read (a chart sheet has no cells), and one whose part is missing was already reported by the package
     if (ref.kind !== 'worksheet' || ref.part === undefined) continue;
     if (sheets.length >= limits.maxSheets) {
-      warnings.push(`The workbook has more than ${limits.maxSheets} worksheets (the import limit maxSheets); the others were not read.`);
-      break;
-    }
-    if (budget.cells <= 0) {
-      warnings.push('The workbook has more cells than the import limit allows (maxTotalCells); the sheets after the last one read were not read.');
+      warnings.push(`The workbook has more than ${limits.maxSheets} worksheets (the import limit maxSheets); the others were not read. Raise the limit with the limits option.`);
+      pkg.loss.add('sheets', '', parts.workbook.sheets.slice(position).filter((r) => r.kind === 'worksheet' && r.part !== undefined).length);
       break;
     }
     // each part is read once: a second sheet naming a part is how one large part is made to count many times over
@@ -67,18 +64,30 @@ async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<Spre
     }
     readParts.add(ref.part);
     const name = names.unique(ref.name, sheetWarnings);
-    placed.set(position, sheets.length);
-    sheets.push(
-      readSheet(await pkg.text(ref.part), { ...ref, name }, {
+    // a sheet that comes after the cell or scan budget is spent is not kept if it has anything to cut (an empty one is), and a part is
+    // still read for that: it is inflated once and stops at its first cell
+    const spent = budget.cells <= 0 || budget.scanned <= 0;
+    const cuts = budget.cuts;
+    const sheet = readSheet(
+      await pkg.text(ref.part),
+      { ...ref, name },
+      {
         styles: parts.styles,
+        formats,
         sharedStrings: parts.sharedStrings,
         colors: parts.colors,
         date1904: parts.workbook.date1904,
         maxSheetFormulaChars: limits.maxSheetFormulaChars,
         budget,
         warn: (message) => warnings.push(message),
-      })
+      }
     );
+    if (spent && budget.cuts > cuts) {
+      names.forget(name);
+      continue;
+    }
+    placed.set(position, sheets.length);
+    sheets.push(sheet);
   }
   sheetWarnings.close();
   // the package's own warnings (damaged parts, unresolvable relationships) come first, in the order they were met
@@ -87,6 +96,7 @@ async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<Spre
     activeSheetIndex: activeSheet(parts.workbook.activeTab, placed, sheets.length),
     warnings: [...new Set([...pkg.warnings, ...warnings])],
     ...toImportExtras(parts),
+    limitLoss: pkg.loss.items(),
   };
 }
 
@@ -110,6 +120,11 @@ class Names {
     }
     this.taken.add(candidate.toLowerCase());
     return candidate;
+  }
+
+  /** The name of a sheet that was not kept is free again. */
+  forget(name: string): void {
+    this.taken.delete(name.toLowerCase());
   }
 }
 

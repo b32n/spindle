@@ -324,10 +324,18 @@ describe('importXlsx: the own reader', () => {
     expect((await importXlsx(bytes)).warnings).toEqual([]);
   });
 
-  it('refuses a workbook part over the element budget with an error that says so, and reads a styles part over it as a skipped part', async () => {
+  it('reads the defined names of a workbook as a list under a cap (one warning, one loss item), refuses a workbook whose other elements are over the budget with an error that says "too many elements", and reads a styles part over it as a skipped part', async () => {
     const many = `<sheet name="S" sheetId="1" r:id="rId1"/></sheets><definedNames>${'<definedName name="n">A1</definedName>'.repeat(20)}</definedNames><sheets>`;
     const bytes = await book(many, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>') });
-    await expect(importXlsx(bytes, { limits: { maxPartElements: 10 } })).rejects.toMatchObject({ code: 'corrupt', message: expect.stringContaining('maxPartElements') });
+    const capped = await importXlsx(bytes, { limits: { maxPartElements: 10 } });
+    expect(capped.workbook?.definedNames).toHaveLength(10);
+    expect(capped.warnings).toEqual(['The workbook has more than 10 defined names (the import limit maxPartElements); 10 were not read.']);
+    expect(capped.limitLoss).toMatchObject([{ id: 'xlsx.package.sizeLimit', label: 'defined name(s) not kept', count: 10 }]);
+    const crowded = await book(`${'<sheet name="S" sheetId="1" r:id="rId1"/>'.repeat(20)}`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>') });
+    await expect(importXlsx(crowded, { limits: { maxPartElements: 10 } })).rejects.toMatchObject({
+      code: 'corrupt',
+      message: 'The workbook part of the file has too many elements (more than the import limit maxPartElements, 10; raise it with the limits option).',
+    });
     expect((await importXlsx(bytes)).sheets).toHaveLength(1);
     const styled = await book('<sheet name="S" sheetId="1" r:id="rId1"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'styles', 'styles.xml']], {
       'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" s="1"><v>1</v></c></row>'),
@@ -336,6 +344,58 @@ describe('importXlsx: the own reader', () => {
     const result = await importXlsx(styled, { limits: { maxPartElements: 10 } });
     expect(result.styles?.cellXfs).toEqual([]);
     expect(result.warnings).toEqual(['The part xl/styles.xml has more than 10 elements (the import limit maxPartElements) and was skipped.', 'S: 1 cell(s) use a format the file does not have; imported unformatted.']);
+    expect(result.limitLoss).toMatchObject([{ label: 'part(s) over the element limit', where: ['xl/styles.xml'] }]);
+  });
+
+  it('reads the workbook part once: a workbook part that is damaged is refused as corrupt, with a message that does not blame the element budget', async () => {
+    const zip = await zipOf({ '_rels/.rels': relsXml([['rId1', 'officeDocument', 'xl/workbook.xml']]), 'xl/workbook.xml': '<workbook><sheets>' });
+    await expect(importXlsx(zip)).rejects.toMatchObject({ code: 'corrupt', message: 'The workbook part of the file is damaged (it is not well-formed XML).' });
+  });
+
+  it('carries what the limits cut as loss items (limitLoss), empty for a file that is not cut, and the same ids and wording on every kind', async () => {
+    const part = sheetXml('<row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>2</v></c></row>');
+    const bytes = await book('<sheet name="S" sheetId="1" r:id="rId1"/><sheet name="T" sheetId="2" r:id="rId2"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
+      'xl/worksheets/sheet1.xml': part,
+      'xl/worksheets/sheet2.xml': part,
+    });
+    expect((await importXlsx(bytes)).limitLoss).toEqual([]);
+    const cut = await importXlsx(bytes, { limits: { maxTotalCells: 3 } });
+    expect(cut.sheets.map((s) => s.cells.size)).toEqual([2, 1]);
+    expect(cut.limitLoss).toEqual([
+      {
+        id: 'xlsx.package.sizeLimit',
+        label: 'sheet(s) cut at the cell limit',
+        count: 1,
+        where: ['T'],
+        effect: 'lost: the cells past maxTotalCells (3) over the workbook were not imported; raise it with the `limits` option of the import',
+      },
+    ]);
+  });
+
+  it('warns once of a number format code over 255 characters, for every sheet and format that uses it, and keeps it as written', async () => {
+    const code = `yyyy${'0'.repeat(300)}`;
+    const files = {
+      'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" s="1"><v>1</v></c><c r="B1" s="2"><v>2</v></c></row>'),
+      'xl/worksheets/sheet2.xml': sheetXml('<row r="1"><c r="A1" s="1"><v>1</v></c></row>'),
+      'xl/styles.xml': `<styleSheet ${MAIN_NS}><numFmts><numFmt numFmtId="164" formatCode="${code}"/></numFmts><cellXfs><xf/><xf numFmtId="164"/><xf numFmtId="164" bold="1"/></cellXfs></styleSheet>`,
+    };
+    const rels: Array<[string, string, string]> = [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml'], ['rId3', 'styles', 'styles.xml']];
+    const result = await importXlsx(await book('<sheet name="S" sheetId="1" r:id="rId1"/><sheet name="T" sheetId="2" r:id="rId2"/>', rels, files));
+    expect(result.warnings).toEqual(['A number format code is over 255 characters (Excel allows no more); it is kept as written and not read as a date or time.']);
+    expect(result.sheets[0].cells.get('0:0')?.numberFormat).toEqual({ code });
+    expect(result.sheets[1].cells.get('0:0')?.numberFormat).toEqual({ code });
+    expect(result.limitLoss).toMatchObject([{ label: 'number format code(s) over 255 characters', count: 1, state: 'approximated' }]);
+  });
+
+  it('records the shared strings past the cap as a loss, and a damaged shared-strings part only as a warning', async () => {
+    const files = (strings: string) => ({ 'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" t="s"><v>0</v></c></row>'), 'xl/sharedStrings.xml': `<sst ${MAIN_NS}>${strings}</sst>` });
+    const rels: Array<[string, string, string]> = [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'sharedStrings', 'sharedStrings.xml']];
+    const many = await importXlsx(await book('<sheet name="S" sheetId="1" r:id="rId1"/>', rels, files('<si><t>a</t></si><si><t>b</t></si><si><t>c</t></si>')), { limits: { maxTotalCells: 2 } });
+    expect(many.sharedStrings).toHaveLength(2);
+    expect(many.limitLoss).toMatchObject([{ label: 'part(s) of the shared strings not read', where: ['xl/sharedStrings.xml'] }]);
+    const damaged = await importXlsx(await book('<sheet name="S" sheetId="1" r:id="rId1"/>', rels, files('<si><t>a</t></si><si><t>b')));
+    expect(damaged.warnings.some((w) => w.includes('is not well-formed XML; it was read as far as the damage'))).toBe(true);
+    expect(damaged.limitLoss).toEqual([]);
   });
 
   it.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])('a sheet named %s is an ordinary sheet', async (name) => {

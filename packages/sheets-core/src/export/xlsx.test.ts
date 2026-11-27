@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import { exportToXlsx, importFromXlsx } from './xlsx';
+import { describeImportLoss, hasImportLoss } from '@b32nio/spindle-shared';
 import { WorkbookImpl } from '../workbook';
 
 async function readBack(workbook: WorkbookImpl): Promise<ExcelJS.Workbook> {
@@ -168,6 +169,46 @@ describe('importFromXlsx on files that must not be opened', () => {
   it('takes the import limits as an option', async () => {
     const bytes = await exportToXlsx(freshWorkbook());
     await expect(importFromXlsx(bytes, freshWorkbook(), { limits: { maxEntries: 1 } })).rejects.toMatchObject({ code: 'size-limit' });
+  });
+});
+
+describe('importFromXlsx: what the import limits cut is in the loss it returns', () => {
+  const fourBySix = async () => {
+    const wb = freshWorkbook();
+    for (let r = 0; r < 6; r++) wb.setCellValue(undefined, r, 0, r);
+    return exportToXlsx(wb);
+  };
+
+  it('adds an xlsx.package.sizeLimit item that names what was cut and the option that raises the limit, and the cells that fit are imported', async () => {
+    const wb = freshWorkbook();
+    const { warnings, loss } = await importFromXlsx(await fourBySix(), wb, { limits: { maxTotalCells: 4 } });
+    expect(wb.getCellValue(undefined, 3, 0)).toBe(3);
+    expect(wb.getCellValue(undefined, 4, 0)).toBeFalsy();
+    expect(warnings).toEqual([expect.stringContaining('maxTotalCells, 4; raise it with the limits option')]);
+    expect(loss.format).toBe('xlsx');
+    expect(loss.items).toEqual([
+      {
+        id: 'xlsx.package.sizeLimit',
+        label: 'sheet(s) cut at the cell limit',
+        count: 1,
+        where: [expect.any(String)],
+        effect: 'lost: the cells past maxTotalCells (4) over the workbook were not imported; raise it with the `limits` option of the import',
+      },
+    ]);
+    expect(hasImportLoss(loss)).toBe(true);
+    expect(describeImportLoss(loss)).toEqual([expect.stringMatching(/^1 × sheet\(s\) cut at the cell limit \(.+\) — lost: the cells past maxTotalCells \(4\)/)]);
+  });
+
+  it('adds nothing when nothing was cut, and appends to the items the detector found otherwise', async () => {
+    const bytes = await fourBySix();
+    const { loss } = await importFromXlsx(bytes, freshWorkbook());
+    expect(loss.items.filter((i) => i.id === 'xlsx.package.sizeLimit')).toEqual([]);
+    // a limit that leaves one cell of two: the item is the last of the report, after whatever the detector found
+    const wb = freshWorkbook();
+    wb.setCellValue(undefined, 0, 0, 1);
+    wb.setCellValue(undefined, 0, 1, 2);
+    const cut = await importFromXlsx(await exportToXlsx(wb), freshWorkbook(), { limits: { maxTotalCells: 1 } });
+    expect(cut.loss.items.map((i) => i.id)).toEqual(['xlsx.package.sizeLimit']);
   });
 });
 

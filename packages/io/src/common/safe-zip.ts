@@ -79,18 +79,50 @@ export interface ImportLimits {
    * about 420 bytes per element (measured, Node 22), so the default bounds each part at about 420 MB, however long the part is.
    */
   maxPartElements: number;
+  /**
+   * XLSX only. Column settings kept over all the worksheets of a package: each `<col>` range read costs one, and so does each column
+   * of a sheet that a range gives a width or hides (up to the sheet's last cell), as those are entries of the result too. A full-width
+   * `<col>` (16,384 columns) on a sheet with cells to column T costs 21, but one on a sheet with a cell in `XFD` costs 16,385. Past it
+   * the rest are left out, with one warning (the sheets that lose some are in the import report). An entry is about 100 bytes, so the default is about 100 MB at most.
+   */
+  maxColumns: number;
+  /**
+   * XLSX only. Characters of raw extension lists (`extLst`, kept for the sheet's `details`) over all the worksheets of a package (each
+   * is also capped at 8 Mi characters). Past it the extension lists that do not fit are not kept, with one warning.
+   * Characters are 2 bytes at most, so the default is 128 MB at most.
+   */
+  maxExtensionChars: number;
+  /**
+   * XLSX only. Relationship entries read over all the parts of a package (the workbook's and each sheet's `.rels`; each part is also
+   * capped at `maxPartElements`). Only the relationships the reader uses are kept (those of sheets, hyperlinks, comments, drawings and
+   * the workbook-level parts), but every entry is read, so this bounds the time too. Past it the rest of that part and the
+   * relationships of the other parts are not read, with one warning.
+   */
+  maxRelationships: number;
+  /**
+   * XLSX only. Cell (`<c>`), row (`<row>`) and column (`<col>`) elements scanned over all the worksheets of a package, whether they are kept or not (a
+   * cell with no value is not kept, and a part of empty `<c/>` costs time and nothing else; the cells kept are also bounded by
+   * `maxTotalCells`). Scanning costs about a microsecond an element, so the default is about 15 seconds at most. Past it the rest of that
+   * sheet and the sheets after it are not read, with one warning.
+   */
+  maxScannedElements: number;
 }
 
 /**
  * Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB,
  * expanded shared-formula text of 32 Mi characters per worksheet and 64 Mi (128 MB of strings) per package, 5,000,000 cells and
  * 1,000 worksheets and 1,048,576 merged ranges and hyperlinks per package, 2,097,152 rows with settings and 1,000,000 elements
- * per workbook-level part. The 100,000 x 10 performance file (1,000,000 cells) is
- * five times under the cell limit. Memory, as measured for the reader alone (`importXlsx`, Node 22): about 0.44 GB of process
- * memory (RSS) per million cells, and 5,000,000 cells took 0.7 GB of heap and 1.0 to 1.6 GB of RSS; the 1.1 GB that the
- * `--runtime` run of `npm run sheets:xlsx-fidelity` reports for the same file is that whole harness (loss detection and mapping
- * included), not the reader. A host that also builds the editor's own model from the result (a second copy of every cell) may
- * want a lower `maxTotalCells`. A sheet of two million shared-formula cells of 15 characters is under the formula limits.
+ * per workbook-level part, 1,048,576 column settings, 64 Mi characters of raw extension lists, 1,048,576 relationship entries and
+ * 16,777,216 scanned cell and row elements per package. The 100,000 x 10 performance file (1,000,000 cells) is
+ * five times under the cell limit. Memory, as measured for the reader alone (`importXlsx`, Node 24, a 4 GB heap): about 0.17 GB of
+ * process memory (RSS) per million cells of plain numbers, and 5,000,000 cells took 0.86 GB (numbers), 1.04 GB (shared strings), 1.22 GB
+ * (formulas) and 1.0 GB (with 1,048,576 merges over them: the cells exist before the merged ones are dropped) in the shapes measured
+ * for this reader, and up to 2.0 GB in the review's variants (1.67 GB of formulas, 1.82 GB of shared strings, 1.96 GB of merges,
+ * measured before the strings it keeps were copied): plan for 2 GB. The 1.1 GB that the `--runtime` run of
+ * `npm run sheets:xlsx-fidelity` reports for the 100,000 x 10 file is that whole harness (loss detection and mapping included), not the
+ * reader. A host that also builds the editor's own model from the result (a second copy of every cell), and any browser host (a tab is
+ * commonly limited to 2 to 4 GB), should lower `maxTotalCells`: 1,000,000 keeps the 100,000 x 10 file whole at a fifth of the cost. A sheet of two million shared-formula cells of 15
+ * characters is under the formula limits.
  */
 export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxPackageBytes: 100 * MB,
@@ -107,6 +139,10 @@ export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxRanges: 1_048_576,
   maxRows: 2_097_152,
   maxPartElements: 1_000_000,
+  maxColumns: 1_048_576,
+  maxExtensionChars: 64 * 1024 * 1024,
+  maxRelationships: 1_048_576,
+  maxScannedElements: 16_777_216,
 };
 
 export interface SafeZipOptions {

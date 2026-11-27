@@ -45,9 +45,9 @@ export interface XlsxWorkbookParts {
   warnings: string[];
 }
 
-/** Read the workbook-level parts of an opened package. */
-export async function readWorkbookParts(pkg: XlsxPackage): Promise<XlsxWorkbookParts> {
-  const workbook = await readWorkbook(pkg);
+/** Read the workbook-level parts of an opened package. With `strict` a workbook part that cannot be read (damaged, or over the element budget) is an `ImportError('corrupt')`, not an empty workbook. */
+export async function readWorkbookParts(pkg: XlsxPackage, options: { strict?: boolean } = {}): Promise<XlsxWorkbookParts> {
+  const workbook = await readWorkbook(pkg, options);
   const theme = parseTheme(workbook.parts.theme === undefined ? undefined : await pkg.xml(workbook.parts.theme), pkg.warnings);
   const styles = parseStyles(workbook.parts.styles === undefined ? undefined : await pkg.xml(workbook.parts.styles), theme.colors);
   const colors: ColorContext = { themeColors: theme.colors, indexedColors: styles.indexedColors };
@@ -55,14 +55,16 @@ export async function readWorkbookParts(pkg: XlsxPackage): Promise<XlsxWorkbookP
   const sharedStrings = parseSharedStrings(stringsPart === undefined ? undefined : await pkg.text(stringsPart), colors, {
     maxItems: pkg.limits.maxTotalCells,
     maxRuns: pkg.limits.maxPartElements,
-    problem: (what) =>
+    problem: (what) => {
+      if (what !== 'damaged') pkg.loss.add('sharedStrings', stringsPart as string);
       pkg.warnings.push(
         what === 'items'
           ? `The part ${abbreviate(stringsPart as string)} has more than ${pkg.limits.maxTotalCells} strings (the import limit maxTotalCells, which no cell could use up); the rest were not read.`
           : what === 'runs'
             ? `The part ${abbreviate(stringsPart as string)} has more than ${pkg.limits.maxPartElements} rich-text runs (the import limit maxPartElements); the formatting of the others was left out, their text kept.`
             : `The part ${abbreviate(stringsPart as string)} is not well-formed XML; it was read as far as the damage.`
-      ),
+      );
+    },
   });
   return { workbook, theme, styles, sharedStrings, colors, warnings: [...pkg.warnings] };
 }

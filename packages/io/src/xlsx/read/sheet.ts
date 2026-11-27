@@ -15,14 +15,16 @@ import type {
   XlsxSheetView,
   XlsxStyles,
 } from '@b32nio/spindle-shared/export/xlsx';
-import { isOn, isTrue, kid, kids, parseXml, type XmlElement } from '../xml';
-import { abbreviate, CappedWarnings } from './capped';
-import { lookOf, type CellLook } from './cell-style';
+import { isOn, isTrue, kid, kids, type XmlElement } from '../xml';
+import { abbreviate, CappedWarnings, flat } from './capped';
+import { LookCache, type CellLook } from './cell-style';
 import { countCover, indexCells, lastCover, sweepCover } from './cell-ranges';
 import { MAX_COL, MAX_ROW, parseCellRef, parseRangeRef, type RangeBounds } from './cell-ref';
 import { readColor, type ColorContext } from './colors';
 import { scanXml, type SaxAttrs } from './sax';
+import { parseTree } from './tree';
 import { decodeStringEscapes } from './shared-strings';
+import { LimitLoss } from './limit-loss';
 import { shiftFormula } from './shared-formula';
 import { boolAttr, intAttr, numAttr, parseDecimal, parseIndex, put } from './values';
 import { DEFAULT_IMPORT_LIMITS, type ImportLimits } from '../../common/safe-zip';
@@ -72,24 +74,55 @@ export interface SheetContext {
   maxSheetFormulaChars?: number;
   /** What the package may still spend, shared by all its sheets (`readBudget`); a sheet read alone gets the defaults. */
   budget?: ReadBudget;
+  /** The cell formats' looks, shared by all the sheets of the workbook (`readFormats`); a sheet read alone makes its own. */
+  formats?: LookCache;
   /** Receives non-fatal problems. */
   warn: (message: string) => void;
 }
 
-/** What a package may still spend over all its worksheets: cells kept, cost of expanded shared-formula text, merged ranges and hyperlinks kept, rows with settings kept. */
+/**
+ * What a package may still spend over all its worksheets: cells kept, cost of expanded shared-formula text, merged ranges and hyperlinks
+ * kept, rows with settings kept, column settings, characters of raw extension lists and cell and row elements scanned. What a budget
+ * cuts is counted in `loss` (the package's own, when the sheets are read through one), with the limits that name it.
+ */
 export interface ReadBudget {
   cells: number;
   formulaChars: number;
   ranges: number;
   rows: number;
+  columns: number;
+  extensionChars: number;
+  scanned: number;
+  /** Sheets so far that a cell or scan limit cut (the reader of a package drops a sheet that is cut before it keeps anything). */
+  cuts: number;
+  readonly limits: ImportLimits;
+  readonly loss: LimitLoss;
 }
 
-export const readBudget = (limits: ImportLimits): ReadBudget => ({ cells: limits.maxTotalCells, formulaChars: limits.maxFormulaChars, ranges: limits.maxRanges, rows: limits.maxRows });
+export const readBudget = (limits: ImportLimits, loss: LimitLoss = new LimitLoss(limits)): ReadBudget => ({
+  cells: limits.maxTotalCells,
+  formulaChars: limits.maxFormulaChars,
+  ranges: limits.maxRanges,
+  rows: limits.maxRows,
+  columns: limits.maxColumns,
+  extensionChars: limits.maxExtensionChars,
+  scanned: limits.maxScannedElements,
+  cuts: 0,
+  limits,
+  loss,
+});
+
+/** The looks of a workbook's cell formats, for all its sheets: the first number format code over 255 characters is warned about, and each is counted as a loss. */
+export function readFormats(styles: XlsxStyles, budget: ReadBudget, warn: (message: string) => void): LookCache {
+  return new LookCache(styles, () => {
+    if (budget.loss.add('numberFormats')) warn('A number format code is over 255 characters (Excel allows no more); it is kept as written and not read as a date or time.');
+  });
+}
 
 /** What an expanded formula costs beyond its characters: the string's own weight (about 32 bytes), counted as characters of 2 bytes. */
 export const FORMULA_OVERHEAD = 16;
 
-/** Most `<col>` elements read from one sheet (the sheet has 16,384 columns, and a valid file has no overlapping ones); the rest are left out with a warning. */
+/** Most `<col>` elements read from one sheet (the sheet has 16,384 columns, and a valid file has no overlapping ones); the rest are left out with a warning, and all sheets together draw on `maxColumns`. */
 export const MAX_COLS = MAX_COL;
 
 /** Most merged ranges read from one sheet (a sheet has 1,048,576 rows, so no sound file has more merges than that). */
@@ -307,7 +340,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   // the file's own text (the sheet's name, a cell's address or value) is quoted in warnings shortened: a warning must not grow with it
   const label = abbreviate(name);
   const cells = new Map<string, SpreadsheetCell>();
-  const looks = new Map<number, CellLook>();
+  const formats = ctx.formats ?? readFormats(styles, budget, ctx.warn);
   const masters = new Map<string, Master>();
   const rowInfo = new Map<number, XlsxRowInfo>();
   const trees = new Map<string, XmlElement>();
@@ -322,8 +355,9 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   let linksLeftOut = 0;
   let rowsLeftOut = 0;
   const linkWarnings = new CappedWarnings(ctx.warn, `${label} hyperlink warnings`);
-  let columnsSeen = 0;
+  let columnsLeftOut = 0;
   let truncated = false;
+  let scanCut = false;
   let extLst: string | undefined;
   let maxRow = 0;
   let maxCol = 0;
@@ -357,11 +391,13 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     if (trees.has(tag) || tooBig.has(tag)) return;
     if (to - from > MAX_TREE_CHARS) {
       tooBig.add(tag);
+      budget.loss.add('elements', name);
       ctx.warn(`${label}: the ${tag} element is over ${MAX_TREE_CHARS} characters; it was not read.`);
       return;
     }
-    const el = parseXml((text as string).slice(from, to));
-    if (el) trees.set(tag, el);
+    // (a tree built from events: its attribute values are copies of their own, so a 13-character `dimension` does not keep the sheet's text alive)
+    const { root } = parseTree((text as string).slice(from, to), MAX_TREE_CHARS);
+    if (root) trees.set(tag, root);
   };
 
   // a shifted formula is about as long as its master (a few characters more or less where a reference gains or loses digits)
@@ -384,37 +420,27 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
         sharedIndex = idx;
       } else if (value.trim() !== '') missingStrings++;
     } else if (type === 'inlineStr') {
-      result = hasValue || inline !== '' ? decodeStringEscapes(inline !== '' ? inline : value) : null;
+      result = hasValue || inline !== '' ? flat(decodeStringEscapes(inline !== '' ? inline : value)) : null;
     } else if (type === 'str') {
-      result = hasValue ? decodeStringEscapes(value) : null;
+      result = hasValue ? flat(decodeStringEscapes(value)) : null;
     } else if (type === 'b') {
       result = hasValue ? isTrue(value.trim()) : null;
     } else if (type === 'e') {
-      result = hasValue ? value : null;
+      result = hasValue ? flat(value) : null;
     } else if (type === 'd') {
       const serial = hasValue ? isoToSerial(value) : undefined;
       if (hasValue && serial === undefined) warnCell(address, `"${abbreviate(value)}" is not a date; imported as text`);
-      result = serial ?? (hasValue ? value : null);
+      result = serial ?? (hasValue ? flat(value) : null);
     } else if (hasValue && value.trim() !== '') {
       const n = parseDecimal(value);
       if (n === undefined) {
         warnCell(address, `"${abbreviate(value)}" is not a number; imported as text`);
-        result = value;
+        result = flat(value);
       } else result = n;
     }
 
     const styleIndex = attrs.s === undefined ? 0 : parseIndex(attrs.s);
-    let look: CellLook | undefined;
-    if (styleIndex !== undefined) {
-      look = looks.get(styleIndex);
-      if (look === undefined) {
-        const xf = styles.cellXfs[styleIndex];
-        if (xf !== undefined) {
-          look = lookOf(xf, styles, styleIndex === 0);
-          looks.set(styleIndex, look);
-        }
-      }
-    }
+    const look: CellLook | undefined = styleIndex === undefined ? undefined : formats.get(styleIndex);
     if (look === undefined && attrs.s !== undefined) missingStyles++;
 
     // the 1904 date system: dates are moved to 1900 serials, as the editor only knows that one, until it models the system
@@ -431,8 +457,8 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
           masters.set(key, { formula: undefined, row, col });
           formulasTooLong++;
         } else if (f.text !== '') {
-          masters.set(key, { formula: f.text, row, col });
-          formulaText = f.text;
+          formulaText = flat(f.text);
+          masters.set(key, { formula: formulaText, row, col });
           info = { type: 'shared', si };
           if (f.ref !== undefined) info.ref = f.ref;
         } else {
@@ -450,7 +476,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
         }
       } else {
         if (f.tooLong) formulasTooLong++;
-        else if (f.text !== '') formulaText = f.text;
+        else if (f.text !== '') formulaText = flat(f.text);
         if (f.type === 'array') {
           info = { type: 'array' };
           if (f.ref !== undefined) info.ref = f.ref;
@@ -519,9 +545,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
                 }
               } else if (attrs.ref !== undefined) linksLeftOut++;
             } else if (depth === 3 && tag === 'col' && top === 'cols') {
+              if (budget.scanned-- <= 0) scanCut = true;
               const col = readColumn(attrs);
-              if (col !== undefined && columnsSeen++ < MAX_COLS) columns.push(col);
+              if (col !== undefined) {
+                if (columns.length < MAX_COLS && budget.columns > 0) {
+                  columns.push(col);
+                  budget.columns--;
+                } else columnsLeftOut++;
+              }
             } else if (depth === 3 && tag === 'row' && top === 'sheetData') {
+              if (budget.scanned-- <= 0) scanCut = true;
               const r = intAttr(attrs.r);
               if (r !== undefined && r >= 1 && r <= MAX_ROW) row = r - 1;
               else {
@@ -549,6 +582,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
                 } else rowsLeftOut++;
               }
             } else if (depth === 4 && tag === 'c' && top === 'sheetData') {
+              if (budget.scanned-- <= 0) scanCut = true;
               const pos = attrs.r === undefined ? undefined : parseCellRef(attrs.r);
               if (pos !== undefined) {
                 col = pos.col;
@@ -579,8 +613,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
           close(tag, end) {
             if (depth === 2 && smallStart >= 0) {
               if (tag !== 'extLst') keepTree(tag, smallStart, end);
-              else if (end - smallStart > MAX_EXT_CHARS) ctx.warn(`${label}: the extension list (extLst) is over ${MAX_EXT_CHARS} characters; it was not kept.`);
-              else extLst = (text as string).slice(smallStart, end);
+              else if (end - smallStart > MAX_EXT_CHARS) {
+                budget.loss.add('extLst', name);
+                ctx.warn(`${label}: the extension list (extLst) is over ${MAX_EXT_CHARS} characters; it was not kept.`);
+              } else if (end - smallStart > budget.extensionChars) {
+                // the package's budget: the list is not kept, and the budget is not spent on it (a smaller list in a later sheet may still fit)
+                if (budget.loss.add('extLst', name)) ctx.warn(`${label}: the extension lists of the workbook are over the import limit maxExtensionChars (${budget.limits.maxExtensionChars} characters); from this sheet on those that do not fit were not kept.`);
+              } else {
+                budget.extensionChars -= end - smallStart;
+                extLst = flat((text as string).slice(smallStart, end));
+              }
               smallStart = -1;
             } else if (cellAttrs !== undefined) {
               if (depth === 4 && tag === 'c') finishCell();
@@ -604,16 +646,23 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
             }
             else if (sink === 't') inline += chunk;
           },
-          halted: () => truncated,
+          halted: () => truncated || scanCut,
         });
-  if (truncated) ctx.warn(`${label}: the workbook has more cells than the import limit allows (maxTotalCells); the rest of this sheet, and the sheets after it, were not read (${cells.size} cells kept here).`);
-  if (columnsSeen > MAX_COLS) ctx.warn(`${label}: the sheet has ${columnsSeen} column ranges; only the first ${MAX_COLS} were read.`);
+  if (truncated || scanCut) budget.cuts++;
+  if (truncated) {
+    if (budget.loss.add('cells', name)) ctx.warn(`${label}: the workbook has more cells than the import limit allows (maxTotalCells, ${budget.limits.maxTotalCells}; raise it with the limits option); the rest of this sheet, and of the sheets after it, was not read (${cells.size} cells kept here).`);
+  }
+  if (scanCut) {
+    if (budget.loss.add('scan', name)) ctx.warn(`${label}: the workbook has more cell, row and column elements than the import limit allows (maxScannedElements, ${budget.limits.maxScannedElements}; raise it with the limits option); the rest of this sheet, and of the sheets after it, was not read (${cells.size} cells kept here).`);
+  }
+  if (columnsLeftOut > 0 && budget.loss.add('columns', name, columnsLeftOut)) ctx.warn(`${label}: ${columnsLeftOut} column range(s) were left out (the limit is ${MAX_COLS} per sheet and maxColumns, ${budget.limits.maxColumns}, for the workbook); the other sheets that lose some are counted in the import report.`);
   if (!wellFormed) {
     // a cell cut off by the damage is not kept: its value may be partial
     ctx.warn(`The sheet "${label}" is not well-formed XML; it was read as far as the damage (${cells.size} cells).`);
   }
   if (cellWarnings > MAX_CELL_WARNINGS) ctx.warn(`${label}: ${cellWarnings - MAX_CELL_WARNINGS} more cell warnings were left out.`);
   if (formulasTooLong + formulasOverBudget > 0) {
+    budget.loss.add('formulas', name, formulasTooLong + formulasOverBudget);
     const reasons = [
       formulasTooLong > 0 ? `${formulasTooLong} over ${MAX_FORMULA_CHARS} characters (and the cells of a shared formula with such a master)` : '',
       formulasOverBudget > 0 ? `${formulasOverBudget} past the limit of ${formulaBudget} characters of expanded shared formulas` : '',
@@ -624,6 +673,8 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   if (missingStyles > 0) ctx.warn(`${label}: ${missingStyles} cell(s) use a format the file does not have; imported unformatted.`);
 
   linkWarnings.close();
+  if (rowsLeftOut > 0) budget.loss.add('rows', name, rowsLeftOut);
+  if (mergesLeftOut + linksLeftOut > 0) budget.loss.add('ranges', name, mergesLeftOut + linksLeftOut);
   if (rowsLeftOut > 0) ctx.warn(`${label}: the settings of ${rowsLeftOut} row(s) were left out (the import limit maxRows).`);
   if (mergesLeftOut > 0) ctx.warn(`${label}: ${mergesLeftOut} merged range(s) were left out (the limit is ${MAX_MERGES} per sheet and maxRanges for the workbook).`);
   if (linksLeftOut > 0) ctx.warn(`${label}: ${linksLeftOut} hyperlink(s) were left out (the limit is ${MAX_HYPERLINKS} per sheet and maxRanges for the workbook).`);
@@ -641,7 +692,14 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   }
   applyHyperlinks(cells, hyperlinks);
 
-  const { columnWidths, hiddenCols } = applyColumns(columns, maxCol);
+  // the columns the ranges set, up to the last cell: each draws on the package's column budget, and the ones past it are left out
+  let columnCount = 0;
+  if (columns.length > 0) {
+    columnCount = Math.max(Math.min(maxCol + 1, budget.columns), 0);
+    budget.columns -= columnCount;
+    if (columnCount < maxCol + 1 && budget.loss.add('columns', name, maxCol + 1 - columnCount)) ctx.warn(`${label}: the widths and hidden state of ${maxCol + 1 - columnCount} column(s) were left out (the import limit maxColumns, ${budget.limits.maxColumns}, for the workbook); the other sheets that lose some are counted in the import report.`);
+  }
+  const { columnWidths, hiddenCols } = applyColumns(columns, columnCount - 1);
   const rowHeights = new Map<number, number>();
   const hiddenRows = new Set<number>();
   for (const [r, info] of rowInfo) {

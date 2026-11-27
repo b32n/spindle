@@ -4,8 +4,21 @@ import { openSafeZip, resolveLimits, type ImportLimits } from '../../common/safe
 import type { XmlElement } from '../xml';
 import { abbreviate } from './capped';
 import { contentTypeOf, EMPTY_CONTENT_TYPES, parseContentTypes, type ContentTypes } from './content-types';
+import { LimitLoss } from './limit-loss';
 import { parseRelationships, relsPart, type ListProblem } from './relationships';
-import { parseTree } from './tree';
+import { parseTree, type ParsedTree } from './tree';
+
+/**
+ * The relationships the reader uses, by kind (the last segment of the type, lower-cased): those of sheets and the workbook-level parts, and
+ * of the hyperlinks, comments and drawings of a sheet, and any that the caller names by id (the workbook's `<sheet r:id>`: the kind of
+ * what a sheet entry points at is the sheet's kind, whatever it is). Every other relationship (images, tables, printer settings, a million made up) is read, counted
+ * against `ImportLimits.maxRelationships` and dropped, so what a package can make the reader keep does not grow with its relationship parts.
+ */
+const KEPT_KINDS: ReadonlySet<string> = new Set([
+  'officedocument', 'worksheet', 'chartsheet', 'dialogsheet', 'xlmacrosheet', 'xlintlmacrosheet',
+  'sharedstrings', 'styles', 'theme', 'person',
+  'hyperlink', 'comments', 'vmldrawing', 'threadedcomment', 'drawing',
+]);
 
 export interface OpenXlsxOptions {
   /** Overrides of the import limits (`DEFAULT_IMPORT_LIMITS`). */
@@ -34,12 +47,18 @@ export class XlsxPackage {
   contentTypes: ContentTypes = EMPTY_CONTENT_TYPES;
   private readonly byLowerName = new Map<string, string>();
   private readonly relCache = new Map<string, readonly XlsxRelationship[]>();
+  /** What the limits cut from the package, as loss items (`limitLoss` of the result). */
+  readonly loss: LimitLoss;
+  /** Relationship entries that may still be read over the package (`ImportLimits.maxRelationships`). */
+  private readonly relBudget: { left: number };
 
   private constructor(
     private readonly zip: JSZip,
     /** The limits this package was opened with (the defaults where not overridden), for the readers that bound their own work by them. */
     readonly limits: ImportLimits
   ) {
+    this.loss = new LimitLoss(limits);
+    this.relBudget = { left: limits.maxRelationships };
     for (const name of Object.keys(zip.files)) {
       if (zip.files[name].dir) continue;
       // a duplicated name differing only by case keeps the first, as the exact spelling is looked up first anyway
@@ -99,10 +118,15 @@ export class XlsxPackage {
    */
   async xml(name: string): Promise<XmlElement | undefined> {
     const text = await this.text(name);
-    if (text === undefined) return undefined;
-    const { root, overLimit } = parseTree(text, this.limits.maxPartElements);
-    if (overLimit) this.warnings.push(`The part ${abbreviate(name)} has more than ${this.limits.maxPartElements} elements (the import limit maxPartElements) and was skipped.`);
-    else if (root === undefined) this.warnings.push(`The part ${abbreviate(name)} is not well-formed XML and was skipped.`);
+    return text === undefined ? undefined : this.report(name, parseTree(text, this.limits.maxPartElements));
+  }
+
+  /** The root of a tree parsed from the part `name` (by `parseTree`, or a reader's own pass over it); a part that is over the budget or not well-formed is reported (a warning and, over the budget, a loss item) and has no root. */
+  report(name: string, { root, overLimit }: ParsedTree): XmlElement | undefined {
+    if (overLimit) {
+      this.warnings.push(`The part ${abbreviate(name)} has more than ${this.limits.maxPartElements} elements (the import limit maxPartElements) and was skipped.`);
+      this.loss.add('parts', name);
+    } else if (root === undefined) this.warnings.push(`The part ${abbreviate(name)} is not well-formed XML and was skipped.`);
     return root;
   }
 
@@ -110,25 +134,28 @@ export class XlsxPackage {
   private listOptions(name: string): { max: number; problem: (what: ListProblem) => void } {
     return {
       max: this.limits.maxPartElements,
-      problem: (what) =>
-        this.warnings.push(
-          what === 'over'
-            ? `The part ${abbreviate(name)} has more than ${this.limits.maxPartElements} entries (the import limit maxPartElements); the rest were not read.`
-            : `The part ${abbreviate(name)} is not well-formed XML; it was read as far as the damage.`
-        ),
+      problem: (what) => {
+        if (what === 'over') {
+          this.warnings.push(`The part ${abbreviate(name)} has more than ${this.limits.maxPartElements} entries (the import limit maxPartElements); the rest were not read.`);
+          this.loss.add('parts', name);
+        } else if (what === 'budget') {
+          // one warning for the package, whichever part the budget ran out in; the loss item lists the parts
+          if (this.loss.add('relationships', name)) this.warnings.push(`The package has more than ${this.limits.maxRelationships} relationships (the import limit maxRelationships); the rest, from ${abbreviate(name)} on, were not read.`);
+        } else this.warnings.push(`The part ${abbreviate(name)} is not well-formed XML; it was read as far as the damage.`);
+      },
     };
   }
 
   /**
-   * The relationships of a part (`''` for the package itself): empty when it has none or its `.rels` is unreadable. The list is
-   * cached and shared by every caller, so it (and each entry) is frozen: read-only.
+   * The relationships of a part (`''` for the package itself) that the reader uses (`KEPT_KINDS`): empty when it has none or its `.rels` is
+   * unreadable. The list is cached and shared by every caller, so it (and each entry) is frozen: read-only.
    */
-  async rels(part: string): Promise<readonly XlsxRelationship[]> {
+  async rels(part: string, also?: ReadonlySet<string>): Promise<readonly XlsxRelationship[]> {
     const owner = part.replace(/^\/+/, '');
     const cached = this.relCache.get(owner);
     if (cached) return cached;
     const relsName = owner === '' ? '_rels/.rels' : relsPart(owner);
-    const rels = Object.freeze(parseRelationships(await this.text(relsName), owner, this.listOptions(relsName)).map((r) => Object.freeze(r)));
+    const rels = Object.freeze(parseRelationships(await this.text(relsName), owner, { ...this.listOptions(relsName), budget: this.relBudget, keep: (kind, id) => KEPT_KINDS.has(kind.toLowerCase()) || (also?.has(id) ?? false) }).map((r) => Object.freeze(r)));
     this.relCache.set(owner, rels);
     return rels;
   }
