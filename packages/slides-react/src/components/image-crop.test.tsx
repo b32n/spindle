@@ -61,7 +61,12 @@ describe('ImageCropFields', () => {
     const inputs = find(tree, 'input');
     expect(inputs.map((i) => i['data-testid'])).toEqual(['image-crop-l', 'image-crop-t', 'image-crop-r', 'image-crop-b']);
     expect(inputs.map((i) => i.value)).toEqual([0, 0, 0, 0]);
-    expect(inputs.every((i) => typeof i['aria-label'] === 'string')).toBe(true);
+    // each input is named by exactly one visible label (no aria-label overriding it)
+    expect(inputs.every((i) => i['aria-label'] === undefined)).toBe(true);
+    expect(find(tree, 'label').map((l) => [l.htmlFor, l.children])).toEqual([
+      ['crop-l', ['Left', ' (%)']], ['crop-t', ['Top', ' (%)']], ['crop-r', ['Right', ' (%)']], ['crop-b', ['Bottom', ' (%)']],
+    ]);
+    expect(inputs.map((i) => i.id)).toEqual(['crop-l', 'crop-t', 'crop-r', 'crop-b']);
     expect(find(tree, 'button')[0]['aria-label']).toBe('Reset crop');
     expect(renderToStaticMarkup(tree)).toContain('role="group"');
   });

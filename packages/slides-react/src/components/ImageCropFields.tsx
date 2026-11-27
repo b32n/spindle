@@ -32,7 +32,6 @@ export function ImageCropFields({
             min={0}
             max={99}
             step={1}
-            aria-label={`Crop ${label.toLowerCase()} (%)`}
             data-testid={`image-crop-${k}`}
             value={Math.round(cur[k] * 100) / 100}
             onChange={(e) => onChange(setCropEdge(crop, k, e.target.valueAsNumber))}

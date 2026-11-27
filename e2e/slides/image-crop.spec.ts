@@ -10,7 +10,7 @@ test.describe('slides: image crop', () => {
     await s.gotoSlide(2);
   });
 
-  test('SL-IMG-08 cropping an image clips it in the DOM and resetting restores the plain image', async ({
+  test('SL-IMG-15 cropping an image clips it in the DOM and resetting restores the plain image', async ({
     page,
   }) => {
     const before = (await s.els()).map((e) => e.id);
@@ -22,23 +22,11 @@ test.describe('slides: image crop', () => {
     await expect(el.locator('img')).toHaveCount(1);
     await expect(el.locator('[data-image-crop]')).toHaveCount(0);
 
-    // The crop popover sits behind the contextual image controls, which collapse into "More tools" in some browsers;
-    // the inline button is used when it exists, otherwise the same model edit the popover makes is applied directly.
-    const open = page.getByRole('button', { name: 'Crop image', exact: true });
-    if ((await open.count()) > 0) {
-      await open.click();
-      await page.getByTestId('image-crop-l').fill('10');
-      await page.getByTestId('image-crop-t').fill('20');
-      await page.getByTestId('image-crop-r').fill('30');
-      await page.keyboard.press('Escape');
-      await page.mouse.click(2, 2);
-    } else {
-      await page.evaluate(
-        (i) =>
-          (window as any).__spindle.deck.updateElement(i, { crop: { l: 10, t: 20, r: 30, b: 0 } }),
-        id
-      );
-    }
+    // The popover is the only crop UI, so the button is required (no model-edit fallback).
+    await page.getByRole('button', { name: 'Crop image', exact: true }).click();
+    await page.getByTestId('image-crop-l').fill('10');
+    await page.getByTestId('image-crop-t').fill('20');
+    await page.getByTestId('image-crop-r').fill('30');
 
     const clip = el.locator('[data-image-crop]');
     await expect(clip).toHaveAttribute('data-image-crop', '10,20,30,0');
@@ -59,11 +47,8 @@ test.describe('slides: image crop', () => {
       await page.evaluate((i) => (window as any).__spindle.deck.getElement(i).crop, id)
     ).toEqual({ l: 10, t: 20, r: 30, b: 0 });
 
-    // Reset: an all-zero crop renders the plain image again.
-    await page.evaluate(
-      (i) => (window as any).__spindle.deck.updateElement(i, { crop: { l: 0, t: 0, r: 0, b: 0 } }),
-      id
-    );
+    // Reset through the popover: an all-zero crop renders the plain image again.
+    await page.getByTestId('image-crop-reset').click();
     await expect(el.locator('[data-image-crop]')).toHaveCount(0);
     await expect(el.locator('img')).toHaveCount(1);
   });
