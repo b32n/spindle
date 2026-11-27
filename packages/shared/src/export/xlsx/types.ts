@@ -4,6 +4,8 @@
 // their types. Callers resolve their own pooled styles/formats down to
 // concrete values before calling exportXlsx.
 
+import type { XlsxSharedString, XlsxStyles, XlsxTheme, XlsxWorkbookInfo } from './package-types';
+
 export type SpreadsheetCellValue = string | number | boolean | null;
 
 export interface SpreadsheetBorder {
@@ -86,6 +88,14 @@ export interface SpreadsheetImportResult {
   activeSheetIndex?: number;
   /** Non-fatal issues (unrecognized cell shape, unresolvable shared formula, etc.) — surfaced rather than silently dropped. */
   warnings: string[];
+  /** Workbook-level facts from the own reader (S2): sheet states, defined names, calculation properties, `date1904`. Absent from the `exceljs` path. */
+  workbook?: XlsxWorkbookInfo;
+  /** The style tables with theme, indexed and tint colours resolved (S2). Absent from the `exceljs` path. */
+  styles?: XlsxStyles;
+  /** The shared-strings table in file order, rich runs kept (S2). Absent from the `exceljs` path. */
+  sharedStrings?: XlsxSharedString[];
+  /** The theme: its 12 colours in a cell colour's `theme` order, and the major/minor fonts (S2). Absent from the `exceljs` path. */
+  theme?: XlsxTheme;
 }
 
 /** Options for the loss detector (`detectXlsxLoss`, and `inspectXlsx` in sheets-core). All optional. */
