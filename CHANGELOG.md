@@ -566,10 +566,14 @@ lockstep.
   skipped with a warning, the workbook part refused as corrupt) where nine million attributes made the engine stop answering; sheets-core
   `importFromXlsx` applies the merges of a sheet in one pass (`WorkbookImpl.mergeCellsBulk` / `SheetImpl.mergeCellsBulk`, the same regions
   and cleared cells as `mergeCells` one by one, one notification, and no undo step per merge: opening a file leaves nothing to undo), 20,000
-  merges in under a second where one by one took 51 s and 200,000 in a few seconds; merges that overlap (Excel writes none) are decided pair
-  by pair up to 20,000 per sheet and the rest are left out with a warning and the loss item `xlsx.merges.overlapping`; the loss detector
+  merges in under a second where one by one took 51 s and 200,000 in a few seconds; merges that overlap (Excel writes none) are resolved as one by one
+  would resolve them, however many (100,000 blocks and one overlap lose only the two it overlaps), also over regions that already overlap each other;
+  the loss detector
   finds the relationship of each hyperlink by id instead of by a search (120,000 external links took 45 s); the React editor can raise the
   limits: `importWorkbookFile(workbook, file, { limits })` and the `importLimits` prop of `WorkbookCanvas`.
+  Known limitation: the reader is bounded, but loading a result with very many formulas into the editor's model is not (20,000 array formulas over
+  blocks took 110 s, 1,000,000 formulas 82 s and 2.1 GB, 1,000 chained sheets 33 s; the reader 0.1 to 0.2 s of each, and a table of two million shared
+  strings peaked at 2.8 GB): hosts should lower `maxTotalCells` and/or import in a worker; follow-up in `documentation/sheets/TODO.md`.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from

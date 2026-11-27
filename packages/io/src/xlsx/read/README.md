@@ -74,6 +74,13 @@ comment-part lookup per part; in `cell-style.ts` the number format scan and the 
 workbook-level parts (shared strings, styles, workbook, theme, relationships) are element trees, linear in time but costing some tens
 of times the size of the part in memory; their only bound is the 256 MB limit on an XML part (a streaming reader is future work).
 
+Bounds of the reader, not of the editor: every hostile shape tested here is read in seconds and within the memory the limits give (a table of two
+million shared strings peaked at 2.8 GB of process memory, five million took 1.17 GB). Loading a result with very many formulas into the editor's
+model (`importFromXlsx` in sheets-core: the recalculation that `setData` runs, engine code this directory does not own) can take far longer:
+20,000 array formulas over blocks took 110 s, 1,000,000 formulas 82 s and 2.1 GB, 1,000 chained sheets 33 s, with the reader at 0.1 to 0.2 s of each.
+A host should lower `maxTotalCells` (and `maxSheets`) and/or run the import in a worker; a faster load is a follow-up in
+`documentation/sheets/TODO.md` (S20 is the candidate owner).
+
 Tests: one file per module (malformed and producer-variety cases, an oracle table for tints), plus `index.test.ts`, which runs the
 whole corpus (`fixtures/xlsx`: openpyxl, xlsxwriter, LibreOffice, hand-authored and edge files). `../reader-differential.test.ts` runs the own
 reader and the `exceljs` reader over the corpus, over the files the e2e specs open and build, and over generated workbooks, and names every difference.

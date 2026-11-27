@@ -122,7 +122,10 @@ export interface ImportLimits {
  * `npm run sheets:xlsx-fidelity` reports for the 100,000 x 10 file is that whole harness (loss detection and mapping included), not the
  * reader. A host that also builds the editor's own model from the result (a second copy of every cell), and any browser host (a tab is
  * commonly limited to 2 to 4 GB), should lower `maxTotalCells`: 1,000,000 keeps the 100,000 x 10 file whole at a fifth of the cost. A sheet of two million shared-formula cells of 15
- * characters is under the formula limits.
+ * characters is under the formula limits. A table of two million shared strings peaked at 2.8 GB (five million took 1.17 GB): plan for 3 GB.
+ * These limits bound the READER. Loading a result of very many formulas into the editor's model (`importFromXlsx` in sheets-core) can still be
+ * slow, in engine code outside the reader: 20,000 array formulas took 110 s, 1,000,000 formulas 82 s and 2.1 GB, 1,000 chained sheets 33 s. A
+ * host should lower `maxTotalCells` and `maxSheets` and/or import in a worker (a follow-up, see documentation/sheets/TODO.md).
  */
 export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxPackageBytes: 100 * MB,
