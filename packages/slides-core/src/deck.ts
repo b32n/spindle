@@ -41,8 +41,8 @@ import {
 import { alignFrames, distributeFrames, type AlignMode, type FrameItem } from './scene/align';
 import type { Rect } from './scene/geometry';
 import { groupChain, groupParents } from './scene/group-tree';
-import { resolveConnectorFrame, resolveEndpoints } from './scene/connector';
-import type { Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
+import { connectionFrame, resolveConnectorFrame, resolveEndpoints } from './scene/connector';
+import type { ConnectionFrame, Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
 import { applyTextFormat, type RichTextDoc, type TextFormatSpec } from './text/model';
 import type { ThemeData, LayoutData } from './theme/types';
 import { getBuiltinTheme, BUILTIN_LAYOUTS, DEFAULT_SLIDE_SIZE } from './theme/builtin';
@@ -530,9 +530,9 @@ export class DeckImpl {
    * connectors whose own box was just set directly, are left alone.
    */
   private reconcileConnectors(changedIds: Set<string>): void {
-    const getFrame = (elementId: string): Frame | undefined => {
+    const getFrame = (elementId: string): ConnectionFrame | undefined => {
       const e = this.elements.get(elementId);
-      return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+      return e ? connectionFrame(e) : undefined;
     };
     for (const el of this.elements.values()) {
       if (el.type !== 'line') continue;
@@ -553,9 +553,9 @@ export class DeckImpl {
    *  reverting to the ambiguous box corner. Applied in-place; call inside a
    *  history/emit cycle. */
   private detachConnectors(deletedIds: Set<string>): void {
-    const getFrame = (elementId: string): Frame | undefined => {
+    const getFrame = (elementId: string): ConnectionFrame | undefined => {
       const e = this.elements.get(elementId);
-      return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+      return e ? connectionFrame(e) : undefined;
     };
     for (const el of this.elements.values()) {
       if (el.type !== 'line') continue;
@@ -741,9 +741,9 @@ export class DeckImpl {
     const el = this.elements.get(id);
     if (!el || el.type !== 'line') return;
     const line = el as LineElement;
-    const getFrame = (elementId: string): Frame | undefined => {
+    const getFrame = (elementId: string): ConnectionFrame | undefined => {
       const e = this.elements.get(elementId);
-      return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+      return e ? connectionFrame(e) : undefined;
     };
     const resolved = resolveEndpoints(line, getFrame);
     const patch: Partial<LineElement> = {};

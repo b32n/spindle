@@ -346,8 +346,20 @@ export interface ImageCrop {
   b: number;
 }
 
+/** A frame plus the preset of a shape element, so connection sites can follow its outline (see `anchorPoint`). */
+export interface ConnectionFrame extends Frame {
+  shape?: ShapeKind;
+}
+
+/** How a connector is routed between its endpoints: a straight segment, right-angle (elbow) legs or an S-curve. */
+export type ConnectorKind = 'straight' | 'elbow' | 'curved';
+
 export interface LineElement extends ElementBase {
   type: 'line';
+  /** Routing of a connector (default `straight`). Elbow and curved routes leave and enter bound anchors perpendicular to their side. */
+  connector?: ConnectorKind;
+  /** Elbow only: where the middle leg sits between the two ends, 0 to 1 (OOXML `bentConnector3` adj1; default 0.5). */
+  adjustments?: number[];
   /** Diagonal orientation flips (a line occupies the box diagonal). */
   flipH?: boolean;
   flipV?: boolean;

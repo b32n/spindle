@@ -2,6 +2,7 @@
 // on the current selection. Rendering + dismissal live in the shared Menu.
 
 import React from 'react';
+import type { ConnectorKind } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useClipboard } from '../hooks';
 import { Menu, type MenuItem } from './Menu';
 
@@ -17,6 +18,13 @@ export function ContextMenu({ x, y, onClose }: ContextMenuProps): React.ReactEle
   const clipboard = useClipboard();
   const ids = selection.elementIds;
   const hasSel = ids.length > 0;
+  const only = ids.length === 1 ? deck.getElement(ids[0]) : undefined;
+  const line = only?.type === 'line' ? only : undefined;
+  // Elbow and curved routing lives here (not in the toolbar) so the toolbar row is unchanged.
+  const route = (kind: ConnectorKind, label: string): MenuItem => ({
+    label: (line?.connector ?? 'straight') === kind ? `${label} ✓` : label,
+    run: () => deck.updateElement(line!.id, { connector: kind === 'straight' ? undefined : kind, adjustments: undefined } as never),
+  });
 
   const items: Array<MenuItem | 'sep'> = [
     { label: 'Cut', run: () => clipboard.cut(), disabled: !hasSel },
@@ -28,6 +36,7 @@ export function ContextMenu({ x, y, onClose }: ContextMenuProps): React.ReactEle
     { label: 'Bring forward', run: () => deck.bringForward(ids), disabled: !hasSel },
     { label: 'Send backward', run: () => deck.sendBackward(ids), disabled: !hasSel },
     { label: 'Send to back', run: () => deck.sendToBack(ids), disabled: !hasSel },
+    ...(line ? ['sep' as const, route('straight', 'Straight connector'), route('elbow', 'Elbow connector'), route('curved', 'Curved connector')] : []),
     'sep',
     { label: 'Group', run: () => deck.groupElements(ids), disabled: ids.length < 2 },
     { label: 'Ungroup', run: () => deck.ungroupElements(ids), disabled: !hasSel },

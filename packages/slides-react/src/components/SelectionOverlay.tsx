@@ -7,7 +7,7 @@
 // reads them on pointerdown to start the right gesture.
 
 import React, { useEffect, useReducer, useSyncExternalStore } from 'react';
-import { unionAABB, resolveEndpoints, adjustmentHandles, resolveAdjustments, type ShapeElement, type Frame, type LineElement, type Point, type Rect } from '@b32nio/spindle-slides-core';
+import { unionAABB, resolveEndpoints, connectionFrame, adjustmentHandles, resolveAdjustments, type ShapeElement, type Frame, type ConnectionFrame, type LineElement, type Point, type Rect } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 import { useSelection } from '../hooks';
 import { flipInBox } from '../interactions/gesture';
@@ -173,11 +173,10 @@ export function SelectionOverlay({ scale }: { scale: number }): React.ReactEleme
     const only = deck.getElement(ids[0])!;
     if (only.type === 'line') {
       const line = only as LineElement;
-      const getEndpointFrame = (elId: string): Frame | undefined => {
-        const l = live?.get(elId);
-        if (l) return l;
+      const getEndpointFrame = (elId: string): ConnectionFrame | undefined => {
         const e = deck.getElement(elId);
-        return e ? frameOf(e) : undefined;
+        const l = live?.get(elId);
+        return e ? { ...connectionFrame(e), ...l } : l;
       };
       const resolved = resolveEndpoints(line, getEndpointFrame);
       const editing = edit?.elementId === line.id ? edit : null;

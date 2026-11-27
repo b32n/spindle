@@ -47,8 +47,12 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * 6: K6 nested groups. An element map carries `parentGroupId` (the group containing its `groupId`) next to `groupId`.
  * A v5 client does not know the key, would read the inner group as top level (selecting and moving it apart from its
  * outer group) and drop the key on its next write of that element, flattening the nesting, so it must not join a v6 room.
+ *
+ * 7: K6b elbow and curved connectors. A line element's `props` carry `connector` ('elbow' | 'curved') and `adjustments`
+ * (the elbow's middle-leg position), and a bound anchor on an ellipse, diamond or triangle sits on the outline rather than
+ * the box. A v6 client would draw these as straight lines to the wrong points, so it must not join a v7 room.
  */
-export const COLLAB_SCHEMA_VERSION = 6;
+export const COLLAB_SCHEMA_VERSION = 7;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

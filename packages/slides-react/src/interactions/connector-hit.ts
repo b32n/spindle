@@ -3,7 +3,7 @@
 // dragged endpoint to. Connectors can start from / attach to any non-line
 // element; lines themselves are never connection targets.
 
-import { anchorPoints, pointInFrame } from '@b32nio/spindle-slides-core';
+import { anchorPoints, connectionFrame, pointInFrame } from '@b32nio/spindle-slides-core';
 import type { AnchorId, Frame, Point, DeckImpl } from '@b32nio/spindle-slides-core';
 
 function frameOf(el: { x: number; y: number; w: number; h: number; rotation: number }): Frame {
@@ -37,7 +37,7 @@ export function nearestAnchor(
     if (id === excludeId) continue;
     const el = deck.getElement(id);
     if (!el || el.type === 'line') continue;
-    for (const { anchor, point } of anchorPoints(frameOf(el))) {
+    for (const { anchor, point } of anchorPoints(connectionFrame(el))) {
       const d = Math.hypot(point.x - p.x, point.y - p.y);
       if (d <= bestD) {
         bestD = d;

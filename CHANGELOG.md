@@ -830,6 +830,14 @@ lockstep.
   includes nested members). Duplicating a slide or elements and copy/paste keep the nesting under fresh group ids.
   `childFrameInParent` and `composeGroupChain` compose DrawingML group transforms (scale, flips, rotation) for the
   PPTX reader. Slides collaboration schema version 6 (a v5 client refuses a v6 room).
+- **Slides elbow and curved connectors (K6b).** A line can be routed as an elbow (right-angle legs, middle leg at
+  `adjustments[0]`, default 0.5) or a curve: new optional `LineElement.connector` (`'straight' | 'elbow' | 'curved'`,
+  type `ConnectorKind`) and `adjustments`. Bound ends leave their shape perpendicular to the bound side (`anchorDirection`,
+  `routeConnector`, `lineRoute`, `routePathD`). Connection sites follow the shape: an ellipse's diagonal sites sit on
+  the outline, a diamond offers its four edge midpoints and a triangle its apex, slanted-side midpoints and base
+  points (`connectionAnchors`, `connectionFrame`, `ConnectionFrame`; the eight anchor ids are unchanged, so existing
+  bindings keep working). Choose the routing from the right-click menu of a selected line. Slides collaboration schema
+  version 7 (a v6 client refuses a v7 room).
 
 ## [0.4.0] - 2026-10-26
 
