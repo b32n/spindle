@@ -23,6 +23,7 @@ export * from './scene/crop';
 
 // Rich text model + schema
 export * from './text/model';
+export * from './text/body';
 export { slidesSchema } from './text/schema';
 
 // Theme + layouts
