@@ -83,7 +83,7 @@ describe('p:sp: identity and frame', () => {
   it('reads p:sp among the shapes of a slide: mc:AlternateContent is entered (Choice, else Fallback); an element no step reads is skipped', async () => {
     const tree =
       sp({ id: 2 }) +
-      '<p:contentPart/>' +
+      '<p:extLst/>' +
       `<mc:AlternateContent><mc:Choice Requires="x">${sp({ id: 3 })}</mc:Choice><mc:Fallback>${sp({ id: 4 })}</mc:Fallback></mc:AlternateContent>` +
       `<mc:AlternateContent><mc:Fallback>${sp({ id: 5 })}</mc:Fallback></mc:AlternateContent>`;
     expect((await shapesOf(tree)).map((s) => s.pptxId)).toEqual(['2', '3', '5']);

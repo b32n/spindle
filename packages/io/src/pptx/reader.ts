@@ -8,6 +8,8 @@ import { DEFAULT_COLOR_MAP, parseColorMap } from './color';
 import { isAvailableFont } from './fonts';
 import { readAuthors } from './comments';
 import { readLayouts } from './layouts';
+import { createOpaqueStore, type OpaqueLimits } from '@b32nio/spindle-shared/opaque';
+import { readContentTypes } from './opaque';
 import { readSlideContent } from './slides';
 import { FALLBACK_THEME, parseTheme } from './theme';
 import { emuToPx } from './units';
@@ -15,6 +17,8 @@ import { emuToPx } from './units';
 export interface ImportPptxOptions {
   /** Overrides of the safe-import limits (`DEFAULT_IMPORT_LIMITS`). */
   limits?: Partial<ImportLimits>;
+  /** Overrides of the size caps of the kept (opaque) parts (`DEFAULT_OPAQUE_LIMITS`): a part over them is dropped with a warning. */
+  opaqueLimits?: Partial<OpaqueLimits>;
 }
 
 const OFFICE_DOCUMENT = 'officeDocument';
@@ -32,7 +36,7 @@ const PRESENTATION_DEFAULT = 'ppt/presentation.xml';
 export async function importPptx(bytes: Uint8Array, options: ImportPptxOptions = {}): Promise<PresentationImportResult> {
   try {
     const zip = await openSafeZip(bytes, { limits: options.limits, target: 'a PowerPoint presentation (.pptx)' });
-    return await readPptx(zip);
+    return await readPptx(zip, options);
   } catch (e) {
     throw toImportError(e);
   }
@@ -62,7 +66,7 @@ function readSize(presentation: XmlElement, warn: (m: string) => void): { w: num
   return { ...DEFAULT_SLIDE_SIZE };
 }
 
-async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
+async function readPptx(zip: JSZip, options: ImportPptxOptions): Promise<PresentationImportResult> {
   const pkg = new OoxmlPackage(zip);
   const warnings: string[] = [];
   const warn = (m: string) => {
@@ -85,7 +89,9 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
   const fonts = new Set<string>();
   const defaultStyle = kid(presentation, 'defaultTextStyle');
   const layouts = await readLayouts(pkg, await masterParts(pkg, presentation, rels, slides), defaultStyle, warn, fonts);
-  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts, await readAuthors(pkg, [...rels.values()]), [...rels.values()].find((r) => r.type === 'tableStyles' && !r.external)?.target);
+  const store = createOpaqueStore(options.opaqueLimits);
+  const opaque = { pkg, store, types: readContentTypes(await pkg.xml('[Content_Types].xml')), stored: new Map() };
+  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts, await readAuthors(pkg, [...rels.values()]), opaque, [...rels.values()].find((r) => r.type === 'tableStyles' && !r.external)?.target);
   const sections = readSections(presentation, slides);
   for (const part of pkg.skipped) warn(`${part} was too large to read and was skipped.`);
   return {
@@ -96,6 +102,7 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
     layouts,
     fonts: reportFonts(fonts, theme, warn),
     ...(sections.length > 0 ? { sections } : {}),
+    opaqueParts: store.list(),
     warnings,
   };
 }

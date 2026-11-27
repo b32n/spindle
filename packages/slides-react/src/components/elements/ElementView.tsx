@@ -17,6 +17,7 @@ import { ImageView } from './ImageView';
 import { LineView } from './LineView';
 import { ConnectorView } from './ConnectorView';
 import { TableView } from './TableView';
+import { OpaqueView } from './OpaqueView';
 
 /** An editable shape: redraws with the live adjustment values while one of its handles is dragged. */
 function LiveShapeView({ el, theme }: { el: ShapeElement; theme: ReturnType<typeof useTheme> }): React.ReactElement {
@@ -38,6 +39,8 @@ function renderInner(el: SlideElement, theme: ReturnType<typeof useTheme>, inter
       return <LineView el={el} theme={theme} />;
     case 'table':
       return <TableView el={el} theme={theme} interactive={interactive} />;
+    case 'opaque':
+      return <OpaqueView el={el} />;
   }
 }
 

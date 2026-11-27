@@ -416,6 +416,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-SIZ-01 | changing the slide size to 4:3 keeps elements at their relative positions and is undoable | covered |  |  | `e2e/slides/layouts-masters.spec.ts` |
 | SL-SIZ-02 | a custom slide size is applied from the width and height fields | covered |  |  | `e2e/slides/layouts-masters.spec.ts` |
 | SL-LAY-02 | static layout content is drawn on slides that use the layout and is not selectable | covered |  |  | `e2e/slides/layouts-masters.spec.ts` |
+| SL-OPQ-01 | the charts deck shows one labelled placeholder per source chart and keeps the chart parts | covered |  |  | `e2e/slides/opaque-content.spec.ts` |
 | SL-TXT-09 | custom bullet, numbering, line height, spacing and margins render and persist | covered |  |  | `e2e/slides/paragraph-attrs.spec.ts` |
 | SL-PRS-01 | Present opens full-screen present mode on the active slide | covered | yes |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-02 | arrow keys, space, PageDown/Up, Home and End navigate | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
@@ -506,7 +507,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 441
+- covered: 442
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

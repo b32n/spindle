@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import {
   PPTX_KINDS,
   crashedResult,
+  opaquePartNames,
   pptxAdapter,
   runPptxFixture,
 } from '../../../../scripts/pptx-fidelity/run';
@@ -158,6 +159,33 @@ describe('runPptxFixture with a scripted importer (what the importer PRs will se
       bytes
     );
     expect(result.model.importError).toBe('cannot open <repo>/x.pptx');
+  });
+});
+
+describe('opaquePartNames', () => {
+  it('lists the package parts every opaque element refers to, groups included, and nothing else', () => {
+    const opaque = (...names: Array<string | undefined>) => ({ kind: 'opaque', parts: names.map((partName) => ({ hash: 'h', role: 'r', ...(partName ? { partName } : {}) })) });
+    const presentation = {
+      slides: [
+        { elements: [opaque('ppt/charts/chart1.xml', undefined, 'ppt/embeddings/a.xlsx'), { kind: 'shape' }, { kind: 'group', children: [opaque('ppt/media/clip.mp4'), { kind: 'group', children: [opaque('ppt/ink/ink1.xml')] }] }] },
+        { elements: [opaque('ppt/charts/chart1.xml')] },
+        { error: 'damaged' },
+      ],
+    };
+    expect([...opaquePartNames(presentation)].sort()).toEqual(['ppt/charts/chart1.xml', 'ppt/embeddings/a.xlsx', 'ppt/ink/ink1.xml', 'ppt/media/clip.mp4']);
+    expect(opaquePartNames(null).size).toBe(0);
+    expect(opaquePartNames({}).size).toBe(0);
+    expect(opaquePartNames({ slides: [{ elements: 'x' }] }).size).toBe(0);
+  });
+
+  it('turns the parts the reader kept into opaque ledger entries', async () => {
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
+    zip.file('ppt/charts/chart1.xml', '<c/>');
+    const presentation = { slides: [{ elements: [{ kind: 'opaque', parts: [{ hash: 'h', role: 'chart', partName: 'ppt/charts/chart1.xml' }] }] }] };
+    const r = await runPptxFixture(withImporter({ importPptx: async () => ({ warnings: [], presentation }) }), await zip.generateAsync({ type: 'uint8array' }));
+    expect(r.ledger.parts.find((p) => p.name === 'ppt/charts/chart1.xml')).toMatchObject({ status: 'opaque', rule: 'opaque' });
+    expect(r.ledger.totals.opaque).toBe(1);
   });
 });
 

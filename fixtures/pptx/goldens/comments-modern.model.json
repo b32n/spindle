@@ -3900,6 +3900,7 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [],
     "slideSize": {
       "h": 720,
       "w": 1280

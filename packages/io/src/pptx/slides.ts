@@ -1,6 +1,6 @@
 import type { PptxColorMap, PptxFill, PptxLayout, PptxSlide } from '@b32nio/spindle-shared/export/pptx';
 import type { OoxmlPackage } from '../common/ooxml-package';
-import { kid, type XmlElement } from '../xlsx/xml';
+import { kid, kids, type XmlElement } from '../xlsx/xml';
 import { DEFAULT_COLOR_MAP, colorElement, overrideColorMap, parseColor, parseColorMap } from './color';
 import { parseFill, type Rels } from './fill';
 import { collectFonts } from './fonts';
@@ -8,6 +8,8 @@ import { parseLevels } from './levels';
 import { elementIds, readAuthors, readThreads } from './comments';
 import { readElements, type ElementContext } from './elements';
 import { readNotes } from './notes';
+import { readControl, type OpaqueContext } from './opaque';
+import { slideFragments } from './fragments';
 import { readTableStyles } from './table-styles';
 
 /** A slide's `p:bg`: the fill of `p:bgPr`, or the colour of a `p:bgRef` as a solid fill. */
@@ -32,6 +34,7 @@ export async function readSlideContent(
   warn: (m: string) => void,
   fonts: Set<string>,
   authors: Awaited<ReturnType<typeof readAuthors>>,
+  opaque: OpaqueContext,
   tableStylesPart?: string
 ): Promise<void> {
   const layoutMaps = new Map<string, PptxColorMap>();
@@ -62,10 +65,17 @@ export async function readSlideContent(
       const map = overrideColorMap(await layoutMap(slide.layoutPart), kid(kid(root, 'clrMapOvr'), 'overrideClrMapping'));
       const rels = await relsOf(pkg, slide.partName);
       const layout = layouts.find((l) => l.partName === slide.layoutPart);
-      const ctx = { map, rels, defaultLevels: parseLevels(defaultStyle, map), ...(layout ? { layout } : {}), warn, pkg, images, styles };
+      const ctx = { map, rels, defaultLevels: parseLevels(defaultStyle, map), ...(layout ? { layout } : {}), warn, pkg, images, styles, opaque };
       const background = readBackground(root, map, rels);
       if (background) slide.background = background;
       slide.elements = await readElements(kid(kid(root, 'cSld'), 'spTree'), ctx);
+      // ActiveX controls sit beside the shape tree, in `p:cSld/p:controls`
+      for (const control of kids(kid(kid(root, 'cSld'), 'controls'), 'control')) slide.elements.push(await readControl(control, ctx));
+      // the transition and the timing tree are kept as written; the source text is read again only for a slide that has them
+      if (root.children.some((c) => ['transition', 'timing', 'AlternateContent'].includes(c.name))) {
+        const fragments = slideFragments((await pkg.text(slide.partName)) as string);
+        if (fragments.transition !== undefined || fragments.timing !== undefined) slide.opaque = fragments;
+      }
       // notes and comments are extras: one that cannot be read is dropped, with a warning, and the slide keeps its content
       try {
         const notes = await readNotes(pkg, [...rels.values()].find((r) => r.type === 'notesSlide' && !r.external)?.target, warn);
@@ -83,6 +93,7 @@ export async function readSlideContent(
       delete slide.elements;
       delete slide.background;
       delete slide.notes;
+      delete slide.opaque;
       delete slide.threads;
       slide.error = 'the content could not be read';
       warn(`Slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); it is kept as an empty placeholder.`);

@@ -46,6 +46,7 @@ export function normalizeDeckData(data: DeckData): DeckData {
     layouts: data.layouts,
     slides,
     threads: data.threads,
+    opaqueParts: data.opaqueParts,
     selection: data.selection,
   };
 }

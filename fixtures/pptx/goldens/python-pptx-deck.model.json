@@ -7819,6 +7819,32 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 2783,
+          "sha256": "4c57ff9f9f735e6611cc27f9b7bffff69e28ac59e74cd6d70156d59d8d627458"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "4c57ff9f9f735e6611cc27f9b7bffff69e28ac59e74cd6d70156d59d8d627458"
+      },
+      {
+        "bytes": {
+          "bytes": 315,
+          "sha256": "6993abdd85830edc87f3f5822b391a5346d35239ee70aa049a729cbe07553f8a"
+        },
+        "contentType": "application/vnd.openxmlformats-package.relationships+xml",
+        "hash": "6993abdd85830edc87f3f5822b391a5346d35239ee70aa049a729cbe07553f8a"
+      },
+      {
+        "bytes": {
+          "bytes": 5421,
+          "sha256": "ca3dc4af54b324c6ad5c46ab2121438a6d28a5628b1ae0302fc54281a55a17c5"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "hash": "ca3dc4af54b324c6ad5c46ab2121438a6d28a5628b1ae0302fc54281a55a17c5"
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 960
@@ -8816,6 +8842,35 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 480,
+              "w": 768,
+              "x": 96,
+              "y": 153.6
+            },
+            "kind": "opaque",
+            "name": "Chart 2",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "4c57ff9f9f735e6611cc27f9b7bffff69e28ac59e74cd6d70156d59d8d627458",
+                "partName": "ppt/charts/chart1.xml",
+                "role": "chart"
+              },
+              {
+                "hash": "6993abdd85830edc87f3f5822b391a5346d35239ee70aa049a729cbe07553f8a",
+                "partName": "ppt/charts/_rels/chart1.xml.rels",
+                "role": "rels"
+              },
+              {
+                "hash": "ca3dc4af54b324c6ad5c46ab2121438a6d28a5628b1ae0302fc54281a55a17c5",
+                "partName": "ppt/embeddings/Microsoft_Excel_Sheet1.xlsx",
+                "role": "package"
+              }
+            ],
+            "pptxId": "3"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout6.xml",

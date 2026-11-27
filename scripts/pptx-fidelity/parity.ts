@@ -2,7 +2,7 @@
  * The automated text parity check (plan K9): every text run of the source slides must appear in the imported model, as a
  * multiset compare. The source side is read independently of the reader, by tokenising the slide XML for `a:t` runs, so a
  * reader bug cannot hide itself. The check covers the shapes the reader reads so far (`p:sp`, `p:pic` and table `p:graphicFrame`s, at any depth of `p:grpSp` groups, table cells included);
- * the `mc:Fallback` copies of alternate content that also has a `mc:Choice` (the reader enters the Choice, else the Fallback) are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
+ * the `mc:Fallback` copies of alternate content that also has a `mc:Choice` (the reader enters the Choice, else the Fallback; but the Fallback of a Choice that `Requires` the `a14` math extension, whose Choice carries only equations) are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
  * knows (outside any shape at all, or in an element no reader step owns) is in scope and so reported as `missing`: such text
  * would be silently dropped by the reader, which is what the check exists to show. Speaker notes (K10c) count too: the runs of the
  * body placeholder of the notes page each (non-failed) slide points at must be the runs of `Slide.notes`; the other text of a notes page (header, footer, date,
@@ -49,30 +49,56 @@ const decode = (s: string): string =>
 export function sourceRuns(xml: string): { inScope: string[]; outOfScope: string[] } {
   const inScope: string[] = [];
   const outOfScope: string[] = [];
-  const stack: { name: string; later: boolean; choice: boolean }[] = [];
+  interface Frame {
+    name: string;
+    later: boolean;
+    choice: boolean;
+    /** Alternate content with an `a14` Choice (equations): the text of that Choice is in scope only when no Fallback stands in for it. */
+    math?: { texts: string[]; fallback: boolean };
+    /** The Choice of such a pair: where its text is held until the alternate content closes. */
+    hold?: string[];
+  }
+  const stack: Frame[] = [];
   let later = 0;
   // where the character data of the `a:t` just opened starts
   let textFrom = -1;
   for (let m = TAG.exec(xml); m; m = TAG.exec(xml)) {
     if (textFrom >= 0) {
-      if (m[1] === '/' && m[2] === 'a:t') (later > 0 ? outOfScope : inScope).push(decode(xml.slice(textFrom, m.index)));
+      if (m[1] === '/' && m[2] === 'a:t') {
+        const text = decode(xml.slice(textFrom, m.index));
+        const hold = stack.find((f) => f.hold)?.hold;
+        if (hold) hold.push(text);
+        else (later > 0 ? outOfScope : inScope).push(text);
+      }
       textFrom = -1;
     }
     const name = m[2];
     if (name === undefined) continue;
     if (m[1] === '/') {
       const at = stack.map((f) => f.name).lastIndexOf(name);
-      if (at >= 0) for (const closed of stack.splice(at)) if (closed.later) later--;
+      if (at >= 0)
+        for (const closed of stack.splice(at)) {
+          if (closed.later) later--;
+          if (closed.math) (closed.math.fallback || later > 0 ? outOfScope : inScope).push(...closed.math.texts);
+        }
     } else if (m[3] !== '/') {
       const parent = stack[stack.length - 1];
-      if (name === 'mc:Choice' && parent?.name === 'mc:AlternateContent') parent.choice = true;
+      const inAlternate = parent?.name === 'mc:AlternateContent';
+      const isChoice = name === 'mc:Choice' && inAlternate;
+      // the reader passes over an `a14` Choice (math) for the Fallback (text in the generated fixture; PowerPoint's own fallback is often a picture, which the reader then reads as one)
+      const math = isChoice && /\bRequires\s*=\s*["'][^"']*\ba14\b/.test(m[0]);
+      if (math) parent.math = { texts: [], fallback: false };
+      else if (isChoice) parent.choice = true;
+      if (name === 'mc:Fallback' && inAlternate && parent.math) parent.math.fallback = true;
       // a Fallback is the copy only when a Choice is there to be read instead
-      const isLater = (name === 'mc:Fallback' && parent?.name === 'mc:AlternateContent' && parent.choice);
-      stack.push({ name, later: isLater, choice: false });
+      const isLater = name === 'mc:Fallback' && inAlternate && parent.choice;
+      stack.push({ name, later: isLater, choice: false, ...(math ? { hold: (parent.math as { texts: string[] }).texts } : {}) });
       if (isLater) later++;
       if (name === 'a:t') textFrom = TAG.lastIndex;
     }
   }
+  // alternate content left open by damaged markup still decides its held text
+  for (const f of stack) if (f.math) (f.math.fallback ? outOfScope : inScope).push(...f.math.texts);
   TAG.lastIndex = 0;
   return { inScope: inScope.filter((t) => t !== ''), outOfScope: outOfScope.filter((t) => t !== '') };
 }

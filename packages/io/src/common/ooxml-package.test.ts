@@ -22,6 +22,14 @@ describe('resolveTarget', () => {
   });
 });
 
+describe('declaredSize', () => {
+  it('is the size the entry declares, and 0 for a part that is not there', async () => {
+    const pkg = await open({ 'a.xml': '<a>1234567890</a>' });
+    expect(pkg.declaredSize('a.xml')).toBe(17);
+    expect(pkg.declaredSize('missing.xml')).toBe(0);
+  });
+});
+
 describe('relsPart', () => {
   it('puts the relationships of a part in the _rels folder next to it', () => {
     expect(relsPart('ppt/slides/slide1.xml')).toBe('ppt/slides/_rels/slide1.xml.rels');

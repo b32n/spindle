@@ -7,8 +7,9 @@
  *                the slide, layout and master parts it reads; what it reads from a slide or a layout grows over the K9
  *                PRs (the slide list and theme first, layouts and slide content next), so `mapped` says "this kind of
  *                part is read", not "everything in it is carried": the loss ids say what is not.
- *   opaque       the part is kept byte-for-byte and written back on export. Nothing is opaque until the opaque
- *                part store (plan X5) exists: `opaque` is the hook that will decide it.
+ *   opaque       the part is kept byte-for-byte in the opaque part store and written back on export (plan K11: the parts of
+ *                charts, SmartArt, OLE objects and controls, audio and video, ink, and their relationship parts). The reader
+ *                names them in its result; `isOpaque` carries that to the ledger and wins over every rule below.
  *   dropped      the part is not imported and the loss report says so: a loss id covers it (`loss` lists the ids).
  *   unaccounted  nothing accounts for the part: it is not read and no reported loss covers it. The count is
  *                recorded as is (plan row L13 wants 0). A part no rule knows is covered by the detector's
@@ -116,7 +117,7 @@ export interface LedgerInput {
   /** Ids of the loss items reported for the file. */
   lossIds: string[];
   importFailed: boolean;
-  /** Part names stored in the opaque part store (none today). */
+  /** Part names stored in the opaque part store (the reader's `opaqueParts` and the elements' part references). */
   isOpaque?: (name: string) => boolean;
 }
 

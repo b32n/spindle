@@ -3,6 +3,8 @@
 // `slides-core` maps a `PresentationImportResult` to a deck (`importFromPptx`, plan K15). The reader (plan K9) grows
 // this result in steps: package, presentation and theme first, then layouts, then slide content.
 
+import type { OpaquePart, OpaqueRef } from '../../opaque/types';
+
 /** Options for the loss detector (`detectPptxLoss`). All optional. */
 export interface DetectPptxLossOptions {
   /** `'summary'` (default) drives the import-confirmation dialog; `'full'` adds the finer ids the fidelity harness records. */
@@ -79,7 +81,20 @@ export interface PptxSlide {
   notes?: PptxTextBody;
   /** The comment threads of the slide (plan K10c), legacy and modern, in file order. Absent when it has none. */
   threads?: PptxCommentThread[];
+  /** The slide's transition and animation XML (plan K11), kept as written (see `PptxSlideOpaque`). Absent when it has neither. */
+  opaque?: PptxSlideOpaque;
   error?: string;
+}
+
+/**
+ * Slide-level XML the editor does not model, as self-contained fragments (the namespaces the slide root declares are repeated on
+ * the fragment's own tag): `transition` is the `p:transition` element, or the `mc:AlternateContent` that wraps it (a `p14`
+ * transition with its fallback), `timing` is the `p:timing` element (animations and media playback). `timing` names shapes by
+ * `pptxId` (`spTgt spid`); the editor prunes those references when it deletes the shape.
+ */
+export interface PptxSlideOpaque {
+  transition?: string;
+  timing?: string;
 }
 
 /** One comment of a thread: the author as the file names them (`Unknown author` when its list does not), the plain text of the body (paragraphs joined by a line break) and the time as UTC ISO-8601 when the file states one. */
@@ -466,8 +481,37 @@ export interface PptxGroup {
   children: PptxElement[];
 }
 
+/** What an opaque element is: a chart, a SmartArt diagram, an OLE object (or control), an audio or video clip, or ink. */
+export type PptxOpaqueKind = 'chart' | 'smartArt' | 'ole' | 'media' | 'ink';
+
+/**
+ * Content the editor cannot edit or draw (plan K11, decision D5): kept byte for byte in the opaque part store
+ * (`PresentationImportResult.opaqueParts`) and drawn as a labelled placeholder. `parts` refer to the stored parts: the root
+ * part first (the chart, the diagram data, the OLE object, the media file, the ink), then everything it relates to
+ * (embedded workbook, style and colour parts, diagram layout, drawing, preview and poster images), each with the package part
+ * name it had and a `role` (the last segment of the relationship type: `chart`, `package`, `diagramData`, `image`, `media`...).
+ * The relationship part of every stored part is stored too (role `rels`) so an exporter can rewrite its targets.
+ * A part the store refused (over the size cap) is not listed; the importer warns. `props` holds what is needed to write the frame
+ * again (`progId` and `name` of an OLE object, the `c:chart` / `dgm:relIds` / `p:oleObj` / media wrapper kind).
+ */
+export interface PptxOpaque {
+  kind: 'opaque';
+  opaqueKind: PptxOpaqueKind;
+  pptxId: string;
+  name: string;
+  altText?: string;
+  hidden?: boolean;
+  frame?: PptxFrame;
+  /** The chart title when the chart states one as plain text, for the placeholder's label. */
+  title?: string;
+  parts: OpaqueRef[];
+  /** A picture to draw in the placeholder (an OLE object's preview, a clip's poster frame), as a data URL; never fetched. */
+  poster?: string;
+  props?: Record<string, string>;
+}
+
 /** What a slide holds, in drawing order. */
-export type PptxElement = PptxShape | PptxPicture | PptxTable | PptxConnector | PptxGroup;
+export type PptxElement = PptxShape | PptxPicture | PptxTable | PptxConnector | PptxGroup | PptxOpaque;
 
 /**
  * A slide layout flattened with its master. `elements` is the static content (the master's shapes, unless the layout hides
@@ -510,5 +554,7 @@ export interface PresentationImportResult {
   layouts: PptxLayout[];
   fonts: PptxFonts;
   sections?: PptxSection[];
+  /** The parts the opaque elements refer to (plan K11), content-addressed: one entry per distinct byte content. */
+  opaqueParts: OpaquePart[];
   warnings: string[];
 }

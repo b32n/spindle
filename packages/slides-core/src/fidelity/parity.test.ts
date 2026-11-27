@@ -34,6 +34,20 @@ describe('sourceRuns', () => {
     expect(textParity(parts(xml), model(['fb']))).toMatchObject({ sourceRuns: 1, outOfScope: 0, missing: [], extra: [] });
   });
 
+  it('reads the Fallback of an a14 (math) Choice, as the reader does, and holds the Choice\'s own text until it knows', () => {
+    const math = (choice: string, fallback: string) => `<mc:AlternateContent><mc:Choice Requires="a14"><p:sp>${choice}</p:sp></mc:Choice>${fallback}</mc:AlternateContent>`;
+    const fb = '<mc:Fallback><p:sp><a:t>plain</a:t></p:sp></mc:Fallback>';
+    expect(sourceRuns(math('<a:t>m</a:t>', fb))).toEqual({ inScope: ['plain'], outOfScope: ['m'] });
+    // no Fallback: the reader enters the Choice after all
+    expect(sourceRuns(math('<a:t>m</a:t>', ''))).toEqual({ inScope: ['m'], outOfScope: [] });
+    // inside a Fallback copy the held text is a copy too, and damaged markup still settles it
+    const copy = `<mc:AlternateContent><mc:Choice><p:sp><a:t>c</a:t></p:sp></mc:Choice><mc:Fallback>${math('<a:t>m</a:t>', '')}</mc:Fallback></mc:AlternateContent>`;
+    expect(sourceRuns(copy)).toEqual({ inScope: ['c'], outOfScope: ['m'] });
+    expect(sourceRuns('<mc:AlternateContent><mc:Choice Requires="p14 a14"><a:t>x</a:t></mc:Choice><mc:Fallback><a:t>y</a:t>')).toEqual({ inScope: ['y'], outOfScope: ['x'] });
+    // another extension's Choice is read as before
+    expect(sourceRuns('<mc:AlternateContent><mc:Choice Requires="p14"><a:t>p</a:t></mc:Choice><mc:Fallback><a:t>q</a:t></mc:Fallback></mc:AlternateContent>')).toEqual({ inScope: ['p'], outOfScope: ['q'] });
+  });
+
   it('treats an a:t outside every shape as in scope, so the parity check reports it as missing', () => {
     expect(sourceRuns('<p:spTree><a:t>stray</a:t></p:spTree>')).toEqual({ inScope: ['stray'], outOfScope: [] });
     const xml = { 'ppt/slides/slide1.xml': '<p:sld><p:spTree><a:t>stray</a:t></p:spTree></p:sld>' };

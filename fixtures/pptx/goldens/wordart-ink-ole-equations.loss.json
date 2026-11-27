@@ -13,9 +13,10 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the object and its preview picture are stored unchanged, kept for saving back; the editor shows the preview in a labelled placeholder and cannot open or edit it",
       "id": "pptx.embeddedObjects",
       "label": "embedded object(s) (OLE) and control(s)",
+      "state": "kept",
       "where": [
         "Slide 3"
       ]
@@ -31,9 +32,10 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the ink is stored unchanged, kept for saving back; the editor shows a labelled placeholder and cannot draw or edit it",
       "id": "pptx.ink",
       "label": "ink drawing(s)",
+      "state": "kept",
       "where": [
         "Slide 2"
       ]
