@@ -492,6 +492,11 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
+  `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
+  New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and
+  `CollabBlockedError`; the `/collab` subpath also exports `COLLAB_SCHEMA_VERSION`, `CollabSchemaVersionError`,
+  `readSchemaVersion` and `assertSchemaVersion`.
 - **XLSX fidelity corpus, first part (`fixtures/xlsx/`).** 26 committed files: eight hand-authored construct
   workbooks (cell types, 1900 and 1904 dates, basic styles, layout, sheet properties, names, conditional
   formatting, data validation), the 159-formula, 33-code number-format and 23-form formula-syntax probe

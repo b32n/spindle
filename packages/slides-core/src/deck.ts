@@ -47,6 +47,7 @@ import { getBuiltinTheme, BUILTIN_LAYOUTS, DEFAULT_SLIDE_SIZE } from './theme/bu
 import { DeckHistory, type DeckSnapshot } from './history';
 import { normalizeDeckData } from './serialization';
 import { SlidesCommentStore } from './comments';
+import { CollabBlockedError, getCollabBlockers } from './collab/blockers';
 import type { CollabHandle, AttachCollabOptions } from './collab/binding';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
 import type {
@@ -969,10 +970,12 @@ export class DeckImpl {
     return this.collabHandle;
   }
 
-  /** Attach a Yjs mirror over a provider. Lazy-loads ./collab (keeps Yjs out of the base bundle). */
+  /** Attach a Yjs mirror over a provider (rejects with CollabBlockedError for a deck the shared layout cannot hold, CollabSchemaVersionError for a newer room). Lazy-loads ./collab (keeps Yjs out of the base bundle). */
   async attachCollab(provider: CollabProvider, identity: CollabIdentity, options?: AttachCollabOptions): Promise<CollabHandle> {
     if (this.collabHandle) return this.collabHandle;
     if (this.pendingAttach) return this.pendingAttach.promise;
+    const blockers = getCollabBlockers(this.getData());
+    if (blockers.length > 0) throw new CollabBlockedError(blockers);
     // detachCollab() aborts this controller, so an attach still connecting can
     // neither seed the room nor leave a live socket behind (rejects with AbortError).
     const abort = new AbortController();

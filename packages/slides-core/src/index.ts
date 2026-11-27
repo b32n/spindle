@@ -36,6 +36,8 @@ export type { NewElementSpec, AddSlideOptions } from './deck';
 export { DeckHistory } from './history';
 export type { DeckSnapshot } from './history';
 export { normalizeDeckData } from './serialization';
+export { getCollabBlockers, CollabBlockedError } from './collab/blockers';
+export type { CollabBlocker } from './collab/blockers';
 
 // Utilities re-exported for convenience
 export { generateId } from './utils/id';
