@@ -66,7 +66,8 @@ export interface WorkbookCanvasProps {
   /**
    * Limits of the XLSX reader over its defaults (`{ maxTotalCells: 20_000_000 }`...), for hosts that open workbooks bigger than the
    * defaults allow (5,000,000 cells, 1,000 sheets...). What a limit cuts is in the `loss` that `onFileOpened` gets, which names the
-   * limit that raises it. Not used for `.csv`.
+   * limit that raises it. Not used for `.csv`. Pass a stable reference (a constant or a memoized object): the open handler depends on it, so an
+   * inline object re-creates the handler on every render.
    */
   importLimits?: SheetsFileImportOptions['limits'];
   /** Called after a file was opened; `warnings` lists features the importer had to drop, and `loss` what the file holds that the editor cannot take, including what an import limit cut (`xlsx.package.sizeLimit`). */
