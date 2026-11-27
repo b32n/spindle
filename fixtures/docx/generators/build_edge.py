@@ -132,7 +132,7 @@ def edge_no_body(out):
 
 
 def edge_zip_bomb(out):
-    """~24 KB on disk, 24 MB inflated: over the 200:1 ratio limit (and the 16 MB floor below which the ratio is not judged)."""
+    """~32 KB on disk, 24 MB inflated: over the 200:1 ratio limit (and the 16 MB floor below which the ratio is not judged)."""
     doc = Doc("Zip bomb")
     body = p(r("Zip bomb"), style="Title")
     body += p(r("An ordinary document with one extra part that inflates a thousandfold. The import limits refuse the package before inflating it."), style="BodyText")

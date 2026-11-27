@@ -499,7 +499,7 @@ lockstep.
   the shared one (depth cap, DOCTYPE removed, so declared and external entities never expand; the five predefined
   entities are decoded as before). A `.docx` without `[Content_Types].xml` is now refused as `not-a-package`. All
   DOCX goldens are unchanged; two new edge fixtures (`edge-zip-bomb`, `edge-entity-bomb`) cover the bomb and the
-  entity expansion.
+  entity expansion. Known gap: docs-core `importFromDocx` does not forward `limits` yet (follow-up).
 - **DOCX fidelity harness re-pointed to the shared core.** `scripts/docx-fidelity/` now keeps only the DOCX adapter
   and imports the generic runner, snapshot, manifest, matrix, diff and report modules from `scripts/fidelity-core/`;
   the duplicated copies are deleted. The DOCX goldens and README coverage matrix are byte-identical. The markdown
