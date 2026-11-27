@@ -23,6 +23,7 @@ interface WorkbookCanvasProps {
   importLimits?: Partial<ImportLimits>;  // XLSX reader limits over the defaults (see documentation/import-loss.md)
   maxArrayCells?: number;      // most cells the array formulas of one sheet may cover when an .xlsx opens; default 1,000,000
   onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
+  onExportWarning?: (message: string) => void;  // what a downloaded .xlsx left out (a spilled array result over the export's caps); the editor shows nothing itself
   onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
 

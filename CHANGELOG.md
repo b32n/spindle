@@ -1033,7 +1033,8 @@ lockstep.
   An imported legacy (Ctrl+Shift+Enter) array formula is no longer written back as a dynamic array when the engine spills it: it stays `{=...}` in
   Excel (no `cm`, no metadata part); only a dynamic array and a formula typed in the editor that spills are written as dynamic arrays.
   `exportToXlsx` also has a budget for the whole workbook, `maxTotalArrayCells` (default 1,000,000 cells of array formula results over all formulas
-  and sheets), and reports the first 20 cuts one by one and the others as a count.
+  and sheets), and reports the first 20 cuts one by one and the others as a count. The in-app download hands them to the host: the
+  `onExportWarning` prop of `WorkbookCanvas` and the `onWarning` option (`SheetsFileExportOptions`, fourth argument) of `exportWorkbookFile`.
 
 ## [0.4.0] - 2026-10-26
 

@@ -54,6 +54,7 @@ function App() {
   exportFormats={['xlsx', 'csv']}           // optional; default is both
   fileName="Budget"                         // optional; defaults to the workbook name
   onFileOpened={({ fileName, warnings }) => {}}
+  onExportWarning={(message) => {}}         // optional; what an .xlsx download cut (a spilled array result over the export's caps)
   onFileError={(error, action) => {}}       // action: 'open' | 'download'
 />
 ```
@@ -62,7 +63,8 @@ Opening a file replaces the whole workbook (a CSV becomes a single-sheet
 workbook); CSV download exports the active sheet. Files are read locally via
 `<input type="file">`; nothing is uploaded. For a host-owned button use the
 exported helpers `exportWorkbookFile(workbook, 'xlsx')` and
-`importWorkbookFile(workbook, file)`, or the `Toolbar` props `onOpenFile` /
+`importWorkbookFile(workbook, file)` (options: `limits`, `maxArrayCells`, `recalculateOnLoad`; `exportWorkbookFile` takes
+`{ onWarning }` as its fourth argument), or the `Toolbar` props `onOpenFile` /
 `onDownload` / `downloadFormats`.
 
 ## Architecture

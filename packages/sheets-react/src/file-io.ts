@@ -47,6 +47,16 @@ export interface SheetsFileExport {
   mimeType: string;
 }
 
+/** What `exportWorkbookFile` takes besides the workbook and the format. */
+export interface SheetsFileExportOptions {
+  /**
+   * Told about what an .xlsx export left out: a spilled array formula result over the export's caps is written as its first rows
+   * only (Excel recalculates the formula and spills it in full). Called once for each of the first 20 results cut, then once with the
+   * count of the others; not called when nothing was cut. Not used for `.csv`.
+   */
+  onWarning?: (message: string) => void;
+}
+
 /**
  * Build the downloadable file for `format`. XLSX covers every sheet; CSV is
  * inherently single-sheet and exports the active one.
@@ -54,12 +64,13 @@ export interface SheetsFileExport {
 export async function exportWorkbookFile(
   workbook: WorkbookImpl,
   format: SheetsExportFormat,
-  baseName: string = workbook.name
+  baseName: string = workbook.name,
+  options: SheetsFileExportOptions = {}
 ): Promise<SheetsFileExport> {
   const info = SHEETS_EXPORT_FORMATS.find((f) => f.id === format);
   if (!info) throw new Error(`Unsupported export format: ${String(format)}`);
   const fileName = `${sanitizeFileName(baseName, 'Workbook')}.${info.extension}`;
-  const data = format === 'xlsx' ? await exportToXlsx(workbook) : exportToCSV(workbook);
+  const data = format === 'xlsx' ? await exportToXlsx(workbook, { onWarning: options.onWarning }) : exportToCSV(workbook);
   return { data, fileName, mimeType: info.mimeType };
 }
 
