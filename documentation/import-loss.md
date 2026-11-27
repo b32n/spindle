@@ -91,7 +91,7 @@ formula (`cm` in the file) spills as far as its result goes; the cells the file 
 is. One it cannot evaluate keeps its saved result cells as plain values and the formula as cached-only. A one-cell array formula stays an
 array formula. On export an array formula is written with `t="array"` and its range (the engine's spill region for one that spills, the file's
 extent for a cached-only one), the spilled values are written as the plain values Excel keeps next to the formula, and a dynamic array also
-gets the cell metadata Excel marks it with (`cm` and `xl/metadata.xml`). A dynamic array whose saved extent is one cell is kept as its saved
+gets the cell metadata Excel marks it with (`cm` and `xl/metadata.xml`); a legacy (CSE) array formula stays legacy on export, written without `cm`, even when the engine spills it (Excel shows it as `{=...}` again, not as a spilled formula), and a formula typed in the editor that spills is written as a dynamic array. A dynamic array whose saved extent is one cell is kept as its saved
 value until a cell it refers to changes. The cells an array formula covers cost as much to take on load as they are many, so a sheet is
 limited to 1,000,000 cells of array formulas (the `maxArrayCells` option of `importFromXlsx` and `importWorkbookFile`, the `maxArrayCells` prop of `WorkbookCanvas`; a dynamic one costs at most the sheet's cell count): past it the
 formula is kept as cached-only (one cell with its saved result, the extent unchanged in the file) and reported as `xlsx.package.sizeLimit`

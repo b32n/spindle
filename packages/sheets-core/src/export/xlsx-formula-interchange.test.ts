@@ -255,6 +255,43 @@ describe('array and dynamic-array formulas', () => {
     expect(again.wb.getSpillRegion(undefined, 0, 3)?.values).toEqual([[3], [4], [5]]);
   });
 
+  describe('on export, legacy and dynamic arrays stay what they were', () => {
+    const exported = async (wb: WorkbookImpl) => {
+      const out = await exportToXlsx(wb);
+      const zip = await JSZip.loadAsync(out);
+      return { out, xml: await zip.file('xl/worksheets/sheet1.xml')!.async('string'), hasMetadata: zip.file('xl/metadata.xml') !== null };
+    };
+
+    it('a legacy A1:B2 array formula stays {=...} (no cm, no metadata part) though the engine spills it', async () => {
+      const { wb } = await open(await xlsxWith({ 1: [fcell('A1', '1+1', 2, 't="array" ref="A1:B2"')] }));
+      expect(wb.getSpillRegion(undefined, 0, 0)).toMatchObject({ rows: 2, cols: 2 });
+      const { out, xml, hasMetadata } = await exported(wb);
+      expect(xml).toMatch(/<c r="A1"><f t="array" ref="A1:B2">1\+1<\/f><v>2<\/v><\/c>/);
+      expect(xml).not.toContain('cm=');
+      expect(hasMetadata).toBe(false);
+      const again = await open(out);
+      expect(cellAt(again.wb, 0, 0)?.arraySpan).toEqual({ rows: 2, cols: 2 });
+    });
+
+    it('a dynamic array stays dynamic (cm="1" and the metadata part)', async () => {
+      const { wb } = await open(await sorted());
+      const { out, xml, hasMetadata } = await exported(wb);
+      expect(xml).toContain('<c r="D1" cm="1">');
+      expect(hasMetadata).toBe(true);
+      expect(cellAt((await open(out)).wb, 0, 3)?.arraySpan).toEqual({ rows: 3, cols: 1, spill: true });
+    });
+
+    it('a formula typed here that spills is written as a dynamic array', async () => {
+      const wb = new WorkbookImpl('wb', 'WB');
+      wb.setFormula(undefined, 0, 0, '=SEQUENCE(2,2)');
+      expect(cellAt(wb, 0, 0)?.arraySpan).toBeUndefined();
+      const { out, xml, hasMetadata } = await exported(wb);
+      expect(xml).toMatch(/<c r="A1" cm="1"><f t="array" ref="A1:B2">/);
+      expect(hasMetadata).toBe(true);
+      expect(cellAt((await open(out)).wb, 0, 0)?.arraySpan).toEqual({ rows: 2, cols: 2, spill: true });
+    });
+  });
+
   it('keep a one-cell array formula as one, so the file still says array', async () => {
     const bytes = await xlsxWith({ 1: [ncell('A1', 2), ncell('B1', 3), fcell('C1', 'SUM(A1:B1*A1:B1)', 13, 't="array" ref="C1"')] });
     const { wb } = await open(bytes);

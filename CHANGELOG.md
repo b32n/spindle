@@ -1030,6 +1030,8 @@ lockstep.
   A formula whose text result is an error literal (`="#N/A"`) is written as an error value: the model cannot tell them apart.
   The array budget of an import is settable where a host opens files: `maxArrayCells` in `SheetsFileImportOptions` (`importWorkbookFile`) and a
   `maxArrayCells` prop of `WorkbookCanvas`; the `xlsx.package.sizeLimit` effect names them.
+  An imported legacy (Ctrl+Shift+Enter) array formula is no longer written back as a dynamic array when the engine spills it: it stays `{=...}` in
+  Excel (no `cm`, no metadata part); only a dynamic array and a formula typed in the editor that spills are written as dynamic arrays.
 
 ## [0.4.0] - 2026-10-26
 

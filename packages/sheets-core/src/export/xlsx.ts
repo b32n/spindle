@@ -74,8 +74,9 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, maxArrayCells:
       }
       if (span) {
         out.arrayRef = spanRef(row, col, span.rows, span.cols);
-        // a formula that spills (or was a dynamic array in the file) goes back as one; a legacy array formula stays legacy
-        if (region || cell.arraySpan?.spill) out.dynamicArray = true;
+        // a dynamic array (one the file marked, or a formula typed here that spills) goes back as one; an array formula the file had
+        // without the dynamic mark (legacy, entered with Ctrl+Shift+Enter) stays legacy even when the engine now spills it
+        if (!cell.arraySpan || cell.arraySpan.spill) out.dynamicArray = true;
       }
       if (written) {
         // the spilled cells are not stored cells: they are written as the values the file keeps next to an array formula
