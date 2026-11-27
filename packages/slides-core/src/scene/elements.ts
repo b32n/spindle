@@ -5,6 +5,7 @@
 
 import { generateId } from '../utils/id';
 import { emptyRichText } from '../text/model';
+import { normalizeCrop } from './crop';
 import type {
   Frame,
   Fill,
@@ -14,6 +15,7 @@ import type {
   TextElement,
   ShapeElement,
   ImageElement,
+  ImageCrop,
   LineElement,
   TableElement,
   TableCell,
@@ -117,6 +119,7 @@ export interface ImageElementInput extends BaseElementInput {
   flipH?: boolean;
   flipV?: boolean;
   fit?: 'fill' | 'contain' | 'cover';
+  crop?: ImageCrop;
 }
 
 export function createImageElement(input: ImageElementInput): ImageElement {
@@ -130,6 +133,8 @@ export function createImageElement(input: ImageElementInput): ImageElement {
   if (input.flipH) el.flipH = input.flipH;
   if (input.flipV) el.flipV = input.flipV;
   if (input.fit) el.fit = input.fit;
+  const crop = normalizeCrop(input.crop);
+  if (crop) el.crop = crop;
   return el;
 }
 

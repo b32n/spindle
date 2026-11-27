@@ -395,6 +395,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | L-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | L-FNT-03 | fontSource {kind:'css', url}: fonts load from the host's own endpoint | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | L-FNT-04 | unreachable font host: the deck still renders | covered |  |  | `e2e/slides/fonts.spec.ts` |
+| SL-IMG-08 | cropping an image clips it in the DOM and resetting restores the plain image | covered |  |  | `e2e/slides/image-crop.spec.ts` |
 | SL-IMG-06 | a 4000x3000 image is inserted scaled to fit the slide and keeps its aspect ratio | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-07 | cancelling the file chooser inserts nothing | covered |  |  | `e2e/slides/image-upload.spec.ts` |
 | SL-IMG-08 | the upload button opens a chooser that accepts images | covered |  |  | `e2e/slides/image-upload.spec.ts` |
@@ -492,7 +493,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 427
+- covered: 428
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

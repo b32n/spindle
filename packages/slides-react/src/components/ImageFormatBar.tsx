@@ -1,14 +1,17 @@
 // ImageFormatBar — inline image controls, rendered in the main Toolbar row (like
 // the other format bars) when a single image is selected: replace the source
 // (file or URL) and flip horizontally / vertically. The model already carries
-// src / naturalW / naturalH / flipH / flipV.
+// src / naturalW / naturalH / flipH / flipV / crop. Crop edges are edited in a small
+// popover (percent trimmed from each edge) so the toolbar itself gains one button.
 
-import React, { useRef } from 'react';
-import { ImageUp, Link2, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
-import type { ImageElement } from '@b32nio/spindle-slides-core';
+import React, { useRef, useState } from 'react';
+import { ImageUp, Link2, FlipHorizontal2, FlipVertical2, Crop } from 'lucide-react';
+import { normalizeCrop, type ImageElement } from '@b32nio/spindle-slides-core';
 import { useImageHooks, readImageFile, storeImageFile, resolveImageUrl } from '@b32nio/spindle-shared/react';
 import { useDeck, useSelection, useElement } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
+import { Popover } from './Popover';
+import { ImageCropFields } from './ImageCropFields';
 
 const FITS: Array<{ v: 'fill' | 'contain' | 'cover'; label: string }> = [
   { v: 'fill', label: 'Stretch' },
@@ -31,6 +34,8 @@ export function ImageFormatBar(): React.ReactElement | null {
   const imageHooks = useImageHooks();
   const selection = useSelection();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [cropAnchor, setCropAnchor] = useState<HTMLElement | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
   const id = selection.elementIds.length === 1 ? selection.elementIds[0] : null;
   const el = useElement(id ?? '') as ImageElement | undefined;
   if (!id || !el || el.type !== 'image') return null;
@@ -88,6 +93,16 @@ export function ImageFormatBar(): React.ReactElement | null {
           <option key={f.v} value={f.v}>{f.label}</option>
         ))}
       </select>
+      <span ref={setCropAnchor} style={{ display: 'inline-flex' }}>
+        <ToolbarButton title="Crop image" active={!!normalizeCrop(el.crop)} onClick={() => setCropOpen((o) => !o)}>
+          <Crop size={15} />
+        </ToolbarButton>
+      </span>
+      {cropOpen && (
+        <Popover anchor={cropAnchor} onClose={() => setCropOpen(false)}>
+          <ImageCropFields crop={el.crop} onChange={(crop) => deck.updateElement(id, { crop })} />
+        </Popover>
+      )}
       <ToolbarButton title="Flip horizontal" active={!!el.flipH} onClick={() => deck.updateElement(id, { flipH: !el.flipH })}>
         <FlipHorizontal2 size={15} />
       </ToolbarButton>
