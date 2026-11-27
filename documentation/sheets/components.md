@@ -277,6 +277,16 @@ const handleInputChange = (value: string) => {
 };
 ```
 
+**Saved-value note and theming:** next to a formula the engine cannot evaluate (a cached-only cell, see `documentation/import-loss.md`), the bar shows a short note that the value is the one saved in the file and is not updated when the cells it uses change. Its colours come from three CSS variables a host can set on the editor or any ancestor (for a dark theme, say):
+
+| Variable | Default | Used for |
+|---|---|---|
+| `--spindle-note-fg` | `#92400e` | text |
+| `--spindle-note-bg` | `#fef3c7` | background |
+| `--spindle-note-border` | `#b45309` | 1px border |
+
+The defaults give a text/background contrast of about 6.4:1 (at least 4.5:1 is required of the text; the border is about 4.5:1 against the background, 3:1 is required of it). A host's own pair should keep at least 4.5:1 for the text.
+
 ### SheetTabs
 
 Sheet navigation and management component.

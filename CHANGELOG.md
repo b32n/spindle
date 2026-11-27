@@ -1013,7 +1013,7 @@ lockstep.
   never shown as `#NAME?`: the cell keeps the file's formula text and the saved result (`cachedOnly`), shows a small "Saved value" note
   in the formula bar (the cell keeps its saved value and its original formula text unchanged: the value does not follow the cells it refers to and the
   references in the text are not adjusted by inserting or deleting rows or columns; Excel recalculates it when the file is reopened,
-  possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: 7:1 contrast), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
+  possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
   spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
   New loss id `xlsx.formulas.cachedOnly` (state `kept`); `xlsx.formulas.unsupported`, `.structuredRefs` and `.externalRef` now say the
   value is kept. Additive: `Cell.cachedOnly` and `Cell.arraySpan`, `SpreadsheetCell.cachedOnly`, `.arrayRef` and `.dynamicArray`,
