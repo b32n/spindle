@@ -17,14 +17,28 @@ export { PACKAGE_LIMITS };
 
 const MAX_WHERE = 5;
 
-/** Parts of opaque elements: the ones the opaque store keeps whole. */
-const OPAQUE_PARTS = /^ppt\/(?:charts|diagrams|media|embeddings|ink|activeX)\//;
-const KEPT_CHART = 'kept: the chart, its workbook and its style parts are stored unchanged and saved back; the editor shows a labelled placeholder and cannot edit or draw it';
-const KEPT_SMARTART = 'kept: the diagram parts are stored unchanged and saved back; the editor shows a labelled placeholder (the diagram\'s cached drawing is not drawn) and cannot edit it';
-const KEPT_MEDIA = 'kept: the clip and its poster frame are stored unchanged and saved back; the editor shows the poster in a labelled placeholder and does not play it (linked clips are never fetched)';
-const KEPT_OLE = 'kept: the object and its preview picture are stored unchanged and saved back; the editor shows the preview in a labelled placeholder and cannot open or edit it';
-const KEPT_TRANSITION = 'kept: the transition is stored as written and saved back; the editor does not play or edit it';
-const KEPT_ANIMATION = 'kept: the animations are stored as written and saved back; the editor does not play or edit them, and an effect on a shape you delete is removed';
+const AUDIO_VIDEO = /\.(?:mp3|mp4|m4a|m4v|mov|wav|wma|wmv|avi|mpg|mpeg|mid|midi|ogg|oga|ogv|webm|flac|aac)$/i;
+/** The loss id of a part the opaque store keeps whole, or `undefined` for any other part (a picture in `ppt/media` is read as a picture, not kept). */
+const opaqueId = (part: string): string | undefined =>
+  /^ppt\/charts\//.test(part) ? 'pptx.charts'
+  : /^ppt\/diagrams\//.test(part) ? 'pptx.smartArt'
+  : /^ppt\/media\//.test(part) && AUDIO_VIDEO.test(part) ? 'pptx.media'
+  : /^ppt\/(?:embeddings|activeX)\//.test(part) ? 'pptx.embeddedObjects'
+  : /^ppt\/ink\//.test(part) ? 'pptx.ink'
+  : undefined;
+const OVER_CAP_LABEL: Record<string, string> = {
+  'pptx.charts': 'chart part(s) over the size limit',
+  'pptx.smartArt': 'SmartArt part(s) over the size limit',
+  'pptx.media': 'audio or video clip(s) over the size limit',
+  'pptx.embeddedObjects': 'embedded object part(s) over the size limit',
+  'pptx.ink': 'ink part(s) over the size limit',
+};
+const KEPT_CHART = 'kept: the chart, its workbook and its style parts are stored unchanged, kept for saving back; the editor shows a labelled placeholder and cannot edit or draw it';
+const KEPT_SMARTART = 'kept: the diagram parts are stored unchanged, kept for saving back; the editor shows a labelled placeholder (the diagram\'s cached drawing is not drawn) and cannot edit it';
+const KEPT_MEDIA = 'kept: the clip and its poster frame are stored unchanged, kept for saving back; the editor shows the poster in a labelled placeholder and does not play it (linked clips are never fetched)';
+const KEPT_OLE = 'kept: the object and its preview picture are stored unchanged, kept for saving back; the editor shows the preview in a labelled placeholder and cannot open or edit it';
+const KEPT_TRANSITION = 'kept: the transition is stored as written, kept for saving back; the editor does not play or edit it';
+const KEPT_ANIMATION = 'kept: the animations are stored as written, kept for saving back; the editor does not play or edit them, and the editor will remove an effect whose shape you delete';
 
 /** The default effect: the reader (`importPptx`) does not read the construct yet. Ids it does read say how, below. */
 const NOT_IMPORTED = 'lost: not imported (the PPTX reader does not read this yet)';
@@ -60,7 +74,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   /** An id that only the `full` level reports. */
   const addFull = (id: string, label: string, count: number, effect: string, where?: string[]) =>
     add(id, label, count, effect, where, true);
-  /** Content the reader keeps as it is (opaque parts, transition and timing XML): saved back unchanged, not editable. */
+  /** Content the reader keeps as it is (opaque parts, transition and timing XML): kept for saving back unchanged, not editable. */
   const addKept = (id: string, label: string, count: number, effect: string, where: string[], onlyFull = false) => {
     if (count > 0 && (full || !onlyFull)) items.push(keptLossItem({ id, label, count, effect, where: where.slice(0, MAX_WHERE) }));
   };
@@ -160,8 +174,13 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addKept('pptx.transitions', 'slide(s) with a transition', t.transitions.total, KEPT_TRANSITION, t.transitions.where);
   addKept('pptx.animations', 'animation effect(s)', t.animations.total, KEPT_ANIMATION, t.animations.where);
   // parts the opaque store would refuse (over the per-part cap); the reader reports the same parts when it imports
-  const tooLarge = names.filter((n) => OPAQUE_PARTS.test(n) && pkg.declaredSize(n) > DEFAULT_OPAQUE_LIMITS.maxPartBytes);
-  if (tooLarge.length > 0) items.push(droppedLossItem('pptx.opaque.tooLarge', 'kept part(s) (chart workbooks, media, embedded objects) over the size limit', tooLarge.map((partName) => ({ reason: 'too-large' as const, size: pkg.declaredSize(partName), role: 'opaque', partName }))));
+  const overCap = new Map<string, string[]>();
+  for (const n of names) {
+    const id = opaqueId(n);
+    if (id !== undefined && pkg.declaredSize(n) > DEFAULT_OPAQUE_LIMITS.maxPartBytes) overCap.set(id, [...(overCap.get(id) ?? []), n]);
+  }
+  for (const [id, parts] of [...overCap].sort(([a], [b]) => a.localeCompare(b)))
+    items.push(droppedLossItem(id, OVER_CAP_LABEL[id], parts.map((partName) => ({ reason: 'too-large' as const, size: pkg.declaredSize(partName), role: 'opaque', partName }))));
   add('pptx.macros', 'macro project', countParts(/^ppt\/vbaProject\.bin$/), 'lost: macros are never run or kept');
   addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden, 'kept: imported as a hidden slide');
   addTally('pptx.comments', 'comment(s) in a comments part no slide points at', t.comments, 'lost: comments are read through the slide that owns them, so these are not imported');
@@ -220,7 +239,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addFull('pptx.customShows', 'custom show(s)', customShows, NOT_IMPORTED);
   addFull('pptx.slideSize', 'slide size other than 16:9', oddSize ? 1 : 0, 'kept: the deck keeps its own slide size', oddSize ? [`${Math.round(cx / 12700)} x ${Math.round(cy / 12700)} pt`] : []);
   addTally('pptx.zoom', 'slide or section zoom object(s)', t.zoom, NOT_IMPORTED, true);
-  if (t.ink.total > 0) addKept('pptx.ink', 'ink drawing(s)', t.ink.total, 'kept: the ink is stored unchanged and saved back; the editor shows a labelled placeholder and cannot draw or edit it', t.ink.where, true);
+  if (t.ink.total > 0) addKept('pptx.ink', 'ink drawing(s)', t.ink.total, 'kept: the ink is stored unchanged, kept for saving back; the editor shows a labelled placeholder and cannot draw or edit it', t.ink.where, true);
   else add('pptx.ink', 'ink drawing(s)', countParts(/^ppt\/ink\/[^/]+\.xml$/), NOT_IMPORTED, undefined, true);
   addTally('pptx.equations', 'equation(s)', t.equations, NOT_IMPORTED, true);
   addFull('pptx.signatures', 'digital signature(s)', countParts(/^_xmlsignatures\/[^/]+\.xml$/), 'lost: signatures are not kept, and any edit would invalidate them anyway');

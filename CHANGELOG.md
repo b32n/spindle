@@ -995,8 +995,8 @@ lockstep.
   diagrams, OLE objects and ActiveX controls, audio and video clips, and ink as opaque elements, and a slide's transition and timing XML,
   and stores the parts byte for byte in the opaque part store (`PresentationImportResult.opaqueParts`; new `PptxOpaque`, `PptxOpaqueKind`,
   `PptxSlideOpaque`; `PptxElement` gains `PptxOpaque` and `PptxSlide` gains `opaque`; `ImportPptxOptions.opaqueLimits`). A part over the
-  cap is dropped with a warning and reported as `pptx.opaque.tooLarge`; the loss ids `pptx.charts`, `.smartArt`, `.media`,
-  `.embeddedObjects`, `.transitions`, `.animations` and `.ink` now say `kept`. The text of an equation is read from its fallback. In
+  cap is dropped with a warning and reported as a `lost` item under its own id (`pptx.media` for a clip, likewise `pptx.charts`, `.smartArt`, `.embeddedObjects`, `.ink`); the loss ids `pptx.charts`, `.smartArt`, `.media`,
+  `.embeddedObjects`, `.transitions`, `.animations` and `.ink` now say `kept`. An equation is read from its `mc:Fallback` when there is one (the text it holds, or a picture). In
   `@b32nio/spindle-slides-core`: new `OpaqueElement` (`type: 'opaque'`, added to `SlideElement`), `ElementBase.pptxId`, `Slide.opaque`,
   `DeckData.opaqueParts`, `DeckImpl.getOpaqueParts()` / `getOpaquePart(hash)`, `createOpaqueElement`, `opaqueLabel`, `pruneTiming`;
   deleting an element prunes the timing that animates it. `@b32nio/spindle-slides-react` draws an opaque element as a labelled placeholder

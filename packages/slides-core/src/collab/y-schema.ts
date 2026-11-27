@@ -244,7 +244,7 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DeckData): void {
     }
 
     if (data.threads) for (const t of data.threads) y.threads.set(t.id, toPlain(t));
-    for (const part of data.opaqueParts ?? []) if (!y.opaqueParts.has(part.hash)) y.opaqueParts.set(part.hash, encodeOpaqueEntry(part));
+    for (const part of data.opaqueParts ?? []) y.opaqueParts.set(part.hash, encodeOpaqueEntry(part));
   });
 }
 

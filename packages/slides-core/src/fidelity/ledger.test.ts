@@ -120,9 +120,17 @@ describe('classifyPart', () => {
     );
   });
 
-  it('covers a kept-content part the store refused by the too-large item, and by nothing else it would not mention', () => {
-    for (const part of ['ppt/charts/chart1.xml', 'ppt/diagrams/data1.xml', 'ppt/media/a.mp4', 'ppt/embeddings/o.bin', 'ppt/activeX/a.bin', 'ppt/ink/ink1.xml']) {
-      expect(classifyPart(part, { lossIds: ['pptx.opaque.tooLarge'], importFailed: false })).toMatchObject({ status: 'dropped', loss: ['pptx.opaque.tooLarge'] });
+  it('covers a kept-content part the store refused by the item of its own construct, and by nothing else it would not mention', () => {
+    const own: Array<[string, string]> = [
+      ['ppt/charts/chart1.xml', 'pptx.charts'],
+      ['ppt/diagrams/data1.xml', 'pptx.smartArt'],
+      ['ppt/media/a.mp4', 'pptx.media'],
+      ['ppt/embeddings/o.bin', 'pptx.embeddedObjects'],
+      ['ppt/activeX/a.bin', 'pptx.embeddedObjects'],
+      ['ppt/ink/ink1.xml', 'pptx.ink'],
+    ];
+    for (const [part, id] of own) {
+      expect(classifyPart(part, { lossIds: [id], importFailed: false })).toMatchObject({ status: 'dropped', loss: [id] });
       expect(classifyPart(part, { lossIds: [], importFailed: false }).status).toBe('unaccounted');
     }
   });

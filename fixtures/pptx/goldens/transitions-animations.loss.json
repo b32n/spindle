@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 7,
-      "effect": "kept: the animations are stored as written and saved back; the editor does not play or edit them, and an effect on a shape you delete is removed",
+      "effect": "kept: the animations are stored as written, kept for saving back; the editor does not play or edit them, and the editor will remove an effect whose shape you delete",
       "id": "pptx.animations",
       "label": "animation effect(s)",
       "state": "kept",
@@ -27,7 +27,7 @@
     },
     {
       "count": 4,
-      "effect": "kept: the transition is stored as written and saved back; the editor does not play or edit it",
+      "effect": "kept: the transition is stored as written, kept for saving back; the editor does not play or edit it",
       "id": "pptx.transitions",
       "label": "slide(s) with a transition",
       "state": "kept",

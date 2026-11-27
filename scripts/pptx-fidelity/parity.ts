@@ -85,7 +85,7 @@ export function sourceRuns(xml: string): { inScope: string[]; outOfScope: string
       const parent = stack[stack.length - 1];
       const inAlternate = parent?.name === 'mc:AlternateContent';
       const isChoice = name === 'mc:Choice' && inAlternate;
-      // the reader passes over an `a14` Choice (math) for the Fallback, which carries the plain text
+      // the reader passes over an `a14` Choice (math) for the Fallback (text in the generated fixture; PowerPoint's own fallback is often a picture, which the reader then reads as one)
       const math = isChoice && /\bRequires\s*=\s*["'][^"']*\ba14\b/.test(m[0]);
       if (math) parent.math = { texts: [], fallback: false };
       else if (isChoice) parent.choice = true;

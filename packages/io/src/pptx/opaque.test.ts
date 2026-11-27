@@ -406,9 +406,60 @@ describe('loss report', () => {
     expect(orphan.items.find((i) => i.id === 'pptx.ink')?.state).toBeUndefined();
   });
 
-  it('reports a part over the size cap as lost', async () => {
+  it('reports a clip over the size cap as a lost pptx.media item, next to the kept one, and no other media part', async () => {
     const big = new Uint8Array(26 * 1024 * 1024);
-    const report = await detectPptxLoss(await build({ extra: { 'ppt/media/big.mp4': big } }));
-    expect(report.items.find((i) => i.id === 'pptx.opaque.tooLarge')).toMatchObject({ count: 1, where: ['ppt/media/big.mp4'], state: 'lost' });
+    const report = await detectPptxLoss(await build({ extra: { 'ppt/media/big.mp4': big, 'ppt/media/photo.png': big } }));
+    const media = report.items.filter((i) => i.id === 'pptx.media');
+    expect(media).toHaveLength(1);
+    expect(media[0]).toMatchObject({ count: 1, where: ['ppt/media/big.mp4'], state: 'lost', effect: 'lost: dropped, too large to keep' });
+    expect(report.items.some((i) => i.id.includes('tooLarge'))).toBe(false);
+  });
+
+  it('reports an oversized chart, diagram, workbook, control and ink part under the id of their construct, in id order', async () => {
+    const big = new Uint8Array(26 * 1024 * 1024);
+    const report = await detectPptxLoss(await build({ extra: { 'ppt/charts/chart9.xml': big, 'ppt/diagrams/data9.xml': big, 'ppt/embeddings/w.xlsx': big, 'ppt/activeX/activeX1.bin': big, 'ppt/ink/ink9.xml': big } }), { detail: 'full' });
+    const lost = report.items.filter((i) => i.state === 'lost' && i.effect === 'lost: dropped, too large to keep');
+    expect(lost.map((i) => [i.id, i.count, i.where])).toEqual([
+      ['pptx.charts', 1, ['ppt/charts/chart9.xml']],
+      ['pptx.embeddedObjects', 2, ['ppt/embeddings/w.xlsx', 'ppt/activeX/activeX1.bin']],
+      ['pptx.ink', 1, ['ppt/ink/ink9.xml']],
+      ['pptx.smartArt', 1, ['ppt/diagrams/data9.xml']],
+    ]);
+  });
+});
+
+describe('part walk limits', () => {
+  const types = '<Default Extension="bin" ContentType="application/octet-stream"/>';
+  const partOf = (n: number): string => `ppt/embeddings/p${n}.bin`;
+
+  it('warns when an element has more parts than the walk keeps', async () => {
+    const links = Array.from({ length: 300 }, (_, i) => rel(`r${i}`, 'package', `../embeddings/p${i}.bin`));
+    const extra: Record<string, string | Uint8Array> = { 'ppt/charts/chart1.xml': CHART_PLAIN, 'ppt/charts/_rels/chart1.xml.rels': rels(links) };
+    for (let i = 0; i < 300; i++) extra[partOf(i)] = Uint8Array.from([i % 256, i >> 8, 7]);
+    const r = await read({ tree: chartFrame('3', 'rId2'), slideRels: [rel('rId2', 'chart', '../charts/chart1.xml')], extra, types });
+    expect(opaqueOf(r)[0].parts.length).toBeLessThan(300);
+    expect(r.warnings).toContain('An element refers to more than 256 parts or nests them more than 8 levels deep: the rest is not kept.');
+  });
+
+  it('warns when parts nest deeper than the walk follows, and stays silent for a chain it finishes', async () => {
+    const chain = (length: number): Record<string, string | Uint8Array> => {
+      const extra: Record<string, string | Uint8Array> = { 'ppt/charts/chart1.xml': CHART_PLAIN, 'ppt/charts/_rels/chart1.xml.rels': rels([rel('r', 'package', '../embeddings/p0.bin')]) };
+      for (let i = 0; i < length; i++) {
+        extra[partOf(i)] = Uint8Array.from([i, 7]);
+        if (i < length - 1) extra[`ppt/embeddings/_rels/p${i}.bin.rels`] = rels([rel('r', 'package', `p${i + 1}.bin`)]);
+      }
+      return extra;
+    };
+    const deep = await read({ tree: chartFrame('3', 'rId2'), slideRels: [rel('rId2', 'chart', '../charts/chart1.xml')], extra: chain(14), types });
+    expect(deep.warnings.some((w) => w.startsWith('An element refers to more than'))).toBe(true);
+    const shallow = await read({ tree: chartFrame('3', 'rId2'), slideRels: [rel('rId2', 'chart', '../charts/chart1.xml')], extra: chain(4), types });
+    expect(shallow.warnings).toEqual([]);
+    expect(opaqueOf(shallow)[0].parts.filter((p) => p.role === 'package')).toHaveLength(4);
+  });
+
+  it('does not warn for parts that point back at each other', async () => {
+    const extra = { 'ppt/charts/chart1.xml': CHART_PLAIN, 'ppt/charts/_rels/chart1.xml.rels': rels([rel('r', 'package', '../embeddings/p0.bin')]), [partOf(0)]: Uint8Array.from([1, 2]), 'ppt/embeddings/_rels/p0.bin.rels': rels([rel('r', 'package', 'p0.bin')]) };
+    const r = await read({ tree: chartFrame('3', 'rId2'), slideRels: [rel('rId2', 'chart', '../charts/chart1.xml')], extra, types });
+    expect(r.warnings).toEqual([]);
   });
 });

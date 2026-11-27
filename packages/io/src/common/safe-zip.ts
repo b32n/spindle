@@ -215,6 +215,9 @@ interface EntryData {
 }
 const entryData = (file: JSZip.JSZipObject): EntryData => (file as unknown as { _data: EntryData })._data;
 
+/** The uncompressed size an entry's central-directory record declares: the one source `openSafeZip` enforces its limits with. */
+export const declaredEntrySize = (file: JSZip.JSZipObject): number => entryData(file).uncompressedSize;
+
 /** The limit that was passed: what it limits and the limit as text. */
 interface Hit {
   what: string;

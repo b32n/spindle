@@ -65,10 +65,15 @@ async function collectParts(o: OpaqueContext, roots: Array<{ part: string; role:
   const refs: OpaqueRef[] = [];
   const seen = new Set<string>();
   let queue = roots.map((r) => ({ ...r, depth: 0 }));
-  while (queue.length > 0 && seen.size < MAX_PARTS) {
+  let truncated = false;
+  while (queue.length > 0) {
     const next: typeof queue = [];
     for (const { part, role, depth } of queue) {
-      if (seen.has(part) || seen.size >= MAX_PARTS) continue;
+      if (seen.has(part)) continue;
+      if (seen.size >= MAX_PARTS) {
+        truncated = true;
+        continue;
+      }
       seen.add(part);
       const ref = await storePart(o, part, role, warn);
       if (!ref) continue;
@@ -76,11 +81,13 @@ async function collectParts(o: OpaqueContext, roots: Array<{ part: string; role:
       const rels = relsPart(part);
       const relsRef = o.pkg.has(rels) ? await storePart(o, rels, 'rels', warn) : null;
       if (relsRef) refs.push(relsRef);
-      if (depth < MAX_DEPTH)
-        for (const r of await o.pkg.rels(part)) if (!r.external && !STRUCTURAL.has(r.type) && o.pkg.has(r.target)) next.push({ part: r.target, role: r.type, depth: depth + 1 });
+      const links = (await o.pkg.rels(part)).filter((r) => !r.external && !STRUCTURAL.has(r.type) && o.pkg.has(r.target));
+      if (depth < MAX_DEPTH) for (const r of links) next.push({ part: r.target, role: r.type, depth: depth + 1 });
+      else if (links.some((r) => !seen.has(r.target))) truncated = true;
     }
     queue = next;
   }
+  if (truncated) warn(`An element refers to more than ${MAX_PARTS} parts or nests them more than ${MAX_DEPTH} levels deep: the rest is not kept.`);
   return refs;
 }
 

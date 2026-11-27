@@ -58,9 +58,9 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
     match: /^ppt\/handoutMasters\//,
     outcome: { dropped: ['pptx.masters.handoutMaster'] },
   },
-  { id: 'chart', match: /^ppt\/charts\//, outcome: { dropped: ['pptx.charts', 'pptx.opaque.tooLarge'] } },
-  { id: 'diagram', match: /^ppt\/diagrams\//, outcome: { dropped: ['pptx.smartArt', 'pptx.opaque.tooLarge'] } },
-  { id: 'audioVideo', match: new RegExp(`^ppt/media/.*${AUDIO_VIDEO.source}`, 'i'), outcome: { dropped: ['pptx.media', 'pptx.opaque.tooLarge'] } },
+  { id: 'chart', match: /^ppt\/charts\//, outcome: { dropped: ['pptx.charts'] } },
+  { id: 'diagram', match: /^ppt\/diagrams\//, outcome: { dropped: ['pptx.smartArt'] } },
+  { id: 'audioVideo', match: new RegExp(`^ppt/media/.*${AUDIO_VIDEO.source}`, 'i'), outcome: { dropped: ['pptx.media'] } },
   {
     id: 'vectorPicture',
     match: new RegExp(`^ppt/media/.*${VECTOR.source}`, 'i'),
@@ -71,16 +71,16 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
   {
     id: 'embedding',
     match: /^ppt\/embeddings\//,
-    outcome: { dropped: ['pptx.embeddedObjects', 'pptx.charts', 'pptx.opaque.tooLarge'] },
+    outcome: { dropped: ['pptx.embeddedObjects', 'pptx.charts'] },
   },
   {
     id: 'controls',
     match: /^ppt\/activeX\//,
-    outcome: { dropped: ['pptx.embeddedObjects', 'pptx.opaque.tooLarge'] },
+    outcome: { dropped: ['pptx.embeddedObjects'] },
   },
   // legacy and modern comments become threads of their slide (K10c)
   { id: 'comments', match: /^ppt\/(?:comments\/|commentAuthors\.xml$|authors\.xml$)/, outcome: 'mapped' },
-  { id: 'ink', match: /^ppt\/ink\//, outcome: { dropped: ['pptx.ink', 'pptx.opaque.tooLarge'] } },
+  { id: 'ink', match: /^ppt\/ink\//, outcome: { dropped: ['pptx.ink'] } },
   {
     id: 'macro',
     match: /^ppt\/vbaProject(?:Signature)?\.bin$/,

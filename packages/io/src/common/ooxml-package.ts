@@ -1,5 +1,6 @@
 import { XMLValidator } from 'fast-xml-parser';
 import JSZip from 'jszip';
+import { declaredEntrySize } from './safe-zip';
 import { kids, parseXml, type XmlElement } from '../xlsx/xml';
 
 // ---------------------------------------------------------------------------
@@ -109,7 +110,8 @@ export class OoxmlPackage {
 
   /** The uncompressed size the entry's header declares (a cheap first look: the real size is counted when the part is read); 0 when the part is absent. */
   declaredSize(name: string): number {
-    return (this.zip.file(name) as unknown as { _data: { uncompressedSize: number } } | null)?._data.uncompressedSize ?? 0;
+    const file = this.zip.file(name);
+    return file ? declaredEntrySize(file) : 0;
   }
 
   /**

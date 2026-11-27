@@ -12,7 +12,7 @@
     },
     {
       "count": 2,
-      "effect": "kept: the clip and its poster frame are stored unchanged and saved back; the editor shows the poster in a labelled placeholder and does not play it (linked clips are never fetched)",
+      "effect": "kept: the clip and its poster frame are stored unchanged, kept for saving back; the editor shows the poster in a labelled placeholder and does not play it (linked clips are never fetched)",
       "id": "pptx.media",
       "label": "audio or video clip(s)",
       "state": "kept",

@@ -13,7 +13,7 @@
     },
     {
       "count": 1,
-      "effect": "kept: the object and its preview picture are stored unchanged and saved back; the editor shows the preview in a labelled placeholder and cannot open or edit it",
+      "effect": "kept: the object and its preview picture are stored unchanged, kept for saving back; the editor shows the preview in a labelled placeholder and cannot open or edit it",
       "id": "pptx.embeddedObjects",
       "label": "embedded object(s) (OLE) and control(s)",
       "state": "kept",
@@ -32,7 +32,7 @@
     },
     {
       "count": 1,
-      "effect": "kept: the ink is stored unchanged and saved back; the editor shows a labelled placeholder and cannot draw or edit it",
+      "effect": "kept: the ink is stored unchanged, kept for saving back; the editor shows a labelled placeholder and cannot draw or edit it",
       "id": "pptx.ink",
       "label": "ink drawing(s)",
       "state": "kept",
