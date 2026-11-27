@@ -12,6 +12,7 @@ export function isSafePictureSrc(src: string): boolean {
   return SAFE_IMAGE_SRC.test(src);
 }
 
+const finiteOr = (n: number | undefined, fallback: number): number => (n !== undefined && Number.isFinite(n) ? n : fallback);
 const clamp01 = (n: number): number => (Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0);
 
 /** How much of a pattern preset is the foreground colour (DrawingML presets: pctN, dark/light/wide variants, rest 50%). */
@@ -84,7 +85,7 @@ export function fillToPaint(fill: Fill, theme: ThemeData): FillPaint | null {
       if (fill.stops.length === 0) return null;
       const stops = fill.stops.map((s) => ({ offset: clamp01(s.pos), color: resolveColor(s.color, theme) }));
       if (stops.length === 1) return { kind: 'color', color: stops[0].color };
-      return { kind: 'gradient', type: fill.type, angle: fill.angle ?? 90, stops };
+      return { kind: 'gradient', type: fill.type, angle: finiteOr(fill.angle, 90), stops };
     }
     case 'picture':
       if (!isSafePictureSrc(fill.src)) return null;
@@ -92,7 +93,7 @@ export function fillToPaint(fill: Fill, theme: ThemeData): FillPaint | null {
         kind: 'picture',
         src: fill.src,
         mode: fill.mode,
-        tile: { w: Math.max(1, fill.tile?.w ?? 64), h: Math.max(1, fill.tile?.h ?? 64) },
+        tile: { w: Math.max(1, finiteOr(fill.tile?.w, 64)), h: Math.max(1, finiteOr(fill.tile?.h, 64)) },
         alpha: fill.alpha === undefined ? 1 : clamp01(fill.alpha),
       };
   }
@@ -100,7 +101,9 @@ export function fillToPaint(fill: Fill, theme: ThemeData): FillPaint | null {
 
 /** CSS declarations for a paint; `alpha` < 1 means the caller must draw it on its own layer with that opacity. */
 export interface FillCss {
-  background: string;
+  /** Colours and gradients use the `background` shorthand; pictures use `backgroundImage` plus longhands (never mixed). */
+  background?: string;
+  backgroundImage?: string;
   backgroundSize?: string;
   backgroundRepeat?: string;
   alpha: number;
@@ -123,8 +126,8 @@ export function paintToCss(paint: FillPaint): FillCss {
   }
   const url = `url("${paint.src}")`;
   return paint.mode === 'tile'
-    ? { background: url, backgroundSize: `${paint.tile.w}px ${paint.tile.h}px`, backgroundRepeat: 'repeat', alpha: paint.alpha }
-    : { background: url, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', alpha: paint.alpha };
+    ? { backgroundImage: url, backgroundSize: `${paint.tile.w}px ${paint.tile.h}px`, backgroundRepeat: 'repeat', alpha: paint.alpha }
+    : { backgroundImage: url, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', alpha: paint.alpha };
 }
 
 /** CSS for a fill, or `null` for no fill. */

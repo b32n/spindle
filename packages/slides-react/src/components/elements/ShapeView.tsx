@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { shapeGeom } from './shapes';
 import { StaticRichText } from './StaticRichText';
@@ -8,12 +8,13 @@ import { strokeAttrs } from './style';
 import { paintId, svgFill } from './fill';
 
 export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement; theme: ThemeData; interactive?: boolean }): React.ReactElement {
+  const instance = useId();
   const editingId = useEditingId();
   const editing = interactive && editingId === el.id;
   const w = Math.max(1, el.w);
   const h = Math.max(1, el.h);
   const geom = shapeGeom(el.shape, w, h, el.adjustments);
-  const { defs, fill } = svgFill(el.fill, theme, paintId(el.id), w, h);
+  const { defs, fill } = svgFill(el.fill, theme, paintId(el.id, instance), w, h);
   const stroke = strokeAttrs(el.stroke, theme);
 
   const flip = `${el.flipH ? -1 : 1}, ${el.flipV ? -1 : 1}`;

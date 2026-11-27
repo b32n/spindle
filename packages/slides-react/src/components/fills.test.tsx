@@ -42,7 +42,10 @@ describe('htmlFill', () => {
 const svgHtml = (n: React.ReactNode): string => renderToStaticMarkup(<svg>{n}</svg>);
 
 describe('svgFill', () => {
-  it('ids are selector safe', () => expect(paintId('a b:c.1')).toBe('fill-a_b_c_1'));
+  it('ids are selector safe', () => {
+    expect(paintId('a b:c.1', ':r1:')).toBe('fill-a_b_c_1-_r1_');
+    expect(paintId('a', ':r1:')).not.toBe(paintId('a', ':r2:'));
+  });
   it('none, colour', () => {
     expect(svgFill({ kind: 'none' }, theme, 'p', 10, 10)).toEqual({ defs: null, fill: 'none' });
     expect(svgFill({ kind: 'solid', color: red }, theme, 'p', 10, 10)).toEqual({ defs: null, fill: 'rgb(255, 0, 0)' });

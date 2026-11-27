@@ -28,7 +28,7 @@ Not in the current scope; verified absent in code.
 - [ ] **Element animations & a slide-transition library** — present mode ships
       only a single 150 ms cross-fade; there are no per-element animations and
       no transition variety.
-- [x] **Gradient fills & image/picture fills** — `Fill` has `gradient` (linear, radial, path; stops with alpha),
+- [x] **Gradient fills & image/picture fills** (model, rendering, presets and file picker; see "Still open") — `Fill` has `gradient` (linear, radial, path; stops with alpha),
       `picture` (stretch or tile, alpha; data URLs only) and `pattern` (rendered as a solid blend of its two colours)
       next to `none` and `solid`, on shapes, text boxes, table cells and slide backgrounds. The fill controls offer
       gradient presets and an image fill from a file picker. Still open: a gradient stop editor, a pattern picker,

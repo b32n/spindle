@@ -115,6 +115,19 @@ describe('fillToPaint', () => {
     });
     expect(fillToPaint({ kind: 'gradient', type: 'radial', stops: [] }, theme)).toBeNull();
   });
+  it('non-finite angle and tile sizes fall back to the defaults', () => {
+    const stops = [{ pos: 0, color: red }, { pos: 1, color: blue }];
+    for (const angle of [NaN, Infinity, -Infinity]) {
+      expect((fillToPaint({ kind: 'gradient', type: 'linear', angle, stops }, theme) as { angle: number }).angle).toBe(90);
+    }
+    expect(fillToPaint({ kind: 'gradient', type: 'linear', angle: 30, stops }, theme)).toMatchObject({ angle: 30 });
+    for (const bad of [NaN, Infinity]) {
+      expect(fillToPaint({ kind: 'picture', src: PNG, mode: 'tile', tile: { w: bad, h: bad } }, theme)).toMatchObject({
+        tile: { w: 64, h: 64 },
+      });
+    }
+    expect(fillToPaint({ kind: 'picture', src: PNG, mode: 'tile', tile: { w: 12, h: 5 } }, theme)).toMatchObject({ tile: { w: 12, h: 5 } });
+  });
   it('picture: safe data URL only, defaults and clamps', () => {
     expect(fillToPaint({ kind: 'picture', src: 'https://x/y.png', mode: 'stretch' }, theme)).toBeNull();
     expect(fillToPaint({ kind: 'picture', src: PNG, mode: 'stretch' }, theme)).toEqual({
@@ -143,10 +156,10 @@ describe('CSS output', () => {
     expect(fillToCss({ kind: 'solid', color: red }, theme)).toEqual({ background: 'rgb(255, 0, 0)', alpha: 1 });
     expect(fillToCss({ kind: 'none' }, theme)).toBeNull();
     expect(fillToCss({ kind: 'picture', src: PNG, mode: 'stretch', alpha: 0.5 }, theme)).toEqual({
-      background: `url("${PNG}")`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', alpha: 0.5,
+      backgroundImage: `url("${PNG}")`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', alpha: 0.5,
     });
     expect(paintToCss({ kind: 'picture', src: PNG, mode: 'tile', tile: { w: 8, h: 9 }, alpha: 1 })).toEqual({
-      background: `url("${PNG}")`, backgroundSize: '8px 9px', backgroundRepeat: 'repeat', alpha: 1,
+      backgroundImage: `url("${PNG}")`, backgroundSize: '8px 9px', backgroundRepeat: 'repeat', alpha: 1,
     });
   });
 });

@@ -39,9 +39,12 @@ export function htmlFill(fill: Fill | undefined, theme: ThemeData): HtmlFill {
   return { style: { position: 'relative', isolation: 'isolate' }, layer };
 }
 
-/** Stable, selector-safe paint-server id for an element. */
-export function paintId(elementId: string): string {
-  return `fill-${elementId.replace(/[^A-Za-z0-9_-]/g, '_')}`;
+/**
+ * Selector-safe paint-server id for an element. `instance` (React `useId`) keeps ids unique when the same slide is
+ * rendered more than once (stage, filmstrip, present mode), so `url(#id)` never binds to another copy.
+ */
+export function paintId(elementId: string, instance: string): string {
+  return `fill-${elementId}-${instance}`.replace(/[^A-Za-z0-9_-]/g, '_');
 }
 
 /**
