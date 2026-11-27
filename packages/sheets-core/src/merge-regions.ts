@@ -190,7 +190,11 @@ function overlapCounts(queries: Corners, rects: Corners): Int32Array {
 const pick = (c: Corners, at: readonly number[]): Corners => ({ sr: Int32Array.from(at, (i) => c.sr[i]), er: Int32Array.from(at, (i) => c.er[i]), sc: Int32Array.from(at, (i) => c.sc[i]), ec: Int32Array.from(at, (i) => c.ec[i]) });
 const slice = (c: Corners, from: number, to: number): Corners => ({ sr: c.sr.subarray(from, to), er: c.er.subarray(from, to), sc: c.sc.subarray(from, to), ec: c.ec.subarray(from, to) });
 
-/** For each of `queries`: whether it overlaps any of `rects`. O((q + r) log), or a comparison of every pair for rects that are not whole numbers within 2^30 of each other. */
+/**
+ * For each of `queries`: whether it overlaps any of `rects`. O((q + r) log), but a comparison of every pair (O(q x r)) when a coordinate is
+ * not a whole number, when coordinates are 2^30 or more apart, or for 4M rects or more (`cornersOfAll` gives up, as for `laterOverlaps`).
+ * The importer cannot reach those: its ranges are whole numbers within a sheet's limits, and at most 1,048,576 merges are read.
+ */
 export function overlapsAny(queries: readonly Range[], rects: readonly Range[]): boolean[] {
   if (queries.length === 0 || rects.length === 0) return queries.map(() => false);
   const corners = cornersOfAll(queries, rects);
