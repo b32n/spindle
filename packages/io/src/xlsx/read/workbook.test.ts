@@ -1,6 +1,6 @@
 import { ImportError } from '../../common/import-error';
 import { XlsxPackage } from './package';
-import { findWorkbookPart, isBinaryWorkbook, readWorkbook } from './workbook';
+import { findWorkbookPart, isBinaryWorkbook, readWorkbook, SHEET_ENTRY_FACTOR } from './workbook';
 import { MAIN_NS, REL_NS, relsXml, workbookZip, zipOf } from './test-support';
 
 const WB_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml';
@@ -180,12 +180,55 @@ describe('readWorkbook: sheets', () => {
       }),
     );
     expect(info.sheets[0].commentParts).toEqual({ threadedComments: [] });
+    // a part is looked at once, however many sheet entries name it: the first entry's name is the one in the warning
     expect(pkg.warnings).toEqual([
       'The sheet "A" has comments at xl/gone-c.xml, which the package does not contain.',
       'The sheet "A" has vmlDrawing at xl/gone.vml, which the package does not contain.',
-      'The sheet "" has comments at xl/gone-c.xml, which the package does not contain.',
-      'The sheet "" has vmlDrawing at xl/gone.vml, which the package does not contain.',
     ]);
+    expect(info.sheets[1].commentParts).toBe(info.sheets[0].commentParts);
+  });
+
+  describe('sheet entries are bounded', () => {
+    const entries = (n: number, rel: (i: number) => string) => Array.from({ length: n }, (_, i) => `<sheet name="S${i}" sheetId="${i + 1}" r:id="${rel(i)}"/>`).join('');
+
+    it('reads at most 4 times maxSheets entries and says so once', async () => {
+      const bytes = await workbookZip(`<sheets>${entries(30, () => 'rId1')}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' });
+      const pkg = await XlsxPackage.open(bytes, { limits: { maxSheets: 5 } });
+      const info = await readWorkbook(pkg);
+      expect(info.sheets).toHaveLength(20);
+      expect(info.sheets.map((s) => s.name).slice(-1)).toEqual(['S19']);
+      expect(pkg.warnings).toEqual(['The workbook lists 30 sheets; only the first 20 entries were read (4 times the import limit maxSheets).']);
+      expect(SHEET_ENTRY_FACTOR).toBe(4);
+    });
+
+    it('does not warn at exactly the limit, and the package carries the limits it was opened with', async () => {
+      const bytes = await workbookZip(`<sheets>${entries(20, () => 'rId1')}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' });
+      const pkg = await XlsxPackage.open(bytes, { limits: { maxSheets: 5 } });
+      expect((await readWorkbook(pkg)).sheets).toHaveLength(20);
+      expect(pkg.warnings).toEqual([]);
+      expect(pkg.limits.maxSheets).toBe(5);
+      const defaults = (await XlsxPackage.open(bytes)).limits;
+      expect([defaults.maxSheets, defaults.maxRanges]).toEqual([1_000, 1_048_576]);
+    });
+
+    it('gives the first few warnings in full and counts the rest: 100 entries with no relationship', async () => {
+      const bytes = await workbookZip(`<sheets>${entries(100, (i) => `rId${i + 5}`)}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' });
+      const pkg = await XlsxPackage.open(bytes);
+      await readWorkbook(pkg);
+      expect(pkg.warnings).toHaveLength(21);
+      expect(pkg.warnings[0]).toBe('The sheet "S0" has no usable relationship (rId5).');
+      expect(pkg.warnings[20]).toBe('80 more sheet warnings were left out.');
+    });
+
+    it('finds the relationship of an entry by id (the first of a repeated id), not by scanning them', async () => {
+      const bytes = await workbookZip(
+        `<sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="constructor"/><sheet name="C" sheetId="3" r:id="__proto__"/></sheets>`,
+        [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId1', 'worksheet', 'worksheets/other.xml'], ['constructor', 'worksheet', 'worksheets/sheet2.xml']],
+        { 'xl/worksheets/sheet1.xml': '<x/>', 'xl/worksheets/sheet2.xml': '<x/>' }
+      );
+      const { info } = await read(bytes);
+      expect(info.sheets.map((s) => s.part)).toEqual(['xl/worksheets/sheet1.xml', 'xl/worksheets/sheet2.xml', undefined]);
+    });
   });
   it('locates the comment parts of a sheet: notes, their VML drawing and threaded comments; external ones and missing parts are not located', async () => {
     const { info } = await read(

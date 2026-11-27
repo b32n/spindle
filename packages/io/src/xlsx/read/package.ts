@@ -1,6 +1,6 @@
 import type JSZip from 'jszip';
 import type { XlsxRelationship } from '@b32nio/spindle-shared/export/xlsx';
-import { openSafeZip, type ImportLimits } from '../../common/safe-zip';
+import { openSafeZip, resolveLimits, type ImportLimits } from '../../common/safe-zip';
 import { parseXml, type XmlElement } from '../xml';
 import { contentTypeOf, EMPTY_CONTENT_TYPES, parseContentTypes, type ContentTypes } from './content-types';
 import { parseRelationships, relsPart } from './relationships';
@@ -33,7 +33,11 @@ export class XlsxPackage {
   private readonly byLowerName = new Map<string, string>();
   private readonly relCache = new Map<string, readonly XlsxRelationship[]>();
 
-  private constructor(private readonly zip: JSZip) {
+  private constructor(
+    private readonly zip: JSZip,
+    /** The limits this package was opened with (the defaults where not overridden), for the readers that bound their own work by them. */
+    readonly limits: ImportLimits
+  ) {
     for (const name of Object.keys(zip.files)) {
       if (zip.files[name].dir) continue;
       // a duplicated name differing only by case keeps the first, as the exact spelling is looked up first anyway
@@ -44,7 +48,7 @@ export class XlsxPackage {
   /** Open `bytes`. The only errors are `ImportError`s from `openSafeZip` (not a package, encrypted, too large, corrupt). */
   static async open(bytes: Uint8Array, options: OpenXlsxOptions = {}): Promise<XlsxPackage> {
     const zip = await openSafeZip(bytes, { limits: options.limits, target: 'an Excel workbook (.xlsx)' });
-    const pkg = new XlsxPackage(zip);
+    const pkg = new XlsxPackage(zip, resolveLimits(options.limits));
     const types = await pkg.xml('[Content_Types].xml');
     if (types) pkg.contentTypes = parseContentTypes(types);
     return pkg;

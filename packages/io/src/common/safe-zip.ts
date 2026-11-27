@@ -45,15 +45,28 @@ export interface ImportLimits {
   maxFormulaChars: number;
   /** Cells kept over all the worksheets of a package. Past it the rest of the file is not read (one warning). */
   maxTotalCells: number;
-  /** Worksheets read from one package. Past it the other sheets are not read (one warning). */
+  /**
+   * Worksheets read from one package. Past it the other sheets are not read (one warning). The workbook's `<sheet>` entries are
+   * listed up to four times this number (chart sheets, sheets without a part and repeats of a part count as entries, not as sheets read).
+   */
   maxSheets: number;
+  /**
+   * Merged ranges and hyperlinks kept over all the worksheets of a package (one budget for both, each of which is also capped per
+   * sheet: 1,048,576 merges, Excel's 65,530 hyperlinks). Past it the rest are left out with one counted warning per sheet. A range
+   * object is about 100 bytes, so the default is about 100 MB at most.
+   */
+  maxRanges: number;
 }
 
 /**
  * Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB,
  * expanded shared-formula text of 32 Mi characters per worksheet and 64 Mi (128 MB of strings) per package, 5,000,000 cells and
- * 1,000 worksheets per package. The 100,000 x 10 performance file (1,000,000 cells, 1.1 GB of process memory at the peak) is
- * five times under the cell limit; a sheet of two million shared-formula cells of 15 characters is under the formula limits.
+ * 1,000 worksheets and 1,048,576 merged ranges and hyperlinks per package. The 100,000 x 10 performance file (1,000,000 cells) is
+ * five times under the cell limit. Memory, as measured for the reader alone (`importXlsx`, Node 22): about 0.44 GB of process
+ * memory (RSS) per million cells, and 5,000,000 cells took 0.7 GB of heap and 1.0 to 1.6 GB of RSS; the 1.1 GB that the
+ * `--runtime` run of `npm run sheets:xlsx-fidelity` reports for the same file is that whole harness (loss detection and mapping
+ * included), not the reader. A host that also builds the editor's own model from the result (a second copy of every cell) may
+ * want a lower `maxTotalCells`. A sheet of two million shared-formula cells of 15 characters is under the formula limits.
  */
 export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxPackageBytes: 100 * MB,
@@ -67,6 +80,7 @@ export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxFormulaChars: 64 * MB,
   maxTotalCells: 5_000_000,
   maxSheets: 1_000,
+  maxRanges: 1_048_576,
 };
 
 export interface SafeZipOptions {

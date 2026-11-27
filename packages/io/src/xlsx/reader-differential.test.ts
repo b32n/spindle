@@ -28,6 +28,12 @@ import { exportXlsx } from './writer';
 //                           detector uses it) where the old reader used its own table (`mm-dd-yy` for id 14) or had none
 //   dateFloat               a date serial (a cell whose number format is a date format) that went through a JavaScript Date
 //                           and back differs by under a millisecond; the new reader returns the number as written
+//   escapeKept              a number format code whose backslash escapes are kept where the backslash is what makes the character
+//                           a literal (`0\\ \\d`, `0.0\\"`, `0\\.00`): the old reader dropped every escape (its `numfmt-xform.js`
+//                           regex), which changed what such a code means; the two differ only by those escapes, and the code
+//                           must be one of ESCAPE_IMPROVEMENTS, each with its reason
+//   escapedLetterNotDate    in a 1904 workbook, a number whose format has an escaped date letter (`0\\ \\d`) is not moved by
+//                           1462 days: the old reader unescaped the code, saw a `d` and took the number for a date
 //   newWarning              a warning the old reader did not have, of one of the kinds listed in NEW_WARNINGS (a missing
 //                           relationship, a duplicate sheet name, a damaged sheet, a cell that is not a number or a date); any
 //                           other new warning is a difference that fails the test
@@ -55,7 +61,30 @@ type Category =
   | 'linkOnRange'
   | 'builtinFormat'
   | 'dateFloat'
+  | 'escapeKept'
+  | 'escapedLetterNotDate'
   | 'newWarning';
+
+/**
+ * The codes (as the own reader gives them, backslashes kept) that differ from the old reader's on purpose, each with why. The old
+ * reader's code is the same with every `\\x` replaced by `x`. `notDate`: the old code reads as a date (a day, month or hour letter
+ * that the escape had made a literal), so in a 1904 workbook the old reader moved its numbers by 1462 days.
+ */
+const ESCAPE_IMPROVEMENTS: Record<string, { reason: string; notDate?: boolean }> = {
+  '0.0\\"': { reason: 'inches: the escaped quote is a literal; unescaped it leaves an unbalanced quote that may make the exported file invalid' },
+  '0 \\m': { reason: 'an escaped m is the letter, not a month token', notDate: true },
+  '0 \\d': { reason: 'an escaped d is the letter, not a day token', notDate: true },
+  '0\\h': { reason: 'an escaped h is the letter, not an hour token', notDate: true },
+  '\\*0\\*': { reason: 'escaped asterisks are literals; unescaped they are fill syntax' },
+  '\\@': { reason: 'an escaped at sign is a literal, not the text placeholder' },
+  '0\\.00': { reason: 'an escaped dot is a literal, not the decimal point' },
+  '0\\,0': { reason: 'an escaped comma is a literal, not the thousands separator' },
+  '0\\%': { reason: 'an escaped percent sign is a literal, it does not scale by 100' },
+  '0\\\\': { reason: 'an escaped backslash is a literal; unescaped it escapes whatever follows' },
+  '"C:\\Temp"0': { reason: 'a backslash inside quotes is a backslash, not an escape' },
+};
+
+const dropEscapes = (code: string): string => code.replace(/\\(.)/g, '$1');
 
 /** Files the old reader read and the own reader refuses, by id, with why. (Empty rows are not allowed: a regression is not an exception.) */
 const REFUSED_NOW: Record<string, string> = {
@@ -156,6 +185,15 @@ function compareCell(
   const at = `${sheet.name}!${addressOf(key)}`;
   if (o.value !== n.value) {
     if (typeof o.value === 'number' && typeof n.value === 'number' && isDateFormat(n.numberFormat?.code) && Math.abs(o.value - n.value) <= ONE_MS) seen.push('dateFloat');
+    else if (
+      typeof o.value === 'number' &&
+      typeof n.value === 'number' &&
+      o.value - n.value === 1462 &&
+      n.numberFormat !== undefined &&
+      ESCAPE_IMPROVEMENTS[n.numberFormat.code]?.notDate === true &&
+      isDateFormat(dropEscapes(n.numberFormat.code))
+    )
+      seen.push('escapedLetterNotDate');
     else if (o.value === null && (n.value === 0 || n.value === false || n.value === '') && o.formula === n.formula) seen.push('falsyResult');
     else return `${at}: value ${JSON.stringify(o.value)} vs ${JSON.stringify(n.value)}`;
   }
@@ -176,6 +214,7 @@ function compareCell(
     const id = newStyleIndex === undefined ? undefined : newStyles?.cellXfs[newStyleIndex]?.numFmtId;
     const builtin = id === undefined || newStyles === undefined || newStyles.numFmts.some((f) => f.id === id) ? undefined : numberFormatCode(newStyles, id);
     if (nc !== undefined && nc === builtin && (oc === undefined || BUILTIN_RENAMES[oc] === nc)) seen.push('builtinFormat');
+    else if (nc !== undefined && oc !== undefined && ESCAPE_IMPROVEMENTS[nc] !== undefined && dropEscapes(nc) === oc) seen.push('escapeKept');
     else return `${at}: number format ${oc} vs ${nc}`;
   }
   const style = compareStyle(o.style, n.style, seen);
@@ -438,6 +477,58 @@ describe('differential: the files the end-to-end specs open', () => {
     expect(sales.cells.get('1:6')?.numberFormat).toEqual({ code: '#,##0.0" kg"' });
     // the workbook's styles keep the code as the file writes it
     expect(n.styles?.numFmts.find((f) => f.id === 165)?.code).toBe('\\$#,##0.00');
+  });
+});
+
+describe('differential: the escapes the own reader keeps (escapeKept)', () => {
+  const NS = `xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"`;
+  const attr = (code: string): string => code.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  /** A one-cell workbook with the number format `code` written as given and the value 7, in the 1900 or 1904 date system. */
+  const book = (code: string, date1904: boolean) =>
+    workbookZip(
+      '<sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets>',
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'styles', 'styles.xml']],
+      {
+        'xl/workbook.xml': `<workbook ${NS} ${REL_NS}><workbookPr${date1904 ? ' date1904="1"' : ''}/><sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets></workbook>`,
+        'xl/styles.xml': `<styleSheet ${NS}><numFmts count="1"><numFmt numFmtId="170" formatCode="${attr(code)}"/></numFmts><cellXfs><xf/><xf numFmtId="170"/></cellXfs></styleSheet>`,
+        'xl/worksheets/sheet1.xml': `<worksheet ${NS}><sheetData><row r="1"><c r="A1" s="1"><v>7</v></c></row></sheetData></worksheet>`,
+      }
+    );
+
+  it.each(Object.entries(ESCAPE_IMPROVEMENTS))('%s: %s', async (code, { reason, notDate }) => {
+    expect(reason.length).toBeGreaterThan(10);
+    for (const date1904 of [false, true]) {
+      const bytes = await book(code, date1904);
+      const o = await importXlsxExceljs(bytes);
+      const n = await importXlsx(bytes);
+      const { unexplained, seen } = compare(o, n);
+      expect(unexplained).toEqual([]);
+      // the old code is the new one without its escapes, and the new one is kept as written (no escape of a plain character in these)
+      expect(o.sheets[0].cells.get('0:0')?.numberFormat?.code).toBe(dropEscapes(code));
+      expect(n.sheets[0].cells.get('0:0')?.numberFormat?.code).toBe(code);
+      expect(seen).toEqual(date1904 && notDate ? ['escapedLetterNotDate', 'escapeKept'] : ['escapeKept']);
+      expect(n.sheets[0].cells.get('0:0')?.value).toBe(7);
+      if (date1904 && notDate) expect(o.sheets[0].cells.get('0:0')?.value).toBe(7 + 1462);
+    }
+  });
+
+  it('is no wider than the table: a code that is not listed, or that differs by more than its escapes, or a 1462 difference without a date letter, is a difference', () => {
+    const one = (value: number, code?: string): SpreadsheetImportResult => ({ sheets: [{ name: 'S', cells: new Map([['0:0', { value, ...(code === undefined ? {} : { numberFormat: { code } }) }]]) }], warnings: [] });
+    expect(compare(one(1, '0.0"'), one(1, '0.0\\"')).seen).toEqual(['escapeKept']);
+    expect(compare(one(1, '0 d'), one(1, '0 \\d')).seen).toEqual(['escapeKept']);
+    expect(compare(one(1463, '0 d'), one(1, '0 \\d')).seen).toEqual(['escapedLetterNotDate', 'escapeKept']);
+    // not listed
+    expect(compare(one(1, '0 q'), one(1, '0 \\q')).unexplained).toHaveLength(1);
+    // listed, but the old code is not the new one without its escapes
+    expect(compare(one(1, '0.1'), one(1, '0.0\\"')).unexplained).toHaveLength(1);
+    // no old code at all
+    expect(compare(one(1), one(1, '0.0\\"')).unexplained).toHaveLength(1);
+    // a 1462 difference where the code is not listed as a non-date, or has no date letter once unescaped
+    expect(compare(one(1463, '0 q'), one(1, '0 \\q')).unexplained.length).toBeGreaterThan(0);
+    expect(compare(one(1463, '0.0"'), one(1, '0.0\\"')).unexplained.length).toBeGreaterThan(0);
+    expect(compare(one(1463), one(1)).unexplained).toHaveLength(1);
+    expect(compare(one(1464, '0 d'), one(1, '0 \\d')).unexplained.length).toBeGreaterThan(0);
+    expect(compare(one(1463, '0 d'), { sheets: [{ name: 'S', cells: new Map([['0:0', { value: 1 }]]) }], warnings: [] }).unexplained.length).toBeGreaterThan(0);
   });
 });
 

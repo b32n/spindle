@@ -1,6 +1,7 @@
 import type { SpreadsheetImportResult, SpreadsheetSheet } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError, toImportError } from '../common/import-error';
 import { resolveLimits, type ImportLimits } from '../common/safe-zip';
+import { CappedWarnings } from './read/capped';
 import { XlsxPackage } from './read/package';
 import { readWorkbookParts, toImportExtras } from './read';
 import { readBudget, readSheet } from './read/sheet';
@@ -39,6 +40,8 @@ async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<Spre
   const parts = await readWorkbookParts(pkg);
   const warnings: string[] = [];
   const sheets: SpreadsheetSheet[] = [];
+  // warnings about single sheets (a repeated part, a repeated name) are given for the first few, then counted
+  const sheetWarnings = new CappedWarnings((m) => warnings.push(m), 'sheet warnings');
   const names = new Names();
   // what the whole package may still spend, shared by all its sheets, and the parts read so far (a part is read once)
   const budget = readBudget(limits);
@@ -59,11 +62,11 @@ async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<Spre
     // each part is read once: a second sheet naming a part is how one large part is made to count many times over
     // (the part name is the package's own spelling: the workbook reader has already resolved it, case-insensitively)
     if (readParts.has(ref.part)) {
-      warnings.push(`The sheet "${ref.name}" names the part ${ref.part}, which another sheet already uses; it was not read.`);
+      sheetWarnings.add(`The sheet "${ref.name}" names the part ${ref.part}, which another sheet already uses; it was not read.`);
       continue;
     }
     readParts.add(ref.part);
-    const name = names.unique(ref.name, warnings);
+    const name = names.unique(ref.name, sheetWarnings);
     placed.set(position, sheets.length);
     sheets.push(
       readSheet(await pkg.text(ref.part), { ...ref, name }, {
@@ -77,6 +80,7 @@ async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<Spre
       })
     );
   }
+  sheetWarnings.close();
   // the package's own warnings (damaged parts, unresolvable relationships) come first, in the order they were met
   return {
     sheets,
@@ -94,7 +98,7 @@ class Names {
   private readonly taken = new Set<string>();
   private readonly next = new Map<string, number>();
 
-  unique(name: string, warnings: string[]): string {
+  unique(name: string, warnings: CappedWarnings): string {
     const key = name.toLowerCase();
     let candidate = name;
     if (this.taken.has(key)) {
@@ -102,7 +106,7 @@ class Names {
       do candidate = `${name} (${n++})`;
       while (this.taken.has(candidate.toLowerCase()));
       this.next.set(key, n);
-      warnings.push(`The workbook has more than one sheet named "${name}"; one was renamed "${candidate}".`);
+      warnings.add(`The workbook has more than one sheet named "${name}"; one was renamed "${candidate}".`);
     }
     this.taken.add(candidate.toLowerCase());
     return candidate;

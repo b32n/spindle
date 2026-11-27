@@ -66,6 +66,7 @@ describe('limits', () => {
       maxFormulaChars: 64 * MB,
       maxTotalCells: 5_000_000,
       maxSheets: 1_000,
+      maxRanges: 1_048_576,
     });
     expect(resolveLimits()).toEqual(DEFAULT_IMPORT_LIMITS);
     expect(resolveLimits({ maxEntries: 3 })).toEqual({ ...DEFAULT_IMPORT_LIMITS, maxEntries: 3 });

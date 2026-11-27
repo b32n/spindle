@@ -9,6 +9,7 @@ import type {
 } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError } from '../../common/import-error';
 import { isTrue, kid, kids, type XmlElement } from '../xml';
+import { CappedWarnings } from './capped';
 import { partsWithContentType } from './content-types';
 import type { XlsxPackage } from './package';
 import { relsOfKind } from './relationships';
@@ -50,17 +51,27 @@ export function isBinaryWorkbook(pkg: XlsxPackage, part: string): boolean {
 /** Sheet kinds by lower-cased relationship kind; a `Map` because the kind is the file's text (`constructor` is not a kind). */
 const SHEET_KINDS: ReadonlyMap<string, string> = new Map([['worksheet', 'worksheet'], ['chartsheet', 'chartsheet'], ['dialogsheet', 'dialogsheet'], ['xlmacrosheet', 'macrosheet'], ['xlintlmacrosheet', 'macrosheet']]);
 
+/** The workbook's `<sheet>` entries read are this many times `maxSheets`: entries that are not read as worksheets (chart sheets, a part repeated, no part) count, so naming many cannot make the reader do work the sheet limit does not bound. */
+export const SHEET_ENTRY_FACTOR = 4;
+
 const STATES: ReadonlySet<string> = new Set<XlsxSheetState>(['visible', 'hidden', 'veryHidden']);
 
 /** `state` as the file writes it; anything else (or nothing) is visible. */
 const sheetState = (v: string | undefined): XlsxSheetState => (v !== undefined && STATES.has(v) ? (v as XlsxSheetState) : 'visible');
 
-function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage, sheetName: string): XlsxCommentParts {
+/** What the sheet entries of a workbook share: the workbook's relationships by id, the comment parts found per sheet part (a part named by many entries is looked at once), and the capped warnings. */
+interface SheetScan {
+  byId: ReadonlyMap<string, XlsxRelationship>;
+  comments: Map<string, XlsxCommentParts>;
+  problems: CappedWarnings;
+}
+
+function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage, sheetName: string, problems: CappedWarnings): XlsxCommentParts {
   const found = (kind: string) =>
     relsOfKind(rels, kind).flatMap((r) => {
       if (r.external) return [];
       const part = pkg.resolve(r.target);
-      if (part === undefined) pkg.warnings.push(`The sheet "${sheetName}" has ${kind} at ${r.target}, which the package does not contain.`);
+      if (part === undefined) problems.add(`The sheet "${sheetName}" has ${kind} at ${r.target}, which the package does not contain.`);
       return part ?? [];
     });
   const out: XlsxCommentParts = { threadedComments: found('threadedComment') };
@@ -69,15 +80,20 @@ function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage, sheet
   return out;
 }
 
-async function readSheetRef(el: XmlElement, index: number, workbookRels: readonly XlsxRelationship[], pkg: XlsxPackage): Promise<XlsxSheetRef> {
+async function readSheetRef(el: XmlElement, index: number, scan: SheetScan, pkg: XlsxPackage): Promise<XlsxSheetRef> {
   const relId = el.attrs.id ?? '';
-  const rel = workbookRels.find((r) => r.id === relId);
+  const rel = scan.byId.get(relId);
   let part: string | undefined;
   if (rel && !rel.external) {
     part = pkg.resolve(rel.target);
-    if (part === undefined) pkg.warnings.push(`The sheet "${el.attrs.name ?? ''}" points at ${rel.target}, which the package does not contain.`);
-  } else pkg.warnings.push(`The sheet "${el.attrs.name ?? ''}" has no usable relationship (${relId === '' ? 'no r:id' : relId}).`);
+    if (part === undefined) scan.problems.add(`The sheet "${el.attrs.name ?? ''}" points at ${rel.target}, which the package does not contain.`);
+  } else scan.problems.add(`The sheet "${el.attrs.name ?? ''}" has no usable relationship (${relId === '' ? 'no r:id' : relId}).`);
   const rels = part === undefined ? [] : await pkg.rels(part);
+  let comments = part === undefined ? undefined : scan.comments.get(part);
+  if (comments === undefined) {
+    comments = commentParts(rels, pkg, el.attrs.name ?? '', scan.problems);
+    if (part !== undefined) scan.comments.set(part, comments);
+  }
   const sheetId = intAttr(el.attrs.sheetId);
   return {
     name: el.attrs.name ?? `Sheet${index + 1}`,
@@ -87,7 +103,7 @@ async function readSheetRef(el: XmlElement, index: number, workbookRels: readonl
     kind: rel ? (SHEET_KINDS.get(rel.kind.toLowerCase()) ?? rel.kind) : 'worksheet',
     ...(part === undefined ? {} : { part }),
     rels,
-    commentParts: commentParts(rels, pkg, el.attrs.name ?? ''),
+    commentParts: comments,
   };
 }
 
@@ -149,7 +165,17 @@ export async function readWorkbook(pkg: XlsxPackage): Promise<XlsxWorkbookInfo> 
   const workbookPr = kid(root, 'workbookPr');
   const view = kid(kid(root, 'bookViews'), 'workbookView');
   const sheets: XlsxSheetRef[] = [];
-  for (const [i, el] of kids(kid(root, 'sheets'), 'sheet').entries()) sheets.push(await readSheetRef(el, i, rels, pkg));
+  // the workbook's relationships by id (the first of a repeated id), and each sheet part's comment parts once: a workbook that
+  // names a million sheets must not scan its relationships once per sheet
+  const byId = new Map<string, XlsxRelationship>();
+  for (const r of rels) if (!byId.has(r.id)) byId.set(r.id, r);
+  const problems = new CappedWarnings((m) => pkg.warnings.push(m), 'sheet warnings');
+  const scan: SheetScan = { byId, comments: new Map(), problems };
+  const entries = kids(kid(root, 'sheets'), 'sheet');
+  const limit = pkg.limits.maxSheets * SHEET_ENTRY_FACTOR;
+  for (const [i, el] of entries.slice(0, limit).entries()) sheets.push(await readSheetRef(el, i, scan, pkg));
+  problems.close();
+  if (entries.length > limit) pkg.warnings.push(`The workbook lists ${entries.length} sheets; only the first ${limit} entries were read (${SHEET_ENTRY_FACTOR} times the import limit maxSheets).`);
 
   const info: XlsxWorkbookInfo = {
     part,
