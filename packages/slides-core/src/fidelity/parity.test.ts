@@ -13,13 +13,13 @@ describe('sourceRuns', () => {
     expect(sourceRuns(xml)).toEqual({ inScope: ['A & B AB <', '<raw> &amp; tail'], outOfScope: [] });
   });
 
-  it('counts the runs of groups, connectors and fallback copies as out of scope, and resumes after them', () => {
+  it('counts the runs of fallback copies as out of scope (groups and connectors are in scope since K10b), and resumes after them', () => {
     const xml =
       '<p:spTree><p:sp><a:t>one</a:t></p:sp><p:grpSp><p:sp><a:t>in group</a:t></p:sp></p:grpSp>' +
       '<p:graphicFrame><a:tbl><a:t>cell</a:t></a:tbl></p:graphicFrame><p:pic><a:t>pic</a:t></p:pic><p:cxnSp><a:t>c</a:t></p:cxnSp>' +
       '<mc:AlternateContent><mc:Choice><p:sp><a:t>two</a:t></p:sp></mc:Choice><mc:Fallback><p:pic><a:t>copy</a:t></p:pic></mc:Fallback></mc:AlternateContent>' +
       '<p:sp><a:t>three</a:t></p:sp></p:spTree>';
-    expect(sourceRuns(xml)).toEqual({ inScope: ['one', 'cell', 'pic', 'two', 'three'], outOfScope: ['in group', 'c', 'copy'] });
+    expect(sourceRuns(xml)).toEqual({ inScope: ['one', 'in group', 'cell', 'pic', 'c', 'two', 'three'], outOfScope: ['copy'] });
   });
 
   it('reads a Fallback as in scope when the alternate content has no Choice, as the reader does', () => {
@@ -42,7 +42,8 @@ describe('sourceRuns', () => {
 
   it('survives unbalanced tags and closing tags it never saw opened', () => {
     expect(sourceRuns('</p:grpSp><p:sp><a:t>x</a:t></p:sp></p:nope><a:t>y')).toEqual({ inScope: ['x'], outOfScope: [] });
-    expect(sourceRuns('<p:grpSp><a:t>x</a:t>')).toEqual({ inScope: [], outOfScope: ['x'] });
+    expect(sourceRuns('<p:grpSp><a:t>x</a:t>')).toEqual({ inScope: ['x'], outOfScope: [] });
+    expect(sourceRuns('<mc:AlternateContent><mc:Choice></mc:Choice><mc:Fallback><a:t>x</a:t>')).toEqual({ inScope: [], outOfScope: ['x'] });
   });
 });
 
@@ -54,6 +55,12 @@ describe('modelRuns', () => {
     expect(modelRuns({ slides: [{ elements: [{ text: {} }] }] })).toEqual([]);
   });
 
+  it('collects the runs inside groups, at any depth', () => {
+    const run = (t: string) => ({ text: { paragraphs: [{ runs: [{ kind: 'text', text: t }] }] } });
+    const m = { slides: [{ elements: [{ kind: 'group', children: [run('a'), { kind: 'group', children: [run('b')] }, { kind: 'group' }] }, run('c')] }] };
+    expect(modelRuns(m as unknown as Json)).toEqual(['a', 'b', 'c']);
+  });
+
   it('collects the runs of table cells as well, and ignores a table without rows or cells', () => {
     const cell = (t: string) => ({ text: { paragraphs: [{ runs: [{ kind: 'text', text: t }] }] } });
     const m = { slides: [{ elements: [{ kind: 'table', rows: [{ cells: [cell('a'), cell('b')] }, { cells: [cell('c')] }, {}] }, { kind: 'table' }] }] };
@@ -62,7 +69,7 @@ describe('modelRuns', () => {
 });
 
 describe('textParity', () => {
-  const slide = (...t: string[]) => `<p:sld>${t.map((x) => `<p:sp><a:t>${x}</a:t></p:sp>`).join('')}<p:grpSp><a:t>cell</a:t></p:grpSp></p:sld>`;
+  const slide = (...t: string[]) => `<p:sld>${t.map((x) => `<p:sp><a:t>${x}</a:t></p:sp>`).join('')}<mc:AlternateContent><mc:Choice></mc:Choice><mc:Fallback><a:t>copy</a:t></mc:Fallback></mc:AlternateContent></p:sld>`;
 
   it('is exact when the model holds every run once, whatever the order, and ignores parts that are not slides', () => {
     const p = parts({ 'ppt/slides/slide2.xml': slide('b', 'a', 'a'), 'ppt/slides/slide1.xml': slide('c'), 'ppt/slideLayouts/slideLayout1.xml': slide('layout') });

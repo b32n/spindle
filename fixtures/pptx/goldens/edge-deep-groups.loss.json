@@ -12,7 +12,7 @@
     },
     {
       "count": 59,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the group tree is stored and every member's frame is composed through the group transforms into slide space",
       "id": "pptx.shapes.groups.nested",
       "label": "group(s) inside another group",
       "where": [

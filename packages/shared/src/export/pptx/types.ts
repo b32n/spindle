@@ -73,7 +73,7 @@ export interface PptxSlide {
   layoutPart?: string;
   /** The slide's own background (`p:bg`), when it has one. */
   background?: PptxFill;
-  /** The `p:sp` shapes, `p:pic` pictures and table `p:graphicFrame`s in drawing order; the other shape kinds arrive with the later reader steps. Absent for a slide that failed. */
+  /** The `p:sp` shapes, `p:pic` pictures, table `p:graphicFrame`s, `p:cxnSp` connectors and `p:grpSp` groups in drawing order; the other shape kinds arrive with the later reader steps. Absent for a slide that failed. */
   elements?: PptxElement[];
   error?: string;
 }
@@ -218,10 +218,38 @@ export interface PptxLine {
 }
 
 /**
- * A shape's geometry (plan K5): a preset by its OOXML `prst` name with its adjustments (`known` is false for a preset
- * the editor's library lacks, which the editor keeps under that name and draws approximately), or custom geometry (read by K10).
+ * One drawing command of a custom path (`a:moveTo`, `a:lnTo`, `a:cubicBezTo`, `a:quadBezTo`, `a:arcTo`, `a:close`), in the
+ * path's own space (`PptxCustomPath.w` x `h`). `arc` angles are degrees clockwise from the +x axis (`arcTo` angles are 60000ths).
  */
-export type PptxGeometry = { kind: 'preset'; prst: string; adjustments?: Record<string, number>; known: boolean } | { kind: 'custom' };
+export type PptxPathCommand =
+  | { op: 'move'; x: number; y: number }
+  | { op: 'line'; x: number; y: number }
+  | { op: 'cubic'; x1: number; y1: number; x2: number; y2: number; x: number; y: number }
+  | { op: 'quad'; x1: number; y1: number; x: number; y: number }
+  | { op: 'arc'; wR: number; hR: number; stAng: number; swAng: number }
+  | { op: 'close' };
+
+/** One `a:path` of custom geometry: commands in a `w` x `h` space (EMU unless the file gives the path a size) scaled onto the shape's box. */
+export interface PptxCustomPath {
+  w: number;
+  h: number;
+  /** `a:path/@fill` when not `norm`: `none`, `lighten`, `lightenLess`, `darken` or `darkenLess`. */
+  fill?: string;
+  /** `stroke="0"`: the path is not outlined. */
+  stroke?: false;
+  extrusionOk?: true;
+  commands: PptxPathCommand[];
+}
+
+/**
+ * A shape's geometry (plan K5): a preset by its OOXML `prst` name with its adjustments (`known` is false for a preset
+ * the editor's library lacks, which the editor keeps under that name and draws approximately), or custom geometry (plan K10b).
+ * `paths` of custom geometry is absent when the geometry cannot be kept faithfully (a coordinate that is a guide formula, a
+ * malformed command, no path, too large): the shape then keeps its frame, fill and text without its outline.
+ */
+export type PptxGeometry =
+  | { kind: 'preset'; prst: string; adjustments?: Record<string, number>; known: boolean }
+  | { kind: 'custom'; paths?: PptxCustomPath[] };
 
 /** A run's attributes (`a:rPr`) beyond what its paragraph's level style gives; only what the run states. */
 export interface PptxRun {
@@ -372,8 +400,47 @@ export interface PptxTable {
   styleName?: string;
 }
 
+/** The shape a connector end is glued to (`a:stCxn`, `a:endCxn`): the `pptxId` of the shape and the index of its connection site. */
+export interface PptxConnection {
+  id: string;
+  idx: number;
+}
+
+/**
+ * A connector (`p:cxnSp`, plan K10b): a line, bent (elbow) or curved route in `geometry` (`straightConnector1`, `bentConnector3`,
+ * `curvedConnector2`... with their adjustments), the outline with its arrow heads (`line.head`, `line.tail`) and the shapes its ends are glued to.
+ * `frame` is the box of the two ends with the flips that say which corners they are.
+ */
+export interface PptxConnector {
+  kind: 'connector';
+  pptxId: string;
+  name: string;
+  altText?: string;
+  hidden?: boolean;
+  frame?: PptxFrame;
+  geometry?: PptxGeometry;
+  line?: PptxLine;
+  start?: PptxConnection;
+  end?: PptxConnection;
+}
+
+/**
+ * A group (`p:grpSp`, plan K10b). `frame` is the group's box in slide space (after the groups it sits in). The frames of everything
+ * in `children` (nested groups included) are **composed**: they are already in slide space, so a child needs no group
+ * transform; the group's own `a:chOff` / `a:chExt` mapping has been applied to them.
+ */
+export interface PptxGroup {
+  kind: 'group';
+  pptxId: string;
+  name: string;
+  altText?: string;
+  hidden?: boolean;
+  frame?: PptxFrame;
+  children: PptxElement[];
+}
+
 /** What a slide holds, in drawing order. */
-export type PptxElement = PptxShape | PptxPicture | PptxTable;
+export type PptxElement = PptxShape | PptxPicture | PptxTable | PptxConnector | PptxGroup;
 
 /**
  * A slide layout flattened with its master. `elements` is the static content (the master's shapes, unless the layout hides

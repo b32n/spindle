@@ -80,10 +80,10 @@ describe('p:sp: identity and frame', () => {
     expect((await one(sp({ spPr: xfrm(0, 0, -5, 5) }))).frame).toBeUndefined();
   });
 
-  it('reads p:sp among the shapes of a slide: groups and connectors are left to the later steps, and mc:AlternateContent is entered (Choice, else Fallback)', async () => {
+  it('reads p:sp among the shapes of a slide: mc:AlternateContent is entered (Choice, else Fallback); an element no step reads is skipped', async () => {
     const tree =
       sp({ id: 2 }) +
-      '<p:grpSp/><p:cxnSp/>' +
+      '<p:contentPart/>' +
       `<mc:AlternateContent><mc:Choice Requires="x">${sp({ id: 3 })}</mc:Choice><mc:Fallback>${sp({ id: 4 })}</mc:Fallback></mc:AlternateContent>` +
       `<mc:AlternateContent><mc:Fallback>${sp({ id: 5 })}</mc:Fallback></mc:AlternateContent>`;
     expect((await shapesOf(tree)).map((s) => s.pptxId)).toEqual(['2', '3', '5']);
@@ -116,7 +116,7 @@ describe('p:sp: fills (K1)', () => {
     expect(await fill(`<a:solidFill>${srgb('FF0000', '<a:alpha val="50000"/>')}</a:solidFill>`)).toEqual({ kind: 'solid', color: { kind: 'rgb', hex: '#FF0000', alpha: 0.5 } });
     expect(await fill('<a:solidFill><a:schemeClr val="bg1"><a:lumMod val="75000"/></a:schemeClr></a:solidFill>')).toEqual({ kind: 'solid', color: { kind: 'theme', slot: 'lt1', lumMod: 0.75 } });
     expect(await fill('<a:solidFill><a:schemeClr val="phClr"/></a:solidFill>')).toBeUndefined();
-    expect(await fill('<a:grpFill/>')).toBeUndefined();
+    expect(await fill('<a:grpFill/>')).toEqual({ kind: 'none' });
   });
 
   it('applies the layout colour-map override and then the slide one', async () => {
@@ -185,10 +185,9 @@ describe('p:sp: shape style references', () => {
     expect(widths).toEqual([undefined, 6350 / E, 12700 / E, 19050 / E]);
   });
 
-  it('reads a grpFill as no fill, so the style fillRef applies (a parent group\'s fill is resolved by the group reader)', async () => {
-    const s = await one(sp({ spPr: '<a:grpFill/>', style: style('1', '0') }));
-    expect(s.fill).toEqual({ kind: 'solid', color: { kind: 'theme', slot: 'accent2' } });
-    expect((await one(sp({ spPr: '<a:grpFill/>' }))).fill).toBeUndefined();
+  it('reads a grpFill outside a group as no fill, and then no style fillRef applies (inside a group it takes the group\'s fill: see elements.test.ts)', async () => {
+    expect((await one(sp({ spPr: '<a:grpFill/>', style: style('1', '0') }))).fill).toEqual({ kind: 'none' });
+    expect((await one(sp({ spPr: '<a:grpFill/>' }))).fill).toEqual({ kind: 'none' });
   });
 
   it('lets spPr win and treats index 0 and a missing or colourless reference as nothing', async () => {

@@ -12,7 +12,7 @@
     },
     {
       "count": 5,
-      "effect": "approximated: the shape keeps its frame, fill and text but not its path",
+      "effect": "approximated: the paths (lines, curves, arcs, several paths, fill modes) are kept as written; guide formulas are not evaluated, so a path that needs them keeps the shape's frame, fill and text but not its outline",
       "id": "pptx.shapes.custGeom",
       "label": "shape(s) with custom geometry",
       "where": [
@@ -21,7 +21,7 @@
     },
     {
       "count": 5,
-      "effect": "approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its frame, fill and text but not its path",
+      "effect": "approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its path unless it needs guide formulas",
       "id": "pptx.shapes.unsupportedGeometry",
       "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)",
       "where": [

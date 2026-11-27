@@ -4543,7 +4543,33 @@
               "y": 157.48031496062993
             },
             "geometry": {
-              "kind": "custom"
+              "kind": "custom",
+              "paths": [
+                {
+                  "commands": [
+                    {
+                      "op": "move",
+                      "x": 0,
+                      "y": 100
+                    },
+                    {
+                      "op": "line",
+                      "x": 50,
+                      "y": 0
+                    },
+                    {
+                      "op": "line",
+                      "x": 100,
+                      "y": 100
+                    },
+                    {
+                      "op": "close"
+                    }
+                  ],
+                  "h": 100,
+                  "w": 100
+                }
+              ]
             },
             "kind": "shape",
             "name": "Custom",
@@ -5267,6 +5293,115 @@
             }
           },
           {
+            "children": [
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 83.98950131233596,
+                  "w": 167.97900262467192,
+                  "x": 73.49081364829397,
+                  "y": 178.47769028871392
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "A",
+                "pptxId": "11",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "A"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              },
+              {
+                "fill": {
+                  "color": {
+                    "kind": "theme",
+                    "slot": "accent1"
+                  },
+                  "kind": "solid"
+                },
+                "frame": {
+                  "h": 83.98950131233596,
+                  "w": 167.97900262467192,
+                  "x": 283.46456692913387,
+                  "y": 178.47769028871392
+                },
+                "geometry": {
+                  "kind": "preset",
+                  "known": true,
+                  "prst": "rect"
+                },
+                "kind": "shape",
+                "name": "B",
+                "pptxId": "12",
+                "text": {
+                  "paragraphs": [
+                    {
+                      "level": 0,
+                      "runs": [
+                        {
+                          "kind": "text",
+                          "lang": "en-US",
+                          "text": "B"
+                        }
+                      ],
+                      "style": {
+                        "align": "center",
+                        "color": {
+                          "kind": "theme",
+                          "slot": "dk1"
+                        },
+                        "font": "minor",
+                        "fontSize": 18,
+                        "marginLeft": 0
+                      }
+                    }
+                  ],
+                  "props": {}
+                }
+              }
+            ],
+            "frame": {
+              "h": 83.98950131233596,
+              "w": 377.9527559055118,
+              "x": 73.49081364829397,
+              "y": 178.47769028871392
+            },
+            "kind": "group",
+            "name": "Group",
+            "pptxId": "10"
+          },
+          {
             "fill": {
               "color": {
                 "kind": "theme",
@@ -5312,6 +5447,46 @@
                 }
               ],
               "props": {}
+            }
+          },
+          {
+            "end": {
+              "id": "13",
+              "idx": 1
+            },
+            "frame": {
+              "h": 157.48031496062993,
+              "w": 178.47769028871392,
+              "x": 451.4435695538058,
+              "y": 220.4724409448819
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": false,
+              "prst": "bentConnector3"
+            },
+            "kind": "connector",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "tail": {
+                "len": "med",
+                "type": "triangle",
+                "w": "med"
+              },
+              "width": 2.6666666666666665
+            },
+            "name": "Elbow",
+            "pptxId": "14",
+            "start": {
+              "id": "12",
+              "idx": 3
             }
           }
         ],
@@ -5617,9 +5792,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 29,
-    "outOfScope": 2,
-    "sourceRuns": 29
+    "modelRuns": 31,
+    "outOfScope": 0,
+    "sourceRuns": 31
   },
   "warnings": [
     "2 fonts the editor may not have (MS Gothic, MS Mincho) are used; text in them shows in a substitute and may reflow."

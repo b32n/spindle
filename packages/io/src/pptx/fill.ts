@@ -2,6 +2,7 @@ import type { PptxColor, PptxColorMap, PptxFill, PptxGeometry, PptxLine } from '
 import type { Rel } from '../common/ooxml-package';
 import { kid, kids, type XmlElement } from '../xlsx/xml';
 import { colorElement, parseColor } from './color';
+import { readCustomGeometry } from './custom-geometry';
 import { SUPPORTED_PRESETS } from './slide-scan';
 import { emuToPx, num, pct } from './units';
 
@@ -92,9 +93,15 @@ export function parseLine(ln: XmlElement | undefined, map: PptxColorMap, rels: R
   return out;
 }
 
-/** `a:prstGeom` (name and the `val` adjustments) or `a:custGeom`; `undefined` when `spPr` states neither. */
+/** `a:prstGeom` (name and the `val` adjustments) or `a:custGeom` (its paths, see `readCustomGeometry`); `undefined` when `spPr` states neither. */
 export function parseGeometry(spPr: XmlElement | undefined): PptxGeometry | undefined {
-  if (kid(spPr, 'custGeom')) return { kind: 'custom' };
+  const custom = kid(spPr, 'custGeom');
+  if (custom) {
+    const ext = kid(kid(spPr, 'xfrm'), 'ext');
+    const [w, h] = [num(ext?.attrs.cx), num(ext?.attrs.cy)];
+    const paths = readCustomGeometry(custom, w !== undefined && h !== undefined ? { w, h } : undefined);
+    return { kind: 'custom', ...(paths ? { paths } : {}) };
+  }
   const geom = kid(spPr, 'prstGeom');
   const prst = geom?.attrs.prst;
   if (!prst) return undefined;

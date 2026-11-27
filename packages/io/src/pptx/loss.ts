@@ -148,7 +148,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden, 'kept: imported as a hidden slide');
   addTally('pptx.notes', 'slide(s) with speaker notes', t.notes);
   add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, 'approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them', unavailable);
-  addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry, 'approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its frame, fill and text but not its path');
+  addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry, 'approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its path unless it needs guide formulas');
   addTally('pptx.images.unsupportedFormat', 'picture(s) in a format browsers cannot show (EMF, WMF)', t.unsupportedImages, 'approximated: shown as a labelled placeholder with the picture\'s frame and alternative text; the image data itself is not kept');
   add('pptx.sizeLimit', 'package part(s) over the size limit', pkg.skipped.length, 'lost: not scanned, so their content is not reported', pkg.skipped);
 
@@ -179,12 +179,12 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.text.lang', 'run(s) tagged with a language other than en-US', t.lang, 'kept: the language tag is stored on the run; it does not drive spell checking', true);
 
   // ---- shapes -------------------------------------------------------------
-  addTally('pptx.shapes.custGeom', 'shape(s) with custom geometry', t.custGeom, 'approximated: the shape keeps its frame, fill and text but not its path', true);
+  addTally('pptx.shapes.custGeom', 'shape(s) with custom geometry', t.custGeom, 'approximated: the paths (lines, curves, arcs, several paths, fill modes) are kept as written; guide formulas are not evaluated, so a path that needs them keeps the shape\'s frame, fill and text but not its outline', true);
   addTally('pptx.shapes.effects', 'shape(s) or run(s) with shadow, glow, reflection or soft edges', t.effects, NOT_IMPORTED, true);
   addTally('pptx.shapes.gradientFill', 'gradient fill(s)', t.gradientFill, 'approximated: imported as a gradient; a gradient taken from the theme\'s style list (not the shape\'s own fill) is read as a solid colour', true);
   addTally('pptx.shapes.patternFill', 'pattern fill(s)', t.patternFill, 'approximated: kept as a pattern but painted as a solid blend of its two colours', true);
-  addTally('pptx.shapes.connectors.elbowCurved', 'elbow or curved connector(s)', t.elbowCurved, NOT_IMPORTED, true);
-  addTally('pptx.shapes.groups.nested', 'group(s) inside another group', t.nestedGroups, NOT_IMPORTED, true);
+  addTally('pptx.shapes.connectors.elbowCurved', 'elbow or curved connector(s)', t.elbowCurved, 'kept: the route (bent or curved preset with its adjustments), the arrow heads and the shapes the ends are glued to are stored; the editor draws the route itself, so bends may differ slightly from PowerPoint\'s', true);
+  addTally('pptx.shapes.groups.nested', 'group(s) inside another group', t.nestedGroups, 'kept: the group tree is stored and every member\'s frame is composed through the group transforms into slide space', true);
   addTally('pptx.shapes.scene3d', '3-D shape(s) or text', t.scene3d, NOT_IMPORTED, true);
 
   // ---- images and tables --------------------------------------------------

@@ -1030,6 +1030,8 @@ describe('detectPptxLoss: the state of each id after the reader (K9c, K10a)', ()
     'pptx.text.baseline': 'approximated',
     'pptx.text.lang': 'kept',
     'pptx.shapes.custGeom': 'approximated',
+    'pptx.shapes.connectors.elbowCurved': 'kept',
+    'pptx.shapes.groups.nested': 'kept',
     'pptx.shapes.gradientFill': 'approximated',
     'pptx.shapes.patternFill': 'approximated',
     'pptx.slideSize': 'kept',

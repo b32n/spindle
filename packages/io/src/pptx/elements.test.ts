@@ -1,10 +1,12 @@
 import JSZip from 'jszip';
-import type { PptxElement, PptxLink, PptxPicture, PptxShape, PptxTable, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
+import type { PptxConnector, PptxElement, PptxGroup, PptxLink, PptxPicture, PptxShape, PptxTable, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
 import { importPptx } from './reader';
 import { sniffImage } from './pictures';
 import { schemeOf } from './links';
+import { MAX_GEOMETRY_PATHS, MAX_PATH_COMMANDS } from './custom-geometry';
+import { MAX_GROUP_DEPTH } from './elements';
 
-// Pictures, tables and hyperlinks (plan K10a), read from synthetic decks that are real zips.
+// Pictures, tables and hyperlinks (plan K10a), groups, connectors and custom geometry (K10b), read from synthetic decks that are real zips.
 
 const NS =
   'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"';
@@ -224,7 +226,8 @@ describe('p:pic', () => {
     const els = await elementsOf(tree, { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } });
     expect(els.map((e) => [e.kind, e.pptxId])).toEqual([['shape', '2'], ['picture', '5'], ['shape', '2']]);
     const fallback = await elementsOf(`<mc:AlternateContent><mc:Fallback>${pic({ id: 6 })}</mc:Fallback></mc:AlternateContent><p:grpSp/><p:cxnSp/><p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="8" name="Chart"/></p:nvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"/></a:graphic></p:graphicFrame>`, { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } });
-    expect(fallback.map((e) => e.pptxId)).toEqual(['6']);
+    // the empty group and connector are read too (K10b); the chart is not (K11)
+    expect(fallback.map((e) => [e.kind, e.pptxId])).toEqual([['picture', '6'], ['group', ''], ['connector', '']]);
   });
 });
 
@@ -536,5 +539,275 @@ describe('table styles', () => {
   it('reads the flags that are on', async () => {
     const t = await tableOnly(table([[cell('A')]], { pr: '<a:tblPr firstRow="1" lastCol="true" bandRow="0"/>' }));
     expect(t.flags).toEqual({ firstRow: true, lastCol: true });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Groups and connectors (plan K10b)
+// ---------------------------------------------------------------------------
+
+const gxfrm = (off: [number, number], ext: [number, number], chOff: [number, number], chExt: [number, number], attrs = ''): string =>
+  `<a:xfrm${attrs}><a:off x="${off[0] * E}" y="${off[1] * E}"/><a:ext cx="${ext[0] * E}" cy="${ext[1] * E}"/><a:chOff x="${chOff[0] * E}" y="${chOff[1] * E}"/><a:chExt cx="${chExt[0] * E}" cy="${chExt[1] * E}"/></a:xfrm>`;
+const box = (id: number, x: number, y: number, w: number, h: number, extra = '', text = 'x'): string =>
+  `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="S${id}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>${xfrm(x, y, w, h, extra)}</p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:t>${text}</a:t></a:r></a:p></p:txBody></p:sp>`;
+const grp = (o: { id?: number; name?: string; cNvPr?: string; xfrm?: string; fill?: string; inner: string }): string =>
+  `<p:grpSp><p:nvGrpSpPr><p:cNvPr id="${o.id ?? 10}" name="${o.name ?? 'G'}"${o.cNvPr ?? ''}/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr>${o.xfrm ?? ''}${o.fill ?? ''}</p:grpSpPr>${o.inner}</p:grpSp>`;
+const cxn = (o: { id?: number; name?: string; cNvPr?: string; cNv?: string; spPr?: string; style?: string } = {}): string =>
+  `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${o.id ?? 5}" name="${o.name ?? 'C'}"${o.cNvPr ?? ''}/><p:cNvCxnSpPr>${o.cNv ?? ''}</p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr><p:spPr>${o.spPr ?? ''}</p:spPr>${o.style ?? ''}</p:cxnSp>`;
+const asGroup = (e: PptxElement | undefined): PptxGroup => e as PptxGroup;
+
+describe('p:grpSp (K10b)', () => {
+  it('maps the children of an identity group to themselves and keeps the group box, name and ids', async () => {
+    const [g] = await elementsOf(grp({ id: 7, name: ' Team ', cNvPr: ' descr="Alt" hidden="1"', xfrm: gxfrm([100, 50], [200, 100], [100, 50], [200, 100]), inner: box(2, 110, 60, 40, 30) }));
+    expect(g).toMatchObject({ kind: 'group', pptxId: '7', name: 'Team', altText: 'Alt', hidden: true, frame: { x: 100, y: 50, w: 200, h: 100 } });
+    expect(asGroup(g).children).toHaveLength(1);
+    expect(asGroup(g).children[0]).toMatchObject({ kind: 'shape', frame: { x: 110, y: 60, w: 40, h: 30 } });
+  });
+
+  it('composes the child space onto the group box (scale and offset), oracle values', async () => {
+    // child space 0..100 x 0..50 shown in a box at (200, 100) of 300 x 100: scale 3 x 2
+    const [g] = await elementsOf(grp({ xfrm: gxfrm([200, 100], [300, 100], [0, 0], [100, 50]), inner: box(2, 10, 5, 20, 10) }));
+    const f = (asGroup(g).children[0] as PptxShape).frame;
+    expect(f).toEqual({ x: 230, y: 110, w: 60, h: 20 });
+  });
+
+  it('applies the group rotation and flips to the children', async () => {
+    // a group of 100 x 100 at (0,0) rotated 90 degrees: a child in its top-left quarter moves to the top-right quarter
+    const [r] = await elementsOf(grp({ xfrm: gxfrm([0, 0], [100, 100], [0, 0], [100, 100], ' rot="5400000"'), inner: box(2, 0, 0, 50, 50) }));
+    const f = (asGroup(r).children[0] as PptxShape).frame as NonNullable<PptxShape['frame']>;
+    expect(f.x).toBeCloseTo(50);
+    expect(f.y).toBeCloseTo(0);
+    expect(f.rot).toBeCloseTo(90);
+    expect(asGroup(r).frame).toMatchObject({ rot: 90 });
+    const [h] = await elementsOf(grp({ xfrm: gxfrm([0, 0], [100, 100], [0, 0], [100, 100], ' flipH="1"'), inner: box(2, 0, 0, 20, 20) }));
+    expect((asGroup(h).children[0] as PptxShape).frame).toEqual({ x: 80, y: 0, w: 20, h: 20, flipH: true });
+    const [v] = await elementsOf(grp({ xfrm: gxfrm([0, 0], [100, 100], [0, 0], [100, 100], ' flipV="1"'), inner: box(2, 0, 0, 20, 20, ' flipH="1" rot="1800000"') }));
+    const vf = (asGroup(v).children[0] as PptxShape).frame as NonNullable<PptxShape['frame']>;
+    // the group's vertical flip toggles nothing on flipH, adds flipV and mirrors the rotation (30 -> 330)
+    expect(vf).toMatchObject({ y: 80, flipV: true });
+    expect(vf.flipH).toBe(true);
+    expect(vf.rot).toBeCloseTo(330);
+  });
+
+  it('composes nested groups into slide space and composes the inner group box too', async () => {
+    const inner = grp({ id: 11, name: 'inner', xfrm: gxfrm([10, 10], [100, 100], [0, 0], [50, 50]), inner: box(2, 5, 5, 10, 10) });
+    const [outer] = await elementsOf(grp({ xfrm: gxfrm([100, 200], [400, 400], [0, 0], [200, 200]), inner }));
+    const innerGroup = asGroup(asGroup(outer).children[0]);
+    // inner box (10,10,100,100) scaled by 2 and moved by (100,200); the shape (5,5,10,10) in the inner space is (20,20,20,20) in the outer space
+    expect(innerGroup.frame).toEqual({ x: 120, y: 220, w: 200, h: 200 });
+    expect((innerGroup.children[0] as PptxShape).frame).toEqual({ x: 140, y: 240, w: 40, h: 40 });
+  });
+
+  it('reads pictures, tables, connectors and shapes inside a group in drawing order', async () => {
+    const table = `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="4" name="T"/><p:cNvGraphicFramePr/><p:nvPr/></p:nvGraphicFramePr><p:xfrm><a:off x="${10 * E}" y="${10 * E}"/><a:ext cx="${40 * E}" cy="${20 * E}"/></p:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table"><a:tbl><a:tblGrid><a:gridCol w="${40 * E}"/></a:tblGrid><a:tr h="${20 * E}"><a:tc><a:txBody><a:bodyPr/><a:p><a:r><a:t>cell</a:t></a:r></a:p></a:txBody></a:tc></a:tr></a:tbl></a:graphicData></a:graphic></p:graphicFrame>`;
+    const inner = box(2, 0, 0, 10, 10) + pic({ id: 3, spPr: xfrm(5, 5, 10, 10) }) + table + cxn({ spPr: xfrm(0, 0, 10, 10) });
+    const [g] = await elementsOf(grp({ xfrm: gxfrm([100, 100], [200, 200], [0, 0], [100, 100]), inner }), { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } });
+    const kinds = asGroup(g).children.map((c) => c.kind);
+    expect(kinds).toEqual(['shape', 'picture', 'table', 'connector']);
+    expect((asGroup(g).children[1] as PptxPicture).frame).toEqual({ x: 110, y: 110, w: 20, h: 20 });
+    expect((asGroup(g).children[2] as PptxTable).frame).toEqual({ x: 120, y: 120, w: 80, h: 40 });
+    expect((asGroup(g).children[3] as PptxConnector).frame).toEqual({ x: 100, y: 100, w: 20, h: 20 });
+  });
+
+  it('leaves the children of a group without a transform where they are, and a group without a name or id empty', async () => {
+    const [g, e] = await elementsOf(grp({ inner: box(2, 10, 10, 20, 20) }) + '<p:grpSp><p:grpSpPr/></p:grpSp>');
+    expect(asGroup(g).frame).toBeUndefined();
+    expect((asGroup(g).children[0] as PptxShape).frame).toEqual({ x: 10, y: 10, w: 20, h: 20 });
+    expect(e).toEqual({ kind: 'group', pptxId: '', name: '', children: [] });
+  });
+
+  it('takes a missing child space as the group box, and ignores a transform without a box', async () => {
+    const noChild = `<a:xfrm><a:off x="${100 * E}" y="${100 * E}"/><a:ext cx="${50 * E}" cy="${50 * E}"/></a:xfrm>`;
+    const [a] = await elementsOf(grp({ xfrm: noChild, inner: box(2, 110, 110, 10, 10) }));
+    expect((asGroup(a).children[0] as PptxShape).frame).toEqual({ x: 110, y: 110, w: 10, h: 10 });
+    const [b] = await elementsOf(grp({ xfrm: '<a:xfrm><a:chOff x="0" y="0"/></a:xfrm>', inner: box(2, 1, 2, 3, 4) }));
+    expect(asGroup(b).frame).toBeUndefined();
+    expect((asGroup(b).children[0] as PptxShape).frame).toEqual({ x: 1, y: 2, w: 3, h: 4 });
+  });
+
+  it('keeps a child without a frame without one', async () => {
+    const bare = '<p:sp><p:nvSpPr><p:cNvPr id="2" name="B"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr/></p:sp>';
+    const [g] = await elementsOf(grp({ xfrm: gxfrm([0, 0], [10, 10], [0, 0], [10, 10]), inner: bare }));
+    expect((asGroup(g).children[0] as PptxShape).frame).toBeUndefined();
+  });
+
+  it('reads a group inside alternate content', async () => {
+    const tree = `<mc:AlternateContent><mc:Choice Requires="x">${grp({ id: 9, inner: box(2, 0, 0, 1, 1) })}</mc:Choice><mc:Fallback>${box(3, 0, 0, 1, 1)}</mc:Fallback></mc:AlternateContent>`;
+    expect((await elementsOf(tree)).map((e) => e.kind)).toEqual(['group']);
+  });
+
+  it('follows groups to a bounded depth and drops a deeper one with a warning', async () => {
+    const nest = (n: number): string => (n === 0 ? box(2, 0, 0, 5, 5) : grp({ id: 100 + n, inner: nest(n - 1) }));
+    const ok = await read({ tree: nest(MAX_GROUP_DEPTH) });
+    expect(ok.warnings).toEqual([]);
+    let g: PptxElement | undefined = ok.slides[0].elements?.[0];
+    let depth = 0;
+    while (g?.kind === 'group') {
+      depth++;
+      g = g.children[0];
+    }
+    expect(depth).toBe(MAX_GROUP_DEPTH);
+    expect(g?.kind).toBe('shape');
+    const deep = await read({ tree: nest(MAX_GROUP_DEPTH + 1) });
+    expect(deep.warnings.some((w) => /nested more than 64 levels/.test(w))).toBe(true);
+  });
+
+  describe('grpFill', () => {
+    const solid = (hex: string): string => `<a:solidFill><a:srgbClr val="${hex}"/></a:solidFill>`;
+    const grpFillBox = (id: number): string => `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="F"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>${xfrm(0, 0, 5, 5)}<a:grpFill/></p:spPr></p:sp>`;
+    const fillOf = (e: PptxElement | undefined) => (e as PptxShape).fill;
+
+    it('takes the fill of the innermost group that has one', async () => {
+      const [g] = await elementsOf(grp({ fill: solid('112233'), inner: grpFillBox(2) }));
+      expect(fillOf(asGroup(g).children[0])).toEqual({ kind: 'solid', color: { kind: 'rgb', hex: '#112233' } });
+    });
+
+    it('takes the enclosing group\'s fill when its own group has a grpFill, and none when no group has a fill', async () => {
+      const inner = grp({ id: 11, fill: '<a:grpFill/>', inner: grpFillBox(2) });
+      const [g] = await elementsOf(grp({ fill: solid('445566'), inner }));
+      expect(fillOf(asGroup(asGroup(g).children[0]).children[0])).toEqual({ kind: 'solid', color: { kind: 'rgb', hex: '#445566' } });
+      const [n] = await elementsOf(grp({ inner: grpFillBox(2) }));
+      expect(fillOf(asGroup(n).children[0])).toEqual({ kind: 'none' });
+    });
+
+    it('does not let an outer group\'s fill reach through a group that has none', async () => {
+      const [g] = await elementsOf(grp({ fill: solid('445566'), inner: grp({ id: 11, inner: grpFillBox(2) }) }));
+      expect(fillOf(asGroup(asGroup(g).children[0]).children[0])).toEqual({ kind: 'none' });
+    });
+  });
+});
+
+describe('p:cxnSp (K10b)', () => {
+  const connector = async (o: Parameters<typeof cxn>[0], d: Deck = {}): Promise<PptxConnector> => (await elementsOf(cxn(o), d))[0] as PptxConnector;
+
+  it('reads frame, flips, route, outline with arrow heads and the glued ends', async () => {
+    const c = await connector({
+      id: 8,
+      name: ' Arrow ',
+      cNvPr: ' descr="Alt" hidden="1"',
+      cNv: '<a:stCxn id="2" idx="3"/><a:endCxn id="4" idx="0"/>',
+      spPr: `${xfrm(10, 20, 100, 50, ' flipV="1" rot="900000"')}<a:prstGeom prst="bentConnector3"><a:avLst><a:gd name="adj1" fmla="val 25000"/></a:avLst></a:prstGeom><a:ln w="19050"><a:solidFill><a:srgbClr val="FF0000"/></a:solidFill><a:tailEnd type="triangle"/></a:ln>`,
+    });
+    expect(c).toEqual({
+      kind: 'connector',
+      pptxId: '8',
+      name: 'Arrow',
+      altText: 'Alt',
+      hidden: true,
+      frame: { x: 10, y: 20, w: 100, h: 50, rot: 15, flipV: true },
+      geometry: { kind: 'preset', prst: 'bentConnector3', adjustments: { adj1: 25000 }, known: false },
+      line: { width: 2, fill: { kind: 'solid', color: { kind: 'rgb', hex: '#FF0000' } }, tail: { type: 'triangle' } },
+      start: { id: '2', idx: 3 },
+      end: { id: '4', idx: 0 },
+    });
+  });
+
+  it('reads a straight connector and takes its colour and width from the style reference', async () => {
+    const style = '<p:style><a:lnRef idx="2"><a:srgbClr val="00FF00"/></a:lnRef><a:fillRef idx="0"/><a:effectRef idx="0"/><a:fontRef idx="minor"/></p:style>';
+    const c = await connector({ spPr: `${xfrm(0, 0, 10, 0)}<a:prstGeom prst="straightConnector1"/>`, style });
+    expect(c.geometry).toEqual({ kind: 'preset', prst: 'straightConnector1', known: true });
+    expect(c.line).toEqual({ width: 12700 / E, fill: { kind: 'solid', color: { kind: 'rgb', hex: '#00FF00' } } });
+    expect(c.frame).toEqual({ x: 0, y: 0, w: 10, h: 0 });
+  });
+
+  it('drops a connection without an id or with an index that is not a whole non-negative number', async () => {
+    for (const bad of ['<a:stCxn idx="1"/>', '<a:stCxn id="2"/>', '<a:stCxn id="2" idx="-1"/>', '<a:stCxn id="2" idx="1.5"/>', '<a:stCxn id="2" idx="x"/>', '']) {
+      const c = await connector({ cNv: bad });
+      expect(c.start).toBeUndefined();
+      expect(c.end).toBeUndefined();
+    }
+  });
+
+  it('reads a bare connector and one in a group, composed', async () => {
+    expect(await elementsOf('<p:cxnSp/>')).toEqual([{ kind: 'connector', pptxId: '', name: '' }]);
+    const [g] = await elementsOf(grp({ xfrm: gxfrm([0, 0], [200, 200], [0, 0], [100, 100]), inner: cxn({ spPr: xfrm(10, 10, 20, 0) }) }));
+    expect((asGroup(g).children[0] as PptxConnector).frame).toEqual({ x: 20, y: 20, w: 40, h: 0 });
+  });
+});
+
+describe('custom geometry (K10b)', () => {
+  const custom = (paths: string, ext: [number, number] = [100, 50]): string => `${xfrm(0, 0, ext[0], ext[1])}<a:custGeom><a:avLst/><a:pathLst>${paths}</a:pathLst></a:custGeom>`;
+  const geomOf = async (spPr: string) => ((await elementsOf(`<p:sp><p:nvSpPr><p:cNvPr id="2" name="G"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr>${spPr}</p:spPr></p:sp>`))[0] as PptxShape).geometry;
+  const pt = (x: number | string, y: number | string): string => `<a:pt x="${x}" y="${y}"/>`;
+
+  it('reads every command, several paths and the fill and stroke modes', async () => {
+    const g = await geomOf(
+      custom(
+        `<a:path w="100" h="50"><a:moveTo>${pt(0, 0)}</a:moveTo><a:lnTo>${pt(100, 0)}</a:lnTo><a:cubicBezTo>${pt(100, 10)}${pt(90, 20)}${pt(80, 30)}</a:cubicBezTo><a:quadBezTo>${pt(70, 40)}${pt(60, 50)}</a:quadBezTo><a:arcTo wR="10" hR="20" stAng="5400000" swAng="-10800000"/><a:close/></a:path>` +
+          '<a:path w="10" h="10" fill="darken" stroke="0" extrusionOk="1"/>' +
+          '<a:path w="10" h="10" fill="norm" stroke="1" extrusionOk="0"/>'
+      )
+    );
+    expect(g).toEqual({
+      kind: 'custom',
+      paths: [
+        {
+          w: 100,
+          h: 50,
+          commands: [
+            { op: 'move', x: 0, y: 0 },
+            { op: 'line', x: 100, y: 0 },
+            { op: 'cubic', x1: 100, y1: 10, x2: 90, y2: 20, x: 80, y: 30 },
+            { op: 'quad', x1: 70, y1: 40, x: 60, y: 50 },
+            { op: 'arc', wR: 10, hR: 20, stAng: 90, swAng: -180 },
+            { op: 'close' },
+          ],
+        },
+        { w: 10, h: 10, fill: 'darken', stroke: false, extrusionOk: true, commands: [] },
+        { w: 10, h: 10, commands: [] },
+      ],
+    });
+  });
+
+  it('gives a path without its own size the shape\'s box in EMU, and the built-in guides their values', async () => {
+    const g = await geomOf(custom(`<a:path><a:moveTo>${pt('l', 't')}</a:moveTo><a:lnTo>${pt('r', 'b')}</a:lnTo><a:lnTo>${pt('hc', 'vc')}</a:lnTo><a:lnTo>${pt('wd4', 'hd4')}</a:lnTo></a:path>`));
+    expect(g).toMatchObject({ kind: 'custom', paths: [{ w: 100 * E, h: 50 * E, commands: [{ x: 0, y: 0 }, { x: 100 * E, y: 50 * E }, { x: 50 * E, y: 25 * E }, { x: 25 * E, y: 12.5 * E }] }] });
+  });
+
+  it.each(['w', 'h', 'r', 'b', 'hc', 'wd2', 'vc', 'hd2', 'wd4', 'hd4', 'wd8', 'hd8', 'wd3', 'hd3', 'wd6', 'hd6'])('reads the guide %s', async (name) => {
+    const g = await geomOf(custom(`<a:path w="600" h="600"><a:moveTo>${pt(name, name)}</a:moveTo></a:path>`));
+    const cmd = (g as { paths: { commands: { x: number }[] }[] }).paths[0].commands[0];
+    expect(cmd.x).toBe({ w: 600, h: 600, r: 600, b: 600, hc: 300, wd2: 300, vc: 300, hd2: 300, wd4: 150, hd4: 150, wd8: 75, hd8: 75, wd3: 200, hd3: 200, wd6: 100, hd6: 100 }[name]);
+  });
+
+  it.each([
+    ['a guide formula coordinate', `<a:path w="10" h="10"><a:moveTo>${pt('x1', 0)}</a:moveTo></a:path>`],
+    ['a coordinate that is missing', '<a:path w="10" h="10"><a:moveTo><a:pt x="1"/></a:moveTo></a:path>'],
+    ['a point count that does not fit the command', `<a:path w="10" h="10"><a:lnTo>${pt(1, 1)}${pt(2, 2)}</a:lnTo></a:path>`],
+    ['a cubic with two points', `<a:path w="10" h="10"><a:cubicBezTo>${pt(1, 1)}${pt(2, 2)}</a:cubicBezTo></a:path>`],
+    ['a quad with one point', `<a:path w="10" h="10"><a:quadBezTo>${pt(1, 1)}</a:quadBezTo></a:path>`],
+    ['an arc with a formula', '<a:path w="10" h="10"><a:arcTo wR="g1" hR="1" stAng="0" swAng="0"/></a:path>'],
+    ['an arc with a formula angle', '<a:path w="10" h="10"><a:arcTo wR="1" hR="1" stAng="0" swAng="g"/></a:path>'],
+    ['an arc with a formula radius', '<a:path w="10" h="10"><a:arcTo wR="1" hR="h1" stAng="0" swAng="0"/></a:path>'],
+    ['an arc with a formula start angle', '<a:path w="10" h="10"><a:arcTo wR="1" hR="1" stAng="s" swAng="0"/></a:path>'],
+    ['an unknown command', '<a:path w="10" h="10"><a:wobble/></a:path>'],
+    ['an unknown fill mode', '<a:path w="10" h="10" fill="sparkle"/>'],
+    ['a coordinate beyond the number range', `<a:path w="10" h="10"><a:moveTo>${pt('9'.repeat(400), 0)}</a:moveTo></a:path>`],
+    ['no path list', ''],
+  ])('reads %s as geometry without paths', async (_n, paths) => {
+    expect(await geomOf(custom(paths))).toEqual({ kind: 'custom' });
+  });
+
+  it('reads a path with a missing, zero or invalid size as geometry without paths when the shape has no box either', async () => {
+    const noBox = '<a:custGeom><a:pathLst><a:path><a:close/></a:path></a:pathLst></a:custGeom>';
+    expect(await geomOf(noBox)).toEqual({ kind: 'custom' });
+    expect(await geomOf(`${xfrm(0, 0, 0, 5)}<a:custGeom><a:pathLst><a:path w="0" h="x"><a:close/></a:path></a:pathLst></a:custGeom>`)).toEqual({ kind: 'custom' });
+  });
+
+  it('limits the number of paths and commands', async () => {
+    const many = '<a:path w="1" h="1"/>'.repeat(MAX_GEOMETRY_PATHS + 1);
+    expect(await geomOf(custom(many))).toEqual({ kind: 'custom' });
+    expect(((await geomOf(custom('<a:path w="1" h="1"/>'.repeat(MAX_GEOMETRY_PATHS)))) as { paths: unknown[] }).paths).toHaveLength(MAX_GEOMETRY_PATHS);
+    const close = '<a:close/>'.repeat(MAX_PATH_COMMANDS);
+    expect(((await geomOf(custom(`<a:path w="1" h="1">${close}</a:path>`))) as { paths: { commands: unknown[] }[] }).paths[0].commands).toHaveLength(MAX_PATH_COMMANDS);
+    expect(await geomOf(custom(`<a:path w="1" h="1">${close}<a:close/></a:path>`))).toEqual({ kind: 'custom' });
+  });
+
+  it('reads the custom geometry of a picture and of a connector', async () => {
+    const path = `<a:path w="10" h="10"><a:moveTo>${pt(1, 2)}</a:moveTo></a:path>`;
+    const [p] = await elementsOf(pic({ spPr: custom(path) }), { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } });
+    expect((p as PptxPicture).geometry).toEqual({ kind: 'custom', paths: [{ w: 10, h: 10, commands: [{ op: 'move', x: 1, y: 2 }] }] });
+    const [c] = await elementsOf(cxn({ spPr: custom(path) }));
+    expect((c as PptxConnector).geometry).toMatchObject({ kind: 'custom' });
   });
 });
