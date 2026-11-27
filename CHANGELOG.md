@@ -868,6 +868,17 @@ lockstep.
   (`xlsx/xml.ts`) gains `rattrs` (attributes in the relationships namespace) so `r:id` is no longer hidden by `id`. The
   fidelity harness (`npm run slides:pptx-fidelity`) now records the imported model and `ledger` mapped counts; the four
   files that are not presentations carry `expectImportError`, and the run is strict about it.
+- **PPTX reader, step 2 (K9b): masters and layouts.** `importPptx` now also returns `layouts` (`PptxLayout`, new additive
+  types `PptxLayout`, `PptxPlaceholder`, `PptxFrame`, `PptxLevelStyle`, `PptxLevelStyles` and `PptxBullet` in
+  `@b32nio/spindle-shared/export/pptx`): every layout of every master, flattened per decision SD6. Each layout placeholder
+  carries its effective frame (the layout's own, else the matching master placeholder's), vertical anchor and the nine
+  paragraph levels merged down the chain (presentation default text style, master `titleStyle` / `bodyStyle` /
+  `otherStyle`, master placeholder `lstStyle`, layout `lstStyle`: size, bold, italic, colour, font, alignment, margins,
+  line height, spacing, bullets). Also read: layout and master names, the layout type, a solid or referenced background
+  (layout, else master, with the layout's colour map override applied), `showMasterSp`, and a count of the static shapes
+  the layout and master draw (their content comes with the shape reader, K9c). A second master with a different theme is
+  reported. An internal `matchLayoutPlaceholder` resolves a slide placeholder to its layout placeholder for K9c. No editor change and
+  the loss report is unchanged; only the `model` goldens grew.
 
 ## [0.4.0] - 2026-10-26
 

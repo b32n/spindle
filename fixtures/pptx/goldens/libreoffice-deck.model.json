@@ -15,6 +15,1981 @@
       "tx1": "dk1",
       "tx2": "dk2"
     },
+    "layouts": [
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "title",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Title Slide",
+        "partName": "ppt/slideLayouts/slideLayout1.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 154.2803149606299,
+              "w": 815.9622047244095,
+              "x": 72,
+              "y": 223.67244094488188
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 1,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 2,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 3,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<number>",
+            "type": "sldNum"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 417.56220472440947,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 168.45354330708662
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "Click to edit the outline text format\nSecond Outline Level\nThird Outline Level\nFourth Outline Level\nFifth Outline Level\nSixth Outline Level\nSeventh Outline Level",
+            "type": "body"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "vertTx",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Title and Vertical Text",
+        "partName": "ppt/slideLayouts/slideLayout2.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 119.96220472440945,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 475.1244094488189,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 168
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 4,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 5,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 6,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "vertTitleAndTx",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Vertical Title and Text",
+        "partName": "ppt/slideLayouts/slideLayout3.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 614.2866141732284,
+              "w": 215.96220472440945,
+              "x": 696,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 614.2866141732284,
+              "w": 631.9748031496063,
+              "x": 48,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 7,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 8,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 9,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "obj",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Title and Content",
+        "partName": "ppt/slideLayouts/slideLayout4.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 119.96220472440945,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 475.1244094488189,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 168
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 10,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 11,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 12,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "blank",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Section Header",
+        "partName": "ppt/slideLayouts/slideLayout5.xml",
+        "placeholders": [
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 142.97952755905513,
+              "w": 815.9622047244095,
+              "x": 75.81732283464567,
+              "y": 462.651968503937
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "bottom",
+            "frame": {
+              "h": 157.4551181102362,
+              "w": 815.9622047244095,
+              "x": 75.81732283464567,
+              "y": 305.15905511811025
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 13,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 14,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 15,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "twoObj",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Two Content",
+        "partName": "ppt/slideLayouts/slideLayout6.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 119.96220472440945,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 475.1244094488189,
+              "w": 423.9496062992126,
+              "x": 48,
+              "y": 168
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 475.1244094488189,
+              "w": 423.9496062992126,
+              "x": 488.01259842519687,
+              "y": 168
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 16,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 17,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 18,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 6",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "blank",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Comparison",
+        "partName": "ppt/slideLayouts/slideLayout7.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 119.96220472440945,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "bottom",
+            "frame": {
+              "h": 67.1244094488189,
+              "w": 424.13858267716535,
+              "x": 48,
+              "y": 161.15905511811025
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles",
+            "type": "body"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 414.8031496062992,
+              "w": 424.13858267716535,
+              "x": 48,
+              "y": 228.32125984251968
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "bottom",
+            "frame": {
+              "h": 67.1244094488189,
+              "w": 424.28976377952756,
+              "x": 487.6724409448819,
+              "y": 161.15905511811025
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "Click to edit Master text styles",
+            "type": "body"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 414.8031496062992,
+              "w": 424.28976377952756,
+              "x": 487.6724409448819,
+              "y": 228.32125984251968
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 19,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 6",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 20,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 7",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 21,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 8",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "titleOnly",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Title Only",
+        "partName": "ppt/slideLayouts/slideLayout8.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 119.96220472440945,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 28.83779527559055
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 22,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 23,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 24,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<number>",
+            "type": "sldNum"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 417.56220472440947,
+              "w": 863.9622047244095,
+              "x": 48,
+              "y": 168.45354330708662
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "Click to edit the outline text format\nSecond Outline Level\nThird Outline Level\nFourth Outline Level\nFifth Outline Level\nSixth Outline Level\nSeventh Outline Level",
+            "type": "body"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "blank",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Blank",
+        "partName": "ppt/slideLayouts/slideLayout9.xml",
+        "placeholders": [
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 25,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 26,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 27,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "blank",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Content with Caption",
+        "partName": "ppt/slideLayouts/slideLayout10.xml",
+        "placeholders": [
+          {
+            "anchor": "bottom",
+            "frame": {
+              "h": 121.96535433070866,
+              "w": 315.7795275590551,
+              "x": 48,
+              "y": 28.648818897637796
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 614.4755905511811,
+              "w": 536.6173228346456,
+              "x": 375.34488188976377,
+              "y": 28.648818897637796
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+            "type": "body"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 492.4724409448819,
+              "w": 315.7795275590551,
+              "x": 48,
+              "y": 150.651968503937
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "Click to edit Master text styles",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 28,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 29,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 30,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 6",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      },
+      {
+        "background": {
+          "hex": "#FFFFFF",
+          "kind": "rgb"
+        },
+        "layoutType": "blank",
+        "masterPart": "ppt/slideMasters/slideMaster1.xml",
+        "name": "Picture with Caption",
+        "partName": "ppt/slideLayouts/slideLayout11.xml",
+        "placeholders": [
+          {
+            "anchor": "bottom",
+            "frame": {
+              "h": 59.45196850393701,
+              "w": 575.9622047244095,
+              "x": 188.18267716535433,
+              "y": 504
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 1",
+            "prompt": "Click to edit Master title style",
+            "type": "title"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 431.96220472440945,
+              "w": 575.9622047244095,
+              "x": 188.18267716535433,
+              "y": 64.32755905511812
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 2",
+            "prompt": "Click to edit the outline text format\nSecond Outline Level\nThird Outline Level\nFourth Outline Level\nFifth Outline Level\nSixth Outline Level\nSeventh Outline Level",
+            "type": "body"
+          },
+          {
+            "anchor": "top",
+            "frame": {
+              "h": 84.4724409448819,
+              "w": 575.9622047244095,
+              "x": 188.18267716535433,
+              "y": 563.4897637795276
+            },
+            "levels": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 3",
+            "prompt": "Click to edit Master text styles",
+            "type": "body"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 48,
+              "y": 667.3511811023623
+            },
+            "idx": 31,
+            "levels": [
+              {
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 4",
+            "prompt": "<date/time>",
+            "type": "dt"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 303.9496062992126,
+              "x": 327.98740157480313,
+              "y": 667.3511811023623
+            },
+            "idx": 32,
+            "levels": [
+              {
+                "align": "center",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "font": "Times New Roman",
+                "fontSize": 14,
+                "indent": 0
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 5",
+            "prompt": "<footer>",
+            "type": "ftr"
+          },
+          {
+            "anchor": "middle",
+            "frame": {
+              "h": 38.286614173228344,
+              "w": 223.9748031496063,
+              "x": 687.9874015748031,
+              "y": 667.3511811023623
+            },
+            "idx": 33,
+            "levels": [
+              {
+                "align": "right",
+                "bold": false,
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "Calibri",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 1
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "name": "PlaceHolder 6",
+            "prompt": "<number>",
+            "type": "sldNum"
+          }
+        ],
+        "staticShapes": 0
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 960

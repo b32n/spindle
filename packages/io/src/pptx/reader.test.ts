@@ -115,7 +115,7 @@ describe('importPptx: the presentation', () => {
       masters: [{}, {}],
     });
     expect(r.slideSize).toEqual({ w: 1280, h: 720 });
-    expect(r.warnings).toEqual([]);
+    expect(r.warnings).toEqual([expect.stringContaining('slideMaster2.xml uses a different theme')]);
     expect(r.slides).toEqual([
       { pptxId: '256', partName: 'ppt/slides/slide1.xml', name: 'Title', layoutPart: 'ppt/slideLayouts/slideLayout1.xml' },
       { pptxId: '257', partName: 'ppt/slides/slide2.xml', hidden: true, layoutPart: 'ppt/slideLayouts/slideLayout1.xml' },

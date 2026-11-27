@@ -74,6 +74,80 @@ export interface PptxSlide {
   error?: string;
 }
 
+/** A rectangle in px (1 px = 9525 EMU); `rot` is degrees clockwise and left out when 0. */
+export interface PptxFrame {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rot?: number;
+}
+
+/** A bullet as the file writes it: none, a literal glyph or an auto-number scheme (`buAutoNum type`, e.g. `arabicPeriod`). */
+export type PptxBullet = { kind: 'none' } | { kind: 'char'; char: string } | { kind: 'auto'; scheme: string; startAt?: number };
+
+/**
+ * The text defaults of one paragraph level (`a:lvl1pPr` ... `a:lvl9pPr` with its `a:defRPr`), already merged down the
+ * inheritance chain, so a level holds what applies to a paragraph of that level. Font size is in pt, `marginLeft` and
+ * `indent` in px, `lineHeight` a multiplier (`spcPct`), `spaceBefore` / `spaceAfter` in pt. A property the chain never sets is absent.
+ */
+export interface PptxLevelStyle {
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+  color?: PptxColor;
+  /** `'major'` / `'minor'` for the theme fonts (`+mj-lt`, `+mn-lt`), else a family name. */
+  font?: string;
+  align?: 'left' | 'center' | 'right' | 'justify';
+  marginLeft?: number;
+  indent?: number;
+  lineHeight?: number;
+  spaceBefore?: number;
+  spaceAfter?: number;
+  bullet?: PptxBullet;
+}
+
+/** The nine paragraph levels of a placeholder; a level the chain never mentions is `{}`. */
+export type PptxLevelStyles = PptxLevelStyle[];
+
+/**
+ * A placeholder of a layout, flattened (plan K4, decision SD6): `frame` is the layout's own position, else the one it
+ * inherits from the matching master placeholder; `levels` holds the effective defaults of its text.
+ */
+export interface PptxPlaceholder {
+  /** `p:ph/@type` as written (`title`, `ctrTitle`, `subTitle`, `body`, `dt`, `ftr`, `sldNum`, `pic`, ...), `obj` when absent. */
+  type: string;
+  /** `p:ph/@idx`; absent for the master-style placeholders that carry none. */
+  idx?: number;
+  name?: string;
+  frame?: PptxFrame;
+  /** Vertical anchor of the text body. */
+  anchor?: 'top' | 'middle' | 'bottom';
+  levels: PptxLevelStyles;
+  /** The prompt text of the layout placeholder. */
+  prompt?: string;
+}
+
+/**
+ * A slide layout flattened with its master. `elements` of the editor's `LayoutData` (static shapes) arrive with the slide
+ * shape reader; here `staticShapes` only counts the non-placeholder shapes the layout and its master draw.
+ */
+export interface PptxLayout {
+  partName: string;
+  name: string;
+  /** `type` of `p:sldLayout` (`title`, `obj`, `blank`...), when set. */
+  layoutType?: string;
+  masterPart: string;
+  /** The master's own name (`p:cSld/@name`), when it has one. */
+  masterName?: string;
+  /** The layout's background (else the master's) when it is a solid colour. */
+  background?: PptxColor;
+  /** `showMasterSp="0"`: the layout hides the master's shapes. */
+  hideMasterShapes?: boolean;
+  placeholders: PptxPlaceholder[];
+  staticShapes: number;
+}
+
 /** What `importPptx` returns. Warnings are plain sentences; nothing in them is a failure (a failure is an `ImportError`). */
 export interface PresentationImportResult {
   /** Slide size in px (1 px = 9525 EMU, so 12192000 EMU = 1280 px). */
@@ -83,6 +157,8 @@ export interface PresentationImportResult {
   /** The colour map of the first master. */
   colorMap: PptxColorMap;
   slides: PptxSlide[];
+  /** Every layout of every master, in master order then layout order, flattened. */
+  layouts: PptxLayout[];
   sections?: PptxSection[];
   warnings: string[];
 }

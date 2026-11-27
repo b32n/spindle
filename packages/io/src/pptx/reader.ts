@@ -5,6 +5,7 @@ import { ImportError, toImportError } from '../common/import-error';
 import { openSafeZip, type ImportLimits } from '../common/safe-zip';
 import { descendants, isOn, kid, kids, type XmlElement } from '../xlsx/xml';
 import { DEFAULT_COLOR_MAP, parseColorMap } from './color';
+import { readLayouts } from './layouts';
 import { FALLBACK_THEME, parseTheme } from './theme';
 import { emuToPx } from './units';
 
@@ -78,6 +79,7 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
   if (!first) warn('The presentation has no readable slide master and theme; the Office default theme is used.');
   for (const m of first?.warnings ?? []) warn(m);
 
+  const layouts = await readLayouts(pkg, await masterParts(pkg, presentation, rels, slides), kid(presentation, 'defaultTextStyle'), warn);
   const sections = readSections(presentation, slides);
   for (const part of pkg.skipped) warn(`${part} was too large to read and was skipped.`);
   return {
@@ -85,6 +87,7 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
     theme,
     colorMap,
     slides,
+    layouts,
     ...(sections.length > 0 ? { sections } : {}),
     warnings,
   };
@@ -156,6 +159,22 @@ async function firstMaster(
   const themeRoot = themePart === undefined ? undefined : await pkg.xml(themePart);
   if (!themeRoot) return { theme: FALLBACK_THEME, colorMap: parseColorMap(kid(master, 'clrMap')), warnings: ['The slide master has no readable theme; the Office default theme is used.'] };
   return { theme: parseTheme(themeRoot, (m) => warnings.push(m)), colorMap: parseColorMap(kid(master, 'clrMap')), warnings };
+}
+
+/** The master parts: those of `p:sldMasterIdLst` in order, then any master a slide's layout belongs to that the list leaves out. */
+async function masterParts(pkg: OoxmlPackage, presentation: XmlElement, rels: Map<string, Rel>, slides: PptxSlide[]): Promise<string[]> {
+  const parts: string[] = [];
+  const add = (part: string | undefined): void => {
+    if (part !== undefined && pkg.has(part) && !parts.includes(part)) parts.push(part);
+  };
+  for (const e of kids(kid(presentation, 'sldMasterIdLst'), 'sldMasterId')) {
+    const rel = rels.get(e.rattrs?.id ?? '');
+    if (rel && !rel.external && rel.type === 'slideMaster') add(rel.target);
+  }
+  for (const layout of new Set(slides.map((s) => s.layoutPart))) {
+    if (layout !== undefined) add((await pkg.rels(layout)).find((r) => r.type === 'slideMaster' && !r.external)?.target);
+  }
+  return parts;
 }
 
 /** Sections (`p14:section` in the presentation's extension list): name and the slides in it. Slide ids that match no slide are dropped. */
