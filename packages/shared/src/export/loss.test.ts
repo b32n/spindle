@@ -1,12 +1,27 @@
-import { countMatches, createLossReport, describeImportLoss, groupImportLoss, hasImportLoss, type ImportLossItem } from './loss';
+import {
+  countMatches,
+  createLossReport,
+  describeImportLoss,
+  groupImportLoss,
+  hasImportLoss,
+  type ImportLossItem,
+} from './loss';
 
 const item = (id: string, state?: ImportLossItem['state'], count = 1): ImportLossItem => ({
-  id, label: id, count, effect: 'e', ...(state && { state }),
+  id,
+  label: id,
+  count,
+  effect: 'e',
+  ...(state && { state }),
 });
 
 describe('loss report helpers', () => {
   it('drops zero-count items and describes the rest', () => {
-    const r = createLossReport('xlsx', [item('a'), item('b', 'kept', 0), { ...item('c'), where: ['S1', 'S2'] }]);
+    const r = createLossReport('xlsx', [
+      item('a'),
+      item('b', 'kept', 0),
+      { ...item('c'), where: ['S1', 'S2'] },
+    ]);
     expect(r.items.map((i) => i.id)).toEqual(['a', 'c']);
     expect(hasImportLoss(r)).toBe(true);
     expect(hasImportLoss(createLossReport('csv', []))).toBe(false);
@@ -20,7 +35,16 @@ describe('loss report helpers', () => {
   });
 
   it('groups by state, absent meaning lost, preserving order', () => {
-    const g = groupImportLoss({ format: 'pptx', items: [item('a'), item('b', 'kept'), item('c', 'lost'), item('d', 'approximated'), item('e', 'kept')] });
+    const g = groupImportLoss({
+      format: 'pptx',
+      items: [
+        item('a'),
+        item('b', 'kept'),
+        item('c', 'lost'),
+        item('d', 'approximated'),
+        item('e', 'kept'),
+      ],
+    });
     expect(g.lost.map((i) => i.id)).toEqual(['a', 'c']);
     expect(g.approximated.map((i) => i.id)).toEqual(['d']);
     expect(g.kept.map((i) => i.id)).toEqual(['b', 'e']);

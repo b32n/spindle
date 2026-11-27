@@ -24,7 +24,7 @@ export * from './hooks/useComments';
 export * from './file-io';
 
 // Import loss report (what an Open would not bring across) — see inspectWorkbookFile / inspectDocumentFile.
-export { hasImportLoss, describeImportLoss } from '@b32nio/spindle-shared';
-export type { ImportLossReport, ImportLossItem, ImportLossFormat } from '@b32nio/spindle-shared';
+export { hasImportLoss, describeImportLoss, groupImportLoss } from '@b32nio/spindle-shared';
+export type { ImportLossReport, ImportLossItem, ImportLossFormat, ImportLossState } from '@b32nio/spindle-shared';
 export { ImportConfirmDialog } from '@b32nio/spindle-shared/react';
 export type { ImportConfirmation, ImportConfirmDialogProps } from '@b32nio/spindle-shared/react';

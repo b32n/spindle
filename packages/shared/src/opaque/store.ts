@@ -1,8 +1,37 @@
 import { hashBytes } from './hash';
-import type { OpaqueDropped, OpaqueLimits, OpaquePart, OpaquePutResult, OpaqueStore } from './types';
+import type {
+  OpaqueDropped,
+  OpaqueLimits,
+  OpaquePart,
+  OpaquePutResult,
+  OpaqueStore,
+} from './types';
 
 /** 25 MiB per part, 200 MiB per store: embedded workbooks and media can be large, and every byte also lives in the collab document. */
-export const DEFAULT_OPAQUE_LIMITS: OpaqueLimits = { maxPartBytes: 25 * 1024 * 1024, maxTotalBytes: 200 * 1024 * 1024 };
+export const DEFAULT_OPAQUE_LIMITS: OpaqueLimits = {
+  maxPartBytes: 25 * 1024 * 1024,
+  maxTotalBytes: 200 * 1024 * 1024,
+};
+
+/** Internal trusted access for `./yjs` (not exported from the package index): lets a verified peer entry in without re-hashing, and reads without copying. */
+export interface OpaqueStoreInternals {
+  /** The refusal reason a part of this size would get, or null. */
+  refusal(size: number): 'too-large' | 'store-full' | null;
+  /** Insert a part whose hash the caller has already verified. False when it would not fit. */
+  insertVerified(part: OpaquePart): boolean;
+  /** The stored parts themselves, not copies; callers must not mutate them. */
+  entries(): IterableIterator<OpaquePart>;
+}
+
+const internals = new WeakMap<OpaqueStore, OpaqueStoreInternals>();
+
+export function opaqueInternals(store: OpaqueStore): OpaqueStoreInternals {
+  const found = internals.get(store);
+  if (!found) throw new TypeError('not an opaque store created by createOpaqueStore');
+  return found;
+}
+
+const copyOf = (part: OpaquePart): OpaquePart => ({ ...part, bytes: part.bytes.slice() });
 
 export function createOpaqueStore(limits: Partial<OpaqueLimits> = {}): OpaqueStore {
   const lim: OpaqueLimits = { ...DEFAULT_OPAQUE_LIMITS, ...limits };
@@ -13,11 +42,16 @@ export function createOpaqueStore(limits: Partial<OpaqueLimits> = {}): OpaqueSto
   const fits = (size: number): 'too-large' | 'store-full' | null =>
     size > lim.maxPartBytes ? 'too-large' : total + size > lim.maxTotalBytes ? 'store-full' : null;
 
-  return {
+  const store: OpaqueStore = {
     limits: lim,
     async put({ bytes, contentType, role, partName }): Promise<OpaquePutResult> {
       const refuse = (reason: 'too-large' | 'store-full') => {
-        const d: OpaqueDropped = { reason, size: bytes.byteLength, role, ...(partName !== undefined && { partName }) };
+        const d: OpaqueDropped = {
+          reason,
+          size: bytes.byteLength,
+          role,
+          ...(partName !== undefined && { partName }),
+        };
         dropped.push(d);
         return { ok: false as const, ...d };
       };
@@ -25,23 +59,26 @@ export function createOpaqueStore(limits: Partial<OpaqueLimits> = {}): OpaqueSto
       if (bytes.byteLength > lim.maxPartBytes) return refuse('too-large');
       const hash = await hashBytes(bytes);
       const ref = { hash, role, ...(partName !== undefined && { partName }) };
-      if (parts.has(hash)) return { ok: true, ref, deduped: true };
+      const existing = parts.get(hash);
+      if (existing)
+        return {
+          ok: true,
+          ref,
+          deduped: true,
+          contentTypeConflict: existing.contentType !== contentType,
+        };
       const over = fits(bytes.byteLength);
       if (over) return refuse(over);
       parts.set(hash, { hash, contentType, bytes: bytes.slice() });
       total += bytes.byteLength;
-      return { ok: true, ref, deduped: false };
+      return { ok: true, ref, deduped: false, contentTypeConflict: false };
     },
-    putVerified(part) {
-      if (parts.has(part.hash)) return true;
-      if (fits(part.bytes.byteLength)) return false;
-      parts.set(part.hash, { ...part, bytes: part.bytes.slice() });
-      total += part.bytes.byteLength;
-      return true;
+    get: (hash) => {
+      const part = parts.get(hash);
+      return part && copyOf(part);
     },
-    get: (hash) => parts.get(hash),
     has: (hash) => parts.has(hash),
-    list: () => [...parts.values()],
+    list: () => [...parts.values()].map(copyOf),
     get size() {
       return parts.size;
     },
@@ -50,4 +87,16 @@ export function createOpaqueStore(limits: Partial<OpaqueLimits> = {}): OpaqueSto
     },
     dropped,
   };
+  internals.set(store, {
+    refusal: fits,
+    insertVerified(part) {
+      if (parts.has(part.hash)) return true;
+      if (fits(part.bytes.byteLength)) return false;
+      parts.set(part.hash, copyOf(part));
+      total += part.bytes.byteLength;
+      return true;
+    },
+    entries: () => parts.values(),
+  });
+  return store;
 }

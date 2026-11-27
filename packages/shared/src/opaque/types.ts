@@ -28,8 +28,20 @@ export interface OpaqueLimits {
 }
 
 export type OpaquePutResult =
-  | { ok: true; ref: OpaqueRef; deduped: boolean }
-  | { ok: false; reason: 'too-large' | 'store-full'; size: number; role: string; partName?: string };
+  | {
+      ok: true;
+      ref: OpaqueRef;
+      deduped: boolean;
+      /** True when the bytes were already stored under a different content type; the stored (first) type is kept. Importers should report it. */
+      contentTypeConflict: boolean;
+    }
+  | {
+      ok: false;
+      reason: 'too-large' | 'store-full';
+      size: number;
+      role: string;
+      partName?: string;
+    };
 
 /** A part the store refused, kept so the importer can report it instead of dropping it silently. */
 export interface OpaqueDropped {
@@ -42,13 +54,21 @@ export interface OpaqueDropped {
 /** Content-addressed part store. In memory; the per-core Y helper (`./yjs`) mirrors it into a document. */
 export interface OpaqueStore {
   readonly limits: OpaqueLimits;
-  /** Store a part (hashing it) unless it is over a cap. Never throws on size; the refusal is the result and is also recorded in `dropped`. */
-  put(input: { bytes: Uint8Array; contentType: string; role: string; partName?: string }): Promise<OpaquePutResult>;
-  /** Insert an already-hashed part (e.g. read from a Y map); the hash is not re-verified. Applies the same caps. */
-  putVerified(part: OpaquePart): boolean;
+  /**
+   * Store a part (hashing it) unless it is over a cap. Never throws on size; the refusal is the result and is also recorded in `dropped`.
+   * The only other failure is a missing SubtleCrypto (non-secure context), which rejects with `Error('SubtleCrypto unavailable: …')`;
+   * an oversized part is refused before hashing, so it never reaches that point.
+   */
+  put(input: {
+    bytes: Uint8Array;
+    contentType: string;
+    role: string;
+    partName?: string;
+  }): Promise<OpaquePutResult>;
+  /** A copy of the stored part (mutating it cannot affect the store), or `undefined`. */
   get(hash: string): OpaquePart | undefined;
   has(hash: string): boolean;
-  /** Parts in insertion order. */
+  /** Copies of the parts in insertion order (one byte copy per part). */
   list(): OpaquePart[];
   /** Number of distinct parts. */
   readonly size: number;

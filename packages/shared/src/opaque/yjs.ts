@@ -1,4 +1,5 @@
 import { hashBytes, isOpaqueHash } from './hash';
+import { opaqueInternals } from './store';
 import type { OpaquePart, OpaqueStore } from './types';
 
 /**
@@ -29,13 +30,24 @@ export function encodeOpaqueEntry(part: OpaquePart): Uint8Array {
   return out;
 }
 
-/** Inverse of `encodeOpaqueEntry`; `undefined` for a malformed value. The hash is not checked here (see `readOpaqueParts`). */
-export function decodeOpaqueEntry(hash: string, value: unknown): OpaquePart | undefined {
+/**
+ * Inverse of `encodeOpaqueEntry`; `undefined` for a malformed value, or one whose part bytes exceed `maxPartBytes`
+ * (checked from the header before anything is copied). The hash is not checked here (see `readOpaqueParts`).
+ */
+export function decodeOpaqueEntry(
+  hash: string,
+  value: unknown,
+  maxPartBytes = Infinity
+): OpaquePart | undefined {
   if (!(value instanceof Uint8Array) || value.byteLength < 2) return undefined;
   const ctLen = (value[0] << 8) | value[1];
-  if (value.byteLength < 2 + ctLen) return undefined;
+  if (value.byteLength < 2 + ctLen || value.byteLength - 2 - ctLen > maxPartBytes) return undefined;
   try {
-    return { hash, contentType: dec.decode(value.subarray(2, 2 + ctLen)), bytes: value.slice(2 + ctLen) };
+    return {
+      hash,
+      contentType: dec.decode(value.subarray(2, 2 + ctLen)),
+      bytes: value.slice(2 + ctLen),
+    };
   } catch {
     return undefined;
   }
@@ -44,7 +56,7 @@ export function decodeOpaqueEntry(hash: string, value: unknown): OpaquePart | un
 /** Add every part of the store that the map lacks (call inside the caller's Y transaction). Returns how many were written. */
 export function writeOpaqueParts(store: OpaqueStore, map: OpaqueYMap): number {
   let written = 0;
-  for (const part of store.list()) {
+  for (const part of opaqueInternals(store).entries()) {
     if (map.has(part.hash)) continue;
     map.set(part.hash, encodeOpaqueEntry(part));
     written++;
@@ -59,14 +71,26 @@ export interface OpaqueReadResult {
   rejected: string[];
 }
 
-/** Load every valid part of the map into the store (a remote peer's data is untrusted: each entry is re-hashed). */
-export async function readOpaqueParts(map: OpaqueYMap, store: OpaqueStore): Promise<OpaqueReadResult> {
+/**
+ * Load every valid part of the map into the store. A remote peer's data is untrusted: an entry is rejected before any
+ * copy or hash when its part is over the per-part cap or would not fit the store, and otherwise re-hashed against its key.
+ * Rejects (does not skip) only when SubtleCrypto is unavailable, which is the host's problem, not the peer's.
+ */
+export async function readOpaqueParts(
+  map: OpaqueYMap,
+  store: OpaqueStore
+): Promise<OpaqueReadResult> {
+  const trusted = opaqueInternals(store);
   const entries: Array<[string, Uint8Array]> = [];
   map.forEach((v, k) => entries.push([k, v]));
   const result: OpaqueReadResult = { loaded: 0, rejected: [] };
   for (const [key, value] of entries) {
-    const part = isOpaqueHash(key) ? decodeOpaqueEntry(key, value) : undefined;
-    if (!part || (await hashBytes(part.bytes)) !== key || !store.putVerified(part)) result.rejected.push(key);
+    const part = isOpaqueHash(key)
+      ? decodeOpaqueEntry(key, value, store.limits.maxPartBytes)
+      : undefined;
+    const fits = part && (store.has(key) || !trusted.refusal(part.bytes.byteLength));
+    if (!part || !fits || (await hashBytes(part.bytes)) !== key || !trusted.insertVerified(part))
+      result.rejected.push(key);
     else result.loaded++;
   }
   return result;

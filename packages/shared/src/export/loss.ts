@@ -33,7 +33,10 @@ export interface ImportLossReport {
   items: ImportLossItem[];
 }
 
-export function createLossReport(format: ImportLossFormat, items: ImportLossItem[]): ImportLossReport {
+export function createLossReport(
+  format: ImportLossFormat,
+  items: ImportLossItem[]
+): ImportLossReport {
   return { format, items: items.filter((i) => i.count > 0) };
 }
 
@@ -51,8 +54,14 @@ export function describeImportLoss(report: ImportLossReport): string[] {
 }
 
 /** The items of a report split by state (absent state counts as `lost`), in report order. */
-export function groupImportLoss(report: ImportLossReport): Record<ImportLossState, ImportLossItem[]> {
-  const groups: Record<ImportLossState, ImportLossItem[]> = { lost: [], approximated: [], kept: [] };
+export function groupImportLoss(
+  report: ImportLossReport
+): Record<ImportLossState, ImportLossItem[]> {
+  const groups: Record<ImportLossState, ImportLossItem[]> = {
+    lost: [],
+    approximated: [],
+    kept: [],
+  };
   for (const item of report.items) groups[item.state ?? 'lost'].push(item);
   return groups;
 }
