@@ -53,15 +53,54 @@ format when that writes the very same code back and as `custom` otherwise, so a 
 (not valid in Excel, a non-Gregorian calendar, `[DBNum1]`), a date or time tagged with another language (`[$-407]dddd`: month and day names would be English),
 and a built-in id with no code, such as the era dates 27 to 36 of the Asian locales. Before S3 the check was "maps to a structured format", which flagged
 every date, time, fraction, elapsed, scaling and literal code: 66 occurrences in 3 of the 43 corpus files, now 0). The effect text says so: the code is kept as written and saved unchanged, but shown in General or with English month and day names.
-`xlsx.formulas.cachedOnly` is not reported yet: it needs the cached-value fallback of the formula work (plan S4).
+`xlsx.formulas.cachedOnly` (state `kept`) counts the formulas the editor cannot evaluate: a function it lacks (what `xlsx.formulas.unsupported` lists by name), text its
+engine cannot parse, a table (structured) or defined-name reference, an external workbook reference. Only reported when the caller passes `knownFunctions` or
+`isFormulaEvaluable`, as `inspectXlsx` does; the importer decides by the same test, so the report and the import agree. See "Formula interchange and cached values" below.
 `xlsx.formulas.wholeColumn` (whole-column and whole-row references, `A:A`, `1:1`) is no longer reported: the engine evaluates them (plan S5), so they are not a
 loss. A formula using one still appears under `xlsx.formulas.unsupported` if it calls a function the engine lacks.
+
+### Formula interchange and cached values (S4)
+
+**Prefixes.** Excel writes functions newer than the 2007 file format with `_xlfn.` (`_xlfn.IFS`, `_xlfn.XLOOKUP`, `_xlfn.STDEV.S`), the
+dynamic-array ones with `_xlfn._xlws.` (`FILTER`, `SORT`), the parameters of `LET` and `LAMBDA` with `_xlpm.`, and writes `@x` as
+`_xlfn.SINGLE(x)` and `A1#` as `_xlfn.ANCHORARRAY(A1)`. The importer reads these as the plain spellings the editor shows and evaluates, and the
+exporter writes the prefixes back (`FUTURE_FUNCTIONS` in `packages/io/src/xlsx/future-functions.ts` is the table; `fromFileFormula` and
+`toFileFormula` are exported from `@b32nio/spindle-io/xlsx`). String literals, quoted sheet names and bracket groups are never rewritten.
+
+**Saved results are the values.** An imported workbook shows the results the file saved. The editor recalculates a formula when a cell it
+refers to changes or when the user edits it, not wholesale on load; a formula with no saved result, a volatile one (`NOW`, `RAND`, `OFFSET`,
+`INDIRECT`...) and an array formula that spills are evaluated on load. The host option `recalculateOnLoad` (`importFromXlsx` option,
+`importWorkbookFile` option, `recalculateOnLoad` prop of `WorkbookCanvas`; default off) evaluates every formula the engine can evaluate on load
+instead. Two limits: undo and redo, and a collaborator who joins a room, recalculate the formulas the engine can evaluate (the saved result
+is kept by the client that imported the file; the cached-only cells below are the same everywhere).
+
+**Cached-only formulas.** A formula the engine cannot evaluate is never shown as `#NAME?`: the cell is marked `cachedOnly`, shows the result the
+file saved, keeps the file's formula text exactly (prefixes included, so the formula bar shows what Excel wrote) and is written back with both
+unchanged. It is reported as `xlsx.formulas.cachedOnly`. **The value can be out of date**: a cached-only cell does not follow the cells it
+refers to, and a cell that depends on it reads its saved value. The formula bar says so ("Saved value", with the same caveat as tooltip and
+accessible name). Editing the cell (a value or a formula) removes the mark. Copying such a cell to another place copies its text, which the
+engine cannot evaluate: the copy shows `#NAME?` until the formula is changed. Defined names are not imported yet, so a formula that uses one is
+cached-only too.
+
+**Array and dynamic-array formulas.** `t="array"` formulas keep their range. One the engine can evaluate is evaluated on load: a legacy
+(CSE) array formula keeps the extent the file gave it (its result is cut to it, or padded with `#N/A`, as Excel shows it), a dynamic-array
+formula (`cm` in the file) spills as far as its result goes; the cells the file kept for its saved result are not cells of the model, the spill
+is. One it cannot evaluate keeps its saved result cells as plain values and the formula as cached-only. A one-cell array formula stays an
+array formula. On export an array formula is written with `t="array"` and its range (the engine's spill region for one that spills, the file's
+extent for a cached-only one), the spilled values are written as the plain values Excel keeps next to the formula, and a dynamic array also
+gets the cell metadata Excel marks it with (`cm` and `xl/metadata.xml`). A dynamic array whose saved extent is one cell is kept as its saved
+value until a cell it refers to changes. The cells an array formula covers cost as much to take on load as they are many, so a sheet is
+limited to 5,000,000 cells of array formulas (a dynamic one costs at most the sheet's cell count): past it the formula is kept as cached-only
+and reported as `xlsx.package.sizeLimit` (`array formula(s) kept as saved values`).
+
+**Cell model.** A cell's JSON gains the optional `cachedOnly: true` and `arraySpan: { rows, cols, spill? }` (collab schema version 2, see
+`documentation/collaboration.md`).
 
 Full-only ids:
 
 | Group | Ids (what is counted) |
 |---|---|
-| Formulas | `xlsx.formulas.array` (`t="array"`), `.dynamicArray` (array formula with `cm` metadata), `.externalRef` (`[1]Sheet!A1`), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
+| Formulas | `xlsx.formulas.array` (`t="array"`: kept as an array formula over its range), `.dynamicArray` (array formula with `cm` metadata: spills, written back as a dynamic array), `.externalRef` (`[1]Sheet!A1`), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
 | Styles | `xlsx.styles.patternFill`, `.gradientFill`, `.diagonalBorder`, `.namedStyles` (named styles in use), `.columnRowStyles` (column and row default formats) |
 | Sheet | `xlsx.sheet.tabColor`, `.zoom` (other than 100), `.rtl`, `.gridlines` (turned off), `.veryHidden`, `.customViews` |
 | Print | `xlsx.print.setup` (a sheet whose orientation, paper size, scale, fit to page, print options or margins differ from Excel's defaults), `.areas`, `.titles`, `.breaks`, `.headersFooters` |
@@ -226,7 +265,7 @@ Not limits of the options but cut and counted the same way: a sheet name over 25
 
 An element with more than 1,024 attributes (namespace declarations included; Excel writes fewer than 30) is damage like a stray end tag: the sheet is read as far as it, a workbook-level part is skipped with a warning, and a workbook part is refused as corrupt. Without a cap, a few MB of zip can ask the engine for an object of eight million properties, which it does not finish. Merged ranges are applied to the model in one pass per sheet (`WorkbookImpl.mergeCellsBulk`, the same result as `mergeCells` one by one, without the undo steps a load must not leave); merges that overlap (Excel writes none, and repairs a file that has them) are resolved as one by one would resolve them (the later wins), in O(n log^2 n), however many: 100,000 blocks with one overlap lose only the two they overlap, and 200,000 merges that each overlap the next are decided in a few seconds.
 
-**What the limits bound, and what they do not.** The reader is bounded; loading the result into the editor's model is not, for huge formula counts. Measured through `importFromXlsx` into a `WorkbookImpl` (Node 24), where the reader itself took 0.1 to 0.2 s of each: 20,000 array formulas (`<f t="array" ref="A1:Z1000">` and so on, each over a block, a 276 KB zip) took 110 s (5,000 took 5.8 s: quadratic), 1,000,000 ordinary formulas (a 7 MB zip) took 82 s and 2.1 GB of process memory, and 1,000 sheets each holding one formula that names the next took 33 s (400 took 4.6 s). The time is the recalculation that `setData` runs (reading each referenced cell, collecting dependencies, resolving sheet names), in engine code that this change does not touch. A host should lower `maxTotalCells` (and `maxSheets`) and/or run the import in a worker; a faster load is a follow-up (`documentation/sheets/TODO.md`, candidate owner S20). A table of two million shared strings peaked at 2.8 GB of process memory in the reader alone (a 4 GB heap; five million entries took 1.17 GB, so the peak is not monotonic in the count): plan for 3 GB there.
+**What the limits bound, and what they do not.** The reader is bounded; loading the result into the editor's model is not, for huge formula counts. Measured through `importFromXlsx` into a `WorkbookImpl` (Node 24), where the reader itself took 0.1 to 0.2 s of each: 20,000 array formulas (`<f t="array" ref="A1:Z1000">` and so on, each over a block, a 276 KB zip) took 110 s (5,000 took 5.8 s: quadratic), 1,000,000 ordinary formulas (a 7 MB zip) took 82 s and 2.1 GB of process memory, and 1,000 sheets each holding one formula that names the next took 33 s (400 took 4.6 s). The time is the recalculation that `setData` ran (reading each referenced cell, collecting dependencies, resolving sheet names), in engine code that the reader change did not touch; since S4 an imported file keeps its saved results instead of evaluating every formula on load (see "Formula interchange and cached values"), which saves the evaluation but not the parse or the dependency graph (100,000 ordinary formulas, `A1*2+1`, took 5.1 s through `importFromXlsx` with the saved results kept and 6.2 s with `recalculateOnLoad`, on a machine under load; 100,000 cached-only formulas, which have no graph node, took 3.8 s in both), so the advice above stands; array formulas are bounded by a per-sheet budget (5,000,000 cells): the 20,000 array formulas above now import in 1.8 s and 336 MB of process memory, 19,808 of them kept as saved values and reported as `xlsx.package.sizeLimit` (19,750 of 20,000 when they are dynamic arrays). A host should lower `maxTotalCells` (and `maxSheets`) and/or run the import in a worker; a faster load is a follow-up (`documentation/sheets/TODO.md`, candidate owner S20). A table of two million shared strings peaked at 2.8 GB of process memory in the reader alone (a 4 GB heap; five million entries took 1.17 GB, so the peak is not monotonic in the count): plan for 3 GB there.
 
 In the React editor the limits are the `importLimits` prop of `WorkbookCanvas` (and the `limits` option of `importWorkbookFile`): `<WorkbookCanvas fileActions importLimits={{ maxTotalCells: 20_000_000 }} />`. What a limit cut is in the `loss` that `onFileOpened` receives; the editor shows nothing of it by itself (the pre-import dialog inspects the file's bytes and does not run the import, and there is no notice component for import warnings), so a host that raises or keeps the defaults should read `loss` there.
 

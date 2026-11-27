@@ -307,7 +307,15 @@ edits, and the inverse operations broadcast to peers like any other edit.
   (a room without the key reads as 1, so existing rooms keep working). `attachCollab` refuses a room written by a
   newer client with a `CollabSchemaVersionError` that names both versions, before it seeds or edits anything.
   `getCollabBlockers(workbook)` and `CollabBlockedError` mirror the documents and slides API; the list is empty
-  today, and a later workbook construct either gets its own Y keys or registers a blocker.
+  today, and a later workbook construct either gets its own Y keys or registers a blocker. Version 2 added the formula
+  interchange marks on a cell's JSON: `cachedOnly: true` (an imported formula the engine cannot evaluate: `formula` is the
+  file's text and `value` the result the file saved; no client recalculates it) and `arraySpan` (`{ rows, cols }`, the extent
+  of an array formula). A v1 client would recalculate such a cell to `#NAME?` and drop the marks on its next write, so it
+  refuses a v2 room. The marks live in the cell JSON, which is last writer wins per cell like the rest of the cell; the
+  spilled cells of an evaluable array formula are not stored (every client re-evaluates the anchor), the plain result cells
+  of a cached-only array formula are ordinary cells. An imported workbook shows the file's saved results on the client that
+  imported it; a client that joins the room recalculates the formulas the engine can evaluate (cached-only cells are the same
+  everywhere).
 - **Content controls.** A Word content control is a ProseMirror node
   (`content_control` around blocks, `content_control_inline` in a paragraph), so it
   syncs like any other content and does not block attach. Concurrent edits merge as

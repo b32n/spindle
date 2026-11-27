@@ -1002,6 +1002,23 @@ lockstep.
   deleting an element prunes the timing that animates it. `@b32nio/spindle-slides-react` draws an opaque element as a labelled placeholder
   ("Chart: <title> (kept, not editable)"). Slides collaboration schema version 10 (`opaque` slide key, `opaqueParts` map, opaque elements):
   older clients refuse such rooms. Hosts that switch exhaustively on `SlideElement['type']` need an `'opaque'` case.
+- **XLSX formula interchange and cached values (S4).** Behaviour change: an opened .xlsx now shows the results the file saved and
+  recalculates a formula when a cell it refers to changes or it is edited, not wholesale on load (formulas without a saved result,
+  volatile ones and array formulas that spill are still evaluated on load); the host option `recalculateOnLoad` (default off; an
+  `importFromXlsx` option, an `importWorkbookFile` option and a `WorkbookCanvas` prop) evaluates every formula the engine can on load.
+  `_xlfn.`, `_xlfn._xlws.` and `_xlpm.` prefixes are read as the plain function names the engine knows (`_xlfn.IFS`, `_xlfn.XLOOKUP`,
+  `_xlfn.STDEV.S`...) and written back on export; `_xlfn.SINGLE(x)` and `_xlfn.ANCHORARRAY(A1)` are read as `@x` and `A1#` and
+  written back as the calls (`fromFileFormula`, `toFileFormula` and `FUTURE_FUNCTIONS` are new exports of `@b32nio/spindle-io/xlsx`).
+  A formula the engine cannot evaluate (a function it lacks, text it cannot parse, a table, defined-name or external reference) is
+  never shown as `#NAME?`: the cell keeps the file's formula text and the saved result (`cachedOnly`), shows a small "Saved value" note
+  in the formula bar (the value does not follow the cells it refers to; the note, its tooltip and `documentation/import-loss.md` say
+  so), and is written back unchanged. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
+  spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
+  New loss id `xlsx.formulas.cachedOnly` (state `kept`); `xlsx.formulas.unsupported`, `.structuredRefs` and `.externalRef` now say the
+  value is kept. Additive: `Cell.cachedOnly` and `Cell.arraySpan`, `SpreadsheetCell.cachedOnly`, `.arrayRef` and `.dynamicArray`,
+  `XlsxFormulaInfo.dynamic`, `DetectXlsxLossOptions.isFormulaEvaluable`, `ImportFromXlsxOptions`, `WorkbookImpl.getSpillRegion`. The sheets
+  collaboration layout is now version 2 (a client at version 1 refuses a version 2 room); `documentation/collaboration.md` has the rules.
+  The values golden counts `cachedOnly` formulas where it counted `passthrough` ones, and measures the engine with a recalculating import.
 
 ## [0.4.0] - 2026-10-26
 

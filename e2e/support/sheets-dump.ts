@@ -3,6 +3,10 @@ import type { Page } from '@playwright/test';
 export interface DumpedCell {
   value: unknown;
   formula?: string;
+  /** An imported formula the engine cannot evaluate: kept as the file's text and saved result (S4). */
+  cachedOnly?: true;
+  /** Extent of an array formula (S4). */
+  arraySpan?: { rows: number; cols: number; spill?: true };
   style?: Record<string, unknown>;
   /** Number-format descriptor from the workbook format pool. */
   format?: Record<string, unknown>;
@@ -35,6 +39,8 @@ export async function dumpWorkbook(page: Page, rows = 12, cols = 8): Promise<Dum
               value: wb.getCellCalculatedValue(sd.id, r, c) ?? cell.value ?? null,
             };
             if (cell.formula) out.formula = cell.formula;
+            if (cell.cachedOnly) out.cachedOnly = true;
+            if (cell.arraySpan) out.arraySpan = cell.arraySpan;
             if (cell.styleId) out.style = wb.getStylePool().get(cell.styleId);
             if (cell.formatId) out.format = wb.getFormatPool().get(cell.formatId);
             if (out.value !== null || out.formula || out.style || out.format)

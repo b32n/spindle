@@ -71,7 +71,8 @@ statistical, date/time, information, financial, reference and array categories
 - [ ] **Missing functions** — `HSTACK`, `VSTACK`, `TAKE`, `DROP`, `CHOOSECOLS`, `CHOOSEROWS`, `EXPAND`, `TOCOL`, `TOROW`, `WRAPROWS`,
       `WRAPCOLS`, `ARRAYTOTEXT`, `VALUETOTEXT` (no LibreOffice oracle and outside plan S12: S13 / post-launch); `LET` and `LAMBDA`
       with its helpers need names in scope in the evaluator (post-launch). The unprefixed names work; the `_xlfn.` spellings
-      Excel writes into files are mapped on import (plan S4).
+      Excel writes into files are mapped on import and export (plan S4), and a formula the engine cannot evaluate keeps its saved
+      result (`cachedOnly`) until its function exists.
 - [x] **Text and date, batch B** — `CLEAN`, `NUMBERVALUE`, `UNICHAR`, `UNICODE`, `T`,
       `FIXED`, `DOLLAR`, `BASE`, `DECIMAL`, `ROMAN`, `ARABIC`, `ISNONTEXT`, `DAYS`, `DAYS360`,
       `YEARFRAC` (all five bases), `ISOWEEKNUM`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`, and `INDEX(range,0,col)` /
