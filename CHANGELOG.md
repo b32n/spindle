@@ -1028,6 +1028,8 @@ lockstep.
   saved value and reported as `xlsx.package.sizeLimit`), and `exportToXlsx(workbook, { maxArrayCells, onWarning })` writes at most 1,000,000 cells
   of one spilled result (the first rows, the range cut to match, reported to `onWarning`): a file of 1.7 KB with `ref="A1:J400000"` took 44 s and 3 GB to write back.
   A formula whose text result is an error literal (`="#N/A"`) is written as an error value: the model cannot tell them apart.
+  The array budget of an import is settable where a host opens files: `maxArrayCells` in `SheetsFileImportOptions` (`importWorkbookFile`) and a
+  `maxArrayCells` prop of `WorkbookCanvas`; the `xlsx.package.sizeLimit` effect names them.
 
 ## [0.4.0] - 2026-10-26
 

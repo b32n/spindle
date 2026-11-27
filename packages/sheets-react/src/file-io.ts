@@ -82,6 +82,12 @@ export interface SheetsFileImportOptions {
    */
   limits?: NonNullable<Parameters<typeof importFromXlsx>[2]>['limits'];
   /**
+   * The most cells the array formulas of one sheet may cover on load (default 1,000,000): past it a formula is kept as its saved
+   * result and the `loss` says so (`xlsx.package.sizeLimit`). Raising it costs memory and time in proportion (see
+   * `documentation/import-loss.md`). Not used for `.csv`.
+   */
+  maxArrayCells?: number;
+  /**
    * Recalculate every formula the engine can evaluate when an .xlsx opens (default `false`: the results saved in the file are shown
    * and a formula is recalculated when a cell it refers to changes or it is edited). Formulas the engine cannot evaluate keep their
    * saved result either way. Not used for `.csv`.
@@ -101,6 +107,7 @@ export async function importWorkbookFile(workbook: WorkbookImpl, file: File, opt
   if (XLSX_READER_EXTENSIONS.includes(ext)) {
     return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook, {
       ...(options.limits ? { limits: options.limits } : {}),
+      ...(options.maxArrayCells !== undefined ? { maxArrayCells: options.maxArrayCells } : {}),
       ...(options.recalculateOnLoad ? { recalculateOnLoad: true } : {}),
     });
   }

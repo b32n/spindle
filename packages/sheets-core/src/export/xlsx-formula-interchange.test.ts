@@ -359,6 +359,8 @@ describe('array and dynamic-array formulas', () => {
     expect(cut).toMatchObject({ count: 1 });
     expect(cut?.effect).toContain('over 1000000 cells');
     expect(cut?.effect).toContain('maxArrayCells');
+    expect(cut?.effect).toContain('importWorkbookFile');
+    expect(cut?.effect).toContain('WorkbookCanvas');
   });
 
   it('takes the array budget from the maxArrayCells option', async () => {

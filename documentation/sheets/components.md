@@ -20,7 +20,9 @@ interface WorkbookCanvasProps {
   fileActions?: boolean;       // show Open (.xlsx/.csv) and Download (XLSX/CSV) in the toolbar; default false
   exportFormats?: ('xlsx' | 'csv')[];   // formats offered by Download; default both
   fileName?: string;           // base name for downloads; default: the workbook name
-  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  importLimits?: Partial<ImportLimits>;  // XLSX reader limits over the defaults (see documentation/import-loss.md)
+  maxArrayCells?: number;      // most cells the array formulas of one sheet may cover when an .xlsx opens; default 1,000,000
+  onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
   onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
 

@@ -162,6 +162,25 @@ describe('importWorkbookFile limits', () => {
     expect(recalculated.getSheet().getCell(0, 1)?.value).toBe(20);
   });
 
+  it('takes the array budget from maxArrayCells and reports what it cut', async () => {
+    const zip = await JSZip.loadAsync((await exportWorkbookFile(makeWorkbook(), 'xlsx')).data as Uint8Array);
+    zip.file(
+      'xl/worksheets/sheet1.xml',
+      (await zip.file('xl/worksheets/sheet1.xml')!.async('string')).replace(
+        /<sheetData>[\s\S]*<\/sheetData>/,
+        '<sheetData><row r="1"><c r="A1"><f t="array" ref="A1:B2">1+1</f><v>2</v></c></row></sheetData>'
+      )
+    );
+    const bytes = await zip.generateAsync({ type: 'uint8array' });
+    const kept = new WorkbookImpl('w', 'W');
+    const { loss } = await importWorkbookFile(kept, asFile(bytes, 'f.xlsx'), { maxArrayCells: 2 });
+    expect(kept.getSheet().getCell(0, 0)?.cachedOnly).toBe(true);
+    expect(loss.items.find((i) => i.id === 'xlsx.package.sizeLimit')?.effect).toContain('over 2 cells');
+    const whole = new WorkbookImpl('w', 'W');
+    await importWorkbookFile(whole, asFile(bytes, 'f.xlsx'));
+    expect(whole.getSheet().getCell(0, 0)?.cachedOnly).toBeUndefined();
+  });
+
   it('does not use the limits for a CSV', async () => {
     const wb = new WorkbookImpl('w', 'W');
     await importWorkbookFile(wb, asFile('a,b\n1,2\n', 'd.csv'), { limits: { maxTotalCells: 1 } });

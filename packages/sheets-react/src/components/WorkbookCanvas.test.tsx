@@ -61,6 +61,15 @@ describe('WorkbookCanvas importLimits', () => {
     spy.mockRestore();
   });
 
+  it('hands maxArrayCells to the import (the reader default unless the host sets it)', async () => {
+    const spy = jest.spyOn(fileIo, 'importWorkbookFile');
+    await render({ maxArrayCells: 50 })(csv());
+    expect(spy).toHaveBeenLastCalledWith(expect.any(WorkbookImpl), expect.any(File), { limits: undefined, maxArrayCells: 50 });
+    await render({})(csv());
+    expect(spy.mock.lastCall?.[2]?.maxArrayCells).toBeUndefined();
+    spy.mockRestore();
+  });
+
   it('reports a file the reader refuses to onFileError', async () => {
     const errors: Array<[Error, string]> = [];
     const bad = new File([new Uint8Array([1, 2, 3])], 'bad.xlsx');

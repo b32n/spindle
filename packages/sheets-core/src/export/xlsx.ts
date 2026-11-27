@@ -453,7 +453,7 @@ function spanBudgetItem(count: number, maxArrayCells: number): ImportLossItem {
     id: 'xlsx.package.sizeLimit',
     label: 'array formula(s) kept as saved values',
     count,
-    effect: `approximated: the cells they cover are too many to take on load (over ${maxArrayCells} cells of array formulas on a sheet; the maxArrayCells option raises it), so they keep their saved results and are not recalculated`,
+    effect: `approximated: the cells they cover are too many to take on load (over ${maxArrayCells} cells of array formulas on a sheet; the maxArrayCells option of the import raises it: importFromXlsx, importWorkbookFile, the maxArrayCells prop of WorkbookCanvas), so they keep their saved results and are not recalculated`,
   };
 }
 

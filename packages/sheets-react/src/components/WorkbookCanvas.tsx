@@ -70,6 +70,8 @@ export interface WorkbookCanvasProps {
    * inline object re-creates the handler on every render.
    */
   importLimits?: SheetsFileImportOptions['limits'];
+  /** The most cells the array formulas of one sheet may cover when an .xlsx opens (default 1,000,000; see `SheetsFileImportOptions`). Not used for `.csv`. */
+  maxArrayCells?: SheetsFileImportOptions['maxArrayCells'];
   /**
    * Recalculate every formula the engine can evaluate when an .xlsx opens. Default `false`: the results saved in the file are
    * shown, and a formula is recalculated when a cell it refers to changes or it is edited. Formulas the engine cannot evaluate keep
@@ -96,6 +98,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   exportFormats,
   fileName,
   importLimits,
+  maxArrayCells,
   recalculateOnLoad,
   onFileOpened,
   onFileError,
@@ -535,7 +538,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     try {
       // Ask before replacing the workbook if the file has things we can't import.
       if (!(await confirmImport(file, await inspectWorkbookFile(file)))) return;
-      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits, recalculateOnLoad });
+      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits, maxArrayCells, recalculateOnLoad });
       // setData swapped every sheet; drop any state pointing into the old one.
       setActiveCell(null);
       setEditingCell(null);
@@ -544,7 +547,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
-  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits, recalculateOnLoad]);
+  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits, maxArrayCells, recalculateOnLoad]);
 
   const handleDownload = useCallback(async (format: SheetsExportFormat) => {
     try {
