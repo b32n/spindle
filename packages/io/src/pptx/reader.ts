@@ -1,11 +1,13 @@
 import type JSZip from 'jszip';
-import type { PptxSection, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
+import type { PptxFonts, PptxSection, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
 import { OoxmlPackage, type Rel } from '../common/ooxml-package';
 import { ImportError, toImportError } from '../common/import-error';
 import { openSafeZip, type ImportLimits } from '../common/safe-zip';
 import { descendants, isOn, kid, kids, type XmlElement } from '../xlsx/xml';
 import { DEFAULT_COLOR_MAP, parseColorMap } from './color';
+import { isAvailableFont } from './fonts';
 import { readLayouts } from './layouts';
+import { readSlideContent } from './slides';
 import { FALLBACK_THEME, parseTheme } from './theme';
 import { emuToPx } from './units';
 
@@ -79,7 +81,10 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
   if (!first) warn('The presentation has no readable slide master and theme; the Office default theme is used.');
   for (const m of first?.warnings ?? []) warn(m);
 
-  const layouts = await readLayouts(pkg, await masterParts(pkg, presentation, rels, slides), kid(presentation, 'defaultTextStyle'), warn);
+  const fonts = new Set<string>();
+  const defaultStyle = kid(presentation, 'defaultTextStyle');
+  const layouts = await readLayouts(pkg, await masterParts(pkg, presentation, rels, slides), defaultStyle, warn, fonts);
+  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts);
   const sections = readSections(presentation, slides);
   for (const part of pkg.skipped) warn(`${part} was too large to read and was skipped.`);
   return {
@@ -88,9 +93,24 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
     colorMap,
     slides,
     layouts,
+    fonts: reportFonts(fonts, theme, warn),
     ...(sections.length > 0 ? { sections } : {}),
     warnings,
   };
+}
+
+/**
+ * The fonts the deck names (slides, layouts, masters and the theme's font scheme), one entry per family however it is
+ * capitalised (the first spelling wins), and the ones outside the editor's short list (`pptx.fonts.unavailable`). Text in those
+ * shows in a substitute and may reflow; nothing is fetched.
+ */
+function reportFonts(named: Set<string>, theme: PresentationImportResult['theme'], warn: (m: string) => void): PptxFonts {
+  const seen = new Map<string, string>();
+  for (const f of [...named, ...Object.values(theme.fonts)]) if (!seen.has(f.toLowerCase())) seen.set(f.toLowerCase(), f);
+  const used = [...seen.values()].sort((a, b) => a.localeCompare(b));
+  const unavailable = used.filter((f) => !isAvailableFont(f));
+  if (unavailable.length > 0) warn(`${unavailable.length === 1 ? 'A font' : `${unavailable.length} fonts`} the editor may not have (${unavailable.join(', ')}) ${unavailable.length === 1 ? 'is' : 'are'} used; text in ${unavailable.length === 1 ? 'it' : 'them'} shows in a substitute and may reflow.`);
+  return { used, unavailable };
 }
 
 /** The slides in `p:sldIdLst` order. A slide whose relationship or part is missing, or whose XML is damaged, stays in the list with an `error`. */
@@ -119,8 +139,9 @@ async function readSlides(pkg: OoxmlPackage, presentation: XmlElement, rels: Map
       slides.push(failed('', 'its relationship is missing'));
       continue;
     }
-    const root = await pkg.xml(rel.target);
-    if (!root || root.name !== 'sld') {
+    // a slide with an unclosed element would be read as far as the lenient parser gets and lose the rest of its content, so it is a damaged part
+    const { root, wellFormed } = await pkg.xmlChecked(rel.target);
+    if (!root || root.name !== 'sld' || !wellFormed) {
       slides.push(failed(rel.target, pkg.skipped.includes(rel.target) ? 'the part is too large to read' : pkg.has(rel.target) ? 'the part is damaged' : 'the part is missing'));
       continue;
     }

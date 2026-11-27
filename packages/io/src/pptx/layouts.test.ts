@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import type { PptxLayout } from '@b32nio/spindle-shared/export/pptx';
 import { importPptx } from './reader';
-import { matchLayoutPlaceholder, mergeLevels, parseLevel, parseLevels } from './layouts';
+import { matchLayoutPlaceholder, mergeLevels, parseLevel, parseLevels } from './levels';
 import { DEFAULT_COLOR_MAP, overrideColorMap } from './color';
 import { parseXml } from '../xlsx/xml';
 
@@ -386,7 +386,7 @@ describe('masters and layouts of a deck', () => {
 describe('matchLayoutPlaceholder', () => {
   const ph = (type: string, idx?: number) => ({ type, ...(idx !== undefined ? { idx } : {}), levels: [] });
   const l: PptxLayout = {
-    partName: 'p', name: 'L', masterPart: 'm', staticShapes: 0,
+    partName: 'p', name: 'L', masterPart: 'm', staticShapes: 0, elements: [],
     placeholders: [ph('ctrTitle'), ph('subTitle', 1), ph('dt', 10), ph('pic', 13), ph('body', 14)],
   };
   it('prefers the idx, then the same type, then the same kind', () => {

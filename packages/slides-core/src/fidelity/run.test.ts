@@ -110,7 +110,7 @@ describe('runPptxFixture with the io reader', () => {
 describe('runPptxFixture with a scripted importer (what the importer PRs will see)', () => {
   it('imports, round-trips and diffs the two models', async () => {
     const result = await runPptxFixture(withImporter(), bytes);
-    expect(result.model).toEqual({ importError: null, warnings: ['w'], presentation: model });
+    expect(result.model).toEqual({ importError: null, warnings: ['w'], presentation: model, textParity: { sourceRuns: 0, modelRuns: 0, outOfScope: 0, inErrorSlides: 0, missing: [], extra: [] } });
     expect(result.roundtrip).toMatchObject({ status: 'ok', reimportWarnings: ['w'] });
     expect(result.roundtrip.diff?.total).toBe(0);
     expect(result.roundtrip.diff?.before).toEqual({ slides: 1, elements: 2 });

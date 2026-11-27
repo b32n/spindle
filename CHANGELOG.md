@@ -939,6 +939,22 @@ lockstep.
   the layout and master draw (their content comes with the shape reader, K9c). A second master with a different theme is
   reported. An internal `matchLayoutPlaceholder` resolves a slide placeholder to its layout placeholder for K9c. No editor change and
   the loss report is unchanged; only the `model` goldens grew.
+- **PPTX reader, step 3 (K9c): slide shapes and text.** `importPptx` now reads the `p:sp` shapes of every slide
+  (`PptxSlide.elements`, new additive types `PptxShape`, `PptxFill`, `PptxLine`, `PptxGeometry`, `PptxBodyProps`,
+  `PptxTextBody`, `PptxParagraph`, `PptxRun`, `PptxFonts`): element id (`pptxId`), name, alt text, hidden flag, frame
+  (px, rotation, flips; a placeholder without its own position takes the layout's), preset geometry with its adjustments
+  (a preset outside the library is marked `known: false`, per K5) and `custGeom` marked as custom, fills (none, solid,
+  gradient, pattern, picture reference) and outlines (width, dash, cap, join, line ends), `p:style` fill, line and font
+  colour references, the slide background, and text bodies with all K3 attributes (insets, anchor, vertical text, columns,
+  stored `fontScale` / `lnSpcReduction`, bullets with colour, size and font, tab stops, spacing, baseline, caps, character
+  spacing, language, fields and breaks), each paragraph carrying its effective level style (layout placeholder or default
+  text style, shape list style, own properties). Layouts gain `elements`: the static shapes of master and layout in drawing
+  order. The result reports its fonts (`fonts`, with a warning for those outside the editor's list: `pptx.fonts.unavailable`),
+  and a slide with an unclosed element is now a damaged slide instead of a partly read one (`OoxmlPackage.xmlChecked`).
+  The fidelity harness gains the automated text parity check (every source `a:t` run of the shapes read so far appears
+  in the model, as a multiset; 536 of 536 in the corpus) in the `model` goldens. Pictures, tables, groups, connectors and
+  custom geometry paths follow (K10). No editor change; the loss report effects stay "not imported" until the editor can
+  open a `.pptx` (K15), so the loss goldens are unchanged and only the `model` goldens changed.
 
 ## [0.4.0] - 2026-10-26
 

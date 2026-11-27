@@ -1,3 +1,4 @@
+import { XMLValidator } from 'fast-xml-parser';
 import JSZip from 'jszip';
 import { kids, parseXml, type XmlElement } from '../xlsx/xml';
 
@@ -93,6 +94,7 @@ export class OoxmlPackage {
   readonly skipped: string[] = [];
   private readonly parsed = new Map<string, XmlElement | undefined>();
   private readonly relCache = new Map<string, Rel[]>();
+  private readonly malformed = new Set<string>();
 
   constructor(private readonly zip: JSZip) {}
 
@@ -135,6 +137,20 @@ export class OoxmlPackage {
     const root = text === undefined ? undefined : (parseXml(text) ?? undefined);
     this.parsed.set(name, root);
     return root;
+  }
+
+  /**
+   * A parsed part that is also checked for well-formedness (balanced tags, one root). `xml` is lenient: it reads a part with
+   * an unclosed element as far as it goes, which is right for what only informs a report but loses content when the part is
+   * the content. The result is cached like `xml`, so the part is read once.
+   */
+  async xmlChecked(name: string): Promise<{ root: XmlElement | undefined; wellFormed: boolean }> {
+    if (this.parsed.has(name)) return { root: this.parsed.get(name), wellFormed: !this.malformed.has(name) };
+    const text = await this.text(name);
+    const root = text === undefined ? undefined : (parseXml(text) ?? undefined);
+    if (text !== undefined && XMLValidator.validate(text) !== true) this.malformed.add(name);
+    this.parsed.set(name, root);
+    return { root, wellFormed: !this.malformed.has(name) };
   }
 
   /** The relationships of a part (empty when it has none or its `.rels` cannot be read). */

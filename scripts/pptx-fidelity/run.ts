@@ -3,7 +3,7 @@
  * step catches its own failures, so a throwing importer is a recorded result, never a crash.
  *
  * The reader exists (plan K9) and the writer does not (K12): `model` holds the imported presentation (or the import
- * error, for the files that are not presentations) and `roundtrip` stops at `no exporter` until the writer lands. Against
+ * error, for the files that are not presentations) with the text parity check against the source, and `roundtrip` stops at `no exporter` until the writer lands. Against
  * an API without `importPptx` the model records `importError: "no importer"`.
  */
 import path from 'node:path';
@@ -14,6 +14,7 @@ import type { Json, LossSnapshot, RoundtripSnapshot } from '../fidelity-core/typ
 import { NO_IMPORTER, type PptxEditorApi } from './api';
 import { buildLedger, type LedgerSnapshot } from './ledger';
 import { countPresentation, diffField, normalizePresentation, scrubMessage } from './normalize';
+import { textParity, type TextParity } from './parity';
 
 export const PPTX_KINDS = ['model', 'loss', 'roundtrip', 'ledger'] as const;
 export type PptxKind = (typeof PPTX_KINDS)[number];
@@ -22,6 +23,8 @@ export interface ModelSnapshot {
   importError: string | null;
   warnings: string[];
   presentation: Json | null;
+  /** Source text runs against the model's (plan K9): present when a model was produced. */
+  textParity?: TextParity;
 }
 
 export interface PptxResult {
@@ -124,6 +127,7 @@ export async function runPptxFixture(api: PptxEditorApi, bytes: Uint8Array): Pro
   const loss = await inspect(api, bytes);
   const { model, raw } = await importModel(api, bytes);
   const parts = await readParts(bytes);
+  if (model.presentation !== null) model.textParity = textParity(parts, model.presentation);
   return {
     loss,
     model,

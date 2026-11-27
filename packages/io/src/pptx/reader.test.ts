@@ -117,10 +117,10 @@ describe('importPptx: the presentation', () => {
     expect(r.slideSize).toEqual({ w: 1280, h: 720 });
     expect(r.warnings).toEqual([expect.stringContaining('slideMaster2.xml uses a different theme')]);
     expect(r.slides).toEqual([
-      { pptxId: '256', partName: 'ppt/slides/slide1.xml', name: 'Title', layoutPart: 'ppt/slideLayouts/slideLayout1.xml' },
-      { pptxId: '257', partName: 'ppt/slides/slide2.xml', hidden: true, layoutPart: 'ppt/slideLayouts/slideLayout1.xml' },
-      { pptxId: '258', partName: 'ppt/slides/slide3.xml', hidden: true, layoutPart: 'ppt/slideLayouts/slideLayout2.xml' },
-      { pptxId: '259', partName: 'ppt/slides/slide4.xml', layoutPart: 'ppt/slideLayouts/slideLayout1.xml' },
+      { pptxId: '256', partName: 'ppt/slides/slide1.xml', name: 'Title', layoutPart: 'ppt/slideLayouts/slideLayout1.xml', elements: [] },
+      { pptxId: '257', partName: 'ppt/slides/slide2.xml', hidden: true, layoutPart: 'ppt/slideLayouts/slideLayout1.xml', elements: [] },
+      { pptxId: '258', partName: 'ppt/slides/slide3.xml', hidden: true, layoutPart: 'ppt/slideLayouts/slideLayout2.xml', elements: [] },
+      { pptxId: '259', partName: 'ppt/slides/slide4.xml', layoutPart: 'ppt/slideLayouts/slideLayout1.xml', elements: [] },
     ]);
     expect(r.sections).toBeUndefined();
   });
@@ -140,6 +140,12 @@ describe('importPptx: the presentation', () => {
       expect(r.slideSize).toEqual({ w: 1280, h: 720 });
       expect(r.warnings).toEqual(['The presentation does not give a usable slide size; 16:9 (1280 x 720) is used.']);
     }
+  });
+
+  it('treats a slide with an unclosed element as damaged instead of reading what the lenient parser makes of it', async () => {
+    const r = await read({ slides: [{}, { raw: `<p:sld ${NS}><p:cSld><p:spTree><a:t>lost</p:spTree></p:cSld></p:sld>` }] });
+    expect(r.slides.map((s) => s.error)).toEqual([undefined, 'the part is damaged']);
+    expect(r.slides[1].elements).toBeUndefined();
   });
 
   it('keeps a slide it cannot read as an error placeholder, with a warning, and reads the others', async () => {

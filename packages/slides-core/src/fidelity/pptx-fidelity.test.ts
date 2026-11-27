@@ -99,6 +99,25 @@ describe('PPTX fidelity corpus (io source)', () => {
     }
   });
 
+  it('keeps every source text run in the model (the automated parity check) and reads the text decks\' shapes', () => {
+    let checked = 0;
+    for (const o of run.fixtures) {
+      const parity = o.result.model.textParity;
+      if (o.result.model.presentation === null) {
+        expect(parity).toBeUndefined();
+        continue;
+      }
+      expect({ id: o.entry.id, missing: parity?.missing, extra: parity?.extra }).toEqual({ id: o.entry.id, missing: [], extra: [] });
+      expect(parity?.modelRuns).toBe(parity?.sourceRuns);
+      checked += parity?.sourceRuns ?? 0;
+    }
+    expect(checked).toBeGreaterThan(100);
+    const shapes = (id: string) => (run.fixtures.find((f) => f.entry.id === id)?.result.model.presentation as unknown as { slides: { elements?: { text?: unknown; geometry?: { prst?: string; known?: boolean } }[] }[] }).slides.flatMap((s) => s.elements ?? []);
+    expect(shapes('text-basic').filter((e) => e.text).length).toBeGreaterThan(0);
+    expect(shapes('shapes-presets').some((e) => e.geometry?.known === false)).toBe(true);
+    expect(shapes('shapes-presets').some((e) => e.geometry?.known === true)).toBe(true);
+  });
+
   it('names the encrypted and the legacy binary stubs, and nothing else about them', () => {
     const lossIds = (id: string) =>
       run.fixtures.find((f) => f.entry.id === id)?.result.loss.items.map((i) => i.id);
