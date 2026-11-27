@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { Json, JsonObject } from './types';
+import type { Json, JsonObject } from '../fidelity-core/types';
 
 type Obj = Record<string, unknown>;
 

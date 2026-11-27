@@ -1,25 +1,19 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
-import JSZip from 'jszip';
-import { CONSTRUCTS, detectConstructs, findConstruct, isWellFormed, readParts, unverifiedClaims, type DocxParts } from '../../../../scripts/docx-fidelity/constructs';
-import { MATRIX_END, MATRIX_START, buildMatrix, injectMatrix, uncoveredConstructs, verifyClaims } from '../../../../scripts/docx-fidelity/matrix';
+import { unverifiedClaims } from '../../../../scripts/fidelity-core/claims';
+import type { OoxmlParts } from '../../../../scripts/fidelity-core/ooxml-package';
+import { CONSTRUCTS } from '../../../../scripts/docx-fidelity/constructs';
 
-const parts = (xml: Record<string, string>, extraNames: string[] = []): DocxParts => ({ names: [...Object.keys(xml), ...extraNames], xml });
-const body = (inner: string, rest: Record<string, string> = {}) => parts({ 'word/document.xml': `<w:document><w:body>${inner}</w:body></w:document>`, ...rest });
-const count = (id: string, p: DocxParts) => findConstruct(id)!.count(p);
-
-describe('isWellFormed', () => {
-  it.each([
-    ['<a><b x="1"/><c>t</c></a>', true],
-    ['<?xml version="1.0"?><!-- c --><a><![CDATA[<x>]]></a>', true],
-    ['<a><b></a>', false],
-    ['<a>', false],
-    ['<a></a><b>', false],
-    ['<a>x < y</a>', false],
-    ['<a b=">"/>', true],
-  ])('%s', (xml, expected) => expect(isWellFormed(xml)).toBe(expected));
+const parts = (xml: Record<string, string>, extraNames: string[] = []): OoxmlParts => ({
+  kind: 'zip',
+  raw: new Uint8Array(),
+  names: [...Object.keys(xml), ...extraNames],
+  xml,
+  sizes: {},
+  oversized: [],
 });
+const findConstruct = (id: string) => CONSTRUCTS.find((c) => c.id === id);
+const detectConstructs = (p: OoxmlParts) => CONSTRUCTS.filter((c) => c.count(p) > 0).map((c) => c.id);
+const body = (inner: string, rest: Record<string, string> = {}) => parts({ 'word/document.xml': `<w:document><w:body>${inner}</w:body></w:document>`, ...rest });
+const count = (id: string, p: OoxmlParts) => findConstruct(id)!.count(p);
 
 describe('probes', () => {
   it('has unique ids and a label for each', () => {
@@ -162,88 +156,6 @@ describe('probes', () => {
 
   it('reports unverified claims', () => {
     const p = body('<w:sdt/>');
-    expect(unverifiedClaims(['sdt', 'equations', 'unknown'], p)).toEqual(['equations', 'unknown']);
-  });
-});
-
-describe('readParts', () => {
-  it('reads names and xml/rels text, skipping directories and binaries', async () => {
-    const zip = new JSZip();
-    zip.file('word/document.xml', '<w:document/>');
-    zip.file('word/_rels/document.xml.rels', '<Relationships/>');
-    zip.file('word/media/a.png', new Uint8Array([1, 2, 3]));
-    zip.folder('empty');
-    const p = await readParts(await zip.generateAsync({ type: 'uint8array' }));
-    expect(p.names.sort()).toEqual(['word/_rels/document.xml.rels', 'word/document.xml', 'word/media/a.png']);
-    expect(Object.keys(p.xml).sort()).toEqual(['word/_rels/document.xml.rels', 'word/document.xml']);
-    await expect(readParts(new Uint8Array([1, 2, 3]))).rejects.toThrow();
-  });
-});
-
-describe('coverage matrix', () => {
-  const fixtures = [
-    { id: 'b', constructs: ['sdt'] },
-    { id: 'a', constructs: ['headings', 'sdt'] },
-  ];
-
-  it('lists the files and marks claimed constructs per fixture', () => {
-    const md = buildMatrix([
-      { id: 'b', constructs: ['sdt'], title: 'B title', source: { tool: 'tool B' } },
-      { id: 'a', constructs: ['headings', 'sdt'] },
-    ]);
-    const lines = md.split('\n');
-    expect(lines.slice(0, 4)).toEqual(['| # | Fixture | Title | Produced by |', '|--:|---|---|---|', '| 1 | `b` | B title | tool B |', '| 2 | `a` |  |  |']);
-    const header = lines.indexOf('| Construct | 1 | 2 |');
-    expect(header).toBeGreaterThan(0);
-    expect(lines[header + 1]).toBe('|---|:-:|:-:|');
-    expect(lines.find((l) => l.includes('(`sdt`)'))).toMatch(/\| yes \| yes \|$/);
-    expect(lines.find((l) => l.includes('(`headings`)'))).toMatch(/\|\s{2}\| yes \|$/);
-    expect(lines).toHaveLength(header + 2 + CONSTRUCTS.length);
-  });
-
-  it('lists constructs nobody claims', () => {
-    const gaps = uncoveredConstructs(fixtures);
-    expect(gaps).toContain('charts');
-    expect(gaps).not.toContain('sdt');
-  });
-
-  it('replaces the generated block and requires markers', () => {
-    const readme = `intro\n${MATRIX_START}\n\nold\n\n${MATRIX_END}\noutro\n`;
-    const out = injectMatrix(readme, 'NEW');
-    expect(out).toBe(`intro\n${MATRIX_START}\n\nNEW\n\n${MATRIX_END}\noutro\n`);
-    expect(injectMatrix(out, 'NEW')).toBe(out);
-    expect(() => injectMatrix('no markers', 'x')).toThrow(/markers/);
-  });
-});
-
-describe('verifyClaims', () => {
-  let dir: string;
-  beforeEach(() => {
-    dir = mkdtempSync(path.join(tmpdir(), 'docx-claims-'));
-  });
-  afterEach(() => rmSync(dir, { recursive: true, force: true }));
-
-  const manifest = (fixtures: Array<{ id: string; constructs: string[] }>) =>
-    writeFileSync(
-      path.join(dir, 'manifest.json'),
-      JSON.stringify({ version: 1, fixtures: fixtures.map((f) => ({ ...f, filename: `${f.id}.docx`, title: f.id, source: { tool: 't', os: 'o' }, license: 'l', notes: 'n' })) })
-    );
-
-  it('accepts true claims and reports false ones', async () => {
-    const zip = new JSZip();
-    zip.file('word/document.xml', '<w:document><w:body><w:sdt/></w:body></w:document>');
-    writeFileSync(path.join(dir, 'real.docx'), await zip.generateAsync({ type: 'uint8array' }));
-    manifest([{ id: 'real', constructs: ['sdt', 'equations'] }]);
-    expect(await verifyClaims(dir)).toEqual(['real: claims "equations" but the file does not contain it']);
-  });
-
-  it('lets an unreadable zip claim only edge constructs', async () => {
-    writeFileSync(path.join(dir, 'bad.docx'), 'not a zip');
-    writeFileSync(path.join(dir, 'worse.docx'), 'not a zip');
-    manifest([
-      { id: 'bad', constructs: ['edge.invalidXml'] },
-      { id: 'worse', constructs: ['edge.invalidXml', 'sdt'] },
-    ]);
-    expect(await verifyClaims(dir)).toEqual(['worse: file is not a readable zip but claims non-edge constructs']);
+    expect(unverifiedClaims(['sdt', 'equations', 'unknown'], CONSTRUCTS, p)).toEqual(['equations', 'unknown']);
   });
 });

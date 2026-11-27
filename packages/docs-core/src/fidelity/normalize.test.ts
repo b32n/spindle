@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { digestDataUrl, normalizeModel, resolveStyles } from '../../../../scripts/docx-fidelity/normalize';
-import type { Json } from '../../../../scripts/docx-fidelity/types';
+import type { Json } from '../../../../scripts/fidelity-core/types';
 import { get } from './support';
 
 const model = (extra: Record<string, unknown> = {}) => ({

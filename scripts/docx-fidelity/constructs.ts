@@ -1,70 +1,33 @@
-import JSZip from 'jszip';
+import { isWellFormed, relationshipTargets, type OoxmlParts } from '../fidelity-core/ooxml-package';
+import type { Construct } from '../fidelity-core/types';
 
-/** The OOXML parts of a .docx: part names plus the text of every XML/rels part. */
-export interface DocxParts {
-  names: string[];
-  xml: Record<string, string>;
-}
-
-export async function readParts(bytes: Uint8Array): Promise<DocxParts> {
-  const zip = await JSZip.loadAsync(bytes);
-  const names = Object.keys(zip.files).filter((n) => !zip.files[n].dir);
-  const xml: Record<string, string> = {};
-  for (const n of names) if (/\.(xml|rels)$/i.test(n)) xml[n] = await zip.files[n].async('string');
-  return { names, xml };
-}
-
-export interface Construct {
-  id: string;
-  label: string;
-  /** How many occurrences of the construct the file contains (0 = absent). */
-  count: (p: DocxParts) => number;
-}
-
-const doc = (p: DocxParts) => p.xml['word/document.xml'] ?? '';
-const all = (p: DocxParts, re: RegExp, only?: RegExp) =>
+const doc = (p: OoxmlParts) => p.xml['word/document.xml'] ?? '';
+const all = (p: OoxmlParts, re: RegExp, only?: RegExp) =>
   Object.entries(p.xml)
     .filter(([n]) => (only ? only.test(n) : /^word\/[^/]+\.xml$/.test(n)))
     .reduce((sum, [, x]) => sum + (x.match(re)?.length ?? 0), 0);
 const n = (s: string, re: RegExp) => s.match(re)?.length ?? 0;
-const part = (p: DocxParts, name: string) => p.xml[name] ?? '';
+const part = (p: OoxmlParts, name: string) => p.xml[name] ?? '';
 const headersFooters = /^word\/(header|footer)\d*\.xml$/;
-const authors = (p: DocxParts) =>
+const authors = (p: OoxmlParts) =>
   new Set([...doc(p).matchAll(/<w:(?:ins|del|moveFrom|moveTo|rPrChange|pPrChange)\b[^>]*\bw:author="([^"]*)"/g)].map((m) => m[1])).size;
 
-/** Tag-balance check; true when every element opens and closes properly (comments/CDATA/PIs skipped). */
-export function isWellFormed(xml: string): boolean {
-  const stack: string[] = [];
-  const stripped = xml.replace(/<!--[\s\S]*?-->/g, '').replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '').replace(/<\?[\s\S]*?\?>/g, '');
-  const re = /<(\/?)([A-Za-z_][\w:.-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
-  let last = 0;
-  for (let m = re.exec(stripped); m; m = re.exec(stripped)) {
-    if (stripped.slice(last, m.index).includes('<')) return false;
-    last = m.index + m[0].length;
-    if (m[4]) continue;
-    if (m[1]) {
-      if (stack.pop() !== m[2]) return false;
-    } else stack.push(m[2]);
-  }
-  return stack.length === 0 && !stripped.slice(last).includes('<');
-}
-
-const lists = (p: DocxParts) => part(p, 'word/numbering.xml');
+const lists = (p: OoxmlParts) => part(p, 'word/numbering.xml');
 /** Paragraphs that use a list instance (w:num) carrying a startOverride, i.e. a restarted or re-numbered list. */
-function restartedListParagraphs(p: DocxParts): number {
+function restartedListParagraphs(p: OoxmlParts): number {
   const restarted = new Set(
     [...lists(p).matchAll(/<w:num\b[^>]*\bw:numId="(\d+)"[^>]*>((?:(?!<\/w:num>)[\s\S])*)<\/w:num>/g)].filter((m) => /<w:startOverride\b/.test(m[2])).map((m) => m[1])
   );
   return [...doc(p).matchAll(/<w:numId w:val="(\d+)"/g)].filter((m) => restarted.has(m[1])).length;
 }
-const instr = (p: DocxParts, re: RegExp) =>
+const instr = (p: OoxmlParts, re: RegExp) =>
   n(
     [...doc(p).matchAll(/<w:instrText[^>]*>([^<]*)<\/w:instrText>/g)].map((m) => m[1]).join('\n') +
       [...doc(p).matchAll(/<w:fldSimple\b[^>]*\bw:instr="([^"]*)"/g)].map((m) => m[1]).join('\n'),
     re
   );
 
-export const CONSTRUCTS: Construct[] = [
+export const CONSTRUCTS: Array<Construct<OoxmlParts>> = [
   { id: 'revisions.insertions', label: 'Tracked insertions', count: (p) => n(doc(p), /<w:ins\b/g) },
   { id: 'revisions.deletions', label: 'Tracked deletions', count: (p) => n(doc(p), /<w:del\b/g) },
   { id: 'revisions.moves', label: 'Tracked moves', count: (p) => Math.min(n(doc(p), /<w:moveFrom\b/g), n(doc(p), /<w:moveTo\b/g)) },
@@ -134,33 +97,12 @@ export const CONSTRUCTS: Construct[] = [
     label: 'Relationship targets that do not exist',
     count: (p) => {
       let missing = 0;
-      for (const [name, x] of Object.entries(p.xml)) {
-        if (!name.endsWith('.rels')) continue;
-        const base = name.replace(/_rels\/[^/]*\.rels$/, '');
-        for (const m of x.matchAll(/<Relationship\b[^>]*>/g)) {
-          const target = /Target="([^"]*)"/.exec(m[0])?.[1];
-          if (!target || /TargetMode="External"/.test(m[0])) continue;
-          const resolved = target.startsWith('/') ? target.slice(1) : new URL(target, `http://x/${base}`).pathname.slice(1);
-          if (!p.names.includes(decodeURIComponent(resolved))) missing++;
-        }
-      }
+      for (const [name, x] of Object.entries(p.xml))
+        if (name.endsWith('.rels'))
+          missing += relationshipTargets(name, x).filter((t) => t.target !== null && !p.names.includes(t.target)).length;
       return missing;
     },
   },
   { id: 'edge.invalidXml', label: 'Part that is not well-formed XML', count: (p) => Object.entries(p.xml).filter(([, x]) => !isWellFormed(x)).length },
   { id: 'edge.missingOptionalParts', label: 'Missing optional parts (styles/settings/numbering)', count: (p) => ['word/styles.xml', 'word/settings.xml', 'word/numbering.xml'].filter((x) => !p.names.includes(x)).length },
 ];
-
-export function findConstruct(id: string): Construct | undefined {
-  return CONSTRUCTS.find((c) => c.id === id);
-}
-
-/** Construct ids a fixture claims but whose probe finds nothing in the file. */
-export function unverifiedClaims(claimed: string[], parts: DocxParts): string[] {
-  return claimed.filter((id) => (findConstruct(id)?.count(parts) ?? 0) === 0);
-}
-
-/** Constructs actually found in the file (for reporting; claims are what the manifest lists). */
-export function detectConstructs(parts: DocxParts): string[] {
-  return CONSTRUCTS.filter((c) => c.count(parts) > 0).map((c) => c.id);
-}

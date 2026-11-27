@@ -1,30 +1,34 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { loadManifest } from '../../../../scripts/docx-fidelity/manifest';
-import { describeOutcome, runHarness } from '../../../../scripts/docx-fidelity/harness';
-import { buildMatrix, injectMatrix, verifyClaims } from '../../../../scripts/docx-fidelity/matrix';
-import { SNAPSHOT_KINDS } from '../../../../scripts/docx-fidelity/types';
+import { verifyClaims } from '../../../../scripts/fidelity-core/claims';
+import { describeOutcome, runHarness } from '../../../../scripts/fidelity-core/harness';
+import { loadManifest } from '../../../../scripts/fidelity-core/manifest';
+import { buildMatrix, injectMatrix } from '../../../../scripts/fidelity-core/matrix';
+import { CONSTRUCTS } from '../../../../scripts/docx-fidelity/constructs';
+import { DOCX_FIXTURES_DIR, DOCX_MANIFEST_OPTIONS, MATRIX_END, MATRIX_START } from '../../../../scripts/docx-fidelity';
+import { docxAdapter } from '../../../../scripts/docx-fidelity/run';
+import { DOCX_KINDS } from '../../../../scripts/docx-fidelity/types';
 import { sourceApi } from './support';
 
 // Run with DOCX_FIDELITY_UPDATE=1 to rewrite the goldens (same as `npm run docs:docx-fidelity:update`).
 const update = process.env.DOCX_FIDELITY_UPDATE === '1';
-const fixturesDir = path.resolve(__dirname, '../../../../fixtures/docx');
+const fixturesDir = DOCX_FIXTURES_DIR;
 
 describe('DOCX fidelity corpus', () => {
-  const manifest = loadManifest(fixturesDir);
+  const manifest = loadManifest(fixturesDir, DOCX_MANIFEST_OPTIONS);
 
   it('lists at least one fixture', () => {
     expect(manifest.fixtures.length).toBeGreaterThan(0);
   });
 
   it('only claims constructs that are really in the files', async () => {
-    expect(await verifyClaims(fixturesDir)).toEqual([]);
+    expect(await verifyClaims(fixturesDir, manifest, CONSTRUCTS)).toEqual([]);
   });
 
   it('keeps the README coverage matrix in sync with the manifest', () => {
     const readmePath = path.join(fixturesDir, 'README.md');
     const readme = readFileSync(readmePath, 'utf8');
-    const expected = injectMatrix(readme, buildMatrix([...manifest.fixtures].sort((a, b) => a.id.localeCompare(b.id))));
+    const expected = injectMatrix(readme, buildMatrix(CONSTRUCTS, manifest.fixtures), MATRIX_START, MATRIX_END);
     if (update) writeFileSync(readmePath, expected);
     else expect(readme).toBe(expected);
   });
@@ -32,7 +36,7 @@ describe('DOCX fidelity corpus', () => {
   describe('snapshots', () => {
     let outcomes: Awaited<ReturnType<typeof runHarness>>;
     beforeAll(async () => {
-      outcomes = await runHarness({ api: sourceApi, fixturesDir, update });
+      outcomes = await runHarness({ adapter: docxAdapter(sourceApi), fixturesDir, manifestOptions: DOCX_MANIFEST_OPTIONS, strictImport: true, update });
     }, 120_000);
 
     it('has no orphaned goldens', () => {
@@ -41,8 +45,8 @@ describe('DOCX fidelity corpus', () => {
 
     it.each(manifest.fixtures.map((f) => f.id).sort())('%s matches its goldens', (id) => {
       const outcome = outcomes.fixtures.find((f) => f.entry.id === id)!;
-      expect(describeOutcome(outcome)).toEqual([]);
-      for (const kind of SNAPSHOT_KINDS) expect(['match', 'created', 'updated']).toContain(outcome.status[kind]);
+      expect(describeOutcome(outcome, DOCX_KINDS)).toEqual([]);
+      for (const kind of DOCX_KINDS) expect(['match', 'created', 'updated']).toContain(outcome.status[kind]);
     });
   });
 });
