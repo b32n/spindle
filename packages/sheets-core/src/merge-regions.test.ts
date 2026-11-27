@@ -1,5 +1,5 @@
-import { coveredBeyondAnchor, intersects, isDisjoint, lastWins, normalized } from './merge-regions';
-import { MAX_OVERLAPPING_MERGES, SheetImpl } from './sheet';
+import { coveredBeyondAnchor, intersects, isDisjoint, laterOverlaps, normalized, overlapsAny } from './merge-regions';
+import { SheetImpl } from './sheet';
 import { WorkbookImpl } from './workbook';
 import type { Range } from './types';
 
@@ -59,25 +59,101 @@ describe('isDisjoint', () => {
   });
 });
 
-describe('lastWins', () => {
-  it('keeps all of rects that do not overlap', () => {
-    expect(lastWins([R(0, 0, 1, 1), R(2, 2, 3, 3)], 0, 10)).toEqual({ alive: [true, true], considered: 2 });
+/** What `laterOverlaps` means, by a comparison of every pair. */
+const naiveLater = (rects: readonly Range[]): boolean[] => rects.map((r, k) => rects.slice(k + 1).some((o) => intersects(r, o)));
+
+/** `count` rects near random cells of a `size` square, `span` the most they reach. */
+const randomRects = (rnd: (n: number) => number, count: number, size: number, span: number): Range[] =>
+  Array.from({ length: count }, () => {
+    const r0 = rnd(size);
+    const c0 = rnd(size);
+    return R(r0, c0, r0 + rnd(span), c0 + rnd(span));
+  });
+
+describe('laterOverlaps', () => {
+  it('finds none in rects that do not overlap, and none in fewer than two', () => {
+    expect(laterOverlaps([])).toEqual([]);
+    expect(laterOverlaps([R(0, 0, 1, 1)])).toEqual([false]);
+    expect(laterOverlaps([R(0, 0, 1, 1), R(2, 2, 3, 3)])).toEqual([false, false]);
   });
 
   it('drops a rect that a later one overlaps, though that one is dropped itself', () => {
-    // 0 overlaps 1, 1 overlaps 2, 0 and 2 apart: only the last survives of 1, 0 is dropped by 1 even though 2 then drops 1
-    expect(lastWins([R(0, 0, 2, 2), R(2, 2, 4, 4), R(4, 4, 6, 6)], 0, 10).alive).toEqual([false, false, true]);
+    // 0 overlaps 1, 1 overlaps 2, 0 and 2 apart: 0 is dropped by 1 even though 2 then drops 1
+    expect(laterOverlaps([R(0, 0, 2, 2), R(2, 2, 4, 4), R(4, 4, 6, 6)])).toEqual([true, true, false]);
+    expect(laterOverlaps([R(0, 0, 1, 1), R(0, 0, 1, 1), R(0, 0, 1, 1), R(5, 5, 6, 6)])).toEqual([true, true, false, false]);
   });
 
-  it('takes no more than `limit` rects when they overlap, never fewer than the fixed ones', () => {
-    const rects = [R(0, 0, 1, 1), R(0, 0, 1, 1), R(0, 0, 1, 1), R(5, 5, 6, 6)];
-    expect(lastWins(rects, 0, 2)).toEqual({ alive: [false, true], considered: 2 });
-    expect(lastWins(rects, 3, 2)).toEqual({ alive: [false, false, true], considered: 3 });
+  it.each([
+    ['rects that overlap at a corner, along an edge, inside one another or across (a plus)', 1, 60, 12, 4],
+    ['many small rects with few overlaps', 2, 60, 40, 3],
+    ['big rects that overlap a lot', 3, 25, 12, 9],
+  ])('agrees with a comparison of every pair, %s, in halves of one rect and of the default size (random)', (_name, seed, count, size, span) => {
+    const rnd = rng(seed);
+    for (let t = 0; t < 120; t++) {
+      const rects = randomRects(rnd, rnd(count) + 2, size, span);
+      const expected = naiveLater(rects);
+      expect(laterOverlaps(rects, 1)).toEqual(expected);
+      expect(laterOverlaps(rects)).toEqual(expected);
+    }
   });
 
-  it('is not limited when the rects are disjoint', () => {
-    const rects = Array.from({ length: 50 }, (_, i) => R(i * 2, 0, i * 2 + 1, 1));
-    expect(lastWins(rects, 0, 2).considered).toBe(50);
+  it('agrees with a comparison of every pair for many disjoint rects with a few clusters that overlap (random)', () => {
+    const rnd = rng(4);
+    for (let t = 0; t < 40; t++) {
+      // 2 x 2 blocks one under the other, then rects over some of them, then more blocks
+      const rects: Range[] = Array.from({ length: 60 }, (_, i) => R(i * 2, 0, i * 2 + 1, 1));
+      for (let k = rnd(5); k >= 0; k--) {
+        const r0 = rnd(100);
+        const c0 = rnd(3);
+        rects.splice(rnd(rects.length), 0, R(r0, c0, r0 + rnd(100) + 5, c0 + rnd(3) + 2));
+      }
+      expect(laterOverlaps(rects, 4)).toEqual(naiveLater(rects));
+    }
+  });
+
+  it('compares every pair for corners that are not whole numbers, or are too far apart to be counted', () => {
+    const rects = [R(0, 0, 1.5, 1), R(1, 1, 2, 2), R(10, 10, 11, 11)];
+    expect(laterOverlaps(rects)).toEqual([true, false, false]);
+    const far = [R(0, 0, 2 ** 40, 1), R(2 ** 40, 0, 2 ** 40 + 1, 1), R(5, 5, 6, 6)];
+    expect(laterOverlaps(far)).toEqual([true, false, false]);
+    expect(overlapsAny([R(0, 0, 1.5, 1), R(5, 5, 6, 6)], [R(1, 1, 2, 2)])).toEqual([true, false]);
+  });
+
+  it('compares every pair for more than 4 million rects, which an index in a sort key cannot name', () => {
+    // a sparse array: only its two rects are there to compare
+    const many = Object.assign([R(0, 0, 1, 1), R(5, 5, 6, 6)], { length: 2 ** 22 });
+    expect(overlapsAny([R(1, 1, 2, 2), R(8, 8, 9, 9)], many)).toEqual([true, false]);
+  });
+
+  it('counts from the smallest corner, so that rects beyond the sheet (negative or past column 16,383) are decided too', () => {
+    expect(laterOverlaps([R(-5, -5, 0, 0), R(0, 0, 3, 3), R(10, 20_000, 11, 20_001), R(10, 20_001, 12, 20_002)])).toEqual([true, false, true, false]);
+  });
+});
+
+describe('overlapsAny', () => {
+  it('is false without queries or rects, and tells the sides apart (left, right, above, below, touching a corner)', () => {
+    expect(overlapsAny([], [R(0, 0, 1, 1)])).toEqual([]);
+    expect(overlapsAny([R(0, 0, 1, 1)], [])).toEqual([false]);
+    const q = R(5, 5, 8, 8);
+    for (const [name, other, hit] of [
+      ['left', R(5, 0, 8, 4), false],
+      ['right', R(5, 9, 8, 12), false],
+      ['above', R(0, 5, 4, 8), false],
+      ['below', R(9, 5, 12, 8), false],
+      ['diagonal', R(9, 9, 12, 12), false],
+      ['corner', R(8, 8, 12, 12), true],
+      ['plus', R(0, 6, 20, 7), true],
+      ['inside', R(6, 6, 7, 7), true],
+    ] as Array<[string, Range, boolean]>) expect([name, overlapsAny([q], [other])[0]]).toEqual([name, hit]);
+  });
+
+  it('agrees with a comparison of every pair on random rects', () => {
+    const rnd = rng(5);
+    for (let t = 0; t < 200; t++) {
+      const queries = randomRects(rnd, rnd(12), 20, 6);
+      const rects = randomRects(rnd, rnd(12), 20, 6);
+      expect(overlapsAny(queries, rects)).toEqual(queries.map((q) => rects.some((r) => intersects(q, r))));
+    }
   });
 });
 
@@ -120,8 +196,16 @@ describe('coveredBeyondAnchor', () => {
 // The differential: merging many ranges at once is merging them one at a time.
 // ---------------------------------------------------------------------------
 
+/** Add a region over `r` without `mergeCells`' dropping the regions it overlaps. */
+function seedRegion(s: SheetImpl, r: Range): void {
+  s.config.mergedRegions = [
+    ...(s.config.mergedRegions ?? []),
+    { startRowId: s.ensureRowId(r.startRow), startColId: s.ensureColId(r.startCol), endRowId: s.ensureRowId(r.endRow), endColId: s.ensureColId(r.endCol) },
+  ];
+}
+
 /** Two sheets with the same cells (about `fill` in a hundred of a grid of `size`), the same merges to start with. */
-function twins(rnd: (n: number) => number, size: number, fill: number, before: Range[]): [SheetImpl, SheetImpl] {
+function twins(rnd: (n: number) => number, size: number, fill: number, before: Range[], seeded: Range[] = []): [SheetImpl, SheetImpl] {
   const make = (): SheetImpl => new SheetImpl('s', 'S');
   const [one, bulk] = [make(), make()];
   for (let r = 0; r < size; r++)
@@ -131,6 +215,8 @@ function twins(rnd: (n: number) => number, size: number, fill: number, before: R
     one.mergeCells(b);
     bulk.mergeCells(b);
   }
+  // regions set as they are (as collab concurrency or `setData` can leave them), overlapping each other or not
+  for (const s of [one, bulk]) for (const r of seeded) seedRegion(s, r);
   return [one, bulk];
 }
 
@@ -161,9 +247,37 @@ describe('SheetImpl.mergeCellsBulk against mergeCells one by one', () => {
       const [one, bulk] = twins(rnd, size, 20 + rnd(80), before);
       const ranges = Array.from({ length: rnd(count) + 1 }, () => randomRange(rnd, size, span));
       for (const range of ranges) one.mergeCells(range);
-      expect(bulk.mergeCellsBulk(ranges)).toBe(0);
+      bulk.mergeCellsBulk(ranges);
       expect(dump(bulk, size)).toEqual(dump(one, size));
     }
+  });
+
+  it.each([
+    ['ranges that overlap often', 12, 5, 25],
+    ['small ranges, mostly apart', 14, 1, 12],
+  ])('%s, over regions that already overlap each other: the same regions, cells and ids (random)', (_name, size, span, count) => {
+    const rnd = rng(size * 17 + span);
+    for (let t = 0; t < 250; t++) {
+      const seeded = Array.from({ length: rnd(5) }, () => randomRange(rnd, size, span + 2)).filter((r) => r.startRow !== r.endRow || r.startCol !== r.endCol);
+      const [one, bulk] = twins(rnd, size, 20 + rnd(80), Array.from({ length: rnd(2) }, () => randomRange(rnd, size, span)), seeded);
+      const ranges = Array.from({ length: rnd(count) + 1 }, () => randomRange(rnd, size, span));
+      for (const range of ranges) one.mergeCells(range);
+      bulk.mergeCellsBulk(ranges);
+      expect(dump(bulk, size)).toEqual(dump(one, size));
+    }
+  });
+
+  it('keeps two existing regions that overlap each other when the merge is somewhere else, as mergeCells does', () => {
+    const [one, bulk] = twins(rng(9), 12, 50, [], [R(0, 0, 3, 3), R(2, 2, 5, 5)]);
+    one.mergeCells(R(9, 9, 10, 10));
+    bulk.mergeCellsBulk([R(9, 9, 10, 10)]);
+    expect(bulk.getMergedRegions()).toEqual([R(0, 0, 3, 3), R(2, 2, 5, 5), R(9, 9, 10, 10)]);
+    expect(dump(bulk, 12)).toEqual(dump(one, 12));
+    // a merge over one of them drops that one only
+    one.mergeCells(R(4, 4, 6, 6));
+    bulk.mergeCellsBulk([R(4, 4, 6, 6)]);
+    expect(bulk.getMergedRegions()).toEqual([R(0, 0, 3, 3), R(9, 9, 10, 10), R(4, 4, 6, 6)]);
+    expect(dump(bulk, 12)).toEqual(dump(one, 12));
   });
 
   it('is the same for merges that do not overlap each other (the fast path), in a grid of blocks', () => {
@@ -182,8 +296,8 @@ describe('SheetImpl.mergeCellsBulk against mergeCells one by one', () => {
     const sheet = new SheetImpl('s', 'S');
     const changes: boolean[] = [];
     (sheet as unknown as { structureChangeListener: (f: boolean) => void }).structureChangeListener = (f) => changes.push(f);
-    expect(sheet.mergeCellsBulk([R(0, 0, 0, 0), R(3, 3, 3, 3)])).toBe(0);
-    expect(sheet.mergeCellsBulk([])).toBe(0);
+    sheet.mergeCellsBulk([R(0, 0, 0, 0), R(3, 3, 3, 3)]);
+    sheet.mergeCellsBulk([]);
     expect(changes).toEqual([]);
     sheet.mergeCellsBulk([R(0, 0, 1, 1), R(4, 4, 5, 5), R(8, 8, 9, 9)]);
     expect(changes).toHaveLength(1);
@@ -216,24 +330,34 @@ describe('SheetImpl.mergeCellsBulk against mergeCells one by one', () => {
     const sheet = new SheetImpl('s', 'S');
     sheet.setCell(0, 20_000, { value: 1 });
     sheet.setCell(0, 20_001, { value: 2 });
-    expect(sheet.mergeCellsBulk([R(0, 20_000, 1, 20_001)])).toBe(0);
+    sheet.mergeCellsBulk([R(0, 20_000, 1, 20_001)]);
     expect(sheet.getCell(0, 20_001)).toBeUndefined();
   });
 
-  it('applies the first MAX_OVERLAPPING_MERGES of overlapping ranges and reports the rest, existing merges counting', () => {
+  it('drops no merge for another far away: one overlapping pair among 30,000 disjoint merges loses only the earlier of the pair', () => {
     const sheet = new SheetImpl('s', 'S');
-    // one range at the far end overlaps the first, so they are not disjoint; every other is a block of its own
-    const ranges = Array.from({ length: MAX_OVERLAPPING_MERGES + 5 }, (_, i) => R(i * 2, 0, i * 2 + 1, 1));
-    ranges.push(R(0, 0, 3, 3));
-    expect(sheet.mergeCellsBulk(ranges)).toBe(6);
-    // the 20,000 applied are the first 20,000: the overlapped one (the first) was never dropped, as the last was not applied
-    expect(sheet.getMergedRegions()).toHaveLength(MAX_OVERLAPPING_MERGES);
-    expect(sheet.getMergedRegions()[0]).toEqual(R(0, 0, 1, 1));
-    // with merges there already, the room is what is left of the limit
-    const full = new SheetImpl('s', 'S');
-    full.config.mergedRegions = Array.from({ length: MAX_OVERLAPPING_MERGES }, (_, i) => ({ startRowId: full.ensureRowId(i * 2), startColId: full.ensureColId(0), endRowId: full.ensureRowId(i * 2 + 1), endColId: full.ensureColId(1) }));
-    expect(full.mergeCellsBulk([R(0, 0, 3, 3), R(100_000, 0, 100_001, 1)])).toBe(2);
-    expect(full.getMergedRegions()).toHaveLength(MAX_OVERLAPPING_MERGES);
+    const ranges = Array.from({ length: 30_000 }, (_, i) => R(i * 2, 0, i * 2 + 1, 1));
+    ranges.push(R(1, 1, 2, 2));
+    sheet.mergeCellsBulk(ranges);
+    const regions = sheet.getMergedRegions();
+    // the first two blocks overlap the last range, which drops both (it touches rows 1 and 2, columns 1 and 2)
+    expect(regions).toHaveLength(30_000 - 2 + 1);
+    expect(regions[0]).toEqual(R(4, 0, 5, 1));
+    expect(regions[regions.length - 1]).toEqual(R(1, 1, 2, 2));
+  });
+
+  it('is the same as one by one for many disjoint merges with a few clusters that overlap, and regions that are there already', () => {
+    const rnd = rng(123);
+    const ranges: Range[] = Array.from({ length: 300 }, (_, i) => R(i, (i % 7) * 40, i + rnd(2), (i % 7) * 40 + rnd(3)));
+    // clusters: a few ranges over many of the others, and chains of ranges that each overlap the next
+    for (let k = 0; k < 4; k++) ranges.splice(rnd(ranges.length), 0, R(rnd(250), rnd(200), rnd(250) + 20, rnd(200) + 90));
+    for (let k = 0; k < 20; k++) ranges.push(R(310 + k, 0, 311 + k, 1));
+    const [one, bulk] = twins(rnd, 8, 50, [], []);
+    const seeded = [R(100, 0, 130, 30), R(120, 20, 150, 60)];
+    for (const s of [one, bulk]) for (const r of seeded) seedRegion(s, r);
+    for (const range of ranges) one.mergeCells(range);
+    bulk.mergeCellsBulk(ranges);
+    expect(bulk.getMergedRegions()).toEqual(one.getMergedRegions());
   });
 });
 
@@ -271,9 +395,9 @@ describe('WorkbookImpl.mergeCellsBulk', () => {
   it('merges in the named sheet, and does nothing for one that is not there', () => {
     const wb = book();
     const second = wb.addSheet('Second').id;
-    expect(wb.mergeCellsBulk([R(0, 0, 1, 1)], second)).toBe(0);
+    wb.mergeCellsBulk([R(0, 0, 1, 1)], second);
     expect(wb.getSheet(second).getMergedRegions()).toHaveLength(1);
     expect(wb.getSheet().getMergedRegions()).toHaveLength(0);
-    expect(wb.mergeCellsBulk([R(0, 0, 1, 1)], 'nope')).toBe(0);
+    wb.mergeCellsBulk([R(0, 0, 1, 1)], 'nope');
   });
 });

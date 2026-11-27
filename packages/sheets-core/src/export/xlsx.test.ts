@@ -318,7 +318,7 @@ describe('importFromXlsx: merges are applied in bulk, as mergeCells would one by
     const bytes = await exportToXlsx(source);
 
     const target = freshWorkbook();
-    const { warnings, loss } = await importFromXlsx(bytes, target);
+    const { warnings } = await importFromXlsx(bytes, target);
     const [first, other] = Array.from(target.sheets.values());
     expect(first.getMergedRegions()).toEqual([
       { startRow: 0, startCol: 0, endRow: 1, endCol: 1 },
@@ -329,12 +329,11 @@ describe('importFromXlsx: merges are applied in bulk, as mergeCells would one by
     expect(first.getCell(0, 1)).toBeUndefined();
     expect(first.getCell(0, 0)?.value).toBe('a');
     expect(warnings).toEqual([]);
-    expect(loss.items.filter((i) => i.id === 'xlsx.merges.overlapping')).toEqual([]);
     // a load replaces the document: nothing to undo (one step per merge would have taken the merges back one at a time)
     expect(target.canUndo()).toBe(false);
   });
 
-  it('applies overlapping merges as one by one would (the later wins), and reports those past the limit with a warning and a loss item', async () => {
+  it('applies overlapping merges as one by one would (the later wins), however many, with no warning and no loss', async () => {
     const JSZip = (await import('jszip')).default;
     const MAIN = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
     const RELS = 'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
@@ -356,15 +355,14 @@ describe('importFromXlsx: merges are applied in bulk, as mergeCells would one by
       { startRow: 1, startCol: 1, endRow: 3, endCol: 3 },
       { startRow: 0, startCol: 5, endRow: 1, endCol: 6 },
     ]);
-    expect(ok.loss.items.some((i) => i.id === 'xlsx.merges.overlapping')).toBe(false);
+    expect(ok.warnings).toEqual([]);
 
-    // 20,005 in a chain, each over the next: the first 20,000 are decided, five are left out
+    // 20,005 in a chain, each over the next (more than the 20,000 an earlier version decided): all are decided, only the last stays
     const chain = Array.from({ length: 20_005 }, (_, i) => `A${i * 2 + 1}:B${i * 2 + 3}`);
     const wb = freshWorkbook();
-    const cut = await importFromXlsx(await build(chain), wb);
-    expect(cut.warnings).toContain("5 merged range(s) were not applied: the file's merges overlap, and more than 20000 were given on a sheet.");
-    expect(cut.loss.items.filter((i) => i.id === 'xlsx.merges.overlapping')).toMatchObject([{ label: 'merged range(s) not applied', count: 5, effect: expect.stringMatching(/^lost: /) }]);
-    // each overlaps the next, so of the 20,000 applied only the last stays
-    expect(wb.getSheet().getMergedRegions()).toEqual([{ startRow: 39_998, startCol: 0, endRow: 40_000, endCol: 1 }]);
+    const long = await importFromXlsx(await build(chain), wb);
+    expect(long.warnings).toEqual([]);
+    expect(long.loss.items.map((i) => i.id)).not.toContain('xlsx.merges.overlapping');
+    expect(wb.getSheet().getMergedRegions()).toEqual([{ startRow: 40_008, startCol: 0, endRow: 40_010, endCol: 1 }]);
   }, 60_000);
 });

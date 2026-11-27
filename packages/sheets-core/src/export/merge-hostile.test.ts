@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 // ---------------------------------------------------------------------------
 // Merged ranges are applied to the model after the reader gives them, and a file can ask for hundreds of thousands in a few MB. The
-// import of such a file runs in a child process (`hostile/merge-probe.ts`) under a heap limit and a time limit, so "near-linear" is a
+// import of such a file runs in a child process (`hostile/merge-probe.ts`) under a heap limit and a time limit, so "fast enough" is a
 // fact the process proves by finishing, not a reading of this process's clock: one `mergeCells` per range was quadratic (10,000 merges
 // took 12 s, 20,000 51 s, and 40,000 more than 170 s). The time limits are 15 to 30 times what a laptop takes.
 // ---------------------------------------------------------------------------
@@ -41,13 +41,16 @@ describe('importing a file with very many merged ranges, in a child process with
     expect(out.zipBytes).toBeLessThan(3 * 1024 * 1024);
   }, 150_000);
 
-  it('200,000 overlapping merges: the first 20,000 are decided pair by pair, the rest are left out with a warning and a loss item', () => {
+  it('100,000 merges of blocks and one over the first two: only those two are lost, none of the rest (an earlier version left out everything past 20,000)', () => {
+    const { out, status, signal, stderr } = importInChild('blocksplus', 100_000, 120_000);
+    expect({ status, signal, stderr }).toEqual({ status: 0, signal: null, stderr: '' });
+    expect(out).toMatchObject({ merges: 100_000 - 2, canUndo: false, warnings: [], loss: [] });
+  }, 150_000);
+
+  it('200,000 merges that each overlap the next: all are decided (the last is the one that stays), with no warning and no loss', () => {
     const { out, status, signal, stderr } = importInChild('overlap', 200_000, 120_000);
     expect({ status, signal, stderr }).toEqual({ status: 0, signal: null, stderr: '' });
-    expect(out.warnings).toEqual(["180000 merged range(s) were not applied: the file's merges overlap, and more than 20000 were given on a sheet."]);
-    expect(out.loss).toEqual([['xlsx.merges.overlapping', 180_000]]);
-    // each overlaps the next: of those applied only the last survives
-    expect(out.merges).toBe(1);
+    expect(out).toMatchObject({ merges: 1, warnings: [], loss: [] });
   }, 150_000);
 
   it('one merge of the whole sheet (17 billion cells) over 5,000 cells clears them by one pass over the cells, not over its area', () => {

@@ -14,6 +14,8 @@ const OD = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 const ref = (i: number): string => {
   // `blocks`: 2 x 2 blocks, one under the other (what a sheet of many merged cells looks like)
   if (shape === 'blocks') return `A${i * 2 + 1}:B${i * 2 + 2}`;
+  // `blocksplus`: the blocks, and a last merge over the first two of them (one overlap among many that do not)
+  if (shape === 'blocksplus') return i === count - 1 ? 'A1:C4' : `A${i * 2 + 1}:B${i * 2 + 2}`;
   // `overlap`: every merge reaches the next one's rows, with a size that varies (so the part compresses as a real one does)
   if (shape === 'overlap') return `A${i + 1}:${String.fromCharCode(66 + (i % 20))}${i + 2 + (i % 7)}`;
   // `wide`: one merge of the whole sheet over the cells below, and `count` single cells

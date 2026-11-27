@@ -16,7 +16,6 @@ import type { Cell, CellStyle, SheetData, Sheet, WorkbookData } from '../types';
 import type { WorkbookImpl } from '../workbook';
 import { StylePool } from '../style-pool';
 import { FormatPool } from '../format-pool';
-import { MAX_OVERLAPPING_MERGES } from '../sheet';
 import { generateId } from '../utils/id';
 import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
 import { isFaithfulFormatCode } from '../number-format';
@@ -162,10 +161,9 @@ function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['st
  * Replace `workbook`'s entire contents with what's in the xlsx file at
  * `bytes` — every existing sheet is discarded, matching what "import a file"
  * should mean. Merges are applied after the bulk load via the live
- * `mergeCellsBulk` (the same result as `mergeCells` for each, in near-linear time and without history) rather than through setData's
+ * `mergeCellsBulk` (the same result as `mergeCells` for each, in O(n log^2 n) and without history) rather than through setData's
  * config, since merged regions (unlike cells/widths/heights) only accept stable row/col IDs, not the numeric indices this adapter
- * otherwise works in. Overlapping merges (Excel writes none) are applied pair by pair up to `MAX_OVERLAPPING_MERGES` per sheet, and the rest
- * are left out with a warning and a loss item (`xlsx.merges.overlapping`).
+ * otherwise works in. Overlapping merges (Excel writes none) are resolved as one by one would: the later wins.
  *
  * Throws an `ImportError` (from `@b32nio/spindle-io/xlsx`, with a `code`) for a file that cannot or must not be opened:
  * encrypted, legacy binary, not a package, over the limits (`options.limits`), or corrupt. The workbook is left untouched.
@@ -192,19 +190,9 @@ export async function importFromXlsx(
   workbook.setData(data);
   // all the merges of a sheet at once: one by one each looked at all the others (10,000 took 12 s, 20,000 51 s). No history: a load
   // replaces the document, and `setData` has just emptied the undo stack; one step per merge would let undo take the merges back one by one
-  let overlapping = 0;
   result.sheets.forEach((sheet, i) => {
-    if (sheet.mergedRanges) overlapping += workbook.mergeCellsBulk(sheet.mergedRanges, sheetIds[i], { history: false });
+    if (sheet.mergedRanges) workbook.mergeCellsBulk(sheet.mergedRanges, sheetIds[i], { history: false });
   });
-  if (overlapping > 0) {
-    loss.items.push({
-      id: 'xlsx.merges.overlapping',
-      label: 'merged range(s) not applied',
-      count: overlapping,
-      effect: `lost: the file's merges overlap (Excel writes none that do); the ones past ${MAX_OVERLAPPING_MERGES} of them over a sheet were not applied`,
-    });
-    warnings.push(`${overlapping} merged range(s) were not applied: the file's merges overlap, and more than ${MAX_OVERLAPPING_MERGES} were given on a sheet.`);
-  }
   return { warnings, loss };
 }
 

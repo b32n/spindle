@@ -13,7 +13,7 @@ import { CommentStore } from './comments';
 import { getStableCellKey, parseStableCellKey } from './utils/cell-key';
 import { generateId } from './utils/id';
 import { getRangeCells } from './utils/range';
-import { coveredBeyondAnchor, lastWins, normalized } from './merge-regions';
+import { coveredBeyondAnchor, laterOverlaps, normalized, overlapsAny } from './merge-regions';
 
 /** Whether two normalized numeric ranges (inclusive bounds) overlap. */
 function rangesIntersect(a: Range, b: Range): boolean {
@@ -24,12 +24,6 @@ function rangesIntersect(a: Range, b: Range): boolean {
     a.endCol >= b.startCol
   );
 }
-
-/**
- * Most merges `mergeCellsBulk` decides pair by pair when some overlap (a sound file has none that do; the cost is a comparison for each
- * pair, so this many take a fraction of a second).
- */
-export const MAX_OVERLAPPING_MERGES = 20_000;
 
 export class SheetImpl implements Sheet {
   id: string;
@@ -678,32 +672,30 @@ export class SheetImpl implements Sheet {
   }
 
   /**
-   * Merge many ranges as if by `mergeCells`, one after the other in this order, with one notification at the end and in near-linear
-   * time (`mergeCells` repeated is quadratic in the merges, for each looks at all the others). The result is the same: the same regions
-   * in the same order, the same cells cleared. The exception is a file that is not sound, whose merges overlap: those are decided pair by
-   * pair, so past `MAX_OVERLAPPING_MERGES` of them (in all, merges already there included) the rest of the ranges are not applied.
-   * Returns how many ranges were left out for that.
+   * Merge many ranges as if by `mergeCells`, one after the other in this order, with one notification at the end and in O(n log^2 n)
+   * (`mergeCells` repeated is quadratic in the merges, for each looks at all the others). The result is the same, for any ranges and any
+   * regions already there (those that overlap each other too): the same regions in the same order, the same cells cleared. A region
+   * that is there stays unless a range overlaps it; a range stays unless a later one overlaps it.
    */
-  mergeCellsBulk(ranges: readonly Range[]): number {
+  mergeCellsBulk(ranges: readonly Range[]): void {
     // a single cell cannot be merged
     const targets = ranges.map(normalized).filter((t) => t.startRow !== t.endRow || t.startCol !== t.endCol);
-    if (targets.length === 0) return 0;
+    if (targets.length === 0) return;
     // what is there already (without the orphans, which a merge drops)
     const existing: Array<{ region: MergedRegion; span: Range }> = [];
     for (const region of this.config.mergedRegions ?? []) {
       const span = this.regionToRange(region);
       if (span !== null) existing.push({ region, span });
     }
-    const { alive, considered } = lastWins([...existing.map((e) => e.span), ...targets], existing.length, MAX_OVERLAPPING_MERGES);
-    const applied = targets.slice(0, considered - existing.length);
-    if (applied.length === 0) return targets.length;
+    const overlapped = overlapsAny(existing.map((e) => e.span), targets);
+    const dropped = laterOverlaps(targets);
 
-    this.clearCovered(applied);
+    this.clearCovered(targets);
     const kept: MergedRegion[] = [];
     existing.forEach((e, k) => {
-      if (alive[k]) kept.push(e.region);
+      if (!overlapped[k]) kept.push(e.region);
     });
-    applied.forEach((t, k) => {
+    targets.forEach((t, k) => {
       // the ids of every merge are made, those of a merge a later one drops too, as `mergeCells` makes them
       const region = {
         startRowId: this.ensureRowId(t.startRow),
@@ -711,11 +703,10 @@ export class SheetImpl implements Sheet {
         endRowId: this.ensureRowId(t.endRow),
         endColId: this.ensureColId(t.endCol),
       };
-      if (alive[existing.length + k]) kept.push(region);
+      if (!dropped[k]) kept.push(region);
     });
     this.config.mergedRegions = kept;
     this.notifyStructureChange();
-    return targets.length - applied.length;
   }
 
   /** Clear the cells the merges cover but their first cells (what `mergeCells` does for each), by the cells of the area where that is fewer, or by one sweep over the cells. */
