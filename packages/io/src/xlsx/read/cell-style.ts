@@ -45,6 +45,18 @@ function rotationOf(value: number | undefined): number | undefined {
   return value > 90 && value <= 180 ? 90 - value : undefined;
 }
 
+/**
+ * The number format code the editor gets. A code the file defines drops its backslash escapes (`\\$#,##0.00` is `$#,##0.00`,
+ * `yyyy\\-mm\\-dd` is `yyyy-mm-dd`): the spelling the `exceljs` reader gave (`numfmt-xform.js`) and the one the editor's format
+ * mapping (`fromExcelNumberFormatCode`) expects, so a code another producer escapes (LibreOffice escapes every literal) still
+ * maps onto a structured format or survives a save as the same custom code. The workbook's styles keep the code as written.
+ * A built-in id's code comes from the table as it is.
+ */
+function editorFormatCode(styles: XlsxStyles, id: number): string | undefined {
+  const defined = id === 0 ? undefined : styles.numFmts.find((n) => n.id === id);
+  return defined === undefined ? numberFormatCode(styles, id) : defined.code.replace(/\\(.)/g, '$1');
+}
+
 export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolean): CellLook {
   const style: SpreadsheetCellStyle = {};
   const font = styles.fonts[xf.fontId];
@@ -85,7 +97,7 @@ export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolea
 
   const look: CellLook = {};
   if (Object.keys(style).length > 0) look.style = style;
-  const code = numberFormatCode(styles, xf.numFmtId);
+  const code = editorFormatCode(styles, xf.numFmtId);
   if (code !== undefined && code !== 'General') look.numberFormat = { code };
   return look;
 }

@@ -80,6 +80,15 @@ describe('lookOf', () => {
     expect(f(27)).toBeUndefined();
   });
 
+  it('drops the backslash escapes of a code the file defines (as the exceljs reader did), and keeps a built-in code as the table has it', () => {
+    const tables = '<numFmts count="3"><numFmt numFmtId="165" formatCode="\\$#,##0.00"/><numFmt numFmtId="166" formatCode="yyyy\\-mm\\-dd"/><numFmt numFmtId="167" formatCode="0\\\\0"/></numFmts>';
+    const f = (id: number) => look(`<xf numFmtId="${id}"/>`, tables).numberFormat;
+    expect(f(165)).toEqual({ code: '$#,##0.00' });
+    expect(f(166)).toEqual({ code: 'yyyy-mm-dd' });
+    expect(f(167)).toEqual({ code: '0\\0' });
+    expect(f(5)).toEqual({ code: '"$"#,##0_);\\("$"#,##0\\)' });
+  });
+
   it('is empty for a format that names tables the file does not have', () => {
     expect(look('<xf fontId="9" fillId="9" borderId="9"/>')).toEqual({});
   });

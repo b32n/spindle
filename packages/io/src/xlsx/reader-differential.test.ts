@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import ExcelJS from 'exceljs';
+import JSZip from 'jszip';
 import { resolve } from 'node:path';
 import type { SpreadsheetCell, SpreadsheetCellStyle, SpreadsheetImportResult, SpreadsheetSheet } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError } from '../common/import-error';
@@ -84,6 +86,9 @@ const BUILTIN_RENAMES: Record<string, string> = {
   mmss: 'mm:ss.0',
   'mmss.0': 'mm:ss.0',
 };
+
+/** What the e2e files show of the named improvements: nothing, they are all identical. */
+const E2E_IMPROVEMENTS: Record<string, number> = {};
 
 const addressOf = (key: string): string => {
   const [r, c] = key.split(':').map(Number);
@@ -353,6 +358,86 @@ describe('differential: own reader against the exceljs reader, over the corpus',
       expect('r' in n).toBe(true);
       if ('r' in n) expect(n.r.sheets[0].cells.get('0:0')).toMatchObject({ value: 'Region' });
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The files the end-to-end specs open (e2e/fixtures, and the workbooks e2e/sheets build in the test itself). The corpus alone let a
+// regression through: LibreOffice escapes every literal in a number format (`\$#,##0.00`), no corpus file does, and the old reader
+// dropped the backslashes the editor's format mapping expects. These run the same comparison, with no named improvement beyond
+// the corpus ones, and pin the improvements that show up.
+// ---------------------------------------------------------------------------
+
+const E2E_FIXTURES = resolve(__dirname, '../../../../e2e/fixtures');
+const e2eFiles = readdirSync(E2E_FIXTURES).filter((f) => /\.(xlsx|xlsm)$/i.test(f)).sort();
+const e2eBytes = (filename: string): Uint8Array => new Uint8Array(readFileSync(resolve(E2E_FIXTURES, filename)));
+
+/** The cases of e2e/sheets/number-formats.spec.ts, as that spec writes them (exceljs writer). */
+const E2E_FORMAT_CASES: Array<[number, string]> = [
+  [1234.5, '"$"#,##0.00'],
+  [46024, 'dddd, mmmm d, yyyy'],
+  [46024.75, 'h:mm AM/PM'],
+  [1.5, '[h]:mm:ss'],
+  [1500000, '0.0,,"M"'],
+  [150, '[>100]"big";"small"'],
+];
+
+async function e2eWorkbooks(): Promise<Array<[string, Uint8Array]>> {
+  const formats = new ExcelJS.Workbook();
+  const sheet = formats.addWorksheet('Formats');
+  E2E_FORMAT_CASES.forEach(([value, code], row) => {
+    const cell = sheet.getCell(row + 1, 1);
+    cell.value = value;
+    cell.numFmt = code;
+  });
+  // e2e/sheets/import-loss.spec.ts: the frozen-header fixture with a conditional format and a chart bolted on
+  const zip = await JSZip.loadAsync(e2eBytes('exceljs-frozen.xlsx'));
+  const path = Object.keys(zip.files).find((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n)) as string;
+  const xml = await (zip.file(path) as JSZip.JSZipObject).async('string');
+  zip.file(path, xml.replace('</sheetData>', '</sheetData><conditionalFormatting sqref="A1"><cfRule type="cellIs" priority="1" operator="equal"><formula>1</formula></cfRule></conditionalFormatting>'));
+  zip.file('xl/charts/chart1.xml', '<c:chartSpace/>');
+  return [
+    ['number-formats.spec: formats.xlsx', new Uint8Array(await formats.xlsx.writeBuffer())],
+    ['import-loss.spec: features.xlsx', await zip.generateAsync({ type: 'uint8array' })],
+  ];
+}
+
+describe('differential: the files the end-to-end specs open', () => {
+  it('finds the e2e fixtures', () => {
+    expect(e2eFiles).toEqual(['exceljs-frozen.xlsx', 'styled-multisheet.xlsx']);
+  });
+
+  const check = async (name: string, bytes: Uint8Array) => {
+    const o = await importXlsxExceljs(bytes);
+    const n = await importXlsx(bytes);
+    const { unexplained, seen } = compare(o, n);
+    expect({ name, unexplained }).toEqual({ name, unexplained: [] });
+    return seen;
+  };
+
+  it.each(e2eFiles)('%s: identical output apart from the named improvements', async (filename) => {
+    await check(filename, e2eBytes(filename));
+  });
+
+  it('the workbooks the e2e specs build: identical output apart from the named improvements', async () => {
+    for (const [name, bytes] of await e2eWorkbooks()) await check(name, bytes);
+  });
+
+  it('pins the improvements the e2e files show', async () => {
+    const seen: Category[] = [];
+    for (const f of e2eFiles) seen.push(...(await check(f, e2eBytes(f))));
+    for (const [name, bytes] of await e2eWorkbooks()) seen.push(...(await check(name, bytes)));
+    expect(tally(seen)).toEqual(E2E_IMPROVEMENTS);
+  });
+
+  it('S-FIO-01: the LibreOffice file keeps the codes LibreOffice escapes, as the old reader unescaped them', async () => {
+    const n = await importXlsx(e2eBytes('styled-multisheet.xlsx'));
+    const sales = n.sheets.find((s) => s.name === 'Sales') as SpreadsheetSheet;
+    expect(sales.cells.get('1:2')?.numberFormat).toEqual({ code: '$#,##0.00' });
+    expect(sales.cells.get('1:5')?.numberFormat).toEqual({ code: 'yyyy-mm-dd' });
+    expect(sales.cells.get('1:6')?.numberFormat).toEqual({ code: '#,##0.0" kg"' });
+    // the workbook's styles keep the code as the file writes it
+    expect(n.styles?.numFmts.find((f) => f.id === 165)?.code).toBe('\\$#,##0.00');
   });
 });
 
