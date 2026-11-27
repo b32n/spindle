@@ -212,6 +212,7 @@
     "truncated": false
   },
   "exportWarnings": [
+    "2 slide masters were merged into one (their layouts keep their placeholders).",
     "Not exported yet: 26 shapes and text boxes (K12b)."
   ],
   "reimportWarnings": [],
