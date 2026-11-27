@@ -172,13 +172,37 @@ function mapInlines(doc: RichTextDoc, fn: (inline: RichTextInline) => RichTextIn
   };
 }
 
+/** The marks an inline carries: a run's own, or those on a field's cached text (where the Y layout keeps them). */
+function inlineMarks(inline: RichTextInline): RichTextMark[] {
+  return inline.type === 'field' ? [...(inline.content?.[0]?.marks ?? []), ...(inline.marks ?? [])] : (inline.marks ?? []);
+}
+
+/**
+ * Rewrite the marks of one inline. A field's marks go on its cached text, never on the node (the Y layout keeps marks
+ * on text only); any marks on the node itself are rewritten too so a stale one cannot override. A field without cached
+ * text has nowhere to hold a mark and is left as is.
+ */
+function mapMarks(inline: RichTextInline, type: string, fn: (marks: RichTextMark[]) => RichTextMark[]): RichTextInline {
+  const apply = (t: RichTextText): RichTextText => {
+    const marks = fn(t.marks ?? []);
+    const { marks: _drop, ...rest } = t;
+    return marks.length ? { ...rest, marks } : rest;
+  };
+  if (inline.type !== 'field') return apply(inline);
+  if (!inline.content?.length) return inline;
+  const { marks: _node, ...rest } = inline;
+  const nodeMarks = (inline.marks ?? []).filter((m) => m.type !== type);
+  return { ...rest, content: inline.content.map(apply), ...(nodeMarks.length ? { marks: nodeMarks } : {}) };
+}
+
 /** Whether every text run in the body carries a mark of `type`. */
 export function docHasMark(doc: RichTextDoc, type: string): boolean {
   let sawText = false;
   for (const p of doc.content) {
     for (const inline of p.content ?? []) {
+      if (inline.type === 'field' && !inline.content?.length) continue;
       sawText = true;
-      if (!(inline.marks ?? []).some((m) => m.type === type)) return false;
+      if (!inlineMarks(inline).some((m) => m.type === type)) return false;
     }
   }
   return sawText;
@@ -186,21 +210,12 @@ export function docHasMark(doc: RichTextDoc, type: string): boolean {
 
 /** Add (or replace) a mark across the whole body. */
 export function applyMarkToDoc(doc: RichTextDoc, mark: RichTextMark): RichTextDoc {
-  return mapInlines(doc, (inline) => ({
-    ...inline,
-    marks: [...(inline.marks ?? []).filter((m) => m.type !== mark.type), mark],
-  }));
+  return mapInlines(doc, (inline) => mapMarks(inline, mark.type, (marks) => [...marks.filter((m) => m.type !== mark.type), mark]));
 }
 
 /** Remove a mark type across the whole body. */
 export function removeMarkFromDoc(doc: RichTextDoc, type: string): RichTextDoc {
-  return mapInlines(doc, (inline) => {
-    const marks = (inline.marks ?? []).filter((m) => m.type !== type);
-    if (marks.length) return { ...inline, marks };
-    const bare = { ...inline };
-    delete bare.marks;
-    return bare;
-  });
+  return mapInlines(doc, (inline) => mapMarks(inline, type, (marks) => marks.filter((m) => m.type !== type)));
 }
 
 /** Toggle a boolean mark across the whole body. */

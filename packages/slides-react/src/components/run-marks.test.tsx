@@ -68,6 +68,8 @@ describe('StaticRichText fields', () => {
     expect(render(doc(field({ kind: 'datetime', format: 'date' }, 'old')), ctx(1))).toContain('>Jan 15, 2026<');
     expect(render(doc(field({ kind: 'footer' }, 'Acme')), ctx(1))).toContain('>Acme<');
     expect(render(doc({ type: 'field', attrs: { kind: 'footer' } } as RichTextInline), ctx(1))).toContain('data-field="footer"');
+    // A crafted kind is rendered as the footer kind, like the editor's toDOM.
+    expect(render(doc(field({ kind: '"><x' as never }, 'A')), ctx(1))).toContain('data-field="footer"');
   });
 
   it('formatting set on the node itself still applies', () => {

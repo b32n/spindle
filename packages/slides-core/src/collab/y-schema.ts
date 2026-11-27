@@ -33,8 +33,8 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * know them and would drop them on its next write, so it must not join a v2 room.
  *
  * 3: the rich-text fragment carries K3c run marks (`baseline`, `caps`, `charSpacing`, `lang`, as text formatting
- * attributes) and `field` nodes (slide number, date/time, footer; an XmlElement with `kind`, `text`, `format`
- * attributes). A v2 client's schema has neither and would drop them on its next write, so it must not join a v3 room.
+ * attributes) and `field` nodes (slide number, date/time, footer; an XmlElement with `kind` and `format`
+ * attributes whose child text is the cached text). A v2 client's schema has neither and would drop them on its next write, so it must not join a v3 room.
  */
 export const COLLAB_SCHEMA_VERSION = 3;
 

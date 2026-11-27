@@ -14,6 +14,7 @@ import {
   baselineCss,
   resolveFieldText,
   fieldMarks,
+  safeFieldKind,
   inlineText,
   type FieldContext,
   type RichTextDoc,
@@ -108,7 +109,7 @@ function renderInline(inline: RichTextInline, theme: ThemeData, key: number, sca
     );
   }
   return (
-    <span key={key} style={style} lang={run.lang ?? undefined} {...(inline.type === 'field' ? { 'data-field': inline.attrs?.kind } : {})}>
+    <span key={key} style={style} lang={run.lang ?? undefined} {...(inline.type === 'field' ? { 'data-field': safeFieldKind(inline.attrs?.kind) } : {})}>
       {content}
     </span>
   );

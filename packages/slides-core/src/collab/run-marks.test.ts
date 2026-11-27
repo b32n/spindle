@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
 import { DeckImpl } from '../deck';
-import type { RichTextDoc } from '../text/model';
+import { applyMarkToDoc, type RichTextDoc } from '../text/model';
 import type { TextElement } from '../scene/types';
 import { COLLAB_SCHEMA_VERSION, CollabSchemaVersionError, assertSchemaVersion, hydrateYDocFromData, serializeYDocToData } from './y-schema';
 import { getCollabBlockers } from './blockers';
@@ -46,6 +46,17 @@ describe('run marks and fields in the collaboration layout', () => {
     // The formatting of a field survives because it sits on the cached text.
     expect(runs[3].type === 'field' && runs[3].content![0]).toMatchObject({ text: '‹#›', marks: expect.arrayContaining([expect.objectContaining({ type: 'bold' }), expect.objectContaining({ type: 'baseline' })]) });
     expect(runs[4]).toMatchObject({ type: 'field', attrs: { kind: 'datetime', format: 'time' }, content: [{ text: '2:30 PM' }] });
+  });
+
+  it('keeps a mark applied to a whole body with a field through hydrate -> serialize', () => {
+    const d = build();
+    const el = d.getData().slides[0].elements[0] as TextElement;
+    const marked = applyMarkToDoc(el.richText, { type: 'baseline', attrs: { pct: -25 } });
+    const ydoc = new Y.Doc();
+    hydrateYDocFromData(ydoc, { ...d.getData(), slides: [{ ...d.getData().slides[0], elements: [{ ...el, richText: marked }] }] });
+    const back = serializeYDocToData(ydoc, { elementIds: [] }, d.getActiveSlideId());
+    const field = inlines(back.slides[0].elements[0] as TextElement)[3];
+    expect(field.type === 'field' && field.content![0].marks).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'baseline', attrs: { pct: -25 } })]));
   });
 
   it('syncs between two clients', async () => {
