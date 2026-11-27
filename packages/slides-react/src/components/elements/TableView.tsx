@@ -6,7 +6,7 @@
 // cell being edited. Grid lines use the element's border stroke.
 
 import React, { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import { resolveColor, type Color, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { resolveColor, resolveCellEdges, spanAt, type Color, type Stroke, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../../context/DeckContext';
 import { inSelection } from '../../interactions/table-selection-store';
 import { StaticRichText } from './StaticRichText';
@@ -23,6 +23,19 @@ const SELECT_TINT_COLOR = 'rgba(45,127,249,0.20)';
 // resize/shift the moment you double-click into a cell.
 const CELL_FONT = 16;
 const CELL_PAD = 6;
+
+/** CSS for one resolved edge (`null` = no line). Widths are at least 1px, as for the grid line. */
+function edgeCss(edge: Stroke | null, theme: ThemeData): string {
+  if (!edge) return 'none';
+  const style = edge.dash === 'dash' ? 'dashed' : edge.dash === 'dot' ? 'dotted' : 'solid';
+  return `${Math.max(1, edge.width)}px ${style} ${resolveColor(edge.color, theme)}`;
+}
+
+function spanCells(s: { r: number; c: number; rs: number; cs: number }): Array<[number, number]> {
+  const out: Array<[number, number]> = [];
+  for (let i = s.r; i < s.r + s.rs; i++) for (let j = s.c; j < s.c + s.cs; j++) out.push([i, j]);
+  return out;
+}
 
 export function TableView({ el, theme, interactive = false }: { el: TableElement; theme: ThemeData; interactive?: boolean }): React.ReactElement {
   const { deck, editing, tableSel, tableMetrics, transient } = useDeckContext();
@@ -62,9 +75,7 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
   }, [tableMetrics, el.id, interactive]);
   useLayoutEffect(() => { syncRef.current(); });
 
-  const border = el.border
-    ? `${Math.max(1, el.border.width)}px solid ${resolveColor(el.border.color, theme)}`
-    : `1px solid ${resolveColor({ kind: 'theme', slot: 'dk2' } as Color, theme)}`;
+  const gridLine: Stroke = el.border ?? { color: { kind: 'theme', slot: 'dk2' } as Color, width: 1 };
 
   return (
     <table
@@ -82,29 +93,42 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
           // A row's manual minimum height (px); content can still push it taller.
           <tr key={r} style={{ height: el.rowHeights?.[r] ? el.rowHeights[r] : undefined }}>
             {row.map((cell, c) => {
+              // A cell covered by a merged region is not drawn; its origin spans over it.
+              const span = spanAt(el, r, c);
+              if (span.r !== r || span.c !== c) return null;
+              const edges = resolveCellEdges(el, r, c, gridLine);
               const { style: fillStyle, layer: fillLayer } = htmlFill(cell.fill, theme);
               const isEditing = !!editingCell && editingCell[0] === r && editingCell[1] === c;
-              const isSelected = !!cellSel && !isEditing && inSelection(cellSel, r, c);
+              const isSelected = !!cellSel && !isEditing && (span.rs > 1 || span.cs > 1
+                ? spanCells(span).some(([sr, sc]) => inSelection(cellSel, sr, sc))
+                : inSelection(cellSel, r, c));
               // Fill in cell defaults so the static <td> and the live editor
               // agree on padding, size, and vertical alignment (no jump on edit).
               const cellStyle = {
+                ...cell.bodyStyle,
                 padding: cell.bodyStyle?.padding ?? CELL_PAD,
                 fontSize: cell.bodyStyle?.fontSize ?? CELL_FONT,
                 vAlign: cell.bodyStyle?.vAlign ?? 'top',
-                ...cell.bodyStyle,
               };
+              // Per-side margins win over the uniform padding.
+              const ins = cellStyle.insets;
               return (
                 <td
                   key={c}
                   data-cell={`${r},${c}`}
+                  colSpan={span.cs > 1 ? span.cs : undefined}
+                  rowSpan={span.rs > 1 ? span.rs : undefined}
                   style={{
-                    border,
+                    borderLeft: edgeCss(edges.l, theme),
+                    borderTop: edgeCss(edges.t, theme),
+                    borderRight: edgeCss(edges.r, theme),
+                    borderBottom: edgeCss(edges.b, theme),
                     verticalAlign: cellStyle.vAlign,
                     fontSize: cellStyle.fontSize,
                     ...fillStyle,
                     // A cell with a fill layer paints the tint as an overlay above that layer (a box-shadow would sit beneath it).
                     boxShadow: isSelected && !fillLayer ? SELECT_TINT : undefined,
-                    padding: isEditing ? 0 : cellStyle.padding,
+                    padding: isEditing ? 0 : ins ? `${ins.t}px ${ins.r}px ${ins.b}px ${ins.l}px` : cellStyle.padding,
                     overflow: 'hidden',
                     boxSizing: 'border-box',
                   }}

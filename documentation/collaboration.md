@@ -293,7 +293,11 @@ edits, and the inverse operations broadcast to peers like any other edit.
   `parentGroupId` key beside `groupId`, so a v5 client (which would flatten the nesting) refuses a v6 room. Version 7 added elbow and curved
   connectors: a line's `props` carry `connector` and `adjustments`, so a v6 client (which would draw them straight)
   refuses a v7 room. Version 8 added custom geometry: a shape's `props` carry `shape: 'path'` and `path`, so a v7 client
-  (which would draw a plain rectangle) refuses a v8 room.
+  (which would draw a plain rectangle) refuses a v8 room. Version 9 added table merges and per-cell borders (`gridSpan`, `rowSpan`,
+  `hMerge`, `vMerge`, `borders` on the cells, `styleFlags` on the table, all inside the element `props` JSON), so a v8 client
+  (which would draw covered cells and ignore the spans) refuses a v9 room. A table's cells, text included, are one
+  `props` JSON value: two users editing cells of one table at the same moment keep one edit (last writer wins; the
+  text is not CRDT-merged). That limit predates version 9 and is unchanged.
 - **Sheets: version gate and blockers.** A sheets room records the layout version in `meta.schemaVersion`
   (a room without the key reads as 1, so existing rooms keep working). `attachCollab` refuses a room written by a
   newer client with a `CollabSchemaVersionError` that names both versions, before it seeds or edits anything.

@@ -56,8 +56,14 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * (paths of move/line/cubic/quad/arc/close commands, fill modes). A v7 client would draw such a shape as a plain
  * rectangle and, on its next write of the element, keep the key but could not edit or re-export it faithfully, so it
  * must not join a v8 room.
+ *
+ * 9: K7 tables. A table element's `props.cells` cells may carry `gridSpan`, `rowSpan`, `hMerge`, `vMerge` (merged
+ * regions) and `borders` (per-side strokes), and the table `props.styleFlags`. A v8 client would draw a merged table as
+ * a plain grid (covered cells shown), and its next edit of the cells would keep the keys while ignoring the spans on
+ * insert/delete, so it must not join a v9 room. Table cell text is part of the same `props` JSON (last writer wins,
+ * not CRDT-merged); that is an existing limit, unchanged here.
  */
-export const COLLAB_SCHEMA_VERSION = 8;
+export const COLLAB_SCHEMA_VERSION = 9;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

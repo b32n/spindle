@@ -29,7 +29,7 @@ import {
   type LineElementInput,
   type TableElementInput,
 } from './scene/elements';
-import { insertRow, insertColumn, removeRow, removeColumn, resizeColumn, setRowHeight } from './scene/table';
+import { insertRow, insertColumn, removeRow, removeColumn, resizeColumn, setRowHeight, mergeCells, splitCell, setCellBorders, type CellRange, type BorderScope } from './scene/table';
 import {
   bringToFront as zBringToFront,
   sendToBack as zSendToBack,
@@ -42,7 +42,7 @@ import { alignFrames, distributeFrames, type AlignMode, type FrameItem } from '.
 import type { Rect } from './scene/geometry';
 import { groupChain, groupParents } from './scene/group-tree';
 import { connectionFrame, resolveConnectorFrame, resolveEndpoints } from './scene/connector';
-import type { ConnectionFrame, ConnectorKind, Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
+import type { ConnectionFrame, ConnectorKind, Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell, Stroke } from './scene/types';
 import { applyTextFormat, type RichTextDoc, type TextFormatSpec } from './text/model';
 import type { ThemeData, LayoutData } from './theme/types';
 import { getBuiltinTheme, BUILTIN_LAYOUTS, DEFAULT_SLIDE_SIZE } from './theme/builtin';
@@ -809,6 +809,15 @@ export class DeckImpl {
   resizeTableColumn(id: string, index: number, delta: number): void { this.tableOp(id, (t) => resizeColumn(t, index, delta)); }
   /** Set row `index`'s minimum height in px (content can grow it further). */
   setTableRowHeight(id: string, index: number, height: number): void { this.tableOp(id, (t) => setRowHeight(t, index, height)); }
+
+  /** Merge the cells of a range into one (expanded to whole merged regions; a single cell is a no-op), one undo. */
+  mergeTableCells(id: string, range: CellRange): void { this.tableOp(id, (t) => mergeCells(t, range)); }
+  /** Split the merged region containing (row, col) back into single cells. */
+  splitTableCell(id: string, row: number, col: number): void { this.tableOp(id, (t) => splitCell(t, row, col)); }
+  /** Set a stroke, `null` (no line) or `undefined` (the grid line) on edges of a range, one undo. */
+  setTableCellBorders(id: string, range: CellRange, scope: BorderScope, value: Stroke | null | undefined): void {
+    this.tableOp(id, (t) => setCellBorders(t, range, scope, value));
+  }
 
   /** Replace one cell's rich text (cell editing commits through here). */
   setTableCellRichText(id: string, row: number, col: number, doc: RichTextDoc): void {

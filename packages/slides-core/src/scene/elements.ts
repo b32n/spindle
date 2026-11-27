@@ -20,13 +20,14 @@ import type {
   ConnectorKind,
   TableElement,
   TableCell,
+  TableStyleFlags,
   ShapeKind,
   ArrowHead,
   EndpointBind,
   PlaceholderMeta,
   ElementType,
 } from './types';
-import { evenFractions, makeGrid } from './table';
+import { evenFractions, makeGrid, normalizeSpans } from './table';
 
 /** Fields every element needs beyond its type-specific payload. */
 export interface BaseElementInput extends Partial<Frame> {
@@ -183,6 +184,7 @@ export interface TableElementInput extends BaseElementInput {
   rowFractions?: number[];
   cells?: TableCell[][];
   border?: Stroke;
+  styleFlags?: TableStyleFlags;
 }
 
 export function createTableElement(input: TableElementInput): TableElement {
@@ -198,16 +200,18 @@ export function createTableElement(input: TableElementInput): TableElement {
       }
     }
   }
-  return {
+  const el: TableElement = {
     ...base(input, 'table'),
     type: 'table',
     rows,
     cols,
     colFractions: input.colFractions?.length === cols ? input.colFractions : evenFractions(cols),
     rowFractions: input.rowFractions?.length === rows ? input.rowFractions : evenFractions(rows),
-    cells: grid,
+    cells: normalizeSpans(grid, rows, cols),
     border: input.border ?? { color: { kind: 'theme', slot: 'dk2' }, width: 1 },
   };
+  if (input.styleFlags) el.styleFlags = input.styleFlags;
+  return el;
 }
 
 /** The default frame for a freshly-inserted element of a given type. */

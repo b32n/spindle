@@ -5,7 +5,7 @@
 // [row, col] that was clicked.
 
 import React, { useSyncExternalStore } from 'react';
-import { resolveColor, type Color, type TableElement } from '@b32nio/spindle-slides-core';
+import { resolveColor, expandRange, spanAt, type BorderScope, type Color, type Stroke, type TableElement } from '@b32nio/spindle-slides-core';
 import { useDeck, useTheme, useElement } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { selectionRect, inSelection, cellsInSelection } from '../interactions/table-selection-store';
@@ -43,6 +43,15 @@ export function TableCellMenu({ tableId, row, col, x, y, onClose }: TableCellMen
   const cell = el.cells[row]?.[col];
   const setFill = (fill: TableElement['cells'][number][number]['fill']) => deck.updateTableCells(tableId, targetCells, { fill });
 
+  // Merge/split and borders work on whole merged regions: the range grows to take any region it touches.
+  const range = expandRange(el, { r0, c0, r1, c1 });
+  const first = spanAt(el, range.r0, range.c0);
+  const canMerge = first.rs < range.r1 - range.r0 + 1 || first.cs < range.c1 - range.c0 + 1; // more than one region inside
+  const region = spanAt(el, row, col);
+  const canSplit = region.rs > 1 || region.cs > 1;
+  const gridLine: Stroke = el.border ?? { color: { kind: 'theme', slot: 'dk2' }, width: 1 };
+  const border = (scope: BorderScope, value: Stroke | null | undefined) => () => deck.setTableCellBorders(tableId, range, scope, value);
+
   const items: Array<MenuItem | 'sep'> = [
     { label: 'Insert row above', run: () => deck.insertTableRow(tableId, r0) },
     { label: 'Insert row below', run: () => deck.insertTableRow(tableId, r1 + 1) },
@@ -51,6 +60,14 @@ export function TableCellMenu({ tableId, row, col, x, y, onClose }: TableCellMen
     'sep',
     { label: rowSpan > 1 ? `Delete ${rowSpan} rows` : 'Delete row', run: () => deck.removeTableRows(tableId, r0, r1), disabled: rowSpan >= el.rows },
     { label: colSpan > 1 ? `Delete ${colSpan} columns` : 'Delete column', run: () => deck.removeTableColumns(tableId, c0, c1), disabled: colSpan >= el.cols },
+    'sep',
+    { label: 'Merge cells', run: () => deck.mergeTableCells(tableId, range), disabled: !canMerge },
+    { label: 'Split cell', run: () => deck.splitTableCell(tableId, row, col), disabled: !canSplit },
+    'sep',
+    { label: 'All borders', run: border('all', gridLine) },
+    { label: 'Outside borders', run: border('outer', gridLine) },
+    { label: 'No borders', run: border('all', null) },
+    { label: 'Reset borders', run: border('all', undefined) },
   ];
 
   const fillLabel = rect ? (rowSpan > 1 || colSpan > 1 ? 'Fill selection' : 'Cell fill') : 'Cell fill';
