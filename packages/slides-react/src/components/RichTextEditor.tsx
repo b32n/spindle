@@ -42,9 +42,19 @@ function ensureEditorStyles(): void {
 .spindle-pm-editor .ProseMirror { column-count: var(--spindle-cols, 1); column-gap: var(--spindle-colgap, 0px); }
 .spindle-pm-editor .ProseMirror { counter-reset: pm-list; }
 .spindle-pm-editor .ProseMirror p:not([data-list="number"]) { counter-reset: pm-list; }
-.spindle-pm-editor .ProseMirror p[data-list="bullet"]::before { content: "•"; position: absolute; left: 8px; opacity: 0.9; }
+.spindle-pm-editor .ProseMirror p[data-list] { --pm-marker-left: 8px; }
+.spindle-pm-editor .ProseMirror p[data-list]::before { position: absolute; left: var(--pm-marker-left); opacity: 0.9; font-size: var(--pm-marker-size, 100%); }
+.spindle-pm-editor .ProseMirror p[data-list][style*="--pm-marker-color"]::before { color: var(--pm-marker-color); opacity: 1; }
+.spindle-pm-editor .ProseMirror p[data-list="bullet"]::before { content: attr(data-bullet-char); }
+.spindle-pm-editor .ProseMirror p[data-list="bullet"]:not([data-bullet-char])::before { content: "•"; }
 .spindle-pm-editor .ProseMirror p[data-list="number"] { counter-increment: pm-list; }
-.spindle-pm-editor .ProseMirror p[data-list="number"]::before { content: counter(pm-list) "."; position: absolute; left: 2px; opacity: 0.9; }`;
+.spindle-pm-editor .ProseMirror p[data-list="number"]::before { content: counter(pm-list) "."; }
+.spindle-pm-editor .ProseMirror p[data-list="number"][data-scheme="alphaLower"]::before { content: counter(pm-list, lower-alpha) "."; }
+.spindle-pm-editor .ProseMirror p[data-list="number"][data-scheme="alphaUpper"]::before { content: counter(pm-list, upper-alpha) "."; }
+.spindle-pm-editor .ProseMirror p[data-list="number"][data-scheme="romanLower"]::before { content: counter(pm-list, lower-roman) "."; }
+.spindle-pm-editor .ProseMirror p[data-list="number"][data-scheme="romanUpper"]::before { content: counter(pm-list, upper-roman) "."; }
+.spindle-pm-editor .ProseMirror p:not([data-list="number"]) + p[data-list="number"][style*="--pm-start"],
+.spindle-pm-editor .ProseMirror > p:first-child[data-list="number"][style*="--pm-start"] { counter-set: pm-list var(--pm-start); }`;
   document.head.appendChild(style);
 }
 

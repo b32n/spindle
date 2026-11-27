@@ -7,8 +7,39 @@
 // This module is pure JSON — it does not import ProseMirror. The live editor
 // (Phase 3) builds a PM schema whose serialized form matches these types.
 
+import type { Color } from '../scene/types';
+
 export type TextAlign = 'left' | 'center' | 'right' | 'justify';
 export type ListType = 'none' | 'bullet' | 'number';
+
+/** How a paragraph's bullet is drawn. `none` suppresses a marker, `char` is a literal glyph, `auto` is a numbered scheme. */
+export type BulletKind = 'none' | 'char' | 'auto';
+/** Auto-number schemes (PPTX `buAutoNum` types that map to a CSS counter style). */
+export type BulletScheme = 'arabic' | 'alphaLower' | 'alphaUpper' | 'romanLower' | 'romanUpper';
+
+/**
+ * A paragraph bullet (PPTX `a:buChar` / `a:buAutoNum` / `a:buNone` with colour and size). When present it takes
+ * precedence over the older `listType`.
+ */
+export interface Bullet {
+  kind: BulletKind;
+  /** The glyph, for `char` (default •). */
+  char?: string;
+  /** First number, for `auto` (default 1). */
+  startAt?: number;
+  /** Number style, for `auto` (default arabic). */
+  scheme?: BulletScheme;
+  /** Bullet colour (default: the text colour). */
+  color?: Color;
+  /** Bullet size as a percent of the text size (default 100). */
+  sizePct?: number;
+}
+
+export interface TabStop {
+  /** Position from the text box's left edge, in px. */
+  pos: number;
+  align: 'l' | 'ctr' | 'r' | 'dec';
+}
 
 export interface ParagraphAttrs {
   align?: TextAlign;
@@ -21,6 +52,20 @@ export interface ParagraphAttrs {
   spaceBefore?: number;
   /** Space after the paragraph, in px. */
   spaceAfter?: number;
+  /** Bullet (kind, glyph, numbering, colour, size). Overrides `listType` when set. */
+  bullet?: Bullet | null;
+  /** Exact line height in px; wins over the `lineHeight` multiplier (PPTX `spcPts` line spacing). */
+  lineHeightPx?: number | null;
+  /** Space before as a percent of the text size; wins over `spaceBefore` (PPTX `spcPct`). */
+  spaceBeforePct?: number | null;
+  /** Space after as a percent of the text size; wins over `spaceAfter`. */
+  spaceAfterPct?: number | null;
+  /** Left margin of the paragraph in px (PPTX `marL`); wins over the indent level's 28px steps. */
+  marginLeft?: number | null;
+  /** First-line indent in px relative to `marginLeft`; negative is a hanging indent (PPTX `indent`). */
+  firstLineIndent?: number | null;
+  /** Custom tab stops (stored and synced; the editor lays out default tabs). */
+  tabStops?: TabStop[] | null;
 }
 
 /**

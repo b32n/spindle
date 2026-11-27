@@ -555,6 +555,18 @@ lockstep.
   `isScaled`, `hasAutofit`, `textVert`, `writingModeCss`, `resolveColumns`, `fitShrinkScale`, `lineReductionFor`,
   `mergeBodyStyle`. The editor schema's font sizes and line heights are now `calc(... * var(--spindle-fs / --spindle-ls))`
   expressions (same computed values at scale 1). Additive; paragraph, run and field attributes follow in K3b and K3c.
+- **Slides paragraph fidelity, part 2 (K3b).** Paragraphs gain `bullet { kind: none | char | auto, char, startAt, scheme,
+  color, sizePct }` (overrides `listType`; schemes arabic, alpha and roman in both cases), `lineHeightPx` (exact line
+  height; `lineHeight` stays the multiple), `spaceBeforePct` / `spaceAfterPct` (percent of the text size; `spaceBefore` /
+  `spaceAfter` stay px), `marginLeft` and `firstLineIndent` (px; a negative first-line indent hangs the marker) and
+  `tabStops` (stored and synced, laid out with default tabs). Editor and static render share one resolver, so edit mode
+  and idle mode agree; untrusted values are coerced or allowlisted before they reach CSS, and the bullet glyph is only
+  ever an attribute. The "Text box options" panel gets a "Paragraph options" section (bullet, numbering, size, colour,
+  line height, spacing, margins). **Collaboration:** the new attributes ride on the paragraph elements of the rich-text
+  Y fragment, so slides `COLLAB_SCHEMA_VERSION` is now 2 and an older client refuses a room written by this one
+  (`CollabSchemaVersionError`) instead of dropping them. New slides-core exports: `Bullet`, `BulletKind`, `BulletScheme`,
+  `TabStop`, `LevelStyles`, `resolveParagraph`, `flattenLevelStyles`, `formatOrdinal`, `normalizeTabStops`,
+  `safeBulletChar`, `INDENT_PX`, `DEFAULT_BULLET_CHAR`, `SCHEME_COUNTER_STYLE`. Additive.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

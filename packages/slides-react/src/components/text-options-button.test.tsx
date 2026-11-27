@@ -16,6 +16,10 @@ jest.mock('../hooks', () => ({
   useEditingId: () => editingId,
   useElement: () => element,
 }));
+let editingView: unknown = null;
+const applyFormatMock = jest.fn();
+jest.mock('../context/DeckContext', () => ({ useDeckContext: () => ({ editing: { getView: () => editingView } }) }));
+jest.mock('../interactions/formatting', () => ({ applyFormat: (...a: unknown[]) => applyFormatMock(...a) }));
 jest.mock('../text-fit', () => ({ refitElement: (...a: unknown[]) => refit(...a) }));
 jest.mock('@b32nio/spindle-shared/react', () => ({
   ...jest.requireActual('@b32nio/spindle-shared/react'),
@@ -23,7 +27,8 @@ jest.mock('@b32nio/spindle-shared/react', () => ({
 }));
 
 import { MenuRow } from '@b32nio/spindle-shared/react';
-import { TextOptionsButton, LiveTextBodyFields } from './TextOptionsButton';
+import { ParagraphFields } from './ParagraphFields';
+import { TextOptionsButton, LiveTextBodyFields, LiveParagraphFields } from './TextOptionsButton';
 
 type P = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const find = (node: React.ReactNode, pred: (e: React.ReactElement<P>) => boolean, out: React.ReactElement<P>[] = []) => {
@@ -83,6 +88,7 @@ describe('TextOptionsButton', () => {
     btn.props.onClick();
     const [pop] = find(render(), (e) => e.type === Popover);
     expect(find(pop, (e) => e.type === LiveTextBodyFields)[0].props.id).toBe('t');
+    expect(find(pop, (e) => e.type === LiveParagraphFields)[0].props.id).toBe('t');
     pop.props.onClose();
     expect(find(render(), (e) => e.type === Popover)).toHaveLength(0);
     find(render(), byTitle('Text box options'))[0].props.onClick();
@@ -115,7 +121,8 @@ describe('TextOptionsButton', () => {
     (render() as React.ReactElement<P>).props.onClick();
     const [title, content] = menu.openModal.mock.calls[0];
     expect(title).toBe('Text box options');
-    expect((content as React.ReactElement<P>).type).toBe(LiveTextBodyFields);
+    expect(find(content as React.ReactNode, (e) => e.type === LiveTextBodyFields)).toHaveLength(1);
+    expect(find(content as React.ReactNode, (e) => e.type === LiveParagraphFields)[0].props.id).toBe('t');
   });
 });
 
@@ -145,5 +152,39 @@ describe('LiveTextBodyFields', () => {
     expect(refit).toHaveBeenCalledTimes(7);
     tree.props.onChange({ padding: 9 });
     expect(refit).toHaveBeenCalledTimes(7);
+  });
+});
+
+describe('LiveParagraphFields', () => {
+  const fields = (id = 't') => LiveParagraphFields({ id }) as React.ReactElement<P>;
+  afterEach(() => {
+    editingView = null;
+    applyFormatMock.mockClear();
+  });
+  it('renders nothing for a missing or non-text element', () => {
+    element = undefined;
+    expect(fields()).toBeNull();
+    element = { id: 't', type: 'image' };
+    expect(fields()).toBeNull();
+  });
+  it('idle: shows the first paragraph and applies to the element', () => {
+    element = { id: 't', type: 'text', richText: { type: 'doc', content: [{ type: 'paragraph', attrs: { marginLeft: 9 } }] } };
+    const tree = fields();
+    expect(tree.type).toBe(ParagraphFields);
+    expect(tree.props.attrs).toEqual({ marginLeft: 9 });
+    tree.props.onChange({ marginLeft: 12 });
+    expect(applyFormatMock).toHaveBeenCalledWith({ editingView: null, deck: expect.anything(), elementId: 't' }, { paragraph: { marginLeft: 12 } });
+    element = { id: 't', type: 'shape' };
+    expect(fields().props.attrs).toBeUndefined();
+  });
+  it('editing: shows the paragraph holding the caret and applies through the view', () => {
+    element = { id: 't', type: 'text', richText: { type: 'doc', content: [{ type: 'paragraph', attrs: { marginLeft: 9 } }] } };
+    editingView = { state: { selection: { $from: { parent: { type: { name: 'paragraph' }, attrs: { marginLeft: 33 } } } } } };
+    const tree = fields();
+    expect(tree.props.attrs).toEqual({ marginLeft: 33 });
+    tree.props.onChange({ marginLeft: 1 });
+    expect(applyFormatMock.mock.calls[0][0].editingView).toBe(editingView);
+    editingView = { state: { selection: { $from: { parent: { type: { name: 'doc' }, attrs: {} } } } } };
+    expect(fields().props.attrs).toEqual({ marginLeft: 9 });
   });
 });

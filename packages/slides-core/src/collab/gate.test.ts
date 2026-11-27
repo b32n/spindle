@@ -98,7 +98,7 @@ describe('attach gate', () => {
     const before = b.getData();
     const err = await b.attachCollab(new InMemoryProvider(), identity('B'), { roomId: 'room' }).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(CollabSchemaVersionError);
-    expect((err as Error).message).toMatch(/schema version 2.*only supports up to version 1/);
+    expect((err as Error).message).toMatch(new RegExp(`schema version ${COLLAB_SCHEMA_VERSION + 1}.*only supports up to version ${COLLAB_SCHEMA_VERSION}`));
     expect(b.getCollabHandle()).toBeNull();
     expect(b.getData().slides).toEqual(before.slides);
     ha.detach();
