@@ -148,7 +148,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden);
   addTally('pptx.notes', 'slide(s) with speaker notes', t.notes);
   add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, `${NOT_IMPORTED}; text in these fonts will show in a substitute unless the host provides them`, unavailable);
-  addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its 18)', t.geometry);
+  addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library of about 75; those are kept under their name and drawn approximately)', t.geometry);
   addTally('pptx.images.unsupportedFormat', 'picture(s) in a format browsers cannot show (EMF, WMF)', t.unsupportedImages);
   add('pptx.sizeLimit', 'package part(s) over the size limit', pkg.skipped.length, 'lost: not scanned, so their content is not reported', pkg.skipped);
 

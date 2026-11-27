@@ -39,8 +39,12 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * 4: K4 layouts and slide visibility. `meta.layouts` entries carry `elements` (static layout content), `textStyles` and
  * `masterName`, and slide maps carry `hidden`. A v3 client would show hidden slides in its presentation and drop the
  * `hidden` key the next time it rewrites a slide, so it must not join a v4 room.
+ *
+ * 5: K5 shape presets. A shape element's `props.shape` may be one of the ~58 added presets or `unknown:<prst>` (an
+ * OOXML preset the editor cannot draw, kept for re-export), and `props.adjustments` carries per-preset guides. A v4
+ * client would draw those shapes as plain rectangles and offer no way to see what they are, so it must not join a v5 room.
  */
-export const COLLAB_SCHEMA_VERSION = 4;
+export const COLLAB_SCHEMA_VERSION = 5;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

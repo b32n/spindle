@@ -240,23 +240,23 @@ describe('summary ids', () => {
     expect(item(r, 'pptx.notes')).toMatchObject({ count: 1, where: ['notesSlide3.xml'] });
   });
 
-  it('counts shapes whose geometry the editor lacks: custom geometry and presets outside its 18', async () => {
-    const supported = ['rect', 'roundRect', 'ellipse', 'triangle', 'rightTriangle', 'diamond', 'pentagon', 'hexagon', 'octagon', 'star5', 'arrowRight', 'arrowLeft', 'chevron', 'parallelogram', 'trapezoid', 'plus', 'heart', 'cloud', 'line', 'straightConnector1'];
+  it('counts shapes whose geometry the editor lacks: custom geometry and presets outside its library', async () => {
+    const supported = ['rect', 'roundRect', 'ellipse', 'triangle', 'rightTriangle', 'diamond', 'pentagon', 'hexagon', 'octagon', 'star5', 'arrowRight', 'arrowLeft', 'chevron', 'parallelogram', 'trapezoid', 'plus', 'heart', 'cloud', 'rtTriangle', 'rightArrow', 'flowChartProcess', 'wedgeRectCallout', 'lineInv', 'line', 'straightConnector1'];
     const r = await one(
       supported.map((p) => sp({ spPr: geom(p) })).join('') +
-        sp({ spPr: geom('rightArrow') }) +
-        sp({ spPr: geom('rightArrow') }) +
-        sp({ spPr: geom('flowChartProcess') }) +
+        sp({ spPr: geom('ribbon') }) +
+        sp({ spPr: geom('ribbon') }) +
+        sp({ spPr: geom('flowChartDocument') }) +
         sp({ spPr: `${frame}<a:custGeom><a:pathLst/></a:custGeom>` }) +
         sp({ spPr: frame })
     );
-    expect(item(r, 'pptx.shapes.unsupportedGeometry')).toMatchObject({ count: 4, where: ['rightArrow', 'flowChartProcess', 'custGeom'] });
+    expect(item(r, 'pptx.shapes.unsupportedGeometry')).toMatchObject({ count: 4, where: ['ribbon', 'flowChartDocument', 'custGeom'] });
     expect(item(r, 'pptx.shapes.custGeom')).toMatchObject({ count: 1, where: ['Slide 1'] });
   });
 
   it('counts a picture with custom geometry, not one cropped to a preset shape', async () => {
     const withGeom = (g: string) => pic().replace(`<p:spPr>${frame}</p:spPr>`, `<p:spPr>${frame}${g}</p:spPr>`);
-    const r = await one(withGeom('<a:custGeom><a:pathLst/></a:custGeom>') + withGeom('<a:prstGeom prst="ellipse"/>') + withGeom('<a:prstGeom prst="rightArrow"/>'));
+    const r = await one(withGeom('<a:custGeom><a:pathLst/></a:custGeom>') + withGeom('<a:prstGeom prst="ellipse"/>') + withGeom('<a:prstGeom prst="ribbon"/>'));
     expect(item(r, 'pptx.shapes.unsupportedGeometry')).toMatchObject({ count: 1, where: ['custGeom'] });
     expect(item(r, 'pptx.shapes.custGeom')?.count).toBe(1);
   });
@@ -384,7 +384,7 @@ describe('summary versus full', () => {
   });
 
   it('starts every effect with a state word and says today that no PPTX can be opened', async () => {
-    const shapes = gf(CHART) + sp({ spPr: geom('rightArrow') });
+    const shapes = gf(CHART) + sp({ spPr: geom('ribbon') });
     const r = await build({ slides: [{ shapes, attrs: 'show="0"', rels: [rel('rId1', 'hyperlink', 'https://example.com/a', true)] }], files: { 'ppt/vbaProject.bin': 'x', 'ppt/odd/part.bin': 'x' } }).then(full);
     expect(r.items.length).toBeGreaterThan(5);
     for (const i of r.items) expect(i.effect).toMatch(/^(lost|approximated|kept): /);

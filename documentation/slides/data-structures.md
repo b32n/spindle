@@ -42,7 +42,7 @@ interface ElementBase {
 The element union is `text` · `shape` · `image` · `line`:
 
 - **`TextElement`** — `richText` (ProseMirror JSON), `bodyStyle`, optional `fill` / `stroke`.
-- **`ShapeElement`** — `shape` (one of ~18 presets), `fill`, optional `stroke`, `adjustments`, `flipH/V`, and its own optional `richText`.
+- **`ShapeElement`** — `shape` (one of 76 presets, or `unknown:<prst>` for an OOXML preset the editor cannot draw, kept for re-export), `fill`, optional `stroke`, `adjustments`, `flipH/V`, and its own optional `richText`.
 - **`ImageElement`** — `src`, `naturalW/H`, `flipH/V`.
 - **`LineElement`** — `stroke`, `startArrow?` / `endArrow?`, `flipH/V`.
 

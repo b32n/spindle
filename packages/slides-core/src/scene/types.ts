@@ -179,7 +179,10 @@ export interface ElementBase extends Frame {
   placeholder?: PlaceholderMeta;
 }
 
-/** ~18 built-in shape presets rendered as inline SVG geometry. */
+/**
+ * The built-in shape presets (K5): the original 18 plus about 58 more, named after the OOXML `prst` values so an
+ * imported preset keeps its name. Geometry lives in `slides-react` (`shapeGeom`); `shape-presets.ts` holds the metadata.
+ */
 export type ShapePreset =
   | 'rect'
   | 'roundRect'
@@ -198,7 +201,82 @@ export type ShapePreset =
   | 'trapezoid'
   | 'plus'
   | 'heart'
-  | 'cloud';
+  | 'cloud'
+  // rectangles
+  | 'snip1Rect'
+  | 'snip2SameRect'
+  | 'snip2DiagRect'
+  | 'snipRoundRect'
+  | 'round1Rect'
+  | 'round2SameRect'
+  | 'round2DiagRect'
+  | 'foldedCorner'
+  | 'frame'
+  | 'plaque'
+  | 'bevel'
+  | 'can'
+  | 'cube'
+  // basic
+  | 'donut'
+  | 'noSmoking'
+  | 'teardrop'
+  | 'pie'
+  | 'chord'
+  | 'blockArc'
+  | 'moon'
+  | 'smileyFace'
+  | 'lightningBolt'
+  | 'heptagon'
+  | 'decagon'
+  | 'dodecagon'
+  // block arrows
+  | 'rightArrow'
+  | 'leftArrow'
+  | 'upArrow'
+  | 'downArrow'
+  | 'leftRightArrow'
+  | 'upDownArrow'
+  | 'homePlate'
+  // stars
+  | 'star4'
+  | 'star6'
+  | 'star8'
+  | 'star12'
+  // callouts
+  | 'wedgeRectCallout'
+  | 'wedgeRoundRectCallout'
+  | 'wedgeEllipseCallout'
+  // flowchart
+  | 'flowChartProcess'
+  | 'flowChartAlternateProcess'
+  | 'flowChartDecision'
+  | 'flowChartInputOutput'
+  | 'flowChartTerminator'
+  | 'flowChartConnector'
+  | 'flowChartPredefinedProcess'
+  | 'flowChartDelay'
+  | 'flowChartPreparation'
+  | 'flowChartOffpageConnector'
+  | 'flowChartMerge'
+  // brackets and braces
+  | 'leftBracket'
+  | 'rightBracket'
+  | 'leftBrace'
+  | 'rightBrace'
+  | 'bracketPair'
+  // math and line inversion
+  | 'mathPlus'
+  | 'mathMinus'
+  | 'lineInv';
+
+/**
+ * A preset the editor has no geometry for, kept under its original OOXML name: `unknown:<prst>`. It is drawn as a
+ * rounded rectangle approximation and re-exported verbatim, so the geometry is never lost, only drawn approximately.
+ */
+export type UnknownShape = `unknown:${string}`;
+
+/** What `ShapeElement.shape` holds: a built-in preset or an unknown preset passed through. */
+export type ShapeKind = ShapePreset | UnknownShape;
 
 export type ArrowHead = 'none' | 'arrow' | 'triangle' | 'circle';
 
@@ -225,8 +303,12 @@ export interface TextElement extends ElementBase {
 
 export interface ShapeElement extends ElementBase {
   type: 'shape';
-  shape: ShapePreset;
-  /** Preset-specific adjustment handles, 0–1 (e.g. corner radius). */
+  shape: ShapeKind;
+  /**
+   * Preset-specific adjustment values in the order of `SHAPE_PRESET_INFO[shape].adj`: OOXML `adj` guides divided by
+   * 100000 (angles by 21600000), so 0.5 is 50000. Missing entries take the preset default. An `unknown:` shape keeps
+   * the raw guide values in file order, uninterpreted.
+   */
   adjustments?: number[];
   flipH?: boolean;
   flipV?: boolean;

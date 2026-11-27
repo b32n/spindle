@@ -235,13 +235,13 @@ describe('collaboration layout (schema v4)', () => {
   });
 
   it('a v3 client refuses a v4 room (refuse-newer-room)', () => {
-    expect(COLLAB_SCHEMA_VERSION).toBe(4);
+    expect(COLLAB_SCHEMA_VERSION).toBeGreaterThanOrEqual(4);
     const ydoc = new Y.Doc();
     hydrateYDocFromData(ydoc, deckWithLayout().getData());
-    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(4);
+    expect(ydoc.getMap('meta').get('schemaVersion')).toBe(COLLAB_SCHEMA_VERSION);
     expect(() => assertSchemaVersion(ydoc, 3)).toThrow(CollabSchemaVersionError);
-    expect(() => assertSchemaVersion(ydoc, 3)).toThrow(/version 4.*up to version 3/);
-    expect(() => assertSchemaVersion(ydoc, 4)).not.toThrow();
+    expect(() => assertSchemaVersion(ydoc, 3)).toThrow(/up to version 3/);
+    expect(() => assertSchemaVersion(ydoc, COLLAB_SCHEMA_VERSION)).not.toThrow();
   });
 
   it('syncs hidden, slide size with scaled content, and layouts between two clients', async () => {

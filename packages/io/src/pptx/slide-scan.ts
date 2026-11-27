@@ -7,10 +7,22 @@ import type { Tallies } from './tally';
 // Counting rules (what one "object" is) are documented per id in documentation/import-loss.md.
 // ---------------------------------------------------------------------------
 
-/** The 18 shape presets of slides-core (`ShapePreset`), plus the two line geometries that become line elements. */
+/**
+ * The shape presets of slides-core (`ShapePreset`, K5), by OOXML `prst` name (`rtTriangle` is `rightTriangle` there), plus the two line geometries that become
+ * line elements. A preset outside this set is kept as an `unknown:<prst>` shape and drawn approximately.
+ */
 export const SUPPORTED_PRESETS: ReadonlySet<string> = new Set([
-  'rect', 'roundRect', 'ellipse', 'triangle', 'rightTriangle', 'diamond', 'pentagon', 'hexagon', 'octagon', 'star5',
-  'arrowRight', 'arrowLeft', 'chevron', 'parallelogram', 'trapezoid', 'plus', 'heart', 'cloud',
+  'rect', 'roundRect', 'ellipse', 'triangle', 'rightTriangle', 'rtTriangle', 'diamond', 'pentagon', 'hexagon', 'octagon', 'star5',
+  'arrowRight', 'arrowLeft', 'chevron', 'parallelogram', 'trapezoid', 'plus', 'heart', 'cloud', 'snip1Rect',
+  'snip2SameRect', 'snip2DiagRect', 'snipRoundRect', 'round1Rect', 'round2SameRect', 'round2DiagRect',
+  'foldedCorner', 'frame', 'plaque', 'bevel', 'can', 'cube', 'donut', 'noSmoking', 'teardrop', 'pie', 'chord',
+  'blockArc', 'moon', 'smileyFace', 'lightningBolt', 'heptagon', 'decagon', 'dodecagon', 'rightArrow', 'leftArrow',
+  'upArrow', 'downArrow', 'leftRightArrow', 'upDownArrow', 'homePlate', 'star4', 'star6', 'star8', 'star12',
+  'wedgeRectCallout', 'wedgeRoundRectCallout', 'wedgeEllipseCallout', 'flowChartProcess',
+  'flowChartAlternateProcess', 'flowChartDecision', 'flowChartInputOutput', 'flowChartTerminator',
+  'flowChartConnector', 'flowChartPredefinedProcess', 'flowChartDelay', 'flowChartPreparation',
+  'flowChartOffpageConnector', 'flowChartMerge', 'leftBracket', 'rightBracket', 'leftBrace', 'rightBrace',
+  'bracketPair', 'mathPlus', 'mathMinus', 'lineInv',
   'line', 'straightConnector1',
 ]);
 

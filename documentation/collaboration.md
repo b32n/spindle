@@ -288,7 +288,8 @@ edits, and the inverse operations broadcast to peers like any other edit.
   `getCollabBlockers(deck)` and `CollabBlockedError` mirror the documents API; the list is empty today, and a later
   deck construct either gets its own Y keys or registers a blocker. Version 4 added layout `elements`, `textStyles` and
   `masterName` (inside the `meta.layouts` JSON, last writer wins: two users editing layouts at the same moment keep one
-  edit) and the per-slide `hidden` key.
+  edit) and the per-slide `hidden` key. Version 5 added the shape presets of the preset geometry library and
+  `unknown:<prst>` shapes (inside the element `props` JSON).
 - **Sheets: version gate and blockers.** A sheets room records the layout version in `meta.schemaVersion`
   (a room without the key reads as 1, so existing rooms keep working). `attachCollab` refuses a room written by a
   newer client with a `CollabSchemaVersionError` that names both versions, before it seeds or edits anything.

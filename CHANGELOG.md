@@ -806,6 +806,16 @@ lockstep.
   `importError` text of six edge fixtures and three openpyxl fixtures in the XLSX goldens changes (nothing else does).
   **Behavioural:** `importXlsx` / `importFromXlsx` used to fail with whatever error JSZip or exceljs raised; hosts that
   matched on those messages should read `error.code` instead. The DOCX reader is not changed here.
+- **Slides: preset geometry library (K5).** `ShapePreset` grows from 18 to 76 presets named after OOXML `prst`
+  values: snipped, rounded and folded rectangles, frame, plaque, bevel, can, cube, donut, no-symbol, teardrop, pie,
+  chord, block arc, moon, smiley, lightning bolt, heptagon to dodecagon, block arrows, 4/6/8/12-point stars, three
+  callouts, eleven flowchart shapes, brackets and braces, plus/minus and the inverted line. Adjustments are fractions
+  (OOXML `adj` / 100000), defaulted and clamped per preset (`resolveAdjustments`). A preset outside the library is
+  kept as an `unknown:<prst>` shape (`ShapeKind`, `unknownShape`, `isUnknownShape`, `shapePrst`, `shapeFromPrst`) with
+  its adjustments, drawn as a rounded rectangle and left intact for re-export. The Shapes menu groups the presets into
+  categories with labelled buttons. Additive exports from `@b32nio/spindle-slides-core`; `ShapeElement.shape` widens
+  from `ShapePreset` to `ShapeKind`. Slides collaboration schema version 5 (a v4 client refuses a v5 room). The PPTX
+  loss id `pptx.shapes.unsupportedGeometry` now counts only presets outside the library.
 
 ## [0.4.0] - 2026-10-26
 
