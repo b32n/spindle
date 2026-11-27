@@ -75,8 +75,10 @@ function assertCsvSize(file: File): void {
 
 /**
  * Replace `workbook`'s contents with the file's contents. Format is chosen by
- * extension (.xlsx or .csv); anything else is rejected. The file is only ever
- * read locally. An unsafe or unreadable file throws an `ImportError` (with a `code`) and leaves the workbook as it was.
+ * extension: .xlsx and the legacy .xls go to the XLSX reader (which answers .xls
+ * with a legacy-binary `ImportError`), .csv to the CSV importer; anything else is
+ * rejected. The file is only ever read locally. An unsafe or unreadable file
+ * throws an `ImportError` (with a `code`) and leaves the workbook as it was.
  */
 export async function importWorkbookFile(workbook: WorkbookImpl, file: File): Promise<SheetsFileImportResult> {
   const ext = fileExtension(file.name);
