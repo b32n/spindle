@@ -14,6 +14,7 @@ import { FormulaParser } from './formula-parser';
 import type { RangeReference, StableFormulaNode, SheetResolver } from './formula-parser';
 import * as Y from 'yjs';
 import { attachCollabToWorkbook } from './collab/binding';
+import { CollabBlockedError, getCollabBlockers } from './collab/blockers';
 import type { CollabHandle, AttachCollabOptions } from './collab/binding';
 import {
   getWorkbookYTypes,
@@ -1895,6 +1896,8 @@ export class WorkbookImpl implements Workbook {
     if (this.pendingAttach) {
       throw new Error('Collaboration is already being attached to this workbook.');
     }
+    const blockers = getCollabBlockers(this.getData());
+    if (blockers.length > 0) throw new CollabBlockedError(blockers);
     // detachCollab() aborts this controller, so an attach still connecting can
     // neither seed the room nor leave a live socket behind (rejects with AbortError).
     const abort = new AbortController();

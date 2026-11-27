@@ -7,6 +7,10 @@
 //   sheetIds:   Y.Array<string>  — sheet display order
 //   sheets:     Y.Map  — sheetId → per-sheet Y.Map (see SheetYTypes below)
 //
+// meta.schemaVersion is the version of this layout the room was written with (missing = 1, the layout described
+// here). attachCollabToWorkbook refuses a room whose version is newer than COLLAB_SCHEMA_VERSION (see
+// assertSchemaVersion), so an older client never re-saves a room and drops keys it does not know.
+//
 // Each sheet's Y.Map contains:
 //   meta:       Y.Map  — id, name, rowCount, colCount, frozenRows/Cols, showGridLines, sortOrder JSON
 //   rowOrder:   Y.Array<rowId>
@@ -36,6 +40,39 @@ import type {
   WorkbookData,
 } from '../types';
 import type { SheetCommentThread } from '../comments';
+
+/**
+ * The Y layout version this client reads and writes. 1 is the layout described above (rooms written before the key
+ * existed have no `schemaVersion` and read as 1). Raised by any later change an older client could not read.
+ */
+export const COLLAB_SCHEMA_VERSION = 1;
+
+/** Thrown when a room was written with a newer Y workbook layout than this client understands. */
+export class CollabSchemaVersionError extends Error {
+  readonly roomVersion: number;
+  readonly supportedVersion: number;
+  constructor(roomVersion: number, supportedVersion: number = COLLAB_SCHEMA_VERSION) {
+    super(
+      `This collaboration room uses workbook schema version ${roomVersion}, but this editor only supports up to ` +
+        `version ${supportedVersion}. Update the editor to join the room.`,
+    );
+    this.name = 'CollabSchemaVersionError';
+    this.roomVersion = roomVersion;
+    this.supportedVersion = supportedVersion;
+  }
+}
+
+/** The schema version a Y.Doc was written with (1 when the key is absent or not a number). */
+export function readSchemaVersion(ydoc: Y.Doc): number {
+  const v = ydoc.getMap<unknown>('meta').get('schemaVersion');
+  return typeof v === 'number' && Number.isFinite(v) && v >= 1 ? v : 1;
+}
+
+/** Throw a CollabSchemaVersionError when the Y.Doc was written with a newer schema than this client supports. */
+export function assertSchemaVersion(ydoc: Y.Doc, supported: number = COLLAB_SCHEMA_VERSION): void {
+  const version = readSchemaVersion(ydoc);
+  if (version > supported) throw new CollabSchemaVersionError(version, supported);
+}
 
 export interface SheetYTypes {
   root: Y.Map<unknown>;
@@ -184,6 +221,7 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: WorkbookData): void {
   const types = getWorkbookYTypes(ydoc);
 
   ydoc.transact(() => {
+    types.meta.set('schemaVersion', COLLAB_SCHEMA_VERSION);
     types.meta.set('id', data.id);
     types.meta.set('name', data.name);
     // NOTE: activeSheetId is deliberately NOT stored in the Y.Doc — which
