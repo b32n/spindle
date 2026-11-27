@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
-import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
+import { useState, useEffect, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  WorkbookProvider,
+  WorkbookCanvas,
+  ImportConfirmDialog,
+} from '@b32nio/spindle-sheets-react';
 import { WorkbookImpl, FilterManager } from '@b32nio/spindle-sheets-core';
+import type { ImportLossReport } from '@b32nio/spindle-sheets-react';
 import type { CommentAuthor, SheetCommentEvent } from '@b32nio/spindle-sheets-core';
 import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
 /** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
-/** e2e hook: `?importConfirmation=never|host-yes|host-no` (default: the built-in dialog). */
+/**
+ * e2e hook: `?importConfirmation=never|host-yes|host-no|host-kept` (default: the built-in dialog).
+ * `host-kept` is a host UI that shows the shared dialog for the real report plus one synthetic
+ * `state: 'kept'` item (no importer emits one yet), to exercise the dialog's grouping.
+ */
 const importConfirmation = (() => {
   const v = new URLSearchParams(window.location.search).get('importConfirmation');
   if (v === 'never') return 'never' as const;
@@ -19,6 +29,33 @@ const importConfirmation = (() => {
       return v === 'host-yes';
     };
   }
+  if (v === 'host-kept') {
+    return (report: ImportLossReport, file: File) =>
+      new Promise<boolean>((resolve) => {
+        const host = document.body.appendChild(document.createElement('div'));
+        const root = createRoot(host);
+        const settle = (ok: boolean) => {
+          root.unmount();
+          host.remove();
+          resolve(ok);
+        };
+        const kept = {
+          id: 'demo.charts',
+          label: 'chart(s)',
+          count: 3,
+          effect: 'kept: stored unchanged and saved back, not editable',
+          state: 'kept' as const,
+        };
+        root.render(
+          createElement(ImportConfirmDialog, {
+            fileName: file.name,
+            report: { ...report, items: [...report.items, kept] },
+            onConfirm: () => settle(true),
+            onCancel: () => settle(false),
+          })
+        );
+      });
+  }
   return undefined;
 })();
 
@@ -28,7 +65,6 @@ const fontSource = (() => {
   if (v?.startsWith('css:')) return { kind: 'css', url: v.slice(4) } as const;
   return undefined;
 })();
-
 
 // Sample directory of users that can be @-mentioned in comments.
 const DEMO_USERS: CommentAuthor[] = [
@@ -44,10 +80,15 @@ function logCommentEvent(event: SheetCommentEvent): void {
 }
 
 // Stand-ins for a host app reacting to Open / Download results.
-function reportFileOpened(info: { fileName: string; warnings: string[]; loss: { items: unknown[] } }): void {
+function reportFileOpened(info: {
+  fileName: string;
+  warnings: string[];
+  loss: { items: unknown[] };
+}): void {
   const { fileName, warnings } = info;
   (window as unknown as { __lastOpened?: unknown }).__lastOpened = info; // e2e hook: what the last Open reported
-  if (warnings.length > 0) console.warn(`[open] ${fileName}: ${warnings.length} import warning(s)`, warnings);
+  if (warnings.length > 0)
+    console.warn(`[open] ${fileName}: ${warnings.length} import warning(s)`, warnings);
 }
 function reportFileError(error: Error, action: 'open' | 'download'): void {
   window.alert(`Could not ${action} the file: ${error.message}`);
@@ -57,7 +98,16 @@ function reportFileError(error: Error, action: 'open' | 'download'): void {
 // Cross-tab WebSocket demo helpers
 // ============================================================================
 
-const COLORS = ['#ff6b6b', '#4ecdc4', '#ffd93d', '#6c5ce7', '#a8e6cf', '#ff8c42', '#54a0ff', '#48dbfb'];
+const COLORS = [
+  '#ff6b6b',
+  '#4ecdc4',
+  '#ffd93d',
+  '#6c5ce7',
+  '#a8e6cf',
+  '#ff8c42',
+  '#54a0ff',
+  '#48dbfb',
+];
 const ADJECTIVES = ['Quick', 'Calm', 'Brave', 'Sharp', 'Bright', 'Eager', 'Lucky', 'Witty'];
 const NOUNS = ['Otter', 'Lynx', 'Owl', 'Fox', 'Heron', 'Bear', 'Hare', 'Crane'];
 
@@ -91,49 +141,49 @@ function parseWsConfig(): WsConfig | null {
 // can hydrate from the same starting state.
 const sampleWorkbookData = (() => {
   const data = {
-      id: 'demo-workbook',
-      name: 'Demo Spreadsheet',
-      activeSheetId: 'sheet_1',
-      defaultRowHeight: 20,
-      defaultColWidth: 100,
-      stylePool: {},
-      formatPool: {},
-      sheets: [
-        {
-          id: 'sheet_1',
-          name: 'Sheet1',
-          cells: [
-            { key: '0:0', cell: { value: 'Product' } },
-            { key: '0:1', cell: { value: 'Price' } },
-            { key: '0:2', cell: { value: 'Quantity' } },
-            { key: '0:3', cell: { value: 'Total' } },
-            { key: '1:0', cell: { value: 'Widget' } },
-            { key: '1:1', cell: { value: 10 } },
-            { key: '1:2', cell: { value: 5 } },
-            { key: '1:3', cell: { value: 50 } },
-            { key: '2:0', cell: { value: 'Gadget' } },
-            { key: '2:1', cell: { value: 20 } },
-            { key: '2:2', cell: { value: 3 } },
-            { key: '2:3', cell: { value: 60 } },
-            { key: '3:0', cell: { value: 'Thing' } },
-            { key: '3:1', cell: { value: 15 } },
-            { key: '3:2', cell: { value: 2 } },
-            { key: '3:3', cell: { value: 30 } },
-          ],
-          config: {
-            defaultRowHeight: 20,
-            defaultColWidth: 100,
-            showGridLines: true,
-          },
-          rowCount: 1000,
-          colCount: 100,
+    id: 'demo-workbook',
+    name: 'Demo Spreadsheet',
+    activeSheetId: 'sheet_1',
+    defaultRowHeight: 20,
+    defaultColWidth: 100,
+    stylePool: {},
+    formatPool: {},
+    sheets: [
+      {
+        id: 'sheet_1',
+        name: 'Sheet1',
+        cells: [
+          { key: '0:0', cell: { value: 'Product' } },
+          { key: '0:1', cell: { value: 'Price' } },
+          { key: '0:2', cell: { value: 'Quantity' } },
+          { key: '0:3', cell: { value: 'Total' } },
+          { key: '1:0', cell: { value: 'Widget' } },
+          { key: '1:1', cell: { value: 10 } },
+          { key: '1:2', cell: { value: 5 } },
+          { key: '1:3', cell: { value: 50 } },
+          { key: '2:0', cell: { value: 'Gadget' } },
+          { key: '2:1', cell: { value: 20 } },
+          { key: '2:2', cell: { value: 3 } },
+          { key: '2:3', cell: { value: 60 } },
+          { key: '3:0', cell: { value: 'Thing' } },
+          { key: '3:1', cell: { value: 15 } },
+          { key: '3:2', cell: { value: 2 } },
+          { key: '3:3', cell: { value: 30 } },
+        ],
+        config: {
+          defaultRowHeight: 20,
+          defaultColWidth: 100,
+          showGridLines: true,
         },
-      ],
-      selection: {
-        ranges: [],
-        activeCell: { row: 0, col: 0 },
+        rowCount: 1000,
+        colCount: 100,
       },
-    };
+    ],
+    selection: {
+      ranges: [],
+      activeCell: { row: 0, col: 0 },
+    },
+  };
   return data;
 })();
 
@@ -198,8 +248,16 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
     })();
     return () => {
       cancelled = true;
-      try { wbA?.detachCollab(); } catch { /* ignore */ }
-      try { wbB?.detachCollab(); } catch { /* ignore */ }
+      try {
+        wbA?.detachCollab();
+      } catch {
+        /* ignore */
+      }
+      try {
+        wbB?.detachCollab();
+      } catch {
+        /* ignore */
+      }
     };
   }, []);
 
@@ -220,7 +278,11 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%' }}>
       <div style={paneStyle}>
-        <div style={{ padding: '4px 12px', background: '#ff6b6b', color: 'white', fontWeight: 500 }}>Alice</div>
+        <div
+          style={{ padding: '4px 12px', background: '#ff6b6b', color: 'white', fontWeight: 500 }}
+        >
+          Alice
+        </div>
         <div style={{ flex: 1, minHeight: 0 }}>
           <WorkbookProvider
             workbook={workbooks[0]}
@@ -228,12 +290,21 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas fontSource={fontSource} importConfirmation={importConfirmation} width={paneWidth} height={paneHeight} />
+            <WorkbookCanvas
+              fontSource={fontSource}
+              importConfirmation={importConfirmation}
+              width={paneWidth}
+              height={paneHeight}
+            />
           </WorkbookProvider>
         </div>
       </div>
       <div style={{ ...paneStyle, borderRight: 'none' }}>
-        <div style={{ padding: '4px 12px', background: '#4ecdc4', color: 'white', fontWeight: 500 }}>Bob</div>
+        <div
+          style={{ padding: '4px 12px', background: '#4ecdc4', color: 'white', fontWeight: 500 }}
+        >
+          Bob
+        </div>
         <div style={{ flex: 1, minHeight: 0 }}>
           <WorkbookProvider
             workbook={workbooks[1]}
@@ -241,7 +312,12 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas fontSource={fontSource} importConfirmation={importConfirmation} width={paneWidth} height={paneHeight} />
+            <WorkbookCanvas
+              fontSource={fontSource}
+              importConfirmation={importConfirmation}
+              width={paneWidth}
+              height={paneHeight}
+            />
           </WorkbookProvider>
         </div>
       </div>
@@ -255,15 +331,7 @@ function CollabDemo({ width, height }: { width: number; height: number }) {
  * machines) on the same ?ws=…&room=… all share state via the relay
  * server at /examples/collab-server.
  */
-function WsDemo({
-  width,
-  height,
-  config,
-}: {
-  width: number;
-  height: number;
-  config: WsConfig;
-}) {
+function WsDemo({ width, height, config }: { width: number; height: number; config: WsConfig }) {
   const [wb, setWb] = useState<WorkbookImpl | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<CollabStatus>('connecting');
@@ -296,12 +364,17 @@ function WsDemo({
     })();
     return () => {
       cancelled = true;
-      try { workbook?.detachCollab(); } catch { /* ignore */ }
+      try {
+        workbook?.detachCollab();
+      } catch {
+        /* ignore */
+      }
     };
   }, [config.url, config.roomId, config.identity]);
 
   // Handle for end-to-end tests (e2e/) to inspect model state behind the canvas.
-  if (wb) (window as unknown as { __spindle?: unknown }).__spindle = { workbook: wb, FilterManager };
+  if (wb)
+    (window as unknown as { __spindle?: unknown }).__spindle = { workbook: wb, FilterManager };
 
   if (error) return <div style={{ padding: 16, color: 'crimson' }}>WS error: {error}</div>;
   if (!wb) return <div style={{ padding: 16 }}>Connecting to {config.url}…</div>;
@@ -330,7 +403,12 @@ function WsDemo({
           mentionableUsers={DEMO_USERS}
           onCommentEvent={logCommentEvent}
         >
-          <WorkbookCanvas fontSource={fontSource} importConfirmation={importConfirmation} width={width} height={height - 28} />
+          <WorkbookCanvas
+            fontSource={fontSource}
+            importConfirmation={importConfirmation}
+            width={width}
+            height={height - 28}
+          />
         </WorkbookProvider>
       </div>
     </div>
@@ -424,7 +502,9 @@ function App() {
             mentionableUsers={DEMO_USERS}
             onCommentEvent={logCommentEvent}
           >
-            <WorkbookCanvas fontSource={fontSource} importConfirmation={importConfirmation}
+            <WorkbookCanvas
+              fontSource={fontSource}
+              importConfirmation={importConfirmation}
               width={dimensions.width}
               height={dimensions.height}
               readOnly={readOnly}
@@ -440,4 +520,3 @@ function App() {
 }
 
 export default App;
-

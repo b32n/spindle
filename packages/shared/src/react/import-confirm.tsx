@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { describeImportLoss, type ImportLossReport } from '../export/loss';
+import {
+  describeImportLoss,
+  groupImportLoss,
+  type ImportLossItem,
+  type ImportLossReport,
+} from '../export/loss';
 
 /**
  * How an editor's "Open" reacts to a file whose import would lose something:
@@ -8,7 +13,8 @@ import { describeImportLoss, type ImportLossReport } from '../export/loss';
  * or pass a function (host UI) that resolves to `true` to import or `false` to cancel.
  * Nothing is asked when the report is empty.
  */
-export type ImportConfirmation = 'dialog' | 'never' | ((report: ImportLossReport, file: File) => boolean | Promise<boolean>);
+export type ImportConfirmation =
+  'dialog' | 'never' | ((report: ImportLossReport, file: File) => boolean | Promise<boolean>);
 
 export interface ImportConfirmDialogProps {
   fileName: string;
@@ -21,9 +27,31 @@ export interface ImportConfirmDialogProps {
  * "This file contains things Spindle can't import" — lists the lost features and offers
  * Import anyway / Cancel. Cancel is focused first and Escape cancels, so a stray Enter keeps the open document.
  */
-export function ImportConfirmDialog({ fileName, report, onConfirm, onCancel }: ImportConfirmDialogProps): React.ReactElement {
+export function ImportConfirmDialog({
+  fileName,
+  report,
+  onConfirm,
+  onCancel,
+}: ImportConfirmDialogProps): React.ReactElement {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const lines = describeImportLoss(report);
+  // Grouping only appears once an importer sets a state; a report without states renders exactly as before.
+  const grouped = report.items.some((i) => i.state !== undefined);
+  const groups = groupImportLoss(report);
+  const lineOf = (item: ImportLossItem) => lines[report.items.indexOf(item)];
+  const list = (items: ImportLossItem[], testId: string) => (
+    <ul
+      data-testid={testId}
+      style={{ margin: '0 0 16px', paddingLeft: 20, fontSize: 14, color: '#3c4043' }}
+    >
+      {items.map((item, i) => (
+        <li key={`${item.id}:${i}`} style={{ margin: '4px 0' }}>
+          {lineOf(item)}
+        </li>
+      ))}
+    </ul>
+  );
+  const intro = { margin: '12px 0 8px', fontSize: 14, color: '#3c4043' };
 
   useEffect(() => {
     cancelRef.current?.focus();
@@ -40,35 +68,107 @@ export function ImportConfirmDialog({ fileName, report, onConfirm, onCancel }: I
   }, [onCancel]);
 
   const button: React.CSSProperties = {
-    padding: '9px 16px', fontSize: 14, fontWeight: 500, borderRadius: 4, cursor: 'pointer',
+    padding: '9px 16px',
+    fontSize: 14,
+    fontWeight: 500,
+    borderRadius: 4,
+    cursor: 'pointer',
   };
   return createPortal(
     <div
-      style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001 }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10001,
+      }}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="spindle-import-confirm-title"
         aria-describedby="spindle-import-confirm-desc"
-        style={{ background: '#fff', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.2)', width: 520, maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto', padding: '20px 24px 24px', fontFamily: 'inherit', color: '#202124' }}
+        style={{
+          background: '#fff',
+          borderRadius: 8,
+          boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+          width: 520,
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          padding: '20px 24px 24px',
+          fontFamily: 'inherit',
+          color: '#202124',
+        }}
       >
         <h2 id="spindle-import-confirm-title" style={{ margin: 0, fontSize: 18, fontWeight: 500 }}>
           Import “{fileName}”?
         </h2>
-        <p id="spindle-import-confirm-desc" style={{ margin: '12px 0 8px', fontSize: 14, color: '#3c4043' }}>
-          This file contains things that can’t be imported. The current content will be replaced, and the following will be lost:
-        </p>
-        <ul data-testid="import-loss-list" style={{ margin: '0 0 16px', paddingLeft: 20, fontSize: 14, color: '#3c4043' }}>
-          {lines.map((line, i) => (
-            <li key={report.items[i]?.id ?? i} style={{ margin: '4px 0' }}>{line}</li>
-          ))}
-        </ul>
+        {grouped ? (
+          <div id="spindle-import-confirm-desc">
+            <p style={intro}>
+              This file contains things that can’t be fully imported. The current content will be
+              replaced.
+            </p>
+            {groups.lost.length > 0 && (
+              <>
+                <p style={intro}>Will be lost:</p>
+                {list(groups.lost, 'import-loss-list')}
+              </>
+            )}
+            {groups.approximated.length > 0 && (
+              <>
+                <p style={intro}>Imported approximately:</p>
+                {list(groups.approximated, 'import-loss-approximated-list')}
+              </>
+            )}
+            {groups.kept.length > 0 && (
+              <>
+                <p style={intro}>Kept, not editable (saved back unchanged):</p>
+                {list(groups.kept, 'import-loss-kept-list')}
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            <p id="spindle-import-confirm-desc" style={intro}>
+              This file contains things that can’t be imported. The current content will be
+              replaced, and the following will be lost:
+            </p>
+            <ul
+              data-testid="import-loss-list"
+              style={{ margin: '0 0 16px', paddingLeft: 20, fontSize: 14, color: '#3c4043' }}
+            >
+              {lines.map((line, i) => (
+                <li key={report.items[i]?.id ?? i} style={{ margin: '4px 0' }}>
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button ref={cancelRef} type="button" onClick={onCancel} style={{ ...button, color: '#5f6368', background: 'transparent', border: '1px solid #dadce0' }}>
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onCancel}
+            style={{
+              ...button,
+              color: '#5f6368',
+              background: 'transparent',
+              border: '1px solid #dadce0',
+            }}
+          >
             Cancel
           </button>
-          <button type="button" onClick={onConfirm} style={{ ...button, color: '#fff', background: '#1a73e8', border: 'none' }}>
+          <button
+            type="button"
+            onClick={onConfirm}
+            style={{ ...button, color: '#fff', background: '#1a73e8', border: 'none' }}
+          >
             Import anyway
           </button>
         </div>
@@ -87,7 +187,11 @@ export function useImportConfirm(mode: ImportConfirmation = 'dialog'): {
   confirm: (file: File, report: ImportLossReport) => Promise<boolean>;
   dialog: React.ReactElement | null;
 } {
-  const [pending, setPending] = useState<{ file: File; report: ImportLossReport; resolve: (ok: boolean) => void } | null>(null);
+  const [pending, setPending] = useState<{
+    file: File;
+    report: ImportLossReport;
+    resolve: (ok: boolean) => void;
+  } | null>(null);
   const pendingRef = useRef(pending);
   useEffect(() => {
     pendingRef.current = pending;
@@ -110,7 +214,12 @@ export function useImportConfirm(mode: ImportConfirmation = 'dialog'): {
     setPending(null);
   };
   const dialog = pending ? (
-    <ImportConfirmDialog fileName={pending.file.name} report={pending.report} onConfirm={() => settle(true)} onCancel={() => settle(false)} />
+    <ImportConfirmDialog
+      fileName={pending.file.name}
+      report={pending.report}
+      onConfirm={() => settle(true)}
+      onCancel={() => settle(false)}
+    />
   ) : null;
   return { confirm, dialog };
 }

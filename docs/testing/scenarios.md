@@ -142,6 +142,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FIO-20 | a semicolon-delimited CSV asks first (it would import into one column) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
 | S-FIO-21 | importConfirmation 'never' imports without asking | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
 | S-FIO-22 | a host callback decides instead of the dialog (headless API) | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
+| S-FIO-23 | a report with kept parts groups "kept, not editable" apart from "will be lost" | covered |  |  | `e2e/sheets/import-loss.spec.ts` |
 | S-KBD-01 | navigate, enter data and a formula, format by shortcut and undo without the mouse | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-02 | Tab reaches the toolbar, the formula bar and the grid, each with a visible focus indicator | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
 | S-KBD-03 | the Insert link dialog opens from a focused button, fills and submits with keys, and Escape cancels | covered |  |  | `e2e/sheets/keyboard.spec.ts` |
@@ -490,7 +491,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 425
+- covered: 426
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

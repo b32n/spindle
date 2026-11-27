@@ -6,6 +6,12 @@
  */
 export type ImportLossFormat = 'xlsx' | 'docx' | 'pptx' | 'csv';
 
+/**
+ * What happens to a detected feature: `lost` (not kept at all; the default when absent),
+ * `approximated` (kept in a weaker form) or `kept` (stored and saved back unchanged, but not editable).
+ */
+export type ImportLossState = 'lost' | 'approximated' | 'kept';
+
 export interface ImportLossItem {
   /** Stable identifier, e.g. `xlsx.conditionalFormatting`. */
   id: string;
@@ -17,6 +23,8 @@ export interface ImportLossItem {
   where?: string[];
   /** What happens to it on import, in a short phrase. */
   effect: string;
+  /** Additive: absent means `lost`. Importers that preserve a feature opaquely set `kept`. */
+  state?: ImportLossState;
 }
 
 export interface ImportLossReport {
@@ -25,7 +33,10 @@ export interface ImportLossReport {
   items: ImportLossItem[];
 }
 
-export function createLossReport(format: ImportLossFormat, items: ImportLossItem[]): ImportLossReport {
+export function createLossReport(
+  format: ImportLossFormat,
+  items: ImportLossItem[]
+): ImportLossReport {
   return { format, items: items.filter((i) => i.count > 0) };
 }
 
@@ -40,6 +51,19 @@ export function describeImportLoss(report: ImportLossReport): string[] {
     const where = i.where && i.where.length > 0 ? ` (${i.where.join(', ')})` : '';
     return `${i.count} × ${i.label}${where} — ${i.effect}`;
   });
+}
+
+/** The items of a report split by state (absent state counts as `lost`), in report order. */
+export function groupImportLoss(
+  report: ImportLossReport
+): Record<ImportLossState, ImportLossItem[]> {
+  const groups: Record<ImportLossState, ImportLossItem[]> = {
+    lost: [],
+    approximated: [],
+    kept: [],
+  };
+  for (const item of report.items) groups[item.state ?? 'lost'].push(item);
+  return groups;
 }
 
 /** Count regex matches (global) in text. */

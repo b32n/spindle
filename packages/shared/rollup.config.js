@@ -10,6 +10,7 @@ import { defineConfig } from 'rollup';
 //   ./export/xlsx  → types + deprecated async shims that lazy-load the optional
 //   ./export/docx    @b32nio/spindle-io peer, where the implementations moved.
 //   ./export/pptx  → types only (no PPTX reader/writer exists yet).
+//   ./opaque       → content-addressed store for parts kept byte for byte (X5).
 
 const tsMain = typescript({
   tsconfig: './tsconfig.json',
@@ -47,6 +48,13 @@ const tsExportDocx = typescript({
   outputToFilesystem: true,
 });
 const tsExportPptx = typescript({
+  tsconfig: './tsconfig.json',
+  declaration: true,
+  declarationDir: './dist',
+  rootDir: './src',
+  outputToFilesystem: true,
+});
+const tsOpaque = typescript({
   tsconfig: './tsconfig.json',
   declaration: true,
   declarationDir: './dist',
@@ -109,5 +117,14 @@ export default defineConfig([
     ],
     external: [],
     plugins: [tsExportPptx],
+  },
+  {
+    input: 'src/opaque/index.ts',
+    output: [
+      { file: 'dist/opaque/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
+      { file: 'dist/opaque/index.esm.js', format: 'esm', sourcemap: true },
+    ],
+    external: [],
+    plugins: [tsOpaque],
   },
 ]);

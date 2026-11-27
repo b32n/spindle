@@ -40,6 +40,11 @@
       "require": "./dist/export/docx/index.js",
       "types": "./dist/export/docx/index.d.ts"
     },
+    "./opaque": {
+      "import": "./dist/opaque/index.esm.js",
+      "require": "./dist/opaque/index.js",
+      "types": "./dist/opaque/index.d.ts"
+    },
     "./export/pptx": {
       "import": "./dist/export/pptx/index.esm.js",
       "require": "./dist/export/pptx/index.js",

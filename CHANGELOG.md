@@ -492,6 +492,15 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **Opaque part store and loss state (X5).** New additive subpath `@b32nio/spindle-shared/opaque`: a
+  content-addressed, size-capped store for package parts kept byte for byte (`createOpaqueStore`, `hashBytes`
+  (SHA-256 via SubtleCrypto), `OpaquePart`, `OpaqueRef`, defaults 25 MiB per part and 200 MiB per store), a
+  Yjs-free helper for a per-document `Y.Map<hash, Uint8Array>` (`writeOpaqueParts`, `readOpaqueParts`, which
+  re-hashes every entry from a peer) and loss-item builders (`keptLossItem`, `droppedLossItem`). A part over a cap
+  is refused and reported as a `lost: too large` item, never dropped silently. `ImportLossItem` gains an optional
+  `state: 'lost' | 'approximated' | 'kept'` (absent = lost; new `ImportLossState` type and `groupImportLoss`),
+  and `ImportConfirmDialog` lists "Kept, not editable" apart from "Will be lost" when any item has a state. A
+  report without states renders exactly as before. No importer emits `state` yet.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from
