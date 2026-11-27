@@ -1,6 +1,6 @@
 import type { OoxmlParts } from '../../../../scripts/fidelity-core/ooxml-package';
 import type { Json } from '../../../../scripts/fidelity-core/types';
-import { modelRuns, sourceRuns, textParity } from '../../../../scripts/pptx-fidelity/parity';
+import { modelRuns, notesRuns, sourceRuns, textParity } from '../../../../scripts/pptx-fidelity/parity';
 
 const parts = (xml: Record<string, string>): OoxmlParts => ({ kind: 'zip', raw: new Uint8Array(), names: Object.keys(xml), xml, sizes: {}, oversized: [] });
 const model = (...runs: string[][]): Json => ({ slides: runs.map((r) => ({ elements: [{ text: { paragraphs: [{ runs: r.map((text) => ({ kind: 'text', text })) }] } }] })) });
@@ -88,5 +88,59 @@ describe('textParity', () => {
     expect(textParity(p, model(['a', 'x']))).toMatchObject({ missing: ['a', 'b'], extra: ['x'] });
     const many = Array.from({ length: 30 }, (_, i) => `t${i}`);
     expect(textParity(parts({ 'ppt/slides/slide1.xml': slide(...many) }), model([])).missing).toHaveLength(20);
+  });
+});
+
+describe('speaker notes', () => {
+  const sp = (type: string, ...t: string[]) => `<p:sp><p:nvSpPr><p:nvPr><p:ph type="${type}"/></p:nvPr></p:nvSpPr><p:txBody>${t.map((x) => `<a:p><a:r><a:t>${x}</a:t></a:r></a:p>`).join('')}</p:txBody></p:sp>`;
+  const page = (...shapes: string[]) => `<p:notes><p:cSld><p:spTree>${shapes.join('')}</p:spTree></p:cSld></p:notes>`;
+  const rels = (...targets: string[]) => `<Relationships>${targets.join('')}</Relationships>`;
+  const notesRel = (target: string, extra = '') => `<Relationship Id="rN" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" Target="${target}"${extra}/>`;
+  const withNotes = (...t: string[]) => ({ slides: [{ notes: { paragraphs: t.map((x) => ({ runs: [{ kind: 'text', text: x }] })) } }] }) as unknown as Json;
+
+  it('notesRuns takes the runs of the body placeholders as in scope and the rest of the page as out of scope', () => {
+    const xml = page(sp('body', 'a', 'b'), sp('sldNum', '1'), sp('hdr', 'h'), sp('body', 'c'));
+    expect(notesRuns(xml)).toEqual({ inScope: ['a', 'b', 'c'], outOfScope: ['1', 'h'] });
+    expect(notesRuns(page(sp('sldImg')))).toEqual({ inScope: [], outOfScope: [] });
+    expect(notesRuns(page())).toEqual({ inScope: [], outOfScope: [] });
+    expect(notesRuns('<p:notes><p:sp><p:ph  type = \'body\'/><a:t>q</a:t></p:sp></p:notes>').inScope).toEqual(['q']);
+  });
+
+  it('modelRuns counts the runs of a slide\'s notes', () => {
+    const m = { slides: [{ elements: [], notes: { paragraphs: [{ runs: [{ kind: 'text', text: 'n' }] }] } }, { notes: null }] };
+    expect(modelRuns(m as unknown as Json)).toEqual(['n']);
+  });
+
+  it('compares the notes body runs of the page each slide points at with the model, and sets the rest aside', () => {
+    const p = parts({
+      'ppt/slides/slide1.xml': '<p:sld/>',
+      'ppt/slides/_rels/slide1.xml.rels': rels(notesRel('../notesSlides/notesSlide1.xml')),
+      'ppt/notesSlides/notesSlide1.xml': page(sp('body', 'x', 'y'), sp('ftr', 'footer')),
+      'ppt/notesSlides/notesSlide9.xml': page(sp('body', 'orphan')),
+    });
+    expect(textParity(p, withNotes('y', 'x'))).toEqual({ sourceRuns: 2, modelRuns: 2, outOfScope: 2, inErrorSlides: 0, missing: [], extra: [] });
+    expect(textParity(p, withNotes('x'))).toMatchObject({ missing: ['y'] });
+    expect(textParity(p, withNotes('x', 'y', 'z'))).toMatchObject({ extra: ['z'] });
+  });
+
+  it('counts the notes of a page several slides share once for each slide that holds it (a failed slide holds none)', () => {
+    const slideRels = (n: number) => ({ [`ppt/slides/slide${n}.xml`]: '<p:sld/>', [`ppt/slides/_rels/slide${n}.xml.rels`]: rels(notesRel('../notesSlides/notesSlide1.xml')) });
+    const notes = { 'ppt/notesSlides/notesSlide1.xml': page(sp('body', 'a', 'b'), sp('hdr', 'h')) };
+    const held = { notes: { paragraphs: [{ runs: [{ kind: 'text', text: 'a' }] }, { runs: [{ kind: 'text', text: 'b' }] }] } };
+    const both = { slides: [{ partName: 'ppt/slides/slide1.xml', ...held }, { partName: 'ppt/slides/slide2.xml', ...held }] } as unknown as Json;
+    expect(textParity(parts({ ...slideRels(1), ...slideRels(2), ...notes }), both)).toMatchObject({ sourceRuns: 4, modelRuns: 4, missing: [], extra: [], outOfScope: 1 });
+    const oneFailed = { slides: [{ partName: 'ppt/slides/slide1.xml', ...held }, { partName: 'ppt/slides/slide2.xml', error: 'x' }] } as unknown as Json;
+    expect(textParity(parts({ ...slideRels(1), ...slideRels(2), ...notes }), oneFailed)).toMatchObject({ sourceRuns: 2, modelRuns: 2, missing: [], extra: [] });
+  });
+
+  it('sets aside the notes of a slide that failed, resolves an absolute target and ignores an external or foreign relationship', () => {
+    const slideRels = (r: string) => ({ 'ppt/slides/slide1.xml': '<p:sld/>', 'ppt/slides/_rels/slide1.xml.rels': rels(r) });
+    const failed = { slides: [{ partName: 'ppt/slides/slide1.xml', error: 'x' }] } as unknown as Json;
+    const notes = { 'ppt/notesSlides/notesSlide1.xml': page(sp('body', 'a', 'b'), sp('hdr', 'h')) };
+    expect(textParity(parts({ ...slideRels(notesRel('/ppt/notesSlides/notesSlide1.xml')), ...notes }), failed)).toMatchObject({ sourceRuns: 0, inErrorSlides: 3 });
+    // external, other relationship types and a missing rels part leave the page unreachable: out of scope
+    const foreign = '<Relationship Id="r" Type="http://x/slideLayout" Target="../notesSlides/notesSlide1.xml"/>';
+    for (const r of [notesRel('http://x/n.xml', ' TargetMode="External"'), foreign]) expect(textParity(parts({ ...slideRels(r), ...notes }), withNotes())).toMatchObject({ sourceRuns: 0, outOfScope: 3 });
+    expect(textParity(parts({ 'ppt/slides/slide1.xml': '<p:sld/>', ...notes }), withNotes())).toMatchObject({ outOfScope: 3 });
   });
 });

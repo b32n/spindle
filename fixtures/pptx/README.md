@@ -100,16 +100,18 @@ Every part (zip entry) of the input gets exactly one status, decided by the firs
   properties, the table style list, printer settings). When the import fails (the four rejected files) the `mapped`
   parts turn into `unaccounted`. A `mapped` part is one the reader reads; what it takes from a slide or layout grows
   over the K9 PRs, and the loss ids say what is still not carried.
+  Rules are path-based, so a comments part or notes page that no slide points at (an orphan) is `mapped` here while the
+  loss detector reports it as `lost`; the loss report is the authority for those parts.
 - `opaque`: kept byte for byte and written back on export. Always zero until the opaque part store (plan X5) exists.
 - `dropped`: not imported, and the loss report covers it. A rule only applies when the file's loss report contains one
-  of the rule's ids (`pptx.notes`, `pptx.masters.notesMaster`, `pptx.masters.handoutMaster`, `pptx.charts`,
+  of the rule's ids (`pptx.masters.handoutMaster`, `pptx.charts`,
   `pptx.smartArt`, `pptx.media` for audio and video, `pptx.images.unsupportedFormat` for EMF and WMF,
-  `pptx.embeddedObjects`, `pptx.comments`, `pptx.ink`, `pptx.macros`, `pptx.signatures`); the covering id is listed. A
+  `pptx.embeddedObjects`, `pptx.ink`, `pptx.macros`, `pptx.signatures`); the covering id is listed. A
   part no rule names (custom XML, tags, embedded fonts) is covered by the detector's catch-all
   `pptx.package.unaccountedParts`, which lists it.
 - `unaccounted`: nothing accounts for the part (launch-bar row L13 wants 0; the plan's K9 to K15 take it there). Today
   that is every part of the rejected files, plus any covered part whose loss id the detector did not report (for
-  example a notes page with no text).
+  example a chart part when the detector found no chart).
 
 A package that cannot be read at all (truncated zip) has an empty ledger and `package` set to `unreadable`; an OLE
 stub (encrypted or legacy `.ppt`) has `package: "ole"`.

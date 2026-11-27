@@ -19,6 +19,12 @@ describe('classifyPart', () => {
     ['ppt/slideLayouts/slideLayout1.xml', 'layout'],
     ['ppt/slideMasters/slideMaster1.xml', 'master'],
     ['ppt/theme/theme1.xml', 'theme'],
+    ['ppt/notesSlides/notesSlide1.xml', 'notesSlide'],
+    ['ppt/notesMasters/notesMaster1.xml', 'notesMaster'],
+    ['ppt/comments/comment1.xml', 'comments'],
+    ['ppt/comments/modernComment_1.xml', 'comments'],
+    ['ppt/commentAuthors.xml', 'comments'],
+    ['ppt/authors.xml', 'comments'],
     ['ppt/media/image1.png', 'picture'],
     ['ppt/media/image2.jpeg', 'picture'],
     ['ppt/media/image3.svg', 'picture'],
@@ -27,8 +33,6 @@ describe('classifyPart', () => {
   });
 
   it.each([
-    ['ppt/notesSlides/notesSlide1.xml', 'notesSlide', 'pptx.notes'],
-    ['ppt/notesMasters/notesMaster1.xml', 'notesMaster', 'pptx.masters.notesMaster'],
     ['ppt/handoutMasters/handoutMaster1.xml', 'handoutMaster', 'pptx.masters.handoutMaster'],
     ['ppt/charts/chart1.xml', 'chart', 'pptx.charts'],
     ['ppt/charts/style1.xml', 'chart', 'pptx.charts'],
@@ -43,10 +47,6 @@ describe('classifyPart', () => {
     ['ppt/embeddings/oleObject1.bin', 'embedding', 'pptx.embeddedObjects'],
     ['ppt/embeddings/Microsoft_Excel_Sheet1.xlsx', 'embedding', 'pptx.charts'],
     ['ppt/activeX/activeX1.xml', 'controls', 'pptx.embeddedObjects'],
-    ['ppt/comments/comment1.xml', 'comments', 'pptx.comments'],
-    ['ppt/comments/modernComment_1.xml', 'comments', 'pptx.comments'],
-    ['ppt/commentAuthors.xml', 'comments', 'pptx.comments'],
-    ['ppt/authors.xml', 'comments', 'pptx.comments'],
     ['ppt/ink/ink1.xml', 'ink', 'pptx.ink'],
     ['ppt/vbaProject.bin', 'macro', 'pptx.macros'],
     ['ppt/vbaProjectSignature.bin', 'macro', 'pptx.macros'],
@@ -69,7 +69,7 @@ describe('classifyPart', () => {
       status: 'unaccounted',
       rule: 'chart',
     });
-    expect(classifyPart('ppt/embeddings/a.bin', { ...base, lossIds: ['pptx.comments'] }).status).toBe(
+    expect(classifyPart('ppt/embeddings/a.bin', { ...base, lossIds: ['pptx.ink'] }).status).toBe(
       'unaccounted'
     );
   });

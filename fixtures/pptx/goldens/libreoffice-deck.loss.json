@@ -12,18 +12,9 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "approximated: its text styles are the base of the notes text; the notes page layout (slide image, header, footer, date, page number placeholders and the master's own theme) is not kept",
       "id": "pptx.masters.notesMaster",
       "label": "notes master(s)"
-    },
-    {
-      "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
-      "id": "pptx.notes",
-      "label": "slide(s) with speaker notes",
-      "where": [
-        "Slide 3"
-      ]
     },
     {
       "count": 3,

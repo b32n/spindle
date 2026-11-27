@@ -3967,7 +3967,30 @@
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
         "partName": "ppt/slides/slide1.xml",
-        "pptxId": "256"
+        "pptxId": "256",
+        "threads": [
+          {
+            "anchor": {
+              "kind": "slide"
+            },
+            "comments": [
+              {
+                "author": "Reviewer One",
+                "body": "Is this the final title?",
+                "createdAt": "2026-01-15T09:00:00.000Z",
+                "initials": "R1"
+              },
+              {
+                "author": "Reviewer Two",
+                "body": "Yes, it is.",
+                "createdAt": "2026-01-15T09:00:00.000Z",
+                "initials": "R2"
+              }
+            ],
+            "format": "modern",
+            "id": "256-{00000000-0000-4000-8000-0000000000C1}"
+          }
+        ]
       },
       {
         "elements": [

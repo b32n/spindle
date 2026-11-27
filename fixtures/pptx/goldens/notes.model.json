@@ -3966,6 +3966,63 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
+        "notes": {
+          "paragraphs": [
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Say hello, then introduce the topic."
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 0.9,
+                "marginLeft": 0,
+                "spaceBefore": 6
+              }
+            },
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Pause for questions."
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 0.9,
+                "marginLeft": 0,
+                "spaceBefore": 6
+              }
+            }
+          ],
+          "props": {}
+        },
         "partName": "ppt/slides/slide1.xml",
         "pptxId": "256"
       },
@@ -4030,6 +4087,174 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
+        "notes": {
+          "paragraphs": [
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "bold": true,
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Key point: "
+                },
+                {
+                  "italic": true,
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "keep it short"
+                },
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": " and "
+                },
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "underline the number",
+                  "underline": "sng"
+                },
+                {
+                  "color": {
+                    "hex": "#C00000",
+                    "kind": "rgb"
+                  },
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": " in red"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 0.9,
+                "marginLeft": 0,
+                "spaceBefore": 6
+              }
+            },
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "First step"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "char": "•",
+                  "kind": "char"
+                },
+                "bulletFont": "Arial",
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": -36,
+                "lineHeight": 0.9,
+                "marginLeft": 36,
+                "spaceBefore": 6
+              }
+            },
+            {
+              "level": 1,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Nested step"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "char": "–",
+                  "kind": "char"
+                },
+                "bulletFont": "Arial",
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 10,
+                "indent": -30,
+                "lineHeight": 0.9,
+                "marginLeft": 78,
+                "spaceBefore": 6
+              }
+            },
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Numbered"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "kind": "auto",
+                  "scheme": "arabicPeriod"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": -36,
+                "lineHeight": 0.9,
+                "marginLeft": 36,
+                "spaceBefore": 6
+              }
+            },
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Spaced paragraph"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 0.9,
+                "marginLeft": 0,
+                "spaceAfter": 6,
+                "spaceBefore": 6
+              }
+            }
+          ],
+          "props": {}
+        },
         "partName": "ppt/slides/slide2.xml",
         "pptxId": "257"
       },
@@ -4124,9 +4349,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 3,
+    "modelRuns": 14,
     "outOfScope": 0,
-    "sourceRuns": 3
+    "sourceRuns": 14
   },
   "warnings": []
 }

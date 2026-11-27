@@ -51,12 +51,9 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.masters.notesMaster"
-      ],
       "name": "ppt/notesMasters/notesMaster1.xml",
       "rule": "notesMaster",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "ppt/notesSlides/_rels/notesSlide3.xml.rels",
@@ -64,12 +61,9 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.notes"
-      ],
       "name": "ppt/notesSlides/notesSlide3.xml",
       "rule": "notesSlide",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "ppt/presProps.xml",
@@ -253,8 +247,8 @@
     }
   ],
   "totals": {
-    "dropped": 3,
-    "mapped": 45,
+    "dropped": 1,
+    "mapped": 47,
     "opaque": 0,
     "total": 48,
     "unaccounted": 0

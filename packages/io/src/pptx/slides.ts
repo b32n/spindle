@@ -5,7 +5,9 @@ import { DEFAULT_COLOR_MAP, colorElement, overrideColorMap, parseColor, parseCol
 import { parseFill, type Rels } from './fill';
 import { collectFonts } from './fonts';
 import { parseLevels } from './levels';
+import { elementIds, readAuthors, readThreads } from './comments';
 import { readElements, type ElementContext } from './elements';
+import { readNotes } from './notes';
 import { readTableStyles } from './table-styles';
 
 /** A slide's `p:bg`: the fill of `p:bgPr`, or the colour of a `p:bgRef` as a solid fill. */
@@ -29,6 +31,7 @@ export async function readSlideContent(
   defaultStyle: XmlElement | undefined,
   warn: (m: string) => void,
   fonts: Set<string>,
+  authors: Awaited<ReturnType<typeof readAuthors>>,
   tableStylesPart?: string
 ): Promise<void> {
   const layoutMaps = new Map<string, PptxColorMap>();
@@ -63,9 +66,24 @@ export async function readSlideContent(
       const background = readBackground(root, map, rels);
       if (background) slide.background = background;
       slide.elements = await readElements(kid(kid(root, 'cSld'), 'spTree'), ctx);
+      // notes and comments are extras: one that cannot be read is dropped, with a warning, and the slide keeps its content
+      try {
+        const notes = await readNotes(pkg, [...rels.values()].find((r) => r.type === 'notesSlide' && !r.external)?.target, warn);
+        if (notes) slide.notes = notes;
+      } catch (e) {
+        warn(`The speaker notes of slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); they are dropped.`);
+      }
+      try {
+        const threads = await readThreads(pkg, slide.partName, slide.pptxId, authors, elementIds(slide.elements), warn);
+        if (threads.length > 0) slide.threads = threads;
+      } catch (e) {
+        warn(`The comments of slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); they are dropped.`);
+      }
     } catch (e) {
       delete slide.elements;
       delete slide.background;
+      delete slide.notes;
+      delete slide.threads;
       slide.error = 'the content could not be read';
       warn(`Slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); it is kept as an empty placeholder.`);
     }

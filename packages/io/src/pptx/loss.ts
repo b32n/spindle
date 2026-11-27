@@ -3,9 +3,11 @@ import { createLossReport, type ImportLossItem, type ImportLossReport } from '@b
 import type { DetectPptxLossOptions } from '@b32nio/spindle-shared/export/pptx';
 import { OoxmlPackage, PACKAGE_LIMITS } from '../common/ooxml-package';
 import { isEncryptedOle, isOleFile } from '../xlsx/package-kind';
-import { descendants, kid, kids, parseXml, type XmlElement } from '../xlsx/xml';
+import { descendants, isTrue, kid, kids, parseXml, type XmlElement } from '../xlsx/xml';
 import { collectFonts, isAvailableFont } from './fonts';
 import { COMMENTS, LAYOUT, MASTER, NOTES_SLIDE, SLIDE, baseName, isKnownPart } from './parts';
+import { isBody } from './notes';
+import { treeChildren } from './shapes';
 import { scanSlide } from './slide-scan';
 import { Tally, newTallies, type Tallies } from './tally';
 
@@ -28,7 +30,6 @@ interface SlideEntry {
   label: string;
 }
 
-const hasText = (e: XmlElement | undefined): boolean => !!e && e.text.trim() !== '';
 
 export async function detectPptxLoss(bytes: Uint8Array, options: DetectPptxLossOptions = {}): Promise<ImportLossReport> {
   const items: ImportLossItem[] = [];
@@ -94,16 +95,14 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
         externalLinks++;
       } else if (rel.type === 'notesSlide') {
         seenNotes.add(rel.target);
-        if (await notesHaveText(pkg, rel.target)) t.notes.add(slide.label);
-      } else if (rel.type === 'comments') {
-        seenComments.add(rel.target);
-        t.comments.add(slide.label, await countComments(pkg, rel.target));
-      }
+        if (await notesAreRich(pkg, rel.target)) t.notes.add(slide.label);
+      } else if (rel.type === 'comments') seenComments.add(rel.target);
     }
   }
-  // notes pages and comment parts no slide points at still hold content
+  // notes pages no slide points at still hold content
   for (const part of names.filter((n) => NOTES_SLIDE.test(n) && !seenNotes.has(n)))
-    if (await notesHaveText(pkg, part)) t.notes.add(baseName(part));
+    if (await notesAreRich(pkg, part)) t.notes.add(baseName(part));
+  // comments the reader finds through a slide are kept; a comments part no slide points at is not read
   for (const part of names.filter((n) => COMMENTS.test(n) && !seenComments.has(n)))
     t.comments.add(baseName(part), await countComments(pkg, part));
 
@@ -143,10 +142,10 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.embeddedObjects', 'embedded object(s) (OLE) and control(s)', t.embedded);
   addTally('pptx.transitions', 'slide(s) with a transition', t.transitions);
   addTally('pptx.animations', 'animation effect(s)', t.animations);
-  addTally('pptx.comments', 'comment(s)', t.comments);
   add('pptx.macros', 'macro project', countParts(/^ppt\/vbaProject\.bin$/), 'lost: macros are never run or kept');
   addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden, 'kept: imported as a hidden slide');
-  addTally('pptx.notes', 'slide(s) with speaker notes', t.notes);
+  addTally('pptx.comments', 'comment(s) in a comments part no slide points at', t.comments, 'lost: comments are read through the slide that owns them, so these are not imported');
+  addTally('pptx.notes', 'slide(s) whose speaker notes carry formatting (bold, italic, underline, bullets or numbering)', t.notes, 'approximated: the notes text and its paragraph and character formatting are kept in the notes; the fonts and styles of the notes master apply only where the notes do not state their own, and the editor may draw a style slightly differently');
   add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, 'approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them', unavailable);
   addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry, 'approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its path unless it needs guide formulas');
   addTally('pptx.images.unsupportedFormat', 'picture(s) in a format browsers cannot show (EMF, WMF)', t.unsupportedImages, 'approximated: shown as a labelled placeholder with the picture\'s frame and alternative text; the image data itself is not kept');
@@ -158,7 +157,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   const masters = countParts(MASTER);
   addFull('pptx.masters.multiple', 'slide master(s) in a deck with more than one', masters > 1 ? masters : 0, NOT_IMPORTED);
   addFull('pptx.masters.handoutMaster', 'handout master(s)', countParts(/^ppt\/handoutMasters\/[^/]+\.xml$/), NOT_IMPORTED);
-  addFull('pptx.masters.notesMaster', 'notes master(s)', countParts(/^ppt\/notesMasters\/[^/]+\.xml$/), NOT_IMPORTED);
+  addFull('pptx.masters.notesMaster', 'notes master(s)', countParts(/^ppt\/notesMasters\/[^/]+\.xml$/), 'approximated: its text styles are the base of the notes text; the notes page layout (slide image, header, footer, date, page number placeholders and the master\'s own theme) is not kept');
   addTally('pptx.masters.layoutInheritance', 'placeholder(s) that take their position from the layout (flattened on import)', t.layoutInheritance, 'approximated: flattened, the placeholder keeps the position and size it inherits as its own', true);
   addTally('pptx.theme.colorMap', 'colour map(s) that are not the default', t.colorMap, 'approximated: colours are resolved through the map into theme colours; the map itself is not kept', true);
   addTally('pptx.theme.fontScheme', 'theme font scheme(s) other than Office default', t.fontScheme, 'approximated: font names are kept as written and theme font references are resolved to them', true);
@@ -242,19 +241,20 @@ async function listSlides(pkg: OoxmlPackage, presentationText: string, names: st
 
 const urlScheme = (target: string): string => /^([a-z][a-z0-9+.-]*):/i.exec(target)?.[1].toLowerCase() ?? 'relative';
 
-/** True when a notes page holds text beyond the slide number, date, footer and header placeholders. */
-async function notesHaveText(pkg: OoxmlPackage, part: string): Promise<boolean> {
-  const root = await pkg.xml(part);
-  const SKIP = new Set(['sldNum', 'dt', 'ftr', 'hdr', 'sldImg']);
-  return descendants(root, 'sp').some((sp) => {
-    const type = descendants(sp, 'ph')[0]?.attrs.type;
-    return !(type !== undefined && SKIP.has(type)) && descendants(sp, 't').some(hasText);
-  });
-}
-
 /** Comment threads in a comments part (legacy `p:cm` or modern `p188:cm`); a legacy reply (a `cm` with a `parentCm`) is not a thread. */
 async function countComments(pkg: OoxmlPackage, part: string): Promise<number> {
   return descendants(await pkg.xml(part), 'cm').filter((cm) => descendants(cm, 'parentCm').length === 0).length;
+}
+
+/** True when the notes body (the body placeholders of a notes page, which is what is kept) has formatted text: bold, italic or underline on a run, or a bullet or numbering on a paragraph. */
+async function notesAreRich(pkg: OoxmlPackage, part: string): Promise<boolean> {
+  const root = await pkg.xml(part);
+  const bodies = treeChildren(kid(kid(root, 'cSld'), 'spTree')).filter((e) => e.name === 'sp' && isBody(e));
+  return bodies.some(
+    (sp) =>
+      descendants(sp, 'rPr').some((r) => isTrue(r.attrs.b) || isTrue(r.attrs.i) || (r.attrs.u !== undefined && r.attrs.u !== 'none')) ||
+      descendants(sp, 'buChar').length + descendants(sp, 'buAutoNum').length > 0
+  );
 }
 
 function scanTheme(root: XmlElement | undefined, label: string, t: Tallies): void {
