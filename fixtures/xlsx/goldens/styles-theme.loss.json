@@ -28,12 +28,6 @@
       "effect": "lost: pattern fills are dropped (only solid fills are imported)",
       "id": "xlsx.styles.patternFill",
       "label": "cell format(s) with a pattern fill"
-    },
-    {
-      "count": 3,
-      "effect": "lost: the colour is dropped (only RGB colours are imported)",
-      "id": "xlsx.styles.themeColors",
-      "label": "cell format(s) using theme or indexed colours"
     }
   ]
 }

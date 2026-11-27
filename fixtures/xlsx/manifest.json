@@ -561,7 +561,7 @@
         "images.png",
         "formulas.basic"
       ],
-      "notes": "Written by openpyxl with one PNG. Absolute relationship targets; the importer at the time of writing throws a TypeError on it (plan 2.2 item 1).",
+      "notes": "Written by openpyxl with one PNG. Absolute relationship targets (the importer used to throw a TypeError on it: plan 2.2 item 1, fixed by the own reader, S2b).",
       "generator": "generators/build_producers.py"
     },
     {
@@ -579,7 +579,7 @@
         "charts.line",
         "formulas.basic"
       ],
-      "notes": "Written by openpyxl with a bar and a line chart. The importer at the time of writing throws a TypeError on it (plan 2.2 item 1).",
+      "notes": "Written by openpyxl with a bar and a line chart. The importer used to throw a TypeError on it (plan 2.2 item 1, fixed by the own reader, S2b).",
       "generator": "generators/build_producers.py"
     },
     {
@@ -596,7 +596,7 @@
         "comments.notes",
         "formulas.basic"
       ],
-      "notes": "Written by openpyxl with one cell comment (legacy note). The importer at the time of writing throws a TypeError on it (plan 2.2 item 1).",
+      "notes": "Written by openpyxl with one cell comment (legacy note). The importer used to throw a TypeError on it (plan 2.2 item 1, fixed by the own reader, S2b).",
       "generator": "generators/build_producers.py"
     },
     {
@@ -730,9 +730,8 @@
       "constructs": [
         "edge.invalidXml"
       ],
-      "notes": "A worksheet part with an unclosed element and a stray closing tag.",
-      "generator": "generators/build_edge.py",
-      "expectImportError": true
+      "notes": "A worksheet part with an unclosed element and a stray closing tag. The workbook still opens: the sheet is read as far as the damage and a warning says so.",
+      "generator": "generators/build_edge.py"
     },
     {
       "id": "edge-encrypted",

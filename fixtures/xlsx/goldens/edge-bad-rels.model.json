@@ -1,6 +1,8 @@
 {
   "importError": null,
-  "warnings": [],
+  "warnings": [
+    "The sheet \"Dangling\" has no usable relationship (rId99)."
+  ],
   "workbook": {
     "activeSheet": 0,
     "defaultColWidth": 100,

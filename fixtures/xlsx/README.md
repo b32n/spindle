@@ -15,7 +15,7 @@ up as a golden diff to review.
   setup, rich text and an inert `.xlsm`.
 - **Probe workbooks** from the fidelity plan: 159 common formulas, 33 number-format codes x 3 values and
   23 formula-syntax forms (cached values in the syntax probe are what Excel computes).
-- **Producer variety**: openpyxl (three single-feature files that make the importer throw), xlsxwriter and
+- **Producer variety**: openpyxl (three single-feature files that made the old `exceljs` reader throw; the own reader imports them), xlsxwriter and
   LibreOffice headless. The tool and version are recorded in `source` in the manifest. The libraries are
   authoring tools only: they are not dependencies and are not installed in CI.
 - **Edge files**: truncated zip, no workbook part, broken relationships, XML entity declarations, malformed
@@ -100,11 +100,11 @@ Every part (zip entry) of the input gets exactly one status, decided by the firs
   one of the rule's ids (`xlsx.charts` for charts and chart sheets, `xlsx.images` and the `xlsx.objects.*` ids for
   media and drawings, `xlsx.comments` and `xlsx.comments.threaded` for notes, threads and legacy drawings,
   `xlsx.tables`, `xlsx.pivotTables`, `xlsx.slicers`, `xlsx.externalLinks`, `xlsx.macros`, `xlsx.print.setup` for
-  printer settings, `xlsx.styles.themeColors` for the theme, `xlsx.workbook.richData` and
+  printer settings, `xlsx.workbook.richData` and
   `xlsx.workbook.externalData`); the covering id is listed. A part no rule names (custom XML, dialog sheets, SmartArt)
   is covered by the detector's catch-all `xlsx.package.unaccountedParts`, which lists it.
-- `unaccounted`: nothing accounts for the part. It is not read and no reported loss covers it: a theme or printer
-  settings part in a file whose reported losses do not mention them, or any part of a file the importer could not read
+- `unaccounted`: nothing accounts for the part. It is not read and no reported loss covers it: a printer
+  settings part in a file whose reported losses do not mention it, or any part of a file the importer could not read
   (below). The number is recorded as is (launch-bar row L8 wants 0; the plan's S2, S6 and X5 take it there).
 
 If the import throws, nothing reached the model, so `mapped` parts count as `unaccounted` for that file (`dropped`

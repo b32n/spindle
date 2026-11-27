@@ -514,6 +514,20 @@ lockstep.
   comment parts located. Additive types in `@b32nio/spindle-shared/export/xlsx` (`XlsxWorkbookInfo`, `XlsxStyles`, ...) and
   optional `workbook`, `styles`, `sharedStrings` and `theme` fields on `SpreadsheetImportResult`; nothing populates them yet. Not wired into
   `importXlsx` (the `exceljs` path is unchanged and import output is identical); the sheet reader and the switch are S2b.
+- **XLSX import uses the own reader (S2b).** `importXlsx` now reads a workbook with the own package reader (`jszip` +
+  `fast-xml-parser`, no new dependency) instead of `exceljs`; export is unchanged (still `exceljs`). New sheet reader:
+  `sheetData` as a forward-only event stream (shared formulas expanded, array formulas kept with their range, inline and
+  shared strings, ISO dates), `sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols` (with default styles), row
+  attributes, `mergeCells`, `hyperlinks` and `extLst` (raw). Theme, indexed and tinted colours now reach cell styles as
+  `#rrggbb` (plain black text is left to the editor), so the loss id `xlsx.styles.themeColors` is removed. Workbooks
+  from openpyxl with an image, a chart or a comment now import (they made the old reader throw), as do files with a
+  shared-string or format index past the table, a damaged worksheet part (read as far as the damage, with a warning) and
+  sheets whose names clash (later ones are renamed `Name (2)` with a warning). A shared formula the old reader read as a
+  plain value now has its formula, and a saved result of 0 or FALSE is kept. A binary `.xlsb` is refused with a message
+  that says to save as `.xlsx`. Additive fields on the result: `workbook`, `styles`, `sharedStrings`, `theme`,
+  per-sheet `details` and per-cell `styleIndex`, `sharedString` and `formulaInfo`. The `exceljs` reader stays in the tree,
+  unused, until S14; `reader-differential.test.ts` runs both over the corpus and over generated workbooks. S2 is
+  complete with this entry.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from

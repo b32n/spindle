@@ -1,5 +1,5 @@
 {
-  "importError": "The file contains no worksheets.",
+  "importError": "The file has no workbook part (it is not a complete Excel workbook).",
   "warnings": [],
   "workbook": null
 }

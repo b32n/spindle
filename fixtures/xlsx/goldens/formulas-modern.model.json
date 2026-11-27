@@ -1,11 +1,6 @@
 {
   "importError": null,
-  "warnings": [
-    "Modern!G20: shared formula without a resolvable expression; imported as a plain value",
-    "Modern!G21: shared formula without a resolvable expression; imported as a plain value",
-    "Modern!G22: shared formula without a resolvable expression; imported as a plain value",
-    "Modern!G23: shared formula without a resolvable expression; imported as a plain value"
-  ],
+  "warnings": [],
   "workbook": {
     "activeSheet": 0,
     "defaultColWidth": 100,
@@ -154,15 +149,19 @@
             "value": "#NAME? Function _XLFN.IFS not found"
           },
           "G20": {
+            "formula": "=B3*2",
             "value": 10
           },
           "G21": {
+            "formula": "=B4*2",
             "value": 14
           },
           "G22": {
+            "formula": "=B5*2",
             "value": 2
           },
           "G23": {
+            "formula": "=B6*2",
             "value": 8
           },
           "G3": {

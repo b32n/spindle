@@ -1,6 +1,54 @@
 {
-  "diff": null,
+  "diff": {
+    "added": 4,
+    "after": {
+      "cells": 2,
+      "formats": 0,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "before": {
+      "cells": 2,
+      "formats": 0,
+      "formulas": 0,
+      "merges": 0,
+      "sheets": 1,
+      "styles": 0
+    },
+    "byField": {
+      "added sheets[].config.colWidths.*": 3,
+      "added sheets[].config.rowHeights.*": 1
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.B"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.C"
+      },
+      {
+        "after": "20",
+        "kind": "added",
+        "path": "sheets[0].config.rowHeights.1"
+      }
+    ],
+    "removed": 0,
+    "total": 4,
+    "truncated": false
+  },
   "exportWarnings": [],
   "reimportWarnings": [],
-  "status": "skipped-import-error"
+  "status": "ok"
 }

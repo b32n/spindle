@@ -9,12 +9,6 @@
       "where": [
         "Styles"
       ]
-    },
-    {
-      "count": 1,
-      "effect": "lost: the colour is dropped (only RGB colours are imported)",
-      "id": "xlsx.styles.themeColors",
-      "label": "cell format(s) using theme or indexed colours"
     }
   ]
 }

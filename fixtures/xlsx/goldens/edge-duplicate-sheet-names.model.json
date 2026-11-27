@@ -1,5 +1,85 @@
 {
-  "importError": "The file could not be read (Worksheet name already exists: Data).",
-  "warnings": [],
-  "workbook": null
+  "importError": null,
+  "warnings": [
+    "The workbook has more than one sheet named \"Data\"; one was renamed \"Data (2)\".",
+    "The workbook has more than one sheet named \"DATA\"; one was renamed \"DATA (3)\"."
+  ],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "sheet 1"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Data",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "sheet 2"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Data (2)",
+        "rowCount": 1000,
+        "threads": []
+      },
+      {
+        "cells": {
+          "A1": {
+            "value": "sheet 3"
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "DATA (3)",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
 }
