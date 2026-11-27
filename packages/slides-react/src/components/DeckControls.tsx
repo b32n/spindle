@@ -78,7 +78,7 @@ export function SlideSizeSection(): React.ReactElement {
           Height (px)
           <input aria-label="Slide height" type="number" min={100} max={5376} value={h} onChange={(e) => setH(e.target.value)} style={fieldInput} />
         </label>
-        <button aria-label="Apply slide size" style={{ ...btn, padding: '5px 10px' }} onClick={() => apply({ w: Number(w), h: Number(h) })}>Apply</button>
+        <button aria-label="Apply slide size" style={{ ...btn, padding: '5px 10px' }} onClick={() => apply({ w: w.trim() === '' ? size.w : Number(w), h: h.trim() === '' ? size.h : Number(h) })}>Apply</button>
       </div>
     </div>
   );

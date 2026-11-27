@@ -74,7 +74,10 @@ describe('SlideSizeSection', () => {
     expect(setSlideSize).toHaveBeenLastCalledWith({ w: 100, h: 801 }, { scaleContent: true });
     find(render(), byLabel('Slide width'))[0].props.onChange({ target: { value: '' } });
     find(render(), byLabel('Apply slide size'))[0].props.onClick();
-    expect(setSlideSize).toHaveBeenLastCalledWith({ w: 100, h: 801 }, { scaleContent: true });
+    expect(setSlideSize).toHaveBeenLastCalledWith({ w: 1000, h: 801 }, { scaleContent: true });
+    find(render(), byLabel('Slide height'))[0].props.onChange({ target: { value: '  ' } });
+    find(render(), byLabel('Apply slide size'))[0].props.onClick();
+    expect(setSlideSize).toHaveBeenLastCalledWith({ w: 1000, h: 700 }, { scaleContent: true });
   });
 
   it('the inputs follow the deck when its size changes', () => {

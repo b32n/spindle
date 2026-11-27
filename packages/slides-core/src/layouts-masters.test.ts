@@ -75,7 +75,7 @@ describe('slide size presets', () => {
     const fb = { w: 1280, h: 720 };
     expect(clampSlideSize({ w: 10, h: 99999 }, fb)).toEqual({ w: MIN_SLIDE_SIDE, h: MAX_SLIDE_SIDE });
     expect(clampSlideSize({ w: 800.6, h: 600.4 }, fb)).toEqual({ w: 801, h: 600 });
-    expect(clampSlideSize({ w: NaN, h: Infinity }, fb)).toEqual({ w: 1280, h: MAX_SLIDE_SIDE === 5376 ? 720 : 720 });
+    expect(clampSlideSize({ w: NaN, h: Infinity }, fb)).toEqual({ w: 1280, h: 720 });
   });
 });
 

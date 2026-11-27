@@ -18,6 +18,7 @@ export const SLIDE_SIZE_PRESETS: readonly SlideSizePreset[] = [
   { id: '16:9', label: 'Widescreen (16:9)', w: 1280, h: 720 },
   { id: '16:10', label: 'Widescreen (16:10)', w: 1280, h: 800 },
   { id: '4:3', label: 'Standard (4:3)', w: 960, h: 720 },
+  // True A4 at 96 dpi; PowerPoint's own "A4" slide is 1040x720 and imports as Custom.
   { id: 'a4', label: 'A4 landscape', w: 1123, h: 794 },
   { id: 'a4-portrait', label: 'A4 portrait', w: 794, h: 1123 },
   { id: 'portrait', label: 'Portrait (9:16)', w: 720, h: 1280 },
@@ -42,6 +43,7 @@ export function clampSlideSize(size: { w: number; h: number }, fallback: { w: nu
   return { w: side(size.w, fallback.w), h: side(size.h, fallback.h) };
 }
 
+// Frames scale per axis, so a rotated element is skewed under a non-uniform scale (the stated policy).
 /** The patch that scales one element by `sx` horizontally and `sy` vertically (frame, line free ends, table row minimums). */
 export function scaleElementPatch(el: SlideElement, sx: number, sy: number): Partial<SlideElement> {
   const patch: Record<string, unknown> = { x: el.x * sx, y: el.y * sy, w: el.w * sx, h: el.h * sy };
