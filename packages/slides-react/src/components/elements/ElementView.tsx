@@ -7,10 +7,10 @@
 // gestures can write transforms straight to the DOM, and it accepts pointer
 // events (the stage delegates hit-testing via `closest('[data-element-id]')`).
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useSyncExternalStore } from 'react';
 import { useElement, useTheme } from '../../hooks';
 import { useDeckContext } from '../../context/DeckContext';
-import type { SlideElement } from '@b32nio/spindle-slides-core';
+import type { ShapeElement, SlideElement } from '@b32nio/spindle-slides-core';
 import { TextView } from './TextView';
 import { ShapeView } from './ShapeView';
 import { ImageView } from './ImageView';
@@ -18,12 +18,20 @@ import { LineView } from './LineView';
 import { ConnectorView } from './ConnectorView';
 import { TableView } from './TableView';
 
+/** An editable shape: redraws with the live adjustment values while one of its handles is dragged. */
+function LiveShapeView({ el, theme }: { el: ShapeElement; theme: ReturnType<typeof useTheme> }): React.ReactElement {
+  const { transient } = useDeckContext();
+  // select just this shape's entry so other transient changes (frames, guides) do not re-render it
+  const live = useSyncExternalStore(transient.subscribe, () => transient.get().liveAdjustments?.get(el.id));
+  return <ShapeView el={live ? { ...el, adjustments: live } : el} theme={theme} interactive />;
+}
+
 function renderInner(el: SlideElement, theme: ReturnType<typeof useTheme>, interactive: boolean): React.ReactElement {
   switch (el.type) {
     case 'text':
       return <TextView el={el} theme={theme} interactive={interactive} />;
     case 'shape':
-      return <ShapeView el={el} theme={theme} interactive={interactive} />;
+      return interactive ? <LiveShapeView el={el} theme={theme} /> : <ShapeView el={el} theme={theme} />;
     case 'image':
       return <ImageView el={el} />;
     case 'line':

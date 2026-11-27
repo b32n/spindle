@@ -816,6 +816,13 @@ lockstep.
   categories with labelled buttons. Additive exports from `@b32nio/spindle-slides-core`; `ShapeElement.shape` widens
   from `ShapePreset` to `ShapeKind`. Slides collaboration schema version 5 (a v4 client refuses a v5 room). The PPTX
   loss id `pptx.shapes.unsupportedGeometry` now counts only presets outside the library.
+- **Slides shape adjustment handles (K5b).** A single selected shape with adjustable guides (rounded and snipped
+  corners, arrows, stars, callouts, brackets, pie, chord, block arc, moon, can, cube and more) shows yellow diamond
+  handles on the canvas; dragging one changes the guides live and commits one undo entry. The handles are drawn in
+  the selection overlay (labelled "Adjust shape"), so the toolbar is unchanged. Guides are already stored in
+  `props.adjustments`, so there is no new collaboration key and the schema version stays 5. New additive slides-core
+  exports `adjustmentHandles` and `adjustmentsAfterDrag`; presets without a handle for a guide (the block arc
+  thickness) keep editing it through the data only.
 
 ## [0.4.0] - 2026-10-26
 

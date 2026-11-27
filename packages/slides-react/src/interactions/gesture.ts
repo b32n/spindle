@@ -15,6 +15,9 @@ import {
   rotateFrame,
   scaleGroup,
   rotateGroup,
+  toLocal,
+  adjustmentsAfterDrag,
+  resolveAdjustments,
   type DeckImpl,
   type SlideElement,
   type Frame,
@@ -222,6 +225,45 @@ export function createRotateGesture(ctx: GestureContext, selectedIds: string[], 
       ctx.transient.clear();
     },
   };
+}
+
+// ── Adjustment handle ──────────────────────────────────────────────────────────
+
+/** Mirror a point in a shape's box for its flips (the geometry is drawn flipped, the handles live in the unflipped box). */
+export function flipInBox(p: Point, el: { w: number; h: number; flipH?: boolean; flipV?: boolean }): Point {
+  return { x: el.flipH ? el.w - p.x : p.x, y: el.flipV ? el.h - p.y : p.y };
+}
+
+/**
+ * Drag one of a shape's adjustment handles. The preview goes through the transient store (the shape redraws with the
+ * live values); the commit is one undo entry at pointerup, and only when the drag changed something.
+ */
+export function createAdjustGesture(ctx: GestureContext, elementId: string, handle: number): Gesture | null {
+  const el = ctx.deck.getElement(elementId);
+  if (!el || el.type !== 'shape') return null;
+  const frame = frameOf(el);
+  let last: number[] | null = null;
+  return {
+    onMove(p) {
+      const local = flipInBox(toLocal(p, frame), el);
+      const next = adjustmentsAfterDrag(el.shape, handle, local, el.w, el.h, el.adjustments);
+      if (!next) return;
+      last = next;
+      ctx.transient.set({ liveAdjustments: new Map([[elementId, next]]) });
+    },
+    onEnd() {
+      ctx.transient.clear();
+      const start = resolveAdjustments(el.shape, el.adjustments);
+      if (last && last.some((v, i) => v !== start[i])) ctx.deck.updateElement(elementId, { adjustments: last } as Partial<SlideElement>);
+    },
+  };
+}
+
+/** The adjust gesture for a pointerdown on a `data-adjust` handle: only with exactly one selected element, and a numeric handle id. */
+export function adjustGestureForSelection(ctx: GestureContext, selection: readonly string[], handleAttr: string | undefined): Gesture | null {
+  const handle = Number(handleAttr);
+  if (selection.length !== 1 || handleAttr === undefined || !Number.isInteger(handle)) return null;
+  return createAdjustGesture(ctx, selection[0], handle);
 }
 
 // ── Marquee ──────────────────────────────────────────────────────────────────
