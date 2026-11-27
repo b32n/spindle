@@ -22,6 +22,18 @@ describe('sourceRuns', () => {
     expect(sourceRuns(xml)).toEqual({ inScope: ['one', 'two', 'three'], outOfScope: ['in group', 'cell', 'pic', 'c', 'copy'] });
   });
 
+  it('reads a Fallback as in scope when the alternate content has no Choice, as the reader does', () => {
+    const only = '<mc:AlternateContent><mc:Fallback><p:sp><a:t>fb</a:t></p:sp></mc:Fallback></mc:AlternateContent>';
+    expect(sourceRuns(only)).toEqual({ inScope: ['fb'], outOfScope: [] });
+    // a Choice of another alternate content does not make this Fallback a copy
+    const two = `<mc:AlternateContent><mc:Choice><p:sp><a:t>c</a:t></p:sp></mc:Choice></mc:AlternateContent>${only}`;
+    expect(sourceRuns(two)).toEqual({ inScope: ['c', 'fb'], outOfScope: [] });
+    // a Choice or Fallback outside alternate content marks nothing out of scope
+    expect(sourceRuns('<mc:Choice/><mc:Fallback><p:sp><a:t>x</a:t></p:sp></mc:Fallback>')).toEqual({ inScope: ['x'], outOfScope: [] });
+    const xml = { 'ppt/slides/slide1.xml': `<p:sld>${only}</p:sld>` };
+    expect(textParity(parts(xml), model(['fb']))).toMatchObject({ sourceRuns: 1, outOfScope: 0, missing: [], extra: [] });
+  });
+
   it('treats an a:t outside every shape as in scope, so the parity check reports it as missing', () => {
     expect(sourceRuns('<p:spTree><a:t>stray</a:t></p:spTree>')).toEqual({ inScope: ['stray'], outOfScope: [] });
     const xml = { 'ppt/slides/slide1.xml': '<p:sld><p:spTree><a:t>stray</a:t></p:spTree></p:sld>' };

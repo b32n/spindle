@@ -3,7 +3,7 @@
  * multiset compare. The source side is read independently of the reader, by tokenising the slide XML for `a:t` runs, so a
  * reader bug cannot hide itself. The check covers the shapes the reader reads so far (`p:sp` directly under the shape tree);
  * runs in shape kinds a later reader step owns (groups, pictures, tables and other graphic frames, connectors) and the
- * `mc:Fallback` copies of alternate content are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
+ * `mc:Fallback` copies of alternate content that also has a `mc:Choice` (the reader enters the Choice, else the Fallback) are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
  * knows (outside any shape at all, or in an element no reader step owns) is in scope and so reported as `missing`: such text
  * would be silently dropped by the reader, which is what the check exists to show.
  */
@@ -28,7 +28,7 @@ export interface TextParity {
 const MAX_LISTED = 20;
 const SLIDE = /^ppt\/slides\/slide\d+\.xml$/;
 /** Containers whose text a later reader step owns. */
-const LATER = new Set(['p:grpSp', 'p:pic', 'p:graphicFrame', 'p:cxnSp', 'mc:Fallback']);
+const LATER = new Set(['p:grpSp', 'p:pic', 'p:graphicFrame', 'p:cxnSp']);
 const TAG = /<(\/?)([A-Za-z_][\w.-]*:[\w.-]+)(?:"[^"]*"|'[^']*'|[^>"'])*?(\/?)>|<!--[\s\S]*?-->/g;
 const NAMED: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
@@ -49,7 +49,7 @@ const decode = (s: string): string =>
 export function sourceRuns(xml: string): { inScope: string[]; outOfScope: string[] } {
   const inScope: string[] = [];
   const outOfScope: string[] = [];
-  const stack: string[] = [];
+  const stack: { name: string; later: boolean; choice: boolean }[] = [];
   let later = 0;
   // where the character data of the `a:t` just opened starts
   let textFrom = -1;
@@ -61,11 +61,15 @@ export function sourceRuns(xml: string): { inScope: string[]; outOfScope: string
     const name = m[2];
     if (name === undefined) continue;
     if (m[1] === '/') {
-      const at = stack.lastIndexOf(name);
-      if (at >= 0) for (const closed of stack.splice(at)) if (LATER.has(closed)) later--;
+      const at = stack.map((f) => f.name).lastIndexOf(name);
+      if (at >= 0) for (const closed of stack.splice(at)) if (closed.later) later--;
     } else if (m[3] !== '/') {
-      stack.push(name);
-      if (LATER.has(name)) later++;
+      const parent = stack[stack.length - 1];
+      if (name === 'mc:Choice' && parent?.name === 'mc:AlternateContent') parent.choice = true;
+      // a Fallback is the copy only when a Choice is there to be read instead
+      const isLater = LATER.has(name) || (name === 'mc:Fallback' && parent?.name === 'mc:AlternateContent' && parent.choice);
+      stack.push({ name, later: isLater, choice: false });
+      if (isLater) later++;
       if (name === 'a:t') textFrom = TAG.lastIndex;
     }
   }
