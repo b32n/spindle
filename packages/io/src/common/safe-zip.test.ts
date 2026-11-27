@@ -62,6 +62,7 @@ describe('limits', () => {
       maxXmlPartBytes: 256 * MB,
       maxRatio: 200,
       ratioFloorBytes: 16 * MB,
+      maxSheetFormulaChars: 16 * MB,
     });
     expect(resolveLimits()).toEqual(DEFAULT_IMPORT_LIMITS);
     expect(resolveLimits({ maxEntries: 3 })).toEqual({ ...DEFAULT_IMPORT_LIMITS, maxEntries: 3 });

@@ -35,9 +35,15 @@ export interface ImportLimits {
    * would be refused for nothing.
    */
   ratioFloorBytes: number;
+  /**
+   * Characters of formula text one worksheet may gain by expanding shared formulas (each cell of a group gets its own copy of the
+   * master's text). Over it the remaining cells of that sheet keep their cached value and lose the formula, with one warning.
+   */
+  maxSheetFormulaChars: number;
 }
 
-/** Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB. */
+/** Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB,
+ * 16 Mi characters of expanded shared-formula text per worksheet. */
 export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxPackageBytes: 100 * MB,
   maxEntries: 20_000,
@@ -46,6 +52,7 @@ export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxXmlPartBytes: 256 * MB,
   maxRatio: 200,
   ratioFloorBytes: 16 * MB,
+  maxSheetFormulaChars: 16 * MB,
 };
 
 export interface SafeZipOptions {

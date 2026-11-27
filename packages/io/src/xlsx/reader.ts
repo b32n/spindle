@@ -1,6 +1,6 @@
 import type { SpreadsheetImportResult, SpreadsheetSheet } from '@b32nio/spindle-shared/export/xlsx';
 import { ImportError, toImportError } from '../common/import-error';
-import type { ImportLimits } from '../common/safe-zip';
+import { resolveLimits, type ImportLimits } from '../common/safe-zip';
 import { XlsxPackage } from './read/package';
 import { readWorkbookParts, toImportExtras } from './read';
 import { readSheet } from './read/sheet';
@@ -29,27 +29,31 @@ export async function importXlsx(bytes: Uint8Array, options: ImportXlsxOptions =
     }
     // a workbook part that is not XML leaves nothing to read (any other damaged part is a warning)
     if ((await pkg.xml(workbookPart)) === undefined) throw new ImportError('corrupt', 'The workbook part of the file is damaged (it is not well-formed XML).');
-    return await readPackage(pkg);
+    return await readPackage(pkg, resolveLimits(options.limits));
   } catch (e) {
     throw toImportError(e);
   }
 }
 
-async function readPackage(pkg: XlsxPackage): Promise<SpreadsheetImportResult> {
+async function readPackage(pkg: XlsxPackage, limits: ImportLimits): Promise<SpreadsheetImportResult> {
   const parts = await readWorkbookParts(pkg);
   const warnings: string[] = [];
   const sheets: SpreadsheetSheet[] = [];
   const taken = new Set<string>();
-  for (const ref of parts.workbook.sheets) {
+  // where each workbook sheet (by its place in the workbook) went in `sheets`, for the active tab
+  const placed = new Map<number, number>();
+  for (const [position, ref] of parts.workbook.sheets.entries()) {
     // only worksheets are read (a chart sheet has no cells), and one whose part is missing was already reported by the package
     if (ref.kind !== 'worksheet' || ref.part === undefined) continue;
     const name = uniqueName(ref.name, taken, warnings);
+    placed.set(position, sheets.length);
     sheets.push(
       readSheet(await pkg.text(ref.part), { ...ref, name }, {
         styles: parts.styles,
         sharedStrings: parts.sharedStrings,
         colors: parts.colors,
         date1904: parts.workbook.date1904,
+        maxFormulaChars: limits.maxSheetFormulaChars,
         warn: (message) => warnings.push(message),
       })
     );
@@ -57,7 +61,7 @@ async function readPackage(pkg: XlsxPackage): Promise<SpreadsheetImportResult> {
   // the package's own warnings (damaged parts, unresolvable relationships) come first, in the order they were met
   return {
     sheets,
-    activeSheetIndex: parts.workbook.activeTab,
+    activeSheetIndex: activeSheet(parts.workbook.activeTab, placed, sheets.length),
     warnings: [...new Set([...pkg.warnings, ...warnings])],
     ...toImportExtras(parts),
   };
@@ -70,4 +74,16 @@ function uniqueName(name: string, taken: Set<string>, warnings: string[]): strin
   taken.add(candidate.toLowerCase());
   if (candidate !== name) warnings.push(`The workbook has more than one sheet named "${name}"; one was renamed "${candidate}".`);
   return candidate;
+}
+
+/**
+ * The editor's active sheet for the workbook's `activeTab` (a place among all sheets, chart sheets and sheets without a part
+ * included; none: the editor's default). When that sheet was not read, the next one that was; past the last one, the last. Never outside `sheets`.
+ */
+function activeSheet(activeTab: number | undefined, placed: ReadonlyMap<number, number>, count: number): number | undefined {
+  if (activeTab === undefined) return undefined;
+  const tab = Math.max(activeTab, 0);
+  let best: number | undefined;
+  for (const position of placed.keys()) if (position >= tab && (best === undefined || position < best)) best = position;
+  return best === undefined ? Math.max(count - 1, 0) : (placed.get(best) as number);
 }

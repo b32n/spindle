@@ -16,7 +16,9 @@ import { MAX_COL, MAX_ROW, columnIndex, columnLetters } from './cell-ref';
 // as Excel does.
 // ---------------------------------------------------------------------------
 
-const NAME_CHAR = /[A-Za-z0-9_.\\]/;
+// letters and digits of any script (`Größe1`, `Налог2`), `_`, `.` and `\`; a surrogate half is a name character too, so a name with
+// a letter outside the BMP is not cut in the middle (the formula is read one UTF-16 unit at a time)
+const NAME_CHAR = /[\p{L}\p{N}_.\\\ud800-\udfff]/u;
 
 /** `formula` as it reads `rows` down and `cols` right of the cell it was written for. */
 export function shiftFormula(formula: string, rows: number, cols: number): string {

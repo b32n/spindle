@@ -299,6 +299,57 @@ describe('importXlsx: the own reader', () => {
     expect(new Set(result.warnings).size).toBe(result.warnings.length);
   });
 
+  describe('the active sheet when sheets are skipped', () => {
+    const sheets = '<sheet name="Chart" sheetId="1" r:id="rId1"/><sheet name="A" sheetId="2" r:id="rId2"/><sheet name="Gone" sheetId="3" r:id="rId3"/><sheet name="B" sheetId="4" r:id="rId4"/><sheet name="Chart2" sheetId="5" r:id="rId5"/>';
+    const rels: Array<[string, string, string]> = [
+      ['rId1', 'chartsheet', 'chartsheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet1.xml'], ['rId3', 'worksheet', 'worksheets/gone.xml'], ['rId4', 'worksheet', 'worksheets/sheet2.xml'], ['rId5', 'chartsheet', 'chartsheets/sheet2.xml'],
+    ];
+    const parts = { 'xl/worksheets/sheet1.xml': sheetXml(''), 'xl/worksheets/sheet2.xml': sheetXml(''), 'xl/chartsheets/sheet1.xml': `<chartsheet ${MAIN_NS}/>`, 'xl/chartsheets/sheet2.xml': `<chartsheet ${MAIN_NS}/>` };
+    const active = async (activeTab: string | undefined, over: { sheets?: string; rels?: Array<[string, string, string]>; parts?: Record<string, string> } = {}) => {
+      const view = activeTab === undefined ? '' : `<bookViews><workbookView activeTab="${activeTab}"/></bookViews>`;
+      const bytes = await workbookZip(`${view}<sheets>${over.sheets ?? sheets}</sheets>`, over.rels ?? rels, over.parts ?? parts);
+      const result = await importXlsx(bytes);
+      return { index: result.activeSheetIndex, names: result.sheets.map((s) => s.name) };
+    };
+
+    it('maps the tab to the sheet it is, among the sheets that were read', async () => {
+      expect(await active('1')).toEqual({ index: 0, names: ['A', 'B'] });
+      expect(await active('3')).toEqual({ index: 1, names: ['A', 'B'] });
+    });
+
+    it('moves a tab that is a chart sheet or a sheet without a part to the next sheet that was read', async () => {
+      expect((await active('0')).index).toBe(0);
+      expect((await active('2')).index).toBe(1);
+    });
+
+    it('moves a tab past the last sheet read, or past the end, to the last sheet read; a negative one to the first', async () => {
+      expect((await active('4')).index).toBe(1);
+      expect((await active('99')).index).toBe(1);
+      expect((await active('-3')).index).toBe(0);
+    });
+
+    it('leaves it unset when the workbook says nothing, and is 0 when no sheet was read', async () => {
+      expect((await active(undefined)).index).toBeUndefined();
+      const onlyChart = await active('0', { sheets: '<sheet name="Chart" sheetId="1" r:id="rId1"/>', rels: [rels[0]], parts: { 'xl/chartsheets/sheet1.xml': parts['xl/chartsheets/sheet1.xml'] } });
+      expect(onlyChart).toEqual({ index: 0, names: [] });
+    });
+  });
+
+  it('takes the budget for expanded shared formulas from the limits', async () => {
+    const children = Array.from({ length: 10 }, (_, i) => `<row r="${i + 2}"><c r="A${i + 2}"><f t="shared" si="0"/><v>1</v></c></row>`).join('');
+    const bytes = await book('<sheet name="A" sheetId="1" r:id="rId1"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
+      'xl/worksheets/sheet1.xml': sheetXml(`<row r="1"><c r="A1"><f t="shared" ref="A1:A11" si="0">B1+1</f><v>1</v></c></row>${children}`),
+    });
+    const formulas = async (limits?: { maxSheetFormulaChars: number }) => {
+      const result = await importXlsx(bytes, limits === undefined ? {} : { limits });
+      return { count: [...result.sheets[0].cells.values()].filter((c) => c.formula !== undefined).length, warnings: result.warnings };
+    };
+    expect(await formulas()).toEqual({ count: 11, warnings: [] });
+    const limited = await formulas({ maxSheetFormulaChars: 10 });
+    expect(limited.count).toBe(1 + 3);
+    expect(limited.warnings).toEqual(['A: formulas left out, their values kept: 7 past the limit of 10 characters of expanded shared formulas.']);
+  });
+
   it('applies the limits to every sheet part it reads', async () => {
     const bytes = await book('<sheet name="A" sheetId="1" r:id="rId1"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': sheetXml(`<row r="1">${'<c r="A1"><v>1</v></c>'.repeat(1000)}</row>`) });
     await expect(importXlsx(bytes, { limits: { maxXmlPartBytes: 1000 } })).rejects.toMatchObject({ code: 'size-limit' });

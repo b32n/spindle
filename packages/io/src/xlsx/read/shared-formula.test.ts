@@ -56,6 +56,21 @@ const ORACLE: Array<[string, number, number, string]> = [
   ['_xlfn.SEQUENCE(3)+A1#', 1, 0, '_xlfn.SEQUENCE(3)+A2#'],
   ['A1&"unterminated', 1, 0, 'A2&"unterminated'],
   ['A1&[unterminated', 1, 0, 'A2&[unterminated'],
+  // names with letters and digits of any script are names, not cells
+  ['Größe1+A1', 1, 0, 'Größe1+A2'],
+  ['Größe1+A1', 0, 1, 'Größe1+B1'],
+  ['Налог2*A1', 1, 0, 'Налог2*A2'],
+  ['税率3+B2', 1, 1, '税率3+C3'],
+  ['A1+Größe', 1, 0, 'A2+Größe'],
+  ['ÄA1+A1', 1, 0, 'ÄA1+A2'], // a letter before a would-be cell glues to it
+  ['A1Ä+A1', 1, 0, 'A1Ä+A2'], // and so does one after it
+  ['SUM(Ünit1:Ünit9)+A1', 1, 0, 'SUM(Ünit1:Ünit9)+A2'],
+  ['Größe1(A1)+A1', 1, 0, 'Größe1(A2)+A2'],
+  ['Größe1!A1+A1', 1, 0, 'Größe1!A2+A2'], // a sheet named Größe1
+  ['x١2+A1', 1, 0, 'x١2+A2'], // a non-ASCII digit is a name character too
+  ['𝒜1+A1', 1, 0, '𝒜1+A2'], // a letter outside the BMP (two UTF-16 units)
+  ['A1+𝒜A1', 1, 0, 'A2+𝒜A1'],
+  ['A1+"Größe1"', 1, 0, 'A2+"Größe1"'],
 ];
 
 describe('shiftFormula', () => {

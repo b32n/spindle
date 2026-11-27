@@ -18,24 +18,36 @@ import type {
 } from '@b32nio/spindle-shared/export/xlsx';
 import { isOn, isTrue, kid, kids, parseXml, type XmlElement } from '../xml';
 import { lookOf, isDateFormat, type CellLook } from './cell-style';
-import { parseCellRef, parseRangeRef, type RangeBounds } from './cell-ref';
+import { countCover, indexCells, lastCover, sweepCover } from './cell-ranges';
+import { MAX_COL, MAX_ROW, parseCellRef, parseRangeRef, type RangeBounds } from './cell-ref';
 import { readColor, type ColorContext } from './colors';
 import { scanXml, type SaxAttrs } from './sax';
+import { decodeStringEscapes } from './shared-strings';
 import { shiftFormula } from './shared-formula';
-import { boolAttr, intAttr, numAttr, put } from './values';
+import { boolAttr, intAttr, numAttr, parseDecimal, parseIndex, put } from './values';
+import { DEFAULT_IMPORT_LIMITS } from '../../common/safe-zip';
 
 // ---------------------------------------------------------------------------
-// One worksheet part. A single forward pass (`scanXml`, no tree) walks the part: `sheetData` is read cell by cell as events,
-// so memory stays proportional to the cells kept, and the small elements around it (`sheetPr`, `dimension`, `sheetViews`,
-// `sheetFormatPr`, `cols`, `mergeCells`, `hyperlinks`, `extLst`) are cut out by offset as they close and read as little trees.
+// One worksheet part. The part's text is held as one string (the package hands it over whole); a single forward pass (`scanXml`,
+// events, no tree) walks it: `sheetData` is read cell by cell, so besides that string only the cells kept are held, and the small
+// elements around it (`sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols`, `mergeCells`, `hyperlinks`, `extLst`) are cut
+// out by offset as they close and read as little trees.
 //
 // What a cell becomes:
-//   - value by type (`t`): number, shared string, formula string result, boolean, error text, inline string, ISO date (as the
-//     serial); an empty cell (no value, no formula) is not kept, as before
+//   - value by type (`t`): number (plain decimals only), shared string, formula string result, boolean, error text, inline
+//     string, ISO date (validated, as the serial); `_xHHHH_` escapes are decoded in inline and formula strings as in shared
+//     strings; an empty cell (no value and nothing of a formula) is not kept, as before
 //   - formula: text of `<f>`; shared formulas are expanded (each cell gets the master's formula moved by its distance from the
-//     master), array formulas keep their text on the anchor cell; the cached result is the value
+//     master), array formulas keep their text on the anchor cell; the cached result is the value. A formula over 8192
+//     characters (Excel's own limit) is dropped, and so are the shared-formula cells past a per-sheet budget of expanded
+//     characters (`ImportLimits.maxSheetFormulaChars`): the value stays, one warning per sheet counts them. `<f/>` with no
+//     text (and no `ref`/`si` meaning) is no formula: with a value the cell is a plain value, without one it is not kept
+//   - position: a cell or row without a usable `r` follows the previous one, clamped to the sheet limits (with a warning)
 //   - hyperlink: the `hyperlinks` entry for the cell, by relationship target (a `location` link is only in `details`)
-//   - cells covered by a merge but its first are dropped, as before (the merge itself is `mergedRanges`)
+//   - cells covered by a merge but its first are dropped, as before (the merge itself is `mergedRanges`); merges and hyperlinks
+//     are applied by one sweep over the cells in row order (`cell-ranges.ts`), so a range of a million cells costs no more than
+//     one cell and a sheet with thousands of ranges stays near-linear
+//   - panes: `frozen` and `frozenSplit` (ECMA-376 18.3.1.66: frozen, but split before) both freeze rows and columns
 //
 // Never throws: a damaged part gives what precedes the damage and `details.wellFormed = false`; a cell that cannot be read is a
 // warning. Everything the file names (shared string index, style index, `si`) is looked up in `Map`s or arrays by number.
@@ -47,6 +59,8 @@ export interface SheetContext {
   sharedStrings: readonly XlsxSharedString[];
   colors: ColorContext;
   date1904: boolean;
+  /** Characters of formula text the sheet may gain by expanding shared formulas (`ImportLimits.maxSheetFormulaChars`). */
+  maxFormulaChars?: number;
   /** Receives non-fatal problems. */
   warn: (message: string) => void;
 }
@@ -54,16 +68,32 @@ export interface SheetContext {
 /** Most warnings one sheet adds for single cells; the rest are counted in one closing message. */
 const MAX_CELL_WARNINGS = 20;
 
+/** Longest formula Excel accepts (characters); a longer one in a file is not read. */
+export const MAX_FORMULA_CHARS = 8192;
+
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?)?Z?$/;
 const EXCEL_EPOCH_UTC = Date.UTC(1899, 11, 30);
 const DAY_MS = 86_400_000;
 
-/** The serial number of an ISO 8601 date or date-time (`t="d"` cells), or `undefined` when it is not one. */
+const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+/**
+ * The serial number of an ISO 8601 date or date-time (`t="d"` cells), or `undefined` when it is not one: the date must exist
+ * (`2020-02-30` does not), the time be in range, and the day not lie before the epoch (1899-12-30: Excel has no serial for an
+ * earlier one). A year under 100 is that year, not 19xx.
+ */
 export function isoToSerial(text: string): number | undefined {
   const m = ISO_DATE.exec(text.trim());
   if (m === null) return undefined;
-  const ms = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4] ?? 0), Number(m[5] ?? 0), 0) + Number(m[6] ?? 0) * 1000;
-  return (ms - EXCEL_EPOCH_UTC) / DAY_MS;
+  const [year, month, day, hour, minute] = [m[1], m[2], m[3], m[4] ?? '0', m[5] ?? '0'].map(Number);
+  const second = Number(m[6] ?? 0);
+  if (month < 1 || month > 12 || day < 1 || hour > 23 || minute > 59 || second >= 60) return undefined;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  if (day > DAYS_IN_MONTH[month - 1] + (month === 2 && leap ? 1 : 0)) return undefined;
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  const serial = (date.getTime() + ((hour * 60 + minute) * 60 + second) * 1000 - EXCEL_EPOCH_UTC) / DAY_MS;
+  return serial < 0 ? undefined : serial;
 }
 
 /** Days between the 1904 and the 1900 date systems. */
@@ -147,14 +177,16 @@ function readColumns(root: XmlElement | undefined): XlsxColumnInfo[] {
 
 function readHyperlinks(root: XmlElement | undefined, rels: readonly XlsxRelationship[], warn: (m: string) => void): XlsxHyperlink[] {
   const out: XlsxHyperlink[] = [];
+  const targets = new Map<string, string>();
+  for (const rel of rels) if (!targets.has(rel.id)) targets.set(rel.id, rel.target);
   for (const el of kids(root, 'hyperlink')) {
     const ref = el.attrs.ref;
     if (ref === undefined) continue;
     const link: XlsxHyperlink = { ref };
     const id = el.attrs.id;
     if (id !== undefined) {
-      const rel = rels.find((r) => r.id === id);
-      if (rel) link.target = rel.target;
+      const target = targets.get(id);
+      if (target !== undefined) link.target = target;
       else warn(`The hyperlink at ${ref} names the relationship ${id}, which the sheet does not have.`);
     }
     put(link, 'location', el.attrs.location);
@@ -176,13 +208,16 @@ function readMerges(root: XmlElement | undefined): SpreadsheetMergedRange[] {
 
 interface RawFormula {
   text: string;
+  /** The text went over `MAX_FORMULA_CHARS` (it is not kept past that point). */
+  tooLong: boolean;
   type: string | undefined;
   ref: string | undefined;
   si: string | undefined;
 }
 
 interface Master {
-  formula: string;
+  /** `undefined` when the master's formula was too long to keep (its cells lose theirs too). */
+  formula: string | undefined;
   row: number;
   col: number;
 }
@@ -193,6 +228,7 @@ const SMALL = new Set(['sheetPr', 'dimension', 'sheetViews', 'sheetFormatPr', 'c
 /** Read one worksheet part. `text` is the part's text (`undefined` when it could not be read: an empty sheet and a warning from the package). */
 export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: SheetContext): SpreadsheetSheet {
   const { styles, sharedStrings, date1904 } = ctx;
+  const formulaBudget = ctx.maxFormulaChars ?? DEFAULT_IMPORT_LIMITS.maxSheetFormulaChars;
   const name = ref.name;
   const cells = new Map<string, SpreadsheetCell>();
   const looks = new Map<number, CellLook>();
@@ -208,6 +244,9 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   };
   let missingStrings = 0;
   let missingStyles = 0;
+  let formulaChars = 0;
+  let formulasTooLong = 0;
+  let formulasOverBudget = 0;
 
   // sheetData state
   let depth = 0;
@@ -233,16 +272,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     let result: SpreadsheetCellValue = null;
     let sharedIndex: number | undefined;
     if (type === 's') {
-      const idx = Number(value);
-      const item = Number.isInteger(idx) && value.trim() !== '' ? sharedStrings[idx] : undefined;
+      const idx = parseIndex(value);
+      const item = idx === undefined ? undefined : sharedStrings[idx];
       if (item !== undefined) {
         result = item.text;
         sharedIndex = idx;
       } else if (value.trim() !== '') missingStrings++;
     } else if (type === 'inlineStr') {
-      result = hasValue || inline !== '' ? (inline !== '' ? inline : value) : null;
+      result = hasValue || inline !== '' ? decodeStringEscapes(inline !== '' ? inline : value) : null;
     } else if (type === 'str') {
-      result = hasValue ? value : null;
+      result = hasValue ? decodeStringEscapes(value) : null;
     } else if (type === 'b') {
       result = hasValue ? isTrue(value.trim()) : null;
     } else if (type === 'e') {
@@ -252,16 +291,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
       if (hasValue && serial === undefined) warnCell(address, `"${value}" is not a date; imported as text`);
       result = serial ?? (hasValue ? value : null);
     } else if (hasValue && value.trim() !== '') {
-      const n = Number(value);
-      if (Number.isNaN(n)) {
+      const n = parseDecimal(value);
+      if (n === undefined) {
         warnCell(address, `"${value}" is not a number; imported as text`);
         result = value;
       } else result = n;
     }
 
-    const styleIndex = attrs.s === undefined ? 0 : Number(attrs.s);
+    const styleIndex = attrs.s === undefined ? 0 : parseIndex(attrs.s);
     let look: CellLook | undefined;
-    if (Number.isInteger(styleIndex) && styleIndex >= 0) {
+    if (styleIndex !== undefined) {
       look = looks.get(styleIndex);
       if (look === undefined) {
         const xf = styles.cellXfs[styleIndex];
@@ -283,7 +322,10 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
       const si = f.si === undefined ? undefined : intAttr(f.si);
       if (f.type === 'shared' && si !== undefined) {
         const key = String(si);
-        if (f.text !== '') {
+        if (f.tooLong) {
+          masters.set(key, { formula: undefined, row, col });
+          formulasTooLong++;
+        } else if (f.text !== '') {
           masters.set(key, { formula: f.text, row, col });
           formulaText = f.text;
           info = { type: 'shared', si };
@@ -291,28 +333,35 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
         } else {
           const master = masters.get(key);
           if (master === undefined) warnCell(address, 'shared formula without a resolvable expression; imported as a plain value');
+          else if (master.formula === undefined) formulasOverBudget++;
+          else if (formulaChars >= formulaBudget) formulasOverBudget++;
           else {
             formulaText = shiftFormula(master.formula, row - master.row, col - master.col);
+            formulaChars += formulaText.length;
             info = { type: 'shared', si };
           }
         }
-      } else if (f.type === 'array') {
-        if (f.text !== '') formulaText = f.text;
-        info = { type: 'array' };
-        if (f.ref !== undefined) info.ref = f.ref;
-      } else if (f.type === 'dataTable') {
-        info = { type: 'dataTable' };
-        if (f.ref !== undefined) info.ref = f.ref;
-      } else if (f.text !== '') formulaText = f.text;
+      } else {
+        if (f.tooLong) formulasTooLong++;
+        else if (f.text !== '') formulaText = f.text;
+        if (f.type === 'array') {
+          info = { type: 'array' };
+          if (f.ref !== undefined) info.ref = f.ref;
+        } else if (f.type === 'dataTable') {
+          info = { type: 'dataTable' };
+          if (f.ref !== undefined) info.ref = f.ref;
+        }
+      }
     }
 
-    // an empty cell is not kept (a formula without a result still is)
-    if (result === null && formula === undefined) return;
+    // an empty cell is not kept: no value and nothing of a formula (a formula with text and no result still is, as is an array or
+    // data-table anchor; `<f/>` alone is not one)
+    if (result === null && formulaText === undefined && info === undefined) return;
     out.value = result;
     if (formulaText !== undefined) out.formula = formulaText;
     if (look?.style) out.style = look.style;
     if (look?.numberFormat) out.numberFormat = look.numberFormat;
-    if (attrs.s !== undefined && look !== undefined) out.styleIndex = styleIndex;
+    if (attrs.s !== undefined && look !== undefined) out.styleIndex = styleIndex as number;
     if (sharedIndex !== undefined) out.sharedString = sharedIndex;
     if (info !== undefined) out.formulaInfo = info;
     cells.set(`${row}:${col}`, out);
@@ -335,7 +384,14 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
               }
             } else if (depth === 3 && tag === 'row') {
               const r = intAttr(attrs.r);
-              row = r !== undefined && r >= 1 ? r - 1 : row + 1;
+              if (r !== undefined && r >= 1 && r <= MAX_ROW) row = r - 1;
+              else {
+                if (attrs.r !== undefined) warnCell(`row ${attrs.r}`, 'the row number is not a row of the sheet; the row follows the previous one');
+                if (row + 1 >= MAX_ROW) {
+                  warnCell(`row ${row + 2}`, 'the row is past the last row of the sheet; its cells are placed on the last row');
+                  row = MAX_ROW - 1;
+                } else row++;
+              }
               col = -1;
               const info: XlsxRowInfo = { row };
               put(info, 'height', numAttr(attrs.ht));
@@ -351,6 +407,9 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
               if (pos !== undefined) {
                 col = pos.col;
                 if (pos.row !== row) row = pos.row;
+              } else if (col + 1 >= MAX_COL) {
+                warnCell(`row ${row + 1}`, 'a cell is past the last column of the sheet; it is placed in the last column');
+                col = MAX_COL - 1;
               } else col++;
               cellAttrs = attrs;
               value = '';
@@ -365,7 +424,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
                 hasValue = true;
               } else if (depth === 5 && tag === 'f') {
                 sink = 'f';
-                formula = { text: '', type: attrs.t, ref: attrs.ref, si: attrs.si };
+                formula = { text: '', tooLong: false, type: attrs.t, ref: attrs.ref, si: attrs.si };
               } else if (depth === 5 && tag === 'is') inInline = true;
               else if (inInline && tag === 'rPh') phonetic++;
               else if (inInline && phonetic === 0 && tag === 't') sink = 't';
@@ -390,7 +449,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
           },
           text(chunk) {
             if (sink === 'v') value += chunk;
-            else if (sink === 'f') (formula as RawFormula).text += chunk;
+            else if (sink === 'f') {
+              const f = formula as RawFormula;
+              if (!f.tooLong) {
+                f.text += chunk;
+                if (f.text.length > MAX_FORMULA_CHARS) {
+                  f.tooLong = true;
+                  f.text = '';
+                }
+              }
+            }
             else if (sink === 't') inline += chunk;
           },
         });
@@ -399,6 +467,13 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     ctx.warn(`The sheet "${name}" is not well-formed XML; it was read as far as the damage (${cells.size} cells).`);
   }
   if (cellWarnings > MAX_CELL_WARNINGS) ctx.warn(`${name}: ${cellWarnings - MAX_CELL_WARNINGS} more cell warnings were left out.`);
+  if (formulasTooLong + formulasOverBudget > 0) {
+    const reasons = [
+      formulasTooLong > 0 ? `${formulasTooLong} over ${MAX_FORMULA_CHARS} characters (and the cells of a shared formula with such a master)` : '',
+      formulasOverBudget > 0 ? `${formulasOverBudget} past the limit of ${formulaBudget} characters of expanded shared formulas` : '',
+    ].filter((r) => r !== '');
+    ctx.warn(`${name}: formulas left out, their values kept: ${reasons.join('; ')}.`);
+  }
   if (missingStrings > 0) ctx.warn(`${name}: ${missingStrings} cell(s) refer to a shared string the file does not have; imported as empty.`);
   if (missingStyles > 0) ctx.warn(`${name}: ${missingStyles} cell(s) use a format the file does not have; imported unformatted.`);
 
@@ -436,7 +511,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     if (info.hidden) hiddenRows.add(r);
   }
 
-  const frozen = views.find((v) => v.pane?.state === 'frozen')?.pane;
+  const frozen = views.find((v) => v.pane?.state === 'frozen' || v.pane?.state === 'frozenSplit')?.pane;
   const details: XlsxSheetDetails = {
     part: ref.part ?? '',
     state: ref.state,
@@ -465,48 +540,38 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   };
 }
 
-/** Run `visit` for every kept cell inside `range`, walking whichever is smaller: the range or the cells. */
-function forCellsIn(cells: Map<string, SpreadsheetCell>, range: RangeBounds, visit: (key: string, row: number, col: number) => void): void {
-  const area = (range.endRow - range.startRow + 1) * (range.endCol - range.startCol + 1);
-  if (area <= cells.size) {
-    for (let r = range.startRow; r <= range.endRow; r++) {
-      for (let c = range.startCol; c <= range.endCol; c++) {
-        const key = `${r}:${c}`;
-        if (cells.has(key)) visit(key, r, c);
-      }
-    }
-  } else {
-    for (const key of [...cells.keys()]) {
-      const i = key.indexOf(':');
-      const r = Number(key.slice(0, i));
-      const c = Number(key.slice(i + 1));
-      if (r >= range.startRow && r <= range.endRow && c >= range.startCol && c <= range.endCol) visit(key, r, c);
-    }
-  }
-}
-
 /** Remove the cells a merge covers but its first; returns how many were removed. */
 function dropMergeCovered(cells: Map<string, SpreadsheetCell>, merges: readonly RangeBounds[]): number {
-  let removed = 0;
+  if (merges.length === 0 || cells.size === 0) return 0;
+  // a cell is covered beyond its own merges when more merges cover it than start on it
+  const starts = new Map<string, number>();
   for (const m of merges) {
-    forCellsIn(cells, m, (key, r, c) => {
-      if (r !== m.startRow || c !== m.startCol) {
-        cells.delete(key);
-        removed++;
-      }
-    });
+    const key = `${m.startRow}:${m.startCol}`;
+    starts.set(key, (starts.get(key) ?? 0) + 1);
   }
-  return removed;
+  const index = indexCells(cells.keys());
+  const covered: string[] = [];
+  sweepCover(index, merges, countCover(), (cell, covering) => {
+    if (covering > (starts.get(index.keys[cell]) ?? 0)) covered.push(index.keys[cell]);
+  });
+  for (const key of covered) cells.delete(key);
+  return covered.length;
 }
 
+/** Give every cell inside a link's range its target; where links overlap the last one written wins. */
 function applyHyperlinks(cells: Map<string, SpreadsheetCell>, links: readonly XlsxHyperlink[]): void {
+  const ranges: RangeBounds[] = [];
+  const targets: string[] = [];
   for (const link of links) {
-    if (link.target === undefined) continue;
-    const range = parseRangeRef(link.ref);
-    if (range === undefined) continue;
-    const target = link.target;
-    forCellsIn(cells, range, (key) => {
-      (cells.get(key) as SpreadsheetCell).hyperlink = target;
-    });
+    const range = link.target === undefined ? undefined : parseRangeRef(link.ref);
+    if (range !== undefined) {
+      ranges.push(range);
+      targets.push(link.target as string);
+    }
   }
+  if (ranges.length === 0 || cells.size === 0) return;
+  const index = indexCells(cells.keys());
+  sweepCover(index, ranges, lastCover(ranges.length), (cell, last) => {
+    if (last >= 0) (cells.get(index.keys[cell]) as SpreadsheetCell).hyperlink = targets[last];
+  });
 }
