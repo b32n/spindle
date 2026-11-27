@@ -536,7 +536,7 @@ export class WorkbookImpl implements Workbook {
    * With `recalculate` the formulas reading the range are evaluated again (an import that recalculates: they were computed from the
    * engine's result, which is no longer what the range holds).
    */
-  keepSavedArray(sheetId: string | undefined, row: number, col: number, formula: string, anchor: Cell['value'], saved: Array<Array<Cell | undefined>>, recalculate = false): void {
+  keepSavedArray(sheetId: string | undefined, row: number, col: number, formula: string, anchor: Cell['value'], saved: Array<Array<Cell | undefined>>, recalculate: boolean): void {
     this.formulaGraph.removeFormula(this.graphKey(sheetId, row, col));
     this.releaseSpill(sheetId, row, col);
     saved.forEach((line, r) => line.forEach((cell, c) => cell && this.setCell(sheetId, row + r, col + c, { ...cell })));
