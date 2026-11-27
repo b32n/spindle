@@ -9,6 +9,49 @@ const par = (id: number, spid: string, cls = 'entr'): string =>
 const click = (id: number, ...effects: string[]): string => `<p:par><p:cTn id="${id}"><p:childTnLst>${effects.join('')}</p:childTnLst></p:cTn></p:par>`;
 const timing = (main: string, bld = ''): string => `<p:timing xmlns:p="urn:p"><p:tnLst><p:par><p:cTn id="1" nodeType="tmRoot"><p:childTnLst><p:seq><p:cTn id="2" nodeType="mainSeq"><p:childTnLst>${main}</p:childTnLst></p:cTn><p:nextCondLst><p:cond evt="onNext"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst></p:seq></p:childTnLst></p:cTn></p:par></p:tnLst>${bld}</p:timing>`;
 
+/**
+ * The elements the array methods scan while `run` executes: a deterministic measure of the work done (no clock). A linear
+ * algorithm scans a small multiple of its input; a filter, find or search per removal scans the input once per removal.
+ */
+function scanned(run: () => void): number {
+  const names = ['filter', 'find', 'some', 'includes', 'indexOf', 'map', 'slice', 'splice', 'concat'] as const;
+  const originals = names.map((m) => Array.prototype[m] as (...a: unknown[]) => unknown);
+  let total = 0;
+  names.forEach((m, i) =>
+    Object.defineProperty(Array.prototype, m, {
+      configurable: true,
+      writable: true,
+      value(this: unknown[], ...a: unknown[]) {
+        total += this.length;
+        return originals[i].apply(this, a);
+      },
+    })
+  );
+  try {
+    run();
+  } finally {
+    names.forEach((m, i) => Object.defineProperty(Array.prototype, m, { configurable: true, writable: true, value: originals[i] }));
+  }
+  return total;
+}
+
+/** The characters `String.prototype.indexOf` scans while `run` executes (from the start index to the hit, or the end of the text when there is none), a clock-free measure of a scanner's work. */
+function searched(run: () => void): number {
+  const original = String.prototype.indexOf;
+  let total = 0;
+  String.prototype.indexOf = function (this: string, needle: string, from?: number) {
+    const at = original.call(this, needle, from);
+    total += (at < 0 ? this.length : at) - Math.min(Math.max(from ?? 0, 0), this.length);
+    return at;
+  };
+  try {
+    run();
+  } finally {
+    String.prototype.indexOf = original;
+  }
+  return total;
+}
+
 describe('pruneTiming', () => {
   it('leaves the text alone when nothing refers to a removed shape', () => {
     const xml = timing(click(3, par(4, '7')), '<p:bldLst><p:bldP spid="7"/></p:bldLst>');
@@ -88,15 +131,15 @@ describe('pruneTiming', () => {
     expect(out).toContain('<p:bldP/>');
   });
 
-  it('is linear on hostile text: unterminated constructs, nested comments and very deep nesting leave the text alone, fast', () => {
-    const t0 = Date.now();
+  it('is linear on hostile text: unterminated constructs, nested comments and very deep nesting leave the text alone, scanning each text a bounded number of times', () => {
     const hostile = ['<!--', '<?', '<![CDATA[', '<!', '<a b="', "<a b='", '<a ', '<', '</', '<a>'.repeat(10000), '<p:timing>' + '<!--'.repeat(10000)];
     for (const unit of hostile) {
       const xml = unit.length > 50 ? unit : unit.repeat(10000);
-      expect(pruneTiming(xml, new Set(['7']))).toBe(xml);
-      expect(timingTargets(xml).size).toBe(0);
+      let out: string | undefined;
+      expect(searched(() => (out = pruneTiming(xml, new Set(['7']))))).toBeLessThanOrEqual(4 * xml.length);
+      expect(out).toBe(xml);
+      expect(searched(() => expect(timingTargets(xml).size).toBe(0))).toBeLessThanOrEqual(4 * xml.length);
     }
-    expect(Date.now() - t0).toBeLessThan(1500);
     for (const xml of ['<a b="x', "<a b='x", '< a>', '<>', '</>', '<a b="x" c']) {
       expect(pruneTiming(xml, new Set(['7']))).toBe(xml);
       expect(timingTargets(xml).size).toBe(0);
@@ -120,33 +163,34 @@ describe('pruneTiming', () => {
     expect(pruneTiming(deck.slides[5].opaque?.timing as string, new Set(['3']))).toBeUndefined();
   });
 
+  /** The work (see `scanned`) of pruning the input of size `n` and of size `2n`: linear work at most doubles (a quadratic one quadruples). */
+  const growth = (input: (n: number) => string): { small: string | undefined; large: string | undefined; ratio: number } => {
+    const [x1, x2] = [input(10000), input(20000)];
+    let small: string | undefined;
+    let large: string | undefined;
+    const w1 = scanned(() => (small = pruneTiming(x1, new Set(['1']))));
+    const w2 = scanned(() => (large = pruneTiming(x2, new Set(['1']))));
+    return { small, large, ratio: w2 / w1 };
+  };
+
   it('prunes a hostile sibling list in linear time and keeps the entries it does not remove', () => {
-    const n = 50000;
-    const bld = `<p:bldLst>${'<p:bldP spid="1"/>'.repeat(n)}<p:bldP spid="2"/></p:bldLst>`;
-    const start = Date.now();
-    const out = pruneTiming(timing(click(3, par(4, '2')), bld), new Set(['1'])) as string;
-    expect(Date.now() - start).toBeLessThan(1000);
-    expect(out).toContain('<p:bldLst><p:bldP spid="2"/></p:bldLst>');
-    expect(out).not.toContain('spid="1"');
+    const g = growth((n) => timing(click(3, par(4, '2')), `<p:bldLst>${'<p:bldP spid="1"/>'.repeat(n)}<p:bldP spid="2"/></p:bldLst>`));
+    expect(g.ratio).toBeLessThan(2.2);
+    expect(g.large).toContain('<p:bldLst><p:bldP spid="2"/></p:bldLst>');
+    expect(g.large).not.toContain('spid="1"');
   });
 
   it('prunes many emptied containers under one parent in linear time', () => {
-    const n = 20000;
-    const steps = Array.from({ length: n }, (_, i) => click(i * 3 + 3, par(i * 3 + 4, '1'))).join('') + click(999999, par(1000000, '2'));
-    const start = Date.now();
-    const out = pruneTiming(timing(steps), new Set(['1'])) as string;
-    expect(Date.now() - start).toBeLessThan(1000);
-    expect(ids(out)).toEqual(['2']);
-    expect(out.match(/<p:par>/g)).toHaveLength(3);
+    const g = growth((n) => timing(Array.from({ length: n }, (_, i) => click(i * 3 + 3, par(i * 3 + 4, '1'))).join('') + click(999999, par(1000000, '2'))));
+    expect(g.ratio).toBeLessThan(2.2);
+    expect(ids(g.large)).toEqual(['2']);
+    expect(g.large?.match(/<p:par>/g)).toHaveLength(3);
   });
 
   it('prunes many references under one par outside any bldLst in linear time', () => {
-    const n = 50000;
-    const hostile = `<p:par><p:cTn/>${'<p:set><p:spTgt spid="1"/></p:set>'.repeat(n)}</p:par>`;
-    const start = Date.now();
-    const out = pruneTiming(timing(click(3, par(4, '2')) + hostile), new Set(['1']));
-    expect(Date.now() - start).toBeLessThan(1000);
-    expect(out).toBeDefined();
-    expect(out).not.toContain('spid="1"');
+    const g = growth((n) => timing(click(3, par(4, '2')) + `<p:par><p:cTn/>${'<p:set><p:spTgt spid="1"/></p:set>'.repeat(n)}</p:par>`));
+    expect(g.ratio).toBeLessThan(2.2);
+    expect(g.large).toBeDefined();
+    expect(g.large).not.toContain('spid="1"');
   });
 });
