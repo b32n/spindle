@@ -343,7 +343,7 @@ export async function importFromXlsx(
   let unfaithfulCount = 0;
   for (const { sheetIndex, row, col, rows, cols, formula, anchor, saved } of legacy) {
     if (engineMatchesSaved(workbook, sheetIds[sheetIndex], row, col, rows, cols, anchor, saved)) continue;
-    workbook.keepSavedArray(sheetIds[sheetIndex], row, col, formula, anchor, saved);
+    workbook.keepSavedArray(sheetIds[sheetIndex], row, col, formula, anchor, saved, recalculateOnLoad === true);
     unfaithfulCount++;
     unfaithful.add(result.sheets[sheetIndex].name);
   }
@@ -497,8 +497,9 @@ function toSheetData(
       continue;
     }
     budget -= cost;
+    // what the file saved over a legacy array's range: the engine's result is held to it once the workbook has evaluated it (a dynamic
+    // array is not: the file's spill is what Excel evaluated, but a file with no results of its own saves zeros, so the engine's spill replaces it)
     if (!cell.arraySpan?.spill) {
-      // what the file saved over a legacy array's range: the engine's result is held to it once the workbook has evaluated it
       byKey ??= new Map(cells.map(({ key, cell: c }) => [key, c]));
       const saved: Array<Array<Cell | undefined>> = [];
       for (let r = 0; r < rows; r++) {
@@ -559,10 +560,16 @@ interface LegacyArray {
   saved: Array<Array<Cell | undefined>>;
 }
 
+/** What a blank cell reads as in a result: nothing, or the 0, empty string or false a file saves for it. */
+const isBlankResult = (value: unknown): boolean => value === null || value === undefined || value === 0 || value === '' || value === false;
+
 /** Whether two results are the same value: numbers to the precision a file keeps, errors by their code (a difference is the safe answer: the file's value is kept). */
 function sameResult(saved: unknown, engine: unknown): boolean {
   const a = toFileValue(saved as SpreadsheetCell['value']);
   const b = toFileValue(engine as SpreadsheetCell['value']);
+  // a blank source cell is null in the engine's result and 0 (or an empty string, or false) in what Excel saved
+  if (isBlankResult(b)) return isBlankResult(a);
+  if (isBlankResult(a)) return false;
   if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
   return a === b;
 }

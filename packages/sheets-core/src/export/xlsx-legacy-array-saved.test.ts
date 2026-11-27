@@ -98,9 +98,9 @@ describe('a legacy array formula the engine evaluates to the saved values stays 
     expect(cachedOnlyItem(loss)).toBeUndefined();
   });
 
-  it('keeps the saved 0 where the engine pads the result with #N/A (a range over a row that holds nothing)', async () => {
-    const { wb, loss } = await open(await xlsxWith({ 1: [ncell('A1', 4), fcell('C1', 'A1:A3', 4, array('C1:C3'))], 2: [ncell('C2', 0)], 3: [ncell('A3', 6), ncell('C3', 6)] }));
-    expect(values(wb, 3, 1, 0, 2)).toEqual([[4], [0], [6]]);
+  it('keeps the saved 0 where the engine pads a result shorter than the range with #N/A (A1:A2 over C1:C3)', async () => {
+    const { wb, loss } = await open(await xlsxWith({ 1: [ncell('A1', 4), fcell('C1', 'A1:A2', 4, array('C1:C3'))], 2: [ncell('A2', 5), ncell('C2', 5)], 3: [ncell('C3', 0)] }));
+    expect(values(wb, 3, 1, 0, 2)).toEqual([[4], [5], [0]]);
     expect(cellAt(wb, 0, 2)?.cachedOnly).toBe(true);
     expect(cachedOnlyItem(loss)?.count).toBe(1);
   });
@@ -256,5 +256,104 @@ describe('what the export writes of array results', () => {
     await exportToXlsx(wb, { maxTotalArrayCells: 7, onWarning: (m) => warnings.push(m) });
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toMatch(/^Two!A1: .*does not fit in the 1 cells left/);
+  });
+});
+
+// what the comparison decides, case by case: the engine's result for `formula` over C1:C3 against the saved members (the data-preservation decision)
+describe('the comparison of the engine result with the saved members (oracle table)', () => {
+  const sc = (ref: string, v: string) => `<c r="${ref}" t="str"><v>${v}</v></c>`;
+  const bc = (ref: string, v: 0 | 1) => `<c r="${ref}" t="b"><v>${v}</v></c>`;
+  const ec = (ref: string, code: string) => `<c r="${ref}" t="e"><v>${code}</v></c>`;
+  // A1:A3 hold 1, (blank), 3; B2 is there so that row 2 exists (the engine pads a range over a row without cells with #N/A)
+  const over = (anchor: string, c2: string, c3: string) => xlsxWith({ 1: [ncell('A1', 1), anchor], 2: [ncell('B2', 9), c2], 3: [ncell('A3', 3), c3] });
+  const table: Array<[string, () => Promise<Uint8Array>, boolean]> = [
+    ['blank source, saved 0', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 0), ncell('C3', 3)), false],
+    ['blank source, saved empty t="str"', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), sc('C2', ''), ncell('C3', 3)), false],
+    ['blank source, saved t="b" false', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), bc('C2', 0), ncell('C3', 3)), false],
+    ['blank source, saved 5 (not blank)', () => over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 5), ncell('C3', 3)), true],
+    ['blank source, no saved cell at all', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A3', 1, array('C1:C3'))], 2: [ncell('B2', 9)], 3: [ncell('A3', 3), ncell('C3', 3)] }), false],
+    ['saved 0 where the engine has 7', () => over(fcell('C1', 'A1:A3*0+7', 7, array('C1:C3')), ncell('C2', 0), ncell('C3', 7)), true],
+    ['saved t="str" members equal to the source text', () => xlsxWith({ 1: [`<c r="A1" t="str"><v>x</v></c>`, fcell('C1', 'A1:A2', 'x', array('C1:C2'))], 2: [`<c r="A2" t="str"><v>y</v></c>`, sc('C2', 'y')] }), false],
+    ['saved t="str" member that differs in case', () => xlsxWith({ 1: [`<c r="A1" t="str"><v>x</v></c>`, fcell('C1', 'A1:A2', 'x', array('C1:C2'))], 2: [`<c r="A2" t="str"><v>y</v></c>`, sc('C2', 'Y')] }), true],
+    ['saved t="b" members equal to the source booleans', () => xlsxWith({ 1: [bc('A1', 1), `<c r="C1" t="b"><f ${array('C1:C2')}>A1:A2</f><v>1</v></c>`], 2: [bc('A2', 0), bc('C2', 0)] }), false],
+    ['float noise on a member (0.1+0.2 saved as 0.3)', () => xlsxWith({ 1: [fcell('C1', 'A1:A2*1', 1, array('C1:C2')), ncell('A1', 1), ncell('A2', 0.1)], 2: [ncell('C2', 0.1 + 0.2)] }), true],
+    ['float noise: the engine 0.1+0.2 against the saved 0.3', () => xlsxWith({ 1: [fcell('C1', 'A1:A2+0.2', 0.3, array('C1:C2')), ncell('A1', 0.1), ncell('A2', 0.1)], 2: [ncell('C2', 0.3)] }), false],
+    ['1e-9 relative: just inside', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2*1', 1, array('C1:C2')), ncell('A2', 5)], 2: [ncell('C2', 5 * (1 + 9e-10))] }), false],
+    ['1e-9 relative: just outside', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2*1', 1, array('C1:C2')), ncell('A2', 5)], 2: [ncell('C2', 5 * (1 + 2e-9))] }), true],
+    ['1e-8 difference', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2*1', 1, array('C1:C2')), ncell('A2', 5)], 2: [ncell('C2', 5.00000005)] }), true],
+    ['type mismatch: the saved text "1" against the engine 1', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2*1', 1, array('C1:C2')), ncell('A2', 1)], 2: [sc('C2', '1')] }), true],
+    ['type mismatch on the anchor: the saved text "1" against 1', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2*1', '1', array('C1:C2')), ncell('A2', 1)], 2: [ncell('C2', 1)] }), true],
+    ['saved error member, the engine has the same error', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2/0', '#DIV/0!', array('C1:C2')).replace('t="str"', 't="e"'), ncell('A2', 1)], 2: [ec('C2', '#DIV/0!')] }), false],
+    ['saved error member, the engine has another error', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2/0', '#DIV/0!', array('C1:C2')).replace('t="str"', 't="e"'), ncell('A2', 1)], 2: [ec('C2', '#N/A')] }), true],
+    ['saved error member where the engine has a number', () => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A2*1', 1, array('C1:C2')), ncell('A2', 1)], 2: [ec('C2', '#DIV/0!')] }), true],
+  ];
+  it.each(table)('%s', async (_name, build, cachedOnly) => {
+    const { wb, loss } = await open(await build());
+    expect(cellAt(wb, 0, 2)?.cachedOnly === true).toBe(cachedOnly);
+    expect(cachedOnlyItem(loss) !== undefined).toBe(cachedOnly);
+  });
+
+  it('keeps an evaluated array with a blank member evaluated: it follows its precedents and its saved 0 is the engine\'s blank', async () => {
+    const { wb } = await open(await over(fcell('C1', 'A1:A3', 1, array('C1:C3')), ncell('C2', 0), ncell('C3', 3)));
+    wb.setCellValue(undefined, 1, 0, 9);
+    expect(wb.getSpillRegion(undefined, 0, 2)?.values).toEqual([[1], [9], [3]]);
+  });
+
+  it('holds date-styled members to their serial numbers', async () => {
+    const base = new WorkbookImpl('wb', 'WB');
+    base.setCell(undefined, 0, 0, { value: 45000, formatId: base.getFormatPool().getOrCreate({ type: 'date', dateFormat: 'YYYY-MM-DD' }) });
+    const zip = await JSZip.loadAsync(await exportToXlsx(base));
+    const style = /<c r="A1" s="(\d+)"/.exec(await zip.file('xl/worksheets/sheet1.xml')!.async('string'))![1];
+    const build = async (saved: number) => {
+      const rows = `<row r="1"><c r="A1" s="${style}"><v>45000</v></c><c r="C1" s="${style}"><f ${array('C1:C2')}>A1:A2</f><v>45000</v></c></row><row r="2"><c r="A2" s="${style}"><v>45001</v></c><c r="C2" s="${style}"><v>${saved}</v></c></row>`;
+      zip.file('xl/worksheets/sheet1.xml', (await zip.file('xl/worksheets/sheet1.xml')!.async('string')).replace(/<sheetData>[\s\S]*<\/sheetData>/, `<sheetData>${rows}</sheetData>`));
+      return zip.generateAsync({ type: 'uint8array' });
+    };
+    expect(cellAt((await open(await build(45001))).wb, 0, 2)?.cachedOnly).toBeUndefined();
+    expect(cellAt((await open(await build(45002))).wb, 0, 2)?.cachedOnly).toBe(true);
+  });
+});
+
+describe('the dependents of an array that keeps its saved results', () => {
+  const book = () => xlsxWith({ 1: [fcell('C1', 'ROW(A1:A3)', 1, array('C1:C3')), fcell('E1', 'SUM(C1:C3)', 6)], 2: [ncell('C2', 2)], 3: [ncell('C3', 3)] });
+
+  it('keep what the file saved on a plain open (E1 stays 6, the sum of the saved 1, 2, 3)', async () => {
+    const { wb } = await open(await book());
+    expect(values(wb, 3, 1, 0, 2)).toEqual([[1], [2], [3]]);
+    expect(wb.getCellValue(undefined, 0, 4)).toBe(6);
+  });
+
+  it('are recalculated from the kept results when the host recalculates on load (E1 is 6, not the 3 of the engine\'s 1, 1, 1)', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    await importFromXlsx(await book(), wb, { recalculateOnLoad: true });
+    expect(values(wb, 3, 1, 0, 2)).toEqual([[1], [2], [3]]);
+    expect(wb.getCellValue(undefined, 0, 4)).toBe(6);
+    expect(cellAt(wb, 0, 2)?.cachedOnly).toBe(true);
+  });
+
+  it('are left alone with recalculateOnLoad false, even when the saved value is not what the kept results sum to', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    await importFromXlsx(await xlsxWith({ 1: [fcell('C1', 'ROW(A1:A3)', 1, array('C1:C3')), fcell('E1', 'SUM(C1:C3)', 99)], 2: [ncell('C2', 2)], 3: [ncell('C3', 3)] }), wb, { recalculateOnLoad: false });
+    expect(wb.getCellValue(undefined, 0, 4)).toBe(99);
+  });
+});
+
+describe('a dynamic array (cm="1") whose spill differs from the saved one', () => {
+  // Decision (SD4, "the saved value wins on open"): a dynamic array is not compared. Files that never calculated (xlsxwriter and the like) save a
+  // 0 for the anchor and nothing for the spill, so holding the engine to them would freeze every dynamic array of such a file; the engine's spill replaces the saved cells.
+  const dyn = (c2: number, c3: number) => xlsxWith({ 1: [ncell('A1', 1), fcell('C1', 'A1:A3*2', 2, array('C1:C3'), ' cm="1"')], 2: [ncell('A2', 2), ncell('C2', c2)], 3: [ncell('A3', 3), ncell('C3', c3)] });
+
+  it.each([[4, 6], [4, 7]])('is evaluated by the engine whatever the file saved (saved %d and %d)', async (c2, c3) => {
+    const { wb, loss } = await open(await dyn(c2, c3));
+    expect(cellAt(wb, 0, 2)).toMatchObject({ arraySpan: { rows: 3, cols: 1, spill: true } });
+    expect(cellAt(wb, 0, 2)?.cachedOnly).toBeUndefined();
+    expect(wb.getSpillRegion(undefined, 0, 2)?.values).toEqual([[2], [4], [6]]);
+    expect(cachedOnlyItem(loss)).toBeUndefined();
+  });
+
+  it('leaves the engine\'s #SPILL! alone when a cell is in the way', async () => {
+    const { wb, loss } = await open(await xlsxWith({ 1: [fcell('C1', 'A1:A3*2', 2, array('C1:C3'), ' cm="1"'), ncell('A1', 1)], 2: [fcell('C2', 'A1+1', 5)], 3: [ncell('C3', 6)] }));
+    expect(wb.getCellValue(undefined, 0, 2)).toBe('#SPILL!');
+    expect(cachedOnlyItem(loss)).toBeUndefined();
   });
 });

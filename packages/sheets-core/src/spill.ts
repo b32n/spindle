@@ -98,11 +98,15 @@ export class SpillIndex {
  */
 export function fitToExtent(result: unknown, span: { rows: number; cols: number }): unknown {
   const matrix = Array.isArray(result) ? (result as unknown[][]) : [[result]];
-  const first = matrix[0]?.[0] ?? '#N/A';
+  // (a blank cell of the result is null: it stays blank, only what the result does not reach is `#N/A`)
+  const first = matrix[0]?.[0] === undefined ? '#N/A' : matrix[0][0];
   if (span.rows * span.cols === 1) return first;
   const repeatDown = matrix.length === 1;
   const repeatAcross = matrix[0]?.length === 1;
   return Array.from({ length: span.rows }, (_, r) =>
-    Array.from({ length: span.cols }, (_, c) => matrix[repeatDown ? 0 : r]?.[repeatAcross ? 0 : c] ?? '#N/A')
+    Array.from({ length: span.cols }, (_, c) => {
+      const value = matrix[repeatDown ? 0 : r]?.[repeatAcross ? 0 : c];
+      return value === undefined ? '#N/A' : value;
+    })
   );
 }
