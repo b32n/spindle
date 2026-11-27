@@ -32,20 +32,46 @@ export interface ExportToXlsxOptions {
    * the formula) still spills it in full. Each region cut is reported to `onWarning`.
    */
   maxArrayCells?: number;
-  /** Told about what the export left out (a spilled region over `maxArrayCells`), once for each. */
+  /**
+   * The most cells of array formula results written to the file in all, over every formula and sheet of the workbook (default
+   * 1,000,000, `DEFAULT_MAX_ARRAY_CELLS`): once it is used up, the next spilled regions are cut like one over `maxArrayCells` (each
+   * keeps at least its first cell). Many results under `maxArrayCells` therefore cannot add up to more than this.
+   */
+  maxTotalArrayCells?: number;
+  /**
+   * Told about what the export left out (a spilled region over `maxArrayCells` or the budget of `maxTotalArrayCells`), once for each
+   * of the first 20, then once with the count of the others.
+   */
   onWarning?: (message: string) => void;
 }
 
+/** What the export has left of its array budget and how many cuts it has reported (shared by every sheet of one export). */
+interface ExportArrayState {
+  maxArrayCells: number;
+  remaining: number;
+  cuts: number;
+  onWarning?: (message: string) => void;
+}
+
+/** The warnings of one export that are worded one by one; the cuts after them are counted in one last message. */
+const MAX_EXPORT_WARNINGS = 20;
+
 export async function exportToXlsx(workbook: WorkbookImpl, options: ExportToXlsxOptions = {}): Promise<Uint8Array> {
-  const maxArrayCells = options.maxArrayCells ?? DEFAULT_MAX_ARRAY_CELLS;
+  const state: ExportArrayState = {
+    maxArrayCells: options.maxArrayCells ?? DEFAULT_MAX_ARRAY_CELLS,
+    remaining: options.maxTotalArrayCells ?? DEFAULT_MAX_ARRAY_CELLS,
+    cuts: 0,
+    onWarning: options.onWarning,
+  };
   const sheetIds = Array.from(workbook.sheets.keys());
-  const sheets = sheetIds.map((id) => toSpreadsheetSheet(workbook, workbook.sheets.get(id)!, maxArrayCells, options.onWarning));
+  const sheets = sheetIds.map((id) => toSpreadsheetSheet(workbook, workbook.sheets.get(id)!, state));
+  if (state.cuts > MAX_EXPORT_WARNINGS) state.onWarning?.(`${state.cuts - MAX_EXPORT_WARNINGS} more array formula results were cut in the same way.`);
   const activeSheetIndex = sheetIds.indexOf(workbook.activeSheetId);
   const { exportXlsx } = await loadIo();
   return exportXlsx({ sheets, activeSheetIndex: activeSheetIndex >= 0 ? activeSheetIndex : undefined });
 }
 
-function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, maxArrayCells: number, onWarning?: (message: string) => void): SpreadsheetSheet {
+function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportArrayState): SpreadsheetSheet {
   const stylePool = workbook.getStylePool();
   const formatPool = workbook.getFormatPool();
   const cells = new Map<string, SpreadsheetCell>();
@@ -64,13 +90,20 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, maxArrayCells:
       const region = workbook.getSpillRegion(sheet.id, row, col);
       let span = region ?? cell.arraySpan;
       let written = region;
-      if (region && region.rows * region.cols > maxArrayCells) {
-        // a result over the cap is written as its first rows; the range says what is written, and Excel spills the rest when it recalculates
-        const cols = Math.min(region.cols, Math.max(1, maxArrayCells));
-        const rows = Math.min(region.rows, Math.max(1, Math.floor(maxArrayCells / cols)));
-        span = { rows, cols };
-        written = { ...region, rows, cols };
-        onWarning?.(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's result (${region.rows} x ${region.cols} cells) is over ${maxArrayCells} cells, so only its first ${rows} x ${cols} are written to the file.`);
+      if (region) {
+        const allowed = Math.min(state.maxArrayCells, state.remaining);
+        if (region.rows * region.cols > allowed) {
+          // a result over the cap (or what is left of the workbook's budget) is written as its first rows; the range says what is written, and Excel spills the rest when it recalculates
+          const cols = Math.min(region.cols, Math.max(1, allowed));
+          const rows = Math.min(region.rows, Math.max(1, Math.floor(allowed / cols)));
+          span = { rows, cols };
+          written = { ...region, rows, cols };
+          if (state.cuts++ < MAX_EXPORT_WARNINGS) {
+            const why = region.rows * region.cols > state.maxArrayCells ? `is over ${state.maxArrayCells} cells` : `does not fit in the ${state.remaining} cells left of the workbook's budget for array formula results`;
+            state.onWarning?.(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's result (${region.rows} x ${region.cols} cells) ${why}, so only its first ${rows} x ${cols} are written to the file.`);
+          }
+        }
+        state.remaining -= (written ?? region).rows * (written ?? region).cols;
       }
       if (span) {
         out.arrayRef = spanRef(row, col, span.rows, span.cols);

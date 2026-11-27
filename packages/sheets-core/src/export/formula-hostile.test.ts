@@ -10,6 +10,7 @@ import { resolve } from 'node:path';
 // ---------------------------------------------------------------------------
 
 const PROBE = resolve(__dirname, 'hostile/formula-probe.ts');
+const EXPORT_PROBE = resolve(__dirname, 'hostile/export-probe.ts');
 
 interface Out {
   ms?: number;
@@ -80,6 +81,19 @@ describe('importing formulas of a hostile shape, in a child process with a heap 
     expect(out.cachedOnly).toBe(0);
     expect(out.exportWarnings).toEqual(['S!A1: the array formula\'s result (200000 x 10 cells) is over 1000000 cells, so only its first 100000 x 10 are written to the file.']);
   }, 300_000);
+
+  it('many array formula results just under the per-result cap cannot add up past the workbook budget, and the warnings are counted', () => {
+    // 40 results of 24,999 cells under a cap of 25,000 each and a budget of 100,000 for all of them (a million cells typed in)
+    const child = spawnSync(process.execPath, ['--max-old-space-size=1024', '--import', 'tsx', EXPORT_PROBE, '40', '24999', '25000', '100000'], { cwd: resolve(__dirname, '../..'), encoding: 'utf8', timeout: 120_000, maxBuffer: 16 * 1024 * 1024 });
+    expect({ status: child.status, signal: child.signal, stderr: child.stderr }).toEqual({ status: 0, signal: null, stderr: '' });
+    const out = JSON.parse(child.stdout.trim().split('\n').pop() as string) as { arrayCells: number; warnings: string[]; error?: string };
+    expect(out.error).toBeUndefined();
+    // 4 results in full (99,996 cells), the fifth cut to the 4 cells left, and each of the other 35 keeps its first cell
+    expect(out.arrayCells).toBe(4 * 24_999 + 4 + 35);
+    expect(out.warnings).toHaveLength(21);
+    expect(out.warnings[0]).toContain('does not fit in the 4 cells left');
+    expect(out.warnings[20]).toBe('16 more array formula results were cut in the same way.');
+  }, 150_000);
 
   it.each(['nested', 'singles'])('2,000 formulas of 8,000 characters, shape %s: no stack overflow, no timeout', (shape) => {
     const { out, status, signal, stderr } = importInChild(shape, 2_000, 120_000);

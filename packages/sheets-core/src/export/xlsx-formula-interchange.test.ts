@@ -468,6 +468,38 @@ describe('what the export writes of one array formula (maxArrayCells)', () => {
     expect(warnings).toEqual([`Sheet1!B1: the array formula's result (${rows} x ${cols} cells) is over ${cap} cells, so only its first ${wRows} x ${wCols} are written to the file.`]);
   });
 
+  it('shares one budget between every array formula of the workbook, over sheets', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setFormula(undefined, 0, 0, '=SEQUENCE(3,2)');
+    wb.setFormula(undefined, 0, 3, '=SEQUENCE(3,2)');
+    const second = wb.addSheet('Two');
+    wb.setFormula(second.id, 0, 0, '=SEQUENCE(3,2)');
+    const warnings: string[] = [];
+    const out = await exportToXlsx(wb, { maxTotalArrayCells: 8, onWarning: (m) => warnings.push(m) });
+    const zip = await JSZip.loadAsync(out);
+    const one = await zip.file('xl/worksheets/sheet1.xml')!.async('string');
+    const two = await zip.file('xl/worksheets/sheet2.xml')!.async('string');
+    // 6 of 8 used by A1, the 2 left cut D1 to 1 x 2 and the second sheet's to one cell
+    expect(one).toContain('ref="A1:B3"');
+    expect(one).toContain('ref="D1:E1"');
+    expect(two).toContain('ref="A1"');
+    expect(warnings).toEqual([
+      "Sheet1!D1: the array formula's result (3 x 2 cells) does not fit in the 2 cells left of the workbook's budget for array formula results, so only its first 1 x 2 are written to the file.",
+      "Two!A1: the array formula's result (3 x 2 cells) does not fit in the 0 cells left of the workbook's budget for array formula results, so only its first 1 x 1 are written to the file.",
+    ]);
+  });
+
+  it('reports the first 20 cuts one by one and counts the others', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    for (let i = 0; i < 23; i++) wb.setFormula(undefined, 0, i, '=SEQUENCE(3)');
+    const warnings: string[] = [];
+    await exportToXlsx(wb, { maxArrayCells: 2, onWarning: (m) => warnings.push(m) });
+    expect(warnings).toHaveLength(21);
+    expect(warnings[20]).toBe('3 more array formula results were cut in the same way.');
+    // no listener: the cuts are still made
+    await expect(exportToXlsx(wb, { maxArrayCells: 2 })).resolves.toBeInstanceOf(Uint8Array);
+  });
+
   it('cuts without a listener, and keeps at least one cell when the cap is zero', async () => {
     const xml = await sheetXml(await exportToXlsx(await seq(4, 4), { maxArrayCells: 0 }));
     expect(xml).toContain('ref="B1"');
