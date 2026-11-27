@@ -66,6 +66,7 @@ describe('elbow and curved connectors in collab (schema v7)', () => {
     expect(a.getElement(l)).toStrictEqual(peer());
 
     a.setConnectorKind(l, 'elbow');
+    // Deliberately untyped: exercises the `{connector: undefined}` reset path.
     a.updateElement(l, { connector: undefined, adjustments: undefined } as never);
     expect(peer().connector).toBeUndefined();
     ha.detach();

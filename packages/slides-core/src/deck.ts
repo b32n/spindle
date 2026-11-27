@@ -67,7 +67,7 @@ export type NewElementSpec =
   | ({ type: 'line' } & Omit<LineElementInput, 'containerId' | 'index'>)
   | ({ type: 'table' } & Omit<TableElementInput, 'containerId' | 'index'>);
 
-const FRAME_KEYS = ['x', 'y', 'w', 'h', 'rotation'] as const;
+const FRAME_KEYS = ['x', 'y', 'w', 'h', 'rotation', 'flipH', 'flipV'] as const;
 /** Whether a patch changes any geometry a bound connector must track. */
 function touchesFrame(patch: Partial<SlideElement>): boolean {
   return FRAME_KEYS.some((k) => k in patch);

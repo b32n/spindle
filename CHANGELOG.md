@@ -836,7 +836,7 @@ lockstep.
   `routeConnector`, `lineRoute`, `routePathD`). Connection sites follow the shape: an ellipse's diagonal sites sit on
   the outline, a diamond offers its four edge midpoints and a triangle its apex, slanted-side midpoints and base
   points (`connectionAnchors`, `connectionFrame`, `ConnectionFrame`; the eight anchor ids are unchanged, so existing
-  bindings keep working). Choose the routing from the right-click menu of a selected line. Slides collaboration schema
+  bindings keep working; sites mirror with a shape's or picture's flip, so a connector bound to a flipped rectangle's `nw` now attaches at its `ne` corner, matching how it is drawn and OOXML). Choose the routing from the right-click menu of a selected line. Slides collaboration schema
   version 7 (a v6 client refuses a v7 room).
 
 ## [0.4.0] - 2026-10-26
