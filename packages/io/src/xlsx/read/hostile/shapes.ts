@@ -110,6 +110,9 @@ function emptyCells(rows: number, perRow: number): string {
 /** `rows` rows of 15 numbers each (columns A to O), so a sheet of `rows` x 15 cells has the shape of a real one, within the sheet's 1,048,576 rows. */
 const numberRows = (rows: number): string => rep(rows, (r) => `<row r="${r + 1}">${rep(15, (c) => `<c r="${String.fromCharCode(65 + c)}${r + 1}"><v>${r * 15 + c}</v></c>`)}</row>`);
 
+/** `n` attributes with names of their own (`a0000000="1"`): unique, so each is a property of the object the reader would build, and not a repeat of one (which a ratio limit refuses). */
+const manyAttributes = (n: number, prefix = 'a'): string => rep(n, (i) => ` ${prefix}${i.toString().padStart(7, '0')}="1"`);
+
 export const SHAPES = {
   // shared strings
   'si-5m-tiny': () => strings(rep(5_000_000, (i) => `<si><t>${i % 99_991}</t></si>`)),
@@ -181,6 +184,18 @@ export const SHAPES = {
     const part = bytesOf(sheet(emptyCells(500_000, 10)));
     return manySheets(4, () => part);
   },
+  // elements of unbounded width (review round 6): attributes past the cap, and one name or value of megabytes where a part is made of such elements
+  'attrs-9m-cell': () => ({ 'xl/worksheets/sheet1.xml': sheet(`<row r="1"><c r="A1"${manyAttributes(9_000_000)}><v>1</v></c></row>`) }),
+  'attrs-2m-styles': () => ({ 'xl/styles.xml': `<styleSheet ${MAIN_NS}><fonts count="1"><font${manyAttributes(2_000_000)}/></fonts></styleSheet>` }),
+  'attrs-2m-workbook': () => ({ 'xl/workbook.xml': `<workbook ${MAIN_NS} ${REL_NS}${manyAttributes(2_000_000)}><sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets></workbook>` }),
+  'xmlns-2m-cell': () => ({ 'xl/worksheets/sheet1.xml': sheet(`<row r="1"><c r="A1"${manyAttributes(2_000_000, 'xmlns:p')}><v>1</v></c></row>`) }),
+  'tagname-20mb': () => ({ 'xl/worksheets/sheet1.xml': sheet(`<row r="1"><c r="A1"><v>1</v></c></row><${filler(20_000_000)}/>`) }),
+  'attrname-20mb': () => ({ 'xl/worksheets/sheet1.xml': sheet(`<row r="1"><c r="A1" ${filler(20_000_000)}="1"><v>1</v></c></row>`) }),
+  // 120,000 external hyperlinks, each with its relationship (the detector found each relationship by a search of the list: 11 s at 60,000)
+  'links-120k-external': () => ({
+    'xl/worksheets/sheet1.xml': `<worksheet ${MAIN_NS} ${REL_NS}><sheetData>${rep(120_000, (i) => `<row r="${i + 1}"><c r="A${i + 1}"><v>${i}</v></c></row>`)}</sheetData><hyperlinks>${rep(120_000, (i) => `<hyperlink ref="A${i + 1}" r:id="x${i}"/>`)}</hyperlinks></worksheet>`,
+    'xl/worksheets/_rels/sheet1.xml.rels': relsOfKind(120_000, 'hyperlink').replace(/t(\d+)\.xml"/g, 'https://example.com/$1" TargetMode="External"'),
+  }),
   'defined-names-150k': () => ({ 'xl/workbook.xml': workbook('<sheet name="S" sheetId="1" r:id="rId1"/>', `<definedNames>${rep(150_000, (i) => `<definedName name="n${i}">S!$A$${(i % 1000) + 1}</definedName>`)}</definedNames>`) }),
 } satisfies Record<string, () => Parts>;
 

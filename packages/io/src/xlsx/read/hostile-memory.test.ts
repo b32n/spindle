@@ -1,5 +1,5 @@
 import { buildShape, type ShapeName } from './hostile/shapes';
-import { describeHeavy, importInChild, MB, SURVIVED, survived, type ChildOptions, type ChildRun, type Probe } from './hostile/child';
+import { DETECT_PROBE, describeHeavy, importInChild, MB, SURVIVED, survived, type ChildOptions, type ChildRun, type Probe } from './hostile/child';
 
 // ---------------------------------------------------------------------------
 // Memory is a fact a process proves by surviving: each hostile shape found by review (a part of millions of tiny items, entity-dense
@@ -107,4 +107,51 @@ describeHeavy('hostile text: entities, rows, names and values', () => {
     expect(run.probe.warnings).toBe(2);
     expect(run.probe.warningChars).toBeLessThan(500);
   }, 120_000);
+});
+
+describeHeavy('elements of unbounded width: attributes past the cap are damage, and a name of megabytes costs its length (review round 6)', () => {
+  // 9 million attributes of their own names in 20 MB of zip: an object with that many properties made V8 stop answering (over 300 s of CPU past 2^23);
+  // the other parts of the damage (a workbook-level part, namespace declarations) are shown at 2 million: the cap ends the scan at 1,025 whatever follows
+  it.each([
+    ['attrs-9m-cell', 'The sheet "S" is not well-formed XML; it was read as far as the damage (0 cells).'],
+    ['xmlns-2m-cell', 'The sheet "S" is not well-formed XML; it was read as far as the damage (0 cells).'],
+  ] as Array<[ShapeName, string]>)('%s: the sheet is read as far as the damage, in seconds and within 768 MB', async (shape, warning) => {
+    const { run, zipBytes } = await build(shape, 768, 60_000);
+    expect(survived(run)).toEqual(SURVIVED);
+    expect(zipBytes).toBeLessThan(22 * MB);
+    expect(run.probe.firstWarnings).toEqual([warning]);
+  }, 200_000);
+
+  it('attrs-2m-styles: a workbook-level part is skipped with a warning and the import goes on', async () => {
+    const { run } = await build('attrs-2m-styles', 768, 60_000);
+    expect(survived(run)).toEqual(SURVIVED);
+    expect(run.probe.firstWarnings).toEqual(['The part xl/styles.xml is not well-formed XML and was skipped.']);
+    expect(run.probe.sheets[0].cells).toBe(1);
+  }, 200_000);
+
+  it('attrs-2m-workbook: the workbook part is refused as damaged, as any other damage to it is', async () => {
+    const { run } = await build('attrs-2m-workbook', 768, 60_000);
+    expect(run.status).toBe(1);
+    expect(run.signal).toBeNull();
+    expect(run.probe).toMatchObject({ errorCode: 'corrupt' });
+  }, 200_000);
+
+  it.each(['tagname-20mb', 'attrname-20mb'] as ShapeName[])('%s: one name of 20 million characters is scanned once and kept nowhere', async (shape) => {
+    const { run } = await build(shape, 256, 60_000);
+    expect(survived(run)).toEqual(SURVIVED);
+    expect(run.probe.sheets[0].cells).toBe(1);
+    expect(run.probe.warnings).toBe(0);
+  }, 120_000);
+});
+
+describeHeavy('hyperlinks and their relationships: the detector looks each up, it does not search for it (review round 6)', () => {
+  it('links-120k-external: 120,000 external hyperlinks are detected and read in seconds (the detector took 45 s, quadratic in the links)', async () => {
+    const bytes = await buildShape('links-120k-external');
+    const run = importInChild(bytes, { heapMb: 512, timeoutMs: 40_000, script: DETECT_PROBE });
+    expect(survived(run)).toEqual(SURVIVED);
+    const out = run.probe as unknown as { hyperlinks: number; warnings: number; items: unknown[] };
+    // the reader's own cap on a sheet's hyperlinks (65,530), with its warning; the detector reports nothing for links that are fine
+    expect(out).toMatchObject({ hyperlinks: 65_530, warnings: 1, items: [] });
+    // (the time limit of the child, 40 s, is the failure for a search per link: it took 45 s)
+  }, 100_000);
 });
