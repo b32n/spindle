@@ -58,7 +58,8 @@ function applyEdit(wb: WorkbookImpl, sheetName: string, e: StructuralEdit): void
 
 /** A workbook with one formula at (20, 20) of `ownerName`, entered as a normal formula or as a cached-only one. */
 function build(ownerName: string, text: string, cachedOnly: boolean): WorkbookImpl {
-  const wb = new WorkbookImpl('wb', 'Main');
+  const wb = new WorkbookImpl('wb', 'WB');
+  wb.renameSheet(wb.getSheet().id, 'Main');
   wb.addSheet('Other');
   wb.addSheet('My Sheet');
   const owner = wb.getSheetIdByName(ownerName);

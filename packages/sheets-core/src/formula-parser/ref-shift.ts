@@ -12,7 +12,7 @@
 // tokens: linear in the text.
 
 import { columnIndexToLabel } from './cell-reference';
-import { tokenizeLenient } from './tokenizer';
+import { tokenizeLenient, type Token } from './tokenizer';
 import { MAX_SHEET_COLS, MAX_SHEET_ROWS } from './types';
 
 export interface StructuralEdit {
@@ -103,17 +103,14 @@ export function shiftFormulaRefs(
 
   /** The text a reference token (`A1`, `$A:$C`, `1:3`) becomes, undefined when the edit deletes what it points at. */
   const shifted = (k: number): string | undefined => {
-    const t = tokens[k];
+    const t = tokens[k] as Extract<Token, { kind: 'cell' | 'colrange' | 'rowrange' }>;
     const own = text.slice(t.pos, endOf(k));
     if (t.kind === 'cell') return shiftCellText(own, edit, t.row, t.col);
-    if (t.kind === 'colrange' || t.kind === 'rowrange') {
-      const isColumn = t.kind === 'colrange';
-      const colon = own.indexOf(':');
-      const first = shiftWholeText(own.slice(0, colon), edit, t.kind === 'colrange' ? t.c1 : t.r1, isColumn);
-      const second = shiftWholeText(own.slice(colon + 1), edit, t.kind === 'colrange' ? t.c2 : t.r2, isColumn);
-      return first === undefined || second === undefined ? undefined : `${first}:${second}`;
-    }
-    return undefined;
+    const isColumn = t.kind === 'colrange';
+    const colon = own.indexOf(':');
+    const first = shiftWholeText(own.slice(0, colon), edit, t.kind === 'colrange' ? t.c1 : t.r1, isColumn);
+    const second = shiftWholeText(own.slice(colon + 1), edit, t.kind === 'colrange' ? t.c2 : t.r2, isColumn);
+    return first === undefined || second === undefined ? undefined : `${first}:${second}`;
   };
 
   for (let k = 0; k < tokens.length - 1; k++) {
