@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  autofitMode,
   resolveColor,
   resolveFont,
   isRichTextEmpty,
@@ -11,19 +12,16 @@ import { RichTextEditor } from '../RichTextEditor';
 import { useDeck, useEditingId } from '../../hooks';
 import { strokeAttrs } from './style';
 import { htmlFill } from './fill';
-
-const V_ALIGN: Record<NonNullable<TextElement['bodyStyle']>['vAlign'] & string, string> = {
-  top: 'flex-start',
-  middle: 'center',
-  bottom: 'flex-end',
-};
+import { bodyBoxStyle, bodyOverflow, columnsStyle, scaleVars } from './body';
+import { textBodyRef } from '../../text-fit';
 
 /** Element-level text defaults (PPTX defRPr analogue) applied to the container. */
 export function bodyDefaults(body: TextElement['bodyStyle'], theme: ThemeData): React.CSSProperties {
   const b = body ?? {};
   return {
     fontFamily: resolveFont(b.fontFamily, theme),
-    fontSize: b.fontSize ?? 18,
+    // Under shrink-to-fit the size follows the body's font scale variable, so measuring can rescale it live.
+    fontSize: autofitMode(b) === 'shrink' ? `calc(${b.fontSize ?? 18}px * var(--spindle-fs, 1))` : (b.fontSize ?? 18),
     fontWeight: b.bold ? 700 : 400,
     color: b.color ? resolveColor(b.color, theme) : resolveColor({ kind: 'theme', slot: 'dk1' }, theme),
   };
@@ -41,11 +39,15 @@ export function TextView({ el, theme, interactive = false }: { el: TextElement; 
   const empty = isRichTextEmpty(el.richText);
   const prompt = empty && el.placeholder ? deck.getPlaceholderPrompt(el.containerId, el.placeholder) : undefined;
 
+  const scaled = autofitMode(body) === 'shrink';
+  const innerRef = React.useMemo(() => textBodyRef(el.id, interactive), [el.id, interactive]);
+  const cols = columnsStyle(body);
+
   const container: React.CSSProperties = {
     width: '100%',
     height: '100%',
     boxSizing: 'border-box',
-    overflow: 'hidden',
+    overflow: bodyOverflow(body),
     ...fillStyle,
     ...(border ? { border: `${border.strokeWidth}px solid ${border.stroke}` } : {}),
   };
@@ -53,11 +55,8 @@ export function TextView({ el, theme, interactive = false }: { el: TextElement; 
   const inner: React.CSSProperties = {
     width: '100%',
     height: '100%',
-    boxSizing: 'border-box',
-    padding: body.padding ?? 8,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: V_ALIGN[body.vAlign ?? 'top'],
+    ...bodyBoxStyle(body),
+    ...(scaled ? scaleVars(body) : {}),
     whiteSpace: body.wrap === false ? 'nowrap' : 'normal',
     ...bodyDefaults(body, theme),
   };
@@ -68,12 +67,14 @@ export function TextView({ el, theme, interactive = false }: { el: TextElement; 
       {editing ? (
         <RichTextEditor elementId={el.id} theme={theme} bodyStyle={body} />
       ) : (
-        <div style={inner}>
+        <div ref={innerRef} data-text-body style={inner}>
           {empty
             ? prompt
               ? <div style={{ opacity: 0.4, textAlign: el.richText.content[0]?.attrs?.align ?? 'left' }}>{prompt}</div>
               : null
-            : <StaticRichText doc={el.richText} theme={theme} />}
+            : cols
+              ? <div style={cols}><StaticRichText doc={el.richText} theme={theme} scaled={scaled} /></div>
+              : <StaticRichText doc={el.richText} theme={theme} scaled={scaled} />}
         </div>
       )}
     </div>

@@ -18,6 +18,7 @@ import { useDeck, useSelection, useEditingId, useFilmstripOpen, useCommentsOpen 
 import { useDeckContext } from '../context/DeckContext';
 import { DeckControls } from './DeckControls';
 import { TextFormatBar } from './TextFormatBar';
+import { TextOptionsButton } from './TextOptionsButton';
 import { LineFormatBar } from './LineFormatBar';
 import { ShapeFormatBar } from './ShapeFormatBar';
 import { ImageFormatBar } from './ImageFormatBar';
@@ -229,6 +230,7 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
       {/* Contextual format bars. Text formatting shows for a text element or a
           cell being edited; the structure bars hide while editing text. */}
       <TextFormatBar />
+      <TextOptionsButton />
       {!editing && <ShapeFormatBar />}
       {!editing && <ImageFormatBar />}
       {!editing && <TableFormatBar />}

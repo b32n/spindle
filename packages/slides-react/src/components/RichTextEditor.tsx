@@ -16,17 +16,17 @@
 // Never unmounts mid-IME (composing guard on blur).
 
 import React, { useEffect, useRef } from 'react';
-import { EditorState, TextSelection } from 'prosemirror-state';
+import { EditorState, Plugin, TextSelection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history, undo, redo } from 'prosemirror-history';
 import { ySyncPlugin, yUndoPlugin, undo as yUndo, redo as yRedo } from 'y-prosemirror';
-import { slidesSchema, resolveColor, resolveFont, emptyRichText, type ThemeData, type BodyStyle, type RichTextDoc } from '@b32nio/spindle-slides-core';
+import { slidesSchema, resolveColor, resolveFont, emptyRichText, autofitMode, type ThemeData, type BodyStyle, type RichTextDoc } from '@b32nio/spindle-slides-core';
 import { useDeck } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
-
-const V_ALIGN = { top: 'flex-start', middle: 'center', bottom: 'flex-end' } as const;
+import { bodyBoxStyle, columnVars, scaleVars } from './elements/body';
+import { createFitController } from '../text-fit';
 
 // Inject the editor's rendering rules once: no focus outline, list markers via
 // ::before (the flat PM schema has no list nodes; StaticRichText draws markers
@@ -38,6 +38,7 @@ function ensureEditorStyles(): void {
   style.textContent = `
 .spindle-pm-editor .ProseMirror { outline: none; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
 .spindle-pm-editor .ProseMirror p { margin: 0; }
+.spindle-pm-editor .ProseMirror { column-count: var(--spindle-cols, 1); column-gap: var(--spindle-colgap, 0px); }
 .spindle-pm-editor .ProseMirror { counter-reset: pm-list; }
 .spindle-pm-editor .ProseMirror p:not([data-list="number"]) { counter-reset: pm-list; }
 .spindle-pm-editor .ProseMirror p[data-list="bullet"]::before { content: "•"; position: absolute; left: 8px; opacity: 0.9; }
@@ -93,10 +94,22 @@ export function RichTextEditor({
 
     let view: EditorView;
 
+    // Shrink-to-fit follows the user's edits: each document change rescales the text live and the commit stores the
+    // result (see createFitController). Table cells have no autofit.
+    const fit = createFitController(deck, elementId, mount, !!cell);
+    const fitPlugin = new Plugin({
+      view: () => ({
+        update: (v, prev) => {
+          if (!prev.doc.eq(v.state.doc)) fit.live();
+        },
+      }),
+    });
+
     const commit = () => {
       const doc = view.state.doc.toJSON() as RichTextDoc;
       if (cell) deck.setTableCellRichText(elementId, cell[0], cell[1], doc);
       else if (!collab) deck.setElementRichText(elementId, doc);
+      fit.settle();
     };
     const exit = () => {
       commit();
@@ -118,6 +131,7 @@ export function RichTextEditor({
         schema: slidesSchema,
         plugins: [
           ySyncPlugin(fragment!),
+          fitPlugin,
           yUndoPlugin({ undoManager: handle!.undoManager }),
           keymap({ ...markKeys, 'Mod-z': yUndo, 'Mod-y': yRedo, 'Shift-Mod-z': yRedo }),
           keymap(baseKeymap),
@@ -130,6 +144,7 @@ export function RichTextEditor({
         doc: slidesSchema.nodeFromJSON(initialDoc),
         plugins: [
           history(),
+          fitPlugin,
           keymap({ ...markKeys, 'Mod-z': undo, 'Mod-y': redo, 'Shift-Mod-z': redo }),
           keymap(baseKeymap),
         ],
@@ -146,6 +161,7 @@ export function RichTextEditor({
     const pmDom = view.dom as HTMLElement;
     pmDom.style.outline = 'none';
     pmDom.style.minHeight = '1em';
+    pmDom.style.flexShrink = '0'; // content height must not be squeezed by the box (shrink-to-fit measures it)
     pmDom.style.width = '100%';
     pmDom.style.whiteSpace = 'pre-wrap';
     pmDom.style.wordBreak = 'break-word';
@@ -179,6 +195,7 @@ export function RichTextEditor({
         const doc = view.state.doc.toJSON() as RichTextDoc;
         if (cell) deck.setTableCellRichText(elementId, cell[0], cell[1], doc);
         else deck.setElementRichText(elementId, doc);
+        fit.flush();
       }
       if (editing.getView() === view) editing.setView(null);
       view.destroy();
@@ -192,6 +209,8 @@ export function RichTextEditor({
   const themeVars: Record<string, string> = { '--font-major': theme.fonts.major, '--font-minor': theme.fonts.minor };
   for (const [slot, hex] of Object.entries(theme.colors)) themeVars[`--slot-${slot}`] = hex;
 
+  const shrink = !cell && autofitMode(bodyStyle) === 'shrink';
+
   return (
     <div
       className="spindle-pm-editor"
@@ -203,12 +222,11 @@ export function RichTextEditor({
         width: '100%',
         height: '100%',
         boxSizing: 'border-box',
-        padding: bodyStyle?.padding ?? 8,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: V_ALIGN[bodyStyle?.vAlign ?? (centered ? 'middle' : 'top')],
+        ...bodyBoxStyle(bodyStyle, centered ? 'middle' : 'top'),
+        ...(shrink ? scaleVars(bodyStyle) : {}),
+        ...columnVars(bodyStyle),
         fontFamily: resolveFont(bodyStyle?.fontFamily, theme),
-        fontSize: bodyStyle?.fontSize ?? 18,
+        fontSize: shrink ? `calc(${bodyStyle?.fontSize ?? 18}px * var(--spindle-fs, 1))` : (bodyStyle?.fontSize ?? 18),
         fontWeight: bodyStyle?.bold ? 700 : 400,
         color: bodyStyle?.color ? resolveColor(bodyStyle.color, theme) : resolveColor({ kind: 'theme', slot: 'dk1' }, theme),
         textAlign: centered ? 'center' : 'left',

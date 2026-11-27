@@ -543,6 +543,18 @@ lockstep.
   renders exactly as before. An axis can never be cropped to less than 1 percent. The image format bar gets a "Crop
   image" popover with four percent fields and a reset. New slides-core exports: `ImageCrop`, `normalizeCrop`,
   `isCropped`, `setCropEdge`, `cropLayout`, `NO_CROP`, `MIN_CROP_VISIBLE`, `CropLayout`, `PctRect`. Additive.
+- **Slides text body fidelity, part 1 (K3a).** `BodyStyle` gains `insets` (px per side; `padding` still works and
+  `insets` wins), `anchorCtr` (centre the text block), `autofit { mode: none | shrink | resize, fontScale, lnSpcReduction }`,
+  `vert: horz | vert | eaVert` and `columns { count, gap }`, all in the element JSON so collaboration carries them with no
+  Y change. A `shrink` body applies the **stored** scales (as PowerPoint's `normAutofit` does) and recomputes them only
+  when the user edits the text (a 2.5 percent step search against the live layout); a `resize` body grows or shrinks its
+  height to the text on commit; a body that declares autofit is no longer clipped (an unset body keeps clipping, so
+  existing decks render as before). Text and shape bodies render all of it, and the live editor lays text out the same
+  way. New "Text box options" toolbar control (popover, or a row and modal in the overflow menu). New slides-core
+  exports: `Autofit`, `BodyInsets`, `TextVert`, `resolveInsets`, `insetsToCss`, `autofitMode`, `autofitScales`,
+  `isScaled`, `hasAutofit`, `textVert`, `writingModeCss`, `resolveColumns`, `fitShrinkScale`, `lineReductionFor`,
+  `mergeBodyStyle`. The editor schema's font sizes and line heights are now `calc(... * var(--spindle-fs / --spindle-ls))`
+  expressions (same computed values at scale 1). Additive; paragraph, run and field attributes follow in K3b and K3c.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

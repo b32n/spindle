@@ -44,11 +44,13 @@ Not in the current scope; verified absent in code.
       clips the picture and the fit (fill/contain/cover) applies to what is left. Edited from the "Crop image" popover
       in the image format bar (four percent fields and a reset). Still open: drag handles on the canvas, crop to an
       aspect ratio or to a shape.
-- [ ] **Text autofit / shrink-to-fit** — there is no autofit anywhere in text
-      layout: text that overflows its box is clipped (and with middle/bottom
-      vertical alignment the overflow clips at the *top*, dropping leading
-      lines). No `bodyStyle` autofit flag and nothing scales the font size to fit
-      (`text/` layout, `elements/*Text*`).
+- [x] **Text autofit / shrink-to-fit** — `bodyStyle.autofit` (`none`, `shrink` with the stored `fontScale` and
+      `lnSpcReduction`, `resize`), per-side `insets`, `anchorCtr`, `vert` (rotated and stacked text) and `columns`
+      render in text boxes and shapes and in the live editor. `shrink` recomputes only when the user edits (a
+      2.5 percent step search); `resize` fits the box height on commit. Edited from the "Text box options" control.
+      Still open: shrink-to-fit with several columns measures the balanced column height (text can still overflow),
+      `resize` does not grow vertical text, table cells have no autofit, and paragraph/run attributes (bullets,
+      spacing forms, baseline, caps, fields) are K3b/K3c.
 - [ ] **Rich speaker notes** — notes are plain-text only (`NotesPanel.tsx`).
 - [ ] **Real PDF / PNG export backend** — intentionally **not** in these
       packages; export is delegated to the host app (`SlidesEditor.tsx`). A
