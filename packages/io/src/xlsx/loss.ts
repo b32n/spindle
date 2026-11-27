@@ -422,7 +422,6 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
 
   // ---- styles -------------------------------------------------------------
   const used = styles.usedFacts(scan.usedStyles);
-  addFull('xlsx.styles.themeColors', 'cell format(s) using theme or indexed colours', used.themeColors, 'lost: the colour is dropped (only RGB colours are imported)');
   addFull('xlsx.styles.patternFill', 'cell format(s) with a pattern fill', used.patternFill, 'lost: pattern fills are dropped (only solid fills are imported)');
   addFull('xlsx.styles.gradientFill', 'cell format(s) with a gradient fill', used.gradientFill, 'lost: gradient fills are dropped');
   addFull('xlsx.styles.diagonalBorder', 'cell format(s) with a diagonal border', used.diagonalBorder, 'lost: diagonal borders are dropped');

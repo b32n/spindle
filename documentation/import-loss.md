@@ -62,7 +62,7 @@ Full-only ids:
 | Group | Ids (what is counted) |
 |---|---|
 | Formulas | `xlsx.formulas.array` (`t="array"`), `.dynamicArray` (array formula with `cm` metadata), `.externalRef` (`[1]Sheet!A1`), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
-| Styles | `xlsx.styles.themeColors` (cell formats in use with a theme or indexed colour; plain black text excluded), `.patternFill`, `.gradientFill`, `.diagonalBorder`, `.namedStyles` (named styles in use), `.columnRowStyles` (column and row default formats) |
+| Styles | `xlsx.styles.patternFill`, `.gradientFill`, `.diagonalBorder`, `.namedStyles` (named styles in use), `.columnRowStyles` (column and row default formats) |
 | Sheet | `xlsx.sheet.tabColor`, `.zoom` (other than 100), `.rtl`, `.gridlines` (turned off), `.veryHidden`, `.customViews` |
 | Print | `xlsx.print.setup` (a sheet whose orientation, paper size, scale, fit to page, print options or margins differ from Excel's defaults), `.areas`, `.titles`, `.breaks`, `.headersFooters` |
 | Conditional formatting | `xlsx.cf.dataBarExt`, `.iconSetExt` (Excel 2010 extensions), `.formulaRule`, `.stopIfTrue` |

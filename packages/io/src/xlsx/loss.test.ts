@@ -444,7 +444,7 @@ describe('formulas', () => {
       const report = await full(await build({ sheets: [{ rows: rows + "<row r='2' outlineLevel='1'/>" + "<row r='3'><c r='A3' s='3'/></row>" }], styles: STYLES('<cellXfs><xf/><xf/><xf/><xf fontId="1"/></cellXfs><fonts><font/><font><color theme="4"/></font></fonts>') }));
       expect(item(report, 'xlsx.formulas.structuredRefs')?.count).toBe(1);
       expect(item(report, 'xlsx.outline')?.count).toBe(1);
-      expect(item(report, 'xlsx.styles.themeColors')?.count).toBe(1);
+      expect(item(report, 'xlsx.styles.themeColors')).toBeUndefined();
     } finally {
       LIMITS.chunkBytes = saved;
     }
@@ -587,7 +587,7 @@ describe('styles and number formats', () => {
   it('reports colours, fills, diagonal borders and named styles only for formats in use', async () => {
     const bytes = await build({ styles, sheets: [{ rows: used(1, 2, 3, 4) }] });
     const report = await full(bytes);
-    expect(item(report, 'xlsx.styles.themeColors')).toMatchObject({ count: 1 });
+    expect(item(report, 'xlsx.styles.themeColors')).toBeUndefined(); // the colours are resolved by the reader now (S2b)
     expect(item(report, 'xlsx.styles.patternFill')).toMatchObject({ count: 1 });
     expect(item(report, 'xlsx.styles.gradientFill')).toMatchObject({ count: 1 });
     expect(item(report, 'xlsx.styles.diagonalBorder')).toMatchObject({ count: 1 });
@@ -610,8 +610,7 @@ describe('styles and number formats', () => {
     });
     const report = await full(bytes);
     expect(item(report, 'xlsx.styles.columnRowStyles')).toMatchObject({ count: 2, where: ['S'] });
-    // the column format (1) and the row format (9) are both themed
-    expect(item(report, 'xlsx.styles.themeColors')).toMatchObject({ count: 2 });
+    expect(item(report, 'xlsx.styles.themeColors')).toBeUndefined();
   });
 
   it('reports number formats the editor cannot show like Excel, by code, through the predicate', async () => {
@@ -1265,7 +1264,7 @@ describe('package level', () => {
 describe('full id coverage', () => {
   const FULL_IDS = [
     'xlsx.formulas.array', 'xlsx.formulas.dynamicArray', 'xlsx.formulas.externalRef', 'xlsx.formulas.volatile',
-    'xlsx.styles.themeColors', 'xlsx.styles.patternFill', 'xlsx.styles.gradientFill', 'xlsx.styles.diagonalBorder', 'xlsx.styles.namedStyles', 'xlsx.styles.columnRowStyles',
+    'xlsx.styles.patternFill', 'xlsx.styles.gradientFill', 'xlsx.styles.diagonalBorder', 'xlsx.styles.namedStyles', 'xlsx.styles.columnRowStyles',
     'xlsx.sheet.tabColor', 'xlsx.sheet.zoom', 'xlsx.sheet.rtl', 'xlsx.sheet.gridlines', 'xlsx.sheet.veryHidden', 'xlsx.sheet.customViews',
     'xlsx.print.setup', 'xlsx.print.areas', 'xlsx.print.titles', 'xlsx.print.breaks', 'xlsx.print.headersFooters',
     'xlsx.cf.dataBarExt', 'xlsx.cf.iconSetExt', 'xlsx.cf.formulaRule', 'xlsx.cf.stopIfTrue',
