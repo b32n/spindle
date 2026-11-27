@@ -7,7 +7,7 @@ import React from 'react';
 import { resolveFill } from '@b32nio/spindle-slides-core';
 import { htmlFill } from './elements/fill';
 import { useDeck, useSlide, useSlideElementIds, useSlideIds, useTheme } from '../hooks';
-import { ElementView } from './elements/ElementView';
+import { ElementView, StaticElement } from './elements/ElementView';
 import { FieldContextValue } from './elements/StaticRichText';
 
 /**
@@ -36,6 +36,9 @@ export function SlideView({
   const slideNumber = useSlideIds().indexOf(slideId) + 1;
   const fields = React.useMemo(() => ({ slideNumber: slideNumber > 0 ? slideNumber : null, now: new Date() }), [slideNumber]);
 
+  // Static content of the slide's layout (logos, rules) sits under the slide's own elements.
+  const layoutElements = slide?.layoutRef ? deck.getLayout(slide.layoutRef)?.elements : undefined;
+
   const bg = htmlFill(slide?.background, theme);
   // No usable background (absent, none, unsafe picture): the theme's light colour, as before.
   const fallback = resolveFill({ kind: 'solid', color: { kind: 'theme', slot: 'lt1' } }, theme) ?? '#ffffff';
@@ -54,6 +57,9 @@ export function SlideView({
     >
       {bg.layer}
       <FieldContextValue.Provider value={fields}>
+        {layoutElements?.map((el) => (
+          <StaticElement key={el.id} el={el} />
+        ))}
         {elementIds.map((id) => (
           <ElementView key={id} elementId={id} interactive={interactive} />
         ))}

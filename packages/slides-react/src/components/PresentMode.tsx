@@ -1,14 +1,14 @@
 // PresentMode — full-screen playback. Portals to <body>, requests fullscreen,
 // and letterboxes the same static SlideView at min(vw/w, vh/h). Arrow/Space/
 // PgUp-Dn/Home/End/number-jump navigation; a 150ms opacity cross-fade is the
-// only v1 transition. No editing chrome.
+// only v1 transition. Hidden slides are skipped. No editing chrome.
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { richTextToPlainText } from '@b32nio/spindle-slides-core';
 import { useDeck, useSlideIds, useActiveSlideId } from '../hooks';
 import { SlideView, ScaledSlide } from './SlideView';
-import { requestGo, commitGo, type FadeNavState } from './present-navigation';
+import { requestGo, commitGo, presentableSlideIds, presentStartIndex, type FadeNavState } from './present-navigation';
 
 /** Opacity cross-fade duration; the navigation timeout and the CSS transition
  *  must share this so the fade actually completes before the slide swaps. */
@@ -23,14 +23,19 @@ function mmss(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export function PresentMode({ onExit }: { onExit: () => void }): React.ReactElement {
+export function PresentMode({ onExit, includeHidden = false }: { onExit: () => void; includeHidden?: boolean }): React.ReactElement {
   const deck = useDeck();
-  const slideIds = useSlideIds();
+  const allIds = useSlideIds();
+  // Hidden slides are not played (unless asked); the list is fixed per slide-list change, like the rest of the playback state.
+  const slideIds = useMemo(
+    () => presentableSlideIds(allIds, (id) => !!deck.getSlide(id)?.hidden, includeHidden),
+    [allIds, deck, includeHidden],
+  );
   const active = useActiveSlideId();
   const { w, h } = deck.getSlideSize();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [index, setIndex] = useState(() => Math.max(0, slideIds.indexOf(active)));
+  const [index, setIndex] = useState(() => presentStartIndex(allIds, slideIds, active));
   const [scale, setScale] = useState(1);
   const [fading, setFading] = useState(false);
   const [showNotes, setShowNotes] = useState(false);

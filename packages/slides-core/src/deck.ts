@@ -14,6 +14,7 @@
 import { EventEmitter, createAttachAbortError } from '@b32nio/spindle-shared';
 import { indexBetween, indexesBetween, sortByIndex } from './scene/fractional-index';
 import { buildPlaceholderElement } from './theme/materialize';
+import { scaleElementPatch, scaleLayout } from './slide-size';
 import type { PlaceholderMeta } from './scene/types';
 import { generateId } from './utils/id';
 import {
@@ -156,10 +157,37 @@ export class DeckImpl {
     return { ...this.slideSize };
   }
 
-  setSlideSize(size: { w: number; h: number }): void {
+  /**
+   * Set the slide size. With `scaleContent` every element of every slide, and the layouts' placeholders and static
+   * elements, is scaled per axis so it keeps its relative position and proportion (one undo step); without it only the
+   * size changes and elements stay where they are.
+   */
+  setSlideSize(size: { w: number; h: number }, opts: { scaleContent?: boolean } = {}): void {
+    const from = this.slideSize;
+    if (opts.scaleContent && from.w > 0 && from.h > 0 && (size.w !== from.w || size.h !== from.h)) {
+      this.scaleDeckContent(size.w / from.w, size.h / from.h, size);
+      return;
+    }
     this.recordHistory();
     this.slideSize = { ...size };
     this.emit('deckChange', { keys: ['slideSize'] });
+  }
+
+  private scaleDeckContent(sx: number, sy: number, size: { w: number; h: number }): void {
+    this.recordHistory();
+    this.events.batch(() => {
+      this.slideSize = { ...size };
+      this.layouts = this.layouts.map((l) => scaleLayout(l, sx, sy));
+      this.emit('deckChange', { keys: ['slideSize', 'layouts'] });
+      const moved = new Set<string>();
+      for (const el of [...this.elements.values()]) {
+        const patch = scaleElementPatch(el, sx, sy);
+        this.applyElementPatch(el.id, patch);
+        this.emit('elementChange', { slideId: el.containerId, elementId: el.id, keys: Object.keys(patch) });
+        moved.add(el.id);
+      }
+      this.reconcileConnectors(moved);
+    });
   }
 
   getTheme(): ThemeData {
@@ -249,7 +277,7 @@ export class DeckImpl {
     if (layout.placeholders.length === 0) return;
     const keys = indexesBetween(null, null, layout.placeholders.length);
     layout.placeholders.forEach((ph, i) => {
-      const el = buildPlaceholderElement(ph, slideId, keys[i]);
+      const el = buildPlaceholderElement(ph, slideId, keys[i], layout.textStyles);
       this.elements.set(el.id, el);
       this.emit('elementAdd', { slideId, elementId: el.id });
     });
@@ -371,6 +399,18 @@ export class DeckImpl {
     this.recordHistory();
     this.slides.set(slideId, { ...slide, notes });
     this.emit('slideChange', { slideId, keys: ['notes'] });
+  }
+
+  /** Hide a slide from the presentation (or show it again); it stays in the deck and the filmstrip. */
+  setSlideHidden(slideId: string, hidden: boolean): void {
+    const slide = this.slides.get(slideId);
+    if (!slide || !!slide.hidden === hidden) return;
+    this.recordHistory();
+    const next = { ...slide };
+    if (hidden) next.hidden = true;
+    else delete next.hidden;
+    this.slides.set(slideId, next);
+    this.emit('slideChange', { slideId, keys: ['hidden'] });
   }
 
   /** Associate a slide with a layout (placeholder materialization is Phase 4). */

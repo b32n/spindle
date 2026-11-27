@@ -82,3 +82,27 @@ export function ElementView({
     </div>
   );
 }
+
+/**
+ * A non-interactive element drawn straight from its record rather than from the engine store: the static content of a
+ * layout (logos, rules, footers). Not selectable, never editable.
+ */
+export function StaticElement({ el }: { el: SlideElement }): React.ReactElement {
+  const theme = useTheme();
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: el.w,
+    height: el.h,
+    transform: `translate(${el.x}px, ${el.y}px) rotate(${el.rotation}deg)`,
+    transformOrigin: 'center center',
+    opacity: el.opacity ?? 1,
+    pointerEvents: 'none',
+  };
+  return (
+    <div data-layout-element-id={el.id} style={style}>
+      {renderInner(el, theme, false)}
+    </div>
+  );
+}
