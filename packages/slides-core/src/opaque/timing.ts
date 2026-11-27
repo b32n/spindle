@@ -3,8 +3,55 @@
 // point at a shape that is not there (PowerPoint reports such a file as damaged). The XML is not modelled otherwise, so it is
 // edited as a small tree of tags and text that serialises back to exactly what it was where nothing is removed.
 
-/** Comments, CDATA, processing instructions and DOCTYPE are text to this tree; a tag is a name and its attribute text (quotes may hold `>`). */
-const TOKEN = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<![^>]*>|<(\/?)([^\s/>]+)((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
+const MAX_DEPTH = 256;
+const SKIPPED: ReadonlyArray<readonly [string, string]> = [
+  ['<!--', '-->'],
+  ['<![CDATA[', ']]>'],
+  ['<?', '?>'],
+  ['<!', '>'],
+];
+
+interface Token {
+  index: number;
+  whole: string;
+  closing: boolean;
+  qname: string;
+  attrs: string;
+}
+
+/**
+ * The tags of an XML text (comments, CDATA, processing instructions and DOCTYPE are text to this tree; a tag is a name and its
+ * attribute text, whose quotes may hold `>`), or `undefined` when a construct is not terminated. One pass of `indexOf`, so a
+ * peer's hostile text (this XML comes from the shared document) cannot make it super-linear.
+ */
+function tokenize(xml: string): Token[] | undefined {
+  const out: Token[] = [];
+  for (let i = xml.indexOf('<'); i >= 0; i = xml.indexOf('<', i)) {
+    const skip = SKIPPED.find(([open]) => xml.startsWith(open, i));
+    if (skip) {
+      const end = xml.indexOf(skip[1], i + skip[0].length);
+      if (end < 0) return undefined;
+      i = end + skip[1].length;
+      continue;
+    }
+    const closing = xml[i + 1] === '/';
+    let at = i + (closing ? 2 : 1);
+    const nameAt = at;
+    while (at < xml.length && !/[\s/>]/.test(xml[at])) at++;
+    if (at === nameAt) return undefined;
+    const attrsAt = at;
+    for (; at < xml.length && xml[at] !== '>'; at++) {
+      if (xml[at] === '"' || xml[at] === "'") {
+        at = xml.indexOf(xml[at], at + 1);
+        if (at < 0) return undefined;
+      }
+    }
+    if (at >= xml.length) return undefined;
+    out.push({ index: i, whole: xml.slice(i, at + 1), closing, qname: xml.slice(nameAt, attrsAt), attrs: xml.slice(attrsAt, at) });
+    i = at + 1;
+  }
+  return out;
+}
 const SPID = /\sspid\s*=\s*(?:"([^"]*)"|'([^']*)')/;
 const PRESET_CLASS = /\spresetClass\s*=/;
 
@@ -20,25 +67,28 @@ interface Tag {
 const localName = (qname: string): string => qname.slice(qname.indexOf(':') + 1);
 const isTag = (n: Tag | string): n is Tag => typeof n !== 'string';
 
-/** The tree of an XML text, or `undefined` when its tags do not nest (the text is then left alone). */
+/** The tree of an XML text, or `undefined` when its tags do not nest, nest too deep or are not terminated (the text is then left alone). */
 function parse(xml: string): Tag | undefined {
   const root: Tag = { tag: '', local: '', open: '', close: '', children: [] };
   let at = root;
   let last = 0;
-  for (const m of xml.matchAll(TOKEN)) {
-    const [whole, closing, qname, attrs] = m;
-    if (qname === undefined) continue;
-    if (m.index > last) at.children.push(xml.slice(last, m.index));
-    last = m.index + whole.length;
+  let depth = 0;
+  const tokens = tokenize(xml);
+  if (!tokens) return undefined;
+  for (const { index, whole, closing, qname, attrs } of tokens) {
+    if (index > last) at.children.push(xml.slice(last, index));
+    last = index + whole.length;
     if (closing) {
       if (at.tag !== qname) return undefined;
       at.close = whole;
       at = at.parent as Tag;
+      depth--;
     } else if (attrs.endsWith('/')) at.children.push({ tag: qname, local: localName(qname), open: whole, close: '', children: [], parent: at });
     else {
       const t: Tag = { tag: qname, local: localName(qname), open: whole, close: '', children: [], parent: at };
       at.children.push(t);
       at = t;
+      if (++depth > MAX_DEPTH) return undefined;
     }
   }
   if (at !== root) return undefined;

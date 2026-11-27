@@ -188,6 +188,49 @@ describe('an opaque deck in a room', () => {
     ha.detach();
   });
 
+  it('a joiner on a host without SubtleCrypto still attaches, without the room\'s parts', async () => {
+    __resetInMemoryRooms();
+    const { d } = await chartDeck();
+    const ha = await d.attachCollab(new InMemoryProvider(), identity('A'), { roomId: 'room' });
+    const b = new DeckImpl('b');
+    const real = Object.getOwnPropertyDescriptor(globalThis, 'crypto') as PropertyDescriptor;
+    Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true });
+    let hb;
+    try {
+      hb = await b.attachCollab(new InMemoryProvider(), identity('B'), { roomId: 'room' });
+      await settle();
+    } finally {
+      Object.defineProperty(globalThis, 'crypto', real);
+    }
+    expect(b.getOpaqueParts()).toEqual([]);
+    expect(b.getData().slides[0].elements.length).toBeGreaterThan(0);
+    hb.detach();
+    ha.detach();
+  });
+
+  it('hashes each room part once however many peers add parts afterwards', async () => {
+    __resetInMemoryRooms();
+    const { d } = await chartDeck();
+    const ha = await d.attachCollab(new InMemoryProvider(), identity('A'), { roomId: 'room' });
+    const b = new DeckImpl('b');
+    const hb = await b.attachCollab(new InMemoryProvider(), identity('B'), { roomId: 'room' });
+    await settle();
+    const digest = jest.spyOn(globalThis.crypto.subtle, 'digest');
+    const extra = [await part('<one/>'), await part('<two/>'), await part('<three/>')];
+    digest.mockClear();
+    for (const p of extra) {
+      ha.ydoc.getMap<Uint8Array>('opaqueParts').set(p.hash, encodeOpaqueEntry(p));
+      await settle();
+    }
+    // B and A (whose seed was never read back) each verify a new part once, plus A's one first read of the chart part;
+    // a store rebuilt on every arrival would hash 1 + 2 + 3 (+ the chart) per peer
+    expect(digest).toHaveBeenCalledTimes(7);
+    expect(b.getOpaqueParts()).toHaveLength(4);
+    digest.mockRestore();
+    hb.detach();
+    ha.detach();
+  });
+
   it('a joiner reads the room\'s parts again when more arrived than it read (a rejected entry among them)', async () => {
     __resetInMemoryRooms();
     const { d } = await chartDeck();

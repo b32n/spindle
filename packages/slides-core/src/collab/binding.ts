@@ -288,9 +288,11 @@ export async function attachCollabToDeck(
   };
 
   // The room's opaque parts, verified against their hashes (a peer's data is untrusted); an empty map needs no hashing at all.
+  // One store serves the whole attachment: `readOpaqueParts` skips what it already holds, so each part is hashed once.
+  const partStore = createOpaqueStore();
   const readParts = async (): Promise<OpaquePart[]> => {
     if (y.opaqueParts.size === 0) return [];
-    const store = createOpaqueStore();
+    const store = partStore;
     await readOpaqueParts(y.opaqueParts, store);
     return store.list();
   };
@@ -379,8 +381,9 @@ export async function attachCollabToDeck(
     });
     seeded = true;
   }
-  // what this client just wrote needs no verifying; anything else in the room does
-  const opaqueParts = seeded ? initialData.opaqueParts ?? [] : await readParts();
+  // what this client just wrote needs no verifying; anything else in the room does. A host that cannot verify
+  // (no SubtleCrypto) joins without the parts, as it does for late ones.
+  const opaqueParts = seeded ? initialData.opaqueParts ?? [] : await readParts().catch((): OpaquePart[] => []);
   deck._resyncFromY(serializeYDocToData(ydoc, deck.getSelection(), deck.getActiveSlideId(), opaqueParts));
   attachObservers();
   attachMirror();

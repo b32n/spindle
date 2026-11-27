@@ -88,6 +88,26 @@ describe('pruneTiming', () => {
     expect(out).toContain('<p:bldP/>');
   });
 
+  it('is linear on hostile text: unterminated constructs, nested comments and very deep nesting leave the text alone, fast', () => {
+    const t0 = Date.now();
+    const hostile = ['<!--', '<?', '<![CDATA[', '<!', '<a b="', "<a b='", '<a ', '<', '</', '<a>'.repeat(10000), '<p:timing>' + '<!--'.repeat(10000)];
+    for (const unit of hostile) {
+      const xml = unit.length > 50 ? unit : unit.repeat(10000);
+      expect(pruneTiming(xml, new Set(['7']))).toBe(xml);
+      expect(timingTargets(xml).size).toBe(0);
+    }
+    expect(Date.now() - t0).toBeLessThan(1500);
+    for (const xml of ['<a b="x', "<a b='x", '< a>', '<>', '</>', '<a b="x" c']) {
+      expect(pruneTiming(xml, new Set(['7']))).toBe(xml);
+      expect(timingTargets(xml).size).toBe(0);
+    }
+  });
+
+  it('reads comments, CDATA, processing instructions, DOCTYPE and quoted \'>\' as text', () => {
+    const xml = `<?xml version="1.0"?><!DOCTYPE x><!-- <p:spTgt spid="7"/> --><p:timing><![CDATA[<p:spTgt spid="7"/>]]><p:tnLst a="x>y" b='<'><p:par>${par(4, '8').slice(7, -8)}</p:par></p:tnLst></p:timing>`;
+    expect([...timingTargets(xml)]).toEqual(['8']);
+  });
+
   it('prunes the animations of a real deck', async () => {
     const deck = await importPptx(new Uint8Array(readFileSync(join(__dirname, '../../../../fixtures/pptx/transitions-animations.pptx'))));
     const five = deck.slides[4].opaque?.timing as string;
