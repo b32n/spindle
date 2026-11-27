@@ -14,7 +14,7 @@ export function fcell(ref: string, f: string, value: number | string | null, att
   return `<c r="${ref}"${t}${cellAttrs}><f${attrs ? ` ${attrs}` : ''}>${esc(f)}</f>${v}</c>`;
 }
 /** `<c>` for a formula whose saved result is the error `error` (`t="e"`). */
-export const ecell = (ref: string, f: string, error: string, attrs = ''): string => `<c r="${ref}" t="e"><f${attrs ? ` ${attrs}` : ''}>${esc(f)}</f><v>${esc(error)}</v></c>`;
+export const ecell = (ref: string, f: string, error: string): string => `<c r="${ref}" t="e"><f>${esc(f)}</f><v>${esc(error)}</v></c>`;
 export const ncell = (ref: string, value: number): string => `<c r="${ref}"><v>${value}</v></c>`;
 
 /** An .xlsx whose first sheet holds `cellsByRow` (row number -> cell XML), made from an export of this editor. */
