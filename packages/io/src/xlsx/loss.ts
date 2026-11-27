@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import { createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
 import type { DetectXlsxLossOptions } from '@b32nio/spindle-shared/export/xlsx';
 import { scanFormula, VOLATILE_FUNCTIONS, withoutStrings, type FormulaFacts } from './formula-scan';
+import { DEFAULT_IMPORT_LIMITS } from '../common/safe-zip';
 import { isEncryptedOle, isKnownPart, isOleFile } from './package-kind';
 import { parseStyles } from './styles-scan';
 import { descendants, isMain, isOn, isTrue, kid, kids, parseXml, walk, type XmlElement } from './xml';
@@ -345,6 +346,10 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
     if (isEncryptedOle(bytes))
       addFull('xlsx.package.encrypted', 'password-protected workbook (encrypted package)', 1, 'lost: cannot be opened; remove the password and save the file again');
     else addFull('xlsx.package.legacyBinary', 'legacy binary workbook (.xls)', 1, 'lost: not supported; save it as .xlsx first');
+    return;
+  }
+  if (bytes.length > DEFAULT_IMPORT_LIMITS.maxPackageBytes) {
+    addFull('xlsx.package.sizeLimit', 'package over the size limit', 1, 'lost: not scanned, and the importer refuses it', ['the file itself']);
     return;
   }
   let zip: JSZip;

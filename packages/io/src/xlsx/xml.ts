@@ -1,12 +1,11 @@
-import { XMLParser } from 'fast-xml-parser';
+import { parseXmlTree } from '../common/safe-xml';
 
 // ---------------------------------------------------------------------------
 // A small, safe XML tree for the XLSX loss detector. Same parser and approach as docx/xml-tree.ts
 // (preserveOrder, no value coercion), turned into a plain element tree with namespaces resolved, so a
 // producer that writes `<x:worksheet>` or an x14 extension under any prefix is read like the usual markup.
 //
-// Safety: entities are never expanded (`processEntities: false`) and a DOCTYPE is cut out before parsing,
-// so an entity bomb or an external entity is inert; nesting is capped by the parser (`maxNestedTags`). The
+// Safety: the parser and its limits (no entity expansion, DOCTYPE removed, depth cap) are `common/safe-xml.ts`. The
 // five predefined entities and numeric references are decoded here, one pass, with no recursion. Parsing
 // never throws: damaged XML yields `null`.
 // ---------------------------------------------------------------------------
@@ -37,19 +36,6 @@ const NAMESPACES: Record<string, string> = {
   'http://schemas.openxmlformats.org/package/2006/relationships': 'rel',
 };
 
-const parser = new XMLParser({
-  preserveOrder: true,
-  ignoreAttributes: false,
-  attributeNamePrefix: '@_',
-  textNodeName: '#text',
-  trimValues: false,
-  parseTagValue: false,
-  parseAttributeValue: false,
-  processEntities: false,
-  // depth cap, set here so a change of the parser's default cannot change the safety behaviour
-  maxNestedTags: 100,
-});
-
 const ENTITY = /&(?:#(\d+)|#x([0-9a-fA-F]+)|(lt|gt|amp|quot|apos));/g;
 const NAMED: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
@@ -61,18 +47,6 @@ export function decodeEntities(s: string): string {
     const code = dec !== undefined ? Number(dec) : parseInt(hex as string, 16);
     return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : whole;
   });
-}
-
-/** Remove a DOCTYPE declaration (with its internal subset). Returns `null` when it cannot be delimited. */
-function stripDoctype(xml: string): string | null {
-  const start = xml.indexOf('<!DOCTYPE');
-  if (start < 0) return xml;
-  const open = xml.indexOf('[', start);
-  const close = xml.indexOf('>', start);
-  if (close < 0) return null;
-  if (open < 0 || open > close) return xml.slice(0, start) + xml.slice(close + 1);
-  const end = /\]\s*>/.exec(xml.slice(open));
-  return end ? xml.slice(0, start) + xml.slice(open + end.index + end[0].length) : null;
 }
 
 type RawNode = Record<string, unknown> & { ':@'?: Record<string, string> };
@@ -115,13 +89,9 @@ function convert(raw: RawNode[], scope: Map<string, string>): XmlElement[] {
 
 /** Parse a part into its root element, or `null` when it is empty, not XML or too deeply nested. Never throws. */
 export function parseXml(xml: string): XmlElement | null {
-  try {
-    const clean = stripDoctype(xml);
-    if (clean === null) return null;
-    return convert(parser.parse(clean) as RawNode[], new Map())[0] ?? null;
-  } catch {
-    return null;
-  }
+  const tree = parseXmlTree(xml);
+  if (tree === null) return null;
+  return convert(tree as RawNode[], new Map())[0] ?? null;
 }
 
 /** Main-namespace markup, tolerating a part that forgot to declare any namespace. */

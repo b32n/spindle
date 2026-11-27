@@ -8,8 +8,29 @@ import type {
   SpreadsheetMergedRange,
   SpreadsheetSheet,
 } from '@b32nio/spindle-shared/export/xlsx';
+import { toImportError } from '../common/import-error';
+import { openSafeZip, type ImportLimits } from '../common/safe-zip';
 
-export async function importXlsx(bytes: Uint8Array): Promise<SpreadsheetImportResult> {
+export interface ImportXlsxOptions {
+  /** Overrides of the import limits (`DEFAULT_IMPORT_LIMITS`). */
+  limits?: Partial<ImportLimits>;
+}
+
+/**
+ * Read a workbook. The only error this throws is an `ImportError` (code `encrypted`, `legacy-binary`, `not-a-package`,
+ * `size-limit` or `corrupt`): the package is opened through `openSafeZip` first, and whatever the reader itself then
+ * fails on is reported as `corrupt`.
+ */
+export async function importXlsx(bytes: Uint8Array, options: ImportXlsxOptions = {}): Promise<SpreadsheetImportResult> {
+  await openSafeZip(bytes, { limits: options.limits, target: 'an Excel workbook (.xlsx)' });
+  try {
+    return await readWorkbook(bytes);
+  } catch (e) {
+    throw toImportError(e);
+  }
+}
+
+async function readWorkbook(bytes: Uint8Array): Promise<SpreadsheetImportResult> {
   const workbook = new ExcelJS.Workbook();
   // exceljs accepts a plain Uint8Array (JSZip reads it directly). Do NOT wrap in
   // Node's `Buffer`: it does not exist in browsers, so Open would always fail there.
