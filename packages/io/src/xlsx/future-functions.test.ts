@@ -25,6 +25,13 @@ const PAIRS: Array<[string, string]> = [
   ['_xlfn._xlws.FILTER(B2:B6,B2:B6>4)', 'FILTER(B2:B6,B2:B6>4)'],
   ['_xlfn._xlws.SORT(B2:B6)', 'SORT(B2:B6)'],
   ['_xlfn.SORTBY(B2:B6,C2:C6)', 'SORTBY(B2:B6,C2:C6)'],
+  ['_xlfn.ENCODEURL(A1)', 'ENCODEURL(A1)'],
+  ['_xlfn.VALUETOTEXT(A1,1)', 'VALUETOTEXT(A1,1)'],
+  ['_xlfn.IMAGE("https://example.com/a.png")', 'IMAGE("https://example.com/a.png")'],
+  ['_xlfn.STOCKHISTORY("MSFT")', 'STOCKHISTORY("MSFT")'],
+  ['_xlfn.GROUPBY(A2:A6,B2:B6,SUM)', 'GROUPBY(A2:A6,B2:B6,SUM)'],
+  ['_xlfn.PIVOTBY(A2:A6,B2:B6,C2:C6,SUM)', 'PIVOTBY(A2:A6,B2:B6,C2:C6,SUM)'],
+  ['_xlfn.PERCENTOF(A1,B1)', 'PERCENTOF(A1,B1)'],
   // nesting, and a prefixed function inside a plain one
   ['SUM(_xlfn.IFS(A1>1,2,TRUE,3),_xlfn.DAYS(B1,A1))', 'SUM(IFS(A1>1,2,TRUE,3),DAYS(B1,A1))'],
   // LET and LAMBDA parameters
@@ -136,6 +143,9 @@ describe('fromFileFormula / toFileFormula', () => {
     expect(FUTURE_FUNCTIONS.get('SORT')).toBe('_xlfn._xlws.');
     expect(FUTURE_FUNCTIONS.get('FILTER')).toBe('_xlfn._xlws.');
     expect(FUTURE_FUNCTIONS.get('SUM')).toBeUndefined();
+    // not a function in Excel's documentation: it was in the table by mistake
+    expect(FUTURE_FUNCTIONS.has('QUERYSTRING')).toBe(false);
+    expect(toFileFormula('QUERYSTRING(A1)')).toBe('QUERYSTRING(A1)');
     for (const [name, prefix] of FUTURE_FUNCTIONS) {
       expect(name).toBe(name.toUpperCase());
       expect(prefix.startsWith('_xlfn.')).toBe(true);
