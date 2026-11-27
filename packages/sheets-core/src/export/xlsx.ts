@@ -559,13 +559,12 @@ interface LegacyArray {
   saved: Array<Array<Cell | undefined>>;
 }
 
-/** Whether two results are the same value: numbers to the precision a file keeps, an empty cell and 0 and "" alike, errors by their code. */
+/** Whether two results are the same value: numbers to the precision a file keeps, errors by their code (a difference is the safe answer: the file's value is kept). */
 function sameResult(saved: unknown, engine: unknown): boolean {
-  const a = toFileValue((saved ?? null) as SpreadsheetCell['value']);
-  const b = toFileValue((engine ?? null) as SpreadsheetCell['value']);
+  const a = toFileValue(saved as SpreadsheetCell['value']);
+  const b = toFileValue(engine as SpreadsheetCell['value']);
   if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
-  const blank = (v: unknown) => v === null || v === '' || v === 0;
-  return a === b || (blank(a) && blank(b));
+  return a === b;
 }
 
 /** Whether what the engine evaluated a legacy array formula to (its live result over the range, a scalar filled across it) is what the file saved there. */
@@ -587,7 +586,7 @@ function addCachedOnly(loss: ImportLossReport, count: number, where: string[]): 
   const item = loss.items.find((i) => i.id === 'xlsx.formulas.cachedOnly');
   if (item) {
     item.count += count;
-    item.where = [...new Set([...(item.where ?? []), ...where])].slice(0, 5);
+    item.where = [...new Set([...new Set(item.where), ...where])].slice(0, 5);
     return;
   }
   loss.items.push({

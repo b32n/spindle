@@ -98,6 +98,13 @@ describe('a legacy array formula the engine evaluates to the saved values stays 
     expect(cachedOnlyItem(loss)).toBeUndefined();
   });
 
+  it('keeps the saved 0 where the engine pads the result with #N/A (a range over a row that holds nothing)', async () => {
+    const { wb, loss } = await open(await xlsxWith({ 1: [ncell('A1', 4), fcell('C1', 'A1:A3', 4, array('C1:C3'))], 2: [ncell('C2', 0)], 3: [ncell('A3', 6), ncell('C3', 6)] }));
+    expect(values(wb, 3, 1, 0, 2)).toEqual([[4], [0], [6]]);
+    expect(cellAt(wb, 0, 2)?.cachedOnly).toBe(true);
+    expect(cachedOnlyItem(loss)?.count).toBe(1);
+  });
+
   it('MMULT, which the engine does not have, keeps the saved 2 x 2 as it always did (cached-only, counted once)', async () => {
     const { wb, loss } = await open(
       await xlsxWith({
@@ -196,6 +203,12 @@ describe('a legacy array formula whose saved results are errors', () => {
 });
 
 describe('what the export writes of array results', () => {
+  it.each(['SEQUENCE(2)/0', 'SEQUENCE(2)*1E308*10', '(SEQUENCE(2)*1E308*10)-(SEQUENCE(2)*1E308*10)'])('writes the non-numbers of =%s as error cells', async (formula) => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setFormula(undefined, 0, 0, `=${formula}`);
+    expect(await xmlOf(await exportToXlsx(wb))).toMatch(/<c r="A2" t="e"><v>#(DIV\/0|NUM)!<\/v><\/c>/);
+  });
+
   const sheetOf = async (wb: WorkbookImpl, options: Parameters<typeof exportToXlsx>[1] = {}) => xmlOf(await exportToXlsx(wb, options));
 
   it('writes the errors of a spilled result as error cells (SEQUENCE(2)/0), not as text', async () => {
