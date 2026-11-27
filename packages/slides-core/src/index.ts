@@ -27,6 +27,7 @@ export { slidesSchema } from './text/schema';
 // Theme + layouts
 export * from './theme/types';
 export * from './theme/resolve';
+export * from './theme/fill';
 export * from './theme/builtin';
 export { buildPlaceholderElement } from './theme/materialize';
 
