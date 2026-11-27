@@ -99,3 +99,23 @@ describe('sheets import loss report', () => {
     await expect(inspectWorkbookFile(asFile('x', 'a.pdf'))).rejects.toThrow(/Unsupported/);
   });
 });
+
+describe('sheets file I/O: unsafe files', () => {
+  const legacyXls = Uint8Array.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, ...Array(512).fill(0), ...Array.from('Workbook').flatMap((c) => [c.charCodeAt(0), 0])]);
+
+  it('answers a legacy .xls with the reader\'s clear error instead of "unsupported type", and leaves the workbook alone', async () => {
+    const wb = makeWorkbook();
+    await expect(importWorkbookFile(wb, asFile(legacyXls, 'old.xls'))).rejects.toMatchObject({ name: 'ImportError', code: 'legacy-binary' });
+    expect(wb.getSheet().getCell(1, 0)?.value).toBe('Pens');
+    expect((await inspectWorkbookFile(asFile(legacyXls, 'old.xls'))).items).toEqual([]);
+  });
+
+  it('refuses a CSV over the size limit before reading it', async () => {
+    const big = asFile('a,b', 'big.csv');
+    Object.defineProperty(big, 'size', { value: 100 * 1024 * 1024 + 1 });
+    const wb = makeWorkbook();
+    await expect(importWorkbookFile(wb, big)).rejects.toMatchObject({ name: 'ImportError', code: 'size-limit' });
+    await expect(inspectWorkbookFile(big)).rejects.toMatchObject({ code: 'size-limit' });
+    expect(wb.getSheet().getCell(1, 0)?.value).toBe('Pens');
+  });
+});

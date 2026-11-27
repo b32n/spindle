@@ -41,13 +41,35 @@ export function exportToCSV(workbook: WorkbookImpl, sheetId?: string): string {
   return exportCsv({ rows });
 }
 
-/** What importing this CSV text would not bring across (currently: delimiters other than comma). */
-export function inspectCsv(csv: string): ImportLossReport {
-  return detectCsvLoss(csv);
+/** Largest CSV text `importFromCSV` takes by default: the importers' package limit (100 MB, `DEFAULT_IMPORT_LIMITS`). */
+export const DEFAULT_CSV_MAX_CHARS = 100 * 1024 * 1024;
+
+export interface ImportCsvOptions {
+  /** Longest text accepted, in characters (which never exceed the file's bytes); default `DEFAULT_CSV_MAX_CHARS`. */
+  maxChars?: number;
 }
 
-export function importFromCSV(csv: string, sheet: Sheet): void {
-  const { rows } = importCsv(csv);
+/** A byte order mark at the start of the text is not data: `\uFEFFName` would otherwise name the first column wrongly. */
+const stripBom = (csv: string): string => (csv.charCodeAt(0) === 0xfeff ? csv.slice(1) : csv);
+
+/** What importing this CSV text would not bring across (currently: delimiters other than comma). */
+export function inspectCsv(csv: string): ImportLossReport {
+  return detectCsvLoss(stripBom(csv));
+}
+
+/**
+ * Put CSV text into `sheet`. A leading byte order mark is dropped. Throws an error named `ImportError` with `code`
+ * `size-limit` (the same shape as the XLSX importer's) for text over `options.maxChars`.
+ */
+export function importFromCSV(csv: string, sheet: Sheet, options: ImportCsvOptions = {}): void {
+  const maxChars = options.maxChars ?? DEFAULT_CSV_MAX_CHARS;
+  if (csv.length > maxChars) {
+    throw Object.assign(new Error(`The file is too large to open safely (the text is over the limit of ${Math.round(maxChars / (1024 * 1024))} MB).`), {
+      name: 'ImportError',
+      code: 'size-limit',
+    });
+  }
+  const { rows } = importCsv(stripBom(csv));
   // A sheet starts with 1000 rows x 100 columns; grow it so a larger file stays reachable
   // in the grid (the XLSX importer does the same).
   let widest = 0;

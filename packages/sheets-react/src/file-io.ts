@@ -4,6 +4,7 @@ import {
   exportToXlsx,
   importFromCSV,
   importFromXlsx,
+  DEFAULT_CSV_MAX_CHARS,
   inspectCsv,
   inspectXlsx,
 } from '@b32nio/spindle-sheets-core';
@@ -61,19 +62,30 @@ export async function exportWorkbookFile(
   return { data, fileName, mimeType: info.mimeType };
 }
 
+/** Extensions that go to the XLSX reader. `.xls` is not importable, but it is answered with the reader's clear "legacy binary" error rather than "unsupported type". */
+const XLSX_READER_EXTENSIONS = ['xlsx', 'xls'];
+
+/** A CSV over the importers' size limit is refused before it is read into memory (an error with `code` `size-limit`, like the XLSX reader's `ImportError`). */
+function assertCsvSize(file: File): void {
+  if (file.size > DEFAULT_CSV_MAX_CHARS) {
+    throw Object.assign(new Error('The file is too large to open safely (over the limit of 100 MB).'), { name: 'ImportError', code: 'size-limit' });
+  }
+}
+
 /**
  * Replace `workbook`'s contents with the file's contents. Format is chosen by
  * extension (.xlsx or .csv); anything else is rejected. The file is only ever
- * read locally.
+ * read locally. An unsafe or unreadable file throws an `ImportError` (with a `code`) and leaves the workbook as it was.
  */
 export async function importWorkbookFile(workbook: WorkbookImpl, file: File): Promise<SheetsFileImportResult> {
   const ext = fileExtension(file.name);
-  if (ext === 'xlsx') {
+  if (XLSX_READER_EXTENSIONS.includes(ext)) {
     return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook);
   }
   if (ext === 'csv') {
     // "Open" semantics: build a fresh single-sheet workbook from the CSV and
     // swap it in, rather than merging into whatever was open before.
+    assertCsvSize(file);
     const scratch = new WorkbookImpl(workbook.id, stripExtension(file.name) || workbook.name);
     const text = await file.text();
     const loss = inspectCsv(text);
@@ -91,7 +103,10 @@ export async function importWorkbookFile(workbook: WorkbookImpl, file: File): Pr
  */
 export async function inspectWorkbookFile(file: File): Promise<ImportLossReport> {
   const ext = fileExtension(file.name);
-  if (ext === 'xlsx') return inspectXlsx(new Uint8Array(await file.arrayBuffer()));
-  if (ext === 'csv') return inspectCsv(await file.text());
+  if (XLSX_READER_EXTENSIONS.includes(ext)) return inspectXlsx(new Uint8Array(await file.arrayBuffer()));
+  if (ext === 'csv') {
+    assertCsvSize(file);
+    return inspectCsv(await file.text());
+  }
   throw new Error(`Unsupported file type: ".${ext || '?'}". Open an .xlsx or .csv file.`);
 }

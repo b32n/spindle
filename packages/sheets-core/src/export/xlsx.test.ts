@@ -149,6 +149,28 @@ describe('importFromXlsx on a file without worksheets', () => {
   });
 });
 
+describe('importFromXlsx on files that must not be opened', () => {
+  const ole = (...streams: string[]) =>
+    Uint8Array.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, ...Array(512).fill(0), ...streams.flatMap((s) => [...Array.from(s).flatMap((c) => [c.charCodeAt(0), 0]), 0, 0])]);
+
+  it.each([
+    ['an encrypted package', ole('EncryptionInfo', 'EncryptedPackage'), 'encrypted'],
+    ['a legacy .xls', ole('Workbook'), 'legacy-binary'],
+    ['random bytes', Uint8Array.from({ length: 512 }, (_, i) => (i * 31 + 7) & 0xff), 'not-a-package'],
+    ['an empty file', new Uint8Array(0), 'not-a-package'],
+  ])('fails %s with a named ImportError and leaves the workbook untouched', async (_name, bytes, code) => {
+    const wb = freshWorkbook();
+    wb.setCellValue(undefined, 0, 0, 'keep');
+    await expect(importFromXlsx(bytes, wb)).rejects.toMatchObject({ name: 'ImportError', code });
+    expect(wb.getCellValue(undefined, 0, 0)).toBe('keep');
+  });
+
+  it('takes the import limits as an option', async () => {
+    const bytes = await exportToXlsx(freshWorkbook());
+    await expect(importFromXlsx(bytes, freshWorkbook(), { limits: { maxEntries: 1 } })).rejects.toMatchObject({ code: 'size-limit' });
+  });
+});
+
 describe('exportToXlsx -> importFromXlsx round-trips', () => {
   it('exports the active sheet as the one the file opens on', async () => {
     const wb = freshWorkbook();
