@@ -19,6 +19,7 @@ jest.mock('@b32nio/spindle-shared/react', () => ({
   useImageHooks: () => ({}),
 }));
 
+import { MenuRow } from '@b32nio/spindle-shared/react';
 import { ImageFormatBar, LiveImageCropFields } from './ImageFormatBar';
 
 type P = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -102,6 +103,8 @@ describe('ImageFormatBar crop control', () => {
     const tree = render();
     expect(find(tree, byTitle('Crop image'))).toHaveLength(0);
     expect(find(tree, (e) => e.type === Popover)).toHaveLength(0);
+    // The row is the whole output: a leading divider would make the overflow surface collapse it as empty.
+    expect((tree as React.ReactElement).type).toBe(MenuRow);
     const [row] = find(tree, (e) => e.props.label === 'Crop image');
     row.props.onClick();
     expect(menu.openModal).toHaveBeenCalledTimes(1);

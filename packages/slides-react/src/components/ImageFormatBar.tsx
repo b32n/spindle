@@ -51,6 +51,12 @@ export function ImageFormatBar(): React.ReactElement | null {
   if (!id || !el || el.type !== 'image') return null;
   const cropOpen = cropOpenFor === id;
 
+  // Overflow menu / mobile sheet: a single row that opens the modal (the anchored Popover would paint under the
+  // surface). It must be the first child: the surface measures a row by it, and a leading divider would collapse the row.
+  if (menu.inMenu) {
+    return <MenuRow icon={<Crop size={17} />} label="Crop image" onClick={() => menu.openModal('Crop image', <LiveImageCropFields id={id} />)} />;
+  }
+
   // `measureSrc` is the local data URL used to read the size; `src` is what is stored
   // (the same data URL, or the URL returned by the host's uploadImage).
   const replace = async (measureSrc: string, src: string = measureSrc) => {
@@ -104,22 +110,15 @@ export function ImageFormatBar(): React.ReactElement | null {
           <option key={f.v} value={f.v}>{f.label}</option>
         ))}
       </select>
-      {menu.inMenu ? (
-        // Overflow menu / mobile sheet: the anchored Popover would paint under the surface, so use the modal.
-        <MenuRow icon={<Crop size={17} />} label="Crop image" onClick={() => menu.openModal('Crop image', <LiveImageCropFields id={id} />)} />
-      ) : (
-        <>
-          <span ref={setCropAnchor} style={{ display: 'inline-flex' }}>
-            <ToolbarButton title="Crop image" active={!!normalizeCrop(el.crop)} onClick={() => setCropOpenFor(cropOpen ? null : id)}>
-              <Crop size={15} />
-            </ToolbarButton>
-          </span>
-          {cropOpen && (
-            <Popover anchor={cropAnchor} onClose={() => setCropOpenFor(null)}>
-              <ImageCropFields crop={el.crop} onChange={(crop) => deck.updateElement(id, { crop })} />
-            </Popover>
-          )}
-        </>
+      <span ref={setCropAnchor} style={{ display: 'inline-flex' }}>
+        <ToolbarButton title="Crop image" active={!!normalizeCrop(el.crop)} onClick={() => setCropOpenFor(cropOpen ? null : id)}>
+          <Crop size={15} />
+        </ToolbarButton>
+      </span>
+      {cropOpen && (
+        <Popover anchor={cropAnchor} onClose={() => setCropOpenFor(null)}>
+          <ImageCropFields crop={el.crop} onChange={(crop) => deck.updateElement(id, { crop })} />
+        </Popover>
       )}
       <ToolbarButton title="Flip horizontal" active={!!el.flipH} onClick={() => deck.updateElement(id, { flipH: !el.flipH })}>
         <FlipHorizontal2 size={15} />
