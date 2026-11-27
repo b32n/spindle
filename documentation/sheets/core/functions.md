@@ -1,6 +1,6 @@
 # Function list
 
-The sheets engine ships **211 built-in functions**. This is the published list, by category, with the evidence for
+The sheets engine ships **229 built-in functions**. This is the published list, by category, with the evidence for
 each function's Excel parity. It is checked against the function catalog (`formula-parser/functions/catalog.ts`) by
 `functions-doc.test.ts`, so a function cannot be added without being listed here.
 
@@ -18,14 +18,14 @@ Notes that apply to the whole list:
 
 - Dotted names (`STDEV.S`, `WORKDAY.INTL`) are registered as written; the `_xlfn.` spellings Excel stores in files are mapped on import (plan S4).
 - An omitted argument in the middle of a call (`INDEX(A1:C3,,2)`, `NUMBERVALUE(A1,,",")`) keeps its position for the functions that
-  take one (`INDEX`, `NUMBERVALUE`, `FIXED`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`); every other function still skips it.
+  take one (`INDEX`, `NUMBERVALUE`, `FIXED`, `WORKDAY.INTL`, `NETWORKDAYS.INTL`, `XIRR`); every other function still skips it.
 - Functions that return arrays spill into the cells below and to the right (see [Dynamic arrays](formulas.md#dynamic-arrays-spill)).
 - The regular-expression functions (`REGEXMATCH`, `REGEXEXTRACT`, `REGEXREPLACE`) are Google Sheets only: they are not Excel functions and are
   outside the Excel parity set.
 - Deferred until Excel-computed files exist (plan S12, D8; LibreOffice has no oracle): `TEXTBEFORE`, `TEXTAFTER`, `TEXTSPLIT`.
 - Not implemented: `LET`, `LAMBDA` and its helpers (`MAP`, `REDUCE`, `SCAN`, `BYROW`, `BYCOL`), which need names in scope in the evaluator (post-launch).
 
-## Math and aggregation (67)
+## Math and aggregation (72)
 
 | Function | Description | Excel parity |
 |---|---|---|
@@ -77,6 +77,7 @@ Notes that apply to the whole list:
 | `PI()` | Returns the value of pi. | 4 oracle rows, LibreOffice-verified |
 | `POWER(base, exponent)` | Raises a number to a power. | 1 oracle rows, LibreOffice-verified |
 | `PRODUCT(number1, [number2, ...])` | Multiplies all the numbers given as arguments. | 1 oracle rows, LibreOffice-verified |
+| `QUOTIENT(numerator, denominator)` | Returns the integer part of a division. | 7 oracle rows, 1 Excel-documented (unverified) |
 | `RADIANS(angle)` | Converts degrees to radians. | 4 oracle rows, LibreOffice-verified |
 | `RAND()` | Returns a random number between 0 and 1. | unit tests |
 | `RANDBETWEEN(low, high)` | Returns a random integer between two values. | unit tests |
@@ -87,12 +88,16 @@ Notes that apply to the whole list:
 | `SIN(number)` | Returns the sine of an angle in radians. | 8 oracle rows, LibreOffice-verified |
 | `SINH(number)` | Returns the hyperbolic sine of a number. | 3 oracle rows, LibreOffice-verified |
 | `SQRT(number)` | Returns the positive square root of a number. | 1 oracle rows, LibreOffice-verified |
+| `SQRTPI(number)` | Returns the square root of a number times pi. | 5 oracle rows, 1 Excel-documented (unverified) |
 | `SUBTOTAL(function_num, ref1, [ref2, ...])` | Returns a subtotal (sum, average, count, …) chosen by a function number. | 1 oracle rows, LibreOffice-verified |
 | `SUM(number1, [number2, ...])` | Adds all the numbers given as arguments. | 3 oracle rows, LibreOffice-verified |
 | `SUMIF(range, criterion, [sum_range])` | Adds the cells that meet a criterion. | 1 oracle rows, LibreOffice-verified |
 | `SUMIFS(sum_range, criteria_range1, criterion1, [criteria_range, criterion, ...])` | Adds the cells that meet multiple criteria. | 1 oracle rows, LibreOffice-verified |
 | `SUMPRODUCT(array1, [array2, ...])` | Sums the products of corresponding array entries. | 2 oracle rows, LibreOffice-verified |
 | `SUMSQ(number1, [number2, ...])` | Returns the sum of the squares of the arguments. | 6 oracle rows, LibreOffice-verified |
+| `SUMX2MY2(array_x, array_y)` | Returns the sum of the differences of the squares of two arrays. | 5 oracle rows, 1 Excel-documented (unverified) |
+| `SUMX2PY2(array_x, array_y)` | Returns the sum of the sums of the squares of two arrays. | 4 oracle rows, 1 Excel-documented (unverified) |
+| `SUMXMY2(array_x, array_y)` | Returns the sum of the squares of the differences of two arrays. | 4 oracle rows, 2 Excel-documented (unverified) |
 | `TAN(number)` | Returns the tangent of an angle in radians. | 4 oracle rows, LibreOffice-verified |
 | `TANH(number)` | Returns the hyperbolic tangent of a number. | 3 oracle rows, LibreOffice-verified |
 | `TRUNC(number, [digits])` | Truncates a number to a number of digits. | 1 oracle rows, LibreOffice-verified |
@@ -249,19 +254,31 @@ Notes that apply to the whole list:
 | `NA()` | Returns the #N/A error value. | unit tests |
 | `TYPE(value)` | Returns a number indicating the type of a value. | 1 oracle rows, LibreOffice-verified |
 
-## Financial (9)
+## Financial (21)
 
 | Function | Description | Excel parity |
 |---|---|---|
+| `DDB(cost, salvage, life, period, [factor])` | Returns the double-declining-balance depreciation for a period. | 11 oracle rows, 4 Excel-documented (unverified) |
+| `EFFECT(nominal_rate, npery)` | Returns the effective annual interest rate. | 7 oracle rows, 3 Excel-documented (unverified) |
 | `FV(rate, nper, pmt, [pv], [type])` | Returns the future value of an investment. | 1 oracle rows, LibreOffice-verified |
+| `FVSCHEDULE(principal, schedule)` | Returns the future value of a principal after a series of interest rates. | 4 oracle rows, 1 Excel-documented (unverified) |
 | `IPMT(rate, per, nper, pv, [fv], [type])` | Returns the interest portion of a given payment. | unit tests |
 | `IRR(values, [guess])` | Returns the internal rate of return for a series of cash flows. | 1 oracle rows, LibreOffice-verified |
+| `ISPMT(rate, per, nper, pv)` | Returns the interest paid in a period of a loan with even principal payments. | 5 oracle rows, 1 Excel-documented (unverified) |
+| `MIRR(values, finance_rate, reinvest_rate)` | Returns the modified internal rate of return. | 7 oracle rows, 2 Excel-documented (unverified) |
+| `NOMINAL(effect_rate, npery)` | Returns the nominal annual interest rate. | 5 oracle rows, 2 Excel-documented (unverified) |
 | `NPER(rate, pmt, pv, [fv], [type])` | Returns the number of periods for an investment. | 1 oracle rows, LibreOffice-verified |
 | `NPV(rate, value1, [value2, ...])` | Returns the net present value of a series of cash flows. | 1 oracle rows, LibreOffice-verified |
+| `PDURATION(rate, pv, fv)` | Returns the periods an investment needs to reach a value. | 5 oracle rows, 2 Excel-documented (unverified) |
 | `PMT(rate, nper, pv, [fv], [type])` | Returns the periodic payment for a loan or annuity. | 1 oracle rows, LibreOffice-verified |
 | `PPMT(rate, per, nper, pv, [fv], [type])` | Returns the principal portion of a given payment. | unit tests |
 | `PV(rate, nper, pmt, [fv], [type])` | Returns the present value of an investment. | 1 oracle rows, LibreOffice-verified |
 | `RATE(nper, pmt, pv, [fv], [type], [guess])` | Returns the interest rate per period of an annuity. | 1 oracle rows, LibreOffice-verified |
+| `RRI(nper, pv, fv)` | Returns the equivalent interest rate for the growth of an investment. | 5 oracle rows, 1 Excel-documented (unverified) |
+| `SLN(cost, salvage, life)` | Returns the straight-line depreciation for one period. | 7 oracle rows, LibreOffice-verified |
+| `SYD(cost, salvage, life, period)` | Returns the sum-of-years-digits depreciation for a period. | 7 oracle rows, 2 Excel-documented (unverified) |
+| `XIRR(values, dates, [guess])` | Returns the internal rate of return of cash flows on given dates. | 14 oracle rows, 5 Excel-documented (unverified) |
+| `XNPV(rate, values, dates)` | Returns the net present value of cash flows on given dates. | 11 oracle rows, 5 Excel-documented (unverified) |
 
 ## Reference (7)
 
@@ -275,7 +292,7 @@ Notes that apply to the whole list:
 | `OFFSET(reference, rows, cols, [height], [width])` | Returns a reference shifted from a starting reference. | 1 oracle rows, LibreOffice-verified |
 | `ROW([reference])` | Returns the row number of a reference. | 1 oracle rows, LibreOffice-verified |
 
-## Array (dynamic arrays) (6)
+## Array (dynamic arrays) (7)
 
 | Function | Description | Excel parity |
 |---|---|---|
@@ -284,4 +301,5 @@ Notes that apply to the whole list:
 | `SORT(array, [sort_index], [sort_order], [by_column])` | Sorts the rows of a range. | 1 oracle rows, LibreOffice-verified |
 | `SORTBY(array, by_array1, [sort_order1], [by_array, sort_order, ...])` | Sorts a range by the values in one or more other ranges. | 1 oracle rows, LibreOffice-verified |
 | `SPLIT(text, delimiter, [split_by_each], [remove_empty])` | Splits text into an array around a delimiter. | unit tests |
+| `TRANSPOSE(array)` | Swaps the rows and columns of an array. | 9 oracle rows, 1 Excel-documented (unverified) |
 | `UNIQUE(array, [by_column], [exactly_once])` | Returns the unique rows of a range. | 1 oracle rows, LibreOffice-verified |

@@ -129,3 +129,25 @@ describe('dates around the 1900 leap-year quirk', () => {
     expect(s.value('A5')).toBe('2/29');
   });
 });
+
+describe('TRANSPOSE through the workbook', () => {
+  it('spills, and a blank cell passing through becomes 0 and follows later edits', () => {
+    const s = sheetWith({ A1: 1, A3: 3, B1: 4, B2: 5, B3: 6 });
+    s.set('E1', '=TRANSPOSE(A1:B3)');
+    expect(s.block('E1', 2, 3)).toEqual([[1, 0, 3], [4, 5, 6]]);
+    s.set('A2', '=7');
+    expect(s.block('E1', 2, 3)).toEqual([[1, 7, 3], [4, 5, 6]]);
+  });
+});
+
+describe('finance functions through the workbook', () => {
+  it('XNPV and XIRR read ranges of dates and cash flows, and XIRR may take a blank guess', () => {
+    const s = sheetWith({ A1: -1000, A2: 300, A3: 400, A4: 500, B1: 43831, B2: 43922, B3: 44013, B4: 44197 });
+    s.set('D1', '=XNPV(0.1,A1:A4,B1:B4)');
+    expect(s.value('D1') as number).toBeCloseTo(128.816961394, 6);
+    s.set('D2', '=XIRR(A1:A4,B1:B4,)');
+    expect(s.value('D2') as number).toBeCloseTo(0.334386096, 8);
+    s.set('D3', '=XNPV(D2,A1:A4,B1:B4)');
+    expect(Math.abs(s.value('D3') as number)).toBeLessThan(1e-6);
+  });
+});

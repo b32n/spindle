@@ -85,7 +85,11 @@ def clean(value):
 
 
 def close(a, b):
-    if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(close(x, y) for x, y in zip(a, b))
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) == isinstance(b, bool) and a == b  # 1 is not TRUE
+    if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
         return a == b
     return abs(a - b) <= 1e-9 * max(abs(a), abs(b)) or abs(a - b) < 1e-12
 

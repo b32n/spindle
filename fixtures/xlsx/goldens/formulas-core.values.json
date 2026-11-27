@@ -98,39 +98,39 @@
       "sheet": "Data"
     },
     {
-      "actual": "\"#NAME? Function XNPV not found\"",
-      "cell": "I104",
-      "expected": "14.107278122268",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function XIRR not found\"",
-      "cell": "I105",
-      "expected": "0.417886145227093",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function SLN not found\"",
-      "cell": "I106",
-      "expected": "180",
-      "sheet": "Data"
-    },
-    {
       "actual": "\"#NAME? Function _XLFN.XLOOKUP not found\"",
       "cell": "I123",
       "expected": "3",
       "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function _XLFN.XMATCH not found\"",
+      "cell": "I124",
+      "expected": "3",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#SPILL!\"",
+      "cell": "I126",
+      "expected": "1",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#NAME? Function _XLFN._XLWS.FILTER not found\"",
+      "cell": "I127",
+      "expected": "9",
+      "sheet": "Data"
     }
   ],
   "formulaCells": 159,
-  "matched": 127,
+  "matched": 130,
   "mismatchClasses": {
     "boolean -> error": 1,
     "error -> error": 1,
-    "number -> error": 23,
+    "number -> error": 20,
     "text -> error": 7
   },
-  "mismatched": 32,
+  "mismatched": 29,
   "passthrough": 0,
   "status": "ok",
   "uncached": 0,
