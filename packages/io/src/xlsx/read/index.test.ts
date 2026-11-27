@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { importXlsx } from '../reader';
+import { importXlsxExceljs } from '../reader-exceljs';
 import * as api from './index';
 import type { SpreadsheetImportResult } from '@b32nio/spindle-shared/export/xlsx';
 import { readWorkbookParts, toImportExtras, XlsxPackage } from './index';
@@ -39,7 +39,7 @@ describe('the whole corpus', () => {
     // differential on what the old reader also reports: the sheet names, in order, and the active tab
     let old;
     try {
-      old = await importXlsx(bytes);
+      old = await importXlsxExceljs(bytes);
     } catch {
       return; // the exceljs reader throws on this file (the openpyxl ones): nothing to compare with
     }

@@ -4,7 +4,7 @@
 // their types. Callers resolve their own pooled styles/formats down to
 // concrete values before calling exportXlsx.
 
-import type { XlsxSharedString, XlsxStyles, XlsxTheme, XlsxWorkbookInfo } from './package-types';
+import type { XlsxFormulaInfo, XlsxSharedString, XlsxSheetDetails, XlsxStyles, XlsxTheme, XlsxWorkbookInfo } from './package-types';
 
 export type SpreadsheetCellValue = string | number | boolean | null;
 
@@ -55,6 +55,12 @@ export interface SpreadsheetCell {
   style?: SpreadsheetCellStyle;
   numberFormat?: SpreadsheetNumberFormat;
   hyperlink?: string;
+  /** Index into `SpreadsheetImportResult.styles.cellXfs` of the cell's format (own reader, S2). */
+  styleIndex?: number;
+  /** Index into `SpreadsheetImportResult.sharedStrings` when the value is a shared string (own reader, S2). */
+  sharedString?: number;
+  /** Set on a cell whose formula was shared or an array formula (own reader, S2). */
+  formulaInfo?: XlsxFormulaInfo;
 }
 
 export interface SpreadsheetMergedRange {
@@ -76,6 +82,8 @@ export interface SpreadsheetSheet {
   frozenRows?: number;
   frozenCols?: number;
   mergedRanges?: SpreadsheetMergedRange[];
+  /** What the own reader read besides the cells: properties, views, defaults, column and row formats, links, raw extensions (S2). */
+  details?: XlsxSheetDetails;
 }
 
 export interface SpreadsheetExportInput {
@@ -88,13 +96,13 @@ export interface SpreadsheetImportResult {
   activeSheetIndex?: number;
   /** Non-fatal issues (unrecognized cell shape, unresolvable shared formula, etc.) — surfaced rather than silently dropped. */
   warnings: string[];
-  /** Workbook-level facts from the own reader (S2): sheet states, defined names, calculation properties, `date1904`. Absent from the `exceljs` path. */
+  /** Workbook-level facts from the own reader (S2): sheet states, defined names, calculation properties, `date1904`. Always set by `importXlsx` (the own reader). */
   workbook?: XlsxWorkbookInfo;
-  /** The style tables with theme, indexed and tint colours resolved (S2). Absent from the `exceljs` path. */
+  /** The style tables with theme, indexed and tint colours resolved (S2). Always set by `importXlsx` (the own reader). */
   styles?: XlsxStyles;
-  /** The shared-strings table in file order, rich runs kept (S2). Absent from the `exceljs` path. */
+  /** The shared-strings table in file order, rich runs kept (S2). Always set by `importXlsx` (the own reader). */
   sharedStrings?: XlsxSharedString[];
-  /** The theme: its 12 colours in a cell colour's `theme` order, and the major/minor fonts (S2). Absent from the `exceljs` path. */
+  /** The theme: its 12 colours in a cell colour's `theme` order, and the major/minor fonts (S2). Always set by `importXlsx` (the own reader). */
   theme?: XlsxTheme;
 }
 

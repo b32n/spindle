@@ -39,15 +39,15 @@ export async function findWorkbookPart(pkg: XlsxPackage): Promise<string> {
   throw new ImportError('corrupt', 'The file has no workbook part (it is not a complete Excel workbook).');
 }
 
-/** Sheet kinds by lower-cased relationship kind; a `Map` because the kind is the file's text (`constructor` is not a kind). */
 /**
  * Whether `part` (as `findWorkbookPart` returned it) is a binary workbook (`.xlsb`: `xl/workbook.bin`), which is not XML and is not
- * read. `findWorkbookPart` still returns it, so the caller can refuse with a message of its own (S2b) rather than see an empty workbook.
+ * read. `findWorkbookPart` still returns it, so the caller can refuse with a message of its own (`importXlsx` does) rather than see an empty workbook.
  */
 export function isBinaryWorkbook(pkg: XlsxPackage, part: string): boolean {
   return /\.bin$/i.test(part) || /ms-excel\.sheet\.binary\.macroEnabled\.main$/i.test(pkg.contentType(part) ?? '');
 }
 
+/** Sheet kinds by lower-cased relationship kind; a `Map` because the kind is the file's text (`constructor` is not a kind). */
 const SHEET_KINDS: ReadonlyMap<string, string> = new Map([['worksheet', 'worksheet'], ['chartsheet', 'chartsheet'], ['dialogsheet', 'dialogsheet'], ['xlmacrosheet', 'macrosheet'], ['xlintlmacrosheet', 'macrosheet']]);
 
 const STATES: ReadonlySet<string> = new Set<XlsxSheetState>(['visible', 'hidden', 'veryHidden']);

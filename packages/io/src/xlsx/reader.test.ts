@@ -1,4 +1,5 @@
 import { exportXlsx } from './writer';
+import { MAIN_NS, relsXml, workbookZip, zipOf } from './read/test-support';
 import JSZip from 'jszip';
 import { importXlsx } from './reader';
 import { ImportError, type ImportErrorCode } from '../common/import-error';
@@ -220,5 +221,86 @@ describe('importXlsx: the only error is an ImportError', () => {
     const bomb = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
     expect(bomb.length).toBeLessThan(200 * 1024);
     expect(await codeOf(bomb)).toBe('size-limit');
+  });
+});
+
+describe('importXlsx: the own reader', () => {
+  const sheetXml = (body: string) => `<worksheet ${MAIN_NS}><sheetData>${body}</sheetData></worksheet>`;
+  const book = (sheets: string, rels: Array<[string, string, string]>, parts: Record<string, string>) =>
+    workbookZip(`<sheets>${sheets}</sheets>`, rels, parts);
+
+  it('reads a workbook through the own reader: sheets, and the workbook, styles, strings and theme beside them', async () => {
+    const bytes = await exportXlsx({ sheets: [{ name: 'One', cells: new Map([['0:0', { value: 'hello', style: { bold: true } }]]) }] });
+    const result = await importXlsx(bytes);
+    expect(result.sheets.map((s) => s.name)).toEqual(['One']);
+    expect(result.sheets[0].cells.get('0:0')).toMatchObject({ value: 'hello', style: { bold: true }, sharedString: 0 });
+    expect(result.sharedStrings).toEqual([{ text: 'hello' }]);
+    expect(result.workbook?.sheets[0]).toMatchObject({ name: 'One', kind: 'worksheet' });
+    expect(result.styles?.cellXfs.length).toBeGreaterThan(1);
+    expect(result.theme?.colors).toHaveLength(12);
+    expect(result.sheets[0].details?.part).toMatch(/worksheets\/sheet1\.xml$/);
+  });
+
+  it('refuses a binary workbook (.xlsb) with a message that says what to do', async () => {
+    const bytes = await zipOf({ '_rels/.rels': relsXml([['rId1', 'officeDocument', 'xl/book.bin']]), 'xl/book.bin': 'BIFF12' });
+    await expect(importXlsx(bytes)).rejects.toMatchObject({ name: 'ImportError', code: 'legacy-binary', message: expect.stringMatching(/\.xlsb.*Save As.*\.xlsx/s) });
+  });
+
+  it('refuses a workbook part that is not XML as corrupt, but only skips a sheet that is not', async () => {
+    await expect(importXlsx(await zipOf({ '_rels/.rels': relsXml([['rId1', 'officeDocument', 'xl/workbook.xml']]), 'xl/workbook.xml': 'not xml <<<' }))).rejects.toMatchObject({ code: 'corrupt' });
+    const bytes = await book('<sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="rId2"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
+      'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row><c><v>1</v></c></row></worksheet>',
+      'xl/worksheets/sheet2.xml': sheetXml('<row r="1"><c r="A1"><v>2</v></c></row>'),
+    });
+    const result = await importXlsx(bytes);
+    expect(result.sheets.map((s) => [s.name, s.cells.size, s.details?.wellFormed])).toEqual([['A', 1, false], ['B', 1, true]]);
+    expect(result.warnings).toContainEqual(expect.stringContaining('not well-formed'));
+  });
+
+  it('reads only worksheets, in order, and skips a sheet whose part is missing, with a warning', async () => {
+    const bytes = await book(
+      '<sheet name="Ws" sheetId="1" r:id="rId1"/><sheet name="Chart" sheetId="2" r:id="rId2"/><sheet name="Gone" sheetId="3" r:id="rId3"/><sheet name="Last" sheetId="4" r:id="rId4"/>',
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'chartsheet', 'chartsheets/sheet1.xml'], ['rId3', 'worksheet', 'worksheets/gone.xml'], ['rId4', 'worksheet', 'worksheets/sheet2.xml']],
+      { 'xl/worksheets/sheet1.xml': sheetXml(''), 'xl/chartsheets/sheet1.xml': `<chartsheet ${MAIN_NS}/>`, 'xl/worksheets/sheet2.xml': sheetXml('') }
+    );
+    const result = await importXlsx(bytes);
+    expect(result.sheets.map((s) => s.name)).toEqual(['Ws', 'Last']);
+    expect(result.warnings).toContainEqual(expect.stringContaining('"Gone"'));
+  });
+
+  it('gives sheets that clash by name (any case) a numbered name and a warning each', async () => {
+    const bytes = await book(
+      ['Data', 'data', 'Data', 'Data (2)'].map((n, i) => `<sheet name="${n}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join(''),
+      [1, 2, 3, 4].map((i) => [`rId${i}`, 'worksheet', `worksheets/sheet${i}.xml`] as [string, string, string]),
+      Object.fromEntries([1, 2, 3, 4].map((i) => [`xl/worksheets/sheet${i}.xml`, sheetXml(`<row r="1"><c r="A1"><v>${i}</v></c></row>`)]))
+    );
+    const result = await importXlsx(bytes);
+    expect(result.sheets.map((s) => s.name)).toEqual(['Data', 'data (2)', 'Data (3)', 'Data (2) (2)']);
+    expect(result.sheets.map((s) => s.cells.get('0:0')?.value)).toEqual([1, 2, 3, 4]);
+    expect(result.warnings.filter((w) => w.includes('more than one sheet'))).toHaveLength(3);
+  });
+
+  it.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])('a sheet named %s is an ordinary sheet', async (name) => {
+    const bytes = await book(`<sheet name="${name}" sheetId="1" r:id="rId1"/><sheet name="${name}" sheetId="2" r:id="rId2"/>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
+      'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1"><v>1</v></c></row>'),
+      'xl/worksheets/sheet2.xml': sheetXml('<row r="1"><c r="A1"><v>2</v></c></row>'),
+    });
+    const result = await importXlsx(bytes);
+    expect(result.sheets.map((s) => s.name)).toEqual([name, `${name} (2)`]);
+    expect(Object.keys(Object.prototype)).toEqual([]);
+  });
+
+  it('reports the active tab of the workbook, and repeats no warning', async () => {
+    const bytes = await workbookZip(`<bookViews><workbookView activeTab="1"/></bookViews><sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="rId1"/></sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
+      'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" t="s"><v>5</v></c></row>'),
+    });
+    const result = await importXlsx(bytes);
+    expect(result.activeSheetIndex).toBe(1);
+    expect(new Set(result.warnings).size).toBe(result.warnings.length);
+  });
+
+  it('applies the limits to every sheet part it reads', async () => {
+    const bytes = await book('<sheet name="A" sheetId="1" r:id="rId1"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': sheetXml(`<row r="1">${'<c r="A1"><v>1</v></c>'.repeat(1000)}</row>`) });
+    await expect(importXlsx(bytes, { limits: { maxXmlPartBytes: 1000 } })).rejects.toMatchObject({ code: 'size-limit' });
   });
 });

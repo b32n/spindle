@@ -1,0 +1,365 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { SpreadsheetCell, SpreadsheetCellStyle, SpreadsheetImportResult, SpreadsheetSheet } from '@b32nio/spindle-shared/export/xlsx';
+import { ImportError } from '../common/import-error';
+import { importXlsx } from './reader';
+import { importXlsxExceljs } from './reader-exceljs';
+import { corpus, MAIN_NS, REL_NS, workbookZip } from './read/test-support';
+import { exportXlsx } from './writer';
+
+// ---------------------------------------------------------------------------
+// The differential test (S2): the own reader (`importXlsx`) against the `exceljs` reader it replaces (`importXlsxExceljs`, kept in
+// the tree until S14) over the whole corpus, and over generated workbooks. On everything the old reader produced the output must
+// be identical, apart from the differences below. Each is an improvement, named here, and a difference that is not one of them
+// fails the test; the corpus run also pins how often each one happens, so a new difference cannot hide among the old ones.
+//
+//   colourResolved          a theme, indexed or tinted colour (font, fill, border) the old reader dropped is now its #rrggbb
+//   sharedFormulaExpanded   a cell of a shared formula group the old reader read as a plain value (it could not find the
+//                           master) now has its formula, moved by its distance from the master
+//   falsyResult             a formula whose saved result is 0 or FALSE had the value null (the old reader dropped a falsy result)
+//   formulaKept             a cell that is a hyperlink and a formula keeps both (the old reader kept the link and the value)
+//   linkOnRange             a link on a range (`A1:B3`) reaches every cell of it (the old reader only linked a cell named
+//                           alone)
+//   builtinFormat           a built-in number format id shows its en-US code (the table of `styles-scan`, as the loss
+//                           detector uses it) where the old reader used its own table (`mm-dd-yy` for id 14) or had none
+//   dateFloat               a date serial that went through a JavaScript Date and back differs in the 10th digit; the new
+//                           reader returns the number as written
+//   newWarning              warnings the old reader did not have (a missing relationship, a duplicate sheet name, ...)
+//
+// What the old reader could not read at all (it threw) is listed separately: the own reader must read it or refuse it with an
+// ImportError.
+// ---------------------------------------------------------------------------
+
+interface Entry {
+  id: string;
+  filename: string;
+  generatedAtRuntime?: boolean;
+  expectImportError?: boolean;
+}
+const manifest = JSON.parse(readFileSync(resolve(__dirname, '../../../../fixtures/xlsx/manifest.json'), 'utf8')) as { fixtures: Entry[] };
+const committed = manifest.fixtures.filter((f) => !f.generatedAtRuntime);
+
+type Category =
+  | 'colourResolved'
+  | 'sharedFormulaExpanded'
+  | 'falsyResult'
+  | 'formulaKept'
+  | 'linkOnRange'
+  | 'builtinFormat'
+  | 'dateFloat'
+  | 'newWarning';
+
+/** The old reader's name for a built-in number format, and the code the own reader gives it. */
+const BUILTIN_RENAMES: Record<string, string> = {
+  'mm-dd-yy': 'm/d/yyyy',
+  'm/d/yy "h":mm': 'm/d/yyyy h:mm',
+  '#,##0 ;(#,##0)': '#,##0_);(#,##0)',
+  '#,##0 ;[Red](#,##0)': '#,##0_);[Red](#,##0)',
+  '#,##0.00 ;(#,##0.00)': '#,##0.00_);(#,##0.00)',
+  '#,##0.00 ;[Red](#,##0.00)': '#,##0.00_);[Red](#,##0.00)',
+  mmss: 'mm:ss.0',
+  'mmss.0': 'mm:ss.0',
+};
+
+const addressOf = (key: string): string => {
+  const [r, c] = key.split(':').map(Number);
+  let letters = '';
+  for (let n = c + 1; n > 0; n = Math.floor((n - 1) / 26)) letters = String.fromCharCode(65 + ((n - 1) % 26)) + letters;
+  return `${letters}${r + 1}`;
+};
+
+/** The old reader's cell with everything the own reader adds on the side removed. */
+const plain = (c: SpreadsheetCell | undefined): SpreadsheetCell | undefined => {
+  if (c === undefined) return undefined;
+  const { styleIndex: _s, sharedString: _h, formulaInfo: _f, ...rest } = c;
+  return rest;
+};
+
+const COLOUR_KEYS = ['fontColor', 'backgroundColor'] as const;
+
+function compareStyle(o: SpreadsheetCellStyle | undefined, n: SpreadsheetCellStyle | undefined, seen: Category[]): string | undefined {
+  const strip = (s: SpreadsheetCellStyle | undefined): Record<string, unknown> => {
+    if (s === undefined) return {};
+    const { fontColor: _a, backgroundColor: _b, border, ...rest } = s;
+    const out: Record<string, unknown> = { ...rest };
+    if (border) {
+      const sides: Record<string, unknown> = {};
+      for (const side of ['top', 'right', 'bottom', 'left'] as const) {
+        const b = border[side];
+        if (b) sides[side] = { style: b.style };
+      }
+      out.border = sides;
+    }
+    return out;
+  };
+  const so = strip(o);
+  const sn = strip(n);
+  if (JSON.stringify(so) !== JSON.stringify(sn)) return `style ${JSON.stringify(so)} vs ${JSON.stringify(sn)}`;
+  // colours: what the old reader had, the new one has too, and it may have more
+  let added = false;
+  for (const key of COLOUR_KEYS) {
+    if (o?.[key] !== undefined && o[key] !== n?.[key]) return `${key} ${o[key]} vs ${n?.[key]}`;
+    if (o?.[key] === undefined && n?.[key] !== undefined) added = true;
+  }
+  for (const side of ['top', 'right', 'bottom', 'left'] as const) {
+    const oc = o?.border?.[side]?.color;
+    const nc = n?.border?.[side]?.color;
+    if (oc !== undefined && oc !== nc) return `border ${side} colour ${oc} vs ${nc}`;
+    if (oc === undefined && nc !== undefined) added = true;
+  }
+  if (added) seen.push('colourResolved');
+  return undefined;
+}
+
+function compareCell(key: string, sheet: SpreadsheetSheet, o: SpreadsheetCell, n: SpreadsheetCell, oldWarnings: string[], seen: Category[]): string | undefined {
+  const at = `${sheet.name}!${addressOf(key)}`;
+  if (o.value !== n.value) {
+    if (typeof o.value === 'number' && typeof n.value === 'number' && Math.abs(o.value - n.value) <= 1e-9 * Math.max(1, Math.abs(o.value))) seen.push('dateFloat');
+    else if (o.value === null && (n.value === 0 || n.value === false || n.value === '') && o.formula === n.formula) seen.push('falsyResult');
+    else return `${at}: value ${JSON.stringify(o.value)} vs ${JSON.stringify(n.value)}`;
+  }
+  if (o.formula !== n.formula) {
+    if (o.formula === undefined && n.formula !== undefined && oldWarnings.some((w) => w.startsWith(`${at}: shared formula`))) seen.push('sharedFormulaExpanded');
+    else if (o.formula === undefined && n.formula !== undefined && o.hyperlink !== undefined) seen.push('formulaKept');
+    else return `${at}: formula ${o.formula} vs ${n.formula}`;
+  }
+  if (o.hyperlink !== n.hyperlink) {
+    const ranged = (sheet.details?.hyperlinks ?? []).some((h) => h.ref.includes(':') && h.target === n.hyperlink);
+    if (o.hyperlink === undefined && ranged) seen.push('linkOnRange');
+    else return `${at}: hyperlink ${o.hyperlink} vs ${n.hyperlink}`;
+  }
+  const oc = o.numberFormat?.code;
+  const nc = n.numberFormat?.code;
+  if (oc !== nc) {
+    if ((oc !== undefined && BUILTIN_RENAMES[oc] === nc) || (oc === undefined && nc !== undefined && n.styleIndex !== undefined)) seen.push('builtinFormat');
+    else return `${at}: number format ${oc} vs ${nc}`;
+  }
+  const style = compareStyle(o.style, n.style, seen);
+  return style === undefined ? undefined : `${at}: ${style}`;
+}
+
+/** Differences between the two results: those that are not one of the named improvements, and the named ones that were seen. */
+function compare(o: SpreadsheetImportResult, n: SpreadsheetImportResult): { unexplained: string[]; seen: Category[] } {
+  const unexplained: string[] = [];
+  const seen: Category[] = [];
+  if (o.activeSheetIndex !== n.activeSheetIndex) unexplained.push(`active sheet ${o.activeSheetIndex} vs ${n.activeSheetIndex}`);
+  if (o.sheets.length !== n.sheets.length) return { unexplained: [`${o.sheets.length} sheets vs ${n.sheets.length}`], seen };
+  o.sheets.forEach((os, i) => {
+    const ns = n.sheets[i];
+    if (os.name !== ns.name) unexplained.push(`sheet ${i} name ${os.name} vs ${ns.name}`);
+    const keys = new Set([...os.cells.keys(), ...ns.cells.keys()]);
+    for (const key of keys) {
+      const oc = plain(os.cells.get(key));
+      const nc = plain(ns.cells.get(key));
+      if (oc === undefined || nc === undefined) unexplained.push(`${os.name}!${addressOf(key)}: ${oc === undefined ? 'only in the new reader' : 'only in the old reader'}`);
+      else {
+        const problem = compareCell(key, ns, oc, nc, o.warnings, seen);
+        if (problem) unexplained.push(problem);
+      }
+    }
+    const asJson = (v: unknown) => JSON.stringify(v, (_k, x) => (x instanceof Map ? [...x] : x instanceof Set ? [...x] : x));
+    for (const field of ['columnWidths', 'rowHeights', 'hiddenCols', 'hiddenRows', 'frozenRows', 'frozenCols', 'mergedRanges'] as const) {
+      if (asJson(os[field] ?? null) !== asJson(ns[field] ?? null)) unexplained.push(`${os.name}.${field} ${asJson(os[field])} vs ${asJson(ns[field])}`);
+    }
+  });
+  // warnings: those of the old reader that are still true remain; the shared-formula ones go with the formulas they were about
+  for (const w of o.warnings) {
+    if (!n.warnings.includes(w) && !/shared formula without a resolvable expression/.test(w)) unexplained.push(`old warning missing: ${w}`);
+  }
+  if (n.warnings.some((w) => !o.warnings.includes(w))) seen.push('newWarning');
+  return { unexplained, seen };
+}
+
+const tally = (seen: Category[]): Record<string, number> => {
+  const out: Record<string, number> = {};
+  for (const c of seen) out[c] = (out[c] ?? 0) + 1;
+  return out;
+};
+
+describe('differential: own reader against the exceljs reader, over the corpus', () => {
+  const both = async (bytes: Uint8Array) => {
+    const o = await importXlsxExceljs(bytes).then((r) => ({ r }), (e: unknown) => ({ e }));
+    const n = await importXlsx(bytes).then((r) => ({ r }), (e: unknown) => ({ e }));
+    return { o, n };
+  };
+
+  it('has the corpus it expects', () => {
+    expect(committed.length).toBeGreaterThanOrEqual(40);
+  });
+
+  it.each(committed.map((f) => [f.id, f.filename]))('%s: identical output where the old reader had output, apart from the named improvements', async (_id, filename) => {
+    const { o, n } = await both(corpus(filename));
+    if ('e' in o || 'e' in n) {
+      // the own reader never throws anything but an ImportError
+      if ('e' in n) expect(n.e).toBeInstanceOf(ImportError);
+      return;
+    }
+    const { unexplained } = compare(o.r, n.r);
+    expect(unexplained).toEqual([]);
+  });
+
+  it('pins every named improvement over the corpus', async () => {
+    const seen: Category[] = [];
+    for (const f of committed) {
+      const { o, n } = await both(corpus(f.filename));
+      if ('r' in o && 'r' in n) seen.push(...compare(o.r, n.r).seen);
+    }
+    expect(tally(seen)).toEqual({ builtinFormat: 8, colourResolved: 3, falsyResult: 7, newWarning: 1, sharedFormulaExpanded: 4 });
+  });
+
+  it('lists the files the old reader could not read: the own reader reads them or refuses them with an ImportError', async () => {
+    const rows: Array<[string, string, string]> = [];
+    for (const f of committed) {
+      const { o, n } = await both(corpus(f.filename));
+      if (!('e' in o)) continue;
+      if ('e' in n) {
+        expect(n.e).toBeInstanceOf(ImportError);
+        rows.push([f.id, 'old throws', `new refuses (${(n.e as ImportError).code})`]);
+      } else rows.push([f.id, 'old throws', `new reads ${n.r.sheets.length} sheet(s), ${n.r.sheets.reduce((a, s) => a + s.cells.size, 0)} cell(s)`]);
+    }
+    expect(rows).toEqual([
+      ['openpyxl-image', 'old throws', 'new reads 1 sheet(s), 25 cell(s)'],
+      ['openpyxl-chart', 'old throws', 'new reads 1 sheet(s), 25 cell(s)'],
+      ['openpyxl-comment', 'old throws', 'new reads 1 sheet(s), 25 cell(s)'],
+      ['edge-truncated-zip', 'old throws', 'new refuses (corrupt)'],
+      ['edge-invalid-xml', 'old throws', 'new reads 1 sheet(s), 0 cell(s)'],
+      ['edge-encrypted', 'old throws', 'new refuses (encrypted)'],
+      ['edge-legacy-xls', 'old throws', 'new refuses (legacy-binary)'],
+      ['edge-duplicate-sheet-names', 'old throws', 'new reads 3 sheet(s), 3 cell(s)'],
+      ['edge-index-out-of-range', 'old throws', 'new reads 1 sheet(s), 2 cell(s)'],
+    ]);
+  });
+
+  it('shows the improvements the corpus has no example of: a link on a formula cell, a link on a range, a cached empty string', async () => {
+    const bytes = await workbookZip(
+      '<sheets><sheet name="L" sheetId="1" r:id="rId1"/></sheets>',
+      [['rId1', 'worksheet', 'worksheets/sheet1.xml']],
+      {
+        'xl/worksheets/sheet1.xml':
+          `<worksheet ${MAIN_NS} ${REL_NS}><sheetData><row r="1"><c r="A1"><v>1</v></c><c r="B1"><v>2</v></c><c r="C1"><f>A1+1</f><v>2</v></c><c r="D1" t="str"><f>"x"&amp;""</f><v></v></c></row></sheetData>` +
+          '<hyperlinks><hyperlink ref="A1:B1" r:id="rId1"/><hyperlink ref="C1" r:id="rId1"/></hyperlinks></worksheet>',
+        'xl/worksheets/_rels/sheet1.xml.rels': '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.com/" TargetMode="External"/></Relationships>',
+      }
+    );
+    const o = await importXlsxExceljs(bytes);
+    const n = await importXlsx(bytes);
+    const { unexplained, seen } = compare(o, n);
+    expect(unexplained).toEqual([]);
+    expect(tally(seen)).toEqual({ formulaKept: 1, linkOnRange: 2, falsyResult: 1 });
+  });
+
+  it('imports the three openpyxl files that made the old reader throw (probe 1)', async () => {
+    for (const filename of ['openpyxl-image.xlsx', 'openpyxl-chart.xlsx', 'openpyxl-comment.xlsx']) {
+      const { o, n } = await both(corpus(filename));
+      expect('e' in o).toBe(true);
+      expect('r' in n).toBe(true);
+      if ('r' in n) expect(n.r.sheets[0].cells.get('0:0')).toMatchObject({ value: 'Region' });
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Generated workbooks: a seeded generator writes workbooks through the exceljs writer, so the old reader can read them, and both
+// readers must agree. A fixed seed: the same workbooks every run.
+// ---------------------------------------------------------------------------
+
+function rng(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const FORMATS = ['0', '0.00', '#,##0.00', '0%', 'yyyy-mm-dd', 'm/d/yyyy h:mm', '0.0" kg"', '@', 'h:mm:ss'];
+const COLOURS = ['#ff0000', '#00ff00', '#0000ff', '#123456', '#abcdef'];
+const BORDERS = ['thin', 'medium', 'thick', 'dashed', 'dotted', 'double'] as const;
+const WORDS = ['alpha', 'beta', 'gamma', 'x & y', '<tag>', 'a "quote"', 'ünï', '  spaced  ', 'line\nbreak'];
+
+function generateSheet(name: string, next: () => number): SpreadsheetSheet {
+  const pick = <T>(xs: readonly T[]): T => xs[Math.floor(next() * xs.length)];
+  const cells = new Map<string, SpreadsheetCell>();
+  const rows = 3 + Math.floor(next() * 12);
+  const cols = 2 + Math.floor(next() * 6);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (next() < 0.25) continue;
+      const kind = next();
+      const cell: SpreadsheetCell = { value: null };
+      if (kind < 0.35) cell.value = Math.round(next() * 1e6) / 100 - 2000;
+      else if (kind < 0.6) cell.value = pick(WORDS);
+      else if (kind < 0.7) cell.value = next() < 0.5;
+      else if (kind < 0.8) {
+        cell.formula = `SUM(A1:A${r + 1})*${c + 1}`;
+        cell.value = next() < 0.2 ? 0 : Math.round(next() * 1000);
+      } else if (kind < 0.88) cell.value = pick(WORDS).trim() || 'x';
+      else cell.value = Math.floor(next() * 100000);
+      if (next() < 0.3) cell.numberFormat = { code: pick(FORMATS) };
+      if (next() < 0.5) {
+        const style: SpreadsheetCellStyle = {};
+        if (next() < 0.3) style.bold = true;
+        if (next() < 0.2) style.italic = true;
+        if (next() < 0.2) style.underline = true;
+        if (next() < 0.1) style.strikethrough = true;
+        if (next() < 0.3) style.fontFamily = pick(['Arial', 'Calibri', 'Times New Roman']);
+        if (next() < 0.3) style.fontSize = pick([8, 10, 11, 14, 24]);
+        if (next() < 0.3) style.fontColor = pick(COLOURS);
+        if (next() < 0.3) style.backgroundColor = pick(COLOURS);
+        if (next() < 0.3) style.horizontalAlign = pick(['left', 'center', 'right'] as const);
+        if (next() < 0.3) style.verticalAlign = pick(['top', 'middle', 'bottom'] as const);
+        if (next() < 0.2) style.wrapText = true;
+        if (next() < 0.15) style.textRotation = pick([0, 45, 90, -45, -90]);
+        if (next() < 0.25) {
+          style.border = {};
+          for (const side of ['top', 'right', 'bottom', 'left'] as const) if (next() < 0.6) style.border[side] = { style: pick(BORDERS), color: next() < 0.5 ? pick(COLOURS) : undefined };
+        }
+        if (Object.keys(style).length > 0) cell.style = style;
+      }
+      if (next() < 0.05 && cell.formula === undefined) cell.hyperlink = `https://example.com/${r}/${c}`;
+      cells.set(`${r}:${c}`, cell);
+    }
+  }
+  const sheet: SpreadsheetSheet = { name, cells };
+  if (next() < 0.6) {
+    sheet.columnWidths = new Map();
+    for (let c = 0; c < cols; c++) if (next() < 0.5) sheet.columnWidths.set(c, 40 + Math.floor(next() * 300));
+  }
+  if (next() < 0.6) {
+    sheet.rowHeights = new Map();
+    for (let r = 0; r < rows; r++) if (next() < 0.3) sheet.rowHeights.set(r, 16 + Math.floor(next() * 60));
+  }
+  if (next() < 0.3) sheet.hiddenCols = new Set([Math.floor(next() * cols)]);
+  if (next() < 0.3) sheet.hiddenRows = new Set([Math.floor(next() * rows)]);
+  if (next() < 0.4) {
+    sheet.frozenRows = Math.floor(next() * 3);
+    sheet.frozenCols = Math.floor(next() * 3);
+  }
+  if (next() < 0.4 && rows > 3 && cols > 3) {
+    const r = Math.floor(next() * (rows - 2));
+    const c = Math.floor(next() * (cols - 2));
+    sheet.mergedRanges = [{ startRow: r, startCol: c, endRow: r + 1, endCol: c + 1 }];
+  }
+  return sheet;
+}
+
+describe('differential: own reader against the exceljs reader, over generated workbooks', () => {
+  const seen: Category[] = [];
+
+  it.each(Array.from({ length: 40 }, (_, i) => i + 1))('seed %i', async (seed) => {
+    const next = rng(seed);
+    const sheets = Array.from({ length: 1 + Math.floor(next() * 3) }, (_, i) => generateSheet(`Sheet ${i + 1}`, next));
+    const bytes = await exportXlsx({ sheets, activeSheetIndex: Math.floor(next() * sheets.length) });
+    const o = await importXlsxExceljs(bytes);
+    const n = await importXlsx(bytes);
+    const { unexplained, seen: s } = compare(o, n);
+    seen.push(...s);
+    expect(unexplained).toEqual([]);
+  });
+
+  it('only ever needs the named improvements', () => {
+    // a falsy cached result and dates whose serial the old reader moved through a Date are what generated workbooks can show
+    expect(Object.keys(tally(seen)).sort()).toEqual(['dateFloat', 'falsyResult']);
+  });
+});
