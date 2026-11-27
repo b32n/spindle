@@ -3,7 +3,7 @@ import { SlidesPage } from '../support/slides';
 import { closeToolbarMenu } from '../support/toolbar';
 
 // The contextual shape format bar sits past the toolbar's overflow point at any width, so its fill controls are
-// reached through the "More tools" menu; a wide window keeps the Background label inline.
+// reached through the "More tools" menu when it overflows (browser-dependent); a wide window keeps the Background label inline.
 test.use({ viewport: { width: 1900, height: 900 } });
 
 test.describe('slides: gradient and picture fills', () => {
@@ -23,8 +23,10 @@ test.describe('slides: gradient and picture fills', () => {
     await expect.poll(async () => (await s.els()).length).toBe(before.length + 1);
     const created = (await s.els()).find((e) => !before.includes(e.id))!;
 
-    await page.getByRole('button', { name: 'More tools', exact: true }).click();
-    await page.getByRole('menu').getByTestId('shape-fill-gradient').selectOption('horizontal');
+    // The overflow trigger only exists when something collapsed (Firefox's font metrics fit the whole bar inline).
+    const more = page.getByRole('button', { name: 'More tools', exact: true });
+    if ((await more.count()) > 0) await more.click();
+    await page.getByTestId('shape-fill-gradient').selectOption('horizontal');
     await closeToolbarMenu(page);
     const el = s.stage.locator(`[data-element-id="${created.id}"]`);
     // The shape paints through an SVG paint server, so the DOM carries the gradient and the path references it.
