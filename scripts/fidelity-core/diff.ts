@@ -1,4 +1,4 @@
-import type { DiffEntry, DiffReport, Json, ModelCounts } from './types';
+import type { DiffEntry, DiffReport, GroupedCounts, Json } from './types';
 
 type Obj = { [key: string]: Json };
 export const isObj = (v: Json | undefined): v is Obj =>
@@ -35,7 +35,7 @@ export function alignBySignature(a: string[], b: string[]): Array<[number, numbe
 
 export interface DiffOptions {
   /** Size counters of each side, shown in the report next to the differences. */
-  counts: (model: Json) => ModelCounts;
+  counts: (model: Json) => GroupedCounts;
   /** Applied to both sides before comparing (e.g. resolve style pools so pool keys do not matter). */
   prepare?: (model: Json) => Json;
   /**

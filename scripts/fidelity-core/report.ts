@@ -123,9 +123,12 @@ function lossTable(items: LossItem[]): string[] {
   ];
 }
 
+/** "3 sheets, 10 cells"; a grouped counter lists its members in place ("1 heading, 10 paragraph"). */
 const countsText = (c: DiffReport['before']) =>
   Object.entries(c)
-    .map(([k, n]) => `${n} ${k}`)
+    .flatMap(([k, n]) =>
+      typeof n === 'number' ? [`${n} ${k}`] : Object.entries(n).map(([g, m]) => `${m} ${g}`)
+    )
     .join(', ') || 'nothing counted';
 
 function diffLines(diff: DiffReport, o: Required<FormatOptions>): string[] {

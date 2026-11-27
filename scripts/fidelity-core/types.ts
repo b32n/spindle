@@ -82,6 +82,8 @@ export interface DiffEntry {
 
 /** Size counters of a model (sheets, cells, ...), supplied by the format adapter. */
 export type ModelCounts = { [name: string]: number };
+/** Counters with one level of grouping (DOCX: blocks per type); every `ModelCounts` is also valid here. */
+export type GroupedCounts = { [name: string]: number | { [key: string]: number } };
 
 export interface DiffReport {
   /** Number of differences between the imported model and the re-imported exported model. */
@@ -91,8 +93,8 @@ export interface DiffReport {
   changed: number;
   /** Difference counts per field, with indexes (and anything the adapter folds) stripped. */
   byField: { [field: string]: number };
-  before: ModelCounts;
-  after: ModelCounts;
+  before: GroupedCounts;
+  after: GroupedCounts;
   /** The first differences in document order (`truncated` when there are more than listed). */
   entries: DiffEntry[];
   truncated: boolean;
