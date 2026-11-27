@@ -6,7 +6,7 @@
 // cell being edited. Grid lines use the element's border stroke.
 
 import React, { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import { resolveColor, resolveCellEdges, spanAt, type Color, type Stroke, type TableCell, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { resolveColor, resolveCellEdges, spanAt, type Color, type Stroke, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../../context/DeckContext';
 import { inSelection } from '../../interactions/table-selection-store';
 import { StaticRichText } from './StaticRichText';
@@ -29,12 +29,6 @@ function edgeCss(edge: Stroke | null, theme: ThemeData): string {
   if (!edge) return 'none';
   const style = edge.dash === 'dash' ? 'dashed' : edge.dash === 'dot' ? 'dotted' : 'solid';
   return `${Math.max(1, edge.width)}px ${style} ${resolveColor(edge.color, theme)}`;
-}
-
-/** The padding of a cell: per-side margins when set, else the uniform padding. */
-function cellPadding(cell: TableCell): string | number {
-  const i = cell.bodyStyle?.insets;
-  return i ? `${i.t}px ${i.r}px ${i.b}px ${i.l}px` : (cell.bodyStyle?.padding ?? CELL_PAD);
 }
 
 function spanCells(s: { r: number; c: number; rs: number; cs: number }): Array<[number, number]> {
@@ -111,11 +105,13 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
               // Fill in cell defaults so the static <td> and the live editor
               // agree on padding, size, and vertical alignment (no jump on edit).
               const cellStyle = {
+                ...cell.bodyStyle,
                 padding: cell.bodyStyle?.padding ?? CELL_PAD,
                 fontSize: cell.bodyStyle?.fontSize ?? CELL_FONT,
                 vAlign: cell.bodyStyle?.vAlign ?? 'top',
-                ...cell.bodyStyle,
               };
+              // Per-side margins win over the uniform padding.
+              const ins = cellStyle.insets;
               return (
                 <td
                   key={c}
@@ -132,7 +128,7 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
                     ...fillStyle,
                     // A cell with a fill layer paints the tint as an overlay above that layer (a box-shadow would sit beneath it).
                     boxShadow: isSelected && !fillLayer ? SELECT_TINT : undefined,
-                    padding: isEditing ? 0 : cellPadding(cell),
+                    padding: isEditing ? 0 : ins ? `${ins.t}px ${ins.r}px ${ins.b}px ${ins.l}px` : cellStyle.padding,
                     overflow: 'hidden',
                     boxSizing: 'border-box',
                   }}

@@ -99,6 +99,11 @@ describe('merged table rendering', () => {
     expect(html).toContain('padding:9px');
   });
 
+  it('falls back to the default padding when none is set', () => {
+    const { deck, slide } = setup(1, 1);
+    expect(renderSlide(deck, slide)).toContain('padding:6px');
+  });
+
   it('tints a merged cell when any covered cell is selected, and only then', () => {
     const { deck, id, slide } = setup();
     deck.mergeTableCells(id, { r0: 0, c0: 0, r1: 1, c1: 1 });
