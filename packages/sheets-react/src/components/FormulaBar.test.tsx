@@ -47,6 +47,9 @@ describe('FormulaBar cached-only indicator', () => {
     expect(html).toContain('>Saved value<');
     // the staleness caveat is in the accessible name and the tooltip
     expect(CACHED_ONLY_NOTICE).toMatch(/not updated when the cells it uses change/);
+    // references in the text follow inserted and deleted rows and columns now (S4b), so the note no longer says they do not
+    expect(CACHED_ONLY_NOTICE).not.toMatch(/adjust/);
+    expect(CACHED_ONLY_NOTICE).toMatch(/kept and saved unchanged/);
     expect(html.match(/aria-label="[^"]*not updated when the cells it uses change[^"]*"/)).not.toBeNull();
     expect(html.match(/title="[^"]*not updated when the cells it uses change[^"]*"/)).not.toBeNull();
   });
