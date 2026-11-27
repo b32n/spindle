@@ -309,8 +309,8 @@ edits, and the inverse operations broadcast to peers like any other edit.
   `getCollabBlockers(workbook)` and `CollabBlockedError` mirror the documents and slides API; the list is empty
   today, and a later workbook construct either gets its own Y keys or registers a blocker. Version 2 added the formula
   interchange marks on a cell's JSON: `cachedOnly: true` (an imported formula the engine cannot evaluate: `formula` is the
-  file's text and `value` the result the file saved; no client recalculates it) and `arraySpan` (`{ rows, cols }`, the extent
-  of an array formula). A v1 client would recalculate such a cell to `#NAME?` and drop the marks on its next write, so it
+  file's text and `value` the result the file saved; no client recalculates it) and `arraySpan` (`{ rows, cols, spill? }`, the extent
+  of an array formula; `spill: true` marks a dynamic-array one). A v1 client would recalculate such a cell to `#NAME?` and drop the marks on its next write, so it
   refuses a v2 room. The marks live in the cell JSON, which is last writer wins per cell like the rest of the cell; the
   spilled cells of an evaluable array formula are not stored (every client re-evaluates the anchor), the plain result cells
   of a cached-only array formula are ordinary cells. An imported workbook shows the file's saved results on the client that

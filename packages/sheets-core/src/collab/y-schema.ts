@@ -47,7 +47,7 @@ import type { SheetCommentThread } from '../comments';
  *
  * 2: S4 formula interchange. A cell's JSON may carry `cachedOnly: true` (an imported formula the engine cannot evaluate:
  * `formula` is the file's text and `value` the result the file saved, never recalculated) and `arraySpan`
- * (`{ rows, cols }`, the extent of an array formula). A v1 client would recalculate such a cell to `#NAME?` or
+ * (`{ rows, cols, spill? }`, the extent of an array formula; `spill: true` for a dynamic-array one). A v1 client would recalculate such a cell to `#NAME?` or
  * re-evaluate its text without the mark, and on its next write of the cell keep or drop the keys unseen, so it must not join
  * a v2 room.
  */

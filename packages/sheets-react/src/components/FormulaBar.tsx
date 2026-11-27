@@ -263,9 +263,9 @@ export const FormulaBar = memo(function FormulaBar({
               padding: '1px 8px',
               fontSize: '11px',
               fontWeight: 600,
-              color: '#92400e',
-              backgroundColor: '#fef3c7',
-              border: '1px solid #f59e0b',
+              color: 'var(--spindle-note-fg, #92400e)',
+              backgroundColor: 'var(--spindle-note-bg, #fef3c7)',
+              border: '1px solid var(--spindle-note-border, #b45309)',
               borderRadius: '999px',
               whiteSpace: 'nowrap',
             }}

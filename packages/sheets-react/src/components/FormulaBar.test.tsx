@@ -51,6 +51,24 @@ describe('FormulaBar cached-only indicator', () => {
     expect(html.match(/title="[^"]*not updated when the cells it uses change[^"]*"/)).not.toBeNull();
   });
 
+  it('takes the note colours from the host\'s CSS variables, with defaults that keep a contrast of at least 4.5:1', () => {
+    const html = render(workbook, { row: 4, col: 4 });
+    const fg = /color:var\(--spindle-note-fg, (#[0-9a-f]{6})\)/.exec(html)?.[1];
+    const bg = /background-color:var\(--spindle-note-bg, (#[0-9a-f]{6})\)/.exec(html)?.[1];
+    expect(html).toContain('border:1px solid var(--spindle-note-border, #b45309)');
+    expect(fg).toBeDefined();
+    expect(bg).toBeDefined();
+    // WCAG 2.x contrast ratio of the default colours (a host that overrides the variables for a dark theme sets a pair of its own)
+    const luminance = (hex: string): number => {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [hi, lo] = [luminance(fg as string), luminance(bg as string)].sort((a, b) => b - a);
+    expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5);
+    // no fixed colour is left in the note's own style
+    expect(html).not.toMatch(/formula-cached-only[^>]*(color|background-color):#/);
+  });
+
   it('shows nothing for an ordinary formula, a plain value, an empty cell or no cell', () => {
     for (const cell of [{ row: 0, col: 1 }, { row: 0, col: 0 }, { row: 9, col: 9 }, null]) {
       expect(render(workbook, cell)).not.toContain('formula-cached-only');
