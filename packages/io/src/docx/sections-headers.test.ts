@@ -11,6 +11,7 @@ const para = (t: string) => `<w:p><w:r><w:t>${t}</w:t></w:r></w:p>`;
 /** A docx whose body is `body` (ending in `sectPr`), with header/footer parts `parts` (file name -> paragraphs text) and optional settings. */
 async function docx(sectPr: string, parts: Record<string, string> = {}, settings = '', body = para('body')): Promise<Uint8Array> {
   const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<Types/>');
   zip.file('word/document.xml', `<?xml version="1.0"?><w:document ${NS}><w:body>${body}${sectPr}</w:body></w:document>`);
   const rels = Object.keys(parts)
     .map((name, i) => `<Relationship Id="rId${10 + i}" Type="${REL}/${name.startsWith('header') ? 'header' : 'footer'}" Target="${name}.xml"/>`)

@@ -1,5 +1,8 @@
 export { exportDocx } from './writer';
 export { importDocx } from './reader';
+export type { ImportDocxOptions } from './reader';
+export { ImportError, type ImportErrorCode } from '../common/import-error';
+export { DEFAULT_IMPORT_LIMITS, type ImportLimits } from '../common/safe-zip';
 export { detectDocxLoss } from './loss';
 export type { DetectDocxLossOptions } from './loss';
 export type {

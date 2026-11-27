@@ -90,6 +90,7 @@ describe('preferRecorded', () => {
 const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
 async function importWithTheme(styles: string, body: string, themeXml?: string) {
   const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<Types/>');
   zip.file('word/document.xml', `<?xml version="1.0"?><w:document ${NS}><w:body>${body}<w:sectPr/></w:body></w:document>`);
   zip.file('word/styles.xml', `<?xml version="1.0"?><w:styles ${NS}>${styles}</w:styles>`);
   if (themeXml) zip.file('word/theme/theme1.xml', themeXml);

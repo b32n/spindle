@@ -9,6 +9,7 @@ const NS =
 /** A minimal docx: just the parts the detector reads. */
 async function docx(body: string, parts: Record<string, string> = {}): Promise<Uint8Array> {
   const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<Types/>');
   zip.file('word/document.xml', `<?xml version="1.0"?><w:document ${NS}><w:body>${body}</w:body></w:document>`);
   for (const [name, xml] of Object.entries(parts)) zip.file(name, xml);
   return zip.generateAsync({ type: 'uint8array' });
@@ -260,6 +261,7 @@ describe('detectDocxLoss: XML-based detectors', () => {
 
   it('does not throw on a document.xml that is not XML', async () => {
     const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
     zip.file('word/document.xml', 'not xml at all <<<');
     const bytes = await zip.generateAsync({ type: 'uint8array' });
     expect((await detectDocxLoss(bytes)).format).toBe('docx');

@@ -10,6 +10,7 @@ type Table = Extract<DocBlock, { type: 'table' }>;
 
 async function docx(body: string, styles = ''): Promise<Uint8Array> {
   const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<Types/>');
   zip.file('word/document.xml', `<?xml version="1.0"?><w:document ${NS}><w:body>${body}<w:sectPr/></w:body></w:document>`);
   if (styles) zip.file('word/styles.xml', `<?xml version="1.0"?><w:styles ${NS}>${styles}</w:styles>`);
   return zip.generateAsync({ type: 'uint8array' });

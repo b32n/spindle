@@ -7,6 +7,7 @@ const NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/mai
 
 async function docx(body: string, extra: Record<string, string> = {}): Promise<Uint8Array> {
   const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<Types/>');
   zip.file('word/document.xml', `<?xml version="1.0"?><w:document ${NS}><w:body>${body}<w:sectPr/></w:body></w:document>`);
   for (const [n, x] of Object.entries(extra)) zip.file(n, x);
   return zip.generateAsync({ type: 'uint8array' });

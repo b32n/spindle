@@ -10,6 +10,7 @@ type Cell = Table['rows'][number]['cells'][number];
 
 async function docx(body: string, extra: Record<string, string> = {}): Promise<Uint8Array> {
   const zip = new JSZip();
+  zip.file('[Content_Types].xml', '<Types/>');
   zip.file('word/document.xml', `<?xml version="1.0"?><w:document ${NS}><w:body>${body}<w:sectPr/></w:body></w:document>`);
   for (const [name, xml] of Object.entries(extra)) zip.file(name, xml);
   return zip.generateAsync({ type: 'uint8array' });

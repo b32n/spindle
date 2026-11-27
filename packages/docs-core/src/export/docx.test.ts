@@ -244,8 +244,17 @@ describe('importFromDocx', () => {
       sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'old', type: 'paragraph', content: [{ type: 'text', text: 'Original' }] }] }],
     });
     const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
     zip.file('hello.txt', 'not a docx');
     await expect(importFromDocx(await zip.generateAsync({ type: 'uint8array' }), doc)).rejects.toThrow(/word\/document\.xml is missing/);
+    expect(doc.getData().sections[0].blocks[0]).toMatchObject({ id: 'old' });
+  });
+
+  it('refuses a file that is not a package with an ImportError and leaves the open document untouched', async () => {
+    const doc = docWith({
+      sections: [{ id: 'sec1', pageConfig: PAGE_CONFIG, blocks: [{ id: 'old', type: 'paragraph', content: [{ type: 'text', text: 'Original' }] }] }],
+    });
+    await expect(importFromDocx(new TextEncoder().encode('plain text'), doc)).rejects.toMatchObject({ name: 'ImportError', code: 'not-a-package' });
     expect(doc.getData().sections[0].blocks[0]).toMatchObject({ id: 'old' });
   });
 

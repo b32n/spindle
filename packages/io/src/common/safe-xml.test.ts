@@ -49,6 +49,13 @@ describe('parseXmlTree', () => {
     expect(parseXmlTree(nested(XML_LIMITS.maxDepth * 2))).toBeNull();
   });
 
+  it('can decode the predefined entities (only for text whose DOCTYPE was stripped), and still not custom ones', () => {
+    const decoding = createSafeXmlParser(XML_LIMITS.maxDepth, true);
+    expect(JSON.stringify(parseXmlTree('<a x="&amp;">&lt;&amp;&gt;&bogus;</a>', decoding))).toBe('[{"a":[{"#text":"<&>&bogus;"}],":@":{"@_x":"&"}}]');
+    expect(JSON.stringify(parseXmlTree('<a>&amp;</a>'))).toContain('&amp;');
+    expect(JSON.stringify(parseXmlTree('<!DOCTYPE a [<!ENTITY x "y">]><a>&x;</a>', decoding))).toContain('&x;');
+  });
+
   it('takes a parser with another depth cap', () => {
     const shallow = createSafeXmlParser(3);
     expect(parseXmlTree(nested(2), shallow)).not.toBeNull();

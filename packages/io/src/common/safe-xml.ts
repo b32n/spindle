@@ -16,8 +16,12 @@ import { XMLParser } from 'fast-xml-parser';
 /** XML limits, shared by every importer (SD16: depth 256). */
 export const XML_LIMITS = { maxDepth: 256 };
 
-/** A parser with the safe settings; `preserveOrder` keeps element order, which OOXML depends on. */
-export function createSafeXmlParser(maxDepth: number = XML_LIMITS.maxDepth): XMLParser {
+/**
+ * A parser with the safe settings; `preserveOrder` keeps element order, which OOXML depends on. With `decodePredefined`
+ * the parser itself decodes the five predefined entities (as the DOCX reader always did); that is only safe on text whose
+ * DOCTYPE is removed first (`stripDoctype`), because then no entity can be declared, so none can expand.
+ */
+export function createSafeXmlParser(maxDepth: number = XML_LIMITS.maxDepth, decodePredefined = false): XMLParser {
   return new XMLParser({
     preserveOrder: true,
     ignoreAttributes: false,
@@ -26,7 +30,7 @@ export function createSafeXmlParser(maxDepth: number = XML_LIMITS.maxDepth): XML
     trimValues: false,
     parseTagValue: false,
     parseAttributeValue: false,
-    processEntities: false,
+    processEntities: decodePredefined,
     // set here so a change of the parser's default cannot change the safety behaviour
     maxNestedTags: maxDepth,
   });

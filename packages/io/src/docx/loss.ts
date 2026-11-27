@@ -1,4 +1,5 @@
-import JSZip from 'jszip';
+import type JSZip from 'jszip';
+import { openSafeZip, type ImportLimits } from '../common/safe-zip';
 import { parseComments } from './comments';
 import { parseNotes, referencedNoteIds } from './notes';
 import { scanDocx } from './loss-scan';
@@ -11,17 +12,19 @@ export interface DetectDocxLossOptions {
    * structure the importer flattens or ignores (table structure, tabs and breaks, sections, …) and breaks fields down by kind; the DOCX fidelity harness uses it.
    */
   detail?: 'summary' | 'full';
+  /** Overrides of the import limits (`DEFAULT_IMPORT_LIMITS`); a package over them is not scanned, as the import refuses it. */
+  limits?: Partial<ImportLimits>;
 }
 
 /**
  * Scan a .docx for content the importer does not bring across. Cheap (zip +
- * pattern counts); never throws on a malformed file — an unreadable zip yields
- * an empty report and the import itself reports the error.
+ * pattern counts); never throws on a malformed file — a package that cannot be opened safely (unreadable, or over the
+ * import limits) yields an empty report and the import itself reports the error.
  */
 export async function detectDocxLoss(bytes: Uint8Array, options: DetectDocxLossOptions = {}): Promise<ImportLossReport> {
   let zip: JSZip;
   try {
-    zip = await JSZip.loadAsync(bytes);
+    zip = await openSafeZip(bytes, { limits: options.limits, target: 'a Word document (.docx)' });
   } catch {
     return createLossReport('docx', []);
   }

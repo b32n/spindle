@@ -27,11 +27,12 @@ function section(blocks: DocSection['blocks'], extra: Partial<DocSection> = {}):
 
 describe('importDocx', () => {
   it('rejects a non-zip byte stream', async () => {
-    await expect(importDocx(new Uint8Array([0, 1, 2, 3]))).rejects.toThrow();
+    await expect(importDocx(new Uint8Array([0, 1, 2, 3]))).rejects.toMatchObject({ name: 'ImportError', code: 'not-a-package' });
   });
 
   it('surfaces a warning instead of throwing for a zip with no word/document.xml', async () => {
     const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
     zip.file('hello.txt', 'not a docx');
     const bytes = await zip.generateAsync({ type: 'uint8array' });
     const result = await importDocx(bytes);
