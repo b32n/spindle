@@ -561,7 +561,15 @@ lockstep.
   format); every string the result keeps is a copy of its own, so a short `dimension` no longer keeps a 100 MB sheet part alive; the
   workbook part is read once; the cells-over-limit warning names the limit and the `limits` option; a sheet after the cell budget is
   spent is kept if it is empty. The hostile-shape tests run in a child process with a limited heap (skipped below 6 GB or with
-  `XLSX_SKIP_HOSTILE`) instead of reading the test process's heap.
+  `XLSX_SKIP_HOSTILE`) instead of reading the test process's heap. Review round 6: an element with more than 1,024 attributes
+  (`MAX_ATTRIBUTES` in `sax.ts`; Excel writes fewer than 30) is damage like any other (a sheet is read as far as it, a workbook-level part
+  skipped with a warning, the workbook part refused as corrupt) where nine million attributes made the engine stop answering; sheets-core
+  `importFromXlsx` applies the merges of a sheet in one pass (`WorkbookImpl.mergeCellsBulk` / `SheetImpl.mergeCellsBulk`, the same regions
+  and cleared cells as `mergeCells` one by one, one notification, and no undo step per merge: opening a file leaves nothing to undo), 20,000
+  merges in under a second where one by one took 51 s and 200,000 in a few seconds; merges that overlap (Excel writes none) are decided pair
+  by pair up to 20,000 per sheet and the rest are left out with a warning and the loss item `xlsx.merges.overlapping`; the loss detector
+  finds the relationship of each hyperlink by id instead of by a search (120,000 external links took 45 s); the React editor can raise the
+  limits: `importWorkbookFile(workbook, file, { limits })` and the `importLimits` prop of `WorkbookCanvas`.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from
