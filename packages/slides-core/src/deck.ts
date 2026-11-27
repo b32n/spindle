@@ -40,6 +40,7 @@ import {
 } from './scene/z-order';
 import { alignFrames, distributeFrames, type AlignMode, type FrameItem } from './scene/align';
 import type { Rect } from './scene/geometry';
+import { groupChain, groupParents } from './scene/group-tree';
 import { resolveConnectorFrame, resolveEndpoints } from './scene/connector';
 import type { Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
 import { applyTextFormat, type RichTextDoc, type TextFormatSpec } from './text/model';
@@ -313,16 +314,12 @@ export class DeckImpl {
     // group, so the copied group is a distinct group of only the copies.
     const idMap = new Map<string, string>();
     for (const el of srcElements) idMap.set(el.id, generateId());
-    const groupMap = new Map<string, string>();
+    const groupMap = this.freshGroupIds(srcElements);
     for (const el of srcElements) {
       const elCopy = { ...structuredClone(el), id: idMap.get(el.id)!, containerId: copy.id } as SlideElement;
       // Give the copied group a fresh shared id so getGroupMembers on the copy
       // returns only the copies (not the source slide's members).
-      if (elCopy.groupId) {
-        let mapped = groupMap.get(elCopy.groupId);
-        if (!mapped) { mapped = generateId(); groupMap.set(elCopy.groupId, mapped); }
-        elCopy.groupId = mapped;
-      }
+      this.remapGroupFields(elCopy, groupMap);
       // Re-point connector binds at the copied shapes; leave binds to off-slide
       // elements untouched.
       if (elCopy.type === 'line') {
@@ -630,6 +627,7 @@ export class DeckImpl {
       if (l.endPoint) l.endPoint = { x: l.endPoint.x + 16, y: l.endPoint.y + 16 };
     }
     delete copy.groupId;
+    delete copy.parentGroupId;
     this.elements.set(copy.id, copy);
     this.emit('elementAdd', { slideId: el.containerId, elementId: copy.id });
     return copy;
@@ -646,7 +644,7 @@ export class DeckImpl {
     this.recordHistory();
     const idMap = new Map<string, string>();
     for (const el of src) idMap.set(el.id, generateId());
-    const groupMap = new Map<string, string>();
+    const groupMap = this.freshGroupIds(src);
     const copies: SlideElement[] = [];
     for (const el of src) {
       const copy = {
@@ -656,11 +654,7 @@ export class DeckImpl {
         x: el.x + 16,
         y: el.y + 16,
       } as SlideElement;
-      if (copy.groupId) {
-        let mapped = groupMap.get(copy.groupId);
-        if (!mapped) { mapped = generateId(); groupMap.set(copy.groupId, mapped); }
-        copy.groupId = mapped;
-      }
+      this.remapGroupFields(copy, groupMap);
       if (copy.type === 'line') {
         const l = copy as LineElement;
         if (l.startPoint) l.startPoint = { x: l.startPoint.x + 16, y: l.startPoint.y + 16 };
@@ -870,25 +864,87 @@ export class DeckImpl {
     this.setFrames(res.map((r) => ({ id: r.id, frame: r.frame })));
   }
 
-  /** Group the given elements under a fresh shared groupId (needs ≥2). */
+  /** A fresh id for every group the given elements belong to (the copies' groups). */
+  private freshGroupIds(els: SlideElement[]): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const el of els) if (el.groupId && !map.has(el.groupId)) map.set(el.groupId, generateId());
+    return map;
+  }
+
+  /** Point a copy at the fresh groups; a parent group outside the copied set is dropped (the copy's group is top level). */
+  private remapGroupFields(copy: SlideElement, groupMap: Map<string, string>): void {
+    if (copy.groupId) copy.groupId = groupMap.get(copy.groupId);
+    if (copy.parentGroupId) {
+      const parent = groupMap.get(copy.parentGroupId);
+      if (parent) copy.parentGroupId = parent;
+      else delete copy.parentGroupId;
+    }
+  }
+
+  private groupTree(): Map<string, string> {
+    return groupParents(this.elements.values());
+  }
+
+  /** The groups an element belongs to, innermost first (empty when ungrouped). */
+  getGroupChain(elementId: string): string[] {
+    return groupChain(this.elements.get(elementId)?.groupId, this.groupTree());
+  }
+
+  /** The outermost group an element belongs to. */
+  getRootGroupId(elementId: string): string | undefined {
+    const chain = this.getGroupChain(elementId);
+    return chain[chain.length - 1];
+  }
+
+  /**
+   * Group the given elements (or the groups they belong to) under a fresh group (needs at least two units). An
+   * element already in a group brings its whole outermost group, which becomes a child of the new one, so groups nest.
+   */
   groupElements(ids: string[]): string | undefined {
-    const valid = ids.filter((id) => this.elements.has(id));
-    if (valid.length < 2) return undefined;
+    const tree = this.groupTree();
+    const units = new Set<string>();
+    for (const id of ids) {
+      const el = this.elements.get(id);
+      if (!el) continue;
+      const chain = groupChain(el.groupId, tree);
+      units.add(chain.length ? `g:${chain[chain.length - 1]}` : `e:${id}`);
+    }
+    if (units.size < 2) return undefined;
     const groupId = generateId();
-    this.updateElements(valid.map((id) => ({ id, patch: { groupId } })));
+    const patches: Array<{ id: string; patch: Partial<SlideElement> }> = [];
+    for (const el of this.elements.values()) {
+      const chain = groupChain(el.groupId, tree);
+      if (chain.length === 0) {
+        if (units.has(`e:${el.id}`)) patches.push({ id: el.id, patch: { groupId } });
+      } else if (el.groupId === chain[chain.length - 1] && units.has(`g:${el.groupId}`)) {
+        patches.push({ id: el.id, patch: { parentGroupId: groupId } });
+      }
+    }
+    this.updateElements(patches);
     return groupId;
   }
 
+  /** Dissolve the outermost group of each given element: its direct members become loose and its child groups top level. */
   ungroupElements(ids: string[]): void {
-    const patches = ids
-      .filter((id) => this.elements.get(id)?.groupId)
-      .map((id) => ({ id, patch: { groupId: undefined } as Partial<SlideElement> }));
+    const tree = this.groupTree();
+    const roots = new Set<string>();
+    for (const id of ids) {
+      const chain = groupChain(this.elements.get(id)?.groupId, tree);
+      if (chain.length) roots.add(chain[chain.length - 1]);
+    }
+    const patches: Array<{ id: string; patch: Partial<SlideElement> }> = [];
+    for (const el of this.elements.values()) {
+      if (!el.groupId) continue;
+      if (roots.has(el.groupId)) patches.push({ id: el.id, patch: { groupId: undefined, parentGroupId: undefined } });
+      else if (el.parentGroupId && roots.has(tree.get(el.groupId) ?? '')) patches.push({ id: el.id, patch: { parentGroupId: undefined } });
+    }
     if (patches.length) this.updateElements(patches);
   }
 
-  /** All element ids sharing a groupId. */
+  /** All element ids in a group, including the members of the groups nested inside it. */
   getGroupMembers(groupId: string): string[] {
-    return [...this.elements.values()].filter((e) => e.groupId === groupId).map((e) => e.id);
+    const tree = this.groupTree();
+    return [...this.elements.values()].filter((e) => groupChain(e.groupId, tree).includes(groupId)).map((e) => e.id);
   }
 
   // ── Selection & active slide (LOCAL view state; never serialized to CRDT) ────

@@ -9,9 +9,9 @@ import { useDeckContext } from '../context/DeckContext';
 
 // Module-scoped so copy in one place and paste in another share it.
 let buffer: NewElementSpec[] = [];
-// Parallel to `buffer`: each spec's source group id (undefined if ungrouped), so
-// paste can re-group the copies that belonged together into a fresh group.
-let bufferGroups: (string | undefined)[] = [];
+// Parallel to `buffer`: each spec's source group chain (innermost first, empty if ungrouped), so
+// paste can re-group the copies that belonged together into fresh groups, nesting included.
+let bufferGroups: string[][] = [];
 let pasteCount = 0;
 
 function toSpec(el: SlideElement): NewElementSpec {
@@ -21,6 +21,7 @@ function toSpec(el: SlideElement): NewElementSpec {
   delete clone.containerId;
   delete clone.index;
   delete clone.groupId;
+  delete clone.parentGroupId;
   return clone as unknown as NewElementSpec;
 }
 
@@ -36,7 +37,7 @@ export function copyElements(deck: DeckImpl): void {
   const els = ids.map((id) => deck.getElement(id)).filter((e): e is SlideElement => !!e);
   if (els.length === 0) return;
   buffer = els.map(toSpec);
-  bufferGroups = els.map((el) => el.groupId);
+  bufferGroups = els.map((el) => deck.getGroupChain(el.id));
   pasteCount = 0;
   try {
     void navigator.clipboard?.writeText('application/x-spindle-slides');
@@ -65,15 +66,17 @@ export function pasteElements(deck: DeckImpl): void {
       y: (base.y ?? 0) + offset,
     } as NewElementSpec);
     newIds.push(el.id);
-    const g = bufferGroups[i];
-    if (g) {
+    for (const g of bufferGroups[i]) {
       const arr = groupToNewIds.get(g) ?? [];
       arr.push(el.id);
       groupToNewIds.set(g, arr);
     }
   });
-  // Re-form each source group among the pasted copies (fresh group ids).
-  for (const ids of groupToNewIds.values()) {
+  // Re-form each source group among the pasted copies (fresh group ids), innermost first so the outer groups nest them.
+  const height = (g: string): number => Math.max(...bufferGroups.map((c) => c.indexOf(g)));
+  const order = [...groupToNewIds.keys()].sort((a, b) => height(a) - height(b));
+  for (const g of order) {
+    const ids = groupToNewIds.get(g)!;
     if (ids.length > 1) deck.groupElements(ids);
   }
   deck.setSelection({ slideId, elementIds: newIds });

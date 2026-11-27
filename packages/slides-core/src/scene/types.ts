@@ -170,8 +170,11 @@ export interface ElementBase extends Frame {
   containerId: string;
   /** Fractional z-order key — sorted ascending, painted back-to-front. */
   index: string;
-  /** Members of the same flat group share a groupId. */
+  /** The innermost group this element belongs to; members of a group share its id. */
   groupId?: string;
+  /** The group that contains `groupId` (nested groups, K6). Every member of a nested group carries the same value; the
+   *  full chain is read by following it (`groupChain`). Absent for a top-level group. */
+  parentGroupId?: string;
   locked?: boolean;
   /** 0–1; omitted means 1 (fully opaque). */
   opacity?: number;

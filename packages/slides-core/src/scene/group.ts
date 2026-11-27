@@ -1,5 +1,6 @@
-// Flat-group transforms. Members share a groupId; a group has no frame of its
-// own — its bounds are the union of member AABBs. Rotating a group orbits each
+// Group transforms. Members share a groupId (nested groups: see group-tree.ts); a group has no frame of its
+// own — its bounds are the union of member AABBs. Members always hold absolute slide frames, so a nested group
+// transforms as the flat list of its leaves; `childFrameInParent` composes a DrawingML group transform for import. Rotating a group orbits each
 // member's centre about the group pivot and adds Δθ to each member's rotation.
 // Scaling is lossy for rotated members under non-uniform factors, so the UI
 // aspect-locks group corner handles (documented in the plan).
@@ -54,4 +55,55 @@ export function scaleGroup(items: FrameItem[], sx: number, sy: number, origin: P
     const h = Math.max(1, frame.h * sy);
     return { id, frame: { ...frame, x: ncx - w / 2, y: ncy - h / 2, w, h } };
   });
+}
+
+/** A DrawingML group transform (`a:xfrm` of a `p:grpSp`): the group box, the child coordinate space it maps, rotation and flips. */
+export interface GroupXfrm {
+  off: Point;
+  ext: { w: number; h: number };
+  chOff: Point;
+  chExt: { w: number; h: number };
+  /** Degrees, clockwise, about the group centre. */
+  rotation: number;
+  flipH?: boolean;
+  flipV?: boolean;
+}
+
+/** A child frame with its flips. */
+export type FlippedFrame = Frame & { flipH: boolean; flipV: boolean };
+
+const normDeg = (d: number): number => ((d % 360) + 360) % 360;
+
+/**
+ * Map a frame given in a group's child space to the group's parent space: scale by ext/chExt about the child-space
+ * centre, mirror for the group flips, rotate about the group centre. A flip mirrors the child (its flip toggles and
+ * its rotation changes sign once per flipped axis). A zero child extent maps with scale 1.
+ */
+export function childFrameInParent(child: Frame & { flipH?: boolean; flipV?: boolean }, g: GroupXfrm): FlippedFrame {
+  const sx = g.chExt.w > 0 ? g.ext.w / g.chExt.w : 1;
+  const sy = g.chExt.h > 0 ? g.ext.h / g.chExt.h : 1;
+  const c = frameCenter(child);
+  const chCx = g.chOff.x + g.chExt.w / 2;
+  const chCy = g.chOff.y + g.chExt.h / 2;
+  const d = { x: (c.x - chCx) * sx * (g.flipH ? -1 : 1), y: (c.y - chCy) * sy * (g.flipV ? -1 : 1) };
+  const n = rotatePointDeg({ x: g.off.x + g.ext.w / 2 + d.x, y: g.off.y + g.ext.h / 2 + d.y }, { x: g.off.x + g.ext.w / 2, y: g.off.y + g.ext.h / 2 }, g.rotation);
+  const w = child.w * sx;
+  const h = child.h * sy;
+  const sign = (g.flipH ? -1 : 1) * (g.flipV ? -1 : 1);
+  return {
+    x: n.x - w / 2,
+    y: n.y - h / 2,
+    w,
+    h,
+    rotation: normDeg(g.rotation + sign * child.rotation),
+    flipH: (child.flipH ?? false) !== (g.flipH ?? false),
+    flipV: (child.flipV ?? false) !== (g.flipV ?? false),
+  };
+}
+
+/** Compose a child frame through nested group transforms, innermost group first, to slide space. */
+export function composeGroupChain(child: Frame & { flipH?: boolean; flipV?: boolean }, chain: GroupXfrm[]): FlippedFrame {
+  let f: FlippedFrame = { ...child, flipH: child.flipH ?? false, flipV: child.flipV ?? false };
+  for (const g of chain) f = childFrameInParent(f, g);
+  return f;
 }

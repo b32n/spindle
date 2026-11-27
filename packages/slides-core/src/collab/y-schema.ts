@@ -4,7 +4,7 @@
 //   meta:     Y.Map — id, title, slideSize(JSON), theme(JSON), layouts(JSON)   (LWW)
 //   slides:   Y.Map<slideId, Y.Map{ index, layoutRef?, background?(JSON), notes?(JSON), hidden? }>
 //   elements: Y.Map<elId, Y.Map{ containerId, type, x, y, w, h, rotation, index,
-//                                groupId?, locked?, opacity?, placeholder?(JSON),
+//                                groupId?, parentGroupId?, locked?, opacity?, placeholder?(JSON),
 //                                props(JSON), richText?: Y.XmlFragment }>
 //   threads:  Y.Map<threadId, JSON>   — outside undo scope (Phase 6)
 //
@@ -43,8 +43,12 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * 5: K5 shape presets. A shape element's `props.shape` may be one of the ~58 added presets or `unknown:<prst>` (an
  * OOXML preset the editor cannot draw, kept for re-export), and `props.adjustments` carries per-preset guides. A v4
  * client would draw those shapes as plain rectangles and offer no way to see what they are, so it must not join a v5 room.
+ *
+ * 6: K6 nested groups. An element map carries `parentGroupId` (the group containing its `groupId`) next to `groupId`.
+ * A v5 client does not know the key, would read the inner group as top level (selecting and moving it apart from its
+ * outer group) and drop the key on its next write of that element, flattening the nesting, so it must not join a v6 room.
  */
-export const COLLAB_SCHEMA_VERSION = 5;
+export const COLLAB_SCHEMA_VERSION = 6;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {
@@ -102,7 +106,7 @@ export function getDeckYTypes(ydoc: Y.Doc): DeckYTypes {
 }
 
 // Element fields stored as individual Y.Map keys (per-key CRDT merge).
-const SCALAR_KEYS = ['containerId', 'type', 'x', 'y', 'w', 'h', 'rotation', 'index', 'groupId', 'locked', 'opacity', 'placeholder'] as const;
+const SCALAR_KEYS = ['containerId', 'type', 'x', 'y', 'w', 'h', 'rotation', 'index', 'groupId', 'parentGroupId', 'locked', 'opacity', 'placeholder'] as const;
 
 /** The type-specific styling fields bundled into the `props` JSON key. */
 export function elementProps(el: SlideElement): Record<string, unknown> {

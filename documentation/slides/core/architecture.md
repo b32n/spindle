@@ -6,7 +6,7 @@
 
 Pure, fully unit-tested, and free of any notion of a slide or a viewport.
 
-- **`scene/types.ts`** — the element union (`text` · `shape` · `image` · `line`), `Frame`, the `Color`/`Fill`/`Stroke` unions, and `PlaceholderMeta`. Every element extends `ElementBase` with an `id`, a `containerId`, a fractional `index` (z-order), and optional `groupId` / `locked` / `opacity`.
+- **`scene/types.ts`** — the element union (`text` · `shape` · `image` · `line`), `Frame`, the `Color`/`Fill`/`Stroke` unions, and `PlaceholderMeta`. Every element extends `ElementBase` with an `id`, a `containerId`, a fractional `index` (z-order), and optional `groupId` / `parentGroupId` (nested groups) / `locked` / `opacity`.
 - **`scene/fractional-index.ts`** — ordering keys. A base-62 lexicographic midpoint plus a 2-char random jitter suffix, so an item can be placed between two neighbours without moving anyone else (Yjs has no move op) and concurrent inserts into the same gap converge instead of colliding. Ties break by id.
 - **`scene/geometry.ts`** — rotated-rectangle math: corners, axis-aligned bounds, point-in-frame, and a separating-axis test for marquee hit-testing.
 - **`scene/transform.ts`** — `resizeFrame` and `rotateFrame`. Resize works in the frame's local space with the opposite anchor pinned; a property test asserts anchor-invariance at any rotation. Rotation snaps within 3° of each 45° step (15° with Shift).

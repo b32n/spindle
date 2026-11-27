@@ -69,7 +69,7 @@ export interface AttachCollabOptions {
   signal?: AbortSignal;
 }
 
-const SCALAR_KEYS = new Set(['containerId', 'type', 'x', 'y', 'w', 'h', 'rotation', 'index', 'groupId', 'locked', 'opacity', 'placeholder']);
+const SCALAR_KEYS = new Set(['containerId', 'type', 'x', 'y', 'w', 'h', 'rotation', 'index', 'groupId', 'parentGroupId', 'locked', 'opacity', 'placeholder']);
 
 export async function attachCollabToDeck(
   deck: DeckImpl,

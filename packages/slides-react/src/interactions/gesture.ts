@@ -284,13 +284,14 @@ export function createMarqueeGesture(ctx: GestureContext, start: Point, additive
   };
 }
 
-/** Expand a set of ids to include all members of any group they belong to. */
+/** Expand a set of ids to include all members of the outermost group each belongs to (nested groups select as one). */
 export function expandGroups(deck: DeckImpl, ids: string[]): string[] {
   const out = new Set<string>();
   for (const id of ids) {
     const el = deck.getElement(id);
     if (!el) continue;
-    if (el.groupId) for (const m of deck.getGroupMembers(el.groupId)) out.add(m);
+    const root = deck.getRootGroupId(id);
+    if (root) for (const m of deck.getGroupMembers(root)) out.add(m);
     else out.add(id);
   }
   return [...out];
