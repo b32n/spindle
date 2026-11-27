@@ -197,7 +197,7 @@ export interface XlsxSheetRef {
   /** The part name, absent when the relationship is missing or points at a part the package does not hold. */
   part?: string;
   /** Every relationship of the sheet part (empty when it has none). */
-  rels: XlsxRelationship[];
+  rels: readonly XlsxRelationship[];
   commentParts: XlsxCommentParts;
 }
 

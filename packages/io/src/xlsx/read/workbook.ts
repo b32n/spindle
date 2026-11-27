@@ -39,15 +39,30 @@ export async function findWorkbookPart(pkg: XlsxPackage): Promise<string> {
   throw new ImportError('corrupt', 'The file has no workbook part (it is not a complete Excel workbook).');
 }
 
-const SHEET_KINDS: Record<string, string> = { worksheet: 'worksheet', chartsheet: 'chartsheet', dialogsheet: 'dialogsheet', xlmacrosheet: 'macrosheet', xlintlmacrosheet: 'macrosheet' };
+/** Sheet kinds by lower-cased relationship kind; a `Map` because the kind is the file's text (`constructor` is not a kind). */
+/**
+ * Whether `part` (as `findWorkbookPart` returned it) is a binary workbook (`.xlsb`: `xl/workbook.bin`), which is not XML and is not
+ * read. `findWorkbookPart` still returns it, so the caller can refuse with a message of its own (S2b) rather than see an empty workbook.
+ */
+export function isBinaryWorkbook(pkg: XlsxPackage, part: string): boolean {
+  return /\.bin$/i.test(part) || /ms-excel\.sheet\.binary\.macroEnabled\.main$/i.test(pkg.contentType(part) ?? '');
+}
+
+const SHEET_KINDS: ReadonlyMap<string, string> = new Map([['worksheet', 'worksheet'], ['chartsheet', 'chartsheet'], ['dialogsheet', 'dialogsheet'], ['xlmacrosheet', 'macrosheet'], ['xlintlmacrosheet', 'macrosheet']]);
 
 const STATES: ReadonlySet<string> = new Set<XlsxSheetState>(['visible', 'hidden', 'veryHidden']);
 
 /** `state` as the file writes it; anything else (or nothing) is visible. */
 const sheetState = (v: string | undefined): XlsxSheetState => (v !== undefined && STATES.has(v) ? (v as XlsxSheetState) : 'visible');
 
-function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage): XlsxCommentParts {
-  const found = (kind: string) => relsOfKind(rels, kind).flatMap((r) => (r.external ? [] : (pkg.resolve(r.target) ?? [])));
+function commentParts(rels: readonly XlsxRelationship[], pkg: XlsxPackage, sheetName: string): XlsxCommentParts {
+  const found = (kind: string) =>
+    relsOfKind(rels, kind).flatMap((r) => {
+      if (r.external) return [];
+      const part = pkg.resolve(r.target);
+      if (part === undefined) pkg.warnings.push(`The sheet "${sheetName}" has ${kind} at ${r.target}, which the package does not contain.`);
+      return part ?? [];
+    });
   const out: XlsxCommentParts = { threadedComments: found('threadedComment') };
   put(out, 'comments', found('comments')[0]);
   put(out, 'vmlDrawing', found('vmlDrawing')[0]);
@@ -69,10 +84,10 @@ async function readSheetRef(el: XmlElement, index: number, workbookRels: readonl
     sheetId: sheetId ?? index + 1,
     state: sheetState(el.attrs.state),
     relId,
-    kind: rel ? (SHEET_KINDS[rel.kind.toLowerCase()] ?? rel.kind) : 'worksheet',
+    kind: rel ? (SHEET_KINDS.get(rel.kind.toLowerCase()) ?? rel.kind) : 'worksheet',
     ...(part === undefined ? {} : { part }),
     rels,
-    commentParts: commentParts(rels, pkg),
+    commentParts: commentParts(rels, pkg, el.attrs.name ?? ''),
   };
 }
 

@@ -98,6 +98,24 @@ describe('XlsxPackage parts', () => {
     expect(await pkg.rels('/xl/book.xml')).toBe(first); // the leading slash is the same part: one cache entry
     expect(await pkg.rels('xl/text.txt')).toEqual([]);
   });
+  it('freezes the cached relationship list and its entries (shared by every caller)', async () => {
+    const pkg = await open();
+    const list = await pkg.rels('xl/book.xml');
+    expect(Object.isFrozen(list)).toBe(true);
+    expect(list.every((r) => Object.isFrozen(r))).toBe(true);
+    expect(() => (list as unknown as unknown[]).push({})).toThrow(TypeError);
+    expect(Object.isFrozen(await pkg.rels('xl/text.txt'))).toBe(true);
+  });
+  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])('inherited object key %s is not a part, a content type or a relationship', async (key) => {
+    const pkg = await open();
+    expect(pkg.resolve(key)).toBeUndefined();
+    expect(pkg.has(`/${key}`)).toBe(false);
+    expect(pkg.contentType(key)).toBeUndefined();
+    expect(pkg.contentType(`x.${key}`)).toBeUndefined();
+    expect(await pkg.bytes(key)).toBeUndefined();
+    expect(await pkg.rels(key)).toEqual([]);
+    expect(pkg.partNames).not.toContain(key);
+  });
   it('keeps the first of two entries whose names differ only by case', async () => {
     const pkg = await XlsxPackage.open(await zipOf({ 'xl/A.xml': '<first/>', 'xl/a.xml': '<second/>' }));
     expect((await pkg.xml('XL/A.XML'))?.name).toBe('first');

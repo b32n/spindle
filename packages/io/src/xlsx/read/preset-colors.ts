@@ -41,15 +41,18 @@ const BASE: Record<string, string> = {
   medVioletRed: 'c71585',
 };
 
-/** Colour for a `prstClr` name, case-sensitive as the schema is; `undefined` for a name that is not a preset. */
-export const PRESET_COLORS: Readonly<Record<string, string>> = (() => {
-  const out: Record<string, string> = {};
+/**
+ * Colour for a `prstClr` name, case-sensitive as the schema is; `get` is `undefined` for a name that is not a preset. A `Map`, not an
+ * object: the name comes from the file, and `constructor` or `__proto__` must not find anything.
+ */
+export const PRESET_COLORS: ReadonlyMap<string, string> = (() => {
+  const out = new Map<string, string>();
   for (const [name, value] of Object.entries(BASE)) {
     const hex = `#${value}`;
-    out[name] = hex;
-    out[name.replace(/^dark/, 'dk').replace(/^light/, 'lt')] = hex;
-    out[name.replace(/(G|g)ray/, '$1rey')] = hex;
-    out[name.replace(/^dark/, 'dk').replace(/^light/, 'lt').replace(/(G|g)ray/, '$1rey')] = hex;
+    out.set(name, hex);
+    out.set(name.replace(/^dark/, 'dk').replace(/^light/, 'lt'), hex);
+    out.set(name.replace(/(G|g)ray/, '$1rey'), hex);
+    out.set(name.replace(/^dark/, 'dk').replace(/^light/, 'lt').replace(/(G|g)ray/, '$1rey'), hex);
   }
   return out;
 })();

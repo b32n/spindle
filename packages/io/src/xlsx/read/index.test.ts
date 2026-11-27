@@ -175,7 +175,7 @@ describe('the internal API surface S2b builds on', () => {
   it('exports the part readers, the package and the colour helpers', () => {
     expect(Object.keys(api).sort()).toEqual([
       'DEFAULT_INDEXED_COLORS', 'DEFAULT_THEME_COLORS', 'PRESET_COLORS', 'XlsxPackage', 'applyTint', 'contentTypeOf', 'decodePart', 'decodeStringEscapes',
-      'findWorkbookPart', 'forEachSharedString', 'numberFormatCode', 'parseContentTypes', 'parseRelationships', 'parseRgb', 'parseSharedStrings',
+      'findWorkbookPart', 'forEachSharedString', 'isBinaryWorkbook', 'numberFormatCode', 'parseContentTypes', 'parseRelationships', 'parseRgb', 'parseSharedStrings',
       'parseStyles', 'parseTheme', 'partsWithContentType', 'readColor', 'readFont', 'readSharedString', 'readWorkbook', 'readWorkbookParts',
       'relsOfKind', 'relsPart', 'resolveColor', 'resolveRelationshipTarget', 'toImportExtras',
     ]);

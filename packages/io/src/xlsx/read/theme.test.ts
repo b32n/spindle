@@ -70,6 +70,20 @@ describe('parseTheme', () => {
     expect(warnings).toEqual([]);
   });
   it('hlsToRgb is the HLS to RGB conversion the tint uses', () => expect(hlsToRgb(0, 0.5, 1)).toBe('#ff0000'));
+  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty', 'valueOf'])('inherited object key %s as a prstClr or sysClr name never leaks into the colours', (key) => {
+    const warnings: string[] = [];
+    const theme = parseTheme(
+      el(`<a:theme ${A}><a:themeElements><a:clrScheme name="x"><a:lt1><a:prstClr val="${key}"/></a:lt1><a:dk1><a:sysClr val="${key}"/></a:dk1></a:clrScheme></a:themeElements></a:theme>`),
+      warnings,
+    );
+    expect(theme.colors).toEqual([...DEFAULT_THEME_COLORS]);
+    expect(theme.colors.every((c) => typeof c === 'string')).toBe(true);
+    expect(warnings).toEqual([
+      'The theme colour lt1 (prstClr) could not be read; the Office default is used.',
+      'The theme colour dk1 (sysClr) could not be read; the Office default is used.',
+    ]);
+    expect(structuredClone(theme)).toEqual(theme);
+  });
   it('a prstClr without a name is unreadable', () => {
     const warnings: string[] = [];
     parseTheme(el(`<a:theme ${A}><a:themeElements><a:clrScheme name="x"><a:dk1><a:prstClr/></a:dk1></a:clrScheme></a:themeElements></a:theme>`), warnings);

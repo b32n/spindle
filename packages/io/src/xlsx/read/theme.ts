@@ -8,7 +8,7 @@ import { numAttr } from './values';
 const SLOTS = ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'];
 
 /** `lastClr` is a system colour's value when last saved; these are the two the Office themes use when it is missing. */
-const SYSTEM_COLORS: Record<string, string> = { windowText: '#000000', window: '#ffffff' };
+const SYSTEM_COLORS: ReadonlyMap<string, string> = new Map([['windowText', '#000000'], ['window', '#ffffff']]);
 
 /** A percentage attribute in 1000ths of a percent (`100000` is 100%) as 0 to 1, or `undefined`. */
 function percent(v: string | undefined): number | undefined {
@@ -34,9 +34,9 @@ function slotColor(slot: XmlElement | undefined): string | undefined {
     case 'srgbClr':
       return parseRgb(a.val);
     case 'sysClr':
-      return parseRgb(a.lastClr) ?? SYSTEM_COLORS[a.val ?? ''];
+      return parseRgb(a.lastClr) ?? SYSTEM_COLORS.get(a.val ?? '');
     case 'prstClr':
-      return PRESET_COLORS[a.val ?? ''];
+      return PRESET_COLORS.get(a.val ?? '');
     case 'scrgbClr': {
       const [r, g, b] = [percent(a.r), percent(a.g), percent(a.b)];
       return r === undefined || g === undefined || b === undefined ? undefined : `#${scrgbByte(r)}${scrgbByte(g)}${scrgbByte(b)}`;

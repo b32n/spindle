@@ -1,6 +1,6 @@
 import { ImportError } from '../../common/import-error';
 import { XlsxPackage } from './package';
-import { findWorkbookPart, readWorkbook } from './workbook';
+import { findWorkbookPart, isBinaryWorkbook, readWorkbook } from './workbook';
 import { MAIN_NS, REL_NS, relsXml, workbookZip, zipOf } from './test-support';
 
 const WB_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml';
@@ -13,6 +13,25 @@ const read = async (bytes: Uint8Array) => {
   const pkg = await XlsxPackage.open(bytes);
   return { info: await readWorkbook(pkg), pkg };
 };
+
+describe('isBinaryWorkbook', () => {
+  it('is true for a .bin workbook part under any name (the conventional xl/workbook.bin is already refused by openSafeZip) and for the binary content type, and false for an XML one', async () => {
+    const bin = await XlsxPackage.open(await zipOf({ '_rels/.rels': relsXml([['rId1', 'officeDocument', 'xl/book.bin']]), 'xl/book.bin': 'BIFF12' }));
+    const part = await findWorkbookPart(bin);
+    expect(part).toBe('xl/book.bin');
+    expect(isBinaryWorkbook(bin, part)).toBe(true);
+    const typed = await XlsxPackage.open(
+      await zipOf({
+        '[Content_Types].xml': '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/xl/book" ContentType="application/vnd.ms-excel.sheet.binary.macroEnabled.main"/></Types>',
+        'xl/book': 'x',
+      }),
+    );
+    expect(isBinaryWorkbook(typed, 'xl/book')).toBe(true);
+    const xml = await XlsxPackage.open(await zipOf({ 'xl/workbook.xml': '<workbook/>' }));
+    expect(isBinaryWorkbook(xml, 'xl/workbook.xml')).toBe(false);
+    expect(isBinaryWorkbook(xml, 'no-extension-or-type')).toBe(false);
+  });
+});
 
 describe('findWorkbookPart', () => {
   const book = `<workbook ${MAIN_NS}/>`;
@@ -136,6 +155,37 @@ describe('readWorkbook: sheets', () => {
   it('words the warning for a sheet without a name too', async () => {
     const { pkg } = await read(await workbookZip('<sheets><sheet sheetId="1"/><sheet sheetId="2" r:id="rId2"/></sheets>', [['rId2', 'worksheet', 'gone.xml']]));
     expect(pkg.warnings).toEqual(['The sheet "" has no usable relationship (no r:id).', 'The sheet "" points at xl/gone.xml, which the package does not contain.']);
+  });
+  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])('a relationship type ending in the inherited key %s keeps that text as the sheet kind', async (key) => {
+    const { info } = await read(
+      await workbookZip('<sheets><sheet name="A" sheetId="1" r:id="rId1"/></sheets>', [['rId1', `http://example.com/rel/${key}`, 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' }),
+    );
+    expect(info.sheets[0].kind).toBe(key);
+  });
+  it('maps the macro sheet kinds and keeps chart and dialog sheets', async () => {
+    const { info } = await read(
+      await workbookZip(
+        '<sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="rId2"/><sheet name="C" sheetId="3" r:id="rId3"/><sheet name="D" sheetId="4" r:id="rId4"/></sheets>',
+        [['rId1', 'chartsheet', 's1.xml'], ['rId2', 'dialogsheet', 's1.xml'], ['rId3', 'XlMacroSheet', 's1.xml'], ['rId4', 'xlIntlMacroSheet', 's1.xml']],
+        { 'xl/s1.xml': '<x/>' },
+      ),
+    );
+    expect(info.sheets.map((s) => s.kind)).toEqual(['chartsheet', 'dialogsheet', 'macrosheet', 'macrosheet']);
+  });
+  it('warns when a comments, VML or threaded-comment target is missing from the package', async () => {
+    const { info, pkg } = await read(
+      await workbookZip('<sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet r:id="rId1"/></sheets>', [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
+        'xl/worksheets/sheet1.xml': '<x/>',
+        'xl/worksheets/_rels/sheet1.xml.rels': relsXml([['rId1', 'comments', '../gone-c.xml'], ['rId2', 'vmlDrawing', '../gone.vml'], ['rId3', 'hyperlink', 'http://x', 'External']]),
+      }),
+    );
+    expect(info.sheets[0].commentParts).toEqual({ threadedComments: [] });
+    expect(pkg.warnings).toEqual([
+      'The sheet "A" has comments at xl/gone-c.xml, which the package does not contain.',
+      'The sheet "A" has vmlDrawing at xl/gone.vml, which the package does not contain.',
+      'The sheet "" has comments at xl/gone-c.xml, which the package does not contain.',
+      'The sheet "" has vmlDrawing at xl/gone.vml, which the package does not contain.',
+    ]);
   });
   it('locates the comment parts of a sheet: notes, their VML drawing and threaded comments; external ones and missing parts are not located', async () => {
     const { info } = await read(

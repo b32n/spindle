@@ -512,7 +512,7 @@ lockstep.
   `definedNames`, `calcPr`, `date1904`), shared strings (rich runs kept), styles (fonts, pattern and gradient fills,
   borders with colours, `numFmts`, `cellXfs`, `cellStyleXfs`, `dxfs`) with theme, indexed and tint colours resolved, and
   comment parts located. Additive types in `@b32nio/spindle-shared/export/xlsx` (`XlsxWorkbookInfo`, `XlsxStyles`, ...) and
-  optional `workbook` and `styles` fields on `SpreadsheetImportResult`; nothing populates them yet. Not wired into
+  optional `workbook`, `styles`, `sharedStrings` and `theme` fields on `SpreadsheetImportResult`; nothing populates them yet. Not wired into
   `importXlsx` (the `exceljs` path is unchanged and import output is identical); the sheet reader and the switch are S2b.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and

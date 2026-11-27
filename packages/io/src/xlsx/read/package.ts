@@ -31,7 +31,7 @@ export class XlsxPackage {
   readonly warnings: string[] = [];
   contentTypes: ContentTypes = EMPTY_CONTENT_TYPES;
   private readonly byLowerName = new Map<string, string>();
-  private readonly relCache = new Map<string, XlsxRelationship[]>();
+  private readonly relCache = new Map<string, readonly XlsxRelationship[]>();
 
   private constructor(private readonly zip: JSZip) {
     for (const name of Object.keys(zip.files)) {
@@ -98,13 +98,16 @@ export class XlsxPackage {
     return root;
   }
 
-  /** The relationships of a part (`''` for the package itself): empty when it has none or its `.rels` is unreadable. */
-  async rels(part: string): Promise<XlsxRelationship[]> {
+  /**
+   * The relationships of a part (`''` for the package itself): empty when it has none or its `.rels` is unreadable. The list is
+   * cached and shared by every caller, so it (and each entry) is frozen: read-only.
+   */
+  async rels(part: string): Promise<readonly XlsxRelationship[]> {
     const owner = part.replace(/^\/+/, '');
     const cached = this.relCache.get(owner);
     if (cached) return cached;
     const root = await this.xml(owner === '' ? '_rels/.rels' : relsPart(owner));
-    const rels = parseRelationships(root, owner);
+    const rels = Object.freeze(parseRelationships(root, owner).map((r) => Object.freeze(r)));
     this.relCache.set(owner, rels);
     return rels;
   }

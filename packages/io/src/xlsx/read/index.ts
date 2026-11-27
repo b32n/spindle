@@ -24,7 +24,7 @@ import { readWorkbook } from './workbook';
 export { XlsxPackage, decodePart, type OpenXlsxOptions } from './package';
 export { parseContentTypes, contentTypeOf, partsWithContentType, type ContentTypes } from './content-types';
 export { parseRelationships, relsOfKind, resolveRelationshipTarget, relsPart } from './relationships';
-export { findWorkbookPart, readWorkbook } from './workbook';
+export { findWorkbookPart, isBinaryWorkbook, readWorkbook } from './workbook';
 export { parseTheme } from './theme';
 export { PRESET_COLORS } from './preset-colors';
 export { parseStyles, numberFormatCode } from './styles';
