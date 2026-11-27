@@ -135,7 +135,10 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(frozen.name).toBe('Frozen');
     expect(frozen.frozen).toEqual({ rows: 2, cols: 1 });
     expect(frozen.colWidths[0]).toBeGreaterThan(frozen.colWidths[1]);
-    expect(frozen.cells.D3).toMatchObject({ value: 7.5, formula: '=SUM(B3:C3)' });
+    // the file's saved result (4.5: this fixture's cached value is not B3 + C3) is what opens; it is not recalculated on load
+    expect(frozen.cells.D3).toMatchObject({ value: 4.5, formula: '=SUM(B3:C3)' });
+    await sheet.enter(2, 1, '3');
+    await sheet.expectValue(2, 3, 7.5);
     expect(frozen.cells.A1.style).toMatchObject({ bold: true });
   });
 
