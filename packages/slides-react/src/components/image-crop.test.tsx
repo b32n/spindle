@@ -70,6 +70,11 @@ describe('ImageCropFields', () => {
     expect(find(tree, 'button')[0]['aria-label']).toBe('Reset crop');
     expect(renderToStaticMarkup(tree)).toContain('role="group"');
   });
+  it('idPrefix namespaces the input ids and label targets', () => {
+    const tree = ImageCropFields({ crop: undefined, onChange: jest.fn(), idPrefix: 'crop-x' });
+    expect(find(tree, 'input').map((i) => i.id)).toEqual(['crop-x-l', 'crop-x-t', 'crop-x-r', 'crop-x-b']);
+    expect(find(tree, 'label').map((l) => l.htmlFor)).toEqual(['crop-x-l', 'crop-x-t', 'crop-x-r', 'crop-x-b']);
+  });
   it('an edit changes one edge and keeps the rest; limits apply; reset zeroes', () => {
     const onChange = jest.fn();
     const crop = { l: 10, t: 0, r: 20, b: 0 };

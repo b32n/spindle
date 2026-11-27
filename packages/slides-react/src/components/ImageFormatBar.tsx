@@ -7,7 +7,7 @@
 import React, { useRef, useState } from 'react';
 import { ImageUp, Link2, FlipHorizontal2, FlipVertical2, Crop } from 'lucide-react';
 import { normalizeCrop, type ImageElement } from '@b32nio/spindle-slides-core';
-import { useImageHooks, readImageFile, storeImageFile, resolveImageUrl } from '@b32nio/spindle-shared/react';
+import { useImageHooks, readImageFile, storeImageFile, resolveImageUrl, useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { useDeck, useSelection, useElement } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
 import { Popover } from './Popover';
@@ -29,16 +29,27 @@ function loadImage(src: string): Promise<{ naturalW: number; naturalH: number }>
   });
 }
 
+/** The crop fields bound live to one image (the overflow-menu modal's content is a static node, so it reads the model itself). */
+export function LiveImageCropFields({ id }: { id: string }): React.ReactElement | null {
+  const deck = useDeck();
+  const el = useElement(id) as ImageElement | undefined;
+  if (!el || el.type !== 'image') return null;
+  return <ImageCropFields idPrefix={`crop-${id}`} crop={el.crop} onChange={(crop) => deck.updateElement(id, { crop })} />;
+}
+
 export function ImageFormatBar(): React.ReactElement | null {
   const deck = useDeck();
   const imageHooks = useImageHooks();
   const selection = useSelection();
   const fileRef = useRef<HTMLInputElement>(null);
   const [cropAnchor, setCropAnchor] = useState<HTMLElement | null>(null);
-  const [cropOpen, setCropOpen] = useState(false);
+  const menu = useToolbarMenu();
+  // The element the popover is open for, so it closes when the selection moves to another image.
+  const [cropOpenFor, setCropOpenFor] = useState<string | null>(null);
   const id = selection.elementIds.length === 1 ? selection.elementIds[0] : null;
   const el = useElement(id ?? '') as ImageElement | undefined;
   if (!id || !el || el.type !== 'image') return null;
+  const cropOpen = cropOpenFor === id;
 
   // `measureSrc` is the local data URL used to read the size; `src` is what is stored
   // (the same data URL, or the URL returned by the host's uploadImage).
@@ -93,15 +104,22 @@ export function ImageFormatBar(): React.ReactElement | null {
           <option key={f.v} value={f.v}>{f.label}</option>
         ))}
       </select>
-      <span ref={setCropAnchor} style={{ display: 'inline-flex' }}>
-        <ToolbarButton title="Crop image" active={!!normalizeCrop(el.crop)} onClick={() => setCropOpen((o) => !o)}>
-          <Crop size={15} />
-        </ToolbarButton>
-      </span>
-      {cropOpen && (
-        <Popover anchor={cropAnchor} onClose={() => setCropOpen(false)}>
-          <ImageCropFields crop={el.crop} onChange={(crop) => deck.updateElement(id, { crop })} />
-        </Popover>
+      {menu.inMenu ? (
+        // Overflow menu / mobile sheet: the anchored Popover would paint under the surface, so use the modal.
+        <MenuRow icon={<Crop size={17} />} label="Crop image" onClick={() => menu.openModal('Crop image', <LiveImageCropFields id={id} />)} />
+      ) : (
+        <>
+          <span ref={setCropAnchor} style={{ display: 'inline-flex' }}>
+            <ToolbarButton title="Crop image" active={!!normalizeCrop(el.crop)} onClick={() => setCropOpenFor(cropOpen ? null : id)}>
+              <Crop size={15} />
+            </ToolbarButton>
+          </span>
+          {cropOpen && (
+            <Popover anchor={cropAnchor} onClose={() => setCropOpenFor(null)}>
+              <ImageCropFields crop={el.crop} onChange={(crop) => deck.updateElement(id, { crop })} />
+            </Popover>
+          )}
+        </>
       )}
       <ToolbarButton title="Flip horizontal" active={!!el.flipH} onClick={() => deck.updateElement(id, { flipH: !el.flipH })}>
         <FlipHorizontal2 size={15} />

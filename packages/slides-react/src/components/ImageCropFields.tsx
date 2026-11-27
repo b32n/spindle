@@ -16,7 +16,9 @@ const field: React.CSSProperties = { height: 26, border: '1px solid rgba(0,0,0,0
 export function ImageCropFields({
   crop,
   onChange,
+  idPrefix = 'crop',
 }: {
+  idPrefix?: string;
   crop: ImageCrop | undefined;
   onChange: (crop: ImageCrop) => void;
 }): React.ReactElement {
@@ -25,9 +27,9 @@ export function ImageCropFields({
     <div role="group" aria-label="Crop image" style={{ display: 'grid', gridTemplateColumns: 'auto 64px', gap: 6, alignItems: 'center', fontSize: 13, color: '#334155' }}>
       {EDGES.map(({ k, label }) => (
         <React.Fragment key={k}>
-          <label htmlFor={`crop-${k}`}>{label} (%)</label>
+          <label htmlFor={`${idPrefix}-${k}`}>{label} (%)</label>
           <input
-            id={`crop-${k}`}
+            id={`${idPrefix}-${k}`}
             type="number"
             min={0}
             max={99}

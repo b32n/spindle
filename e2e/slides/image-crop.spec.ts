@@ -23,7 +23,7 @@ test.describe('slides: image crop', () => {
     await expect(el.locator('img')).toHaveCount(1);
     await expect(el.locator('[data-image-crop]')).toHaveCount(0);
 
-    // The popover is the only crop UI; the button may sit inline or in the "More tools" overflow menu.
+    // The crop UI is an inline popover, or a modal opened from the "More tools" overflow menu.
     await toolbarButton(page, 'Crop image').click();
     await page.getByTestId('image-crop-l').fill('10');
     await page.getByTestId('image-crop-t').fill('20');
@@ -52,6 +52,12 @@ test.describe('slides: image crop', () => {
     await page.getByTestId('image-crop-reset').click();
     await expect(el.locator('[data-image-crop]')).toHaveCount(0);
     await expect(el.locator('img')).toHaveCount(1);
+    // Overflow path: the fields live in a modal that must be dismissed before the menu.
+    const dialog = page.getByRole('dialog', { name: 'Crop image' });
+    if (await dialog.isVisible()) {
+      await dialog.getByRole('button', { name: 'Close' }).click();
+      await dialog.waitFor({ state: 'hidden' });
+    }
     await closeToolbarMenu(page);
   });
 });
