@@ -356,13 +356,14 @@ describe('readOpaqueParts size pre-checks', () => {
     expect(
       await readOpaqueParts(mapOf(new Map([e])), createOpaqueStore({ maxPartBytes: 9 }))
     ).toMatchObject({ loaded: 0 });
-    expect(decodeOpaqueEntry('h', e[1], 10)).toBeDefined();
-    expect(decodeOpaqueEntry('h', e[1], 9)).toBeUndefined();
+    expect(decodeOpaqueEntry('h', e[1], (n) => n <= 10)).toBeDefined();
+    expect(decodeOpaqueEntry('h', e[1], (n) => n <= 9)).toBeUndefined();
   });
 
   it('rejects an entry that would overflow the store before hashing, but accepts one the store already holds', async () => {
     const a = await entryFor(bytes(1, 2, 3, 4));
     const b = await entryFor(bytes(5, 6, 7));
+    const sliceSpy = jest.spyOn(b[1], 'slice');
     const store = createOpaqueStore({ maxTotalBytes: 5 });
     const digest = jest.spyOn(globalThis.crypto.subtle, 'digest');
     try {
@@ -371,6 +372,7 @@ describe('readOpaqueParts size pre-checks', () => {
         rejected: [b[0]],
       });
       expect(digest).toHaveBeenCalledTimes(1);
+      expect(sliceSpy).not.toHaveBeenCalled();
       expect(await readOpaqueParts(mapOf(new Map([a])), store)).toEqual({
         loaded: 1,
         rejected: [],

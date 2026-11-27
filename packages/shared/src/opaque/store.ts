@@ -17,7 +17,7 @@ export const DEFAULT_OPAQUE_LIMITS: OpaqueLimits = {
 export interface OpaqueStoreInternals {
   /** The refusal reason a part of this size would get, or null. */
   refusal(size: number): 'too-large' | 'store-full' | null;
-  /** Insert a part whose hash the caller has already verified. False when it would not fit. */
+  /** Insert a part whose hash the caller has already verified and whose bytes the caller owns (no copy is made). False when it would not fit. */
   insertVerified(part: OpaquePart): boolean;
   /** The stored parts themselves, not copies; callers must not mutate them. */
   entries(): IterableIterator<OpaquePart>;
@@ -92,7 +92,7 @@ export function createOpaqueStore(limits: Partial<OpaqueLimits> = {}): OpaqueSto
     insertVerified(part) {
       if (parts.has(part.hash)) return true;
       if (fits(part.bytes.byteLength)) return false;
-      parts.set(part.hash, copyOf(part));
+      parts.set(part.hash, part);
       total += part.bytes.byteLength;
       return true;
     },

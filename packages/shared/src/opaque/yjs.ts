@@ -31,17 +31,17 @@ export function encodeOpaqueEntry(part: OpaquePart): Uint8Array {
 }
 
 /**
- * Inverse of `encodeOpaqueEntry`; `undefined` for a malformed value, or one whose part bytes exceed `maxPartBytes`
- * (checked from the header before anything is copied). The hash is not checked here (see `readOpaqueParts`).
+ * Inverse of `encodeOpaqueEntry`; `undefined` for a malformed value, or one whose part length `accepts` refuses
+ * (judged from the header before anything is copied). The hash is not checked here (see `readOpaqueParts`).
  */
 export function decodeOpaqueEntry(
   hash: string,
   value: unknown,
-  maxPartBytes = Infinity
+  accepts: (partBytes: number) => boolean = () => true
 ): OpaquePart | undefined {
   if (!(value instanceof Uint8Array) || value.byteLength < 2) return undefined;
   const ctLen = (value[0] << 8) | value[1];
-  if (value.byteLength < 2 + ctLen || value.byteLength - 2 - ctLen > maxPartBytes) return undefined;
+  if (value.byteLength < 2 + ctLen || !accepts(value.byteLength - 2 - ctLen)) return undefined;
   try {
     return {
       hash,
@@ -72,8 +72,8 @@ export interface OpaqueReadResult {
 }
 
 /**
- * Load every valid part of the map into the store. A remote peer's data is untrusted: an entry is rejected before any
- * copy or hash when its part is over the per-part cap or would not fit the store, and otherwise re-hashed against its key.
+ * Load every valid part of the map into the store. A remote peer's data is untrusted: an entry is rejected from its header, before any
+ * copy or hash, when its part is over the per-part cap or would not fit the store, and otherwise re-hashed against its key.
  * Rejects (does not skip) only when SubtleCrypto is unavailable, which is the host's problem, not the peer's.
  */
 export async function readOpaqueParts(
@@ -86,10 +86,9 @@ export async function readOpaqueParts(
   const result: OpaqueReadResult = { loaded: 0, rejected: [] };
   for (const [key, value] of entries) {
     const part = isOpaqueHash(key)
-      ? decodeOpaqueEntry(key, value, store.limits.maxPartBytes)
+      ? decodeOpaqueEntry(key, value, (n) => store.has(key) || !trusted.refusal(n))
       : undefined;
-    const fits = part && (store.has(key) || !trusted.refusal(part.bytes.byteLength));
-    if (!part || !fits || (await hashBytes(part.bytes)) !== key || !trusted.insertVerified(part))
+    if (!part || (await hashBytes(part.bytes)) !== key || !trusted.insertVerified(part))
       result.rejected.push(key);
     else result.loaded++;
   }

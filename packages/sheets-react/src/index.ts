@@ -19,12 +19,16 @@ export * from './context/WorkbookContext';
 // Hooks
 export * from './hooks/useComments';
 
-
 // File open / download helpers (XLSX, CSV)
 export * from './file-io';
 
 // Import loss report (what an Open would not bring across) — see inspectWorkbookFile / inspectDocumentFile.
 export { hasImportLoss, describeImportLoss, groupImportLoss } from '@b32nio/spindle-shared';
-export type { ImportLossReport, ImportLossItem, ImportLossFormat, ImportLossState } from '@b32nio/spindle-shared';
+export type {
+  ImportLossReport,
+  ImportLossItem,
+  ImportLossFormat,
+  ImportLossState,
+} from '@b32nio/spindle-shared';
 export { ImportConfirmDialog } from '@b32nio/spindle-shared/react';
 export type { ImportConfirmation, ImportConfirmDialogProps } from '@b32nio/spindle-shared/react';
