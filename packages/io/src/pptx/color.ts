@@ -99,3 +99,13 @@ export function parseColor(el: XmlElement | undefined, colorMap: PptxColorMap = 
       return undefined;
   }
 }
+
+/** A layout's `p:clrMapOvr/a:overrideClrMapping`: the roles it names a valid slot for replace the master's, the others stay. */
+export function overrideColorMap(base: PptxColorMap, override: XmlElement | undefined): PptxColorMap {
+  const map = { ...base };
+  for (const role of Object.keys(map) as (keyof PptxColorMap)[]) {
+    const slot = override?.attrs[role];
+    if (slot !== undefined && SLOT_SET.has(slot)) map[role] = slot as PptxThemeSlot;
+  }
+  return map;
+}
