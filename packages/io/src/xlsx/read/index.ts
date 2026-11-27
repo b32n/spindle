@@ -17,7 +17,7 @@ import { readWorkbook } from './workbook';
 //
 // Streaming-ready (S20): every part reader is a pure function from a parsed part to plain, structured-cloneable data, with no
 // DOM and no shared state, so the whole reader can run in a worker. Workbook-level parts are small and use the bounded element
-// tree. `sheetData` is not read here: `readSheet` reads it as an event stream (`sax.ts`) from `pkg.text()`. Shared strings can be
+// tree. `sheetData` is not read here: `readSheet` reads it as a forward-only event stream (`sax.ts`, no tree) from `pkg.text()`, which holds the part as one string. Shared strings can be
 // large, so `forEachSharedString` pushes items to a callback instead of requiring the list.
 // ---------------------------------------------------------------------------
 

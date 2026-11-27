@@ -3,8 +3,9 @@ import { XML_LIMITS } from '../../common/safe-xml';
 
 // ---------------------------------------------------------------------------
 // A forward-only XML event scanner for the one part that can be large, a worksheet's `sheetData`. It reads a string and calls
-// back for each start tag, end tag and run of character data, building nothing (no tree), so memory stays flat however many
-// cells there are, and a worker (S20) can feed it chunks of the same shape later.
+// back for each start tag, end tag and run of character data, never building a tree: what a caller holds is what it keeps from
+// the events. The text itself is held whole (the package hands a part over as one string, so memory is at least the part's size);
+// the scanner reads it once, front to back, and could be fed chunks of the same shape by a worker later (S20).
 //
 // - Names are local (the prefix is dropped), so `<x:c>` reads like `<c>`; attributes likewise (`r:id` is `id`; an unprefixed
 //   attribute of the same name wins). `xmlns` attributes are not reported.

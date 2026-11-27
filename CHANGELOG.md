@@ -516,8 +516,8 @@ lockstep.
   `importXlsx` (the `exceljs` path is unchanged and import output is identical); the sheet reader and the switch are S2b.
 - **XLSX import uses the own reader (S2b).** `importXlsx` now reads a workbook with the own package reader (`jszip` +
   `fast-xml-parser`, no new dependency) instead of `exceljs`; export is unchanged (still `exceljs`). New sheet reader:
-  `sheetData` as a forward-only event stream (shared formulas expanded, array formulas kept with their range, inline and
-  shared strings, ISO dates), `sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols` (with default styles), row
+  `sheetData` read as forward-only events with no tree (the part's text is still held as one string; shared formulas
+  expanded, array formulas kept with their range, inline and shared strings, ISO dates), `sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols` (with default styles), row
   attributes, `mergeCells`, `hyperlinks` and `extLst` (raw). Theme, indexed and tinted colours now reach cell styles as
   `#rrggbb` (plain black text is left to the editor), so the loss id `xlsx.styles.themeColors` is removed. Workbooks
   from openpyxl with an image, a chart or a comment now import (they made the old reader throw), as do files with a
@@ -525,7 +525,13 @@ lockstep.
   sheets whose names clash (later ones are renamed `Name (2)` with a warning). A shared formula the old reader read as a
   plain value now has its formula, and a saved result of 0 or FALSE is kept. A binary `.xlsb` is refused with a message
   that says to save as `.xlsx`. Additive fields on the result: `workbook`, `styles`, `sharedStrings`, `theme`,
-  per-sheet `details` and per-cell `styleIndex`, `sharedString` and `formulaInfo`. The `exceljs` reader stays in the tree,
+  per-sheet `details` and per-cell `styleIndex`, `sharedString` and `formulaInfo`. Bounded against hostile files: a formula
+  over 8192 characters is dropped and shared formulas stop expanding past `ImportLimits.maxSheetFormulaChars` (16 Mi
+  characters per sheet; the cells keep their value, one warning), merges and hyperlinks are applied in one sweep (thousands
+  of huge ranges stay fast), and cells without an address are clamped to the sheet. Numbers are plain decimals only (no
+  `Infinity` or hex), `t="d"` dates are validated, `_xHHHH_` escapes are decoded in inline and formula strings, `<f/>`
+  without text is no formula, shared-formula names may use letters of any script, `frozenSplit` panes freeze, and
+  `activeSheetIndex` follows the sheets that were read. The `exceljs` reader stays in the tree,
   unused, until S14; `reader-differential.test.ts` runs both over the corpus and over generated workbooks. S2 is
   complete with this entry.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through

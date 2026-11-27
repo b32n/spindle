@@ -184,6 +184,7 @@ Limits (options on the importer, `limits`; defaults `DEFAULT_IMPORT_LIMITS`): pa
 (256 MB for an XML part), compression ratio 200:1. The ratio is only judged for a part (or package) that inflates to more than 16 MB: smaller parts cannot cost more
 than that however well they compress, and legitimate files do contain tiny, very regular parts. The limits are checked from the zip's declared sizes first and then
 again while each part is inflated, so a header that lies about a size cannot get a bomb inflated.
+For XLSX, `maxSheetFormulaChars` (16 Mi characters) also bounds the formula text one worksheet may gain by expanding shared formulas: past it the remaining cells keep their saved value and lose the formula, with one warning for the sheet. A formula over 8192 characters (Excel's own limit) is dropped the same way.
 
 XML is parsed with entities never expanded, the DOCTYPE removed and nesting capped at 256.
 

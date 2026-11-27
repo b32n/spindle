@@ -24,7 +24,7 @@ export function decodePart(bytes: Uint8Array): string {
  * and is recorded in `warnings`.
  *
  * Parts are read when asked for and nothing is kept (apart from the small relationship lists), so a reader can take the
- * workbook-level parts through `xml()` and leave a large `sheetData` to a streaming reader over `text()`/`bytes()` (`readSheet`, S2b; a worker, S20).
+ * workbook-level parts through `xml()` and leave a large `sheetData` to a forward-only event reader over `text()`/`bytes()` (`readSheet`, S2b; a worker, S20).
  */
 export class XlsxPackage {
   /** Non-fatal problems found while reading, in the order met. */
