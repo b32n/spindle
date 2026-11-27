@@ -36,6 +36,8 @@ interface SlideSpec {
   relId?: string;
   /** Write the `p:sldId` without an `id`. */
   noId?: boolean;
+  /** Write this `p:sldId/@id` instead of 256 + index. */
+  id?: string;
 }
 
 interface Spec {
@@ -64,7 +66,7 @@ async function build(spec: Spec = {}): Promise<Uint8Array> {
   slides.forEach((s, i) => {
     const n = i + 1;
     presRels.push(rel(`rId${n}`, 'slide', `slides/slide${n}.xml`));
-    ids.push(`<p:sldId ${s.noId ? '' : `id="${256 + i}" `}r:id="${s.relId ?? `rId${n}`}"/>`);
+    ids.push(`<p:sldId ${s.noId ? '' : `id="${s.id ?? 256 + i}" `}r:id="${s.relId ?? `rId${n}`}"/>`);
     if (!s.missing)
       zip.file(
         `ppt/slides/slide${n}.xml`,
@@ -133,7 +135,7 @@ describe('importPptx: the presentation', () => {
     expect((await read({ size: '<p:sldSz cx="9144000" cy="6858000" type="screen4x3"/>' })).slideSize).toEqual({ w: 960, h: 720 });
     expect((await read({ size: '<p:sldSz cx="6858000" cy="12192000"/>' })).slideSize).toEqual({ w: 720, h: 1280 });
     expect((await read({ size: '<p:sldSz cx="10692000" cy="7560000"/>' })).slideSize).toEqual({ w: 1123, h: 794 });
-    for (const size of ['', '<p:sldSz cx="0" cy="6858000"/>', '<p:sldSz cx="abc" cy="1"/>', '<p:sldSz cx="12192000"/>']) {
+    for (const size of ['', '<p:sldSz cx="99999999999999" cy="6858000"/>', '<p:sldSz cx="12192000" cy="51206401"/>', '<p:sldSz cx="0" cy="6858000"/>', '<p:sldSz cx="abc" cy="1"/>', '<p:sldSz cx="12192000"/>']) {
       const r = await read({ size });
       expect(r.slideSize).toEqual({ w: 1280, h: 720 });
       expect(r.warnings).toEqual(['The presentation does not give a usable slide size; 16:9 (1280 x 720) is used.']);
@@ -155,6 +157,16 @@ describe('importPptx: the presentation', () => {
       'Slide 4 could not be read (the part is damaged); it is kept as an empty placeholder.',
       'Slide 5 could not be read (its relationship is missing); it is kept as an empty placeholder.',
     ]);
+  });
+
+  it('accepts PowerPoint\'s largest slide size and no more', async () => {
+    expect((await read({ size: '<p:sldSz cx="51206400" cy="51206400"/>' })).slideSize).toEqual({ w: 5376, h: 5376 });
+  });
+
+  it('gives a slide without a usable id a number no other slide has', async () => {
+    const r = await read({ slides: [{ noId: true }, { id: '256' }, { id: 'x' }, { id: '257' }, { noId: true }] });
+    expect(r.slides.map((s) => s.pptxId)).toEqual(['258', '256', '259', '257', '260']);
+    expect(new Set(r.slides.map((s) => s.pptxId)).size).toBe(5);
   });
 
   it('copes with list entries and overrides that carry no attributes', async () => {
@@ -235,8 +247,14 @@ describe('importPptx: the main part', () => {
   });
 
   it('reads macro-enabled and template main parts by their content type', async () => {
-    for (const type of ['application/vnd.ms-powerpoint.presentation.macroEnabled.main+xml', 'application/vnd.openxmlformats-officedocument.presentationml.template.main+xml']) {
-      const r = await read({ rootRels: rels([]), contentTypes: `<Types xmlns="${CT}"><Override PartName="/ppt/presentation.xml" ContentType="${type.replace('ms-powerpoint.presentation.macroEnabled', 'openxmlformats-officedocument.presentationml.presentation')}"/></Types>` });
+    const types = [
+      'application/vnd.ms-powerpoint.presentation.macroEnabled.main+xml',
+      'application/vnd.ms-powerpoint.template.macroEnabled.main+xml',
+      'application/vnd.ms-powerpoint.slideshow.macroEnabled.main+xml',
+      'application/vnd.openxmlformats-officedocument.presentationml.template.main+xml',
+    ];
+    for (const type of types) {
+      const r = await read({ rootRels: rels([]), contentTypes: `<Types xmlns="${CT}"><Override PartName="/ppt/presentation.xml" ContentType="${type}"/></Types>` });
       expect(r.slides).toHaveLength(1);
     }
   });

@@ -27,7 +27,7 @@ export type PptxThemeSlot =
 /**
  * A colour as the file writes it, with the transforms the editor can carry: a theme slot (after the colour map has
  * turned `bg1`, `tx1` and friends into a slot) with `lumMod` / `lumOff` / `alpha`, or a literal. `lumMod`, `lumOff` and
- * `alpha` are fractions (`lumMod val="75000"` is 0.75).
+ * `alpha` are fractions (`lumMod val="75000"` is 0.75); `alpha` is left out when the colour is opaque.
  */
 export type PptxColor =
   | { kind: 'theme'; slot: PptxThemeSlot; alpha?: number; lumMod?: number; lumOff?: number }

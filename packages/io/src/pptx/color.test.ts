@@ -1,4 +1,4 @@
-import { DEFAULT_COLOR_MAP, THEME_SLOTS, colorElement, parseColor, parseColorMap, toHex } from './color';
+import { DEFAULT_COLOR_MAP, THEME_SLOTS, colorElement, parseColor, parseColorMap, presetHex, toHex } from './color';
 import { parseXml, type XmlElement } from '../xlsx/xml';
 
 const A = 'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"';
@@ -45,7 +45,30 @@ describe('parseColor', () => {
   it('reads preset names, black for one it does not know', () => {
     expect(color('<a:prstClr val="red"/>')).toEqual({ kind: 'rgb', hex: '#FF0000' });
     expect(color('<a:prstClr/>')).toEqual({ kind: 'rgb', hex: '#000000' });
-    expect(color('<a:prstClr val="mediumOrchid"/>')).toEqual({ kind: 'rgb', hex: '#000000' });
+    expect(color('<a:prstClr val="notAColour"/>')).toEqual({ kind: 'rgb', hex: '#000000' });
+    expect(color('<a:prstClr val="toString"/>')).toEqual({ kind: 'rgb', hex: '#000000' });
+  });
+
+  it('reads the whole preset table, in the dk / lt / med and grey spellings', () => {
+    const hex = (v: string) => (color(`<a:prstClr val="${v}"/>`) as { hex: string }).hex;
+    expect(hex('mediumOrchid')).toBe('#BA55D3');
+    expect(hex('medOrchid')).toBe('#BA55D3');
+    expect(hex('dkBlue')).toBe('#00008B');
+    expect(hex('medBlue')).toBe('#0000CD');
+    expect(hex('ltBlue')).toBe('#ADD8E6');
+    expect(hex('dkRed')).toBe('#8B0000');
+    expect(hex('dkGrey')).toBe('#A9A9A9');
+    expect(hex('ltGoldenrodYellow')).toBe('#FAFAD2');
+    expect(hex('whiteSmoke')).toBe('#F5F5F5');
+    for (const name of ['aliceBlue', 'yellowGreen', 'dkSlateGray', 'ltSteelBlue', 'medSpringGreen', 'dkOliveGreen']) expect(hex(name)).not.toBe('#000000');
+    expect(presetHex(undefined)).toBeUndefined();
+    expect(presetHex('black')).toBe('000000');
+  });
+
+  it('keeps alpha only when the colour is not opaque', () => {
+    expect(color('<a:srgbClr val="FF0000"><a:alpha val="50000"/></a:srgbClr>')).toEqual({ kind: 'rgb', hex: '#FF0000', alpha: 0.5 });
+    expect(color('<a:srgbClr val="FF0000"><a:alpha val="100000"/></a:srgbClr>')).toEqual({ kind: 'rgb', hex: '#FF0000' });
+    expect(color('<a:srgbClr val="FF0000"><a:alpha val="-5000"/></a:srgbClr>')).toEqual({ kind: 'rgb', hex: '#FF0000', alpha: 0 });
   });
 
   it('turns a scheme colour into a slot through the colour map, with luminance transforms', () => {

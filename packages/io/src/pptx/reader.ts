@@ -16,7 +16,7 @@ export interface ImportPptxOptions {
 const OFFICE_DOCUMENT = 'officeDocument';
 const DEFAULT_SLIDE_SIZE = { w: 1280, h: 720 };
 /** The part of a content type that says what the main part is. */
-const PRESENTATION_TYPES = /presentationml\.(?:presentation|template|slideshow)\.main\+xml$/;
+const PRESENTATION_TYPES = /(?:presentationml\.(?:presentation|template|slideshow)|ms-powerpoint\.(?:presentation|template|slideshow)\.macroEnabled)\.main\+xml$/;
 const PRESENTATION_DEFAULT = 'ppt/presentation.xml';
 
 /**
@@ -45,12 +45,15 @@ async function findPresentation(pkg: OoxmlPackage): Promise<string | undefined> 
   return pkg.has(PRESENTATION_DEFAULT) ? PRESENTATION_DEFAULT : undefined;
 }
 
-/** `ppt/presentation.xml` -> its own `p:sldSz` in px, or the default 16:9 with a warning when it is missing or absurd. */
+/** PowerPoint's largest slide dimension (51206400 EMU, 56 inches) in px. */
+const MAX_SLIDE_PX = 5376;
+
+/** `ppt/presentation.xml` -> its own `p:sldSz` in px, or the default 16:9 with a warning when it is missing, under 1 px or over what PowerPoint allows. */
 function readSize(presentation: XmlElement, warn: (m: string) => void): { w: number; h: number } {
   const size = kid(presentation, 'sldSz');
   const w = emuToPx(size?.attrs.cx);
   const h = emuToPx(size?.attrs.cy);
-  if (w !== undefined && h !== undefined && w >= 1 && h >= 1) return { w: Math.round(w), h: Math.round(h) };
+  if (w !== undefined && h !== undefined && w >= 1 && h >= 1 && w <= MAX_SLIDE_PX && h <= MAX_SLIDE_PX) return { w: Math.round(w), h: Math.round(h) };
   warn('The presentation does not give a usable slide size; 16:9 (1280 x 720) is used.');
   return { ...DEFAULT_SLIDE_SIZE };
 }
@@ -90,11 +93,21 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
 /** The slides in `p:sldIdLst` order. A slide whose relationship or part is missing, or whose XML is damaged, stays in the list with an `error`. */
 async function readSlides(pkg: OoxmlPackage, presentation: XmlElement, rels: Map<string, Rel>, warn: (m: string) => void): Promise<PptxSlide[]> {
   const slides: PptxSlide[] = [];
-  for (const entry of kids(kid(presentation, 'sldIdLst'), 'sldId')) {
+  const entries = kids(kid(presentation, 'sldIdLst'), 'sldId');
+  // `attrs.id` is `r:id` when `id` is absent, so only a number counts
+  const realId = (e: XmlElement): string | undefined => (/^\d+$/.test(e.attrs.id ?? '') ? e.attrs.id : undefined);
+  const used = new Set(entries.map(realId));
+  let synthetic = 255;
+  // a slide without a usable id gets the next number no other slide uses, so ids (sections, K9c timing) stay unique
+  const nextId = (): string => {
+    do synthetic++;
+    while (used.has(String(synthetic)));
+    return String(synthetic);
+  };
+  for (const entry of entries) {
     const number = slides.length + 1;
     const rel = rels.get(entry.rattrs?.id ?? '');
-    // `attrs.id` is `r:id` when `id` is absent, so only a number counts
-    const pptxId = /^\d+$/.test(entry.attrs.id ?? '') ? (entry.attrs.id as string) : String(255 + number);
+    const pptxId = realId(entry) ?? nextId();
     const failed = (partName: string, error: string): PptxSlide => {
       warn(`Slide ${number} could not be read (${error}); it is kept as an empty placeholder.`);
       return { pptxId, partName, error };
