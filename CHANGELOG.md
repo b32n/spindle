@@ -1020,6 +1020,10 @@ lockstep.
   `XlsxFormulaInfo.dynamic`, `DetectXlsxLossOptions.isFormulaEvaluable`, `ImportFromXlsxOptions`, `WorkbookImpl.getSpillRegion`. The sheets
   collaboration layout is now version 2 (a client at version 1 refuses a version 2 room); `documentation/collaboration.md` has the rules.
   The values golden counts `cachedOnly` formulas where it counted `passthrough` ones, and measures the engine with a recalculating import.
+  A formula whose result is an error (`#DIV/0!`, `#N/A`, `#NAME?`, `#SPILL!`, `#CALC!`...) is written as an error value (`t="e"`), not as text,
+  for cached-only and ordinary formulas alike. A legacy array formula whose range does not start at its own cell is read as a one-cell
+  formula, with a warning; a one-row or one-column result is repeated across a bigger array-entered range, as Excel does. The `_xlfn.` table gains
+  `ENCODEURL`, `VALUETOTEXT`, `IMAGE`, `STOCKHISTORY`, `GROUPBY`, `PIVOTBY` and `PERCENTOF` and loses `QUERYSTRING` (not an Excel function).
 
 ## [0.4.0] - 2026-10-26
 
