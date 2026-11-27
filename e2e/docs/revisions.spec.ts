@@ -351,6 +351,8 @@ test.describe('docs: tracked changes in a .docx', () => {
     const before = await items.count();
     await panel(page).getByRole('button', { name: 'Accept change' }).first().click();
     await expect(items).toHaveCount(before - 1);
+    // The edit lays the page out again, and it still shows the Original view (no markup drawn).
+    await expect(markup(doc)).toHaveCount(0);
 
     // One click on the banner goes back to All markup, where the document can be edited again.
     await banner.getByRole('button', { name: 'Switch to All markup' }).click();

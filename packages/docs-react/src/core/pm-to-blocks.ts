@@ -57,6 +57,8 @@ export interface ConversionOptions {
    * every position of the document stays one position on the page.
    */
   revisionView?: RevisionView;
+  /** Colours some authors of tracked changes are drawn in (in a shared document, the colours of their cursors); the others share out the palette. */
+  authorColors?: ReadonlyMap<string, string>;
 }
 
 /** How tracked changes are shown (see `ConversionOptions.revisionView`). */
@@ -81,15 +83,25 @@ const noteCounts = { footnote: 0, endnote: 0 };
 let convertedDoc: PmNode | null = null;
 let authorColors: Map<string, string> | null = null;
 let convertedView: RevisionView = 'markup';
+let preferredColors: ReadonlyMap<string, string> | undefined;
 
 function authorColorOf(author: string): string {
-  authorColors ??= convertedDoc ? assignAuthorColors(documentRevisionAuthors(convertedDoc)) : new Map();
+  authorColors ??= convertedDoc ? assignAuthorColors(documentRevisionAuthors(convertedDoc), preferredColors) : new Map();
   return authorColors.get(author) ?? authorColor(author);
 }
 
-function resetNotes(doc: PmNode, view: RevisionView = 'markup'): void {
+/** Lets go of the document and the colours of the conversion that ended, so they are not kept alive (nor leak into another editor's conversion). */
+function releaseConversion(): void {
+  convertedDoc = null;
+  convertedView = 'markup';
+  preferredColors = undefined;
+  authorColors = null;
+}
+
+function resetNotes(doc: PmNode, view: RevisionView = 'markup', colors?: ReadonlyMap<string, string>): void {
   convertedDoc = doc;
   convertedView = view;
+  preferredColors = colors;
   authorColors = null;
   noteEntries = [];
   noteCounts.footnote = 0;
@@ -157,23 +169,26 @@ export function proseMirrorToFlowBlocks(
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes(doc, options.revisionView);
-  
-  const blocks: FlowBlock[] = [];
-  
-  doc.forEach((node, _offset) => {
-    const block = nodeToFlowBlock(node);
-    if (block) {
-      if (Array.isArray(block)) {
-        blocks.push(...block);
-      } else {
-        blocks.push(block);
+  resetNotes(doc, options.revisionView, options.authorColors);
+  try {
+    const blocks: FlowBlock[] = [];
+
+    doc.forEach((node, _offset) => {
+      const block = nodeToFlowBlock(node);
+      if (block) {
+        if (Array.isArray(block)) {
+          blocks.push(...block);
+        } else {
+          blocks.push(block);
+        }
       }
-    }
-  });
-  blocks.push(...notesArea(0));
-  
-  return blocks;
+    });
+    blocks.push(...notesArea(0));
+
+    return blocks;
+  } finally {
+    releaseConversion();
+  }
 }
 
 /** The flow blocks of a document and which blocks belong to which section. */
@@ -196,7 +211,15 @@ export function proseMirrorToSectionedFlowBlocks(doc: PmNode, options: Conversio
   if (options.resetIds) {
     resetBlockIdCounter();
   }
-  resetNotes(doc, options.revisionView);
+  resetNotes(doc, options.revisionView, options.authorColors);
+  try {
+    return sectionedConversion(doc, options);
+  } finally {
+    releaseConversion();
+  }
+}
+
+function sectionedConversion(doc: PmNode, options: ConversionOptions): SectionedFlowBlocks {
   const blocks: FlowBlock[] = [];
   const sections: SectionedFlowBlocks['sections'] = [];
   const footnotes: SectionedFlowBlocks['footnotes'] = [];

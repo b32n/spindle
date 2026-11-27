@@ -21,6 +21,7 @@ import { Toolbar } from './Toolbar';
 import { CommentsSidebar } from './CommentsSidebar';
 import { RevisionViewBanner, isEditLocked } from './RevisionViewBanner';
 import { RevisionLegend } from './RevisionLegend';
+import { authorsWithColors, sameAuthorColors, suggestionAuthor, watchAuthorColors } from '../core/collab-authors';
 import { ReviewPanel } from './ReviewPanel';
 import { ModeSwitch, headerFooterNotice, type EditorMode } from './ModeSwitch';
 import { Ruler } from './Ruler';
@@ -102,6 +103,8 @@ interface DocumentEditorProps {
   showModeSwitch?: boolean;
 }
 
+const NO_COLORS: ReadonlyMap<string, string> = new Map();
+
 const defaultActiveMarks: ActiveMarks = {
   bold: false,
   italic: false,
@@ -158,6 +161,18 @@ export const DocumentEditor = memo(function DocumentEditor({
   const notice = noticeState?.text ?? null;
   const showNotice = useCallback((text: string | null) => setNoticeState((prev) => (text === null ? null : { text, n: (prev?.n ?? 0) + 1 })), []);
   const directNoticeShown = useRef(false);
+  // In a shared document the author of a suggestion is the name the user joined under, and people who are in the room are drawn in the colour of their cursor.
+  // (Attaching collaboration emits a documentChange, which re-renders the editor through the document context, so the handle is read again.)
+  const collabHandle = docModel.getCollabHandle();
+  const [presence, setPresence] = useState<ReadonlyMap<string, string>>(NO_COLORS);
+  useEffect(() => {
+    if (!collabHandle) {
+      setPresence(NO_COLORS);
+      return;
+    }
+    return watchAuthorColors(collabHandle, (next) => setPresence((prev) => (sameAuthorColors(prev, next) ? prev : next)));
+  }, [collabHandle]);
+  const suggestionAuthorName = suggestionAuthor(collabHandle, currentUser.name);
   const handleModeChange = useCallback((next: EditorMode) => {
     setOwnMode(next);
     onModeChange?.(next);
@@ -188,9 +203,12 @@ export const DocumentEditor = memo(function DocumentEditor({
   const [activePageInfo, setActivePageInfo] = useState<ActivePageInfo | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [showComments, setShowComments] = useState(false);
-  const [authors, setAuthors] = useState<RevisionAuthor[]>([]);
   const [changes, setChanges] = useState<ReviewChange[]>([]);
   const [palette, setPalette] = useState<string[]>([]);
+  // The authors of the changes and how many each has (kept while the list of changes is not), then in the colour the markup
+  // shows them in: shared out among every author of the document, with the cursor colours of those who are in the room first.
+  const [authorCounts, setAuthorCounts] = useState<RevisionAuthor[]>([]);
+  const authors = useMemo(() => authorsWithColors(authorCounts, palette, presence), [authorCounts, palette, presence]);
   const [showReview, setShowReview] = useState(false);
   const showReviewRef = useRef(false);
   const [revisionView, setRevisionView] = useState<RevisionView>(initialRevisionView);
@@ -377,7 +395,7 @@ export const DocumentEditor = memo(function DocumentEditor({
       const next = revisionAuthors(nextChanges, everyone);
       setPalette((prev) => (prev.length === everyone.length && prev.every((name, i) => name === everyone[i]) ? prev : everyone));
       // Keep the old list (and skip a render) when nothing in it changed.
-      setAuthors((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
+      setAuthorCounts((prev) => (sameRevisionAuthors(prev, next) ? prev : next));
       // The list of changes (new ids with every edit) is only kept while the panel shows it, so typing does not render the editor.
       if (showReviewRef.current) setChanges(nextChanges);
     }, AUTHORS_DELAY_MS);
@@ -724,7 +742,8 @@ export const DocumentEditor = memo(function DocumentEditor({
           collabHandle={docModel.getCollabHandle()}
           revisionView={revisionView}
           suggesting={mode === 'suggesting' && !readOnly}
-          suggestAuthor={currentUser.name || 'Unknown'}
+          suggestAuthor={suggestionAuthorName}
+          authorColors={presence}
           onSuggestionNotice={handleSuggestionNotice}
         />
 
@@ -749,6 +768,7 @@ export const DocumentEditor = memo(function DocumentEditor({
               onResolve={hostReadOnly ? undefined : handleResolve}
               onGoTo={handleGoToChange}
               onClose={() => setShowReview(false)}
+              authorColors={presence}
             />
           </div>
         )}

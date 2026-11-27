@@ -386,6 +386,22 @@ lockstep.
   a comment added inside someone's change is not recorded; text composed with an IME is recorded like typing but has not been tried with a real input method), and a change is continued by the same author name, with no time limit, so two people with one display name
   share a change. `RevisionLegend` keeps its own band unless drawn with the new `bare` prop (which `DocumentEditor` uses). Formatting text that carries another person's formatting change is applied directly, with a notice (rejecting their change brings back the formatting from before it). The mode switch group is labelled "Editor mode", and the notice is announced through a live region that is always present.
 
+- **Tracked changes between collaborators.** In a shared document the author of a suggestion is the name the user joined under
+  (`CollabIdentity.displayName`, before the provider's `currentUser`), and people who are in the room are drawn in the colour of
+  their cursor: new `collabAuthorColors(handle)` (docs-core, also from `@b32nio/spindle-docs-core/collab`) reads it from the
+  presence (awareness), `assignAuthorColors`, `revisionAuthors` take a `preferred` map of such colours (the others share out the
+  palette, never a taken colour), `ConversionOptions.authorColors`, `TrueLayoutEditor.authorColors` and `ReviewPanel.authorColors`
+  carry it, and the legend, the panel and the markup agree. The collaboration `schemaVersion` is not raised again (7, for the
+  tracked-change marks and attributes): a client from before them refuses to join such a room. Suggestions, and accepting and
+  rejecting them, are ordinary edits of marks and attributes, so they merge, converge and survive being made offline like other
+  edits (tests with three and four clients, concurrent accepts and rejects of one change, and a person who was never part of
+  the suggestions settling them all; two people splitting and deleting the mark of one paragraph at once keep both suggestions
+  and settle them one by one, also in the browser, with the two offline). Limits: two people suggesting the *same* kind of change on one
+  paragraph mark or row at once leave one of the two (the same everywhere), and when one splits a paragraph while another marks
+  its mark, the other's record lands on the first half; text a person adds to a change while someone else settles it is settled
+  with it; two people with one display name are one author, in the smallest of their cursor colours (and a blank joined name falls
+  back to the current user). Comments still carry the provider's `currentUser`, not the name the user joined under.
+
 ### Changed
 
 - **DOCX loss report: `docx.trackedInsertions`, `docx.trackedDeletions` and `docx.trackedMoves` are gone, and `docx.formattingRevisions`
@@ -423,6 +439,9 @@ lockstep.
 
 ### Fixed
 
+- **Editing no longer lays the document out with the settings the editor first rendered with.** After a keystroke the editor used
+  the layout function from its first render, so later changes of `footnotesAtPageBottom`, `revisionView` or `authorColors` were
+  undone as soon as the user typed (the Final view showed its markup again). It uses the current one now.
 - **Switching an editor to read-only and back no longer resets the document.** `TrueLayoutEditor` rebuilt its ProseMirror view (and
   seeded it again from the initial content) whenever `editable` changed, so the edits made before the switch were lost on screen.
   It now reads `editable` live. (Needed by the Viewing mode.)

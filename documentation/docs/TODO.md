@@ -71,7 +71,9 @@ Verified absent in code.
       done: changes of cells, tables and sections, and a change around a field, image or note reference (those are not
       kept as changes); the Final and Original views (read-only, with a banner to switch back) do not remove deleted rows or show the old
       paragraph formatting, a paragraph whose text is hidden stays as an empty line, paragraph breaks are not hidden (a deleted mark still splits paragraphs in Final, an inserted one in Original), accepting the deletion of the mark of an empty paragraph keeps the first paragraph's type (a heading after it becomes a paragraph), and the zero-width placeholders can change where
-      a long hidden run wraps; accepting or rejecting a change in a shared document is not coordinated between collaborators yet.
+      a long hidden run wraps; one accepting and another rejecting the same change at the same time ends in one of the two (the same for everybody), with
+      nothing telling them; the colour of an author's changes follows the room's presence, so it can change when they leave or join (and
+      one author joining can move another's colour to the next free one).
       The margin bar is drawn beside top-level paragraphs, headings and list items only, not inside table cells, text boxes or
       tables of contents (those paragraphs carry the change, without a visible bar). Two move ranges of one direction open in
       one paragraph at once are read as one (the later name wins). A formatting-only change on text that is also struck through draws the author's strike-through dotted too (one `text-decoration` shorthand). The library has no plain-text, HTML or Markdown export, word count or search of its own; `getPlainText` / `getPmPlainText` and the clipboard text leave deleted text out, the clipboard HTML keeps it (so a paste keeps the change); a host that counts or searches text takes the final text from those helpers.
