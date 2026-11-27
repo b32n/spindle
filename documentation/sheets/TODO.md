@@ -106,6 +106,12 @@ statistical, date/time, information, financial, reference and array categories
       host should lower `maxTotalCells` and `maxSheets` and/or import in a worker (`documentation/import-loss.md`). Related, not a defect: a table of
       two million shared strings peaks at 2.8 GB of process memory in the reader (five million took 1.17 GB).
 
+- [ ] **Textual reference shifting for cached-only formulas** (found in the S4 review; S13 or later). A cached-only formula (one the engine cannot
+      evaluate) keeps no parsed form, so inserting or deleting rows or columns, sorting and moving cells do not adjust the cell references in its text.
+      Repro: open a file with `B1 = _xlfn.LET(_xlpm.x,A1,_xlpm.x*2)` (saved result 4, A1 = 2), insert a row above row 1: the cell is now B2, still
+      reads `A1` (now an empty cell) and is exported that way, so Excel recalculates a different result on reopen. Fix: a tokenizer-level shifter
+      over the formula text (A1, ranges, whole rows and columns, sheet-qualified names) that applies the same edits as the engine's.
+
 ## Feature parity
 
 Gaps against Excel / Google Sheets in the non-formula feature set.

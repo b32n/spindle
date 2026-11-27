@@ -1011,8 +1011,9 @@ lockstep.
   written back as the calls (`fromFileFormula`, `toFileFormula` and `FUTURE_FUNCTIONS` are new exports of `@b32nio/spindle-io/xlsx`).
   A formula the engine cannot evaluate (a function it lacks, text it cannot parse, a table, defined-name or external reference) is
   never shown as `#NAME?`: the cell keeps the file's formula text and the saved result (`cachedOnly`), shows a small "Saved value" note
-  in the formula bar (the value does not follow the cells it refers to; the note, its tooltip and `documentation/import-loss.md` say
-  so), and is written back unchanged. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
+  in the formula bar (the cell keeps its saved value and its original formula text unchanged: the value does not follow the cells it refers to and the
+  references in the text are not adjusted by inserting or deleting rows or columns; Excel recalculates it when the file is reopened,
+  possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
   spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
   New loss id `xlsx.formulas.cachedOnly` (state `kept`); `xlsx.formulas.unsupported`, `.structuredRefs` and `.externalRef` now say the
   value is kept. Additive: `Cell.cachedOnly` and `Cell.arraySpan`, `SpreadsheetCell.cachedOnly`, `.arrayRef` and `.dynamicArray`,

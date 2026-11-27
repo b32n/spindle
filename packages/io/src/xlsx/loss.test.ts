@@ -508,6 +508,9 @@ describe('formulas', () => {
     const report = await full(bytes);
     expect(item(report, 'xlsx.formulas.array')).toMatchObject({ count: 1, where: ['F'] });
     expect(item(report, 'xlsx.formulas.dynamicArray')).toMatchObject({ count: 1 });
+    // the writer marks it with cm="1" and xl/metadata.xml: the text must say it is written back as a dynamic array
+    expect(item(report, 'xlsx.formulas.dynamicArray')?.effect).toMatch(/saved back as a dynamic array/);
+    expect(item(report, 'xlsx.formulas.dynamicArray')?.effect).not.toMatch(/legacy|not written/);
     expect(item(report, 'xlsx.formulas.externalRef')).toMatchObject({ count: 1 });
     // A:A and 1:1 (cells A4) are calculated by the engine now, so they are not a loss and have no id.
     expect(item(report, 'xlsx.formulas.wholeColumn')).toBeUndefined();

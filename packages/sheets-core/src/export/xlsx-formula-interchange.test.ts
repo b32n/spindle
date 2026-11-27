@@ -119,16 +119,31 @@ describe('cached-only formulas (the engine cannot evaluate them)', () => {
     expect(cellAt(wb, 0, 1)?.value).toBe(99);
     expect(cellAt(wb, 1, 1)?.value).toBe(7);
     expect(wb.getCellCalculatedValue(undefined, 1, 3)).toBe(100);
-    wb.getSheet().insertRows(0, 1);
-    expect(cellAt(wb, 1, 1)?.formula).toBe(`=${LET}`);
-    expect(cellAt(wb, 2, 1)?.formula).toBe('=A1+++');
 
     const item = loss.items.find((i) => i.id === 'xlsx.formulas.cachedOnly');
     expect(item).toMatchObject({ count: 3, state: 'kept' });
     expect(item?.effect).toMatch(/out of date/);
     expect(item?.effect).toMatch(/written back unchanged/);
+    expect(item?.effect).toMatch(/references in the text are not adjusted when rows or columns are inserted or deleted/);
     const unsupported = loss.items.find((i) => i.id === 'xlsx.formulas.unsupported');
     expect(unsupported?.effect).toMatch(/^kept: shown from the value saved in the file/);
+  });
+
+  // Known limitation (documentation/sheets/TODO.md, "cached-only reference shifting"): a cached-only cell keeps no parsed
+  // formula, so its text is not adjusted by structural edits. It keeps the saved value and the original text, and Excel
+  // recalculates it on reopen, possibly to a different result.
+  it('does NOT adjust the cell references in a cached-only formula when rows or columns are inserted or deleted', async () => {
+    const { wb } = await opened();
+    wb.getSheet().insertRows(0, 1);
+    // the cell moved down one row; its text still reads A1 and A2, which now hold other cells
+    expect(cellAt(wb, 1, 1)).toMatchObject({ formula: `=${LET}`, value: 99, cachedOnly: true });
+    expect(cellAt(wb, 2, 1)).toMatchObject({ formula: '=A1+++', value: 7, cachedOnly: true });
+    expect(cellAt(wb, 1, 0)?.value).toBe(2);
+    expect(cellAt(wb, 0, 0)).toBeUndefined();
+    wb.getSheet().deleteRows(0, 1);
+    expect(cellAt(wb, 0, 1)?.formula).toBe(`=${LET}`);
+    wb.getSheet().insertCols(0, 1);
+    expect(cellAt(wb, 0, 2)).toMatchObject({ formula: `=${LET}`, value: 99 });
   });
 
   it('are written back unchanged, formula and result, and stay cached-only on the next open', async () => {

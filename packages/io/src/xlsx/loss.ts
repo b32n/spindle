@@ -423,7 +423,7 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
       label: 'formula(s) the editor cannot calculate (kept as saved)',
       count: t.cachedOnly.total,
       effect:
-        "kept: shown from the value saved in the file and written back unchanged with the original formula; the value may be out of date: it does not change when the cells it refers to change",
+        "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)",
       where: t.cachedOnly.where.slice(0, MAX_WHERE),
       state: 'kept',
     });
@@ -436,7 +436,7 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
 
   // ---- full detail: formulas ---------------------------------------------
   addFull('xlsx.formulas.array', 'array formula(s)', t.array.total, 'kept: imported as an array formula over its range and saved back as one; a formula the editor cannot calculate keeps the saved values of the range', t.array.where, 'kept');
-  addFull('xlsx.formulas.dynamicArray', 'dynamic-array formula(s)', t.dynamic.total, "approximated: spills like Excel's and is saved back as an array formula over what it spilled (Excel's dynamic-array metadata is not written, so Excel shows it as a legacy array formula)", t.dynamic.where);
+  addFull('xlsx.formulas.dynamicArray', 'dynamic-array formula(s)', t.dynamic.total, "approximated: spills like Excel's and is saved back as a dynamic array (with the range it spilled and Excel's dynamic-array metadata), so Excel shows it as a dynamic array", t.dynamic.where);
   addFull('xlsx.formulas.externalRef', 'formula(s) referencing another workbook', t.external.total, 'kept: shown from the value saved in the file; external references are not evaluated', t.external.where, 'kept');
   addFull('xlsx.formulas.volatile', 'formula(s) using volatile functions (NOW, RAND, OFFSET...)', t.volatile.total, "approximated: recalculated on import; the file's saved value is not kept", t.volatile.where);
 

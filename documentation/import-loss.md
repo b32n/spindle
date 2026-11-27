@@ -77,7 +77,10 @@ is kept by the client that imported the file; the cached-only cells below are th
 **Cached-only formulas.** A formula the engine cannot evaluate is never shown as `#NAME?`: the cell is marked `cachedOnly`, shows the result the
 file saved, keeps the file's formula text exactly (prefixes included, so the formula bar shows what Excel wrote) and is written back with both
 unchanged. It is reported as `xlsx.formulas.cachedOnly`. **The value can be out of date**: a cached-only cell does not follow the cells it
-refers to, and a cell that depends on it reads its saved value. The formula bar says so ("Saved value", with the same caveat as tooltip and
+refers to, and a cell that depends on it reads its saved value. **Its references are not adjusted either**: the cell keeps its saved value and
+its original formula text unchanged, so inserting or deleting rows or columns (and sorting or moving cells) does not shift the cell references in
+that text, and the exported formula can point at other cells than before. Excel recalculates the formula when the file is reopened, possibly to a
+different result. Textual reference shifting is a follow-up (`documentation/sheets/TODO.md`). The formula bar says so ("Saved value", with the same caveat as tooltip and
 accessible name). Editing the cell (a value or a formula) removes the mark. Copying such a cell to another place copies its text, which the
 engine cannot evaluate: the copy shows `#NAME?` until the formula is changed. Defined names are not imported yet, so a formula that uses one is
 cached-only too.
