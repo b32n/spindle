@@ -162,6 +162,12 @@ describe('malformed spans', () => {
     expect(el.styleFlags).toEqual({ firstRow: true, bandRow: true });
     expect(createTableElement({ containerId: 's', index: 'a', x: 0, y: 0, w: 10, h: 10, rows: 1, cols: 1 }).styleFlags).toBeUndefined();
   });
+  it('spanAt treats a flagged cell with no region, or a cell outside the grid, as a cell of its own', () => {
+    const g = makeGrid(1, 2);
+    g[0][1] = { ...g[0][1], hMerge: true };
+    expect(spanAt({ rows: 1, cols: 2, cells: g }, 0, 1)).toEqual({ r: 0, c: 1, rs: 1, cs: 1 });
+    expect(spanAt({ rows: 1, cols: 2, cells: g }, 4, 4)).toEqual({ r: 4, c: 4, rs: 1, cs: 1 });
+  });
   it('applySpanRects leaves plain cells untouched (identity)', () => {
     const g = makeGrid(1, 1);
     expect(applySpanRects(g, [])[0][0]).toBe(g[0][0]);
