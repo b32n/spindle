@@ -4,8 +4,11 @@
 
 import React, { useState } from 'react';
 import { Settings2 } from 'lucide-react';
-import { autofitMode, mergeBodyStyle, type BodyStyle } from '@b32nio/spindle-slides-core';
+import { autofitMode, mergeBodyStyle, type BodyStyle, type ParagraphAttrs, type RichTextDoc } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
+import { useDeckContext } from '../context/DeckContext';
+import { applyFormat } from '../interactions/formatting';
+import { ParagraphFields } from './ParagraphFields';
 import { useDeck, useSelection, useEditingId, useElement } from '../hooks';
 import { ToolbarButton } from './toolbarUI';
 import { Popover } from './Popover';
@@ -29,6 +32,26 @@ export function LiveTextBodyFields({ id }: { id: string }): React.ReactElement |
   return <TextBodyFields idPrefix={`text-body-${id}`} body={el.bodyStyle} onChange={apply} allowResize={el.type === 'text'} />;
 }
 
+/**
+ * The paragraph fields bound to one element: they show the first paragraph (or the one holding the caret while editing)
+ * and apply to the selection while editing or to every paragraph when the box is only selected.
+ */
+export function LiveParagraphFields({ id }: { id: string }): React.ReactElement | null {
+  const deck = useDeck();
+  const { editing } = useDeckContext();
+  const el = useElement(id);
+  if (!el || (el.type !== 'text' && el.type !== 'shape')) return null;
+  const view = editing.getView();
+  const doc = el.richText as RichTextDoc | undefined;
+  let attrs: ParagraphAttrs | undefined = doc?.content[0]?.attrs;
+  if (view) {
+    const caret = view.state.selection.$from.parent;
+    if (caret.type.name === 'paragraph') attrs = caret.attrs as ParagraphAttrs;
+  }
+  const apply = (patch: Partial<ParagraphAttrs>) => applyFormat({ editingView: view, deck, elementId: id }, { paragraph: patch });
+  return <ParagraphFields idPrefix={`para-${id}`} attrs={attrs} onChange={apply} />;
+}
+
 export function TextOptionsButton(): React.ReactElement | null {
   const selection = useSelection();
   const editingId = useEditingId();
@@ -49,7 +72,7 @@ export function TextOptionsButton(): React.ReactElement | null {
         icon={<Settings2 size={17} />}
         label={LABEL}
         hint={autofitMode(el.bodyStyle) === 'none' ? undefined : autofitMode(el.bodyStyle) === 'shrink' ? 'Shrink' : 'Resize'}
-        onClick={() => menu.openModal(LABEL, <LiveTextBodyFields id={id} />)}
+        onClick={() => menu.openModal(LABEL, <><LiveTextBodyFields id={id} /><LiveParagraphFields id={id} /></>)}
       />
     );
   }
@@ -63,6 +86,7 @@ export function TextOptionsButton(): React.ReactElement | null {
       {open && (
         <Popover anchor={anchor} onClose={() => setOpenFor(null)}>
           <LiveTextBodyFields id={id} />
+          <LiveParagraphFields id={id} />
         </Popover>
       )}
     </>

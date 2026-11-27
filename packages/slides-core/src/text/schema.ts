@@ -12,13 +12,14 @@
 
 import { Schema } from 'prosemirror-model';
 import type { Color } from '../scene/types';
+import type { ParagraphAttrs } from './model';
+import { resolveParagraph, type ResolvedParagraph } from './paragraph';
 import {
   sanitizeHref,
   safeCssColor,
   safeFontFamily,
   safeThemeSlot,
   safeCssKeyword,
-  safeCssNumber,
 } from './sanitize';
 
 // Resolve a model Color to a sanitized CSS value for the editor's best-effort
@@ -45,32 +46,43 @@ export const slidesSchema = new Schema({
         lineHeight: { default: null },
         spaceBefore: { default: 0 },
         spaceAfter: { default: 0 },
+        // K3b: absent (null) attrs are not written to the collaboration layout, so existing text is unchanged.
+        bullet: { default: null },
+        lineHeightPx: { default: null },
+        spaceBeforePct: { default: null },
+        spaceAfterPct: { default: null },
+        marginLeft: { default: null },
+        firstLineIndent: { default: null },
+        tabStops: { default: null },
       },
       parseDOM: [{ tag: 'p' }],
       toDOM(node) {
-        const a = node.attrs;
-        const indent = (a.indent as number) || 0;
-        const isList = a.listType && a.listType !== 'none';
-        // List items reserve a left gutter for the marker (drawn by the editor
-        // stylesheet's ::before, since the flat schema has no list nodes).
-        const padLeft = isList ? (indent + 1) * 28 : indent * 28;
-        // Attrs come from imported/collaborator JSON (untrusted); sanitize each
-        // before interpolating, or a value like `left;background:url(//evil)`
-        // injects a CSS declaration into the style string.
+        const a = node.attrs as ParagraphAttrs;
+        // Attrs come from imported/collaborator JSON (untrusted); resolveParagraph coerces every number and allowlists
+        // every keyword, and the colour goes through colorToCss, or a value like `left;background:url(//evil)` would
+        // inject a CSS declaration into the style string.
+        const r = resolveParagraph(a);
         const align = safeCssKeyword(a.align) || 'left';
-        const lineHeight = safeCssNumber(a.lineHeight) ?? 1.2;
-        const spaceBefore = safeCssNumber(a.spaceBefore);
-        const spaceAfter = safeCssNumber(a.spaceAfter);
+        const m = r.marker;
+        const lineHeight = 'px' in r.lineHeight ? `${r.lineHeight.px}px` : String(r.lineHeight.mult);
+        const space = (v: ResolvedParagraph['spaceBefore']) => (v ? ('px' in v ? `${v.px}px` : `${v.em}em`) : '');
         const style =
           `text-align:${align};position:relative;` +
-          // Always emit line-height (default 1.2) so it matches StaticRichText —
-          // otherwise the editor inherits the browser's `normal` and the text
-          // shifts a hair when entering/leaving edit.
+          // Always emit line-height (default 1.2) so it matches StaticRichText — otherwise the editor inherits the
+          // browser's `normal` and the text shifts a hair when entering/leaving edit.
           `line-height:calc(${lineHeight} * var(--spindle-ls, 1));` +
-          (spaceBefore ? `margin-top:${spaceBefore}px;` : '') +
-          (spaceAfter ? `margin-bottom:${spaceAfter}px;` : '') +
-          (padLeft ? `padding-left:${padLeft}px;` : '');
-        return ['p', { style, 'data-list': a.listType }, 0];
+          (r.spaceBefore ? `margin-top:${space(r.spaceBefore)};` : '') +
+          (r.spaceAfter ? `margin-bottom:${space(r.spaceAfter)};` : '') +
+          (r.paddingLeft ? `padding-left:${r.paddingLeft}px;` : '') +
+          (r.textIndent ? `text-indent:${r.textIndent}px;` : '') +
+          (m ? `--pm-marker-left:${r.markerLeft}px;--pm-marker-size:${m.sizePct}%;` : '') +
+          (m && m.color && colorToCss(m.color) ? `--pm-marker-color:${colorToCss(m.color)};` : '') +
+          (m && m.kind === 'number' && m.startAt !== null ? `--pm-start:${m.startAt};` : '');
+        const attrs: Record<string, string> = { style, 'data-list': m ? m.kind : 'none' };
+        // The glyph and scheme travel as attributes (the editor stylesheet reads them), never inside CSS text.
+        if (m && m.kind === 'bullet') attrs['data-bullet-char'] = m.char;
+        if (m && m.kind === 'number') attrs['data-scheme'] = m.scheme;
+        return ['p', attrs, 0];
       },
     },
     text: { group: 'inline' },

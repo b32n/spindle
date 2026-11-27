@@ -7,14 +7,14 @@ import React from 'react';
 import {
   resolveColor,
   resolveFont,
+  resolveParagraph,
+  formatOrdinal,
   type RichTextDoc,
   type RichTextParagraph,
   type RichTextInline,
   type ThemeData,
   type Color,
 } from '@b32nio/spindle-slides-core';
-
-const INDENT_PX = 28;
 
 // URL sanitizer for rendered link hrefs. Attacker-controlled hrefs (from pasted
 // or imported HTML) must not become `javascript:`/`data:`/`vbscript:` anchors.
@@ -107,20 +107,23 @@ function renderParagraph(
   scaled: boolean
 ): React.ReactNode {
   const attrs = p.attrs ?? {};
-  const indent = attrs.indent ?? 0;
+  const r = resolveParagraph(attrs);
+  const lh = 'px' in r.lineHeight ? `${r.lineHeight.px}px` : r.lineHeight.mult;
+  const space = (v: typeof r.spaceBefore): string | number => (v ? ('px' in v ? v.px : `${v.em}em`) : 0);
   const style: React.CSSProperties = {
     textAlign: attrs.align ?? 'left',
-    lineHeight: scaled ? `calc(${attrs.lineHeight ?? 1.2} * var(--spindle-ls, 1))` : (attrs.lineHeight ?? 1.2),
-    marginTop: attrs.spaceBefore ?? 0,
-    marginBottom: attrs.spaceAfter ?? 0,
-    paddingLeft: indent * INDENT_PX,
+    lineHeight: scaled ? `calc(${lh} * var(--spindle-ls, 1))` : lh,
+    marginTop: space(r.spaceBefore),
+    marginBottom: space(r.spaceAfter),
+    paddingLeft: r.paddingLeft,
+    ...(r.textIndent ? { textIndent: r.textIndent } : {}),
   };
 
   const inlines = (p.content ?? []).map((inline, i) => renderInline(inline, theme, i, scaled));
   const body = inlines.length ? inlines : <br />;
 
-  const listType = attrs.listType ?? 'none';
-  if (listType === 'none') {
+  const marker = r.marker;
+  if (!marker) {
     return (
       <div key={key} style={style}>
         {body}
@@ -128,13 +131,19 @@ function renderParagraph(
     );
   }
 
-  // Mirror the live editor's list layout (schema toDOM + editor stylesheet):
-  // a (indent+1)*INDENT_PX gutter with the marker hanging in it, so there's no
-  // indent jump when entering/leaving edit mode.
-  const marker = listType === 'bullet' ? '•' : `${ordinal}.`;
+  // Mirror the live editor's list layout (schema toDOM + editor stylesheet): the marker hangs in the left gutter, so
+  // there's no indent jump when entering/leaving edit mode.
+  const label = marker.kind === 'bullet' ? marker.char : `${formatOrdinal(ordinal, marker.scheme)}.`;
+  const markerStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: r.markerLeft,
+    opacity: marker.color ? 1 : 0.9,
+    ...(marker.color ? { color: resolveColor(marker.color, theme) } : {}),
+    ...(marker.sizePct !== 100 ? { fontSize: `${marker.sizePct}%` } : {}),
+  };
   return (
-    <div key={key} style={{ ...style, position: 'relative', paddingLeft: (indent + 1) * INDENT_PX }}>
-      <span style={{ position: 'absolute', left: listType === 'bullet' ? 8 : 2, opacity: 0.9 }}>{marker}</span>
+    <div key={key} style={{ ...style, position: 'relative' }}>
+      <span style={markerStyle}>{label}</span>
       {body}
     </div>
   );
@@ -155,9 +164,11 @@ function StaticRichTextImpl({ doc, theme, scaled = false }: StaticRichTextProps)
   const children = doc.content.map((p, i) => {
     const attrs = p.attrs ?? {};
     const level = (attrs.indent as number) ?? 0;
+    const marker = resolveParagraph(attrs).marker;
     let ordinal = 0;
-    if ((attrs.listType ?? 'none') === 'number') {
-      counters[level] = (counters[level] ?? 0) + 1;
+    if (marker?.kind === 'number') {
+      // A start value applies where a list begins; later items of the run keep counting (PPTX repeats it on each item).
+      counters[level] = counters[level] === undefined ? (marker.startAt ?? 1) : counters[level] + 1;
       counters.length = level + 1; // entering this level ends deeper sub-lists
       ordinal = counters[level];
     } else {

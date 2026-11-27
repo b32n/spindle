@@ -410,6 +410,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-KBD-03 | Tab reaches the toolbar buttons | fixme + bug |  | the editor root swallows Tab to cycle the slide's elements, so the toolbar can never be reached with Tab/Shift+Tab (a keyboard trap). https://github.com/b32n/spindle/issues/89 | `e2e/slides/keyboard.spec.ts` |
 | SL-KBD-04 | focus returns to the editor after leaving present mode | fixme + bug |  | leaving present mode drops focus to <body>, so the next keystroke goes nowhere. https://github.com/b32n/spindle/issues/90 | `e2e/slides/keyboard.spec.ts` |
 | SL-BIG-01 | a slide with 100 elements renders, selects, drags, multi-moves and deletes within budget | covered |  |  | `e2e/slides/large-data.spec.ts` |
+| SL-TXT-09 | custom bullet, numbering, line height, spacing and margins render and persist | covered |  |  | `e2e/slides/paragraph-attrs.spec.ts` |
 | SL-PRS-01 | Present opens full-screen present mode on the active slide | covered | yes |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-02 | arrow keys, space, PageDown/Up, Home and End navigate | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
 | SL-PRS-03 | clicking the stage advances; typing a number then Enter jumps | covered |  |  | `e2e/slides/present-and-more.spec.ts` |
@@ -495,7 +496,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 430
+- covered: 431
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

@@ -27,8 +27,12 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
 /**
  * The Y layout version this client reads and writes. 1 is the layout described above (rooms written before the key
  * existed have no `schemaVersion` and read as 1). Raised by any later change an older client could not read.
+ *
+ * 2: paragraph nodes of the rich-text fragment carry K3b attributes (`bullet`, `lineHeightPx`, `spaceBeforePct`,
+ * `spaceAfterPct`, `marginLeft`, `firstLineIndent`, `tabStops`) as XmlElement attributes. A v1 client's schema does not
+ * know them and would drop them on its next write, so it must not join a v2 room.
  */
-export const COLLAB_SCHEMA_VERSION = 1;
+export const COLLAB_SCHEMA_VERSION = 2;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {
@@ -123,7 +127,10 @@ export function createElementYMap(el: SlideElement): Y.Map<unknown> {
 /** Populate an element's richText fragment from JSON (after the map is attached). */
 export function populateElementRichText(m: Y.Map<unknown>, richText: RichTextDoc | undefined): void {
   const frag = m.get('richText') as Y.XmlFragment | undefined;
-  if (frag && richText) prosemirrorToYXmlFragment(slidesSchema.nodeFromJSON(richText), frag);
+  // Yjs only stores attribute values whose constructor is exactly Object/Array (object-valued paragraph attrs such as
+  // `bullet`), so rebuild the JSON from plain literals: a structuredClone'd value (other realm) or a null-prototype one
+  // from an importer would otherwise throw "Unexpected content type".
+  if (frag && richText) prosemirrorToYXmlFragment(slidesSchema.nodeFromJSON(JSON.parse(JSON.stringify(richText))), frag);
 }
 
 /** Read an element's richText fragment back to JSON. */
