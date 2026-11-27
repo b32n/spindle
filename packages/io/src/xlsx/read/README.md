@@ -14,10 +14,11 @@ const sheet = readSheet(await pkg.text(ref.part), ref, { styles, sharedStrings, 
 | Module | Reads | Notes |
 |---|---|---|
 | `package.ts` | zip, `[Content_Types].xml`, parts | case-insensitive part lookup; BOM and UTF-16 parts; a part that is absent or not well-formed is `undefined` plus a warning, never a throw |
-| `content-types.ts` | defaults and overrides | override first, then extension default |
-| `relationships.ts` | `.rels` | absolute (`/xl/...`, openpyxl), relative, `./`, `..`, backslash and percent-encoded targets; external targets kept as written; type matched by last segment, case-insensitively (LibreOffice writes `officedocument`); strict-namespace types; a fragment (`#a`) is dropped from an internal target, and a target with a URI scheme (`file:`) is kept as written and counts as external |
+| `content-types.ts` | defaults and overrides | read as events (the entries kept are the memory, at most `maxPartElements`); override first, then extension default |
+| `tree.ts` | any workbook-level part | an element tree built from `sax.ts` events under an element budget (`maxPartElements`): a part over it is not read, so memory is bounded by the budget and not by the part |
+| `relationships.ts` | `.rels` | read as events, the first `maxPartElements` entries kept; absolute (`/xl/...`, openpyxl), relative, `./`, `..`, backslash and percent-encoded targets; external targets kept as written; type matched by last segment, case-insensitively (LibreOffice writes `officedocument`); strict-namespace types; a fragment (`#a`) is dropped from an internal target, and a target with a URI scheme (`file:`) is kept as written and counts as external |
 | `workbook.ts` | `workbook.xml` | workbook part found via relationships, else content types, else `xl/workbook.xml`; `sheets` (state, kind, part, relationships, comment parts), `definedNames`, `calcPr`, `workbookPr/date1904`, `bookViews`; shared parts located by relationship, content type or conventional name |
-| `shared-strings.ts` | `sharedStrings.xml` | rich runs kept with their fonts, phonetic text left out, `_xHHHH_` escapes decoded; `forEachSharedString` pushes items instead of building a list |
+| `shared-strings.ts` | `sharedStrings.xml` | rich runs kept with their fonts, phonetic text left out, `_xHHHH_` escapes decoded; read as events, never as a tree (a run is a small tree of its own, at most 256 elements): `forEachSharedString` pushes items instead of building a list, at most `maxTotalCells` items and `maxPartElements` runs |
 | `styles.ts` | `styles.xml` | number formats, fonts, fills (pattern and gradient), borders with colours, `cellStyleXfs`, `cellXfs`, named styles, `dxfs`, custom `indexedColors`; tables keep file order so ids index straight in |
 | `theme.ts`, `colors.ts` | theme part, colours | theme (Excel's index order), theme slots as `srgbClr`, `sysClr`, `prstClr`, `scrgbClr` or `hslClr` resolve (anything else warns and takes the Office default), indexed (workbook palette, per index falling back to the default; 64/65 system) and tint (HLS) resolved to `#rrggbb`; the file's own attributes are kept next to `resolved` |
 | `font.ts` | `<font>` and run `<rPr>` | only what is written is set |
@@ -33,8 +34,8 @@ Hostile names: anything keyed by file text (attribute names, shared formula ids,
 `Map`/`Set`, a null-prototype object or an array by number; tests use `__proto__`, `constructor` and `toString`.
 
 **Streaming-ready (S20):** every part reader is a pure function from a parsed part to structured-cloneable data, with no DOM and
-no shared state; the package class holds nothing but the zip and small relationship lists. Workbook-level parts use the bounded
-element tree. `sheetData` is read by `readSheet` as a forward-only event stream (no tree) from `pkg.text()`; the part's text is
+no shared state; the package class holds nothing but the zip and small relationship lists. Workbook-level parts are events
+(shared strings, relationships, content types) or an element tree under an element budget (`tree.ts`). `sheetData` is read by `readSheet` as a forward-only event stream (no tree) from `pkg.text()`; the part's text is
 held as one string, so memory is at least the size of the part (a chunked feed for a worker is what S20 adds).
 
 Limits on what a file can make the reader do (`ImportLimits`, tunable through the `limits` option of the io entry `importXlsx` and
@@ -46,7 +47,9 @@ one flat string, so the count is what the memory is. At most `maxTotalCells` (5,
 `maxSheets` (1,000) worksheets read, each with one warning when passed; the workbook's `<sheet>` entries read are capped at four
 times `maxSheets`; a part is read once (a second `<sheet>` naming it is skipped). `<col>`, `<mergeCell>` and `<hyperlink>` are read
 as events, never as a tree: at most 16,384 `<col>` per sheet, 1,048,576 merges and 65,530 hyperlinks per sheet, and `maxRanges`
-(1,048,576) merges and hyperlinks over the package. `sheetPr`, `dimension`, `sheetViews` and `sheetFormatPr` are read as trees only
+(1,048,576) merges and hyperlinks over the package; `maxRows` (2,097,152) rows with settings over the package; `maxPartElements`
+(1,000,000) elements per workbook-level part (a tree part over it is skipped with a warning, a list part keeps its first entries; about
+420 bytes per element); a sheet name is cut at 255 characters, and a warning quotes the file's own text at 64 (`capped.ts`, `abbreviate`). `sheetPr`, `dimension`, `sheetViews` and `sheetFormatPr` are read as trees only
 up to 64 KiB each, and `extLst` is kept raw up to 8 MiB; past a limit the item is left out with a warning. Warnings about single
 items are given for the first 20 of a kind (`capped.ts`) and then counted. A number text over 64 characters is not a number;
 sheet names are made unique with a counter per name. A cell or row without a usable address follows the previous one silently;
@@ -54,9 +57,10 @@ only a position past the sheet's last row or column is clamped, with a warning. 
 (`cell-ranges.ts`), near-linear in cells plus ranges.
 
 Number format codes (`cell-style.ts`): the editor gets the code a file defines with the backslash dropped only before a character
-Excel shows without quotes (`$ - + ( ) : / ! ^ & ' ~ { } < > =` and a space); an escape before a letter, digit or one of
+Excel shows without quotes (`$ - + ( ) : / ! ^ & ' ~ { } < > =` and a space) and where that is no syntax: `/` stays escaped in a section
+with a digit placeholder (`0\/0` is the text, `0/0` a fraction) and in `AM\/PM` and `A\/P`, `+` and `-` stay after an `E` (`0.00E\+00`); an escape before a letter, digit or one of
 `" \ . , @ * _ % # ?` stays, as it is what keeps the character a literal, and a quoted run is never touched. `isDateFormat` reads the
-code as written (escapes, quoted runs, `[...]` groups and the `_x` and `*x` pairs are not tokens), once per format.
+code as written, in either case (`DD`, `YYYY`; escapes, quoted runs, `[...]` groups and the `_x` and `*x` pairs are not tokens), once per format.
 
 Hostile input, audited in S2b (every `indexOf`, `slice`, regular expression and loop of this directory; each construct that scans is
 timed by a test on a shape of hundreds of thousands to a million items, in `sax.test.ts`, `hostile-parts.test.ts`, `reader-hostile.test.ts`

@@ -533,12 +533,18 @@ lockstep.
   and capped, merges and hyperlinks are read as events and applied in one sweep (thousands of huge ranges stay fast), at
   most 1,048,576 merges and 65,530 hyperlinks per sheet and `maxRanges` (1,048,576) over the workbook, the per-item
   warnings (a link without its relationship, a repeated sheet) are given for the first twenty and then counted, and the
-  small elements cut out of a sheet part are read up to a size (64 KiB each, 8 MiB for the raw `extLst`). A cell or row
+  small elements cut out of a sheet part are read up to a size (64 KiB each, 8 MiB for the raw `extLst`). The workbook-level
+  parts are bounded by what they keep: shared strings, relationships and content types are read as events, and the styles,
+  theme and workbook are element trees under a budget (`maxPartElements`, 1,000,000 elements: a part over it is not read, with
+  one warning); rows with settings are bounded by `maxRows` (2,097,152); entity-dense text is decoded in windows; a sheet name
+  is cut at 255 characters and warnings quote the file's text at 64. A cell or row
   without an address follows the previous one; only a position past the sheet's last row or column is clamped, with a
   warning. A number text over 64 characters is not a number, and the 1900 date quirk (serial 60) is honoured for `t="d"`
   dates. Number format codes a file defines lose the backslash only before a character Excel shows without quotes
   (a LibreOffice `\$#,##0.00` is `$#,##0.00` in the editor); an escape that keeps a letter, digit or `. , @ * _ % # ? " \`
-  literal stays (`0\ \d`, `0.0\"`), nothing in quotes is touched, and an escaped letter is no date token. The `exceljs`
+  literal stays (`0\ \d`, `0.0\"`), as does the one that keeps `/` from being a fraction or an AM/PM token (`0\/0`,
+  `AM\/PM`) and `+`/`-` from being an exponent sign (`0.00E\+00`); nothing in quotes is touched, an escaped letter is no date
+  token, and a date format is recognised in either case (`DD`, `YYYY`). The `exceljs`
   reader dropped every escape; the differential names each code where the two now differ. Numbers are plain decimals only (no
   `Infinity` or hex), `t="d"` dates are validated, `_xHHHH_` escapes are decoded in inline and formula strings, `<f/>`
   without text is no formula, shared-formula names may use letters of any script, `frozenSplit` panes freeze, and
