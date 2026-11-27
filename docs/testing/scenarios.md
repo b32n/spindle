@@ -390,6 +390,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-GRP-01 | group and ungroup with Ctrl/Cmd+G | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-ORD-01 | bring to front / send to back change z-order | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-TAB-01 | Tab cycles element selection | covered |  |  | `e2e/slides/editing.spec.ts` |
+| SL-FIL-01 | a gradient preset fills the selected shape and the slide background | covered |  |  | `e2e/slides/fills.spec.ts` |
 | L-FNT-01 | default: theme fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | L-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | L-FNT-03 | fontSource {kind:'css', url}: fonts load from the host's own endpoint | covered |  |  | `e2e/slides/fonts.spec.ts` |
