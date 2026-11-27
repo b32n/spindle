@@ -142,7 +142,10 @@ export function flattenLevelStyles(doc: RichTextDoc, levels: LevelStyles | undef
     content: doc.content.map((p) => {
       const level = Math.max(0, Math.min(8, Math.trunc(finite(p.attrs?.indent) ?? 0)));
       const base = levels[level];
-      return base ? { ...p, attrs: { ...base, ...p.attrs } } : p;
+      if (!base) return p;
+      // A null or undefined attr (the editor schema's defaults) means "unset", so the level default shows through.
+      const own = Object.fromEntries(Object.entries(p.attrs ?? {}).filter(([, v]) => v !== null && v !== undefined));
+      return { ...p, attrs: { ...base, ...own } };
     }),
   };
 }

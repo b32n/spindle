@@ -78,7 +78,7 @@ export const slidesSchema = new Schema({
           (m ? `--pm-marker-left:${r.markerLeft}px;--pm-marker-size:${m.sizePct}%;` : '') +
           (m && m.color && colorToCss(m.color) ? `--pm-marker-color:${colorToCss(m.color)};` : '') +
           (m && m.kind === 'number' && m.startAt !== null ? `--pm-start:${m.startAt};` : '');
-        const attrs: Record<string, string> = { style, 'data-list': m ? m.kind : (a.listType as string) };
+        const attrs: Record<string, string> = { style, 'data-list': m ? m.kind : 'none' };
         // The glyph and scheme travel as attributes (the editor stylesheet reads them), never inside CSS text.
         if (m && m.kind === 'bullet') attrs['data-bullet-char'] = m.char;
         if (m && m.kind === 'number') attrs['data-scheme'] = m.scheme;

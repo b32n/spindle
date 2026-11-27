@@ -47,6 +47,9 @@ export function ParagraphFields({
   const exact = 'px' in r.lineHeight;
   const spaceBefore = r.spaceBefore && 'px' in r.spaceBefore ? r.spaceBefore.px : 0;
   const spaceAfter = r.spaceAfter && 'px' in r.spaceAfter ? r.spaceAfter.px : 0;
+  // A percent spacing (of text size) has no px value to show; say so, since typing px replaces it.
+  const spaceLabel = (name: string, s: typeof r.spaceBefore) =>
+    s && 'em' in s ? `${name} (${px(s.em * 100)}% of text, px replaces)` : `${name} (px)`;
   const id = (k: string) => `${idPrefix}-${k}`;
   return (
     <div role="group" aria-label="Paragraph options" style={{ display: 'grid', gridTemplateColumns: 'auto 150px', gap: 6, alignItems: 'center', fontSize: 13, color: '#334155', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
@@ -152,7 +155,7 @@ export function ParagraphFields({
         onValue={(n) => (exact ? onChange({ lineHeightPx: Math.max(1, n) }) : onChange({ lineHeight: Math.max(0.5, n) }))}
         style={field}
       />
-      <label htmlFor={id('before')}>Space before (px)</label>
+      <label htmlFor={id('before')}>{spaceLabel('Space before', r.spaceBefore)}</label>
       <DraftNumber
         id={id('before')}
         min={0}
@@ -162,7 +165,7 @@ export function ParagraphFields({
         onValue={(n) => onChange({ spaceBefore: Math.max(0, n), spaceBeforePct: null })}
         style={field}
       />
-      <label htmlFor={id('after')}>Space after (px)</label>
+      <label htmlFor={id('after')}>{spaceLabel('Space after', r.spaceAfter)}</label>
       <DraftNumber
         id={id('after')}
         min={0}

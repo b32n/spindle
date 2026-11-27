@@ -152,6 +152,9 @@ describe('ParagraphFields', () => {
       { firstLineIndent: -12 },
     ]);
     expect(one(tree({ spaceBeforePct: 10 }).el, 'para-space-before').props.value).toBe(0);
+    const labels = JSON.stringify(tree({ spaceBeforePct: 10, spaceAfter: 5 }).el);
+    expect(labels).toContain('Space before (10% of text, px replaces)');
+    expect(labels).toContain('Space after (px)');
     expect(one(tree({ spaceAfter: 5, spaceBefore: 0 }).el, 'para-space-after').props.value).toBe(5);
   });
 });

@@ -103,6 +103,13 @@ describe('flattenLevelStyles', () => {
     expect(out.content[2]).toBe(doc.content[2]);
     expect(out.content[3].attrs).toMatchObject({ bullet: { kind: 'char' }, indent: -3 });
   });
+  it('treats null and undefined attrs as unset so level defaults show through', () => {
+    const out = flattenLevelStyles(
+      { type: 'doc', content: [{ type: 'paragraph', attrs: { bullet: null, marginLeft: undefined, spaceAfter: 2 } as never }] },
+      { 0: { bullet: { kind: 'char' as const }, marginLeft: 10 } },
+    );
+    expect(out.content[0].attrs).toEqual({ bullet: { kind: 'char' }, marginLeft: 10, spaceAfter: 2 });
+  });
   it('is the identity without level styles', () => {
     expect(flattenLevelStyles(doc, undefined)).toBe(doc);
   });
@@ -119,6 +126,13 @@ describe('schema toDOM for K3b attrs', () => {
     expect(a.style).toBe('text-align:left;position:relative;line-height:calc(1.2 * var(--spindle-ls, 1));');
     expect(a['data-list']).toBe('none');
     expect(a['data-bullet-char']).toBeUndefined();
+  });
+  it('emits no list marker for an explicit no-bullet over a legacy listType', () => {
+    for (const listType of ['bullet', 'number']) {
+      const a = dom({ listType, bullet: { kind: 'none' } });
+      expect(a['data-list']).toBe('none');
+      expect(a['data-bullet-char']).toBeUndefined();
+    }
   });
   it('renders bullet, spacing, margin and indent', () => {
     const a = dom({
