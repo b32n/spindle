@@ -987,9 +987,10 @@ lockstep.
   notes master's `p:notesStyle` and body placeholder) and comments into `PptxSlide.threads` (`PptxCommentThread` and
   `PptxComment`, new additive types): legacy `ppt/comments/*.xml` (author list, position, replies by `p15:parentCm`) and
   modern comments (authors part, replies, `resolved` and `closed` status, anchored to the slide or to the shape a
-  `*MkLst` marks). `pptx.comments` is removed from the loss report, `pptx.notes` narrows to notes with formatting
-  (`approximated`) and `pptx.masters.notesMaster` is `approximated`; the summary ids are now 15. The text parity check covers the
-  notes body runs. No editor change.
+  `*MkLst` marks). `pptx.comments` now counts only comments parts no slide points at (`lost`), `pptx.notes` narrows
+  to notes with formatting in the notes body (`approximated`) and `pptx.masters.notesMaster` is `approximated`; the summary ids
+  stay 16. Notes or comments of a slide that cannot be read are dropped with a warning, not the whole slide. The text parity
+  check covers the notes body runs (a notes page shared by several slides once for each). No editor change.
 
 ## [0.4.0] - 2026-10-26
 

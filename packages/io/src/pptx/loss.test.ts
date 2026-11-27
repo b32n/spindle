@@ -186,12 +186,19 @@ describe('summary ids', () => {
     expect(item(await build({ slides: [{ tail: media }] }).then(full), 'pptx.animations')).toBeUndefined();
   });
 
+  it('reports a comments part no slide points at: it is not read', async () => {
+    const legacy = `<p:cmLst ${NS}><p:cm authorId="0" idx="1"><p:text>a</p:text></p:cm><p:cm authorId="0" idx="2"><p:text>r</p:text><p:extLst><p:ext><p15:threadingInfo xmlns:p15="urn:p"><p15:parentCm authorId="0" idx="1"/></p15:threadingInfo></p:ext></p:extLst></p:cm></p:cmLst>`;
+    const r = await build({ files: { 'ppt/comments/comment7.xml': legacy } }).then(full);
+    expect(item(r, 'pptx.comments')).toMatchObject({ count: 1, where: ['comment7.xml'] });
+    expect(item(r, 'pptx.comments')?.effect).toMatch(/^lost:/);
+  });
+
   it('does not report comments: the reader keeps them as threads (K10c)', async () => {
     const legacy = `<p:cmLst ${NS}><p:cm authorId="0" dt="2024-01-01T00:00:00.000" idx="1"><p:pos x="1" y="1"/><p:text>a</p:text></p:cm></p:cmLst>`;
     const modern = `<p188:cmLst xmlns:p188="http://schemas.microsoft.com/office/powerpoint/2018/8/main"><p188:cm id="{1}" authorId="{2}"><p188:reply id="{3}"/></p188:cm></p188:cmLst>`;
     const r = await build({
       slides: [{ rels: [rel('rId1', 'comments', '../comments/comment1.xml')] }, { rels: [rel('rId1', 'comments', '../comments/modernComment_1.xml')] }],
-      files: { 'ppt/comments/comment1.xml': legacy, 'ppt/comments/modernComment_1.xml': modern, 'ppt/commentAuthors.xml': '<x/>', 'ppt/comments/comment7.xml': legacy },
+      files: { 'ppt/comments/comment1.xml': legacy, 'ppt/comments/modernComment_1.xml': modern, 'ppt/commentAuthors.xml': '<x/>' },
     }).then(full);
     expect(item(r, 'pptx.comments')).toBeUndefined();
     expect(item(r, 'pptx.package.unaccountedParts')).toBeUndefined();
@@ -226,6 +233,15 @@ describe('summary ids', () => {
     }).then(full);
     expect(item(r, 'pptx.notes')).toMatchObject({ count: 5, where: ['Slide 1', 'Slide 2', 'Slide 3', 'Slide 4', 'Slide 5'] });
     expect(item(r, 'pptx.notes')?.effect).toMatch(/^approximated:/);
+  });
+
+  it('counts only the notes body: bold in a footer or header placeholder is not formatted notes', async () => {
+    const page = (ph: string) => `<p:notes ${NS}><p:cSld><p:spTree>${sp({ ph: `<p:ph type="${ph}"/>`, body: '<a:p><a:r><a:rPr b="1"/><a:t>x</a:t></a:r></a:p>' })}</p:spTree></p:cSld></p:notes>`;
+    const r = await build({
+      slides: ['ftr', 'body'].map((_, i) => ({ rels: [rel('rId1', 'notesSlide', `../notesSlides/notesSlide${i + 1}.xml`)] })),
+      files: { 'ppt/notesSlides/notesSlide1.xml': page('ftr'), 'ppt/notesSlides/notesSlide2.xml': page('body') },
+    }).then(full);
+    expect(item(r, 'pptx.notes')).toMatchObject({ count: 1, where: ['Slide 2'] });
   });
 
   it('finds formatted notes pages no slide points at, by file name', async () => {

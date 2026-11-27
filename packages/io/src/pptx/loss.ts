@@ -5,7 +5,9 @@ import { OoxmlPackage, PACKAGE_LIMITS } from '../common/ooxml-package';
 import { isEncryptedOle, isOleFile } from '../xlsx/package-kind';
 import { descendants, isTrue, kid, kids, parseXml, type XmlElement } from '../xlsx/xml';
 import { collectFonts, isAvailableFont } from './fonts';
-import { LAYOUT, MASTER, NOTES_SLIDE, SLIDE, baseName, isKnownPart } from './parts';
+import { COMMENTS, LAYOUT, MASTER, NOTES_SLIDE, SLIDE, baseName, isKnownPart } from './parts';
+import { isBody } from './notes';
+import { treeChildren } from './shapes';
 import { scanSlide } from './slide-scan';
 import { Tally, newTallies, type Tallies } from './tally';
 
@@ -79,6 +81,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
 
   // ---- slides -------------------------------------------------------------
   const seenNotes = new Set<string>();
+  const seenComments = new Set<string>();
   let externalLinks = 0;
   for (const slide of slides) {
     const root = await pkg.xml(slide.part);
@@ -93,12 +96,15 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
       } else if (rel.type === 'notesSlide') {
         seenNotes.add(rel.target);
         if (await notesAreRich(pkg, rel.target)) t.notes.add(slide.label);
-      }
+      } else if (rel.type === 'comments') seenComments.add(rel.target);
     }
   }
   // notes pages no slide points at still hold content
   for (const part of names.filter((n) => NOTES_SLIDE.test(n) && !seenNotes.has(n)))
     if (await notesAreRich(pkg, part)) t.notes.add(baseName(part));
+  // comments the reader finds through a slide are kept; a comments part no slide points at is not read
+  for (const part of names.filter((n) => COMMENTS.test(n) && !seenComments.has(n)))
+    t.comments.add(baseName(part), await countComments(pkg, part));
 
   // ---- masters, layouts, themes -------------------------------------------
   const themes = new Set<string>();
@@ -138,6 +144,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.animations', 'animation effect(s)', t.animations);
   add('pptx.macros', 'macro project', countParts(/^ppt\/vbaProject\.bin$/), 'lost: macros are never run or kept');
   addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden, 'kept: imported as a hidden slide');
+  addTally('pptx.comments', 'comment(s) in a comments part no slide points at', t.comments, 'lost: comments are read through the slide that owns them, so these are not imported');
   addTally('pptx.notes', 'slide(s) whose speaker notes carry formatting (bold, italic, underline, bullets or numbering)', t.notes, 'approximated: the notes text and its paragraph and character formatting are kept in the notes; the fonts and styles of the notes master apply only where the notes do not state their own, and the editor may draw a style slightly differently');
   add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, 'approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them', unavailable);
   addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry, 'approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its path unless it needs guide formulas');
@@ -234,12 +241,19 @@ async function listSlides(pkg: OoxmlPackage, presentationText: string, names: st
 
 const urlScheme = (target: string): string => /^([a-z][a-z0-9+.-]*):/i.exec(target)?.[1].toLowerCase() ?? 'relative';
 
-/** True when a notes page has formatted text: bold, italic or underline on a run, or a bullet or numbering on a paragraph. */
+/** Comment threads in a comments part (legacy `p:cm` or modern `p188:cm`); a legacy reply (a `cm` with a `parentCm`) is not a thread. */
+async function countComments(pkg: OoxmlPackage, part: string): Promise<number> {
+  return descendants(await pkg.xml(part), 'cm').filter((cm) => descendants(cm, 'parentCm').length === 0).length;
+}
+
+/** True when the notes body (the body placeholders of a notes page, which is what is kept) has formatted text: bold, italic or underline on a run, or a bullet or numbering on a paragraph. */
 async function notesAreRich(pkg: OoxmlPackage, part: string): Promise<boolean> {
   const root = await pkg.xml(part);
-  return (
-    descendants(root, 'rPr').some((r) => isTrue(r.attrs.b) || isTrue(r.attrs.i) || (r.attrs.u !== undefined && r.attrs.u !== 'none')) ||
-    descendants(root, 'buChar').length + descendants(root, 'buAutoNum').length > 0
+  const bodies = treeChildren(kid(kid(root, 'cSld'), 'spTree')).filter((e) => e.name === 'sp' && isBody(e));
+  return bodies.some(
+    (sp) =>
+      descendants(sp, 'rPr').some((r) => isTrue(r.attrs.b) || isTrue(r.attrs.i) || (r.attrs.u !== undefined && r.attrs.u !== 'none')) ||
+      descendants(sp, 'buChar').length + descendants(sp, 'buAutoNum').length > 0
   );
 }
 

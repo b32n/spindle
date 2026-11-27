@@ -66,10 +66,19 @@ export async function readSlideContent(
       const background = readBackground(root, map, rels);
       if (background) slide.background = background;
       slide.elements = await readElements(kid(kid(root, 'cSld'), 'spTree'), ctx);
-      const notes = await readNotes(pkg, [...rels.values()].find((r) => r.type === 'notesSlide' && !r.external)?.target, warn);
-      if (notes) slide.notes = notes;
-      const threads = await readThreads(pkg, slide.partName, slide.pptxId, authors, elementIds(slide.elements), warn);
-      if (threads.length > 0) slide.threads = threads;
+      // notes and comments are extras: one that cannot be read is dropped, with a warning, and the slide keeps its content
+      try {
+        const notes = await readNotes(pkg, [...rels.values()].find((r) => r.type === 'notesSlide' && !r.external)?.target, warn);
+        if (notes) slide.notes = notes;
+      } catch (e) {
+        warn(`The speaker notes of slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); they are dropped.`);
+      }
+      try {
+        const threads = await readThreads(pkg, slide.partName, slide.pptxId, authors, elementIds(slide.elements), warn);
+        if (threads.length > 0) slide.threads = threads;
+      } catch (e) {
+        warn(`The comments of slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); they are dropped.`);
+      }
     } catch (e) {
       delete slide.elements;
       delete slide.background;

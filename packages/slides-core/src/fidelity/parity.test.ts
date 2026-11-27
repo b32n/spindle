@@ -123,6 +123,16 @@ describe('speaker notes', () => {
     expect(textParity(p, withNotes('x', 'y', 'z'))).toMatchObject({ extra: ['z'] });
   });
 
+  it('counts the notes of a page several slides share once for each slide that holds it (a failed slide holds none)', () => {
+    const slideRels = (n: number) => ({ [`ppt/slides/slide${n}.xml`]: '<p:sld/>', [`ppt/slides/_rels/slide${n}.xml.rels`]: rels(notesRel('../notesSlides/notesSlide1.xml')) });
+    const notes = { 'ppt/notesSlides/notesSlide1.xml': page(sp('body', 'a', 'b'), sp('hdr', 'h')) };
+    const held = { notes: { paragraphs: [{ runs: [{ kind: 'text', text: 'a' }] }, { runs: [{ kind: 'text', text: 'b' }] }] } };
+    const both = { slides: [{ partName: 'ppt/slides/slide1.xml', ...held }, { partName: 'ppt/slides/slide2.xml', ...held }] } as unknown as Json;
+    expect(textParity(parts({ ...slideRels(1), ...slideRels(2), ...notes }), both)).toMatchObject({ sourceRuns: 4, modelRuns: 4, missing: [], extra: [], outOfScope: 1 });
+    const oneFailed = { slides: [{ partName: 'ppt/slides/slide1.xml', ...held }, { partName: 'ppt/slides/slide2.xml', error: 'x' }] } as unknown as Json;
+    expect(textParity(parts({ ...slideRels(1), ...slideRels(2), ...notes }), oneFailed)).toMatchObject({ sourceRuns: 2, modelRuns: 2, missing: [], extra: [] });
+  });
+
   it('sets aside the notes of a slide that failed, resolves an absolute target and ignores an external or foreign relationship', () => {
     const slideRels = (r: string) => ({ 'ppt/slides/slide1.xml': '<p:sld/>', 'ppt/slides/_rels/slide1.xml.rels': rels(r) });
     const failed = { slides: [{ partName: 'ppt/slides/slide1.xml', error: 'x' }] } as unknown as Json;

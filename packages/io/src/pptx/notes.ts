@@ -13,7 +13,7 @@ import { readTextBody } from './text';
 const NO_LEVELS: PptxLevelStyles = Array.from({ length: 9 }, () => ({}));
 
 /** The body placeholder of a notes tree: `p:ph type="body"`, in either its `p:sp` or alternate-content form. */
-const isBody = (sp: XmlElement): boolean => kid(kid(kid(sp, 'nvSpPr'), 'nvPr'), 'ph')?.attrs.type === 'body';
+export const isBody = (sp: XmlElement): boolean => kid(kid(kid(sp, 'nvSpPr'), 'nvPr'), 'ph')?.attrs.type === 'body';
 
 /** What a paragraph of the notes body starts from: the notes master's text style under its body placeholder's own list style. */
 export function notesBaseLevels(master: XmlElement | undefined, map: PptxColorMap): PptxLevelStyles {

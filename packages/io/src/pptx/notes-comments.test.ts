@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import type { PptxCommentThread, PptxSlide } from '@b32nio/spindle-shared/export/pptx';
 import { importPptx } from './reader';
+import { OoxmlPackage } from '../common/ooxml-package';
 import { isoTime } from './comments';
 
 // Speaker notes and comments (plan K10c), read from synthetic decks that are real zips.
@@ -154,6 +155,23 @@ describe('legacy comments', () => {
     expect(threads.map((t) => t.comments.map((c) => c.body))).toEqual([['Q', 'A'], ['Next']]);
   });
 
+  it('puts a reply that comes before its parent into the parent\'s thread, and a reply to a reply into the thread at the top', async () => {
+    const early = await threadsOf(legacyDeck(lcm('1', '1', 'A', parent('0', '1')) + lcm('0', '1', 'Q')));
+    expect(early.map((t) => t.comments.map((c) => c.body))).toEqual([['Q', 'A']]);
+    const chain = await threadsOf(legacyDeck(lcm('0', '1', 'Q') + lcm('1', '1', 'A', parent('0', '1')) + lcm('0', '2', 'B', parent('1', '1')) + lcm('1', '2', 'C', parent('0', '2'))));
+    expect(chain.map((t) => t.comments.map((c) => c.body))).toEqual([['Q', 'A', 'B', 'C']]);
+  });
+
+  it('keeps comments whose parents loop, or point at themselves, as threads of their own', async () => {
+    const loop = await threadsOf(legacyDeck(lcm('0', '1', 'a', parent('0', '2')) + lcm('0', '2', 'b', parent('0', '1')) + lcm('0', '3', 'c', parent('0', '3')) + lcm('0', '4', 'd', parent('0', '1'))));
+    expect(loop.map((t) => t.comments.map((c) => c.body))).toEqual([['a'], ['b'], ['c'], ['d']]);
+  });
+
+  it('keeps a reply to a thread whose own parent is missing in that thread', async () => {
+    const t = await threadsOf(legacyDeck(lcm('0', '5', 'x', parent('0', '1')) + lcm('0', '6', 'y', parent('0', '5'))));
+    expect(t.map((x) => x.comments.map((c) => c.body))).toEqual([['x', 'y']]);
+  });
+
   it('keeps a reply whose parent is missing as a thread of its own', async () => {
     expect((await threadsOf(legacyDeck(lcm('0', '5', 'orphan', parent('0', '1'))))).map((t) => t.comments.length)).toEqual([1]);
   });
@@ -262,6 +280,15 @@ describe('modern comments', () => {
     expect(slide.threads).toHaveLength(10_000);
     expect(warnings.some((w) => w.includes('10000'))).toBe(true);
   });
+
+  it('caps replies too: one thread with a very large number of replies is cut at 10,000 comments, later threads dropped', async () => {
+    const replies = Array.from({ length: 10_005 }, (_, i) => `<p188:reply id="{r${i}}" authorId="${AUTHOR_A}">${tx('r')}</p188:reply>`).join('');
+    const big = `<p188:cm id="{big}" authorId="${AUTHOR_A}">${tx('q')}<p188:replyLst>${replies}</p188:replyLst></p188:cm>`;
+    const { slide, warnings } = await slideOf(modernDeck(big + mcm('{next}', AUTHOR_A, tx('n'))));
+    expect(slide.threads).toHaveLength(1);
+    expect(slide.threads?.[0].comments).toHaveLength(10_000);
+    expect(warnings.filter((w) => w.includes('more than 10000 comments'))).toHaveLength(1);
+  });
 });
 
 describe('isoTime', () => {
@@ -273,6 +300,14 @@ describe('isoTime', () => {
     ['2026-01-15T09:00:00-0130', '2026-01-15T10:30:00.000Z'],
     [' 2026-01-15T09:00:00.5 ', '2026-01-15T09:00:00.500Z'],
     ['2026-13-45T09:00:00', undefined],
+    ['2024-02-31T10:00:00', undefined],
+    ['2023-02-29T10:00:00Z', undefined],
+    ['2024-02-29T10:00:00Z', '2024-02-29T10:00:00.000Z'],
+    ['2024-04-31T10:00:00', undefined],
+    ['2024-01-15T24:00:00', undefined],
+    ['2024-01-15T10:60:00', undefined],
+    ['2024-01-15T23:59:59', '2024-01-15T23:59:59.000Z'],
+    ['2024-00-10T10:00:00', undefined],
     ['yesterday', undefined],
     ['', undefined],
     [undefined, undefined],
@@ -286,5 +321,65 @@ describe('a slide that fails to read has neither notes nor threads', () => {
     expect(slide.error).toBeDefined();
     expect(slide.notes).toBeUndefined();
     expect(slide.threads).toBeUndefined();
+  });
+});
+
+describe('notes and comments that cannot be read cost the slide nothing else', () => {
+  const text = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="s"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/>${para('kept')}</p:txBody></p:sp>`;
+  const deck = (): Deck => {
+    const n = withNotes(notesPage(body(para('n'))));
+    const c = legacyDeck(lcm('0', '1', 'c'));
+    return { tree: text, slideRels: [...(n.slideRels ?? []), ...(c.slideRels ?? [])], presRels: c.presRels ?? [], extra: { ...n.extra, ...c.extra } };
+  };
+  /** Makes one method of the package throw for the part named by `part`. */
+  const failOn = (method: 'rels' | 'xml', part: string, error: unknown): void => {
+    const original = OoxmlPackage.prototype[method] as (this: OoxmlPackage, name: string) => Promise<unknown>;
+    jest.spyOn(OoxmlPackage.prototype, method).mockImplementation(async function (this: OoxmlPackage, name: string) {
+      if (name === part) throw error;
+      return original.call(this, name);
+    } as never);
+  };
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('drops unreadable notes, with a warning, and keeps the slide elements and comments', async () => {
+    failOn('rels', 'ppt/notesSlides/notesSlide1.xml', new Error('boom'));
+    expect((await slideOf(deck())).warnings.some((w) => w.includes('boom'))).toBe(true);
+    jest.restoreAllMocks();
+    failOn('rels', 'ppt/notesSlides/notesSlide1.xml', 'plain failure');
+    expect((await slideOf(deck())).warnings.some((w) => w.includes('speaker notes of slide 1') && w.includes('unknown error'))).toBe(true);
+    jest.restoreAllMocks();
+    failOn('rels', 'ppt/notesSlides/notesSlide1.xml', new Error('boom'));
+    const { slide, warnings } = await slideOf(deck());
+    expect(slide.error).toBeUndefined();
+    expect(slide.elements).toHaveLength(1);
+    expect(slide.notes).toBeUndefined();
+    expect(slide.threads).toHaveLength(1);
+    expect(warnings.some((w) => w.includes('speaker notes of slide 1') && w.includes('boom'))).toBe(true);
+  });
+
+  it('drops unreadable comments, with a warning, and keeps the slide elements and notes', async () => {
+    failOn('xml', 'ppt/comments/comment1.xml', new Error('bang'));
+    expect((await slideOf(deck())).warnings.some((w) => w.includes('comments of slide 1') && w.includes('bang'))).toBe(true);
+    jest.restoreAllMocks();
+    failOn('xml', 'ppt/comments/comment1.xml', 'plain failure');
+    const { slide, warnings } = await slideOf(deck());
+    expect(slide.error).toBeUndefined();
+    expect(slide.elements).toHaveLength(1);
+    expect(slide.notes?.paragraphs).toHaveLength(1);
+    expect(slide.threads).toBeUndefined();
+    expect(warnings.some((w) => w.includes('comments of slide 1') && w.includes('unknown error'))).toBe(true);
+  });
+});
+
+describe('a notes page shared by several slides', () => {
+  it('is read for each slide', async () => {
+    const zip = await JSZip.loadAsync(await build({ ...withNotes(notesPage(body(para('shared')))) }));
+    zip.file('ppt/_rels/presentation.xml.rels', rels([rel('rId1', 'slide', 'slides/slide1.xml'), rel('rId2', 'slide', 'slides/slide2.xml')]));
+    zip.file('ppt/presentation.xml', `<p:presentation ${NS}><p:sldIdLst><p:sldId id="256" r:id="rId1"/><p:sldId id="257" r:id="rId2"/></p:sldIdLst><p:sldSz cx="12192000" cy="6858000"/></p:presentation>`);
+    zip.file('ppt/slides/slide2.xml', await (zip.file('ppt/slides/slide1.xml') as JSZip.JSZipObject).async('string'));
+    zip.file('ppt/slides/_rels/slide2.xml.rels', await (zip.file('ppt/slides/_rels/slide1.xml.rels') as JSZip.JSZipObject).async('string'));
+    const result = await importPptx(await zip.generateAsync({ type: 'uint8array' }));
+    expect(result.slides.map((s) => s.notes?.paragraphs[0].runs[0].text)).toEqual(['shared', 'shared']);
   });
 });

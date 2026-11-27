@@ -150,12 +150,18 @@ export function textParity(parts: OoxmlParts, model: Json): TextParity {
   const failed = errorSlides(model);
   let outOfScope = 0;
   let inErrorSlides = 0;
-  const notesOf = new Map<string, boolean>();
+  /** Per notes part: the slides that point at it and are kept, and those the model keeps as error placeholders. */
+  const notesOf = new Map<string, { live: number; failed: number }>();
   for (const name of Object.keys(parts.xml).sort()) {
     if (!SLIDE.test(name)) continue;
     const runs = sourceRuns(parts.xml[name]);
     const notes = notesPartOf(parts, name);
-    if (notes !== undefined && !notesOf.has(notes)) notesOf.set(notes, failed.has(name));
+    if (notes !== undefined) {
+      const n = notesOf.get(notes) ?? { live: 0, failed: 0 };
+      if (failed.has(name)) n.failed++;
+      else n.live++;
+      notesOf.set(notes, n);
+    }
     if (failed.has(name)) {
       inErrorSlides += runs.inScope.length + runs.outOfScope.length;
       continue;
@@ -166,14 +172,14 @@ export function textParity(parts: OoxmlParts, model: Json): TextParity {
   for (const name of Object.keys(parts.xml).sort()) {
     if (!/^ppt\/notesSlides\/[^/]+\.xml$/.test(name)) continue;
     const runs = notesRuns(parts.xml[name]);
-    const orphan = !notesOf.has(name);
-    const inFailed = notesOf.get(name) === true;
-    if (inFailed || orphan) {
-      if (inFailed) inErrorSlides += runs.inScope.length + runs.outOfScope.length;
+    const users = notesOf.get(name);
+    if (!users || users.live === 0) {
+      if (users) inErrorSlides += runs.inScope.length + runs.outOfScope.length;
       else outOfScope += runs.inScope.length + runs.outOfScope.length;
       continue;
     }
-    source.push(...runs.inScope);
+    // a notes page several slides share is held once by each of them
+    for (let i = 0; i < users.live; i++) source.push(...runs.inScope);
     outOfScope += runs.outOfScope.length;
   }
   const held = modelRuns(model);

@@ -11,7 +11,7 @@ import { num } from './units';
 const UNKNOWN_AUTHOR = 'Unknown author';
 /** Legacy positions are in 1/576 inch; a px is 1/96 inch. */
 const LEGACY_PER_PX = 6;
-/** Threads and replies read per slide: a damaged or hostile part cannot make the model unbounded. */
+/** Comments (threads and replies together) kept per slide; the part itself is bounded by the package's part size limit. */
 const MAX_COMMENTS = 10_000;
 
 interface Author {
@@ -23,8 +23,12 @@ interface Author {
 export function isoTime(value: string | undefined): string | undefined {
   const v = (value ?? '').trim();
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/.test(v)) return undefined;
+  const [y, mo, d, h, mi] = (v.match(/\d+/g) as string[]).slice(0, 5).map(Number);
   const t = Date.parse(/(?:Z|[+-]\d{2}:?\d{2})$/.test(v) ? v : `${v}Z`);
-  return Number.isNaN(t) ? undefined : new Date(t).toISOString();
+  // Date.parse rolls 02-31 over to March and 24:00 to the next day: only a date that reads back as written is a date
+  const day = new Date(Date.UTC(y, mo - 1, d));
+  if (Number.isNaN(t) || day.getUTCMonth() !== mo - 1 || day.getUTCDate() !== d || h > 23 || mi > 59) return undefined;
+  return new Date(t).toISOString();
 }
 
 const comment = (author: Author | undefined, body: string, created: string | undefined): PptxComment => ({
@@ -90,29 +94,46 @@ function modernThread(cm: XmlElement, id: string, authors: ReadonlyMap<string, A
   };
 }
 
-/** The threads of one legacy comments part: a `cm` with a `parentCm` is a reply to the comment with that author and index (kept as a thread of its own when that comment is not there). */
+/**
+ * The threads of one legacy comments part: a `cm` with a `parentCm` is a reply to the comment with that author and index,
+ * wherever that comment is in the part (a reply to a reply joins the thread of the comment at the top). A reply whose
+ * parent is missing, or whose chain of parents loops, is kept as a thread of its own.
+ */
 function legacyThreads(comments: XmlElement[], slideId: string, authors: ReadonlyMap<string, Author>, taken: Set<string>): PptxCommentThread[] {
-  const threads: PptxCommentThread[] = [];
-  const byKey = new Map<string, PptxCommentThread>();
-  for (const cm of comments) {
-    const key = `${cm.attrs.authorId ?? ''}.${cm.attrs.idx ?? ''}`;
+  const keyOf = (cm: XmlElement): string => `${cm.attrs.authorId ?? ''}.${cm.attrs.idx ?? ''}`;
+  const parentOf = (cm: XmlElement): string | undefined => {
     const parent = descendants(cm, 'parentCm')[0];
-    const entry = comment(authors.get(cm.attrs.authorId ?? ''), (kid(cm, 'text')?.text ?? '').trim(), cm.attrs.dt);
-    const root = parent ? byKey.get(`${parent.attrs.authorId ?? ''}.${parent.attrs.idx ?? ''}`) : undefined;
-    if (root) {
-      root.comments.push(entry);
-      continue;
+    return parent ? `${parent.attrs.authorId ?? ''}.${parent.attrs.idx ?? ''}` : undefined;
+  };
+  // the first comment of each author and index is the one a reply can name
+  const byKey = new Map<string, XmlElement>();
+  for (const cm of comments) if (!byKey.has(keyOf(cm))) byKey.set(keyOf(cm), cm);
+  /** The comment at the top of the chain of parents above `cm` (its own thread when it has none), or `cm` when the chain loops. */
+  const topOf = (cm: XmlElement): XmlElement => {
+    const seen = new Set<XmlElement>([cm]);
+    let top = cm;
+    for (;;) {
+      const key = parentOf(top);
+      const parent = key === undefined ? undefined : byKey.get(key);
+      if (!parent) return top;
+      if (seen.has(parent)) return cm;
+      seen.add(parent);
+      top = parent;
     }
+  };
+  const threads = new Map<XmlElement, PptxCommentThread>();
+  const entryOf = (cm: XmlElement): PptxComment => comment(authors.get(cm.attrs.authorId ?? ''), (kid(cm, 'text')?.text ?? '').trim(), cm.attrs.dt);
+  const roots = comments.filter((cm) => topOf(cm) === cm);
+  for (const cm of roots) {
     const pos = kid(cm, 'pos');
     const [x, y] = [num(pos?.attrs.x), num(pos?.attrs.y)];
-    let id = `${slideId}-${key}`;
-    for (let n = 2; taken.has(id); n++) id = `${slideId}-${key}-${n}`;
+    let id = `${slideId}-${keyOf(cm)}`;
+    for (let n = 2; taken.has(id); n++) id = `${slideId}-${keyOf(cm)}-${n}`;
     taken.add(id);
-    const thread: PptxCommentThread = { id, format: 'legacy', anchor: { kind: 'slide' }, ...(x !== undefined && y !== undefined ? { position: { x: Math.round((x / LEGACY_PER_PX) * 100) / 100, y: Math.round((y / LEGACY_PER_PX) * 100) / 100 } } : {}), comments: [entry] };
-    if (!byKey.has(key)) byKey.set(key, thread);
-    threads.push(thread);
+    threads.set(cm, { id, format: 'legacy', anchor: { kind: 'slide' }, ...(x !== undefined && y !== undefined ? { position: { x: Math.round((x / LEGACY_PER_PX) * 100) / 100, y: Math.round((y / LEGACY_PER_PX) * 100) / 100 } } : {}), comments: [entryOf(cm)] });
   }
-  return threads;
+  for (const cm of comments) if (!threads.has(cm)) threads.get(topOf(cm))?.comments.push(entryOf(cm));
+  return roots.map((cm) => threads.get(cm) as PptxCommentThread);
 }
 
 /**
@@ -136,9 +157,15 @@ export async function readThreads(pkg: OoxmlPackage, slidePart: string, slideId:
     }
     threads.push(...legacyThreads(legacy, slideId, authors, taken));
   }
-  if (threads.length > MAX_COMMENTS) {
-    warn(`A slide has more than ${MAX_COMMENTS} comment threads; the rest are dropped.`);
-    threads.length = MAX_COMMENTS;
+  const total = threads.reduce((n, t) => n + t.comments.length, 0);
+  if (total > MAX_COMMENTS) {
+    warn(`A slide has more than ${MAX_COMMENTS} comments; the rest are dropped.`);
+    let left = MAX_COMMENTS;
+    for (const thread of threads) {
+      thread.comments.length = Math.min(thread.comments.length, left);
+      left -= thread.comments.length;
+    }
+    threads.splice(0, threads.length, ...threads.filter((t) => t.comments.length > 0));
   }
   return threads;
 }
