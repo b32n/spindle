@@ -34,7 +34,8 @@ interface ElementBase {
   index: string;          // fractional z-order key (ascending = back-to-front)
   x: number; y: number; w: number; h: number;
   rotation: number;       // degrees, clockwise, about the box centre
-  groupId?: string; locked?: boolean; opacity?: number;
+  groupId?: string; parentGroupId?: string;   // innermost group; the group that group is nested in
+  locked?: boolean; opacity?: number;
   placeholder?: { type: PlaceholderType; idx: number };   // PPTX fidelity
 }
 ```

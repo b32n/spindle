@@ -823,6 +823,13 @@ lockstep.
   `props.adjustments`, so there is no new collaboration key and the schema version stays 5. New additive slides-core
   exports `adjustmentHandles` and `adjustmentsAfterDrag`; presets without a handle for a guide (the block arc
   thickness) keep editing it through the data only.
+- **Slides nested groups (K6a).** A group can sit inside another group: Group on a selection that includes a group
+  wraps the whole group, Ungroup dissolves the outermost group and leaves the inner ones, and a click selects the
+  outermost group. Elements carry `parentGroupId` beside `groupId` (additive; `groupChain`, `groupParents`,
+  `rootGroupOf` in `scene/group-tree.ts`, `DeckImpl.getGroupChain` / `getRootGroupId`, and `getGroupMembers` now
+  includes nested members). Duplicating a slide or elements and copy/paste keep the nesting under fresh group ids.
+  `childFrameInParent` and `composeGroupChain` compose DrawingML group transforms (scale, flips, rotation) for the
+  PPTX reader. Slides collaboration schema version 6 (a v5 client refuses a v6 room).
 
 ## [0.4.0] - 2026-10-26
 

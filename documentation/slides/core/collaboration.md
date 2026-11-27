@@ -20,7 +20,7 @@ deck.detachCollab();
 |------------|-------|
 | `meta`     | `Y.Map` — id, title, slideSize, theme, layouts (LWW) |
 | `slides`   | `Y.Map<slideId, Y.Map{ index, layoutRef?, background?, notes? }>` |
-| `elements` | `Y.Map<elId, Y.Map{ containerId, type, x, y, w, h, rotation, index, groupId?, …, props, richText? }>` |
+| `elements` | `Y.Map<elId, Y.Map{ containerId, type, x, y, w, h, rotation, index, groupId?, parentGroupId?, …, props, richText? }>` |
 | `threads`  | `Y.Map<threadId, JSON>` — comments, outside the undo scope |
 
 Frame fields are **individual Y.Map keys**, so concurrent move / rotate / z-reorder on one element merge per-key. Type-specific styling rides in one `props` JSON key (last-writer-wins, v1-acceptable). The rich-text body is a **`Y.XmlFragment`** bound via `y-prosemirror`. Fractional `index` + jitter make concurrent reorders converge.

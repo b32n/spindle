@@ -22,7 +22,7 @@ Research confirmed the niche is empty — no React + permissive-OSS + Yjs-collab
 4. **Rich text: raw ProseMirror** (already in-repo via docs-core). PM-JSON stored in the model; idle elements render statically; exactly one live PM editor mounts on the actively-edited element (tldraw's shipped pattern).
 5. **Data model: PPTX-semantic, CRDT-mechanic** — theme = 12 symbolic color slots + major/minor fonts; `layoutRef` + placeholder `{type, idx}` metadata in the schema from day one (retrofitting caps PPTX fidelity — the PPTist lesson); fractional-index strings for slide order AND z-order, never array order (Yjs has no move op).
 6. **Collab: Yjs behind `attachCollab()`** — Y.Map per element, Y.XmlFragment per text body via y-prosemirror, Y.UndoManager with trackedOrigins, awareness for presence. Per-user view state (active slide, zoom, selection) stays out of the CRDT doc (hard project rule). Granular observers, not sheets' v1 whole-doc reload.
-7. **Scope = Tier 1+2**: text/shape/image/line elements, multi-select + move/resize/rotate handles, smart guides + snapping, align/distribute, group/ungroup (flat), z-order, filmstrip, speaker notes, themes + layout gallery, present mode, shortcuts, clipboard, undo/redo, element-anchored comments, collab, PDF export (print pipeline), `getData()/setData()`.
+7. **Scope = Tier 1+2**: text/shape/image/line elements, multi-select + move/resize/rotate handles, smart guides + snapping, align/distribute, group/ungroup (nested via `parentGroupId`), z-order, filmstrip, speaker notes, themes + layout gallery, present mode, shortcuts, clipboard, undo/redo, element-anchored comments, collab, PDF export (print pipeline), `getData()/setData()`.
    **Excluded (follow-ups)**: PPTX import/export, tables, charts, video, animations, nested groups, presenter view w/ timer, in-text remote carets, gradient/image fills.
 8. **Reuse from shared**: `CollabProvider`, `CollabIdentity`, `InMemoryProvider`, `CommentThread<Anchor>`, and the shared `EventEmitter<T>` directly (verified it has typed events + `batch()` — don't fork it a third time like docs/sheets did).
 9. Defaults: slide size **1280×720** (16:9 @ 96 DPI, matching docs-core's DPI convention).
@@ -49,7 +49,7 @@ scene/                   SCENE LAYER — pure, container-agnostic, fully unit-te
   snapping.ts            collectSnapTargets() once per gesture + computeSnap() per move → {dx,dy,guides}
   align.ts               alignFrames()/distributeFrames() (pure)
   z-order.ts             front/back/forward/backward → new fractional indices (pure)
-  group.ts               group AABB, rotateGroup(), scaleGroup() (flat groups via shared groupId)
+  group.ts               group AABB, rotateGroup(), scaleGroup() (groups via shared groupId; nesting via parentGroupId, see group-tree.ts)
 text/                    SCENE LAYER (rich text)
   schema.ts              slidesSchema: minimal PM schema (see Rich text)
   model.ts               RichTextDoc JSON type + pure helpers: emptyRichText, to/from plain text,
@@ -93,7 +93,7 @@ type Fill  = { kind: 'none' } | { kind: 'solid'; color: Color };
 interface ElementBase extends Frame {
   id: string; containerId: string;
   index: string;                    // fractional z-order key
-  groupId?: string; locked?: boolean; opacity?: number;
+  groupId?: string; parentGroupId?: string; locked?: boolean; opacity?: number;
   placeholder?: { type: PlaceholderType; idx: number };   // PPTX fidelity, in schema NOW
 }
 // union: TextElement {richText, bodyStyle, fill?, stroke?} | ShapeElement {shape: ShapePreset (76 presets),
@@ -121,10 +121,10 @@ API groups: deck (title, slideSize, theme, layouts) · slides (add w/ `{afterSli
 
 ## Interaction design (scene layer, all pure + tested)
 
-- **Hit testing**: DOM-first — wrapper divs carry `data-element-id`, browser handles rotated hit-testing via CSS transforms; `closest()` on pointerdown. Geometry math only for marquee (separating-axis rotated-rect vs AABB) and snap bounds. Lines get a wide invisible SVG hit-stroke. Click selects whole group (expand via groupId); double-click drills in (PowerPoint convention).
+- **Hit testing**: DOM-first — wrapper divs carry `data-element-id`, browser handles rotated hit-testing via CSS transforms; `closest()` on pointerdown. Geometry math only for marquee (separating-axis rotated-rect vs AABB) and snap bounds. Lines get a wide invisible SVG hit-stroke. Click selects whole group (expand via groupId); drilling into a nested group is not implemented yet (the UI selects the outermost group).
 - **Resize**: transform pointer to element-local space, fixed opposite anchor, clamp, aspect-lock (corners; images default-locked), recompute center so anchor stays fixed in world space. Property-test anchor invariance under rotation.
 - **Snapping**: targets collected once at gesture start (other elements' AABB edges/centers + slide edges/center); threshold 5 screen px ÷ zoom; move snaps 3 x-lines + 3 y-lines, resize snaps moving edges only; emits GuideLine render data.
-- **Groups v1 (flat)**: move trivial; rotate = orbit member centers + add Δθ to member rotations; resize = scale centers + w/h relative to group AABB — lossy for rotated members under non-uniform scale, so group/multi corner handles are aspect-locked by default (documented).
+- **Groups (nested via `parentGroupId`; started flat)**: move trivial; rotate = orbit member centers + add Δθ to member rotations; resize = scale centers + w/h relative to group AABB — lossy for rotated members under non-uniform scale, so group/multi corner handles are aspect-locked by default (documented).
 
 ## Rich text
 
@@ -142,7 +142,7 @@ API groups: deck (title, slideSize, theme, layouts) · slides (add w/ `{afterSli
 ```
 meta:     Y.Map — id, title, slideSize, theme JSON, layouts JSON (LWW)
 slides:   Y.Map<slideId, Y.Map{ index, layoutRef?, background?, notes? }>
-elements: Y.Map<elId, Y.Map{ containerId, type, x, y, w, h, rotation, index, groupId?, locked?,
+elements: Y.Map<elId, Y.Map{ containerId, type, x, y, w, h, rotation, index, groupId?, parentGroupId?, locked?,
                              opacity?, placeholder?, props: JSON, richText?: Y.XmlFragment }>
 threads:  Y.Map<threadId, JSON>   — outside undo scope (sheets precedent)
 ```

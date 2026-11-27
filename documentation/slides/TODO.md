@@ -33,8 +33,9 @@ Not in the current scope; verified absent in code.
       next to `none` and `solid`, on shapes, text boxes, table cells and slide backgrounds. The fill controls offer
       gradient presets and an image fill from a file picker. Still open: a gradient stop editor, a pattern picker,
       layout backgrounds in the UI, tile offset/mirroring and picture-fill cropping (`a:srcRect`).
-- [ ] **Nested groups** — v1 groups are flat via a shared `groupId`
-      (`scene/group.ts`); no group hierarchy.
+- [x] **Nested groups** — a group nests in another through `parentGroupId` (`scene/group-tree.ts`); clicking selects
+      the outermost group, Group wraps whole groups and Ungroup dissolves the outermost one. Still open: drilling into
+      an inner group with a double-click, and a group frame of its own (a group is still the union of its members).
 - [ ] **Master-slide editing UI** — the model supports masters/layouts and
       materializes placeholders, but there's no surface to edit a master/layout.
 - [ ] **Image host-upload hook** — images inline as data URLs (size-unbounded);

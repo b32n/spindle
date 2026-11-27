@@ -33,6 +33,7 @@ export interface BaseElementInput extends Partial<Frame> {
   index: string;
   id?: string;
   groupId?: string;
+  parentGroupId?: string;
   locked?: boolean;
   opacity?: number;
   placeholder?: PlaceholderMeta;
@@ -61,6 +62,7 @@ function base(input: BaseElementInput, type: ElementType): ElementBase {
     rotation: input.rotation ?? f.rotation,
   };
   if (input.groupId !== undefined) el.groupId = input.groupId;
+  if (input.parentGroupId !== undefined) el.parentGroupId = input.parentGroupId;
   if (input.locked !== undefined) el.locked = input.locked;
   if (input.opacity !== undefined) el.opacity = input.opacity;
   if (input.placeholder !== undefined) el.placeholder = input.placeholder;
