@@ -40,12 +40,22 @@ describe('toReportFile', () => {
 describe('pptxScoreboard', () => {
   const files = (list: Array<[string, Partial<ReportFile>]>): ReportFile[] => list.map(([id, over]) => ({ ...toReportFile(outcome(id, result())), ...over }));
 
-  it('says L11, L12 and L14 are not measurable without an importer, and measures the ledger for L13', () => {
+  it('measures L12 and L13, covers only the stubs for L11 and says L14 needs the exporter', () => {
     const rows = pptxScoreboard(files([['a', {}], ['b', {}]]));
     expect(rows.map((r) => r.id)).toEqual(['L11', 'L12', 'L13', 'L14']);
-    expect(rows.map((r) => r.status)).toEqual(['not-measured', 'not-measured', 'not-met', 'not-measured']);
-    expect(rows[2].measured).toBe('4 of 6 parts unaccounted in 2 of 2 files (0 mapped, 0 opaque, 2 dropped); nothing is mapped until an importer exists');
-    for (const i of [0, 1, 3]) expect(rows[i].measured).toMatch(/^not measurable yet: no importer yet/);
+    // both files threw although the manifest does not say they should: L12 is not met
+    expect(rows.map((r) => r.status)).toEqual(['not-measured', 'not-met', 'not-met', 'not-measured']);
+    expect(rows[1].measured).toBe('2 of 2 files: a threw, b threw');
+    expect(rows[2].measured).toBe('4 of 6 parts unaccounted in 2 of 2 files (0 mapped, 0 opaque, 2 dropped)');
+    expect(rows[0].measured).toMatch(/^only the stub files are covered so far/);
+    expect(rows[3].measured).toMatch(/^not measurable yet: no exporter yet/);
+  });
+
+  it('meets L12 when every file ends as its manifest says, and names a file that imported but should have failed', () => {
+    const fine = pptxScoreboard(files([['a', { importExpectation: 'as-expected' }]]));
+    expect(fine[1]).toMatchObject({ status: 'met', measured: '0 of 1 files' });
+    const odd = pptxScoreboard(files([['e', { importExpectation: 'unexpected-success' }]]));
+    expect(odd[1]).toMatchObject({ status: 'not-met', measured: '1 of 1 files: e imported but should fail' });
   });
 
   it('shows whether the detector names the encrypted and legacy stubs', () => {

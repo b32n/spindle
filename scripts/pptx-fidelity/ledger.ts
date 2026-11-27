@@ -3,8 +3,10 @@
  *
  *   mapped       the part's content will flow into the slides-core model (or it is package plumbing that an export
  *                rebuilds). A mapped part can still carry features the model lacks; those are reported through
- *                loss ids, not through the ledger. Nothing is mapped today: there is no importer, so a `mapped` rule
- *                turns into `unaccounted` for every file (the import "failed"). The first importer PR (K9) flips this.
+ *                loss ids, not through the ledger. The reader (K9) maps the package plumbing, the presentation, the theme and
+ *                the slide, layout and master parts it reads; what it reads from a slide or a layout grows over the K9
+ *                PRs (the slide list and theme first, layouts and slide content next), so `mapped` says "this kind of
+ *                part is read", not "everything in it is carried": the loss ids say what is not.
  *   opaque       the part is kept byte-for-byte and written back on export. Nothing is opaque until the opaque
  *                part store (plan X5) exists: `opaque` is the hook that will decide it.
  *   dropped      the part is not imported and the loss report says so: a loss id covers it (`loss` lists the ids).
@@ -14,7 +16,7 @@
  *
  * Rules are the first-match table below, keyed by part name. A `dropped` rule only holds when the file's loss
  * report really contains one of the rule's loss ids; otherwise the part is `unaccounted`. If the import threw (it
- * always does today), `mapped` parts become `unaccounted` as well; dropped parts keep their status, because the loss
+ * fails, as for a file that is not a presentation), `mapped` parts become `unaccounted` as well; dropped parts keep their status, because the loss
  * report is produced independently of the import.
  */
 import type { OoxmlParts } from '../fidelity-core/ooxml-package';

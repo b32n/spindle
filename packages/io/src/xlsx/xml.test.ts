@@ -124,3 +124,22 @@ describe('tree helpers', () => {
     expect([isOn('1'), isOn('true'), isOn('0'), isOn('false'), isOn(undefined)]).toEqual([true, true, false, false, true]);
   });
 });
+
+describe('relationship attributes', () => {
+  const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+
+  it('keeps r:id apart from an unprefixed id, whatever the prefix is called', () => {
+    const root = parseXml(`<a xmlns:rel="${R}" xmlns:o="urn:other"><b id="256" rel:id="rId4" o:id="x"/><c id="1"/><d xmlns:q="${R}" q:embed="rId9"/></a>`) as XmlElement;
+    const [b, c, d] = root.children;
+    expect(b.attrs.id).toBe('256');
+    expect(b.rattrs).toEqual({ id: 'rId4' });
+    expect(c.rattrs).toBeUndefined();
+    expect(d.rattrs).toEqual({ embed: 'rId9' });
+  });
+
+  it('knows the strict namespace and an undeclared prefix is not one', () => {
+    // network-allow: XML namespace identifier of the ISO strict variant, never requested
+    const root = parseXml('<a xmlns:r="http://purl.oclc.org/ooxml/officeDocument/relationships"><b r:id="rId1" z:id="no"/></a>') as XmlElement;
+    expect(root.children[0].rattrs).toEqual({ id: 'rId1' });
+  });
+});

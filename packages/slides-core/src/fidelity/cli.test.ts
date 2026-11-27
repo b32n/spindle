@@ -22,7 +22,7 @@ describe('pptxCliConfig', () => {
       fixturesDir: PPTX_FIXTURES_DIR,
     });
     expect(config.adapter.kinds).toEqual(['model', 'loss', 'roundtrip', 'ledger']);
-    expect(config.strictImport).toBeUndefined();
+    expect(config.strictImport).toBe(true);
   });
 
   it('runs a subset against the committed goldens and prints the report', async () => {
@@ -33,7 +33,8 @@ describe('pptxCliConfig', () => {
     const text = sink.out.join('\n');
     expect(text).toContain('## PPTX fidelity report');
     expect(text).toContain('### Launch-bar scoreboard');
-    expect(text).toContain('`kitchen-sink` | **error**');
+    expect(text).toContain('`kitchen-sink`');
+    expect(text).not.toContain('`kitchen-sink` | **error**');
     expect(text).toContain('| L13 | Slides |');
   });
 

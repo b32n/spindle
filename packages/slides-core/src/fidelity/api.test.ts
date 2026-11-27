@@ -1,6 +1,6 @@
 import { NO_IMPORTER, createApi, loadBuiltApi, type PptxModule } from '../../../../scripts/pptx-fidelity/api';
 import { detectPptxLoss } from '@b32nio/spindle-io/pptx';
-import { sourceApi } from './support';
+import { detectOnlyApi, sourceApi } from './support';
 
 describe('createApi', () => {
   it('binds the harness to a module and asks for the full loss detail', async () => {
@@ -20,17 +20,19 @@ describe('createApi', () => {
   });
 
   it('passes an importer and an exporter through once the module has them', async () => {
-    const importPptx = async () => ({ warnings: ['w'], presentation: { slides: [] } });
+    const importPptx = async () => ({ warnings: ['w'], slides: [] });
     const exportPptx = async () => new Uint8Array([7]);
     const api = createApi({ detectPptxLoss, importPptx, exportPptx } as unknown as PptxModule);
-    expect(api.importPptx).toBe(importPptx);
+    // the reader's result is split into the warnings and the rest, which becomes the model
+    expect(await api.importPptx?.(new Uint8Array(0))).toEqual({ warnings: ['w'], presentation: { slides: [] } });
     expect(api.exportPptx).toBe(exportPptx);
     expect(Object.keys(createApi({ detectPptxLoss, importPptx } as unknown as PptxModule)).sort()).toEqual(['importPptx', 'inspectPptx']);
   });
 
   it('works against the io source', async () => {
     expect(await sourceApi.inspectPptx(new Uint8Array(0))).toEqual({ format: 'pptx', items: [] });
-    expect(sourceApi.importPptx).toBeUndefined();
+    expect(sourceApi.importPptx).toBeDefined();
+    expect(detectOnlyApi.importPptx).toBeUndefined();
   });
 
   it('says what the model snapshot holds when there is no importer', () => {
