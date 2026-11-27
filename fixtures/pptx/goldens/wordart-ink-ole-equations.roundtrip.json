@@ -1,7 +1,94 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 3
+    },
+    "before": {
+      "elements": 10,
+      "slides": 3
+    },
+    "byField": {
+      "removed opaqueParts[]": 3,
+      "removed slides[].elements[]": 10
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"hash\":\"980ebf817f204fff9a9069747675a57a62cdb6f0601908c93b525518953c69e8\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[0]"
+      },
+      {
+        "before": "{\"hash\":\"d4eb7fcb1ad5d21793e68bf101723e750964b2bf59257af46eb55335d7947b11\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[1]"
+      },
+      {
+        "before": "{\"hash\":\"e7a74ce0393b4d20209e02b0aa09042c07192a32763f922883a45fb28d989290\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Arch WordArt\",\"textBox\":true,\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Wave WordArt\",\"textBox\":true,\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"ink\",\"pptxId\":\"3\",\"name\":\"Ink 2\",\"frame\":{\"x\":...",
+        "kind": "removed",
+        "path": "slides[1].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Equation\",\"textBox\":true,\"frame\":{\"x\":47...",
+        "kind": "removed",
+        "path": "slides[1].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"ole\",\"pptxId\":\"3\",\"name\":\"Embedded worksheet\",...",
+        "kind": "removed",
+        "path": "slides[2].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Next slide button\",\"frame\":{\"x\":419.9475...",
+        "kind": "removed",
+        "path": "slides[2].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Macro button\",\"frame\":{\"x\":419.947506561...",
+        "kind": "removed",
+        "path": "slides[2].elements[3]"
+      }
+    ],
+    "removed": 13,
+    "total": 13,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 8 shapes and text boxes (K12b).",
+    "Not exported yet: 2 charts, diagrams, objects, media and ink (K14)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

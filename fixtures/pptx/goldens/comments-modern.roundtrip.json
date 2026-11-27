@@ -1,7 +1,44 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 2
+    },
+    "before": {
+      "elements": 2,
+      "slides": 2
+    },
+    "byField": {
+      "removed slides[].elements[]": 2,
+      "removed slides[].threads": 1
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "[{\"id\":\"256-{00000000-0000-4000-8000-0000000000C1}\",\"format\":\"modern\",\"anchor...",
+        "kind": "removed",
+        "path": "slides[0].threads"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      }
+    ],
+    "removed": 3,
+    "total": 3,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 2 shapes and text boxes (K12b).",
+    "Not exported yet: 1 comment threads (K13)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

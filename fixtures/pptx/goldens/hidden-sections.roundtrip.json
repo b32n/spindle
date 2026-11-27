@@ -1,7 +1,52 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 5
+    },
+    "before": {
+      "elements": 5,
+      "slides": 5
+    },
+    "byField": {
+      "removed slides[].elements[]": 5
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[3].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[4].elements[0]"
+      }
+    ],
+    "removed": 5,
+    "total": 5,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 5 shapes and text boxes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

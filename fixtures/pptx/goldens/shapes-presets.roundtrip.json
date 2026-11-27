@@ -1,7 +1,227 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 9
+    },
+    "before": {
+      "elements": 395,
+      "slides": 9
+    },
+    "byField": {
+      "removed slides[].elements[]": 395
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"line\",\"frame\":{\"x\":47.24409448818898,\"y\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"100\",\"name\":\"Label line\",\"textBox\":true,\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"lineInv\",\"frame\":{\"x\":241.4698162729659,...",
+        "kind": "removed",
+        "path": "slides[0].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"101\",\"name\":\"Label lineInv\",\"textBox\":true,\"frame\":...",
+        "kind": "removed",
+        "path": "slides[0].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"triangle\",\"frame\":{\"x\":435.6955380577428...",
+        "kind": "removed",
+        "path": "slides[0].elements[5]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"102\",\"name\":\"Label triangle\",\"textBox\":true,\"frame\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[6]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"rtTriangle\",\"frame\":{\"x\":629.92125984251...",
+        "kind": "removed",
+        "path": "slides[0].elements[7]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"103\",\"name\":\"Label rtTriangle\",\"textBox\":true,\"fram...",
+        "kind": "removed",
+        "path": "slides[0].elements[8]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"rect\",\"frame\":{\"x\":824.1469816272966,\"y\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[9]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"104\",\"name\":\"Label rect\",\"textBox\":true,\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[10]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"diamond\",\"frame\":{\"x\":1018.3727034120735...",
+        "kind": "removed",
+        "path": "slides[0].elements[11]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"105\",\"name\":\"Label diamond\",\"textBox\":true,\"frame\":...",
+        "kind": "removed",
+        "path": "slides[0].elements[12]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"9\",\"name\":\"parallelogram\",\"frame\":{\"x\":47.244094488...",
+        "kind": "removed",
+        "path": "slides[0].elements[13]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"106\",\"name\":\"Label parallelogram\",\"textBox\":true,\"f...",
+        "kind": "removed",
+        "path": "slides[0].elements[14]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"trapezoid\",\"frame\":{\"x\":241.46981627296...",
+        "kind": "removed",
+        "path": "slides[0].elements[15]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"107\",\"name\":\"Label trapezoid\",\"textBox\":true,\"frame...",
+        "kind": "removed",
+        "path": "slides[0].elements[16]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"nonIsoscelesTrapezoid\",\"frame\":{\"x\":435...",
+        "kind": "removed",
+        "path": "slides[0].elements[17]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"108\",\"name\":\"Label nonIsoscelesTrapezoid\",\"textBox\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[18]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"pentagon\",\"frame\":{\"x\":629.921259842519...",
+        "kind": "removed",
+        "path": "slides[0].elements[19]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"109\",\"name\":\"Label pentagon\",\"textBox\":true,\"frame\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[20]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"13\",\"name\":\"hexagon\",\"frame\":{\"x\":824.1469816272966...",
+        "kind": "removed",
+        "path": "slides[0].elements[21]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"110\",\"name\":\"Label hexagon\",\"textBox\":true,\"frame\":...",
+        "kind": "removed",
+        "path": "slides[0].elements[22]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"14\",\"name\":\"heptagon\",\"frame\":{\"x\":1018.37270341207...",
+        "kind": "removed",
+        "path": "slides[0].elements[23]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"111\",\"name\":\"Label heptagon\",\"textBox\":true,\"frame\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[24]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"15\",\"name\":\"octagon\",\"frame\":{\"x\":47.24409448818898...",
+        "kind": "removed",
+        "path": "slides[0].elements[25]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"112\",\"name\":\"Label octagon\",\"textBox\":true,\"frame\":...",
+        "kind": "removed",
+        "path": "slides[0].elements[26]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"16\",\"name\":\"decagon\",\"frame\":{\"x\":241.4698162729659...",
+        "kind": "removed",
+        "path": "slides[0].elements[27]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"113\",\"name\":\"Label decagon\",\"textBox\":true,\"frame\":...",
+        "kind": "removed",
+        "path": "slides[0].elements[28]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"17\",\"name\":\"dodecagon\",\"frame\":{\"x\":435.69553805774...",
+        "kind": "removed",
+        "path": "slides[0].elements[29]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"114\",\"name\":\"Label dodecagon\",\"textBox\":true,\"frame...",
+        "kind": "removed",
+        "path": "slides[0].elements[30]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"18\",\"name\":\"star4\",\"frame\":{\"x\":629.9212598425197,\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[31]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"115\",\"name\":\"Label star4\",\"textBox\":true,\"frame\":{\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[32]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"19\",\"name\":\"star5\",\"frame\":{\"x\":824.1469816272966,\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[33]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"116\",\"name\":\"Label star5\",\"textBox\":true,\"frame\":{\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[34]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"20\",\"name\":\"star6\",\"frame\":{\"x\":1018.3727034120735,...",
+        "kind": "removed",
+        "path": "slides[0].elements[35]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"117\",\"name\":\"Label star6\",\"textBox\":true,\"frame\":{\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[36]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"21\",\"name\":\"star7\",\"frame\":{\"x\":47.24409448818898,\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[37]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"118\",\"name\":\"Label star7\",\"textBox\":true,\"frame\":{\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[38]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"22\",\"name\":\"star8\",\"frame\":{\"x\":241.4698162729659,\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[39]"
+      }
+    ],
+    "removed": 395,
+    "total": 395,
+    "truncated": true
+  },
+  "exportWarnings": [
+    "Not exported yet: 395 shapes and text boxes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

@@ -1,7 +1,192 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
-  "reimportWarnings": [],
-  "status": "export-error"
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 8
+    },
+    "before": {
+      "elements": 23,
+      "slides": 8
+    },
+    "byField": {
+      "removed opaqueParts[]": 3,
+      "removed slides[].elements[]": 23,
+      "removed slides[].notes": 1,
+      "removed slides[].opaque": 2,
+      "removed slides[].threads": 1
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"hash\":\"5f7866c780fbd59943d6082410c5f9c42ea5b290afd5c3a982a8dd7b5b1b2575\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[0]"
+      },
+      {
+        "before": "{\"hash\":\"6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[1]"
+      },
+      {
+        "before": "{\"hash\":\"79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"ctrTitle...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Subtitle 2\",\"placeholder\":{\"type\":\"subTi...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
+        "kind": "removed",
+        "path": "slides[0].opaque"
+      },
+      {
+        "before": "[{\"id\":\"256-0.1\",\"format\":\"legacy\",\"anchor\":{\"kind\":\"slide\"},\"position\":{\"x\":...",
+        "kind": "removed",
+        "path": "slides[0].threads"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Content Placeholder 3\",\"placeholder\":{\"t...",
+        "kind": "removed",
+        "path": "slides[1].elements[1]"
+      },
+      {
+        "before": "{\"props\":{},\"paragraphs\":[{\"level\":0,\"style\":{\"fontSize\":12,\"color\":{\"kind\":\"...",
+        "kind": "removed",
+        "path": "slides[1].notes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Gradient\",\"frame\":{\"x\":73.49081364829397...",
+        "kind": "removed",
+        "path": "slides[2].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Shadow\",\"frame\":{\"x\":346.45669291338584,...",
+        "kind": "removed",
+        "path": "slides[2].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Rotated\",\"frame\":{\"x\":619.4225721784777,...",
+        "kind": "removed",
+        "path": "slides[2].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Custom\",\"frame\":{\"x\":892.3884514435696,\"...",
+        "kind": "removed",
+        "path": "slides[2].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[3].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Table\",\"frame\":{\"x\":73.49081364829397,\"y...",
+        "kind": "removed",
+        "path": "slides[3].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"Picture\",\"altText\":\"A small picture\",\"...",
+        "kind": "removed",
+        "path": "slides[3].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[4].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Bar chart\",\"frame\"...",
+        "kind": "removed",
+        "path": "slides[4].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[5].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"group\",\"pptxId\":\"10\",\"name\":\"Group\",\"frame\":{\"x\":73.49081364829397,\"...",
+        "kind": "removed",
+        "path": "slides[5].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"13\",\"name\":\"Target\",\"frame\":{\"x\":629.9212598425197,...",
+        "kind": "removed",
+        "path": "slides[5].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"connector\",\"pptxId\":\"14\",\"name\":\"Elbow\",\"frame\":{\"x\":451.44356955380...",
+        "kind": "removed",
+        "path": "slides[5].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[6].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Animated\",\"frame\":{\"x\":73.49081364829397...",
+        "kind": "removed",
+        "path": "slides[6].elements[1]"
+      },
+      {
+        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
+        "kind": "removed",
+        "path": "slides[6].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[7].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Hebrew\",\"textBox\":true,\"frame\":{\"x\":73.4...",
+        "kind": "removed",
+        "path": "slides[7].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Japanese\",\"textBox\":true,\"frame\":{\"x\":73...",
+        "kind": "removed",
+        "path": "slides[7].elements[2]"
+      }
+    ],
+    "removed": 30,
+    "total": 30,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 20 shapes and text boxes (K12b).",
+    "Not exported yet: 1 pictures (K13).",
+    "Not exported yet: 1 tables (K13).",
+    "Not exported yet: 1 connectors (K13).",
+    "Not exported yet: 1 groups (K13).",
+    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
+    "Not exported yet: 1 speaker notes (K13).",
+    "Not exported yet: 1 comment threads (K13).",
+    "Not exported yet: 2 transitions (K14).",
+    "Not exported yet: 1 animation timelines (K14)."
+  ],
+  "reimportWarnings": [
+    "2 fonts the editor may not have (MS Gothic, MS Mincho) are used; text in them shows in a substitute and may reflow."
+  ],
+  "status": "ok"
 }

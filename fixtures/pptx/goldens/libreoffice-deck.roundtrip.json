@@ -1,7 +1,149 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 4
+    },
+    "before": {
+      "elements": 13,
+      "slides": 4
+    },
+    "byField": {
+      "changed fonts.used[]": 2,
+      "removed fonts.used[]": 1,
+      "removed opaqueParts[]": 1,
+      "removed slides[].elements[]": 13,
+      "removed slides[].notes": 1,
+      "removed slides[].opaque": 4
+    },
+    "changed": 2,
+    "entries": [
+      {
+        "after": "\"Calibri\"",
+        "before": "\"Arial\"",
+        "kind": "changed",
+        "path": "fonts.used[0]"
+      },
+      {
+        "after": "\"Times New Roman\"",
+        "before": "\"Calibri\"",
+        "kind": "changed",
+        "path": "fonts.used[1]"
+      },
+      {
+        "before": "\"Times New Roman\"",
+        "kind": "removed",
+        "path": "fonts.used[2]"
+      },
+      {
+        "before": "{\"hash\":\"d4dabbe6d26f4c31f10c4758bbb46e65aafb7c5441c0329b813f3922eb71400d\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"65\",\"name\":\"PlaceHolder 1\",\"placeholder\":{\"type\":\"t...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"66\",\"name\":\"PlaceHolder 2\",\"placeholder\":{\"type\":\"s...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
+        "kind": "removed",
+        "path": "slides[0].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"67\",\"name\":\"PlaceHolder 1\",\"placeholder\":{\"type\":\"t...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"68\",\"name\":\"PlaceHolder 2\",\"placeholder\":{\"type\":\"o...",
+        "kind": "removed",
+        "path": "slides[1].elements[1]"
+      },
+      {
+        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
+        "kind": "removed",
+        "path": "slides[1].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"69\",\"name\":\"PlaceHolder 1\",\"placeholder\":{\"type\":\"t...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"table\",\"pptxId\":\"70\",\"name\":\"Table 2\",\"frame\":{\"x\":48,\"y\":153.6,\"w\":...",
+        "kind": "removed",
+        "path": "slides[2].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"picture\",\"pptxId\":\"71\",\"name\":\"Picture 3\",\"altText\":\"image.png\",\"fra...",
+        "kind": "removed",
+        "path": "slides[2].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"72\",\"name\":\"Rounded Rectangle 4\",\"frame\":{\"x\":48,\"y...",
+        "kind": "removed",
+        "path": "slides[2].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"73\",\"name\":\"5-Point Star 5\",\"frame\":{\"x\":201.6,\"y\":...",
+        "kind": "removed",
+        "path": "slides[2].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"74\",\"name\":\"Right Arrow 6\",\"frame\":{\"x\":355.2,\"y\":3...",
+        "kind": "removed",
+        "path": "slides[2].elements[5]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"75\",\"name\":\"TextBox 7\",\"frame\":{\"x\":480,\"y\":384,\"w\"...",
+        "kind": "removed",
+        "path": "slides[2].elements[6]"
+      },
+      {
+        "before": "{\"props\":{\"insets\":{\"l\":9.6,\"t\":4.8,\"r\":9.6,\"b\":4.8},\"anchor\":\"top\",\"autofit\"...",
+        "kind": "removed",
+        "path": "slides[2].notes"
+      },
+      {
+        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
+        "kind": "removed",
+        "path": "slides[2].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"76\",\"name\":\"PlaceHolder 1\",\"placeholder\":{\"type\":\"t...",
+        "kind": "removed",
+        "path": "slides[3].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"77\",\"name\":\"Chart 2\",\"frame\":...",
+        "kind": "removed",
+        "path": "slides[3].elements[1]"
+      },
+      {
+        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
+        "kind": "removed",
+        "path": "slides[3].opaque"
+      }
+    ],
+    "removed": 20,
+    "total": 22,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 10 shapes and text boxes (K12b).",
+    "Not exported yet: 1 pictures (K13).",
+    "Not exported yet: 1 tables (K13).",
+    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
+    "Not exported yet: 1 speaker notes (K13).",
+    "Not exported yet: 4 transitions (K14)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

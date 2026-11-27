@@ -4,7 +4,7 @@ import type { Json, LossSnapshot } from '../fidelity-core/types';
  * The editor-level PPTX API, injected so the same harness runs against the sources (Jest) and against the built
  * packages (the CLI) without importing either itself.
  *
- * The loss detector and the reader (`importPptx`, plan K9) exist; the writer does not (K12). `importPptx` and `exportPptx`
+ * The loss detector, the reader (`importPptx`, plan K9) and the writer (`exportPptx`, K12) exist. `importPptx` and `exportPptx`
  * stay optional so the harness still runs against a build without them: while the importer is absent it records
  * `importError: "no importer"` for the `model` kind, and while the exporter is absent the round trip records `no exporter`.
  */
@@ -13,8 +13,8 @@ export interface PptxEditorApi {
   inspectPptx(bytes: Uint8Array): Promise<LossSnapshot>;
   /** Import into a JSON-friendly presentation model (normalised by `normalize.ts`). */
   importPptx?(bytes: Uint8Array): Promise<{ warnings: string[]; presentation: unknown }>;
-  /** Export a model produced by `importPptx`. */
-  exportPptx?(presentation: unknown): Promise<Uint8Array>;
+  /** Export a model produced by `importPptx`; `warnings` say what the writer left out. */
+  exportPptx?(presentation: unknown): Promise<{ bytes: Uint8Array; warnings: string[] }>;
 }
 
 /** The parts of `@b32nio/spindle-io/pptx` (and, later, the slides core) the API is built from. */

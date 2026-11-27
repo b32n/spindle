@@ -1,7 +1,92 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 2
+    },
+    "before": {
+      "elements": 13,
+      "slides": 2
+    },
+    "byField": {
+      "removed slides[].elements[]": 13
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Tab stops\",\"frame\":{\"x\":72,\"y\":157.48031...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Two columns\",\"frame\":{\"x\":72,\"y\":272.965...",
+        "kind": "removed",
+        "path": "slides[0].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Rotated 90\",\"frame\":{\"x\":776.90288713910...",
+        "kind": "removed",
+        "path": "slides[0].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Rotated 270\",\"frame\":{\"x\":881.8897637795...",
+        "kind": "removed",
+        "path": "slides[0].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"East Asian vertical\",\"frame\":{\"x\":986.87...",
+        "kind": "removed",
+        "path": "slides[0].elements[5]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"Stacked\",\"frame\":{\"x\":1091.8635170603675...",
+        "kind": "removed",
+        "path": "slides[0].elements[6]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Shrink text\",\"frame\":{\"x\":72,\"y\":157.480...",
+        "kind": "removed",
+        "path": "slides[1].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Resize shape\",\"frame\":{\"x\":482.939632545...",
+        "kind": "removed",
+        "path": "slides[1].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Baseline\",\"textBox\":true,\"frame\":{\"x\":48...",
+        "kind": "removed",
+        "path": "slides[1].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Bullets\",\"frame\":{\"x\":72,\"y\":335.9580052...",
+        "kind": "removed",
+        "path": "slides[1].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"No wrap\",\"frame\":{\"x\":776.9028871391076,...",
+        "kind": "removed",
+        "path": "slides[1].elements[5]"
+      }
+    ],
+    "removed": 13,
+    "total": 13,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 13 shapes and text boxes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

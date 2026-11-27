@@ -24,7 +24,7 @@ const api = (over: Partial<PptxEditorApi> = {}): PptxEditorApi => ({
 const withImporter = (over: Partial<PptxEditorApi> = {}): PptxEditorApi =>
   api({
     importPptx: async () => ({ warnings: ['w'], presentation: model }),
-    exportPptx: async () => new Uint8Array([1]),
+    exportPptx: async () => ({ bytes: new Uint8Array([1]), warnings: ['not yet'] }),
     ...over,
   });
 const bytes = new Uint8Array([1, 2, 3]);
@@ -92,12 +92,12 @@ describe('runPptxFixture without an importer', () => {
 });
 
 describe('runPptxFixture with the io reader', () => {
-  it('imports a deck, then stops the round trip at "no exporter"', async () => {
+  it('imports a deck and round-trips it through the writer', async () => {
     const result = await runPptxFixture(sourceApi, await minimalDeck());
     expect(result.model.importError).toBeNull();
     expect(result.model.presentation).toMatchObject({ slideSize: { w: 1280, h: 720 }, slides: [] });
     expect(result.model.warnings.length).toBeGreaterThan(0);
-    expect(result.roundtrip).toMatchObject({ status: 'export-error', error: 'no exporter' });
+    expect(result.roundtrip).toMatchObject({ status: 'ok', exportWarnings: [], diff: { added: 1, removed: 0, changed: 0 } }); // the deck had no layout: the writer adds a blank one
     expect(result.ledger.importError).toBe(false);
     expect(result.ledger.totals).toMatchObject({ mapped: 2, dropped: 0, unaccounted: 1, total: 3 });
   });
@@ -143,6 +143,8 @@ describe('runPptxFixture with a scripted importer (what the importer PRs will se
   it('records export and re-import failures at the right level', async () => {
     const none = await runPptxFixture(api({ importPptx: async () => ({ warnings: [], presentation: model }) }), bytes);
     expect(none.roundtrip).toEqual({ status: 'export-error', error: 'no exporter', exportWarnings: [], reimportWarnings: [], diff: null });
+    const warned = await runPptxFixture(withImporter(), bytes);
+    expect(warned.roundtrip).toMatchObject({ status: 'ok', exportWarnings: ['not yet'] });
     const exp = await runPptxFixture(withImporter({ exportPptx: () => Promise.reject(new Error('export broke')) }), bytes);
     expect(exp.roundtrip).toMatchObject({ status: 'export-error', error: 'export broke' });
     let calls = 0;
@@ -150,7 +152,7 @@ describe('runPptxFixture with a scripted importer (what the importer PRs will se
       withImporter({ importPptx: async () => (++calls === 1 ? { warnings: [], presentation: model } : Promise.reject(new Error('second import broke'))) }),
       bytes
     );
-    expect(re.roundtrip).toMatchObject({ status: 'reimport-error', error: 'second import broke' });
+    expect(re.roundtrip).toMatchObject({ status: 'reimport-error', error: 'second import broke', exportWarnings: ['not yet'] });
   });
 
   it('removes the checkout path from error messages', async () => {

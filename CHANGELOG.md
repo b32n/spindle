@@ -1040,6 +1040,17 @@ lockstep.
   `exportToXlsx` also has a budget for the whole workbook, `maxTotalArrayCells` (default 1,000,000 cells of array formula results over all formulas
   and sheets), and reports the first 20 cuts one by one and the others as a count. The in-app download hands them to the host: the
   `onExportWarning` prop of `WorkbookCanvas` and the `onWarning` option (`SheetsFileExportOptions`, fourth argument) of `exportWorkbookFile`.
+- **PPTX writer A: package, theme, master and layouts (K12a).** New `exportPptx(presentation, options?)` in `@b32nio/spindle-io/pptx`
+  (`jszip` and string builders, no new dependency) writes what `importPptx` returns as a .pptx: `[Content_Types].xml`, relationships,
+  `presentation.xml` (slide size, slide list with kept or allocated ids, hidden slides, sections), the deck theme (twelve colours,
+  major and minor fonts with east Asian and complex-script faces), one master with the standard placeholders and the deck's colour map,
+  the deck's layouts with their placeholders stated in full, empty slide shells and `docProps` (the application is "Spindle"; no clock
+  unless `options.metadata.modified` is given). The same deck gives the same bytes. It returns `{ bytes, warnings }`: the warnings say
+  what is not exported yet (slide shapes and text, K12b; pictures, tables, groups, connectors, notes and comments, K13; opaque parts,
+  transitions and timing, K14), so nothing is dropped silently. New `lintPptxPackage(bytes)`: the structural lints of the plan (content
+  types, relationship ids and targets, unique shape ids, `p:spTree` child order, slide, master and layout id ranges). The PPTX fidelity
+  harness now runs import, export, import for every readable deck (`roundtrip` goldens hold real differences; the scoreboard row L14 is measured),
+  and `scripts/fidelity-core/lo-check.mjs` is a local LibreOffice open-and-render check (not run in CI).
 
 ## [0.4.0] - 2026-10-26
 

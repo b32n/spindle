@@ -21,7 +21,7 @@ describe('createApi', () => {
 
   it('passes an importer and an exporter through once the module has them', async () => {
     const importPptx = async () => ({ warnings: ['w'], slides: [] });
-    const exportPptx = async () => new Uint8Array([7]);
+    const exportPptx = async () => ({ bytes: new Uint8Array([7]), warnings: [] });
     const api = createApi({ detectPptxLoss, importPptx, exportPptx } as unknown as PptxModule);
     // the reader's result is split into the warnings and the rest, which becomes the model
     expect(await api.importPptx?.(new Uint8Array(0))).toEqual({ warnings: ['w'], presentation: { slides: [] } });

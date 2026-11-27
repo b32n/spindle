@@ -1,7 +1,66 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 2,
+    "after": {
+      "elements": 0,
+      "slides": 3
+    },
+    "before": {
+      "elements": 4,
+      "slides": 3
+    },
+    "byField": {
+      "added slides[].elements": 1,
+      "added slides[].layoutPart": 1,
+      "removed slides[].elements[]": 4,
+      "removed slides[].error": 1
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Box\",\"frame\":{\"x\":96,\"y\":209.97375328083...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "after": "[]",
+        "kind": "added",
+        "path": "slides[1].elements"
+      },
+      {
+        "before": "\"the part is damaged\"",
+        "kind": "removed",
+        "path": "slides[1].error"
+      },
+      {
+        "after": "\"ppt/slideLayouts/slideLayout1.xml\"",
+        "kind": "added",
+        "path": "slides[1].layoutPart"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Box\",\"frame\":{\"x\":96,\"y\":209.97375328083...",
+        "kind": "removed",
+        "path": "slides[2].elements[1]"
+      }
+    ],
+    "removed": 5,
+    "total": 7,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "1 slide could not be read at import and is written empty.",
+    "Not exported yet: 4 shapes and text boxes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

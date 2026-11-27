@@ -1,7 +1,37 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 1
+    },
+    "before": {
+      "elements": 2,
+      "slides": 1
+    },
+    "byField": {
+      "removed slides[].elements[]": 2
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Macro button\",\"frame\":{\"x\":73.4908136482...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      }
+    ],
+    "removed": 2,
+    "total": 2,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 2 shapes and text boxes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }
