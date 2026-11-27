@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -13,7 +13,7 @@
     },
     {
       "count": 9,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.effects",
       "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges",
       "where": [
@@ -23,7 +23,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.scene3d",
       "label": "3-D shape(s) or text",
       "where": [

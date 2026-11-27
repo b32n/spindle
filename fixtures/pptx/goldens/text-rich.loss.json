@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -13,7 +13,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the stored font scale and line spacing reduction are applied as written; line breaks may differ from PowerPoint",
       "id": "pptx.text.autofit",
       "label": "text box(es) that shrink or resize to fit their text",
       "where": [
@@ -22,7 +22,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: kept, drawn at a reduced size shifted by the stored percent (PowerPoint's size change differs by font)",
       "id": "pptx.text.baseline",
       "label": "run(s) raised or lowered (superscript, subscript)",
       "where": [
@@ -31,7 +31,7 @@
     },
     {
       "count": 3,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: bullet character, colour, size and numbering are kept; bullet fonts and numbering schemes beyond arabic, alpha and roman are not",
       "id": "pptx.text.bullets.custom",
       "label": "paragraph(s) with custom bullets or numbering",
       "where": [
@@ -40,7 +40,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.text.bullets.picture",
       "label": "paragraph(s) with picture bullets",
       "where": [
@@ -49,7 +49,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the column count and spacing are kept; shrink-to-fit measures the balanced height",
       "id": "pptx.text.columns",
       "label": "text box(es) with several columns",
       "where": [
@@ -58,7 +58,7 @@
     },
     {
       "count": 4,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: character spacing and capitalisation are kept; small caps are the browser's",
       "id": "pptx.text.spacing",
       "label": "run(s) with character spacing or capitalisation",
       "where": [
@@ -67,7 +67,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: tab stops are kept, but the editor lays out default tabs",
       "id": "pptx.text.tabStops",
       "label": "paragraph(s) with tab stops",
       "where": [
@@ -76,7 +76,7 @@
     },
     {
       "count": 4,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the text direction is kept and drawn by the browser",
       "id": "pptx.text.vertical",
       "label": "text box(es) or cell(s) with vertical text",
       "where": [

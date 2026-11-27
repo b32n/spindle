@@ -4,7 +4,7 @@ import { colorElement, parseColor } from './color';
 import { parseFill, parseGeometry, parseLine, type Rels } from './fill';
 import { frameOf, matchLayoutPlaceholder } from './levels';
 import { readTextBody } from './text';
-import { num } from './units';
+import { EMU_PER_PX, num } from './units';
 
 // `p:sp` shapes (plan K9c): frame, geometry, fill and outline, placeholder inheritance and the text body.
 
@@ -18,8 +18,8 @@ export interface ShapeContext {
   warn: (message: string) => void;
 }
 
-/** Outline widths of the Office theme's three line styles (`lnRef idx` 1 to 3), in px: 0.5, 1 and 1.5 pt. */
-const STYLE_LINE_PX = [0, 0.75, 1.5, 2.25];
+/** Outline widths of the Office theme's three line styles (`lnRef idx` 1 to 3: 6350, 12700 and 19050 EMU, that is 0.5, 1 and 1.5 pt), in px. */
+const STYLE_LINE_PX = [0, 6350, 12700, 19050].map((emu) => emu / EMU_PER_PX);
 
 const hasPlaceholder = (e: XmlElement): boolean => !!kid(kid(kid(e, 'nvSpPr'), 'nvPr'), 'ph');
 
@@ -63,6 +63,7 @@ function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
 
   const frame = frameOf(kid(spPr, 'xfrm')) ?? match?.frame;
   const geometry = parseGeometry(spPr);
+  // a `grpFill` reads as no fill here, so a style `fillRef` applies; PowerPoint takes the parent group's fill instead (groups are read in K10, which must resolve it)
   let fill = parseFill(spPr, ctx.map, ctx.rels);
   const fillRef = styleRef(style, 'fillRef', ctx.map);
   if (!fill && fillRef) fill = fillRef.idx === 0 || !fillRef.color ? undefined : styleFill(fillRef.color, fillRef.idx, ctx);

@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -12,7 +12,7 @@
     },
     {
       "count": 59,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.groups.nested",
       "label": "group(s) inside another group",
       "where": [

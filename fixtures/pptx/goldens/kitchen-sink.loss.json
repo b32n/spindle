@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.animations",
       "label": "animation effect(s)",
       "where": [
@@ -12,7 +12,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.charts",
       "label": "chart(s)",
       "where": [
@@ -21,7 +21,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.comments",
       "label": "comment(s)",
       "where": [
@@ -30,7 +30,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported; links are stored as written when the importer lands and never fetched",
+      "effect": "lost: not imported; links are never fetched",
       "id": "pptx.externalLinks",
       "label": "external link target(s) (web pages, files, linked media)",
       "where": [
@@ -39,7 +39,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today); text in these fonts will show in a substitute unless the host provides them",
+      "effect": "approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them",
       "id": "pptx.fonts.unavailable",
       "label": "font(s) the editor may not have",
       "where": [
@@ -49,7 +49,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "kept: imported as a hidden slide",
       "id": "pptx.hiddenSlides",
       "label": "hidden slide(s)",
       "where": [
@@ -58,7 +58,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.images.crop",
       "label": "cropped picture(s)",
       "where": [
@@ -67,13 +67,13 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.masters.handoutMaster",
       "label": "handout master(s)"
     },
     {
       "count": 10,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -86,13 +86,13 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.masters.notesMaster",
       "label": "notes master(s)"
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.notes",
       "label": "slide(s) with speaker notes",
       "where": [
@@ -101,13 +101,13 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.sections",
       "label": "section(s)"
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.connectors.elbowCurved",
       "label": "elbow or curved connector(s)",
       "where": [
@@ -116,7 +116,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the shape keeps its frame, fill and text but not its path",
       "id": "pptx.shapes.custGeom",
       "label": "shape(s) with custom geometry",
       "where": [
@@ -125,7 +125,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.effects",
       "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges",
       "where": [
@@ -134,7 +134,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: imported as a gradient; a gradient taken from the theme's style list (not the shape's own fill) is read as a solid colour",
       "id": "pptx.shapes.gradientFill",
       "label": "gradient fill(s)",
       "where": [
@@ -143,7 +143,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its frame, fill and text but not its path",
       "id": "pptx.shapes.unsupportedGeometry",
       "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)",
       "where": [
@@ -152,7 +152,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.tables.banding",
       "label": "table(s) with banded rows or columns",
       "where": [
@@ -161,7 +161,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.tables.merge",
       "label": "merged table cell(s)",
       "where": [
@@ -170,7 +170,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.tables.styles",
       "label": "table(s) with a table style",
       "where": [
@@ -179,7 +179,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: bullet character, colour, size and numbering are kept; bullet fonts and numbering schemes beyond arabic, alpha and roman are not",
       "id": "pptx.text.bullets.custom",
       "label": "paragraph(s) with custom bullets or numbering",
       "where": [
@@ -188,7 +188,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "kept: the language tag is stored on the run; it does not drive spell checking",
       "id": "pptx.text.lang",
       "label": "run(s) tagged with a language other than en-US",
       "where": [
@@ -198,7 +198,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the paragraph direction is kept and drawn by the browser",
       "id": "pptx.text.rtl",
       "label": "right-to-left paragraph(s)",
       "where": [
@@ -207,7 +207,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: tab stops are kept, but the editor lays out default tabs",
       "id": "pptx.text.tabStops",
       "label": "paragraph(s) with tab stops",
       "where": [
@@ -216,7 +216,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.theme.effectScheme",
       "label": "theme effect scheme(s) with shadows, glow or reflection",
       "where": [
@@ -225,7 +225,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: font names are kept as written and theme font references are resolved to them",
       "id": "pptx.theme.fontScheme",
       "label": "theme font scheme(s) other than Office default",
       "where": [
@@ -234,7 +234,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.transitions",
       "label": "slide(s) with a transition",
       "where": [

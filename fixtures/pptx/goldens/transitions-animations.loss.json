@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 7,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.animations",
       "label": "animation effect(s)",
       "where": [
@@ -13,7 +13,7 @@
     },
     {
       "count": 7,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -26,7 +26,7 @@
     },
     {
       "count": 4,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.transitions",
       "label": "slide(s) with a transition",
       "where": [

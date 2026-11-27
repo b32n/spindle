@@ -168,11 +168,22 @@ describe('p:sp: shape style references', () => {
     const r = await read({ tree: sp({ style: style('3', '2') }) });
     const s = (r.slides[0].elements as PptxShape[])[0];
     expect(s.fill).toEqual({ kind: 'solid', color: { kind: 'theme', slot: 'accent2' } });
-    expect(s.line).toEqual({ width: 1.5, fill: { kind: 'solid', color: { kind: 'theme', slot: 'accent1' } } });
+    expect(s.line).toEqual({ width: 12700 / E, fill: { kind: 'solid', color: { kind: 'theme', slot: 'accent1' } } });
     expect(r.warnings).toContain("A shape takes a gradient fill from the theme's style list; it is read as a solid colour.");
     const plain = await read({ tree: sp({ style: style('1', '7') }) });
-    expect((plain.slides[0].elements as PptxShape[])[0].line?.width).toBe(2.25);
+    expect((plain.slides[0].elements as PptxShape[])[0].line?.width).toBe(19050 / E);
     expect(plain.warnings.filter((w) => /gradient fill/.test(w))).toEqual([]);
+  });
+
+  it('maps the three style line widths to 6350, 12700 and 19050 EMU in px', async () => {
+    const widths = await Promise.all(['0', '1', '2', '3'].map(async (ln) => (await one(sp({ style: style('0', ln) }))).line?.width));
+    expect(widths).toEqual([undefined, 6350 / E, 12700 / E, 19050 / E]);
+  });
+
+  it('reads a grpFill as no fill, so the style fillRef applies (a parent group\'s fill is resolved by the group reader)', async () => {
+    const s = await one(sp({ spPr: '<a:grpFill/>', style: style('1', '0') }));
+    expect(s.fill).toEqual({ kind: 'solid', color: { kind: 'theme', slot: 'accent2' } });
+    expect((await one(sp({ spPr: '<a:grpFill/>' }))).fill).toBeUndefined();
   });
 
   it('lets spPr win and treats index 0 and a missing or colourless reference as nothing', async () => {
@@ -362,7 +373,7 @@ describe('a slide that cannot be read', () => {
     spy.mockImplementation(failing(new Error('boom')));
     const r = await read({ tree: sp() });
     const s: PptxSlide = r.slides[0];
-    expect(s.error).toBe('its content could not be read');
+    expect(s.error).toBe('the content could not be read');
     expect(s.elements).toBeUndefined();
     expect(r.warnings).toContain('Slide 1 could not be read (boom); it is kept as an empty placeholder.');
     spy.mockImplementation(failing('not an error'));

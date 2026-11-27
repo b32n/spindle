@@ -59,7 +59,7 @@ export async function readSlideContent(
     } catch (e) {
       delete slide.elements;
       delete slide.background;
-      slide.error = 'its content could not be read';
+      slide.error = 'the content could not be read';
       warn(`Slide ${i + 1} could not be read (${e instanceof Error ? e.message : 'unknown error'}); it is kept as an empty placeholder.`);
     }
   }

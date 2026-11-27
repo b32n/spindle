@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import JSZip from 'jszip';
 import type { ImportLossItem, ImportLossReport } from '@b32nio/spindle-shared';
 import { PACKAGE_LIMITS, detectPptxLoss } from './loss';
@@ -309,7 +311,7 @@ describe('fonts', () => {
     const fonts = item(r, 'pptx.fonts.unavailable');
     expect(fonts?.count).toBe(5);
     expect(fonts?.where).toEqual(['Comic Sans MS', 'Impact', 'MS Gothic', 'Papyrus', 'Zapfino']);
-    expect(fonts?.effect).toMatch(/^lost: not imported/);
+    expect(fonts?.effect).toMatch(/^approximated: font names are kept/);
   });
 
   it('ignores a font element with no typeface', async () => {
@@ -383,13 +385,13 @@ describe('summary versus full', () => {
     expect(ids(await full(bytes))).toEqual(['pptx.charts', 'pptx.shapes.gradientFill', 'pptx.slideSize', 'pptx.text.rtl']);
   });
 
-  it('starts every effect with a state word and says today that no PPTX can be opened', async () => {
+  it('starts every effect with a state word and says which ids the reader does not read yet', async () => {
     const shapes = gf(CHART) + sp({ spPr: geom('ribbon') });
     const r = await build({ slides: [{ shapes, attrs: 'show="0"', rels: [rel('rId1', 'hyperlink', 'https://example.com/a', true)] }], files: { 'ppt/vbaProject.bin': 'x', 'ppt/odd/part.bin': 'x' } }).then(full);
     expect(r.items.length).toBeGreaterThan(5);
     for (const i of r.items) expect(i.effect).toMatch(/^(lost|approximated|kept): /);
-    expect(item(r, 'pptx.charts')?.effect).toMatch(/no \.pptx can be opened today/);
-    expect(item(r, 'pptx.hiddenSlides')?.effect).toMatch(/no \.pptx can be opened today/);
+    expect(item(r, 'pptx.charts')?.effect).toMatch(/the PPTX reader does not read this yet/);
+    expect(item(r, 'pptx.hiddenSlides')?.effect).toMatch(/^kept: /);
   });
 
   it('caps where at five entries but counts them all', async () => {
@@ -1005,5 +1007,44 @@ describe('presentation level', () => {
     );
     expect(item(r, 'pptx.actions')).toMatchObject({ count: 5, where: ['hlinkshowjump', 'macro', 'hlinkfile', 'other'] });
     expect(JSON.stringify(r)).not.toContain('Secret');
+  });
+});
+
+describe('detectPptxLoss: the state of each id after the reader (K9c)', () => {
+  // the ids `importPptx` reads say how (kept or approximated); the rest are still lost
+  const READ: Record<string, 'kept' | 'approximated'> = {
+    'pptx.fonts.unavailable': 'approximated',
+    'pptx.shapes.unsupportedGeometry': 'approximated',
+    'pptx.hiddenSlides': 'kept',
+    'pptx.masters.layoutInheritance': 'approximated',
+    'pptx.theme.colorMap': 'approximated',
+    'pptx.theme.fontScheme': 'approximated',
+    'pptx.text.autofit': 'approximated',
+    'pptx.text.bullets.custom': 'approximated',
+    'pptx.text.tabStops': 'approximated',
+    'pptx.text.columns': 'approximated',
+    'pptx.text.vertical': 'approximated',
+    'pptx.text.fields': 'approximated',
+    'pptx.text.rtl': 'approximated',
+    'pptx.text.spacing': 'approximated',
+    'pptx.text.baseline': 'approximated',
+    'pptx.text.lang': 'kept',
+    'pptx.shapes.custGeom': 'approximated',
+    'pptx.shapes.gradientFill': 'approximated',
+    'pptx.shapes.patternFill': 'approximated',
+    'pptx.slideSize': 'kept',
+  };
+
+  it('reports every id the reader reads as kept or approximated and every other id as lost', async () => {
+    const bytes = readFileSync(join(__dirname, '../../../../fixtures/pptx/kitchen-sink.pptx'));
+    const report = await detectPptxLoss(new Uint8Array(bytes), { detail: 'full' });
+    const seen = new Set<string>();
+    for (const it of report.items) {
+      const state = it.effect.split(':')[0];
+      expect([it.id, state]).toEqual([it.id, READ[it.id] ?? 'lost']);
+      seen.add(it.id);
+    }
+    // the fixture exercises most of the read ids, so the table above is not vacuous
+    expect([...seen].filter((id) => READ[id]).length).toBeGreaterThan(8);
   });
 });

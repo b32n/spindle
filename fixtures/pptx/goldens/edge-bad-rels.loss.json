@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported; links are stored as written when the importer lands and never fetched",
+      "effect": "lost: not imported; links are never fetched",
       "id": "pptx.externalLinks",
       "label": "external link target(s) (web pages, files, linked media)",
       "where": [
@@ -12,7 +12,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [

@@ -3,7 +3,9 @@
  * multiset compare. The source side is read independently of the reader, by tokenising the slide XML for `a:t` runs, so a
  * reader bug cannot hide itself. The check covers the shapes the reader reads so far (`p:sp` directly under the shape tree);
  * runs in shape kinds a later reader step owns (groups, pictures, tables and other graphic frames, connectors) and the
- * `mc:Fallback` copies of alternate content are counted as `outOfScope`, so the number shows what the check does not yet cover.
+ * `mc:Fallback` copies of alternate content are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
+ * knows (outside any shape at all, or in an element no reader step owns) is in scope and so reported as `missing`: such text
+ * would be silently dropped by the reader, which is what the check exists to show.
  */
 import type { OoxmlParts } from '../fidelity-core/ooxml-package';
 import type { Json } from '../fidelity-core/types';

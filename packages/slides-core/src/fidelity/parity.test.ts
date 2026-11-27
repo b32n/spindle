@@ -22,6 +22,12 @@ describe('sourceRuns', () => {
     expect(sourceRuns(xml)).toEqual({ inScope: ['one', 'two', 'three'], outOfScope: ['in group', 'cell', 'pic', 'c', 'copy'] });
   });
 
+  it('treats an a:t outside every shape as in scope, so the parity check reports it as missing', () => {
+    expect(sourceRuns('<p:spTree><a:t>stray</a:t></p:spTree>')).toEqual({ inScope: ['stray'], outOfScope: [] });
+    const xml = { 'ppt/slides/slide1.xml': '<p:sld><p:spTree><a:t>stray</a:t></p:spTree></p:sld>' };
+    expect(textParity(parts(xml), model([])).missing).toEqual(['stray']);
+  });
+
   it('survives unbalanced tags and closing tags it never saw opened', () => {
     expect(sourceRuns('</p:grpSp><p:sp><a:t>x</a:t></p:sp></p:nope><a:t>y')).toEqual({ inScope: ['x'], outOfScope: [] });
     expect(sourceRuns('<p:grpSp><a:t>x</a:t>')).toEqual({ inScope: [], outOfScope: ['x'] });

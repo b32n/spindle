@@ -14,8 +14,8 @@ export { PACKAGE_LIMITS };
 
 const MAX_WHERE = 5;
 
-/** Every effect says the same thing today: there is no PPTX importer yet, so no presentation can be opened at all. */
-const NOT_IMPORTED = 'lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)';
+/** The default effect: the reader (`importPptx`) does not read the construct yet. Ids it does read say how, below. */
+const NOT_IMPORTED = 'lost: not imported (the PPTX reader does not read this yet)';
 
 /** Office's own default theme fonts: a font scheme with any other family is a theme the importer will have to carry. */
 const DEFAULT_THEME_FONTS = new Set(['calibri', 'calibri light']);
@@ -144,11 +144,11 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.transitions', 'slide(s) with a transition', t.transitions);
   addTally('pptx.animations', 'animation effect(s)', t.animations);
   addTally('pptx.comments', 'comment(s)', t.comments);
-  add('pptx.macros', 'macro project', countParts(/^ppt\/vbaProject\.bin$/), 'lost: macros are never run or kept (and no PPTX importer exists yet)');
-  addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden);
+  add('pptx.macros', 'macro project', countParts(/^ppt\/vbaProject\.bin$/), 'lost: macros are never run or kept');
+  addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden, 'kept: imported as a hidden slide');
   addTally('pptx.notes', 'slide(s) with speaker notes', t.notes);
-  add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, `${NOT_IMPORTED}; text in these fonts will show in a substitute unless the host provides them`, unavailable);
-  addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry);
+  add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, 'approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them', unavailable);
+  addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry, 'approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its frame, fill and text but not its path');
   addTally('pptx.images.unsupportedFormat', 'picture(s) in a format browsers cannot show (EMF, WMF)', t.unsupportedImages);
   add('pptx.sizeLimit', 'package part(s) over the size limit', pkg.skipped.length, 'lost: not scanned, so their content is not reported', pkg.skipped);
 
@@ -159,30 +159,30 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addFull('pptx.masters.multiple', 'slide master(s) in a deck with more than one', masters > 1 ? masters : 0, NOT_IMPORTED);
   addFull('pptx.masters.handoutMaster', 'handout master(s)', countParts(/^ppt\/handoutMasters\/[^/]+\.xml$/), NOT_IMPORTED);
   addFull('pptx.masters.notesMaster', 'notes master(s)', countParts(/^ppt\/notesMasters\/[^/]+\.xml$/), NOT_IMPORTED);
-  addTally('pptx.masters.layoutInheritance', 'placeholder(s) that take their position from the layout (flattened on import)', t.layoutInheritance, NOT_IMPORTED, true);
-  addTally('pptx.theme.colorMap', 'colour map(s) that are not the default', t.colorMap, NOT_IMPORTED, true);
-  addTally('pptx.theme.fontScheme', 'theme font scheme(s) other than Office default', t.fontScheme, NOT_IMPORTED, true);
+  addTally('pptx.masters.layoutInheritance', 'placeholder(s) that take their position from the layout (flattened on import)', t.layoutInheritance, 'approximated: flattened, the placeholder keeps the position and size it inherits as its own', true);
+  addTally('pptx.theme.colorMap', 'colour map(s) that are not the default', t.colorMap, 'approximated: colours are resolved through the map into theme colours; the map itself is not kept', true);
+  addTally('pptx.theme.fontScheme', 'theme font scheme(s) other than Office default', t.fontScheme, 'approximated: font names are kept as written and theme font references are resolved to them', true);
   addTally('pptx.theme.effectScheme', 'theme effect scheme(s) with shadows, glow or reflection', t.effectScheme, NOT_IMPORTED, true);
 
   // ---- text ---------------------------------------------------------------
-  addTally('pptx.text.autofit', 'text box(es) that shrink or resize to fit their text', t.autofit, NOT_IMPORTED, true);
-  addTally('pptx.text.bullets.custom', 'paragraph(s) with custom bullets or numbering', t.bulletsCustom, NOT_IMPORTED, true);
+  addTally('pptx.text.autofit', 'text box(es) that shrink or resize to fit their text', t.autofit, 'approximated: the stored font scale and line spacing reduction are applied as written; line breaks may differ from PowerPoint', true);
+  addTally('pptx.text.bullets.custom', 'paragraph(s) with custom bullets or numbering', t.bulletsCustom, 'approximated: bullet character, colour, size and numbering are kept; bullet fonts and numbering schemes beyond arabic, alpha and roman are not', true);
   addTally('pptx.text.bullets.picture', 'paragraph(s) with picture bullets', t.bulletsPicture, NOT_IMPORTED, true);
-  addTally('pptx.text.tabStops', 'paragraph(s) with tab stops', t.tabStops, NOT_IMPORTED, true);
-  addTally('pptx.text.columns', 'text box(es) with several columns', t.columns, NOT_IMPORTED, true);
-  addTally('pptx.text.vertical', 'text box(es) or cell(s) with vertical text', t.vertical, NOT_IMPORTED, true);
-  addTally('pptx.text.fields', 'field(s) (slide number, date)', t.fields, NOT_IMPORTED, true);
+  addTally('pptx.text.tabStops', 'paragraph(s) with tab stops', t.tabStops, 'approximated: tab stops are kept, but the editor lays out default tabs', true);
+  addTally('pptx.text.columns', 'text box(es) with several columns', t.columns, 'approximated: the column count and spacing are kept; shrink-to-fit measures the balanced height', true);
+  addTally('pptx.text.vertical', 'text box(es) or cell(s) with vertical text', t.vertical, 'approximated: the text direction is kept and drawn by the browser', true);
+  addTally('pptx.text.fields', 'field(s) (slide number, date)', t.fields, 'approximated: kept as a field with its stored text; the editor shows the stored text', true);
   addTally('pptx.text.wordArt', 'text box(es) with a WordArt warp', t.wordArt, NOT_IMPORTED, true);
-  addTally('pptx.text.rtl', 'right-to-left paragraph(s)', t.rtl, NOT_IMPORTED, true);
-  addTally('pptx.text.spacing', 'run(s) with character spacing or capitalisation', t.spacing, NOT_IMPORTED, true);
-  addTally('pptx.text.baseline', 'run(s) raised or lowered (superscript, subscript)', t.baseline, NOT_IMPORTED, true);
-  addTally('pptx.text.lang', 'run(s) tagged with a language other than en-US', t.lang, NOT_IMPORTED, true);
+  addTally('pptx.text.rtl', 'right-to-left paragraph(s)', t.rtl, 'approximated: the paragraph direction is kept and drawn by the browser', true);
+  addTally('pptx.text.spacing', 'run(s) with character spacing or capitalisation', t.spacing, 'approximated: character spacing and capitalisation are kept; small caps are the browser\'s', true);
+  addTally('pptx.text.baseline', 'run(s) raised or lowered (superscript, subscript)', t.baseline, 'approximated: kept, drawn at a reduced size shifted by the stored percent (PowerPoint\'s size change differs by font)', true);
+  addTally('pptx.text.lang', 'run(s) tagged with a language other than en-US', t.lang, 'kept: the language tag is stored on the run; it does not drive spell checking', true);
 
   // ---- shapes -------------------------------------------------------------
-  addTally('pptx.shapes.custGeom', 'shape(s) with custom geometry', t.custGeom, NOT_IMPORTED, true);
+  addTally('pptx.shapes.custGeom', 'shape(s) with custom geometry', t.custGeom, 'approximated: the shape keeps its frame, fill and text but not its path', true);
   addTally('pptx.shapes.effects', 'shape(s) or run(s) with shadow, glow, reflection or soft edges', t.effects, NOT_IMPORTED, true);
-  addTally('pptx.shapes.gradientFill', 'gradient fill(s)', t.gradientFill, NOT_IMPORTED, true);
-  addTally('pptx.shapes.patternFill', 'pattern fill(s)', t.patternFill, NOT_IMPORTED, true);
+  addTally('pptx.shapes.gradientFill', 'gradient fill(s)', t.gradientFill, 'approximated: imported as a gradient; a gradient taken from the theme\'s style list (not the shape\'s own fill) is read as a solid colour', true);
+  addTally('pptx.shapes.patternFill', 'pattern fill(s)', t.patternFill, 'approximated: kept as a pattern but painted as a solid blend of its two colours', true);
   addTally('pptx.shapes.connectors.elbowCurved', 'elbow or curved connector(s)', t.elbowCurved, NOT_IMPORTED, true);
   addTally('pptx.shapes.groups.nested', 'group(s) inside another group', t.nestedGroups, NOT_IMPORTED, true);
   addTally('pptx.shapes.scene3d', '3-D shape(s) or text', t.scene3d, NOT_IMPORTED, true);
@@ -199,12 +199,12 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   // ---- presentation -------------------------------------------------------
   addFull('pptx.sections', 'section(s)', sections, NOT_IMPORTED);
   addFull('pptx.customShows', 'custom show(s)', customShows, NOT_IMPORTED);
-  addFull('pptx.slideSize', 'slide size other than 16:9', oddSize ? 1 : 0, NOT_IMPORTED, oddSize ? [`${Math.round(cx / 12700)} x ${Math.round(cy / 12700)} pt`] : []);
+  addFull('pptx.slideSize', 'slide size other than 16:9', oddSize ? 1 : 0, 'kept: the deck keeps its own slide size', oddSize ? [`${Math.round(cx / 12700)} x ${Math.round(cy / 12700)} pt`] : []);
   addTally('pptx.zoom', 'slide or section zoom object(s)', t.zoom, NOT_IMPORTED, true);
   add('pptx.ink', 'ink drawing(s)', t.ink.total > 0 ? t.ink.total : countParts(/^ppt\/ink\/[^/]+\.xml$/), NOT_IMPORTED, t.ink.where, true);
   addTally('pptx.equations', 'equation(s)', t.equations, NOT_IMPORTED, true);
   addFull('pptx.signatures', 'digital signature(s)', countParts(/^_xmlsignatures\/[^/]+\.xml$/), 'lost: signatures are not kept, and any edit would invalidate them anyway');
-  addFull('pptx.externalLinks', 'external link target(s) (web pages, files, linked media)', externalLinks, 'lost: not imported; links are stored as written when the importer lands and never fetched', t.externalLinks.where);
+  addFull('pptx.externalLinks', 'external link target(s) (web pages, files, linked media)', externalLinks, 'lost: not imported; links are never fetched', t.externalLinks.where);
   addTally('pptx.actions', 'action hyperlink(s) (jump to slide, run macro, open file)', t.actions, 'lost: not imported; actions are never run, macros included', true);
 
   // ---- package ------------------------------------------------------------

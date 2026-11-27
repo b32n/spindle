@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.charts",
       "label": "chart(s)",
       "where": [
@@ -12,7 +12,7 @@
     },
     {
       "count": 6,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -24,13 +24,13 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.masters.notesMaster",
       "label": "notes master(s)"
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.notes",
       "label": "slide(s) with speaker notes",
       "where": [
@@ -39,7 +39,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "kept: the deck keeps its own slide size",
       "id": "pptx.slideSize",
       "label": "slide size other than 16:9",
       "where": [
@@ -48,7 +48,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.tables.banding",
       "label": "table(s) with banded rows or columns",
       "where": [
@@ -57,7 +57,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.tables.merge",
       "label": "merged table cell(s)",
       "where": [
@@ -66,7 +66,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.tables.styles",
       "label": "table(s) with a table style",
       "where": [
@@ -75,7 +75,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the stored font scale and line spacing reduction are applied as written; line breaks may differ from PowerPoint",
       "id": "pptx.text.autofit",
       "label": "text box(es) that shrink or resize to fit their text",
       "where": [
@@ -84,7 +84,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.theme.effectScheme",
       "label": "theme effect scheme(s) with shadows, glow or reflection",
       "where": [

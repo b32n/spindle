@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today); text in these fonts will show in a substitute unless the host provides them",
+      "effect": "approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them",
       "id": "pptx.fonts.unavailable",
       "label": "font(s) the editor may not have",
       "where": [
@@ -13,7 +13,7 @@
     },
     {
       "count": 3,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -24,13 +24,13 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.masters.multiple",
       "label": "slide master(s) in a deck with more than one"
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "kept: the language tag is stored on the run; it does not drive spell checking",
       "id": "pptx.text.lang",
       "label": "run(s) tagged with a language other than en-US",
       "where": [
@@ -39,7 +39,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: colours are resolved through the map into theme colours; the map itself is not kept",
       "id": "pptx.theme.colorMap",
       "label": "colour map(s) that are not the default",
       "where": [
@@ -49,7 +49,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.theme.effectScheme",
       "label": "theme effect scheme(s) with shadows, glow or reflection",
       "where": [
@@ -58,7 +58,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: font names are kept as written and theme font references are resolved to them",
       "id": "pptx.theme.fontScheme",
       "label": "theme font scheme(s) other than Office default",
       "where": [

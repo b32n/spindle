@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 5,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -16,7 +16,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.connectors.elbowCurved",
       "label": "elbow or curved connector(s)",
       "where": [
@@ -25,7 +25,7 @@
     },
     {
       "count": 5,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: imported as a gradient; a gradient taken from the theme's style list (not the shape's own fill) is read as a solid colour",
       "id": "pptx.shapes.gradientFill",
       "label": "gradient fill(s)",
       "where": [
@@ -35,7 +35,7 @@
     },
     {
       "count": 3,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: kept as a pattern but painted as a solid blend of its two colours",
       "id": "pptx.shapes.patternFill",
       "label": "pattern fill(s)",
       "where": [
