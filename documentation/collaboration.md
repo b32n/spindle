@@ -292,7 +292,8 @@ edits, and the inverse operations broadcast to peers like any other edit.
   `unknown:<prst>` shapes (inside the element `props` JSON). Version 6 added nested groups: an element map carries a
   `parentGroupId` key beside `groupId`, so a v5 client (which would flatten the nesting) refuses a v6 room. Version 7 added elbow and curved
   connectors: a line's `props` carry `connector` and `adjustments`, so a v6 client (which would draw them straight)
-  refuses a v7 room.
+  refuses a v7 room. Version 8 added custom geometry: a shape's `props` carry `shape: 'path'` and `path`, so a v7 client
+  (which would draw a plain rectangle) refuses a v8 room.
 - **Sheets: version gate and blockers.** A sheets room records the layout version in `meta.schemaVersion`
   (a room without the key reads as 1, so existing rooms keep working). `attachCollab` refuses a room written by a
   newer client with a `CollabSchemaVersionError` that names both versions, before it seeds or edits anything.

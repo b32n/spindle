@@ -838,6 +838,14 @@ lockstep.
   points (`connectionAnchors`, `connectionFrame`, `ConnectionFrame`; the eight anchor ids are unchanged, so existing
   bindings keep working; sites mirror with a shape's or picture's flip, so a connector bound to a flipped rectangle's `nw` now attaches at its `ne` corner, matching how it is drawn and OOXML). Choose the routing from the right-click menu of a selected line. Slides collaboration schema
   version 7 (a v6 client refuses a v7 room).
+- **Slides custom geometry (K6c).** A shape can carry an arbitrary outline: `ShapeElement.shape` may be `path` (type
+  `PathShape`, part of `ShapeKind`) with `ShapeElement.path` (`CustomGeometry`: one or more `CustomPath`s of
+  move/line/cubic/quad/arc/close commands, per-path size, `norm`/`none`/`lighten`/`darken` fill modes and a stroke
+  flag). It is drawn scaled onto the box (arcs, several paths, shaded fills) and survives collab and copy/paste.
+  New slides-core `scene/custom-geometry.ts`: `parseCustGeom` and `serializeCustGeom` read and write `a:custGeom`
+  on a plain element tree (for the PPTX reader and writer), `normalizeCustomGeometry` validates untrusted data with caps
+  on paths and commands. Guide formulas are not evaluated: a geometry using them stays an `unknown:custGeom`
+  passthrough. Slides collaboration schema version 8 (a v7 client refuses a v8 room).
 
 ## [0.4.0] - 2026-10-26
 

@@ -278,8 +278,42 @@ export type ShapePreset =
  */
 export type UnknownShape = `unknown:${string}`;
 
-/** What `ShapeElement.shape` holds: a built-in preset or an unknown preset passed through. */
-export type ShapeKind = ShapePreset | UnknownShape;
+/** The shape kind of a custom geometry (`a:custGeom`): the outline is `ShapeElement.path`, not a preset. */
+export type PathShape = 'path';
+
+/** What `ShapeElement.shape` holds: a built-in preset, an unknown preset passed through, or `path` (custom geometry). */
+export type ShapeKind = ShapePreset | UnknownShape | PathShape;
+
+/** One drawing command of a custom path. Coordinates are in the path's own space (`CustomPath.w` x `CustomPath.h`);
+ *  `arc` angles are degrees clockwise from the +x axis (OOXML `arcTo`, converted from 60000ths) and the arc starts at
+ *  the current point. */
+export type PathCommand =
+  | { op: 'move'; x: number; y: number }
+  | { op: 'line'; x: number; y: number }
+  | { op: 'cubic'; x1: number; y1: number; x2: number; y2: number; x: number; y: number }
+  | { op: 'quad'; x1: number; y1: number; x: number; y: number }
+  | { op: 'arc'; wR: number; hR: number; stAng: number; swAng: number }
+  | { op: 'close' };
+
+/** How a path is filled (`a:path/@fill`): `none` leaves it unfilled; the others shade the shape's fill. */
+export type PathFillMode = 'norm' | 'none' | 'lighten' | 'lightenLess' | 'darken' | 'darkenLess';
+
+/** One `a:path`: commands in a `w` x `h` coordinate space that is scaled onto the shape's box. */
+export interface CustomPath {
+  w: number;
+  h: number;
+  /** Omitted means `norm`. */
+  fill?: PathFillMode;
+  /** Omitted means true (the path is outlined). */
+  stroke?: boolean;
+  extrusionOk?: boolean;
+  commands: PathCommand[];
+}
+
+/** Custom geometry (`a:custGeom`): one or more paths drawn over the same box. */
+export interface CustomGeometry {
+  paths: CustomPath[];
+}
 
 export type ArrowHead = 'none' | 'arrow' | 'triangle' | 'circle';
 
@@ -307,6 +341,8 @@ export interface TextElement extends ElementBase {
 export interface ShapeElement extends ElementBase {
   type: 'shape';
   shape: ShapeKind;
+  /** The outline of a `path` shape (custom geometry). Ignored for any other kind. */
+  path?: CustomGeometry;
   /**
    * Preset-specific adjustment values in the order of `SHAPE_PRESET_INFO[shape].adj`: OOXML `adj` guides divided by
    * 100000 (angles by 21600000), so 0.5 is 50000. Missing entries take the preset default. An `unknown:` shape keeps

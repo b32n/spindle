@@ -132,4 +132,41 @@ describe('ShapeView', () => {
     const unknown = view(shape({ shape: unknownShape('flowChartDocument'), adjustments: [99999] }));
     expect(unknown).toBe(view(shape({ shape: 'roundRect' })));
   });
+  describe('custom geometry', () => {
+    const geom = {
+      paths: [
+        { w: 10, h: 10, commands: [{ op: 'move', x: 0, y: 0 }, { op: 'line', x: 10, y: 10 }, { op: 'close' }] },
+        { w: 10, h: 10, fill: 'none', commands: [{ op: 'move', x: 0, y: 5 }, { op: 'line', x: 10, y: 5 }] },
+        { w: 10, h: 10, fill: 'darken', stroke: false, commands: [{ op: 'move', x: 5, y: 0 }, { op: 'line', x: 5, y: 10 }] },
+      ],
+    } as ShapeElement['path'];
+
+    it('draws each path scaled to the box, honouring fill modes and the stroke flag', () => {
+      const html = view(shape({ shape: 'path', path: geom }));
+      const paths = html.match(/<path [^>]*>/g)!;
+      // path 1: fill + stroke; path 2: no fill (fill="none") + stroke; path 3: fill + shade, no stroke
+      expect(paths).toHaveLength(6);
+      expect(paths[0]).toContain('d="M0 0 L100 60 Z"');
+      expect(paths[0]).toContain('stroke="none"');
+      expect(paths[1]).toContain('fill="none"');
+      expect(paths[1]).toContain('stroke-width="2"');
+      expect(paths[2]).toContain('fill="none"');
+      expect(paths[3]).toContain('stroke-width="2"');
+      expect(paths[4]).toContain('stroke="none"');
+      expect(paths[5]).toContain('fill="#000000"');
+      expect(paths[5]).toContain('fill-opacity="0.4"');
+    });
+
+    it('falls back to a rectangle when the geometry is missing or unusable', () => {
+      for (const path of [undefined, { paths: [] }, { paths: 7 }] as Array<ShapeElement['path']>) {
+        const html = view(shape({ shape: 'path', path }));
+        expect(html).toContain('d="M0 0 L100 0 L100 60 L0 60 Z"');
+      }
+    });
+
+    it('ignores `path` on a preset shape', () => {
+      const html = view(shape({ shape: 'rect', path: geom }));
+      expect(html).toContain('d="M0 0 L100 0 L100 60 L0 60 Z"');
+    });
+  });
 });
