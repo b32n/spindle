@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { useSyncExternalStore } from 'react';
-import { connectorBox, resolveEndpoints, type Frame, type LineElement } from '@b32nio/spindle-slides-core';
+import { anchorDirection, connectionFrame, connectorBox, resolveEndpoints, type ConnectionFrame, type Direction, type LineElement } from '@b32nio/spindle-slides-core';
 import { useElement, useTheme } from '../../hooks';
 import { useDeckContext } from '../../context/DeckContext';
 import { LineView } from './LineView';
@@ -30,11 +30,14 @@ export function ConnectorView({ elementId, interactive }: { elementId: string; i
 
   if (!el) return null;
 
-  const getFrame = (id: string): Frame | undefined => {
-    const l = live?.get(id);
-    if (l) return l;
+  const getFrame = (id: string): ConnectionFrame | undefined => {
     const e = deck.getElement(id);
-    return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+    const l = live?.get(id);
+    return e ? { ...connectionFrame(e), ...l } : l;
+  };
+  const dirOf = (bind: LineElement['startBind']): Direction | undefined => {
+    const f = bind && getFrame(bind.elementId);
+    return f ? anchorDirection(f, bind!.anchor) : undefined;
   };
 
   const resolved = resolveEndpoints(el, getFrame);
@@ -61,7 +64,7 @@ export function ConnectorView({ elementId, interactive }: { elementId: string; i
 
   return (
     <div ref={ref} data-element-id={el.id} style={style}>
-      <LineView el={effective} theme={theme} endpoints={endpoints} />
+      <LineView el={effective} theme={theme} endpoints={endpoints} dirs={{ start: edit?.elementId === el.id && edit.end === 'start' ? undefined : dirOf(el.startBind), end: edit?.elementId === el.id && edit.end === 'end' ? undefined : dirOf(el.endBind) }} />
     </div>
   );
 }

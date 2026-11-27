@@ -5,14 +5,10 @@
 // handles are untouched — these dots are a separate, hover-only affordance.
 
 import React, { useSyncExternalStore } from 'react';
-import { anchorPoints, type AnchorId, type Frame } from '@b32nio/spindle-slides-core';
+import { anchorPoints, connectionFrame, type AnchorId } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../context/DeckContext';
 
 const ACCENT = '#2d7ff9';
-
-function frameOf(el: { x: number; y: number; w: number; h: number; rotation: number }): Frame {
-  return { x: el.x, y: el.y, w: el.w, h: el.h, rotation: el.rotation };
-}
 
 function Dot({ x, y, r, elementId, anchor, active }: { x: number; y: number; r: number; elementId: string; anchor: AnchorId; active: boolean }): React.ReactElement {
   return (
@@ -72,7 +68,7 @@ export function ConnectionPointsOverlay({ scale }: { scale: number }): React.Rea
       )}
       {/* Connection dots for the hovered / candidate-target element. */}
       {dotsEl && dotsEl.type !== 'line' &&
-        anchorPoints(frameOf(dotsEl)).map(({ anchor, point }) => (
+        anchorPoints(connectionFrame(dotsEl)).map(({ anchor, point }) => (
           <Dot key={anchor} x={point.x} y={point.y} r={r} elementId={dotsEl.id} anchor={anchor} active={anchor === snapAnchor} />
         ))}
     </div>

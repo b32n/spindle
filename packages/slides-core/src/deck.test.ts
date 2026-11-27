@@ -363,6 +363,36 @@ describe('connectors (bound lines track their shapes)', () => {
     expect(line.h).toBe(380);
   });
 
+  it('refreshes the stored connector box when a bound shape is flipped (single and batch)', () => {
+    const { deck, a, conn } = setup();
+    deck.updateElement(a.id, { flipH: true }); // east site mirrors to the box's west edge (0,50)
+    let line = deck.getElement(conn.id)!;
+    expect(line.x).toBe(0);
+    expect(line.w).toBe(400);
+    deck.updateElement(a.id, { flipH: false });
+    expect(deck.getElement(conn.id)!.x).toBe(100);
+    deck.updateElements([{ id: a.id, patch: { flipH: true } }]);
+    line = deck.getElement(conn.id)!;
+    expect(line.x).toBe(0);
+    expect(line.w).toBe(400);
+  });
+
+  it('mirrors a flipped plain rectangle: a bound nw site resolves to the ne corner', () => {
+    const deck = new DeckImpl();
+    const slide = deck.getActiveSlideId();
+    const r = deck.addElement(slide, { type: 'shape', x: 0, y: 0, w: 100, h: 100, flipH: true });
+    const t = deck.addElement(slide, { type: 'shape', x: 400, y: 400, w: 100, h: 100 });
+    const l = deck.addElement(slide, {
+      type: 'line', x: 0, y: 0, w: 400, h: 400,
+      startBind: { elementId: r.id, anchor: 'nw' },
+      endBind: { elementId: t.id, anchor: 'w' },
+    });
+    deck.updateElement(t.id, { x: 410 });
+    const line = deck.getElement(l.id)!;
+    expect(line.x).toBe(100); // start at the mirrored (100,0)
+    expect(line.y).toBe(0);
+  });
+
   it('tracks a bound shape through resize', () => {
     const { deck, b, conn } = setup();
     deck.updateElement(b.id, { x: 300, w: 200 }); // west anchor now (300,450)

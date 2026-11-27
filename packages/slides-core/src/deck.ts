@@ -41,8 +41,8 @@ import {
 import { alignFrames, distributeFrames, type AlignMode, type FrameItem } from './scene/align';
 import type { Rect } from './scene/geometry';
 import { groupChain, groupParents } from './scene/group-tree';
-import { resolveConnectorFrame, resolveEndpoints } from './scene/connector';
-import type { Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
+import { connectionFrame, resolveConnectorFrame, resolveEndpoints } from './scene/connector';
+import type { ConnectionFrame, ConnectorKind, Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
 import { applyTextFormat, type RichTextDoc, type TextFormatSpec } from './text/model';
 import type { ThemeData, LayoutData } from './theme/types';
 import { getBuiltinTheme, BUILTIN_LAYOUTS, DEFAULT_SLIDE_SIZE } from './theme/builtin';
@@ -67,7 +67,7 @@ export type NewElementSpec =
   | ({ type: 'line' } & Omit<LineElementInput, 'containerId' | 'index'>)
   | ({ type: 'table' } & Omit<TableElementInput, 'containerId' | 'index'>);
 
-const FRAME_KEYS = ['x', 'y', 'w', 'h', 'rotation'] as const;
+const FRAME_KEYS = ['x', 'y', 'w', 'h', 'rotation', 'flipH', 'flipV'] as const;
 /** Whether a patch changes any geometry a bound connector must track. */
 function touchesFrame(patch: Partial<SlideElement>): boolean {
   return FRAME_KEYS.some((k) => k in patch);
@@ -470,6 +470,18 @@ export class DeckImpl {
     return el;
   }
 
+  /** Set a line's routing; `straight` deletes `connector` and `adjustments` (a bare line carries neither key). */
+  setConnectorKind(id: string, kind: ConnectorKind): void {
+    const el = this.elements.get(id);
+    if (!el || el.type !== 'line') return;
+    this.recordHistory();
+    this.events.batch(() => {
+      const { connector: _c, adjustments: _a, ...rest } = el;
+      this.elements.set(id, (kind === 'straight' ? rest : { ...rest, connector: kind }) as SlideElement);
+      this.emit('elementChange', { slideId: el.containerId, elementId: id, keys: ['connector', 'adjustments'] });
+    });
+  }
+
   /** Patch an element; the record is replaced (immutable). */
   updateElement(id: string, patch: Partial<SlideElement>): void {
     const el = this.elements.get(id);
@@ -530,9 +542,9 @@ export class DeckImpl {
    * connectors whose own box was just set directly, are left alone.
    */
   private reconcileConnectors(changedIds: Set<string>): void {
-    const getFrame = (elementId: string): Frame | undefined => {
+    const getFrame = (elementId: string): ConnectionFrame | undefined => {
       const e = this.elements.get(elementId);
-      return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+      return e ? connectionFrame(e) : undefined;
     };
     for (const el of this.elements.values()) {
       if (el.type !== 'line') continue;
@@ -553,9 +565,9 @@ export class DeckImpl {
    *  reverting to the ambiguous box corner. Applied in-place; call inside a
    *  history/emit cycle. */
   private detachConnectors(deletedIds: Set<string>): void {
-    const getFrame = (elementId: string): Frame | undefined => {
+    const getFrame = (elementId: string): ConnectionFrame | undefined => {
       const e = this.elements.get(elementId);
-      return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+      return e ? connectionFrame(e) : undefined;
     };
     for (const el of this.elements.values()) {
       if (el.type !== 'line') continue;
@@ -741,9 +753,9 @@ export class DeckImpl {
     const el = this.elements.get(id);
     if (!el || el.type !== 'line') return;
     const line = el as LineElement;
-    const getFrame = (elementId: string): Frame | undefined => {
+    const getFrame = (elementId: string): ConnectionFrame | undefined => {
       const e = this.elements.get(elementId);
-      return e ? { x: e.x, y: e.y, w: e.w, h: e.h, rotation: e.rotation } : undefined;
+      return e ? connectionFrame(e) : undefined;
     };
     const resolved = resolveEndpoints(line, getFrame);
     const patch: Partial<LineElement> = {};

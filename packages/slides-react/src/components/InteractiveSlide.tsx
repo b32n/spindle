@@ -5,7 +5,7 @@
 // only re-renders on the commit at pointerup.
 
 import React, { useEffect, useRef } from 'react';
-import { anchorPoint, connectorBox, resolveEndpoints, toLocal, type AnchorId, type DeckImpl, type Frame, type NewElementSpec, type ResizeHandle, type TableElement, type Point } from '@b32nio/spindle-slides-core';
+import { anchorPoint, connectionFrame, connectorBox, resolveEndpoints, toLocal, type AnchorId, type ConnectionFrame, type DeckImpl, type Frame, type NewElementSpec, type ResizeHandle, type TableElement, type Point } from '@b32nio/spindle-slides-core';
 import { useDeck } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
 import { SlideView } from './SlideView';
@@ -234,7 +234,7 @@ export function InteractiveSlide({ slideId, scale }: { slideId: string; scale: n
       const lineId = deck.getSelection().elementIds[0];
       const lineEl = lineId ? deck.getElement(lineId) : undefined;
       if (!lineEl || lineEl.type !== 'line') return;
-      const getFrame = (elId: string): Frame | undefined => { const el = deck.getElement(elId); return el ? frameOf(el) : undefined; };
+      const getFrame = (elId: string): ConnectionFrame | undefined => { const el = deck.getElement(elId); return el ? connectionFrame(el) : undefined; };
       const orig = resolveEndpoints(lineEl, getFrame)[which];
       gesture = {
         onMove(p) {
@@ -259,7 +259,7 @@ export function InteractiveSlide({ slideId, scale }: { slideId: string; scale: n
       const fromAnchor = connectEl.dataset.connectAnchor as AnchorId;
       const srcEl = deck.getElement(fromElementId);
       if (!srcEl) return;
-      const from = anchorPoint(frameOf(srcEl), fromAnchor);
+      const from = anchorPoint(connectionFrame(srcEl), fromAnchor);
       connectors.setHover(null);
       connectors.setDraft({ fromElementId, fromAnchor, from, to: from, snap: null, overElementId: null });
       let moved = false;

@@ -17,6 +17,7 @@ import type {
   ImageElement,
   ImageCrop,
   LineElement,
+  ConnectorKind,
   TableElement,
   TableCell,
   ShapeKind,
@@ -150,6 +151,8 @@ export interface LineElementInput extends BaseElementInput {
   endBind?: EndpointBind;
   startPoint?: { x: number; y: number };
   endPoint?: { x: number; y: number };
+  connector?: ConnectorKind;
+  adjustments?: number[];
 }
 
 export function createLineElement(input: LineElementInput): LineElement {
@@ -166,6 +169,8 @@ export function createLineElement(input: LineElementInput): LineElement {
   if (input.endBind) el.endBind = input.endBind;
   if (input.startPoint) el.startPoint = input.startPoint;
   if (input.endPoint) el.endPoint = input.endPoint;
+  if (input.connector && input.connector !== 'straight') el.connector = input.connector;
+  if (input.adjustments?.length) el.adjustments = input.adjustments;
   return el;
 }
 
