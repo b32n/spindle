@@ -991,6 +991,17 @@ lockstep.
   to notes with formatting in the notes body (`approximated`) and `pptx.masters.notesMaster` is `approximated`; the summary ids
   stay 16. Notes or comments of a slide that cannot be read are dropped with a warning, not the whole slide. The text parity
   check covers the notes body runs (a notes page shared by several slides once for each). No editor change.
+- **PPTX reader C: opaque content (K11a).** `importPptx` now keeps charts (with their embedded workbook and style parts), SmartArt
+  diagrams, OLE objects and ActiveX controls, audio and video clips, and ink as opaque elements, and a slide's transition and timing XML,
+  and stores the parts byte for byte in the opaque part store (`PresentationImportResult.opaqueParts`; new `PptxOpaque`, `PptxOpaqueKind`,
+  `PptxSlideOpaque`; `PptxElement` gains `PptxOpaque` and `PptxSlide` gains `opaque`; `ImportPptxOptions.opaqueLimits`). A part over the
+  cap is dropped with a warning and reported as `pptx.opaque.tooLarge`; the loss ids `pptx.charts`, `.smartArt`, `.media`,
+  `.embeddedObjects`, `.transitions`, `.animations` and `.ink` now say `kept`. The text of an equation is read from its fallback. In
+  `@b32nio/spindle-slides-core`: new `OpaqueElement` (`type: 'opaque'`, added to `SlideElement`), `ElementBase.pptxId`, `Slide.opaque`,
+  `DeckData.opaqueParts`, `DeckImpl.getOpaqueParts()` / `getOpaquePart(hash)`, `createOpaqueElement`, `opaqueLabel`, `pruneTiming`;
+  deleting an element prunes the timing that animates it. `@b32nio/spindle-slides-react` draws an opaque element as a labelled placeholder
+  ("Chart: <title> (kept, not editable)"). Slides collaboration schema version 10 (`opaque` slide key, `opaqueParts` map, opaque elements):
+  older clients refuse such rooms. Hosts that switch exhaustively on `SlideElement['type']` need an `'opaque'` case.
 
 ## [0.4.0] - 2026-10-26
 

@@ -297,7 +297,12 @@ edits, and the inverse operations broadcast to peers like any other edit.
   `hMerge`, `vMerge`, `borders` on the cells, `styleFlags` on the table, all inside the element `props` JSON), so a v8 client
   (which would draw covered cells and ignore the spans) refuses a v9 room. A table's cells, text included, are one
   `props` JSON value: two users editing cells of one table at the same moment keep one edit (last writer wins; the
-  text is not CRDT-merged). That limit predates version 9 and is unchanged.
+  text is not CRDT-merged). That limit predates version 9 and is unchanged. Version 10 added opaque content from an imported PPTX:
+  elements with `type: 'opaque'` (a chart, SmartArt diagram, OLE object, clip or ink kept but not editable, drawn as a labelled
+  placeholder), a `pptxId` in an element's `props`, a per-slide `opaque` key (the transition and timing XML; deleting a shape
+  prunes the timing that animates it), and a top-level `opaqueParts` map from hash to part (content-addressed, so a part is
+  carried once however many elements refer to it, and every entry a peer sends is re-hashed against its key before it is
+  used). A v9 client would draw nothing for such an element and leave the timing pointing at a deleted shape, so it refuses a v10 room.
 - **Sheets: version gate and blockers.** A sheets room records the layout version in `meta.schemaVersion`
   (a room without the key reads as 1, so existing rooms keep working). `attachCollab` refuses a room written by a
   newer client with a `CollabSchemaVersionError` that names both versions, before it seeds or edits anything.
