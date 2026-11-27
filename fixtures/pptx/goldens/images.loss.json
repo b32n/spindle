@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the crop is stored as the percent trimmed from each edge",
       "id": "pptx.images.crop",
       "label": "cropped picture(s)",
       "where": [
@@ -12,7 +12,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "lost: the picture is not in the file, so it becomes a labelled placeholder; linked files are never fetched",
       "id": "pptx.images.linked",
       "label": "linked (not embedded) picture(s)",
       "where": [
@@ -30,7 +30,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "approximated: the PNG fallback stored beside the SVG is used",
       "id": "pptx.images.svg",
       "label": "SVG picture(s)",
       "where": [
@@ -39,7 +39,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "approximated: shown as a labelled placeholder with the picture's frame and alternative text; the image data itself is not kept",
       "id": "pptx.images.unsupportedFormat",
       "label": "picture(s) in a format browsers cannot show (EMF, WMF)",
       "where": [

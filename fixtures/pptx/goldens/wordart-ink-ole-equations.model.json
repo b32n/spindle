@@ -4261,6 +4261,10 @@
               "prst": "roundRect"
             },
             "kind": "shape",
+            "link": {
+              "kind": "action",
+              "target": "ppaction://hlinkshowjump?jump=nextslide"
+            },
             "name": "Next slide button",
             "pptxId": "4",
             "text": {
@@ -4309,6 +4313,10 @@
               "prst": "roundRect"
             },
             "kind": "shape",
+            "link": {
+              "kind": "action",
+              "target": "ppaction://macro?name=Module1.Hello"
+            },
             "name": "Macro button",
             "pptxId": "5",
             "text": {

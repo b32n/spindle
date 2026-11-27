@@ -108,11 +108,11 @@ export class OoxmlPackage {
   }
 
   /**
-   * The text of a part, or `undefined` when it is absent, over the limits or unreadable. Never throws. The declared size
+   * The bytes of a part, or `undefined` when it is absent, over the limits or unreadable. Never throws. The declared size
    * is a cheap first check; the inflated bytes are counted as they come out and the stream is stopped at the limit, so a
    * forged header cannot make a bomb inflate.
    */
-  async text(name: string): Promise<string | undefined> {
+  async bytes(name: string): Promise<Uint8Array | undefined> {
     const file = this.zip.file(name);
     if (!file) return undefined;
     const size = (file as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize;
@@ -126,8 +126,13 @@ export class OoxmlPackage {
     // sizes then runs out of budget instead of costing a full inflate each
     this.read += used;
     if (bytes === 'limit') this.skipped.push(name);
-    if (typeof bytes === 'string' || bytes === undefined) return undefined;
-    return new TextDecoder().decode(bytes);
+    return typeof bytes === 'string' || bytes === undefined ? undefined : bytes;
+  }
+
+  /** The text of a part (see `bytes`). */
+  async text(name: string): Promise<string | undefined> {
+    const bytes = await this.bytes(name);
+    return bytes === undefined ? undefined : new TextDecoder().decode(bytes);
   }
 
   /** A parsed part; each part is read, counted against the budget and parsed once however many parts refer to it. */

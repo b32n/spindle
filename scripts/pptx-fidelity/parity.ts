@@ -1,8 +1,8 @@
 /**
  * The automated text parity check (plan K9): every text run of the source slides must appear in the imported model, as a
  * multiset compare. The source side is read independently of the reader, by tokenising the slide XML for `a:t` runs, so a
- * reader bug cannot hide itself. The check covers the shapes the reader reads so far (`p:sp` directly under the shape tree);
- * runs in shape kinds a later reader step owns (groups, pictures, tables and other graphic frames, connectors) and the
+ * reader bug cannot hide itself. The check covers the shapes the reader reads so far (`p:sp`, `p:pic` and `p:graphicFrame` directly under the shape tree, table cells included);
+ * runs in shape kinds a later reader step owns (groups, connectors) and the
  * `mc:Fallback` copies of alternate content that also has a `mc:Choice` (the reader enters the Choice, else the Fallback) are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
  * knows (outside any shape at all, or in an element no reader step owns) is in scope and so reported as `missing`: such text
  * would be silently dropped by the reader, which is what the check exists to show.
@@ -28,7 +28,7 @@ export interface TextParity {
 const MAX_LISTED = 20;
 const SLIDE = /^ppt\/slides\/slide\d+\.xml$/;
 /** Containers whose text a later reader step owns. */
-const LATER = new Set(['p:grpSp', 'p:pic', 'p:graphicFrame', 'p:cxnSp']);
+const LATER = new Set(['p:grpSp', 'p:cxnSp']);
 const TAG = /<(\/?)([A-Za-z_][\w.-]*:[\w.-]+)(?:"[^"]*"|'[^']*'|[^>"'])*?(\/?)>|<!--[\s\S]*?-->/g;
 const NAMED: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
@@ -77,6 +77,8 @@ export function sourceRuns(xml: string): { inScope: string[]; outOfScope: string
   return { inScope: inScope.filter((t) => t !== ''), outOfScope: outOfScope.filter((t) => t !== '') };
 }
 
+type TextBody = { paragraphs?: { runs?: { kind?: string; text?: string }[] }[] };
+
 /** The text and field runs of every slide of a normalised model. */
 export function modelRuns(model: Json): string[] {
   const out: string[] = [];
@@ -84,9 +86,13 @@ export function modelRuns(model: Json): string[] {
   if (!Array.isArray(slides)) return out;
   for (const slide of slides as { elements?: unknown }[]) {
     if (!Array.isArray(slide?.elements)) continue;
-    for (const el of slide.elements as { text?: { paragraphs?: { runs?: { kind?: string; text?: string }[] }[] } }[])
-      for (const p of el?.text?.paragraphs ?? [])
-        for (const r of p.runs ?? []) if ((r.kind === 'text' || r.kind === 'field') && r.text) out.push(r.text);
+    for (const el of slide.elements as { text?: TextBody; rows?: { cells?: { text?: TextBody }[] }[] }[]) {
+      // a shape's text, and the text of every cell of a table
+      const bodies = [el?.text, ...(el?.rows ?? []).flatMap((row) => (row.cells ?? []).map((cell) => cell.text))];
+      for (const body of bodies)
+        for (const p of body?.paragraphs ?? [])
+          for (const r of p.runs ?? []) if ((r.kind === 'text' || r.kind === 'field') && r.text) out.push(r.text);
+    }
   }
   return out;
 }

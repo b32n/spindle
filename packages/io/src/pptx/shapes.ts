@@ -3,6 +3,7 @@ import { isTrue, kid, type XmlElement } from '../xlsx/xml';
 import { colorElement, parseColor } from './color';
 import { parseFill, parseGeometry, parseLine, type Rels } from './fill';
 import { frameOf, matchLayoutPlaceholder } from './levels';
+import { shapeLink } from './links';
 import { readTextBody } from './text';
 import { EMU_PER_PX, num } from './units';
 
@@ -23,22 +24,27 @@ const STYLE_LINE_PX = [0, 6350, 12700, 19050].map((emu) => emu / EMU_PER_PX);
 
 const hasPlaceholder = (e: XmlElement): boolean => !!kid(kid(kid(e, 'nvSpPr'), 'nvPr'), 'ph');
 
-/** The `p:sp` elements directly under a shape tree, those inside `mc:AlternateContent` (its `Choice`, else its `Fallback`) included, in drawing order. */
-function spElements(tree: XmlElement | undefined): XmlElement[] {
+/** `p:ph` as the model keeps it: its type (`obj` when absent) and `idx`. */
+export function readPlaceholder(ph: XmlElement | undefined): { type: string; idx?: number } | undefined {
+  return ph ? { type: ph.attrs.type || 'obj', ...(num(ph.attrs.idx) !== undefined ? { idx: num(ph.attrs.idx) as number } : {}) } : undefined;
+}
+
+/** The children of a shape tree, those inside `mc:AlternateContent` (its `Choice`, else its `Fallback`) included, in drawing order. */
+export function treeChildren(tree: XmlElement | undefined): XmlElement[] {
   const out: XmlElement[] = [];
   for (const c of tree?.children ?? []) {
-    if (c.name === 'sp') out.push(c);
-    else if (c.name === 'AlternateContent' && c.ns === 'mc') {
+    if (c.name === 'AlternateContent' && c.ns === 'mc') {
       const branch = c.children.find((b) => b.name === 'Choice') ?? c.children.find((b) => b.name === 'Fallback');
-      out.push(...spElements(branch));
-    }
+      out.push(...treeChildren(branch));
+    } else out.push(c);
   }
   return out;
 }
 
 /** The `p:sp` shapes of a shape tree (`p:spTree`). With `placeholders` false (a layout's or master's static content) the placeholders are left out. */
 export function readShapes(tree: XmlElement | undefined, ctx: ShapeContext, placeholders: boolean): PptxShape[] {
-  return spElements(tree)
+  return treeChildren(tree)
+    .filter((e) => e.name === 'sp')
     .filter((e) => placeholders || !hasPlaceholder(e))
     .map((e) => readShape(e, ctx));
 }
@@ -52,13 +58,13 @@ function styleRef(style: XmlElement | undefined, name: string, map: PptxColorMap
   return { idx, ...(color ? { color } : {}) };
 }
 
-function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
+export function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
   const nv = kid(e, 'nvSpPr');
   const cNvPr = kid(nv, 'cNvPr');
   const ph = kid(kid(nv, 'nvPr'), 'ph');
   const spPr = kid(e, 'spPr');
   const style = kid(e, 'style');
-  const placeholder = ph ? { type: ph.attrs.type || 'obj', ...(num(ph.attrs.idx) !== undefined ? { idx: num(ph.attrs.idx) as number } : {}) } : undefined;
+  const placeholder = readPlaceholder(ph);
   const match = placeholder ? matchLayoutPlaceholder(ctx.layout, placeholder) : undefined;
 
   const frame = frameOf(kid(spPr, 'xfrm')) ?? match?.frame;
@@ -78,6 +84,8 @@ function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
   const fontColor = parseColor(colorElement(kid(style, 'fontRef')), ctx.map);
   const name = (cNvPr?.attrs.name ?? '').trim();
   const altText = (cNvPr?.attrs.descr ?? '').trim();
+  const links = { rels: ctx.rels, warn: ctx.warn };
+  const link = shapeLink(cNvPr, links);
   return {
     kind: 'shape',
     pptxId: cNvPr?.attrs.id ?? '',
@@ -90,7 +98,8 @@ function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
     ...(geometry ? { geometry } : {}),
     ...(fill ? { fill } : {}),
     ...(line ? { line } : {}),
-    ...(body ? { text: readTextBody(body, match?.levels ?? ctx.defaultLevels, match?.bodyProps, ctx.map, fontColor) } : {}),
+    ...(body ? { text: readTextBody(body, match?.levels ?? ctx.defaultLevels, match?.bodyProps, ctx.map, fontColor, links) } : {}),
+    ...(link ? { link } : {}),
   };
 }
 

@@ -149,7 +149,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.notes', 'slide(s) with speaker notes', t.notes);
   add('pptx.fonts.unavailable', 'font(s) the editor may not have', unavailable.length, 'approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them', unavailable);
   addTally('pptx.shapes.unsupportedGeometry', 'shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)', t.geometry, 'approximated: a preset outside the library is kept under its name and drawn approximately; custom geometry keeps its frame, fill and text but not its path');
-  addTally('pptx.images.unsupportedFormat', 'picture(s) in a format browsers cannot show (EMF, WMF)', t.unsupportedImages);
+  addTally('pptx.images.unsupportedFormat', 'picture(s) in a format browsers cannot show (EMF, WMF)', t.unsupportedImages, 'approximated: shown as a labelled placeholder with the picture\'s frame and alternative text; the image data itself is not kept');
   add('pptx.sizeLimit', 'package part(s) over the size limit', pkg.skipped.length, 'lost: not scanned, so their content is not reported', pkg.skipped);
 
   if (!full) return;
@@ -188,13 +188,13 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.shapes.scene3d', '3-D shape(s) or text', t.scene3d, NOT_IMPORTED, true);
 
   // ---- images and tables --------------------------------------------------
-  addTally('pptx.images.crop', 'cropped picture(s)', t.crop, NOT_IMPORTED, true);
+  addTally('pptx.images.crop', 'cropped picture(s)', t.crop, 'kept: the crop is stored as the percent trimmed from each edge', true);
   addTally('pptx.images.recolor', 'recoloured picture(s)', t.recolor, NOT_IMPORTED, true);
-  addTally('pptx.images.linked', 'linked (not embedded) picture(s)', t.linked, NOT_IMPORTED, true);
-  addTally('pptx.images.svg', 'SVG picture(s)', t.svg, NOT_IMPORTED, true);
-  addTally('pptx.tables.merge', 'merged table cell(s)', t.merge, NOT_IMPORTED, true);
-  addTally('pptx.tables.styles', 'table(s) with a table style', t.tableStyles, NOT_IMPORTED, true);
-  addTally('pptx.tables.banding', 'table(s) with banded rows or columns', t.banding, NOT_IMPORTED, true);
+  addTally('pptx.images.linked', 'linked (not embedded) picture(s)', t.linked, 'lost: the picture is not in the file, so it becomes a labelled placeholder; linked files are never fetched', true);
+  addTally('pptx.images.svg', 'SVG picture(s)', t.svg, 'approximated: the PNG fallback stored beside the SVG is used', true);
+  addTally('pptx.tables.merge', 'merged table cell(s)', t.merge, 'kept: spans are stored on the origin cell and the cells it covers are marked', true);
+  addTally('pptx.tables.styles', 'table(s) with a table style', t.tableStyles, 'approximated: the style is resolved into each cell (fill, borders, bold, colour) and its name kept; corner-cell rules are not applied', true);
+  addTally('pptx.tables.banding', 'table(s) with banded rows or columns', t.banding, 'approximated: the banding is resolved into each cell\'s fill and the switch is kept', true);
 
   // ---- presentation -------------------------------------------------------
   addFull('pptx.sections', 'section(s)', sections, NOT_IMPORTED);
@@ -204,8 +204,8 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   add('pptx.ink', 'ink drawing(s)', t.ink.total > 0 ? t.ink.total : countParts(/^ppt\/ink\/[^/]+\.xml$/), NOT_IMPORTED, t.ink.where, true);
   addTally('pptx.equations', 'equation(s)', t.equations, NOT_IMPORTED, true);
   addFull('pptx.signatures', 'digital signature(s)', countParts(/^_xmlsignatures\/[^/]+\.xml$/), 'lost: signatures are not kept, and any edit would invalidate them anyway');
-  addFull('pptx.externalLinks', 'external link target(s) (web pages, files, linked media)', externalLinks, 'lost: not imported; links are never fetched', t.externalLinks.where);
-  addTally('pptx.actions', 'action hyperlink(s) (jump to slide, run macro, open file)', t.actions, 'lost: not imported; actions are never run, macros included', true);
+  addFull('pptx.externalLinks', 'external link target(s) (web pages, files, linked media)', externalLinks, 'approximated: http, https, mailto and tel links are kept and any other scheme is dropped; linked files and media are never fetched', t.externalLinks.where);
+  addTally('pptx.actions', 'action hyperlink(s) (jump to slide, run macro, open file)', t.actions, 'approximated: kept inert as written (jump to slide, open file) and never run, macros included', true);
 
   // ---- package ------------------------------------------------------------
   if (presentation) {

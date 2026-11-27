@@ -80,13 +80,18 @@ describe('p:sp: identity and frame', () => {
     expect((await one(sp({ spPr: xfrm(0, 0, -5, 5) }))).frame).toBeUndefined();
   });
 
-  it('reads only p:sp: other shape kinds are left to the later steps, and mc:AlternateContent is entered (Choice, else Fallback)', async () => {
+  it('reads p:sp among the shapes of a slide: groups and connectors are left to the later steps, and mc:AlternateContent is entered (Choice, else Fallback)', async () => {
     const tree =
       sp({ id: 2 }) +
-      '<p:pic/><p:grpSp/><p:cxnSp/>' +
+      '<p:grpSp/><p:cxnSp/>' +
       `<mc:AlternateContent><mc:Choice Requires="x">${sp({ id: 3 })}</mc:Choice><mc:Fallback>${sp({ id: 4 })}</mc:Fallback></mc:AlternateContent>` +
       `<mc:AlternateContent><mc:Fallback>${sp({ id: 5 })}</mc:Fallback></mc:AlternateContent>`;
     expect((await shapesOf(tree)).map((s) => s.pptxId)).toEqual(['2', '3', '5']);
+  });
+
+  it('reads the static shapes of a layout the same way, alternate content included', async () => {
+    const layoutTree = `<mc:AlternateContent><mc:Choice Requires="x">${sp({ id: 3 })}</mc:Choice><mc:Fallback>${sp({ id: 4 })}</mc:Fallback></mc:AlternateContent><p:pic/>${sp({ id: 6 })}`;
+    expect((await read({ layoutTree })).layouts[0].elements.map((s) => s.pptxId)).toEqual(['3', '6']);
   });
 });
 
@@ -363,12 +368,10 @@ describe('fonts', () => {
 
 describe('a slide that cannot be read', () => {
   it('degrades to an error placeholder with a warning and leaves the others alone', async () => {
-    const real = shapesModule.readShapes;
-    const spy = jest.spyOn(shapesModule, 'readShapes');
-    // the layouts' static content is read first: only the slide's own call (placeholders included) fails
-    const failing = (error: unknown) => (...args: Parameters<typeof shapesModule.readShapes>) => {
-      if (args[2]) throw error;
-      return real(...args);
+    const spy = jest.spyOn(shapesModule, 'readShape');
+    // the layouts' static content goes through `readShapes`: only the slide's own shapes fail
+    const failing = (error: unknown) => () => {
+      throw error;
     };
     spy.mockImplementation(failing(new Error('boom')));
     const r = await read({ tree: sp() });

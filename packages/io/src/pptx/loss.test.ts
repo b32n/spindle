@@ -1010,7 +1010,7 @@ describe('presentation level', () => {
   });
 });
 
-describe('detectPptxLoss: the state of each id after the reader (K9c)', () => {
+describe('detectPptxLoss: the state of each id after the reader (K9c, K10a)', () => {
   // the ids `importPptx` reads say how (kept or approximated); the rest are still lost
   const READ: Record<string, 'kept' | 'approximated'> = {
     'pptx.fonts.unavailable': 'approximated',
@@ -1033,6 +1033,14 @@ describe('detectPptxLoss: the state of each id after the reader (K9c)', () => {
     'pptx.shapes.gradientFill': 'approximated',
     'pptx.shapes.patternFill': 'approximated',
     'pptx.slideSize': 'kept',
+    'pptx.images.unsupportedFormat': 'approximated',
+    'pptx.images.crop': 'kept',
+    'pptx.images.svg': 'approximated',
+    'pptx.tables.merge': 'kept',
+    'pptx.tables.styles': 'approximated',
+    'pptx.tables.banding': 'approximated',
+    'pptx.actions': 'approximated',
+    'pptx.externalLinks': 'approximated',
   };
 
   it('reports every id the reader reads as kept or approximated and every other id as lost', async () => {

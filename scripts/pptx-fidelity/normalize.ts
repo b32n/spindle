@@ -11,9 +11,19 @@ import type { Json, JsonObject, ModelCounts } from '../fidelity-core/types';
 const sha256 = (data: Uint8Array | string): string =>
   createHash('sha256').update(data).digest('hex');
 
-/** A JSON value for anything: binaries become `{ bytes, sha256 }`, undefined properties are dropped, non-finite numbers become text. */
+/** An embedded image (a picture's `dataUrl`, plan K10): the goldens keep its type, size and digest, not the pixels. */
+const DATA_URL = /^data:([^;,]*);base64,/;
+
+/** A JSON value for anything: binaries and data URLs become `{ bytes, sha256 }`, undefined properties are dropped, non-finite numbers become text. */
 export function normalizePresentation(value: unknown): Json {
   if (value instanceof Uint8Array) return { bytes: value.length, sha256: sha256(value) };
+  if (typeof value === 'string') {
+    const m = DATA_URL.exec(value);
+    if (m) {
+      const bytes = Buffer.from(value.slice(m[0].length), 'base64');
+      return { dataUrl: m[1], bytes: bytes.length, sha256: sha256(bytes) };
+    }
+  }
   if (value instanceof ArrayBuffer) return normalizePresentation(new Uint8Array(value));
   if (value instanceof Date)
     return Number.isNaN(value.getTime()) ? 'Invalid Date' : value.toISOString();

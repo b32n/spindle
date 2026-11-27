@@ -3984,6 +3984,10 @@
               "prst": "roundRect"
             },
             "kind": "shape",
+            "link": {
+              "kind": "action",
+              "target": "ppaction://macro?name=Module1.Hello"
+            },
             "name": "Macro button",
             "pptxId": "3",
             "text": {
