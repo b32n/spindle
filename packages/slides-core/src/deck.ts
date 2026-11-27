@@ -970,7 +970,10 @@ export class DeckImpl {
     return this.collabHandle;
   }
 
-  /** Attach a Yjs mirror over a provider (rejects with CollabBlockedError for a deck the shared layout cannot hold, CollabSchemaVersionError for a newer room). Lazy-loads ./collab (keeps Yjs out of the base bundle). */
+  /**
+   * Attach a Yjs mirror over a provider. Rejects with CollabBlockedError for a deck the shared layout
+   * cannot hold, and CollabSchemaVersionError for a newer room. Lazy-loads ./collab (keeps Yjs out of the base bundle).
+   */
   async attachCollab(provider: CollabProvider, identity: CollabIdentity, options?: AttachCollabOptions): Promise<CollabHandle> {
     if (this.collabHandle) return this.collabHandle;
     if (this.pendingAttach) return this.pendingAttach.promise;
