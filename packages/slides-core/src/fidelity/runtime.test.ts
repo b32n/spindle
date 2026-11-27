@@ -11,7 +11,7 @@ import {
   runRuntime,
   runRuntimeFile,
 } from '../../../../scripts/pptx-fidelity/runtime';
-import { sourceApi } from './support';
+import { detectOnlyApi, sourceApi } from './support';
 
 const python = spawnSync('python3', ['--version']).status === 0;
 const itPy = python || process.env.CI ? it : it.skip;
@@ -25,7 +25,7 @@ async function deckBytes(): Promise<Uint8Array> {
 
 describe('runRuntimeFile', () => {
   it('scans a file and reports time, memory and the loss counts; "no importer" without one', async () => {
-    const run = await runRuntimeFile(sourceApi, 'small', await deckBytes(), 30_000);
+    const run = await runRuntimeFile(detectOnlyApi, 'small', await deckBytes(), 30_000);
     expect(run).toMatchObject({ id: 'small', importError: 'no importer', lossTypes: 1, lossCount: 1 });
     expect(run.elapsedMs).toBeGreaterThanOrEqual(0);
     expect(run.rssMb).toBeGreaterThan(0);
@@ -102,7 +102,7 @@ describe('runRuntime', () => {
     const sink = io();
     await runRuntime(
       {
-        api: sourceApi,
+        api: detectOnlyApi,
         fixturesDir: '/fixtures',
         generate: (script, dir, ids) => {
           seen = { script, dir, ids };
@@ -159,7 +159,7 @@ describe('runRuntime', () => {
     expect(existsSync(dirSeen)).toBe(false);
   });
 
-  itPy('uses the real generator by default and scans the 1000-slide deck', async () => {
+  itPy('uses the real generator by default and scans and imports the 1000-slide deck', async () => {
     const sink = io();
     // A private TMPDIR, so a runtime directory created by a suite running in parallel cannot be mistaken for ours.
     const previous = process.env.TMPDIR;
@@ -173,7 +173,7 @@ describe('runRuntime', () => {
         sink
       );
       expect(sink.out[1]).toContain('edge-1000-slides');
-      expect(sink.out[1]).toMatch(/import: no importer$/);
+      expect(sink.out[1]).toMatch(/import: ok$/);
       expect(readdirSync(own).filter((n) => n.startsWith('pptx-fidelity-runtime-'))).toEqual([]);
     } finally {
       if (previous === undefined) delete process.env.TMPDIR;

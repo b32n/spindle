@@ -17,6 +17,8 @@ export interface XmlElement {
   ns: string;
   /** Attributes by local name (a prefixed attribute loses its prefix unless an unprefixed one of that name exists). */
   attrs: Record<string, string>;
+  /** Attributes in the officeDocument relationships namespace (`r:id`, `r:embed`) by local name, whatever prefix they were written with; absent when there are none. */
+  rattrs?: Record<string, string>;
   /** Concatenated character data directly inside the element. */
   text: string;
   children: XmlElement[];
@@ -35,6 +37,10 @@ const NAMESPACES: Record<string, string> = {
   'http://purl.oclc.org/ooxml/drawingml/spreadsheetDrawing': 'xdr',
   'http://schemas.openxmlformats.org/package/2006/relationships': 'rel',
 };
+
+const REL_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+// network-allow: XML namespace identifier of the ISO strict variant, never requested
+const REL_NS_STRICT = 'http://purl.oclc.org/ooxml/officeDocument/relationships';
 
 const ENTITY = /&(?:#(\d+)|#x([0-9a-fA-F]+)|(lt|gt|amp|quot|apos));/g;
 const NAMED: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
@@ -67,11 +73,17 @@ function convert(raw: RawNode[], scope: Map<string, string>): XmlElement[] {
     const colon = tag.indexOf(':');
     const uri = inner.get(colon < 0 ? '' : tag.slice(0, colon));
     const attrs: Record<string, string> = {};
+    let rattrs: Record<string, string> | undefined;
     for (const key of Object.keys(rawAttrs)) {
       const name = key.slice(2);
       if (name === 'xmlns' || name.startsWith('xmlns:')) continue;
-      const local = name.slice(name.indexOf(':') + 1);
+      const colon2 = name.indexOf(':');
+      const local = name.slice(colon2 + 1);
       if (local === name || !(local in attrs)) attrs[local] = decodeEntities(rawAttrs[key]);
+      if (colon2 > 0) {
+        const attrUri = inner.get(name.slice(0, colon2));
+        if (attrUri === REL_NS || attrUri === REL_NS_STRICT) (rattrs ??= {})[local] = decodeEntities(rawAttrs[key]);
+      }
     }
     const kids = node[tag] as RawNode[];
     let text = '';
@@ -80,6 +92,7 @@ function convert(raw: RawNode[], scope: Map<string, string>): XmlElement[] {
       name: tag.slice(colon + 1),
       ns: uri === undefined ? '' : (NAMESPACES[uri] ?? uri),
       attrs,
+      ...(rattrs ? { rattrs } : {}),
       text: decodeEntities(text),
       children: convert(kids, inner),
     });

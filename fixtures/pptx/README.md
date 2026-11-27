@@ -2,8 +2,8 @@
 
 A set of `.pptx` / `.pptm` / `.ppt` files that exercise what real presentations contain, plus a manifest that says
 exactly which constructs each file holds, plus the goldens that record what the PPTX tooling does with each file
-today. There is no PPTX importer yet, so the goldens describe the loss detector (`loss`, `ledger`) and record
-`importError: "no importer"` for the importer kinds (`model`, `roundtrip`); they describe **current behaviour, not
+today. The goldens describe the loss detector (`loss`, `ledger`) and the reader (`model`: the slide list, size, theme
+and sections so far; `roundtrip` stops at `no exporter` until the writer exists); they describe **current behaviour, not
 correctness**, and the importer PRs (plan K9 onwards) show up as golden diffs to review. The construct probes in
 `scripts/pptx-fidelity/constructs.ts` verify the manifest against its own files, and the detector is checked against
 those claims.
@@ -85,9 +85,9 @@ byte-identical on Node 22 and 24. The harness catches everything: a detector or 
 
 | Kind | What it records today |
 |---|---|
-| `model` | `importError: "no importer"`, empty `warnings`, `presentation: null`. The file exists so orphan detection works from the first PR; when the importer lands it holds the normalised model (`scripts/pptx-fidelity/normalize.ts`). |
+| `model` | The reader's `PresentationImportResult` (`@b32nio/spindle-shared/export/pptx`) without its `warnings`, normalised by `scripts/pptx-fidelity/normalize.ts`, plus the warnings; or `importError` and `presentation: null` for the four files that are not presentations (`expectImportError` in the manifest: truncated zip, no presentation part, encrypted, legacy `.ppt`). It grows with each K9 PR: slide size, slide list (`pptxId`, hidden flag, layout, error placeholders), sections, theme and colour map now; layouts and slide content next. |
 | `loss` | `detectPptxLoss(bytes, { detail: 'full' })` sorted by id: the 16 summary ids the import dialog will show (`pptx.charts`, `smartArt`, `media`, `embeddedObjects`, `transitions`, `animations`, `comments`, `macros`, `hiddenSlides`, `notes`, `fonts.unavailable`, `shapes.unsupportedGeometry`, `images.unsupportedFormat`, `encrypted`, `legacyBinary`, `sizeLimit`) plus the finer ids of the PPTX table in `documentation/import-loss.md`. Every effect starts with `lost:` and says that no `.pptx` can be opened today. |
-| `roundtrip` | `status: "skipped-import-error"` for every file until the importer and exporter exist, then the structured difference between the first and the second import. |
+| `roundtrip` | `status: "skipped-import-error"` for the four rejected files; `export-error` with `no exporter` for every other file until the writer exists (K12), then the structured difference between the first and the second import. |
 | `ledger` | Every part of the input package with a status, see below. |
 
 ### Package ledger rules
@@ -97,8 +97,9 @@ Every part (zip entry) of the input gets exactly one status, decided by the firs
 
 - `mapped`: the part is something the importer will read (presentation, slides, layouts, masters, themes, pictures) or
   package plumbing the export rebuilds (`[Content_Types].xml`, every `.rels`, `docProps/`, presentation and view
-  properties, the table style list, printer settings). **Nothing is mapped today**: with no importer the import
-  "failed", so a `mapped` rule turns into `unaccounted`. The first importer PR flips these.
+  properties, the table style list, printer settings). When the import fails (the four rejected files) the `mapped`
+  parts turn into `unaccounted`. A `mapped` part is one the reader reads; what it takes from a slide or layout grows
+  over the K9 PRs, and the loss ids say what is still not carried.
 - `opaque`: kept byte for byte and written back on export. Always zero until the opaque part store (plan X5) exists.
 - `dropped`: not imported, and the loss report covers it. A rule only applies when the file's loss report contains one
   of the rule's ids (`pptx.notes`, `pptx.masters.notesMaster`, `pptx.masters.handoutMaster`, `pptx.charts`,
@@ -107,7 +108,7 @@ Every part (zip entry) of the input gets exactly one status, decided by the firs
   part no rule names (custom XML, tags, embedded fonts) is covered by the detector's catch-all
   `pptx.package.unaccountedParts`, which lists it.
 - `unaccounted`: nothing accounts for the part (launch-bar row L13 wants 0; the plan's K9 to K15 take it there). Today
-  that is every part an importer will read, plus any covered part whose loss id the detector did not report (for
+  that is every part of the rejected files, plus any covered part whose loss id the detector did not report (for
   example a notes page with no text).
 
 A package that cannot be read at all (truncated zip) has an empty ledger and `package` set to `unreadable`; an OLE
@@ -127,8 +128,9 @@ npm run fidelity                                # DOCX, then XLSX, then PPTX
 PPTX_FIDELITY_UPDATE=1 npm test -w @b32nio/spindle-slides-core -- fidelity   # same update, bound to the source
 ```
 
-The report ends with the launch-bar scoreboard (plan 7.3): L11, L12 and L14 say "not measurable yet" until the importer
-exists, L13 shows the ledger (today 1,113 of 1,156 parts unaccounted).
+The report ends with the launch-bar scoreboard (plan 7.3): L12 (no uncaught exception; every edge file ends as its
+manifest says) is measured, L11 only covers the stub files and L14 says "not measurable yet" until the writer exists, L13
+shows the ledger (today 26 of 1,156 parts unaccounted: the package that has no presentation part and is rejected).
 
 ## Coverage matrix
 

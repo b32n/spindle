@@ -17,7 +17,7 @@ const { warnings, loss } = await importWorkbookFile(workbook, file); // `loss` i
 Docs: `inspectDocumentFile(file)` / `importDocumentFile(doc, file)` from `@b32nio/spindle-docs-react`. Core (no React):
 `inspectXlsx(bytes)`, `inspectCsv(text)` in sheets-core, `inspectDocx(bytes)` in docs-core, or `detectXlsxLoss` / `detectDocxLoss` / `detectCsvLoss`
 from `@b32nio/spindle-io/{xlsx,docx}` (XLSX/DOCX) and `@b32nio/spindle-shared/export/csv`. PPTX: `detectPptxLoss(bytes, { detail })` from
-`@b32nio/spindle-io/pptx` (slides has no importer yet, so there is no `inspectPptx` or dialog flow; see the PPTX table below).
+`@b32nio/spindle-io/pptx` (the editor has no `inspectPptx` or dialog flow yet; the io reader `importPptx` from the same subpath exists and is being completed in stages, see the PPTX table below).
 
 `ImportLossReport` is `{ format, items: ImportLossItem[] }`; an item is `{ id, label, count, where?, effect, state? }` with a stable `id` such as
 `xlsx.conditionalFormatting`. `state` (`'lost'` when absent, `'approximated'`, or `'kept'`: stored and saved back unchanged but not editable) lets the dialog list
@@ -103,7 +103,7 @@ Bookmarks and internal links are kept: a `w:bookmarkStart` becomes a named posit
 `detectPptxLoss(bytes, { detail })` (`@b32nio/spindle-io/pptx`) parses the package XML with the same safety measures as the XLSX detector (entities are
 never expanded and a DOCTYPE is cut out, nesting is capped at 100 levels, a part is read only up to 64 MB and the whole read up to 256 MB, counted on
 the bytes that actually come out of the zip so a forged header cannot make a bomb inflate, a package of more than 50,000 entries is not scanned, nothing
-throws). **There is no PPTX importer yet** (plan K9 to K15): today no presentation can be opened at all, so every effect says
+throws). **The editor cannot open a presentation yet** (plan K9 to K15: the io reader `importPptx` reads the package, presentation, theme and slide list so far, and slide content, layouts and the editor's `importFromPptx` and dialog follow), so every effect still says
 `lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)` (a few say more: macros are never run or kept, an encrypted package
 cannot be opened). The ids are stable; as importer PRs land, only counts, effect texts and states change. The default `detail: 'summary'` returns the
 16 summary ids; `'full'` adds the finer ids and is what `npm run slides:pptx-fidelity` records. `where` lists slides as `Slide n` (their place in the

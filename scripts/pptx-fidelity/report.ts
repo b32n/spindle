@@ -1,6 +1,6 @@
 import type { HarnessReport } from '../fidelity-core/harness';
 import type { FidelityReport, ReportFile } from '../fidelity-core/report';
-import { ledgerStats, scoreRow, unmeasuredRow, type ScoreRow } from '../fidelity-core/scoreboard';
+import { exceptionStats, ledgerStats, scoreRow, unmeasuredRow, type ScoreRow } from '../fidelity-core/scoreboard';
 import { PPTX_KINDS, type PptxResult } from './run';
 
 const MAX_UNACCOUNTED_LISTED = 12;
@@ -28,11 +28,11 @@ export function toReportFile(o: HarnessReport<PptxResult>['fixtures'][number]): 
   };
 }
 
-const NO_IMPORTER_YET = 'no importer yet (plan K9 to K15): every file records importError "no importer"';
+const NO_EXPORTER_YET = 'no exporter yet (plan K12): every round trip stops at "no exporter"';
 
 /**
- * The launch-bar rows (plan 7.3) a PPTX run can speak to. L11 to L14 need the importer, so they say so; the ledger figure
- * under L13 is real today. L15 to L17 need other tools (PowerPoint, Google Slides, LibreOffice) and are not listed.
+ * The launch-bar rows (plan 7.3) a PPTX run can speak to. L12 and L13 are real now that the reader exists (K9); L11 only
+ * covers the stub files until the limit probes are added, and L14 needs the exporter (K12). L15 to L17 need other tools (PowerPoint, Google Slides, LibreOffice) and are not listed.
  */
 export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
   const area = 'Slides';
@@ -40,26 +40,29 @@ export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
   const withId = (id: string) => files.find((f) => f.id === id);
   const flagged = (id: string, lossId: string) =>
     withId(id)?.loss.some((i) => i.id === lossId) ? 'reported' : 'not reported';
+  const ex = exceptionStats(files);
+  const bad = ex.unexpectedErrors.length + ex.unexpectedSuccesses.length;
   return [
     unmeasuredRow(
       'L11',
       area,
       'Safety: bomb, entity, traversal, encrypted, legacy files rejected with a named message under the limits',
-      `not measurable yet: ${NO_IMPORTER_YET}. The detector itself names the stubs (encrypted: ${flagged('edge-encrypted', 'pptx.encrypted')}, legacy .ppt: ${flagged('edge-legacy-ppt', 'pptx.legacyBinary')}) and is bounded by size, entry and depth limits`,
+      `only the stub files are covered so far (the reader rejects them with a named message; the detector reports encrypted: ${flagged('edge-encrypted', 'pptx.encrypted')}, legacy .ppt: ${flagged('edge-legacy-ppt', 'pptx.legacyBinary')}); the bomb, entity and traversal probes are not in the corpus`,
       'all rejected'
     ),
-    unmeasuredRow(
+    scoreRow(
       'L12',
       area,
-      'Corpus and edge: 0 uncaught exceptions',
-      `not measurable yet: ${NO_IMPORTER_YET}, so there is nothing that could throw`,
-      '0'
+      'Corpus and edge: 0 uncaught exceptions; every edge file ends as its manifest says',
+      `${bad} of ${ex.total} files${bad ? `: ${[...ex.unexpectedErrors.map((i) => `${i} threw`), ...ex.unexpectedSuccesses.map((i) => `${i} imported but should fail`)].join(', ')}` : ''}`,
+      '0',
+      bad === 0
     ),
     scoreRow(
       'L13',
       area,
-      'Ledger: 0 unaccounted package parts on every file (text parity and element mapping need the importer: not measurable yet)',
-      `${lg.unaccounted} of ${lg.total} parts unaccounted in ${lg.filesWithUnaccounted} of ${lg.files} files (${lg.mapped} mapped, ${lg.opaque} opaque, ${lg.dropped} dropped); nothing is mapped until an importer exists`,
+      'Ledger: 0 unaccounted package parts on every file (text parity and element mapping arrive with the slide content reader: not measurable yet)',
+      `${lg.unaccounted} of ${lg.total} parts unaccounted in ${lg.filesWithUnaccounted} of ${lg.files} files (${lg.mapped} mapped, ${lg.opaque} opaque, ${lg.dropped} dropped)`,
       '0',
       lg.unaccounted === 0
     ),
@@ -67,7 +70,7 @@ export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
       'L14',
       area,
       'Round trip: counts, positions, text, theme equal; opaque parts hash-identical',
-      `not measurable yet: ${NO_IMPORTER_YET}, so every round trip is skipped`,
+      `not measurable yet: ${NO_EXPORTER_YET}`,
       '0 diffs'
     ),
   ];

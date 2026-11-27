@@ -1,5 +1,5 @@
 {
-  "importError": "no importer",
+  "importError": "This is a legacy binary Office file (.xls, .ppt or .doc), which cannot be opened. Save it as a PowerPoint presentation (.pptx) first.",
   "presentation": null,
   "warnings": []
 }

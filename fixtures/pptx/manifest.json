@@ -716,7 +716,8 @@
         "edge.truncatedZip"
       ],
       "notes": "A deck cut off at 60 percent of its bytes: it starts as a zip and has no central directory.",
-      "generator": "generators/build_edge.py"
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
     },
     {
       "id": "edge-no-presentation",
@@ -732,7 +733,8 @@
         "slides.multiple"
       ],
       "notes": "A package with slides, masters and a theme but no ppt/presentation.xml (and no relationship to it).",
-      "generator": "generators/build_edge.py"
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
     },
     {
       "id": "edge-slide-missing",
@@ -827,7 +829,8 @@
         "edge.encrypted"
       ],
       "notes": "An OLE compound-file stub with EncryptionInfo and EncryptedPackage directory entries (a password-protected file), header and directory only.",
-      "generator": "generators/build_edge.py"
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
     },
     {
       "id": "edge-legacy-ppt",
@@ -842,7 +845,8 @@
         "edge.legacyBinary"
       ],
       "notes": "An OLE compound-file stub with a PowerPoint Document stream entry (the binary format before 2007), header and directory only.",
-      "generator": "generators/build_edge.py"
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
     },
     {
       "id": "edge-1000-slides",

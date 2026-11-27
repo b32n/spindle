@@ -1,5 +1,52 @@
 {
-  "importError": "no importer",
-  "presentation": null,
+  "importError": null,
+  "presentation": {
+    "colorMap": {
+      "accent1": "accent1",
+      "accent2": "accent2",
+      "accent3": "accent3",
+      "accent4": "accent4",
+      "accent5": "accent5",
+      "accent6": "accent6",
+      "bg1": "lt1",
+      "bg2": "lt2",
+      "folHlink": "folHlink",
+      "hlink": "hlink",
+      "tx1": "dk1",
+      "tx2": "dk2"
+    },
+    "slideSize": {
+      "h": 720,
+      "w": 1280
+    },
+    "slides": [
+      {
+        "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
+        "partName": "ppt/slides/slide1.xml",
+        "pptxId": "256"
+      }
+    ],
+    "theme": {
+      "colors": {
+        "accent1": "#4472C4",
+        "accent2": "#ED7D31",
+        "accent3": "#A5A5A5",
+        "accent4": "#FFC000",
+        "accent5": "#5B9BD5",
+        "accent6": "#70AD47",
+        "dk1": "#000000",
+        "dk2": "#44546A",
+        "folHlink": "#954F72",
+        "hlink": "#0563C1",
+        "lt1": "#FFFFFF",
+        "lt2": "#E7E6E6"
+      },
+      "fonts": {
+        "major": "Calibri Light",
+        "minor": "Calibri"
+      },
+      "name": "Office Theme"
+    }
+  },
   "warnings": []
 }

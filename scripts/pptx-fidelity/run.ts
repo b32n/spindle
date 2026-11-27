@@ -2,9 +2,9 @@
  * The PPTX adapter for the generic harness: one file in, four measurements out (model, loss, roundtrip, ledger). Every
  * step catches its own failures, so a throwing importer is a recorded result, never a crash.
  *
- * There is no PPTX importer yet, so `model` records `importError: "no importer"` and `roundtrip` is skipped for every
- * file; `loss` and `ledger` are real. The placeholders still produce goldens, so orphan detection works from day one and
- * the importer PRs only change their content.
+ * The reader exists (plan K9) and the writer does not (K12): `model` holds the imported presentation (or the import
+ * error, for the files that are not presentations) and `roundtrip` stops at `no exporter` until the writer lands. Against
+ * an API without `importPptx` the model records `importError: "no importer"`.
  */
 import path from 'node:path';
 import { diffValues } from '../fidelity-core/diff';

@@ -6,7 +6,7 @@ import {
   runPptxFixture,
 } from '../../../../scripts/pptx-fidelity/run';
 import type { PptxEditorApi } from '../../../../scripts/pptx-fidelity/api';
-import { sourceApi } from './support';
+import { detectOnlyApi, sourceApi } from './support';
 
 const okLoss = {
   format: 'pptx',
@@ -36,9 +36,9 @@ async function minimalDeck(): Promise<Uint8Array> {
   return zip.generateAsync({ type: 'uint8array' });
 }
 
-describe('runPptxFixture without an importer (today)', () => {
+describe('runPptxFixture without an importer', () => {
   it('records "no importer", skips the round trip, and still reports loss and ledger', async () => {
-    const result = await runPptxFixture(sourceApi, await minimalDeck());
+    const result = await runPptxFixture(detectOnlyApi, await minimalDeck());
     expect(result.model).toEqual({ importError: 'no importer', warnings: [], presentation: null });
     expect(result.roundtrip).toEqual({
       status: 'skipped-import-error',
@@ -62,7 +62,7 @@ describe('runPptxFixture without an importer (today)', () => {
   });
 
   it('gives bytes that are not a package an unreadable ledger instead of crashing', async () => {
-    const result = await runPptxFixture(sourceApi, new Uint8Array([9, 9, 9]));
+    const result = await runPptxFixture(detectOnlyApi, new Uint8Array([9, 9, 9]));
     expect(result.model.importError).toBe('no importer');
     expect(result.ledger).toMatchObject({ package: 'unreadable', importError: true });
     expect(result.loss).toEqual({ format: 'pptx', items: [] });
@@ -70,7 +70,7 @@ describe('runPptxFixture without an importer (today)', () => {
 
   it('knows an OLE compound file when it sees one', async () => {
     const ole = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, 0, 0, 0, 0]);
-    const result = await runPptxFixture(sourceApi, ole);
+    const result = await runPptxFixture(detectOnlyApi, ole);
     expect(result.ledger.package).toBe('ole');
     expect(result.loss.items.map((i) => i.id)).toEqual(['pptx.legacyBinary']);
   });
@@ -87,6 +87,23 @@ describe('runPptxFixture without an importer (today)', () => {
     });
     const stringy = await runPptxFixture(api({ inspectPptx: () => Promise.reject('plain') }), bytes);
     expect(stringy.loss.items[0].effect).toBe('plain');
+  });
+});
+
+describe('runPptxFixture with the io reader', () => {
+  it('imports a deck, then stops the round trip at "no exporter"', async () => {
+    const result = await runPptxFixture(sourceApi, await minimalDeck());
+    expect(result.model.importError).toBeNull();
+    expect(result.model.presentation).toMatchObject({ slideSize: { w: 1280, h: 720 }, slides: [] });
+    expect(result.model.warnings.length).toBeGreaterThan(0);
+    expect(result.roundtrip).toMatchObject({ status: 'export-error', error: 'no exporter' });
+    expect(result.ledger.importError).toBe(false);
+    expect(result.ledger.totals).toMatchObject({ mapped: 2, dropped: 0, unaccounted: 1, total: 3 });
+  });
+
+  it('records the reader\'s named error for bytes that are not a package', async () => {
+    const result = await runPptxFixture(sourceApi, new Uint8Array([9, 9, 9]));
+    expect(result.model).toEqual({ importError: 'This is not a PowerPoint presentation (.pptx).', warnings: [], presentation: null });
   });
 });
 

@@ -32,6 +32,7 @@ export function pptxCliConfig(
     registry: CONSTRUCTS,
     matrixMarkers: { start: MATRIX_START, end: MATRIX_END },
     adapter: pptxAdapter(api),
+    strictImport: true,
     toReport: toPptxReport,
     runRuntime: (entries, args, io) => runRuntime({ api, fixturesDir }, entries, args, io),
   };

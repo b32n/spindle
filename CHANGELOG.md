@@ -856,6 +856,18 @@ lockstep.
   `mergeTableCells`, `splitTableCell` and `setTableCellBorders`, and row/column insert and delete keep merged regions
   intact. The cell right-click menu gains Merge cells, Split cell and border commands. Slides collaboration schema
   version 9 (a v8 client refuses a v9 room); table cell text stays last-writer-wins, not CRDT-merged.
+- **PPTX reader, step 1 (K9a): package, presentation and theme.** New `importPptx(bytes, { limits })` in
+  `@b32nio/spindle-io/pptx` (also from the package root): opens the package through `openSafeZip`, finds the main part
+  through the package relationships (falling back to the content type and to `ppt/presentation.xml`), and returns a
+  `PresentationImportResult` (new additive types in `@b32nio/spindle-shared/export/pptx`: `PptxSlide`, `PptxTheme`,
+  `PptxColorMap`, `PptxColor`, `PptxSection`). It reads the slide size (EMU to px, 1 px = 9525 EMU), the slide list in
+  presentation order (`pptxId`, name, hidden flag, layout part), sections, the first master's theme (12 colours, major and
+  minor fonts) and colour map. A slide that is missing or unreadable stays in the list as an error placeholder with a
+  warning; the only error thrown is an `ImportError`. Slide content, layouts and the editor's `importFromPptx` follow
+  (K9b, K9c, K15), so nothing in the editor opens a `.pptx` yet and the loss report is unchanged. The XML tree
+  (`xlsx/xml.ts`) gains `rattrs` (attributes in the relationships namespace) so `r:id` is no longer hidden by `id`. The
+  fidelity harness (`npm run slides:pptx-fidelity`) now records the imported model and `ledger` mapped counts; the four
+  files that are not presentations carry `expectImportError`, and the run is strict about it.
 
 ## [0.4.0] - 2026-10-26
 

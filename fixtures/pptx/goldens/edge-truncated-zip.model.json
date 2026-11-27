@@ -1,5 +1,5 @@
 {
-  "importError": "no importer",
+  "importError": "The file is damaged (it is not a complete zip archive).",
   "presentation": null,
   "warnings": []
 }
