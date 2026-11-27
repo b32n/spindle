@@ -134,11 +134,11 @@ Summary ids (dialog):
 | `pptx.encrypted`, `pptx.legacyBinary` | an OLE container with an `EncryptedPackage`/`EncryptionInfo` stream (password-protected), or any other OLE container (a legacy `.ppt`); these two end the scan |
 | `pptx.sizeLimit` | parts not read because of the size limits (named), or one item for a package with too many entries |
 
-`pptx.fonts.unavailable` means "the deck may not look the same here", not that anything is lost. A font is **available** when it is one of: Arial, The reader (`importPptx`, plan K9c) lists the same families in `PresentationImportResult.fonts` (`used`, `unavailable`) and adds one warning naming the unavailable ones; it never fetches a font.
+`pptx.fonts.unavailable` means "the deck may not look the same here", not that anything is lost. A font is **available** when it is one of: Arial,
 Helvetica, Times New Roman, Times, Courier New, Courier, Georgia, Verdana, Tahoma, Trebuchet MS (web-safe), Calibri, Calibri Light, Cambria and their
 metric-compatible substitutes Carlito and Caladea, Liberation Sans, Serif and Mono, Noto Sans and Serif, DejaVu Sans, or the generic families
 `sans-serif`, `serif`, `monospace` and `system-ui`. The list is deliberately short and conservative; fonts outside it (including the East Asian fonts of
-CJK decks) are reported. Bullet fonts (`a:buFont`) and symbol fonts (`a:sym`) are not scanned.
+CJK decks) are reported. Bullet fonts (`a:buFont`) and symbol fonts (`a:sym`) are not scanned. The reader (`importPptx`, plan K9c) lists the same families in `PresentationImportResult.fonts` (`used`, `unavailable`) and adds one warning naming the unavailable ones; it never fetches a font.
 
 Full-only ids:
 
