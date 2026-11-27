@@ -580,6 +580,21 @@ lockstep.
   `resolveFieldText`, `initialFieldText`, `fieldMarks`, `safeLang`, `safeFieldKind`, `BASELINE_SCALE`,
   `SLIDENUM_PLACEHOLDER`. `RichTextInline` is now the union `RichTextText | RichTextField` (hosts that read
   `inline.text` should narrow on `type`). Additive otherwise.
+- **Slides layouts, slide size and hidden slides (K4).** `LayoutData` gains `elements` (static, non-placeholder content
+  from the layout and its master: logos, rules, footers, drawn under the slide's own elements and never selectable),
+  `textStyles` (per placeholder type, per paragraph level 0 to 8, with level-to-level inheritance via
+  `resolveLevelStyle`; level 0 is baked into a placeholder when a slide is created from the layout) and `masterName`.
+  `Slide.hidden` (PPTX `show="0"`): a hidden slide stays in the deck, is dimmed with a badge in the filmstrip (right-click
+  menu: Hide slide / Show slide) and is skipped by present mode (`PresentMode` takes `includeHidden`). The "Theme"
+  popover (and its overflow modal) gains a **Slide size** section: presets 16:9, 16:10, 4:3, A4 landscape and portrait,
+  portrait 9:16, plus custom width and height; `DeckImpl.setSlideSize(size, { scaleContent: true })` scales every
+  element, line end point and layout per axis (one undo step) so content keeps its relative position. Importers still
+  flatten master to layout to slide inheritance into effective values (decision SD6); there is no master editor.
+  **Collaboration:** `meta.layouts` (one LWW JSON blob, so two users editing layouts at once keep one edit) now carries the
+  new fields and slide maps carry `hidden`, so slides `COLLAB_SCHEMA_VERSION` is now 4 and an older client refuses the
+  room. New slides-core exports: `LevelTextStyle`, `LayoutTextStyles`, `resolveLevelStyle`, `SLIDE_SIZE_PRESETS`,
+  `SlideSizePreset`, `SlideSizePresetId`, `detectSlideSizePreset`, `clampSlideSize`, `scaleElementPatch`, `scaleLayout`,
+  `MIN_SLIDE_SIDE`, `MAX_SLIDE_SIDE`. Additive.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

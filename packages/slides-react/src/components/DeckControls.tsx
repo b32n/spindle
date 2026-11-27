@@ -5,7 +5,14 @@
 
 import React, { useState } from 'react';
 import { Plus, Palette, ChevronDown, SquareDashed } from 'lucide-react';
-import { BUILTIN_THEMES, getBuiltinTheme, type Fill } from '@b32nio/spindle-slides-core';
+import {
+  BUILTIN_THEMES,
+  SLIDE_SIZE_PRESETS,
+  clampSlideSize,
+  detectSlideSizePreset,
+  getBuiltinTheme,
+  type Fill,
+} from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { useDeck, useActiveSlideId, useTheme, useSlide } from '../hooks';
 import { Popover } from './Popover';
@@ -20,6 +27,62 @@ const BG_SWATCHES = [
   '#ffffff', '#f8fafc', '#f1f5f9', '#e2e8f0', '#94a3b8', '#475569', '#1e293b', '#0f172a',
   '#fee2e2', '#fef3c7', '#dcfce7', '#dbeafe', '#ede9fe', '#fce7f3', '#f59e0b', '#3b82f6',
 ];
+
+const fieldLabel: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: '#8a93a2', flex: 1 };
+const fieldInput: React.CSSProperties = { padding: '5px 6px', border: '1px solid #d5d9e0', borderRadius: 5, fontSize: 13, width: '100%', boxSizing: 'border-box' };
+
+/**
+ * Slide size: a preset list plus custom width and height in px. Changing it scales every element (and the layouts) per
+ * axis so content keeps its relative position; it is one undo step.
+ */
+export function SlideSizeSection(): React.ReactElement {
+  const deck = useDeck();
+  const size = deck.getSlideSize();
+  const preset = detectSlideSizePreset(size);
+  const [w, setW] = useState(String(size.w));
+  const [h, setH] = useState(String(size.h));
+  // The inputs follow the deck when the size changes from outside (a preset pick, undo, a collaborator).
+  const [seen, setSeen] = useState(`${size.w}x${size.h}`);
+  if (seen !== `${size.w}x${size.h}`) {
+    setSeen(`${size.w}x${size.h}`);
+    setW(String(size.w));
+    setH(String(size.h));
+  }
+  const apply = (next: { w: number; h: number }) => deck.setSlideSize(clampSlideSize(next, size), { scaleContent: true });
+
+  return (
+    <div data-testid="slide-size-section" style={{ borderTop: '1px solid #e4e7ec', marginTop: 8, paddingTop: 10 }}>
+      <label style={{ ...fieldLabel, marginBottom: 8 }}>
+        Slide size
+        <select
+          aria-label="Slide size"
+          value={preset}
+          onChange={(e) => {
+            const p = SLIDE_SIZE_PRESETS.find((x) => x.id === e.target.value);
+            if (p) apply(p);
+          }}
+          style={fieldInput}
+        >
+          {SLIDE_SIZE_PRESETS.map((p) => (
+            <option key={p.id} value={p.id}>{p.label}</option>
+          ))}
+          {preset === 'custom' && <option value="custom">Custom</option>}
+        </select>
+      </label>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+        <label style={fieldLabel}>
+          Width (px)
+          <input aria-label="Slide width" type="number" min={100} max={5376} value={w} onChange={(e) => setW(e.target.value)} style={fieldInput} />
+        </label>
+        <label style={fieldLabel}>
+          Height (px)
+          <input aria-label="Slide height" type="number" min={100} max={5376} value={h} onChange={(e) => setH(e.target.value)} style={fieldInput} />
+        </label>
+        <button aria-label="Apply slide size" style={{ ...btn, padding: '5px 10px' }} onClick={() => apply({ w: Number(w), h: Number(h) })}>Apply</button>
+      </div>
+    </div>
+  );
+}
 
 export function DeckControls(): React.ReactElement {
   const deck = useDeck();
@@ -67,6 +130,7 @@ export function DeckControls(): React.ReactElement {
           <span style={{ fontSize: 14 }}>{t.name}</span>
         </div>
       ))}
+      <SlideSizeSection />
     </div>
   );
 
@@ -92,7 +156,7 @@ export function DeckControls(): React.ReactElement {
     return (
       <>
         <MenuRow icon={<Plus size={17} />} label="New slide" onClick={() => menu.openModal('New slide', layoutGrid((id) => { addSlide(id); menu.closeMenu(); }))} />
-        <MenuRow icon={<Palette size={17} />} label="Theme" hint={theme.name} onClick={() => menu.openModal('Theme', themeList((name) => { deck.setTheme(getBuiltinTheme(name)); menu.closeMenu(); }))} />
+        <MenuRow icon={<Palette size={17} />} label="Theme" hint={theme.name} onClick={() => menu.openModal('Theme and slide size', themeList((name) => { deck.setTheme(getBuiltinTheme(name)); menu.closeMenu(); }))} />
         <MenuRow icon={<SquareDashed size={17} />} label="Slide background" hint={<span style={{ width: 16, height: 16, borderRadius: 4, border: '1px solid #d5d9e0', background: bgHex, display: 'inline-block' }} />} onClick={() => menu.openModal('Slide background', bgPanel(() => menu.closeMenu()))} />
       </>
     );

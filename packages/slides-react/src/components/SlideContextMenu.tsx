@@ -17,6 +17,7 @@ export function SlideContextMenu({ slideId, x, y, onClose }: SlideContextMenuPro
   const slideIds = useSlideIds();
   const i = slideIds.indexOf(slideId);
   const isLast = slideIds.length <= 1;
+  const hidden = !!deck.getSlide(slideId)?.hidden;
 
   const deleteSlide = () => {
     if (isLast) return;
@@ -31,6 +32,8 @@ export function SlideContextMenu({ slideId, x, y, onClose }: SlideContextMenuPro
     'sep',
     { label: 'Move up', run: () => { const prev = slideIds[i - 2]; deck.moveSlide(slideId, prev ? { afterSlideId: prev } : {}); }, disabled: i <= 0 },
     { label: 'Move down', run: () => { const nextAfter = slideIds[i + 1]; if (nextAfter) deck.moveSlide(slideId, { afterSlideId: nextAfter }); }, disabled: i >= slideIds.length - 1 },
+    'sep',
+    { label: hidden ? 'Show slide' : 'Hide slide', run: () => deck.setSlideHidden(slideId, !hidden) },
     'sep',
     { label: 'Delete slide', run: deleteSlide, disabled: isLast },
   ];

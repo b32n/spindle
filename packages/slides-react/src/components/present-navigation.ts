@@ -49,3 +49,25 @@ export function requestGo(state: FadeNavState, target: number, length: number): 
 export function commitGo(state: FadeNavState): { state: FadeNavState; commit: number } {
   return { state: { pending: state.pending, timerArmed: false }, commit: state.pending };
 }
+
+/**
+ * The slides a presentation plays, in order. Hidden slides are skipped unless `includeHidden`; a deck whose slides are all
+ * hidden plays every slide (a blank presentation helps nobody).
+ */
+export function presentableSlideIds(ids: string[], isHidden: (id: string) => boolean, includeHidden = false): string[] {
+  if (includeHidden) return ids;
+  const shown = ids.filter((id) => !isHidden(id));
+  return shown.length > 0 ? shown : ids;
+}
+
+/**
+ * Where playback starts for the active slide: its own position, or, when it is hidden (not played), the next played slide
+ * after it, or the last one when nothing follows.
+ */
+export function presentStartIndex(ids: string[], played: string[], activeId: string): number {
+  const own = played.indexOf(activeId);
+  if (own >= 0) return own;
+  const from = ids.indexOf(activeId);
+  const next = from < 0 ? -1 : played.findIndex((id) => ids.indexOf(id) > from);
+  return next >= 0 ? next : Math.max(0, played.length - 1);
+}

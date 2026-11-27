@@ -3,11 +3,44 @@
 // Delete to remove the focused slide. An add-slide button sits at the bottom.
 
 import React, { useRef, useState } from 'react';
-import { Plus } from 'lucide-react';
-import { useDeck, useSlideIds, useActiveSlideId } from '../hooks';
+import { Plus, EyeOff } from 'lucide-react';
+import { useDeck, useSlideIds, useActiveSlideId, useSlide } from '../hooks';
 import { ScaledSlide } from './SlideView';
 
 const THUMB_WIDTH = 168;
+
+/** One filmstrip thumbnail; a hidden slide is dimmed with an eye-off badge (it is skipped in the presentation). */
+function ThumbButton({ slideId, index, active, scale, onClick, onKeyDown }: {
+  slideId: string;
+  index: number;
+  active: boolean;
+  scale: number;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+}): React.ReactElement {
+  const hidden = !!useSlide(slideId)?.hidden;
+  return (
+    <button
+      data-slide-thumb={slideId}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      style={{ padding: 0, border: active ? '2px solid #2d7ff9' : '1px solid #d5d9e0', borderRadius: 4, overflow: 'hidden', cursor: 'pointer', background: '#fff', lineHeight: 0, position: 'relative', boxShadow: active ? '0 0 0 2px rgba(45,127,249,0.2)' : 'none' }}
+      aria-label={`Go to slide ${index + 1}${hidden ? ' (hidden)' : ''}`}
+      aria-current={active}
+    >
+      <ScaledSlide slideId={slideId} scale={scale} />
+      {hidden && (
+        <span
+          data-testid="slide-hidden-badge"
+          title="Hidden slide: skipped in the presentation"
+          style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5b6673' }}
+        >
+          <EyeOff size={20} aria-hidden="true" />
+        </span>
+      )}
+    </button>
+  );
+}
 
 export function Filmstrip({ readOnly = false }: { readOnly?: boolean } = {}): React.ReactElement {
   const deck = useDeck();
@@ -89,16 +122,14 @@ export function Filmstrip({ readOnly = false }: { readOnly?: boolean } = {}): Re
             style={{ display: 'flex', gap: 8, alignItems: 'flex-start', opacity: dragId === id ? 0.4 : 1, borderTop: overId === id && dragId ? '2px solid #2d7ff9' : '2px solid transparent' }}
           >
             <span style={{ fontSize: 12, color: '#8a93a2', width: 16, textAlign: 'right', paddingTop: 4 }}>{i + 1}</span>
-            <button
-              data-slide-thumb={id}
+            <ThumbButton
+              slideId={id}
+              index={i}
+              active={active}
+              scale={scale}
               onClick={(e) => { deck.setActiveSlide(id); e.currentTarget.focus(); }}
               onKeyDown={(e) => onThumbKeyDown(e, id, i)}
-              style={{ padding: 0, border: active ? '2px solid #2d7ff9' : '1px solid #d5d9e0', borderRadius: 4, overflow: 'hidden', cursor: 'pointer', background: '#fff', lineHeight: 0, boxShadow: active ? '0 0 0 2px rgba(45,127,249,0.2)' : 'none' }}
-              aria-label={`Go to slide ${i + 1}`}
-              aria-current={active}
-            >
-              <ScaledSlide slideId={id} scale={scale} />
-            </button>
+            />
           </div>
         );
       })}
