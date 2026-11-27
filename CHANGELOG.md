@@ -514,8 +514,9 @@ lockstep.
   comment parts located. Additive types in `@b32nio/spindle-shared/export/xlsx` (`XlsxWorkbookInfo`, `XlsxStyles`, ...) and
   optional `workbook`, `styles`, `sharedStrings` and `theme` fields on `SpreadsheetImportResult`; nothing populates them yet. Not wired into
   `importXlsx` (the `exceljs` path is unchanged and import output is identical); the sheet reader and the switch are S2b.
-- **XLSX import uses the own reader (S2b).** `importXlsx` now reads a workbook with the own package reader (`jszip` +
-  `fast-xml-parser`, no new dependency) instead of `exceljs`; export is unchanged (still `exceljs`). New sheet reader:
+- **XLSX import uses the own reader (S2b).** `importXlsx` now reads a workbook with the own package reader (`jszip` and its own
+  forward-only XML scanner, `sax.ts`, for the workbook-level parts, `sheetData` and the small sheet elements; `fast-xml-parser` is left to
+  the loss detector; no new dependency) instead of `exceljs`; export is unchanged (still `exceljs`). New sheet reader:
   `sheetData` read as forward-only events with no tree (the part's text is still held as one string; shared formulas
   expanded, array formulas kept with their range, inline and shared strings, ISO dates), `sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols` (with default styles), row
   attributes, `mergeCells`, `hyperlinks` and `extLst` (raw). Theme, indexed and tinted colours now reach cell styles as
@@ -550,7 +551,17 @@ lockstep.
   without text is no formula, shared-formula names may use letters of any script, `frozenSplit` panes freeze, and
   `activeSheetIndex` follows the sheets that were read. The `exceljs` reader stays in the tree,
   unused, until S14; `reader-differential.test.ts` runs both over the corpus and over generated workbooks. S2 is
-  complete with this entry.
+  complete with this entry. Review round 5: what a limit cuts is also a loss item (`xlsx.package.sizeLimit`, in `SpreadsheetImportResult.limitLoss`
+  and appended by `importFromXlsx` to the `loss` it returns: cells past `maxTotalCells`, sheets, rows, ranges, columns, extension lists,
+  formulas, parts and defined names past `maxPartElements`, relationships; each names the option that raises it); new `ImportLimits`
+  `maxColumns`, `maxExtensionChars`, `maxRelationships` and `maxScannedElements` (package-wide budgets for `<col>`, `extLst` text,
+  relationship entries read and cell, row and column elements scanned); only the relationships the reader uses are kept; defined names are read
+  as a list under `maxPartElements` instead of refusing the workbook (a workbook over the element budget says it has too many
+  elements); a number format code over 255 characters is kept as written and never scanned (it was rescanned for every cell
+  format); every string the result keeps is a copy of its own, so a short `dimension` no longer keeps a 100 MB sheet part alive; the
+  workbook part is read once; the cells-over-limit warning names the limit and the `limits` option; a sheet after the cell budget is
+  spent is kept if it is empty. The hostile-shape tests run in a child process with a limited heap (skipped below 6 GB or with
+  `XLSX_SKIP_HOSTILE`) instead of reading the test process's heap.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from
