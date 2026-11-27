@@ -666,8 +666,12 @@ function scanWorksheet(root: XmlElement, name: string, t: Tallies, owned: Set<st
 }
 
 function scanLinks(root: XmlElement, rels: Rel[], name: string, t: Tallies): void {
-  for (const link of kids(kid(root, 'hyperlinks'), 'hyperlink')) {
-    const rel = link.attrs.id === undefined ? undefined : rels.find((r) => r.id === link.attrs.id);
+  const links = kids(kid(root, 'hyperlinks'), 'hyperlink');
+  // by id, the first of an id as `find` gave it: one lookup per hyperlink, not a pass over the relationships (60,000 of each was quadratic)
+  const byId = new Map<string, Rel>();
+  if (links.length > 0) for (const r of rels) if (!byId.has(r.id)) byId.set(r.id, r);
+  for (const link of links) {
+    const rel = link.attrs.id === undefined ? undefined : byId.get(link.attrs.id);
     if (rel) {
       if (isUnsafeTarget(rel.raw)) t.linksUnsafe.add(name);
     } else if (link.attrs.location !== undefined) t.linksInternal.add(name);

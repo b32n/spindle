@@ -824,6 +824,16 @@ describe('conditional formatting, validation, comments and links', () => {
     expect(item(await full(bytes), 'xlsx.links.unsafeScheme')?.count).toBe(1);
   });
 
+  it('takes the first relationship of an id, as a search of the list did, and looks each link up (a sheet of thousands of them)', async () => {
+    const n = 3_000;
+    const links = Array.from({ length: n }, (_, i) => `<hyperlink ref="A${i + 1}" r:id="r${i}"/>`).join('');
+    const rels = Array.from({ length: n }, (_, i) => rel(`r${i}`, 'hyperlink', i % 2 ? 'javascript:x' : 'https://example.com', true));
+    // a second relationship with the id of the first, whose target is a script: the first (https) is the one a link finds
+    rels.push(rel('r0', 'hyperlink', 'javascript:y', true));
+    const bytes = await build({ sheets: [{ tail: `<hyperlinks>${links}</hyperlinks>`, rels }] });
+    expect(item(await full(bytes), 'xlsx.links.unsafeScheme')?.count).toBe(n / 2);
+  });
+
   it('ignores an exclamation mark inside a string literal when looking for references to another sheet', async () => {
     const bytes = await build({
       sheets: [{ tail: '<dataValidations><dataValidation type="custom" sqref="A1"><formula1>A2="Hi!"</formula1></dataValidation><dataValidation type="list" sqref="A2"><formula1>Other!A1:A3</formula1></dataValidation></dataValidations>' }],
