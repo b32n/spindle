@@ -259,6 +259,13 @@ export function createAdjustGesture(ctx: GestureContext, elementId: string, hand
   };
 }
 
+/** The adjust gesture for a pointerdown on a `data-adjust` handle: only with exactly one selected element, and a numeric handle id. */
+export function adjustGestureForSelection(ctx: GestureContext, selection: readonly string[], handleAttr: string | undefined): Gesture | null {
+  const handle = Number(handleAttr);
+  if (selection.length !== 1 || handleAttr === undefined || !Number.isInteger(handle)) return null;
+  return createAdjustGesture(ctx, selection[0], handle);
+}
+
 // ── Marquee ──────────────────────────────────────────────────────────────────
 
 export function createMarqueeGesture(ctx: GestureContext, start: Point, additive: boolean, baseIds: string[]): Gesture {

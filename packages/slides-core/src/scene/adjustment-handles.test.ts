@@ -55,6 +55,48 @@ describe('adjustmentHandles', () => {
     }
   });
 
+  it('is a round trip at non-default guide values too (positions are not just self-consistent at the defaults)', () => {
+    for (const p of SHAPE_PRESETS) {
+      const specs = SHAPE_PRESET_INFO[p].adj;
+      if (!specs) continue;
+      for (const f of [0, 0.2, 0.5, 0.8, 0.95]) {
+        const adj = specs.map((s) => s.min + (s.max - s.min) * f);
+        for (const [w, h] of [[400, 200], [300, 300]] as Array<[number, number]>) {
+          for (const hd of adjustmentHandles(p, w, h, adj)) {
+            const next = adjustmentsAfterDrag(p, hd.id, { x: hd.x, y: hd.y }, w, h, adj);
+            // a feature the box can't hold (long arrow heads, a teardrop tip past the box) reads back shorter, from a handle pinned at the limit
+            const pinned = [0, w, h, w / 2, h / 2].some((edge) => Math.abs(hd.x - edge) < 1e-9 || Math.abs(hd.y - edge) < 1e-9);
+            next!.forEach((v, i) => {
+              if (Math.abs(v - adj[i]) < 1e-5) return;
+              expect({ p, id: hd.id, f, pinned }).toEqual({ p, id: hd.id, f, pinned: true });
+              expect(v).toBeLessThan(adj[i]);
+            });
+          }
+        }
+      }
+    }
+  });
+
+  it('puts handles on the feature they move at non-default values (oracle positions)', () => {
+    // moon: the inner crescent vertex is at a * w, so the handle moves right as the guide grows
+    expect(adjustmentHandles('moon', 400, 200, [0.2])[0]).toEqual({ id: 0, x: 80, y: 100 });
+    expect(adjustmentHandles('moon', 400, 200, [0.8])[0].x).toBeCloseTo(320);
+    expect(adjustmentsAfterDrag('moon', 0, { x: 120, y: 100 }, 400, 200)![0]).toBeCloseTo(0.3);
+    // roundRect, teardrop, star4 and mathMinus at off-default values
+    expect(adjustmentHandles('roundRect', 400, 200, [0.3])[0].x).toBeCloseTo(60);
+    expect(adjustmentHandles('star4', 400, 200, [0.4])[0].x).toBeCloseTo(200 + 160);
+  });
+
+  it('stops the head handle of double arrows at half the box, where the geometry stops the head', () => {
+    // 300 x 300: a2 = 0.9 would put the head at 270, but the head is drawn at most 150 long
+    expect(adjustmentHandles('leftRightArrow', 300, 300, [0.5, 0.9])[1].x).toBe(150);
+    expect(adjustmentHandles('upDownArrow', 300, 300, [0.5, 0.9])[1].y).toBe(150);
+    // dragging past the half way point stores the value of the half way point, not a hidden larger one
+    expect(adjustmentsAfterDrag('leftRightArrow', 1, { x: 250, y: 0 }, 300, 300)![1]).toBeCloseTo(0.5);
+    expect(adjustmentsAfterDrag('upDownArrow', 1, { x: 0, y: 250 }, 300, 300)![1]).toBeCloseTo(0.5);
+    expect(adjustmentsAfterDrag('leftRightArrow', 1, { x: 90, y: 0 }, 300, 300)![1]).toBeCloseTo(0.3);
+  });
+
   it('maps a drag onto the guide it moves and clamps to the preset range', () => {
     // roundRect: x = a * min(w, h)
     expect(adjustmentsAfterDrag('roundRect', 0, { x: 40, y: 0 }, 400, 200)).toEqual([0.2]);

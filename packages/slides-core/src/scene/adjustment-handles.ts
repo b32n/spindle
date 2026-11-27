@@ -31,7 +31,8 @@ const clampTo = (v: number, max: number): number => Math.min(Math.max(v, 0), max
 
 /**
  * A handle that slides along one axis: the position is `origin + sign * adj * factor * len`, the other coordinate
- * comes from `cross`. The position stays inside the box (the geometry clamps its features there too).
+ * comes from `cross`. The position stays inside the box, or inside `limit` of its extent when the geometry clamps the
+ * feature earlier (arrow heads on double arrows stop at half the box).
  */
 function along(
   index: number,
@@ -41,6 +42,7 @@ function along(
   len: Len,
   factor: number,
   cross: Cross,
+  limit = 1,
 ): HandleDef {
   const base = (w: number, h: number): number => {
     const extent = axis === 'x' ? w : h;
@@ -48,14 +50,15 @@ function along(
   };
   return {
     at(w, h, adj) {
-      const pos = clampTo(base(w, h) + sign * adj[index] * factor * len(w, h), axis === 'x' ? w : h);
+      const pos = clampTo(base(w, h) + sign * adj[index] * factor * len(w, h), (axis === 'x' ? w : h) * limit);
       const other = cross(w, h, adj);
       return axis === 'x' ? { x: pos, y: other } : { x: other, y: pos };
     },
     from(p, w, h) {
       const scale = factor * len(w, h);
       if (scale <= 0) return [];
-      return [[index, (sign * ((axis === 'x' ? p.x : p.y) - base(w, h))) / scale]];
+      const offset = sign * ((axis === 'x' ? p.x : p.y) - base(w, h));
+      return [[index, Math.min(offset, (axis === 'x' ? w : h) * limit) / scale]];
     },
   };
 }
@@ -109,7 +112,7 @@ const HANDLES: Partial<Record<ShapePreset, HandleDef[]>> = {
   pie: [onEllipseAt(0), onEllipseAt(1)],
   chord: [onEllipseAt(0), onEllipseAt(1)],
   blockArc: [onEllipseAt(0), onEllipseAt(1)],
-  moon: [along(0, 'x', 'end', -1, W, 1, centreY)],
+  moon: [along(0, 'x', 'start', 1, W, 1, centreY)],
 
   rightArrow: [
     along(0, 'y', 'mid', -1, H, 0.5, (w, h, adj) => w - Math.min(SS(w, h) * adj[1], w)),
@@ -129,11 +132,11 @@ const HANDLES: Partial<Record<ShapePreset, HandleDef[]>> = {
   ],
   leftRightArrow: [
     along(0, 'y', 'mid', -1, H, 0.5, (w, h, adj) => Math.min(SS(w, h) * adj[1], w / 2)),
-    along(1, 'x', 'start', 1, SS, 1, top),
+    along(1, 'x', 'start', 1, SS, 1, top, 0.5),
   ],
   upDownArrow: [
     along(0, 'x', 'mid', 1, W, 0.5, centreY),
-    along(1, 'y', 'start', 1, SS, 1, at(0)),
+    along(1, 'y', 'start', 1, SS, 1, at(0), 0.5),
   ],
   homePlate: [along(0, 'x', 'end', -1, SS, 1, top)],
 

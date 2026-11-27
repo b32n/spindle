@@ -22,7 +22,7 @@ import {
   createMoveGesture,
   createResizeGesture,
   createRotateGesture,
-  createAdjustGesture,
+  adjustGestureForSelection,
   createMarqueeGesture,
   expandGroups,
   type GestureContext,
@@ -293,10 +293,9 @@ export function InteractiveSlide({ slideId, scale }: { slideId: string; scale: n
           deck.setSelection({ slideId, elementIds: [el.id] });
         },
       };
-    } else if (adjustEl?.dataset.adjust !== undefined) {
+    } else if (adjustEl) {
       // Drag a shape's adjustment handle: the preset's guide values follow the pointer.
-      const sel = deck.getSelection().elementIds;
-      const adjust = sel.length === 1 ? createAdjustGesture(ctx, sel[0], Number(adjustEl.dataset.adjust)) : null;
+      const adjust = adjustGestureForSelection(ctx, deck.getSelection().elementIds, adjustEl.dataset.adjust);
       if (!adjust) return;
       gesture = adjust;
     } else if (rotateEl) {

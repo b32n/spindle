@@ -1,9 +1,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DeckImpl, createShapeElement, getBuiltinTheme, type ShapeElement } from '@b32nio/spindle-slides-core';
+import { adjustmentHandles } from '@b32nio/spindle-slides-core';
+import { presetPath } from './elements/preset-geom';
 import { NodeRegistry } from '../interactions/node-registry';
 import { TransientStore } from '../interactions/transient-store';
-import { createAdjustGesture, flipInBox, type GestureContext } from '../interactions/gesture';
+import { adjustGestureForSelection, createAdjustGesture, flipInBox, type GestureContext } from '../interactions/gesture';
 
 let selected: string[] = [];
 let current: unknown;
@@ -139,10 +141,34 @@ describe('createAdjustGesture', () => {
     expect((deck.getElement(el.id) as ShapeElement).adjustments).toBeUndefined();
   });
 
+  it('starts from a data-adjust pointerdown only for one selected shape and a numeric handle id', () => {
+    const { el, store, ctx } = make();
+    const g = adjustGestureForSelection(ctx, [el.id], '0')!;
+    g.onMove({ x: 100 + 60, y: 50 });
+    expect(store.get().liveAdjustments?.get(el.id)).toEqual([0.3]);
+    expect(adjustGestureForSelection(ctx, [el.id, 'b'], '0')).toBeNull();
+    expect(adjustGestureForSelection(ctx, [], '0')).toBeNull();
+    expect(adjustGestureForSelection(ctx, [el.id], undefined)).toBeNull();
+    expect(adjustGestureForSelection(ctx, [el.id], 'x')).toBeNull();
+    expect(adjustGestureForSelection(ctx, [el.id], '1.5')).toBeNull();
+    expect(adjustGestureForSelection(ctx, ['nope'], '0')).toBeNull();
+  });
+
   it('is not available for a missing element or a non-shape', () => {
     const { deck, ctx } = make();
     expect(createAdjustGesture(ctx, 'nope', 0)).toBeNull();
     const text = deck.addElement(ctx.slideId, { type: 'text', x: 0, y: 0, w: 10, h: 10 } as never);
     expect(createAdjustGesture(ctx, text.id, 0)).toBeNull();
+  });
+});
+
+describe('moon handle against the drawn geometry', () => {
+  it('sits on the inner crescent vertex (the leftmost point of the inner arc) for several guide values', () => {
+    for (const a of [0.1, 0.2, 0.5, 0.7]) {
+      const { d } = presetPath('moon', 400, 200, [a]) as { d: string };
+      const inner = [...d.matchAll(/A([\d.]+) ([\d.]+) 0 [01] [01] ([\d.]+) ([\d.]+)/g)][1];
+      const vertex = 400 - Number(inner[1]);
+      expect(adjustmentHandles('moon', 400, 200, [a])[0].x).toBeCloseTo(vertex, 1);
+    }
   });
 });
