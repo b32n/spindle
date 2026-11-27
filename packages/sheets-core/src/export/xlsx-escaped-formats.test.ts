@@ -1,9 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import JSZip from 'jszip';
 import { exportToXlsx, importFromXlsx } from './xlsx';
 import { fromExcelNumberFormatCode, toExcelNumberFormatCode } from './xlsx-number-format';
 import { compileFormat, formatDisplay, isValidFormatCode } from '../number-format';
-// the reader's table of codes (data only), so that every code it is tested on is also checked against the engine here
-import { NUMBER_FORMAT_CASES } from '../../../io/src/xlsx/read/number-format-cases';
 import { WorkbookImpl } from '../workbook';
 import type { CellFormat } from '../types';
 
@@ -39,6 +39,10 @@ const CASES: Array<{ raw: string; editor: string; value: number; shown: string }
   { raw: 'A\\/P', editor: 'A\\/P', value: 0.75, shown: '0.75' },
 ];
 
+// the reader's table of codes (data: fixtures/xlsx/data/number-format-cases.json, which the reader's own test reads too), so that every code it is tested on is also checked against the engine here
+const NUMBER_FORMAT_CASES: Array<[raw: string, editor: string, isDate: boolean, why: string]> = JSON.parse(
+  readFileSync(resolve(__dirname, '../../../../fixtures/xlsx/data/number-format-cases.json'), 'utf8')
+);
 const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
 const RELS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 const attr = (code: string): string => code.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');

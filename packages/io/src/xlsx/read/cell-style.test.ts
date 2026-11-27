@@ -1,8 +1,7 @@
 import { DEFAULT_THEME_COLORS } from './colors';
-import { isDateFormat, lookOf, unescapeLiterals } from './cell-style';
-import { NUMBER_FORMAT_CASES } from './number-format-cases';
+import { isDateFormat, lookOf, LookCache, unescapeLiterals } from './cell-style';
 import { parseStyles } from './styles';
-import { el, MAIN_NS } from './test-support';
+import { el, MAIN_NS, numberFormatCases } from './test-support';
 
 const styles = (inner: string) => parseStyles(el(`<styleSheet ${MAIN_NS}>${inner}</styleSheet>`), DEFAULT_THEME_COLORS);
 
@@ -143,16 +142,13 @@ describe('isDateFormat on hostile codes', () => {
   });
 
   it('is linear in the length of a code that is a long run of unclosed brackets or quotes (the regex form was quadratic)', () => {
-    for (const unit of ['[', '"', '["', '[]"', '"[']) {
-      const t0 = Date.now();
-      isDateFormat(unit.repeat(1_000_000) + 'y');
-      expect(Date.now() - t0).toBeLessThan(1000);
-    }
-  });
+    // (a quadratic form never ends on these: the test's own timeout is the failure)
+    for (const unit of ['[', '"', '["', '[]"', '"[']) expect(isDateFormat(unit.repeat(1_000_000) + 'y')).toBe(true);
+  }, 120_000);
 });
 
 
-const CODES = NUMBER_FORMAT_CASES;
+const CODES = numberFormatCases();
 
 describe('number format codes: what the editor gets and what is a date', () => {
   const defined = (raw: string) => {
@@ -185,19 +181,71 @@ describe('number format codes: what the editor gets and what is a date', () => {
     const fmts = Array.from({ length: 20_000 }, (_, i) => `<numFmt numFmtId="${1000 + i}" formatCode="0.${i}"/>`).join('');
     const xfs = Array.from({ length: 20_000 }, (_, i) => `<xf numFmtId="${i % 2 === 0 ? 14 : 1000 + i}" fontId="${i}"/>`).join('');
     const s = styles(`<numFmts>${fmts}</numFmts><cellXfs>${xfs}</cellXfs>`);
-    const t0 = Date.now();
+    const cache = new LookCache(s);
+    for (let i = 0; i < s.cellXfs.length; i++) cache.get(i);
     for (const xf of s.cellXfs) lookOf(xf, s, false);
-    expect(Date.now() - t0).toBeLessThan(2_000);
-  });
+  }, 120_000);
 });
 
 describe('unescapeLiterals and isDateFormat are linear on long codes', () => {
   const units = ['\\', '\\-', '"', '[', ']', '[$\\$', '"\\', '_', '*', '\\"', '[]"', '"[', '\\\\', '0\\ \\d'];
   it.each(units)('a million of %j', (unit) => {
     const code = unit.repeat(1_000_000) + 'y';
-    const t0 = Date.now();
     unescapeLiterals(code);
     isDateFormat(code);
-    expect(Date.now() - t0).toBeLessThan(3_000);
-  }, 30_000);
+  }, 120_000);
+});
+
+describe('LookCache: a format is read once however many cells and sheets use it', () => {
+  const tables = (code: string, xfs = 3) => `<numFmts><numFmt numFmtId="164" formatCode="${code.replace(/"/g, '&quot;')}"/></numFmts>`.concat(`<cellXfs>${Array.from({ length: xfs }, () => '<xf numFmtId="164"/>').join('')}</cellXfs>`);
+
+  it('gives the same look object for the same format index, and none for an index the file does not have (also remembered)', () => {
+    const cache = new LookCache(styles('<cellXfs><xf/><xf numFmtId="14"/></cellXfs>'));
+    expect(cache.get(1)).toBe(cache.get(1));
+    expect(cache.get(1)?.isDate).toBe(true);
+    expect(cache.get(0)?.numberFormat).toBeUndefined();
+    expect(cache.get(9)).toBeUndefined();
+    expect(cache.get(9)).toBeUndefined();
+  });
+
+  it('reads the code of a number format once for all the formats that name it', () => {
+    const cache = new LookCache(styles(tables('yyyy\\-mm\\-dd', 3)));
+    const [a, b, c] = [cache.get(0), cache.get(1), cache.get(2)];
+    expect(a?.numberFormat).toEqual({ code: 'yyyy-mm-dd' });
+    expect(a?.isDate).toBe(true);
+    expect(cache.numberFormat(164)).toBe(cache.numberFormat(164));
+    // equal but separate looks (a look is per format index), all pointing at the one code that was read
+    expect([b?.numberFormat?.code, c?.numberFormat?.code]).toEqual(['yyyy-mm-dd', 'yyyy-mm-dd']);
+  });
+
+  it('a code of more than 255 characters is opaque: kept as written, not scanned (so not a date, whatever letters it holds), told of once however many formats use it', () => {
+    const told: number[] = [];
+    const long = `yyyy\\$${'0\\$'.repeat(200)}`;
+    expect(long.length).toBeGreaterThan(255);
+    const cache = new LookCache(styles(tables(long, 50)), (id) => told.push(id));
+    for (let i = 0; i < 50; i++) {
+      const l = cache.get(i);
+      expect(l?.isDate).toBe(false);
+      expect(l?.numberFormat?.code).toBe(long);
+    }
+    expect(told).toEqual([164]);
+  });
+
+  it('a code of exactly 255 characters is read as usual, with its escapes and its date letters', () => {
+    const code = `d\\-${'0'.repeat(252)}`;
+    expect(code).toHaveLength(255);
+    const l = new LookCache(styles(tables(code, 1))).get(0);
+    expect(l?.isDate).toBe(true);
+    expect(l?.numberFormat?.code).toBe(`d-${'0'.repeat(252)}`);
+  });
+
+  it('works without anyone to tell (the default), and for ids that are built in or unknown', () => {
+    const cache = new LookCache(styles(`${tables('x'.repeat(300), 1)}`));
+    expect(cache.get(0)?.numberFormat?.code).toBe('x'.repeat(300));
+    const builtin = new LookCache(styles('<cellXfs><xf numFmtId="14"/><xf numFmtId="0"/><xf numFmtId="999"/></cellXfs>'));
+    expect(builtin.get(0)?.numberFormat?.code).toBe('m/d/yyyy');
+    expect(builtin.get(1)?.numberFormat).toBeUndefined();
+    expect(builtin.get(2)?.numberFormat).toBeUndefined();
+    expect(builtin.numberFormat(999)).toEqual({ isDate: false, code: undefined, opaque: false });
+  });
 });

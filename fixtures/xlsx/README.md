@@ -321,3 +321,6 @@ and prints time, memory and outcome. Importing the bomb takes about 1 GB of memo
 | Sheet of 100,000 rows or more (`perf.largeSheet`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |
 
 <!-- coverage-matrix:end -->
+
+`data/number-format-cases.json` is not a workbook: the table of number format codes (`[raw, editor, isDate, why]`) that the reader's cell-style test and
+the editor's escaped-format parity test (`packages/sheets-core/src/export/xlsx-escaped-formats.test.ts`) both read, so neither package imports the other's source.

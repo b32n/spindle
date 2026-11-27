@@ -47,22 +47,32 @@ function rotationOf(value: number | undefined): number | undefined {
   return value > 90 && value <= 180 ? 90 - value : undefined;
 }
 
+/** Longest number format code that is read (characters): Excel's own limit. A longer one is opaque: kept as written, never scanned or copied. */
+export const MAX_FORMAT_CODE_CHARS = 255;
+
+/** What a number format id means for a cell: whether it shows dates or times, and the code the editor gets. */
+interface NumberFormatLook {
+  isDate: boolean;
+  /** `undefined` for an id the file does not define and the table does not know. */
+  code: string | undefined;
+  /** The code is over `MAX_FORMAT_CODE_CHARS`: kept as written, not scanned (so `isDate` is false). */
+  opaque: boolean;
+}
+
 /**
- * The number format code the editor gets. A code the file defines drops the backslash before a character Excel shows without
+ * The number format of an id. A code the file defines drops the backslash before a character Excel shows without
  * quotes (`\\$#,##0.00` is `$#,##0.00`, `yyyy\\-mm\\-dd` is `yyyy-mm-dd`: LibreOffice escapes every literal, and the editor's
  * format mapping, `fromExcelNumberFormatCode`, expects the plain spelling) and keeps every other escape, where the backslash is
  * what makes the character a literal (`0\\ \\d` shows a `d`, it is not a day; see `unescapeLiterals`). The workbook's styles keep the
- * code as written. A built-in id's code comes from the table as it is.
+ * code as written, and the date test is on that. A built-in id's code comes from the table as it is. A code over
+ * `MAX_FORMAT_CODE_CHARS` is not scanned at all: a file may name a megabyte of one for every cell format.
  */
-function editorFormatCode(styles: XlsxStyles, id: number): string | undefined {
-  if (id === 0) return 'General';
-  const defined = definedCodes(styles).get(id);
-  return defined === undefined ? builtinNumberFormat(id) : unescapeLiterals(defined);
-}
-
-/** The code of an id as the file or the built-in table has it (not unescaped), for the date test. */
-function rawFormatCode(styles: XlsxStyles, id: number): string | undefined {
-  return id === 0 ? 'General' : (definedCodes(styles).get(id) ?? builtinNumberFormat(id));
+function numberFormatOf(styles: XlsxStyles, id: number): NumberFormatLook {
+  const defined = id === 0 ? undefined : definedCodes(styles).get(id);
+  const raw = id === 0 ? 'General' : (defined ?? builtinNumberFormat(id));
+  if (raw === undefined) return { isDate: false, code: undefined, opaque: false };
+  if (raw.length > MAX_FORMAT_CODE_CHARS) return { isDate: false, code: raw, opaque: true };
+  return { isDate: isDateFormat(raw), code: defined === undefined ? raw : unescapeLiterals(defined), opaque: false };
 }
 
 /** The codes a workbook's `numFmts` define, by id (the first of a repeated id wins), built once per workbook: a lookup per format must not scan the table. */
@@ -77,7 +87,42 @@ function definedCodes(styles: XlsxStyles): Map<number, string> {
   return codes;
 }
 
-export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolean): CellLook {
+/**
+ * The looks of one workbook's cell formats, made once and shared by every cell (and every sheet) that uses them: by format index, and
+ * the number formats under them by id, so a code is read once however many formats name it (a workbook of 60,000 formats naming
+ * one long code costs one read, not 60,000).
+ */
+export class LookCache {
+  private readonly looks = new Map<number, CellLook | undefined>();
+  private readonly formats = new Map<number, NumberFormatLook>();
+
+  /** `opaque` is told of each number format id whose code is over `MAX_FORMAT_CODE_CHARS`, the first time a format uses it. */
+  constructor(
+    readonly styles: XlsxStyles,
+    private readonly opaque: (id: number) => void = () => {}
+  ) {}
+
+  numberFormat(id: number): NumberFormatLook {
+    let format = this.formats.get(id);
+    if (format === undefined) {
+      format = numberFormatOf(this.styles, id);
+      this.formats.set(id, format);
+      if (format.opaque) this.opaque(id);
+    }
+    return format;
+  }
+
+  /** The look of the cell format at `index`, or `undefined` when the file has none there. */
+  get(index: number): CellLook | undefined {
+    if (this.looks.has(index)) return this.looks.get(index);
+    const xf = this.styles.cellXfs[index];
+    const look = xf === undefined ? undefined : lookOf(xf, this.styles, index === 0, this);
+    this.looks.set(index, look);
+    return look;
+  }
+}
+
+export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolean, cache: LookCache = new LookCache(styles)): CellLook {
   const style: SpreadsheetCellStyle = {};
   const font = styles.fonts[xf.fontId];
   if (font !== undefined) {
@@ -115,10 +160,10 @@ export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolea
     style.border = { top: sideOf(border.top), right: sideOf(border.right), bottom: sideOf(border.bottom), left: sideOf(border.left) };
   }
 
-  const look: CellLook = { isDate: isDateFormat(rawFormatCode(styles, xf.numFmtId)) };
+  const format = cache.numberFormat(xf.numFmtId);
+  const look: CellLook = { isDate: format.isDate };
   if (Object.keys(style).length > 0) look.style = style;
-  const code = editorFormatCode(styles, xf.numFmtId);
-  if (code !== undefined && code !== 'General') look.numberFormat = { code };
+  if (format.code !== undefined && format.code !== 'General') look.numberFormat = { code: format.code };
   return look;
 }
 
