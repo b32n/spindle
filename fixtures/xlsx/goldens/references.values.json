@@ -1,4 +1,5 @@
 {
+  "cachedOnly": 1,
   "compared": 5,
   "firstMismatches": [
     {
@@ -14,7 +15,6 @@
     "number -> error": 1
   },
   "mismatched": 1,
-  "passthrough": 1,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

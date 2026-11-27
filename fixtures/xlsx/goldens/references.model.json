@@ -109,9 +109,10 @@
           },
           "F12": {
             "formula": "=F12+1",
-            "value": "#VALUE!"
+            "value": 0
           },
           "F13": {
+            "cachedOnly": true,
             "formula": "=[1]Remote!$A$1",
             "value": 42
           },

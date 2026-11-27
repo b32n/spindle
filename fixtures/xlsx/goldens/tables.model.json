@@ -46,10 +46,12 @@
             "value": 1
           },
           "B6": {
+            "cachedOnly": true,
             "formula": "=SUBTOTAL(109,Sales[Q1])",
             "value": 23
           },
           "B8": {
+            "cachedOnly": true,
             "formula": "=SUM(Sales[Q1])",
             "value": 23
           },
@@ -69,6 +71,7 @@
             "value": 2
           },
           "C6": {
+            "cachedOnly": true,
             "formula": "=SUBTOTAL(109,Sales[Q2])",
             "value": 45
           },
@@ -88,6 +91,7 @@
             "value": 3
           },
           "D6": {
+            "cachedOnly": true,
             "formula": "=SUBTOTAL(109,Sales[Q3])",
             "value": 67
           },
@@ -95,22 +99,27 @@
             "value": "Total"
           },
           "E2": {
+            "cachedOnly": true,
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
             "value": 60
           },
           "E3": {
+            "cachedOnly": true,
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
             "value": 45
           },
           "E4": {
+            "cachedOnly": true,
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
             "value": 24
           },
           "E5": {
+            "cachedOnly": true,
             "formula": "=Sales[[#This Row],[Q1]]+Sales[[#This Row],[Q2]]+Sales[[#This Row],[Q3]]",
             "value": 6
           },
           "E6": {
+            "cachedOnly": true,
             "formula": "=SUBTOTAL(109,Sales[Total])",
             "value": 135
           }

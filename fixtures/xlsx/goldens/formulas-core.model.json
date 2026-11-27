@@ -622,7 +622,7 @@
           },
           "I103": {
             "formula": "=IRR(D1:D4)",
-            "value": 0.08896339469335
+            "value": 0.08896339469334
           },
           "I104": {
             "formula": "=XNPV(0.1,D1:D4,E1:E4)",
@@ -709,60 +709,108 @@
             "value": 2
           },
           "I123": {
-            "formula": "=_xlfn.XLOOKUP(3,A1:A10,A1:A10)",
-            "value": "#NAME? Function _XLFN.XLOOKUP not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=XLOOKUP(3,A1:A10,A1:A10)",
+            "value": 3
           },
           "I124": {
-            "formula": "=_xlfn.XMATCH(3,A1:A10)",
-            "value": "#NAME? Function _XLFN.XMATCH not found"
+            "formula": "=XMATCH(3,A1:A10)",
+            "value": 3
           },
           "I125": {
             "formula": "=LOOKUP(3,A1:A10)",
             "value": 3
           },
           "I126": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
             "formula": "=TRANSPOSE(A1:B2)",
-            "value": "#SPILL!"
+            "value": 1
           },
           "I127": {
-            "formula": "=_xlfn._xlws.FILTER(A1:A10,A1:A10>8)",
-            "value": "#NAME? Function _XLFN._XLWS.FILTER not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=FILTER(A1:A10,A1:A10>8)",
+            "value": 9
           },
           "I128": {
-            "formula": "=_xlfn._xlws.SORT(A1:A3,1,-1)",
-            "value": "#NAME? Function _XLFN._XLWS.SORT not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=SORT(A1:A3,1,-1)",
+            "value": 3
           },
           "I129": {
-            "formula": "=_xlfn.UNIQUE(B1:B10)",
-            "value": "#NAME? Function _XLFN.UNIQUE not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=UNIQUE(B1:B10)",
+            "value": "x"
           },
           "I13": {
             "formula": "=FLOOR(A2,2)",
             "value": 2
           },
           "I130": {
-            "formula": "=_xlfn.SEQUENCE(3)",
-            "value": "#NAME? Function _XLFN.SEQUENCE not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=SEQUENCE(3)",
+            "value": 1
           },
           "I131": {
-            "formula": "=_xlfn.SORTBY(A1:A3,A1:A3,-1)",
-            "value": "#NAME? Function _XLFN.SORTBY not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=SORTBY(A1:A3,A1:A3,-1)",
+            "value": 3
           },
           "I132": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "cachedOnly": true,
             "formula": "=_xlfn.LET(x,2,x*3)",
-            "value": "#NAME? Function _XLFN.LET not found"
+            "value": 6
           },
           "I133": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "cachedOnly": true,
             "formula": "=_xlfn.HSTACK(A1:A2,B1:B2)",
-            "value": "#NAME? Function _XLFN.HSTACK not found"
+            "value": 1
           },
           "I134": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "cachedOnly": true,
             "formula": "=_xlfn.VSTACK(A1:A2,B1:B2)",
-            "value": "#NAME? Function _XLFN.VSTACK not found"
+            "value": 1
           },
           "I135": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "cachedOnly": true,
             "formula": "=_xlfn.TAKE(A1:A10,2)",
-            "value": "#NAME? Function _XLFN.TAKE not found"
+            "value": 1
           },
           "I136": {
             "formula": "=COUNTA(A1:C10)",
@@ -838,7 +886,7 @@
           },
           "I152": {
             "formula": "=A1:A3*2",
-            "value": "#SPILL!"
+            "value": "#VALUE!"
           },
           "I153": {
             "formula": "=\"a\"&1",
@@ -905,19 +953,19 @@
             "value": true
           },
           "I24": {
-            "formula": "=_xlfn.MAXIFS(A1:A10,B1:B10,\"x\")",
-            "value": "#NAME? Function _XLFN.MAXIFS not found"
+            "formula": "=MAXIFS(A1:A10,B1:B10,\"x\")",
+            "value": 9
           },
           "I25": {
-            "formula": "=_xlfn.AGGREGATE(9,6,A1:A10)",
-            "value": "#NAME? Function _XLFN.AGGREGATE not found"
+            "formula": "=AGGREGATE(9,6,A1:A10)",
+            "value": 55
           },
           "I26": {
-            "formula": "=VLOOKUP(3,A1:C10,2,FALSE())",
+            "formula": "=VLOOKUP(3,A1:C10,2,FALSE)",
             "value": "x"
           },
           "I27": {
-            "formula": "=HLOOKUP(1,A1:C3,2,FALSE())",
+            "formula": "=HLOOKUP(1,A1:C3,2,FALSE)",
             "value": 2
           },
           "I28": {
@@ -941,24 +989,28 @@
             "value": "n"
           },
           "I32": {
-            "formula": "=_xlfn.IFS(A1>5,\"a\",TRUE,\"b\")",
-            "value": "#NAME? Function _XLFN.IFS not found"
+            "formula": "=IFS(A1>5,\"a\",TRUE,\"b\")",
+            "value": "b"
           },
           "I33": {
-            "formula": "=_xlfn.SWITCH(A1,1,\"one\",\"other\")",
-            "value": "#NAME? Function _XLFN.SWITCH not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=SWITCH(A1,1,\"one\",\"other\")",
+            "value": "one"
           },
           "I34": {
             "formula": "=IFERROR(1/0,\"e\")",
             "value": "e"
           },
           "I35": {
-            "formula": "=AND(TRUE(),FALSE())",
+            "formula": "=AND(TRUE,FALSE)",
             "value": false
           },
           "I36": {
-            "formula": "=_xlfn.XOR(TRUE,FALSE)",
-            "value": "#NAME? Function _XLFN.XOR not found"
+            "formula": "=XOR(TRUE,FALSE)",
+            "value": true
           },
           "I37": {
             "formula": "=SUMIF(B1:B10,\"x\",A1:A10)",
@@ -1029,12 +1081,12 @@
             "value": "a b"
           },
           "I52": {
-            "formula": "=_xlfn.CONCAT(\"a\",\"b\")",
-            "value": "#NAME? Function _XLFN.CONCAT not found"
+            "formula": "=CONCAT(\"a\",\"b\")",
+            "value": "ab"
           },
           "I53": {
-            "formula": "=_xlfn.TEXTJOIN(\",\",TRUE,B1:B3)",
-            "value": "#NAME? Function _XLFN.TEXTJOIN not found"
+            "formula": "=TEXTJOIN(\",\",TRUE,B1:B3)",
+            "value": "x,y,x"
           },
           "I54": {
             "formula": "=SUBSTITUTE(\"aab\",\"a\",\"c\")",
@@ -1085,16 +1137,22 @@
             "value": true
           },
           "I65": {
-            "formula": "=_xlfn.NUMBERVALUE(\"1,5\",\",\")",
-            "value": "#NAME? Function _XLFN.NUMBERVALUE not found"
+            "formula": "=NUMBERVALUE(\"1,5\",\",\")",
+            "value": 1.5
           },
           "I66": {
+            "cachedOnly": true,
             "formula": "=_xlfn.TEXTBEFORE(\"a-b\",\"-\")",
-            "value": "#NAME? Function _XLFN.TEXTBEFORE not found"
+            "value": "a"
           },
           "I67": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "cachedOnly": true,
             "formula": "=_xlfn.TEXTSPLIT(\"a-b\",\"-\")",
-            "value": "#NAME? Function _XLFN.TEXTSPLIT not found"
+            "value": "a"
           },
           "I68": {
             "formula": "=DATE(2026,2,3)",
@@ -1141,8 +1199,8 @@
             "value": 46030
           },
           "I78": {
-            "formula": "=_xlfn.DAYS(DATE(2026,2,1),DATE(2026,1,1))",
-            "value": "#NAME? Function _XLFN.DAYS not found"
+            "formula": "=DAYS(DATE(2026,2,1),DATE(2026,1,1))",
+            "value": 31
           },
           "I79": {
             "formula": "=YEARFRAC(DATE(2026,1,1),DATE(2026,7,1))",
@@ -1153,8 +1211,8 @@
             "value": 2
           },
           "I80": {
-            "formula": "=_xlfn.ISOWEEKNUM(DATE(2026,1,5))",
-            "value": "#NAME? Function _XLFN.ISOWEEKNUM not found"
+            "formula": "=ISOWEEKNUM(DATE(2026,1,5))",
+            "value": 2
           },
           "I81": {
             "formula": "=WEEKNUM(DATE(2026,1,5))",
@@ -1173,20 +1231,20 @@
             "value": 3.027650354097
           },
           "I85": {
-            "formula": "=_xlfn.STDEV.S(A1:A10)",
-            "value": "#NAME? Function _XLFN.STDEV.S not found"
+            "formula": "=STDEV.S(A1:A10)",
+            "value": 3.027650354097
           },
           "I86": {
-            "formula": "=_xlfn.VAR.S(A1:A10)",
-            "value": "#NAME? Function _XLFN.VAR.S not found"
+            "formula": "=VAR.S(A1:A10)",
+            "value": 9.166666666667
           },
           "I87": {
             "formula": "=PERCENTILE(A1:A10,0.9)",
             "value": 9.1
           },
           "I88": {
-            "formula": "=_xlfn.PERCENTILE.INC(A1:A10,0.9)",
-            "value": "#NAME? Function _XLFN.PERCENTILE.INC not found"
+            "formula": "=PERCENTILE.INC(A1:A10,0.9)",
+            "value": 9.1
           },
           "I89": {
             "formula": "=QUARTILE(A1:A10,1)",
@@ -1201,8 +1259,8 @@
             "value": 8
           },
           "I91": {
-            "formula": "=_xlfn.RANK.EQ(3,A1:A10)",
-            "value": "#NAME? Function _XLFN.RANK.EQ not found"
+            "formula": "=RANK.EQ(3,A1:A10)",
+            "value": 8
           },
           "I92": {
             "formula": "=LARGE(A1:A10,2)",

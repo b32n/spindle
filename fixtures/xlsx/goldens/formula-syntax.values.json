@@ -1,39 +1,11 @@
 {
+  "cachedOnly": 0,
   "compared": 24,
-  "firstMismatches": [
-    {
-      "actual": "\"#NAME? Function _XLFN.SEQUENCE not found\"",
-      "cell": "J1",
-      "expected": "1",
-      "sheet": "Sheet1"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.SINGLE not found\"",
-      "cell": "G2",
-      "expected": "2",
-      "sheet": "Sheet1"
-    },
-    {
-      "actual": "31",
-      "cell": "G4",
-      "expected": "32",
-      "sheet": "Sheet1"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.ANCHORARRAY not found\"",
-      "cell": "G11",
-      "expected": "6",
-      "sheet": "Sheet1"
-    }
-  ],
+  "firstMismatches": [],
   "formulaCells": 24,
-  "matched": 20,
-  "mismatchClasses": {
-    "number -> error": 3,
-    "number -> number": 1
-  },
-  "mismatched": 4,
-  "passthrough": 0,
+  "matched": 24,
+  "mismatchClasses": {},
+  "mismatched": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

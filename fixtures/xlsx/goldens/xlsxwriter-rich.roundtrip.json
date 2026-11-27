@@ -2,7 +2,7 @@
   "diff": {
     "added": 13,
     "after": {
-      "cells": 16,
+      "cells": 15,
       "formats": 0,
       "formulas": 4,
       "merges": 1,
@@ -10,7 +10,7 @@
       "styles": 0
     },
     "before": {
-      "cells": 16,
+      "cells": 15,
       "formats": 0,
       "formulas": 4,
       "merges": 1,

@@ -3,9 +3,20 @@
   "items": [
     {
       "count": 9,
-      "effect": "lost: table references are not calculated",
+      "effect": "kept: shown from the value saved in the file and written back unchanged with the original formula; the value may be out of date: it does not change when the cells it refers to change",
+      "id": "xlsx.formulas.cachedOnly",
+      "label": "formula(s) the editor cannot calculate (kept as saved)",
+      "state": "kept",
+      "where": [
+        "Tables"
+      ]
+    },
+    {
+      "count": 9,
+      "effect": "kept: shown from the value saved in the file; table references are not calculated",
       "id": "xlsx.formulas.structuredRefs",
       "label": "formula(s) using table (structured) references",
+      "state": "kept",
       "where": [
         "Tables"
       ]

@@ -43,19 +43,25 @@
             "value": 4
           },
           "F1": {
-            "formula": "=_xlfn.XLOOKUP(\"S\",A2:A3,B2:B3)",
-            "value": "#NAME? Function _XLFN.XLOOKUP not found"
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "formula": "=XLOOKUP(\"S\",A2:A3,B2:B3)",
+            "value": 3
           },
           "F2": {
+            "cachedOnly": true,
             "formula": "=_xlfn.LET(_xlpm.x,2,_xlpm.x*3)",
-            "value": "#NAME? Function _XLFN.LET not found"
+            "value": 6
           },
           "F4": {
-            "formula": "=_xlfn.SORT(A2:A3)",
-            "value": "#NAME? Function _XLFN.SORT not found"
-          },
-          "F5": {
-            "value": 0
+            "arraySpan": {
+              "cols": 1,
+              "rows": 2
+            },
+            "formula": "=SORT(A2:A3)",
+            "value": "N"
           },
           "F8": {
             "formula": "=IFERROR(1/0,0)",
