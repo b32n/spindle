@@ -19,6 +19,7 @@ import { emuToPx, num, pct } from './units';
 // placeholder are merged into the effective values, so nothing downstream follows inheritance again.
 
 const LEVELS = 9;
+// `just`, `justLow`, `dist` and `thaiDist` all read as `justify`: the distinction (distributed spacing) is not modelled.
 const ALIGN: Record<string, PptxLevelStyle['align']> = { l: 'left', ctr: 'center', r: 'right', just: 'justify', justLow: 'justify', dist: 'justify', thaiDist: 'justify' };
 const ANCHOR: Record<string, PptxPlaceholder['anchor']> = { t: 'top', ctr: 'middle', b: 'bottom' };
 /** Shape elements that can carry a placeholder (`p:sp`, `p:pic`, `p:graphicFrame`) and every element that counts as a drawn shape. */
@@ -28,9 +29,20 @@ const SHAPES = new Set(['sp', 'pic', 'graphicFrame', 'cxnSp', 'grpSp']);
 const FIXED_TYPES = new Set(['dt', 'ftr', 'sldNum', 'hdr']);
 const TITLE_TYPES = new Set(['title', 'ctrTitle']);
 
+/** Spacing properties that state one value in two units: stating either in `over` replaces both in `base`. */
+const SPACING_GROUPS: (keyof PptxLevelStyle)[][] = [
+  ['spaceBefore', 'spaceBeforePct'],
+  ['spaceAfter', 'spaceAfterPct'],
+  ['lineHeight', 'lineSpacingPts'],
+];
+
 /** The merged level styles `over` on `base`, level by level, a property of `over` winning. */
 export function mergeLevels(base: PptxLevelStyles, over: PptxLevelStyles): PptxLevelStyles {
-  return Array.from({ length: LEVELS }, (_, i) => ({ ...base[i], ...over[i] }));
+  return Array.from({ length: LEVELS }, (_, i) => {
+    const merged = { ...base[i] };
+    for (const group of SPACING_GROUPS) if (group.some((k) => over[i]?.[k] !== undefined)) for (const k of group) delete merged[k];
+    return { ...merged, ...over[i] };
+  });
 }
 
 const emptyLevels = (): PptxLevelStyles => Array.from({ length: LEVELS }, () => ({}));
@@ -45,6 +57,14 @@ function parseBullet(p: XmlElement): PptxBullet | undefined {
     return { kind: 'auto', scheme: auto.attrs.type ?? 'arabicPeriod', ...(startAt !== undefined && startAt !== 1 ? { startAt } : {}) };
   }
   return undefined;
+}
+
+/** `a:spcBef` / `a:spcAft`: points (`spcPts`) or a fraction of the font size (`spcPct`), a negative value being unusable. */
+function spacing(e: XmlElement | undefined): { pts?: number; pct?: number } | undefined {
+  const pts = num(kid(e, 'spcPts')?.attrs.val);
+  if (pts !== undefined && pts >= 0) return { pts: pts / 100 };
+  const fraction = pct(kid(e, 'spcPct')?.attrs.val);
+  return fraction !== undefined && fraction >= 0 ? { pct: fraction } : undefined;
 }
 
 /** One `a:lvlNpPr` (or `a:defPPr`): paragraph properties and its `a:defRPr`, only what the element states. */
@@ -68,12 +88,17 @@ export function parseLevel(p: XmlElement | undefined, colorMap: PptxColorMap): P
   if (marginLeft !== undefined) out.marginLeft = marginLeft;
   const indent = emuToPx(p.attrs.indent);
   if (indent !== undefined) out.indent = indent;
-  const lineHeight = pct(kid(kid(p, 'lnSpc'), 'spcPct')?.attrs.val);
+  const line = kid(p, 'lnSpc');
+  const lineHeight = pct(kid(line, 'spcPct')?.attrs.val);
+  const linePts = num(kid(line, 'spcPts')?.attrs.val);
   if (lineHeight !== undefined && lineHeight > 0) out.lineHeight = lineHeight;
-  const before = num(kid(kid(p, 'spcBef'), 'spcPts')?.attrs.val);
-  if (before !== undefined && before >= 0) out.spaceBefore = before / 100;
-  const after = num(kid(kid(p, 'spcAft'), 'spcPts')?.attrs.val);
-  if (after !== undefined && after >= 0) out.spaceAfter = after / 100;
+  else if (linePts !== undefined && linePts > 0) out.lineSpacingPts = linePts / 100;
+  const before = spacing(kid(p, 'spcBef'));
+  if (before?.pts !== undefined) out.spaceBefore = before.pts;
+  else if (before?.pct !== undefined) out.spaceBeforePct = before.pct;
+  const after = spacing(kid(p, 'spcAft'));
+  if (after?.pts !== undefined) out.spaceAfter = after.pts;
+  else if (after?.pct !== undefined) out.spaceAfterPct = after.pct;
   const bullet = parseBullet(p);
   if (bullet) out.bullet = bullet;
   return out;
@@ -188,6 +213,7 @@ export interface ReadLayoutsResult {
  */
 export async function readLayouts(pkg: OoxmlPackage, masterParts: string[], defaultStyle: XmlElement | undefined, warn: (m: string) => void): Promise<PptxLayout[]> {
   const layouts: PptxLayout[] = [];
+  const warnedBackgrounds = new Set<string>();
   let firstTheme: string | undefined;
   for (const masterPart of masterParts) {
     const master = await pkg.xml(masterPart);
@@ -212,7 +238,7 @@ export async function readLayouts(pkg: OoxmlPackage, masterParts: string[], defa
         warn(`${baseName(part)} could not be read as a slide layout; it is skipped.`);
         continue;
       }
-      layouts.push(flattenLayout(part, masterPart, masterName, master, masterMap, masterTree, layout, defaultStyle, warn));
+      layouts.push(flattenLayout(part, masterPart, masterName, master, masterMap, masterTree, layout, defaultStyle, warn, warnedBackgrounds));
     }
   }
   return layouts;
@@ -227,7 +253,8 @@ function flattenLayout(
   masterTree: ReturnType<typeof scanTree>,
   layout: XmlElement,
   defaultStyle: XmlElement | undefined,
-  warn: (m: string) => void
+  warn: (m: string) => void,
+  warnedBackgrounds: Set<string>
 ): PptxLayout {
   const map = overrideColorMap(masterMap, kid(kid(layout, 'clrMapOvr'), 'overrideClrMapping'));
   const tree = scanTree(layout);
@@ -257,7 +284,13 @@ function flattenLayout(
 
   const own = readBackground(layout, map);
   const bg = own.present ? own : readBackground(master, masterMap);
-  if (bg.approximated) warn(`${name}: the background is a ${bg.approximated} fill; it is read as a ${bg.color ? 'solid colour' : 'plain background'}.`);
+  // One warning per background source: a master gradient shared by eleven layouts is reported once, under the master.
+  const source = own.present ? part : masterPart;
+  if (bg.approximated && !warnedBackgrounds.has(source)) {
+    warnedBackgrounds.add(source);
+    const label = own.present ? name : masterName || baseName(masterPart);
+    warn(`${label}: the background is a ${bg.approximated} fill; it is read as a ${bg.color ? 'solid colour' : 'plain background'}.`);
+  }
   return {
     partName: part,
     name,
@@ -267,6 +300,7 @@ function flattenLayout(
     ...(bg.color ? { background: bg.color } : {}),
     ...(hideMasterShapes ? { hideMasterShapes: true } : {}),
     placeholders,
+    // Shapes inside `mc:AlternateContent` or other wrappers are not counted: the count is advisory (the shape reader owns them).
     staticShapes: tree.shapes + (hideMasterShapes ? 0 : masterTree.shapes),
   };
 }
@@ -275,15 +309,19 @@ const family = (type: string): string => (TITLE_TYPES.has(type) ? 'title' : type
 
 /**
  * The layout placeholder a slide placeholder inherits from: the one with the same `idx`, else the first of the same
- * type (the two title types and `subTitle` / `body` / `obj` are interchangeable, as in PowerPoint), else `undefined`.
+ * type, else (only when the slide placeholder has no `idx` or `idx` 0) the first of the same kind (the two title types and
+ * `subTitle` / `body` / `obj` are interchangeable, as in PowerPoint), else `undefined`.
  */
 export function matchLayoutPlaceholder(layout: PptxLayout | undefined, ph: { type?: string; idx?: number }): PptxPlaceholder | undefined {
   if (!layout) return undefined;
   const type = ph.type || 'obj';
+  // `idx` 0 is the title / first body slot and is matched like an absent idx, by type.
   const byIdx = ph.idx !== undefined && ph.idx !== 0 ? layout.placeholders.find((p) => p.idx === ph.idx) : undefined;
   if (byIdx) return byIdx;
   const exact = layout.placeholders.find((p) => p.type === type);
   if (exact) return exact;
+  // A slide placeholder naming an `idx` the layout lacks inherits nothing beyond an exact type match, as in PowerPoint.
+  if (ph.idx !== undefined && ph.idx !== 0) return undefined;
   const textual = (t: string) => t === 'body' || t === 'obj' || t === 'subTitle';
   return layout.placeholders.find((p) => family(p.type) === family(type) || (textual(p.type) && textual(type)));
 }

@@ -102,8 +102,14 @@ export interface PptxLevelStyle {
   marginLeft?: number;
   indent?: number;
   lineHeight?: number;
+  /** Exact line spacing in pt (`lnSpc/spcPts`); excludes `lineHeight`. */
+  lineSpacingPts?: number;
   spaceBefore?: number;
+  /** Space before as a fraction of the font size (`spcBef/spcPct`, `0.2` is 20%); excludes `spaceBefore`. */
+  spaceBeforePct?: number;
   spaceAfter?: number;
+  /** Space after as a fraction of the font size (`spcAft/spcPct`); excludes `spaceAfter`. */
+  spaceAfterPct?: number;
   bullet?: PptxBullet;
 }
 

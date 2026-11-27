@@ -110,6 +110,25 @@ describe('level styles', () => {
     expect(parseLevel(parse(lvl(1, ''))?.children[0], DEFAULT_COLOR_MAP)).toEqual({});
   });
 
+  it('reads percentage paragraph spacing and exact line spacing', () => {
+    const at = (inner: string) => parseLevel(parse(lvl(1, '', inner))?.children[0], DEFAULT_COLOR_MAP);
+    expect(at('<a:spcBef><a:spcPct val="20000"/></a:spcBef><a:spcAft><a:spcPct val="10%"/></a:spcAft>')).toEqual({ spaceBeforePct: 0.2, spaceAfterPct: 0.1 });
+    expect(at('<a:lnSpc><a:spcPts val="1800"/></a:lnSpc>')).toEqual({ lineSpacingPts: 18 });
+    expect(at('<a:lnSpc><a:spcPct val="80000"/><a:spcPts val="1800"/></a:lnSpc>')).toEqual({ lineHeight: 0.8 });
+    expect(at('<a:lnSpc><a:spcPts val="0"/></a:lnSpc>')).toEqual({});
+    expect(at('<a:spcBef><a:spcPts val="600"/><a:spcPct val="20000"/></a:spcBef>')).toEqual({ spaceBefore: 6 });
+    expect(at('<a:spcBef><a:spcPct val="-1"/></a:spcBef><a:spcAft><a:spcPct val="x"/></a:spcAft>')).toEqual({});
+  });
+
+  it('lets a level that states spacing in one unit replace the other unit', () => {
+    const lv = (o: object) => Array.from({ length: 9 }, (_, i) => (i === 0 ? o : {}));
+    const base = lv({ spaceBefore: 6, spaceAfterPct: 0.1, lineHeight: 0.9, fontSize: 20 });
+    expect(mergeLevels(base, lv({ spaceBeforePct: 0.2, spaceAfter: 3, lineSpacingPts: 24 }))[0]).toEqual({
+      fontSize: 20, spaceBeforePct: 0.2, spaceAfter: 3, lineSpacingPts: 24,
+    });
+    expect(mergeLevels(base, lv({ fontSize: 10 }))[0]).toEqual({ ...base[0], fontSize: 10 });
+  });
+
   it.each([
     ['<a:buNone/>', { kind: 'none' }],
     ['<a:buChar char=""/>', undefined],
@@ -287,6 +306,18 @@ describe('layout backgrounds', () => {
     expect(noColor.warnings).toEqual([]);
   });
 
+  it('warns once per background source, not once per layout inheriting it', async () => {
+    const gradMaster = master('<p:cSld name="Grad"><p:bg><p:bgPr><a:gradFill/></p:bgPr></p:bg></p:cSld>');
+    const r = await layoutsOf([{ xml: gradMaster, layouts: [{ xml: layout('<p:cSld name="A"/>') }, { xml: layout('<p:cSld name="B"/>') }, { xml: layout('<p:cSld name="C"><p:bg><p:bgPr><a:pattFill/></p:bgPr></p:bg></p:cSld>') }] }]);
+    expect(r.layouts).toHaveLength(3);
+    expect(r.warnings).toEqual([
+      'Grad: the background is a grad fill; it is read as a plain background.',
+      'C: the background is a patt fill; it is read as a plain background.',
+    ]);
+    const unnamed = await layoutsOf([{ xml: master('<p:cSld><p:bg><p:bgPr><a:blipFill/></p:bgPr></p:bg></p:cSld>'), layouts: [{ xml: layout('<p:cSld name="A"/>') }] }]);
+    expect(unnamed.warnings).toEqual(['slideMaster1.xml: the background is a blip fill; it is read as a plain background.']);
+  });
+
   it('applies the layout colour map override to its own background and text colours', async () => {
     const r = await one(
       layout(`<p:cSld name="Dark"><p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg>${tree(sp('<p:ph type="title"/>'))}</p:cSld>`, '', '<p:clrMapOvr><a:overrideClrMapping bg1="dk1" tx1="lt1" bg2="dk2" tx2="lt2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/></p:clrMapOvr>'),
@@ -363,9 +394,17 @@ describe('matchLayoutPlaceholder', () => {
     expect(matchLayoutPlaceholder(l, { type: 'dt', idx: 99 })?.idx).toBe(10);
     expect(matchLayoutPlaceholder(l, { type: 'title' })?.type).toBe('ctrTitle');
     expect(matchLayoutPlaceholder(l, { type: 'ctrTitle', idx: 0 })?.type).toBe('ctrTitle');
-    expect(matchLayoutPlaceholder(l, { idx: 5 })?.type).toBe('subTitle');
+    expect(matchLayoutPlaceholder(l, { idx: 0 })?.type).toBe('subTitle');
+    expect(matchLayoutPlaceholder(l, {})?.type).toBe('subTitle');
     expect(matchLayoutPlaceholder(l, { type: 'obj' })?.type).toBe('subTitle');
     expect(matchLayoutPlaceholder(l, { type: 'tbl' })).toBeUndefined();
     expect(matchLayoutPlaceholder(undefined, { type: 'title' })).toBeUndefined();
+  });
+
+  it('does not pair a slide placeholder naming an idx the layout lacks with a placeholder of the same kind', () => {
+    expect(matchLayoutPlaceholder(l, { type: 'obj', idx: 13 })?.type).toBe('pic');
+    expect(matchLayoutPlaceholder(l, { type: 'obj', idx: 7 })).toBeUndefined();
+    expect(matchLayoutPlaceholder(l, { type: 'subTitle', idx: 7 })?.idx).toBe(1);
+    expect(matchLayoutPlaceholder(l, { type: 'title', idx: 7 })).toBeUndefined();
   });
 });
