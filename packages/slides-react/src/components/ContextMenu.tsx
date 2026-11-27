@@ -23,7 +23,7 @@ export function ContextMenu({ x, y, onClose }: ContextMenuProps): React.ReactEle
   // Elbow and curved routing lives here (not in the toolbar) so the toolbar row is unchanged.
   const route = (kind: ConnectorKind, label: string): MenuItem => ({
     label: (line?.connector ?? 'straight') === kind ? `${label} ✓` : label,
-    run: () => deck.updateElement(line!.id, { connector: kind === 'straight' ? undefined : kind, adjustments: undefined } as never),
+    run: () => deck.setConnectorKind(line!.id, kind),
   });
 
   const items: Array<MenuItem | 'sep'> = [

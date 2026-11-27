@@ -42,7 +42,7 @@ import { alignFrames, distributeFrames, type AlignMode, type FrameItem } from '.
 import type { Rect } from './scene/geometry';
 import { groupChain, groupParents } from './scene/group-tree';
 import { connectionFrame, resolveConnectorFrame, resolveEndpoints } from './scene/connector';
-import type { ConnectionFrame, Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
+import type { ConnectionFrame, ConnectorKind, Frame, Fill, SlideElement, LineElement, EndpointBind, TableElement, TableCell } from './scene/types';
 import { applyTextFormat, type RichTextDoc, type TextFormatSpec } from './text/model';
 import type { ThemeData, LayoutData } from './theme/types';
 import { getBuiltinTheme, BUILTIN_LAYOUTS, DEFAULT_SLIDE_SIZE } from './theme/builtin';
@@ -468,6 +468,18 @@ export class DeckImpl {
     this.elements.set(el.id, el);
     this.emit('elementAdd', { slideId, elementId: el.id });
     return el;
+  }
+
+  /** Set a line's routing; `straight` deletes `connector` and `adjustments` (a bare line carries neither key). */
+  setConnectorKind(id: string, kind: ConnectorKind): void {
+    const el = this.elements.get(id);
+    if (!el || el.type !== 'line') return;
+    this.recordHistory();
+    this.events.batch(() => {
+      const { connector: _c, adjustments: _a, ...rest } = el;
+      this.elements.set(id, (kind === 'straight' ? rest : { ...rest, connector: kind }) as SlideElement);
+      this.emit('elementChange', { slideId: el.containerId, elementId: id, keys: ['connector', 'adjustments'] });
+    });
   }
 
   /** Patch an element; the record is replaced (immutable). */

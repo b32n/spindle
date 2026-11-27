@@ -5,11 +5,11 @@ import { LineView } from './elements/LineView';
 
 let selected: string[] = [];
 let elements: Record<string, unknown> = {};
-const updateElement = jest.fn();
+const setConnectorKind = jest.fn();
 
 jest.mock('../hooks', () => ({
   ...jest.requireActual('../hooks'),
-  useDeck: () => ({ getElement: (id: string) => elements[id], updateElement, getActiveSlideId: () => 's1' }),
+  useDeck: () => ({ getElement: (id: string) => elements[id], setConnectorKind, getActiveSlideId: () => 's1' }),
   useSelection: () => ({ slideId: 's1', elementIds: selected }),
   useClipboard: () => ({ hasContent: () => false }),
 }));
@@ -40,7 +40,7 @@ describe('LineView connector routing', () => {
 });
 
 describe('ContextMenu connector routing', () => {
-  beforeEach(() => { updateElement.mockClear(); });
+  beforeEach(() => { setConnectorKind.mockClear(); });
 
   it('offers straight, elbow and curved for a single selected line, marking the current one', () => {
     elements = { l: line({ connector: 'elbow' }) };
@@ -61,14 +61,14 @@ describe('ContextMenu connector routing', () => {
     expect(renderToStaticMarkup(<ContextMenu x={0} y={0} onClose={() => undefined} />)).not.toContain('connector');
   });
 
-  it('choosing a routing updates the line and resets the elbow position', () => {
+  it('choosing a routing sets the connector kind on the line', () => {
     elements = { l: line() };
     selected = ['l'];
     const tree = ContextMenu({ x: 0, y: 0, onClose: () => undefined }) as React.ReactElement<{ items: Array<{ label: string; run: () => void } | 'sep'> }>;
     const items = tree.props.items.filter((i): i is { label: string; run: () => void } => i !== 'sep');
     items.find((i) => i.label.startsWith('Elbow'))!.run();
-    expect(updateElement).toHaveBeenLastCalledWith('l', { connector: 'elbow', adjustments: undefined });
+    expect(setConnectorKind).toHaveBeenLastCalledWith('l', 'elbow');
     items.find((i) => i.label.startsWith('Straight'))!.run();
-    expect(updateElement).toHaveBeenLastCalledWith('l', { connector: undefined, adjustments: undefined });
+    expect(setConnectorKind).toHaveBeenLastCalledWith('l', 'straight');
   });
 });

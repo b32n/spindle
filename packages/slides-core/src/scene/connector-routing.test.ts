@@ -11,7 +11,8 @@ import {
   ANCHOR_IDS,
 } from './connector';
 import { createLineElement, createShapeElement, createTextElement } from './elements';
-import type { AnchorId, ConnectionFrame, LineElement } from './types';
+import type { AnchorId, ConnectionFrame, LineElement, SlideElement } from './types';
+import { resolveAdjustments } from './shape-presets';
 import type { Point } from './geometry';
 
 const f = (x: number, y: number, w: number, h: number, shape?: ConnectionFrame['shape'], rotation = 0): ConnectionFrame => ({ x, y, w, h, rotation, ...(shape ? { shape } : {}) });
@@ -61,11 +62,47 @@ describe('shape-specific connection sites', () => {
     expect(p.y).toBeCloseTo(100 * (1 - k));
   });
 
+  it('a flipped triangle puts its apex at the bottom and a flipped ellipse mirrors its diagonals', () => {
+    const t = { ...f(0, 0, 100, 80, 'triangle'), flipV: true };
+    expect(anchorPoint(t, 'n')).toEqual({ x: 50, y: 80 });
+    expect(anchorPoint(t, 's')).toEqual({ x: 50, y: 0 });
+    expect(anchorPoint(t, 'nw')).toEqual({ x: 25, y: 40 });
+    expect(anchorPoint(t, 'sw')).toEqual({ x: 0, y: 0 });
+    const k = 0.5 - Math.SQRT1_2 / 2;
+    const e = { ...f(0, 0, 200, 100, 'ellipse'), flipH: true };
+    expect(anchorPoint(e, 'nw').x).toBeCloseTo(200 * (1 - k));
+    expect(anchorPoint(e, 'nw').y).toBeCloseTo(100 * k);
+    expect(anchorPoint(e, 'e')).toEqual({ x: 0, y: 50 });
+    const both = { ...e, flipV: true };
+    expect(anchorPoint(both, 'nw').x).toBeCloseTo(200 * (1 - k));
+    expect(anchorPoint(both, 'nw').y).toBeCloseTo(100 * (1 - k));
+  });
+
+  it('flips mirror before the rotation turns the box', () => {
+    // flipH then 90 degrees clockwise: the east site (flipped to the west edge) ends up at the top.
+    const p = anchorPoint({ ...f(0, 0, 100, 100, 'ellipse', 90), flipH: true }, 'e');
+    expect(p.x).toBeCloseTo(50);
+    expect(p.y).toBeCloseTo(0);
+  });
+
+  it('the triangle apex is fixed because the preset has no adjustment to read', () => {
+    expect(resolveAdjustments('triangle', [0.2])).toEqual([]);
+  });
+
   it('connectionFrame carries the preset of shapes only', () => {
     const shape = createShapeElement({ containerId: 's', index: 'a', shape: 'triangle', x: 1, y: 2, w: 3, h: 4 });
     expect(connectionFrame(shape)).toEqual({ x: 1, y: 2, w: 3, h: 4, rotation: 0, shape: 'triangle' });
     const text = createTextElement({ containerId: 's', index: 'a', x: 1, y: 2, w: 3, h: 4 });
     expect(connectionFrame(text)).toEqual({ x: 1, y: 2, w: 3, h: 4, rotation: 0 });
+  });
+
+  it('connectionFrame carries the flips of shapes and images, and omits them when unset', () => {
+    const shape = { ...createShapeElement({ containerId: 's', index: 'a', shape: 'triangle', x: 1, y: 2, w: 3, h: 4 }), flipV: true };
+    expect(connectionFrame(shape)).toEqual({ x: 1, y: 2, w: 3, h: 4, rotation: 0, shape: 'triangle', flipV: true });
+    expect(connectionFrame({ ...shape, flipH: true, flipV: false })).toMatchObject({ flipH: true });
+    expect(connectionFrame({ ...shape, flipH: true, flipV: false })).not.toHaveProperty('flipV');
+    const image = { type: 'image', id: 'i', containerId: 's', index: 'a', x: 0, y: 0, w: 10, h: 10, rotation: 0, src: '', naturalW: 1, naturalH: 1, flipH: true } as SlideElement;
+    expect(connectionFrame(image)).toEqual({ x: 0, y: 0, w: 10, h: 10, rotation: 0, flipH: true });
   });
 
   it('a bound line resolves to the shape site through the frame lookup', () => {
@@ -80,6 +117,14 @@ describe('anchorDirection', () => {
   it.each<[AnchorId, { x: number; y: number }]>([
     ['n', N], ['s', S], ['e', E], ['w', W], ['nw', W], ['sw', W], ['ne', E], ['se', E],
   ])('%s leaves outward', (a, d) => expect(anchorDirection(box, a)).toEqual(d));
+
+  it('mirrors with the flips, before the rotation', () => {
+    expect(anchorDirection({ ...box, flipH: true }, 'e')).toEqual(W);
+    expect(anchorDirection({ ...box, flipH: true }, 'nw')).toEqual(E);
+    expect(anchorDirection({ ...box, flipV: true }, 'n')).toEqual(S);
+    expect(anchorDirection({ ...box, flipV: true }, 'e')).toEqual(E);
+    expect(anchorDirection({ ...box, flipH: true, flipV: true, rotation: 90 }, 'n')).toEqual(W);
+  });
 
   it('turns with the rotation to the nearest axis', () => {
     expect(anchorDirection({ ...box, rotation: 90 }, 'n')).toEqual(E);
@@ -213,5 +258,36 @@ describe('deck keeps a bound connector on a shape-specific site', () => {
     d.deleteElements([a]);
     expect((d.getElement(l) as LineElement).startBind).toBeUndefined();
     expect((d.getElement(l) as LineElement).startPoint?.x).toBeCloseTo(10 + 100 * (1 - k));
+  });
+});
+
+describe('Deck.setConnectorKind', () => {
+  it('sets elbow or curved, and straight deletes the keys instead of leaving undefined ones', async () => {
+    const { DeckImpl } = await import('../deck');
+    const d = new DeckImpl('room', 'Deck');
+    const s = d.getActiveSlideId();
+    const l = d.addElement(s, { type: 'line', adjustments: [0.3], x: 0, y: 0, w: 10, h: 10 }).id;
+    d.setConnectorKind(l, 'elbow');
+    expect(d.getElement(l)).toMatchObject({ connector: 'elbow' });
+    expect(d.getElement(l)).not.toHaveProperty('adjustments');
+    d.setConnectorKind(l, 'curved');
+    expect((d.getElement(l) as LineElement).connector).toBe('curved');
+    d.setConnectorKind(l, 'straight');
+    expect(Object.keys(d.getElement(l)!)).not.toContain('connector');
+    expect(Object.keys(d.getElement(l)!)).not.toContain('adjustments');
+    const plain = new DeckImpl('room', 'Deck');
+    plain.addElement(plain.getActiveSlideId(), { type: 'line', x: 0, y: 0, w: 10, h: 10 });
+    expect(Object.keys(plain.getElement(plain.getElementIdsForSlide(plain.getActiveSlideId())[0])!).sort()).toEqual(Object.keys(d.getElement(l)!).sort());
+    d.undo();
+    expect((d.getElement(l) as LineElement).connector).toBe('curved');
+  });
+
+  it('ignores a missing element and a non-line', async () => {
+    const { DeckImpl } = await import('../deck');
+    const d = new DeckImpl('room', 'Deck');
+    const a = d.addElement(d.getActiveSlideId(), { type: 'shape', shape: 'rect', x: 0, y: 0, w: 10, h: 10 }).id;
+    d.setConnectorKind('nope', 'elbow');
+    d.setConnectorKind(a, 'elbow');
+    expect(d.getElement(a)).not.toHaveProperty('connector');
   });
 });

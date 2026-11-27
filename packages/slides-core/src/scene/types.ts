@@ -346,9 +346,12 @@ export interface ImageCrop {
   b: number;
 }
 
-/** A frame plus the preset of a shape element, so connection sites can follow its outline (see `anchorPoint`). */
+/** A frame plus the preset and flips of a shape element, so connection sites can follow its outline (see `anchorPoint`). */
 export interface ConnectionFrame extends Frame {
   shape?: ShapeKind;
+  /** Mirrored like the rendered element: sites and exit directions are flipped in the box before rotating. */
+  flipH?: boolean;
+  flipV?: boolean;
 }
 
 /** How a connector is routed between its endpoints: a straight segment, right-angle (elbow) legs or an S-curve. */

@@ -36,7 +36,8 @@ const FOUR_EDGE_SITES: SiteMap = edgeMids();
 /** Isosceles triangle: apex, the midpoints of both slanted sides, and the three base points. */
 const TRIANGLE_SITES: SiteMap = { n: { u: 0.5, v: 0 }, nw: { u: 0.25, v: 0.5 }, ne: { u: 0.75, v: 0.5 }, sw: { u: 0, v: 1 }, s: { u: 0.5, v: 1 }, se: { u: 1, v: 1 } };
 
-/** Shapes whose connection sites differ from the rectangle's eight (OOXML `cxnLst`, mapped onto the eight anchor ids). */
+/** Shapes whose connection sites differ from the rectangle's eight (OOXML `cxnLst`, mapped onto the eight anchor ids).
+ * The triangle's apex is fixed at 0.5: `triangle` has no adjustment in `SHAPE_PRESET_INFO`, so these sites are exact. */
 const SHAPE_SITES: Partial<Record<string, SiteMap>> = {
   ellipse: ELLIPSE_SITES,
   flowChartConnector: ELLIPSE_SITES,
@@ -66,7 +67,9 @@ function anchorUV(shape: ShapeKind | undefined, anchor: AnchorId): UV {
 
 /** Resolve an anchor on a (possibly rotated) frame to slide coordinates. A shape-specific site follows the outline. */
 export function anchorPoint(f: ConnectionFrame, anchor: AnchorId): Point {
-  const { u, v } = anchorUV(f.shape, anchor);
+  const site = anchorUV(f.shape, anchor);
+  const u = f.flipH ? 1 - site.u : site.u;
+  const v = f.flipV ? 1 - site.v : site.v;
   const local = { x: f.x + u * f.w, y: f.y + v * f.h };
   return f.rotation ? rotatePoint(local, frameCenter(f), f.rotation) : local;
 }
@@ -80,6 +83,10 @@ export function anchorPoints(f: ConnectionFrame): Array<{ anchor: AnchorId; poin
 export function connectionFrame(el: SlideElement): ConnectionFrame {
   const f: ConnectionFrame = { x: el.x, y: el.y, w: el.w, h: el.h, rotation: el.rotation };
   if (el.type === 'shape') f.shape = el.shape;
+  if (el.type === 'shape' || el.type === 'image') {
+    if (el.flipH) f.flipH = true;
+    if (el.flipV) f.flipV = true;
+  }
   return f;
 }
 
@@ -154,7 +161,8 @@ const OUTWARD: Record<AnchorId, Point> = {
 
 /** The axis direction a connector leaves a shape's anchor in, turned with the shape's rotation to the nearest axis. */
 export function anchorDirection(f: ConnectionFrame, anchor: AnchorId): Direction {
-  const o = OUTWARD[anchor];
+  const base = OUTWARD[anchor];
+  const o = { x: f.flipH ? -base.x : base.x, y: f.flipV ? -base.y : base.y };
   const rad = (f.rotation * Math.PI) / 180;
   const x = o.x * Math.cos(rad) - o.y * Math.sin(rad);
   const y = o.x * Math.sin(rad) + o.y * Math.cos(rad);
