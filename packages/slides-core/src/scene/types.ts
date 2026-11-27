@@ -113,10 +113,43 @@ export interface PlaceholderMeta {
 
 // ── Text body styling (element-level; paragraph/run styling lives in PM) ─────
 
+/** Inner padding per side in px (`a:bodyPr` `lIns`/`tIns`/`rIns`/`bIns`, converted from EMU). */
+export interface BodyInsets {
+  l: number;
+  t: number;
+  r: number;
+  b: number;
+}
+
+/**
+ * What a text body does when its text does not fit the box (`a:noAutofit`, `a:normAutofit`, `a:spAutoFit`).
+ * `shrink` stores the scales the file (or the last edit) computed and applies them as stored: `fontScale` multiplies
+ * every font size (0.625 is 62.5%) and `lnSpcReduction` takes that share off the line spacing (0.2 is 20%). They are
+ * recomputed only when the user edits the text, as PowerPoint does. `resize` grows or shrinks the box height to the text.
+ */
+export interface Autofit {
+  mode: 'none' | 'shrink' | 'resize';
+  /** 0.1-1; omitted means 1 (the text fits unscaled). Only meaningful for `shrink`. */
+  fontScale?: number;
+  /** 0-0.5; omitted means 0. Only meaningful for `shrink`. */
+  lnSpcReduction?: number;
+}
+
+/** Text direction of a body (`a:bodyPr/@vert`): `vert` rotates horizontal text 90 degrees, `eaVert` stacks East Asian text upright. */
+export type TextVert = 'horz' | 'vert' | 'eaVert';
+
 export interface BodyStyle {
   vAlign?: 'top' | 'middle' | 'bottom';
-  /** Uniform inner padding in px (v1). */
+  /** Uniform inner padding in px (v1). `insets`, when present, wins. */
   padding?: number;
+  /** Inner padding per side in px. */
+  insets?: BodyInsets;
+  /** Centre the text block horizontally in the box (`anchorCtr`), independent of paragraph alignment. */
+  anchorCtr?: boolean;
+  autofit?: Autofit;
+  vert?: TextVert;
+  /** Text columns (`numCol`, `spcCol`); `gap` in px. */
+  columns?: { count: number; gap?: number };
   /** Wrap text to the box width (default true). */
   wrap?: boolean;
   // Element-level text defaults (PPTX defRPr analogue): runs that don't carry

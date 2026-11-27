@@ -36,7 +36,7 @@ function sanitizeHref(href: string | null | undefined): string {
   return SAFE_HREF_SCHEMES.includes(scheme) ? value : '';
 }
 
-function inlineStyle(inline: RichTextInline, theme: ThemeData): { style: React.CSSProperties; href?: string } {
+function inlineStyle(inline: RichTextInline, theme: ThemeData, scaled: boolean): { style: React.CSSProperties; href?: string } {
   const style: React.CSSProperties = {};
   const decorations: string[] = [];
   let href: string | undefined;
@@ -62,7 +62,10 @@ function inlineStyle(inline: RichTextInline, theme: ThemeData): { style: React.C
         style.fontFamily = resolveFont(mark.attrs?.family as string | undefined, theme);
         break;
       case 'fontSize':
-        if (typeof mark.attrs?.size === 'number') style.fontSize = `${mark.attrs.size}px`;
+        if (typeof mark.attrs?.size === 'number') {
+          // Under autofit the size routes through the body's font scale variable (same expression as the editor schema).
+          style.fontSize = scaled ? `calc(${mark.attrs.size}px * var(--spindle-fs, 1))` : `${mark.attrs.size}px`;
+        }
         break;
       case 'highlight':
         if (mark.attrs?.color) style.backgroundColor = resolveColor(mark.attrs.color as Color, theme);
@@ -78,8 +81,8 @@ function inlineStyle(inline: RichTextInline, theme: ThemeData): { style: React.C
   return { style, href };
 }
 
-function renderInline(inline: RichTextInline, theme: ThemeData, key: number): React.ReactNode {
-  const { style, href } = inlineStyle(inline, theme);
+function renderInline(inline: RichTextInline, theme: ThemeData, key: number, scaled: boolean): React.ReactNode {
+  const { style, href } = inlineStyle(inline, theme, scaled);
   const span = (
     <span key={key} style={style}>
       {inline.text}
@@ -100,19 +103,20 @@ function renderParagraph(
   p: RichTextParagraph,
   theme: ThemeData,
   key: number,
-  ordinal: number
+  ordinal: number,
+  scaled: boolean
 ): React.ReactNode {
   const attrs = p.attrs ?? {};
   const indent = attrs.indent ?? 0;
   const style: React.CSSProperties = {
     textAlign: attrs.align ?? 'left',
-    lineHeight: attrs.lineHeight ?? 1.2,
+    lineHeight: scaled ? `calc(${attrs.lineHeight ?? 1.2} * var(--spindle-ls, 1))` : (attrs.lineHeight ?? 1.2),
     marginTop: attrs.spaceBefore ?? 0,
     marginBottom: attrs.spaceAfter ?? 0,
     paddingLeft: indent * INDENT_PX,
   };
 
-  const inlines = (p.content ?? []).map((inline, i) => renderInline(inline, theme, i));
+  const inlines = (p.content ?? []).map((inline, i) => renderInline(inline, theme, i, scaled));
   const body = inlines.length ? inlines : <br />;
 
   const listType = attrs.listType ?? 'none';
@@ -139,9 +143,11 @@ function renderParagraph(
 export interface StaticRichTextProps {
   doc: RichTextDoc;
   theme: ThemeData;
+  /** Route font sizes and line heights through the `--spindle-fs` / `--spindle-ls` variables of an ancestor (autofit). */
+  scaled?: boolean;
 }
 
-function StaticRichTextImpl({ doc, theme }: StaticRichTextProps): React.ReactElement {
+function StaticRichTextImpl({ doc, theme, scaled = false }: StaticRichTextProps): React.ReactElement {
   // Per-nesting-level ordered-list counters. A numbered item continues its own
   // level's sequence and restarts any deeper levels; a non-numbered paragraph
   // breaks the list. (A single flat counter numbered nested lists continuously.)
@@ -157,7 +163,7 @@ function StaticRichTextImpl({ doc, theme }: StaticRichTextProps): React.ReactEle
     } else {
       counters.length = 0;
     }
-    return renderParagraph(p, theme, i, ordinal);
+    return renderParagraph(p, theme, i, ordinal, scaled);
   });
   return <>{children}</>;
 }

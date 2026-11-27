@@ -66,7 +66,7 @@ export const slidesSchema = new Schema({
           // Always emit line-height (default 1.2) so it matches StaticRichText —
           // otherwise the editor inherits the browser's `normal` and the text
           // shifts a hair when entering/leaving edit.
-          `line-height:${lineHeight};` +
+          `line-height:calc(${lineHeight} * var(--spindle-ls, 1));` +
           (spaceBefore ? `margin-top:${spaceBefore}px;` : '') +
           (spaceAfter ? `margin-bottom:${spaceAfter}px;` : '') +
           (padLeft ? `padding-left:${padLeft}px;` : '');
@@ -131,7 +131,8 @@ export const slidesSchema = new Schema({
       toDOM: (mark) => {
         // Coerce to a finite number so a crafted attr can't inject CSS.
         const size = Number(mark.attrs.size);
-        return ['span', { style: `font-size:${Number.isFinite(size) ? size : 18}px` }, 0];
+        // The editor container sets --spindle-fs to the body's autofit font scale (1 when none).
+        return ['span', { style: `font-size:calc(${Number.isFinite(size) ? size : 18}px * var(--spindle-fs, 1))` }, 0];
       },
     },
     highlight: {

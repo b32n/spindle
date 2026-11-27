@@ -1,11 +1,13 @@
 import React, { useId } from 'react';
-import { type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { autofitMode, type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { shapeGeom } from './shapes';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
 import { useEditingId } from '../../hooks';
 import { strokeAttrs } from './style';
 import { paintId, svgFill } from './fill';
+import { bodyBoxStyle, bodyOverflow, columnsStyle, scaleVars } from './body';
+import { textBodyRef } from '../../text-fit';
 
 export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement; theme: ThemeData; interactive?: boolean }): React.ReactElement {
   const instance = useId();
@@ -16,6 +18,10 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
   const geom = shapeGeom(el.shape, w, h, el.adjustments);
   const { defs, fill } = svgFill(el.fill, theme, paintId(el.id, instance), w, h);
   const stroke = strokeAttrs(el.stroke, theme);
+
+  const shrink = autofitMode(el.bodyStyle) === 'shrink';
+  const bodyRef = React.useMemo(() => textBodyRef(el.id, interactive), [el.id, interactive]);
+  const cols = columnsStyle(el.bodyStyle);
 
   const flip = `${el.flipH ? -1 : 1}, ${el.flipV ? -1 : 1}`;
   const svgStyle: React.CSSProperties = {
@@ -47,21 +53,22 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
         </div>
       ) : el.richText ? (
         <div
+          ref={bodyRef}
+          data-text-body
           style={{
             position: 'absolute',
             inset: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: el.bodyStyle?.vAlign === 'top' ? 'flex-start' : el.bodyStyle?.vAlign === 'bottom' ? 'flex-end' : 'center',
-            padding: el.bodyStyle?.padding ?? 8,
-            boxSizing: 'border-box',
+            ...bodyBoxStyle(el.bodyStyle, 'middle'),
+            ...(shrink ? scaleVars(el.bodyStyle) : {}),
             fontFamily: theme.fonts.minor,
-            fontSize: 18,
+            fontSize: shrink ? 'calc(18px * var(--spindle-fs, 1))' : 18,
             textAlign: 'center',
-            overflow: 'hidden',
+            overflow: bodyOverflow(el.bodyStyle),
           }}
         >
-          <StaticRichText doc={el.richText} theme={theme} />
+          {cols
+            ? <div style={cols}><StaticRichText doc={el.richText} theme={theme} scaled={shrink} /></div>
+            : <StaticRichText doc={el.richText} theme={theme} scaled={shrink} />}
         </div>
       ) : null}
     </div>

@@ -78,8 +78,8 @@ describe('slidesSchema toDOM sanitizes untrusted color/font attrs', () => {
   });
 
   it('coerces a crafted font-size to a number', () => {
-    expect(renderMark('fontSize', { size: '10px;background:url(//evil)' })).toBe('font-size:18px');
-    expect(renderMark('fontSize', { size: 24 })).toBe('font-size:24px');
+    expect(renderMark('fontSize', { size: '10px;background:url(//evil)' })).toBe('font-size:calc(18px * var(--spindle-fs, 1))');
+    expect(renderMark('fontSize', { size: 24 })).toBe('font-size:calc(24px * var(--spindle-fs, 1))');
   });
 });
 
@@ -101,9 +101,9 @@ describe('slidesSchema paragraph toDOM sanitizes untrusted align/line-height/spa
   });
 
   it('coerces line-height and spacing to numbers', () => {
-    expect(styleOfNode({ lineHeight: 1.5 })).toContain('line-height:1.5;');
+    expect(styleOfNode({ lineHeight: 1.5 })).toContain('line-height:calc(1.5 * var(--spindle-ls, 1));');
     const injected = styleOfNode({ lineHeight: '1;background:url(//evil)', spaceBefore: '4;x', spaceAfter: '2}x' });
-    expect(injected).toContain('line-height:1;'); // parseFloat keeps the leading number
+    expect(injected).toContain('line-height:calc(1 * var(--spindle-ls, 1));'); // parseFloat keeps the leading number
     expect(injected).not.toContain('url(');
     expect(injected).not.toContain('background');
     // Non-numeric spacing is dropped entirely rather than interpolated raw.
