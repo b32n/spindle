@@ -525,14 +525,21 @@ lockstep.
   sheets whose names clash (later ones are renamed `Name (2)` with a warning). A shared formula the old reader read as a
   plain value now has its formula, and a saved result of 0 or FALSE is kept. A binary `.xlsb` is refused with a message
   that says to save as `.xlsx`. Additive fields on the result: `workbook`, `styles`, `sharedStrings`, `theme`,
-  per-sheet `details` and per-cell `styleIndex`, `sharedString` and `formulaInfo`. Bounded against hostile files: a formula
-  over 8192 characters is dropped and shared formulas stop expanding past `ImportLimits.maxSheetFormulaChars` (32 Mi per
-  sheet) and `maxFormulaChars` (64 Mi for the whole workbook; the cells keep their value, one warning), a workbook is cut off
-  past `maxTotalCells` (5,000,000) and `maxSheets` (1,000), a worksheet part is read once, `<col>` ranges are applied in
-  one sweep and capped, merges and hyperlinks are applied in one sweep (thousands of huge ranges stay fast), and cells
-  without an address are clamped to the sheet. A number text over 64 characters is not a number, and the 1900 date quirk
-  (serial 60) is honoured for `t="d"` dates. Number format codes a file defines drop their backslash escapes, as the
-  `exceljs` reader did (a LibreOffice `\$#,##0.00` is `$#,##0.00` in the editor). Numbers are plain decimals only (no
+  per-sheet `details` and per-cell `styleIndex`, `sharedString` and `formulaInfo`. Limits against hostile files (what each
+  costs is in `documentation/import-loss.md`): a formula over 8192 characters is dropped and shared formulas stop expanding
+  past `ImportLimits.maxSheetFormulaChars` (32 Mi per sheet) and `maxFormulaChars` (64 Mi for the whole workbook; the cells
+  keep their value, one warning), a workbook is cut off past `maxTotalCells` (5,000,000) and `maxSheets` (1,000, with the
+  `<sheet>` entries read capped at four times that), a worksheet part is read once, `<col>` ranges are applied in one sweep
+  and capped, merges and hyperlinks are read as events and applied in one sweep (thousands of huge ranges stay fast), at
+  most 1,048,576 merges and 65,530 hyperlinks per sheet and `maxRanges` (1,048,576) over the workbook, the per-item
+  warnings (a link without its relationship, a repeated sheet) are given for the first twenty and then counted, and the
+  small elements cut out of a sheet part are read up to a size (64 KiB each, 8 MiB for the raw `extLst`). A cell or row
+  without an address follows the previous one; only a position past the sheet's last row or column is clamped, with a
+  warning. A number text over 64 characters is not a number, and the 1900 date quirk (serial 60) is honoured for `t="d"`
+  dates. Number format codes a file defines lose the backslash only before a character Excel shows without quotes
+  (a LibreOffice `\$#,##0.00` is `$#,##0.00` in the editor); an escape that keeps a letter, digit or `. , @ * _ % # ? " \`
+  literal stays (`0\ \d`, `0.0\"`), nothing in quotes is touched, and an escaped letter is no date token. The `exceljs`
+  reader dropped every escape; the differential names each code where the two now differ. Numbers are plain decimals only (no
   `Infinity` or hex), `t="d"` dates are validated, `_xHHHH_` escapes are decoded in inline and formula strings, `<f/>`
   without text is no formula, shared-formula names may use letters of any script, `frozenSplit` panes freeze, and
   `activeSheetIndex` follows the sheets that were read. The `exceljs` reader stays in the tree,
