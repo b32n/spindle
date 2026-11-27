@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DeckImpl, GRADIENT_PRESETS, getBuiltinTheme, type Fill } from '@b32nio/spindle-slides-core';
-import { DeckProvider } from '../context/DeckContext';
+import { DeckProvider, useDeckContext } from '../context/DeckContext';
 import { SlideView } from './SlideView';
 import { htmlFill, paintId, svgFill } from './elements/fill';
 import { FillExtras, readImageAsFill } from './FillExtras';
@@ -72,13 +72,21 @@ describe('svgFill', () => {
   });
 });
 
-function render(setup: (d: DeckImpl, slideId: string) => void): string {
+/** Selects cell (0,0) of `tableId` during render, before the sibling slide reads the selection. */
+function SeedSelection({ tableId }: { tableId: string }): null {
+  useDeckContext().tableSel.set(tableId, [0, 0]);
+  return null;
+}
+
+function render(setup: (d: DeckImpl, slideId: string) => void, selectTable?: () => string | undefined): string {
   const deck = new DeckImpl('d', 'Deck');
   const sid = deck.getActiveSlideId();
   setup(deck, sid);
+  const tableId = selectTable?.();
   return renderToStaticMarkup(
     <DeckProvider deck={deck}>
-      <SlideView slideId={sid} />
+      {tableId && <SeedSelection tableId={tableId} />}
+      <SlideView slideId={sid} interactive={!!tableId} />
     </DeckProvider>,
   );
 }
@@ -101,6 +109,17 @@ describe('rendered slide', () => {
     expect(html).toContain('isolation:isolate');
     expect(html).toContain('data-fill-layer');
   });
+  it('paints an opaque picture background over the theme colour (stretch and tile)', () => {
+    const stretch = render((d, s) => d.setSlideBackground(s, picture()));
+    expect(stretch).toContain('background-image:url(&quot;data:image/png');
+    expect(stretch).toContain('background-size:100% 100%');
+    expect(stretch).toMatch(/background-color:rgb\(/);
+    expect(stretch).not.toContain('data-fill-layer');
+    const tile = render((d, s) => d.setSlideBackground(s, picture({ mode: 'tile', tile: { w: 20, h: 10 } })));
+    expect(tile).toContain('background-repeat:repeat');
+    expect(tile).toContain('background-size:20px 10px');
+    expect(tile).toMatch(/background-color:rgb\(/);
+  });
   it('paints shape fills through SVG paint servers', () => {
     const html = render((d, s) => { d.addElement(s, { type: 'shape', shape: 'rect', x: 0, y: 0, w: 100, h: 50, fill: gradient }); });
     expect(html).toContain('<linearGradient');
@@ -118,6 +137,24 @@ describe('rendered slide', () => {
     });
     expect(html).toContain('linear-gradient(90deg');
     expect(html).toContain('data-fill-layer');
+  });
+  it('a selected translucent-picture cell paints its tint as an overlay above the layer, not a box-shadow', () => {
+    let tid: string | undefined;
+    const setup = (d: DeckImpl, s: string): void => {
+      const t = d.addElement(s, { type: 'table', rows: 1, cols: 2, x: 0, y: 0, w: 100, h: 20 });
+      tid = t.id;
+      d.updateTableCells(t.id, [[0, 0]], { fill: picture({ alpha: 0.5 }) });
+      d.updateTableCells(t.id, [[0, 1]], { fill: gradient });
+    };
+    const html = render(setup, () => tid);
+    expect(html).toContain('data-select-tint');
+    expect(html.indexOf('data-fill-layer')).toBeLessThan(html.indexOf('data-select-tint'));
+    expect(html).not.toContain('box-shadow:inset 0 0 0 9999px');
+    // Unselected: no overlay; selected plain cell keeps the box-shadow tint.
+    expect(render(setup)).not.toContain('data-select-tint');
+    const plain = render((d, s) => { tid = d.addElement(s, { type: 'table', rows: 1, cols: 1, x: 0, y: 0, w: 50, h: 20 }).id; }, () => tid);
+    expect(plain).toContain('box-shadow:inset 0 0 0 9999px');
+    expect(plain).not.toContain('data-select-tint');
   });
   it('pattern fills render as their solid blend', () => {
     const html = render((d, s) => {

@@ -9,6 +9,16 @@ import { htmlFill } from './elements/fill';
 import { useDeck, useSlide, useSlideElementIds, useTheme } from '../hooks';
 import { ElementView } from './elements/ElementView';
 
+/**
+ * Gradients and colours own the whole `background`; pictures set only longhands, so the theme colour goes under them
+ * (a transparent PNG still shows it). With nothing paintable the theme colour alone is the background.
+ */
+function slideBackgroundStyle(style: React.CSSProperties, fallback: string): React.CSSProperties {
+  if (style.background) return style;
+  if (style.backgroundImage) return { backgroundColor: fallback, ...style };
+  return { background: fallback };
+}
+
 export function SlideView({
   slideId,
   interactive = false,
@@ -33,7 +43,7 @@ export function SlideView({
         position: 'relative',
         width: w,
         height: h,
-        ...(bg.style.background ? bg.style : { background: fallback }),
+        ...slideBackgroundStyle(bg.style, fallback),
         ...(bg.layer ? { isolation: 'isolate' } : {}),
         overflow: 'hidden',
       }}

@@ -74,7 +74,9 @@ function paintServer(paint: Exclude<FillPaint, { kind: 'color' }>, id: string, w
         </linearGradient>
       );
     }
-    // Radial and path gradients: an ellipse from the centre reaching the corners (CSS `farthest-corner`).
+    // Radial and path gradients: an ellipse from the centre reaching the corners (CSS `farthest-corner`). Unlike the
+    // linear case (user space, full shape box) this uses bounding-box units, so on non-rect shapes it follows the
+    // geometry's bbox.
     return (
       <radialGradient id={id} cx="0.5" cy="0.5" r="0.7071">
         {stops}

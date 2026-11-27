@@ -16,6 +16,7 @@ import { htmlFill } from './fill';
 // Translucent tint painted over a selected cell (sits above its own fill, below
 // the text) via a huge inset shadow the cell's overflow:hidden clips flat.
 const SELECT_TINT = 'inset 0 0 0 9999px rgba(45,127,249,0.20)';
+const SELECT_TINT_COLOR = 'rgba(45,127,249,0.20)';
 
 // Cell text metrics. StaticRichText inherits font-size from the <td>, so we set
 // it explicitly to the SAME values the live editor uses — otherwise text would
@@ -101,13 +102,21 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
                     verticalAlign: cellStyle.vAlign,
                     fontSize: cellStyle.fontSize,
                     ...fillStyle,
-                    boxShadow: isSelected ? SELECT_TINT : undefined,
+                    // A cell with a fill layer paints the tint as an overlay above that layer (a box-shadow would sit beneath it).
+                    boxShadow: isSelected && !fillLayer ? SELECT_TINT : undefined,
                     padding: isEditing ? 0 : cellStyle.padding,
                     overflow: 'hidden',
                     boxSizing: 'border-box',
                   }}
                 >
                   {fillLayer}
+                  {isSelected && fillLayer && (
+                    <div
+                      aria-hidden
+                      data-select-tint=""
+                      style={{ position: 'absolute', inset: 0, zIndex: -1, pointerEvents: 'none', background: SELECT_TINT_COLOR }}
+                    />
+                  )}
                   {isEditing ? (
                     <RichTextEditor elementId={el.id} theme={theme} cell={[r, c]} bodyStyle={cellStyle} />
                   ) : (
