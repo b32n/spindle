@@ -48,6 +48,8 @@ export async function readSlideContent(
   const images: ElementContext['images'] = new Map();
   let styleRoot: XmlElement | undefined;
   if (tableStylesPart) styleRoot = await pkg.xml(tableStylesPart);
+  // table styles depend on the style part and the default colour map only (style parts carry no blip fills)
+  const styles = readTableStyles(styleRoot, DEFAULT_COLOR_MAP, new Map());
   for (const [i, slide] of slides.entries()) {
     if (slide.error) continue;
     try {
@@ -57,7 +59,7 @@ export async function readSlideContent(
       const map = overrideColorMap(await layoutMap(slide.layoutPart), kid(kid(root, 'clrMapOvr'), 'overrideClrMapping'));
       const rels = await relsOf(pkg, slide.partName);
       const layout = layouts.find((l) => l.partName === slide.layoutPart);
-      const ctx = { map, rels, defaultLevels: parseLevels(defaultStyle, map), ...(layout ? { layout } : {}), warn, pkg, images, styles: readTableStyles(styleRoot, DEFAULT_COLOR_MAP, rels) };
+      const ctx = { map, rels, defaultLevels: parseLevels(defaultStyle, map), ...(layout ? { layout } : {}), warn, pkg, images, styles };
       const background = readBackground(root, map, rels);
       if (background) slide.background = background;
       slide.elements = await readElements(kid(kid(root, 'cSld'), 'spTree'), ctx);

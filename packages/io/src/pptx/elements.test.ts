@@ -71,7 +71,7 @@ describe('sniffImage', () => {
     ['jpeg', JPEG, 'image/jpeg'],
     ['gif', ascii('GIF89a'), 'image/gif'],
     ['webp', ascii('RIFF\0\0\0\0WEBPVP8 '), 'image/webp'],
-    ['bmp', ascii('BM\0\0'), 'image/bmp'],
+    ['bmp', Uint8Array.from([0x42, 0x4d, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 'image/bmp'],
     ['avif', ascii('\0\0\0\x1cftypavif'), 'image/avif'],
     ['svg', ascii('<svg xmlns="http://www.w3.org/2000/svg"/>'), 'image/svg+xml'],
     ['svg with a declaration and a comment', ascii('<?xml version="1.0"?>\n<!-- c -->\n<!DOCTYPE svg>\n<svg>'), 'image/svg+xml'],
@@ -85,6 +85,9 @@ describe('sniffImage', () => {
     ['text', ascii('hello')],
     ['an HTML page', ascii('<html><svg></html>')],
     ['a RIFF that is not WebP', ascii('RIFF\0\0\0\0WAVE')],
+    ['text starting with BM', ascii('BMW is a car maker, not a bitmap image')],
+    ['a BM header with a short DIB size', Uint8Array.from([0x42, 0x4d, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])],
+    ['a truncated BM header', ascii('BM\0\0')],
     ['nothing', new Uint8Array()],
   ])('gives nothing for %s', (_name, bytes) => {
     expect(sniffImage(bytes)).toBeUndefined();
@@ -171,6 +174,7 @@ describe('p:pic', () => {
     expect(result.warnings).toContain('A picture is linked from outside the file, which is never fetched; it is kept as a placeholder.');
     // an embed that points at an external target is not read either
     const external = await read({ tree: pic(), slideRels: [rel('rImg', 'image', 'https://example.com/a.png', true)] });
+    expect((external.slides[0].elements as PptxPicture[])[0]).toMatchObject({ unsupported: 'linked' });
     expect((external.slides[0].elements as PptxPicture[])[0].dataUrl).toBeUndefined();
   });
 
@@ -178,9 +182,14 @@ describe('p:pic', () => {
     const opts = { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } };
     const crop = async (rect: string): Promise<PptxPicture['crop']> => ((await elementsOf(pic({ blipFill: `${rect}<a:stretch/>` }), opts)) as PptxPicture[])[0].crop;
     expect(await crop('<a:srcRect l="25000" t="10000" r="25000" b="40000"/>')).toEqual({ l: 25, t: 10, r: 25, b: 40 });
-    expect(await crop('<a:srcRect l="-5000" r="150000"/>')).toEqual({ l: 0, t: 0, r: 100, b: 0 });
+    expect(await crop('<a:srcRect l="-5000" r="90000"/>')).toEqual({ l: 0, t: 0, r: 90, b: 0 });
+    expect(await crop('<a:srcRect r="150000"/>')).toBeUndefined();
     expect(await crop('<a:srcRect l="0" t="-1000"/>')).toBeUndefined();
     expect(await crop('')).toBeUndefined();
+    // edges that meet or overlap leave nothing visible: ignored
+    expect(await crop('<a:srcRect l="60000" r="40000"/>')).toBeUndefined();
+    expect(await crop('<a:srcRect t="70000" b="60000"/>')).toBeUndefined();
+    expect(await crop('<a:srcRect l="60000" r="39000"/>')).toEqual({ l: 60, t: 0, r: 39, b: 0 });
   });
 
   it('reads transparency, ignoring full opacity', async () => {
@@ -354,7 +363,7 @@ describe('tables', () => {
     expect(c.margins).toBeUndefined();
   });
 
-  it('pads short rows and drops cells beyond the grid', async () => {
+  it('pads short rows and widens the grid to the widest row (extra columns have width 0)', async () => {
     const t = await tableOnly(table([[cell('A'), cell('B'), cell('C')], [cell('D')]], { grid: 2 }));
     expect(t.columns).toHaveLength(3);
     expect(t.columns[2]).toBe(0);
@@ -362,6 +371,12 @@ describe('tables', () => {
     expect(textOf(t, 1, 1)).toBe('');
     const empty = await tableOnly(table([[cell('A')]], { grid: 3 }));
     expect(empty.rows[0].cells).toHaveLength(3);
+  });
+
+  it('reads a very wide row in linear time', async () => {
+    const wide = await tableOnly(table([Array.from({ length: 3000 }, (_, i) => cell(String(i)))], { grid: 3000 }));
+    expect(wide.rows[0].cells).toHaveLength(3000);
+    expect(textOf(wide, 0, 2999)).toBe('2999');
   });
 
   it('reads a table without a frame, and an empty table', async () => {

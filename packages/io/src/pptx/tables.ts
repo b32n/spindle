@@ -83,16 +83,19 @@ export function readTable(frame: XmlElement, tbl: XmlElement, ctx: TableContext)
   const styleId = (kid(pr, 'tableStyleId')?.text ?? '').trim();
   const style = styleId !== '' ? ctx.styles.get(styleId) : undefined;
   if (styleId !== '' && !style) ctx.warn(`A table uses the style ${styleId}, which the file does not define; its cells keep only their own formatting.`);
-  // the grid is rectangular: a row with fewer cells than the grid has columns is padded, extra cells are dropped
+  // the grid is rectangular and as wide as the widest row: a shorter row is padded with empty cells, and columns the grid
+  // does not list are added with width 0
   const cols = Math.max(columns.length, ...trs.map((tr) => kids(tr, 'tc').length));
   while (columns.length < cols) columns.push(0);
-  const rows = trs.map((tr, row) => ({
-    height: Math.max(0, emuToPx(tr.attrs.h) ?? 0),
-    cells: Array.from({ length: cols }, (_, col) => {
-      const tc = kids(tr, 'tc')[col];
-      return readCell(tc ?? { name: 'tc', ns: 'main', attrs: {}, children: [], text: '' }, { row, col, rows: trs.length, cols }, flags, style, ctx);
-    }),
-  }));
+  const rows = trs.map((tr, row) => {
+    const tcs = kids(tr, 'tc');
+    return {
+      height: Math.max(0, emuToPx(tr.attrs.h) ?? 0),
+      cells: Array.from({ length: cols }, (_, col) =>
+        readCell(tcs[col] ?? { name: 'tc', ns: 'main', attrs: {}, children: [], text: '' }, { row, col, rows: trs.length, cols }, flags, style, ctx)
+      ),
+    };
+  });
   const altText = (cNvPr?.attrs.descr ?? '').trim();
   const frameBox = frameOf(kid(frame, 'xfrm'));
   const flagsOn = Object.fromEntries(Object.entries(flags).filter(([, on]) => on).map(([k]) => [k, true as const]));

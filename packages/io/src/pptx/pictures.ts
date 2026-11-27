@@ -1,6 +1,6 @@
 import type { PptxPicture } from '@b32nio/spindle-shared/export/pptx';
 import type { OoxmlPackage } from '../common/ooxml-package';
-import { kid, type XmlElement } from '../xlsx/xml';
+import { isTrue, kid, type XmlElement } from '../xlsx/xml';
 import { parseGeometry, parseLine } from './fill';
 import { frameOf, matchLayoutPlaceholder } from './levels';
 import { shapeLink } from './links';
@@ -36,7 +36,8 @@ export function sniffImage(b: Uint8Array): string | undefined {
   if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
   if (at(0, 'GIF8')) return 'image/gif';
   if (at(0, 'RIFF') && at(8, 'WEBP')) return 'image/webp';
-  if (at(0, 'BM')) return 'image/bmp';
+  // a BMP file header is 14 bytes then a DIB header of at least 12; the reserved fields (offsets 6 to 9) are zero
+  if (at(0, 'BM') && b.length >= 26 && b[6] === 0 && b[7] === 0 && b[8] === 0 && b[9] === 0 && b[14] >= 12) return 'image/bmp';
   if (at(4, 'ftypavif')) return 'image/avif';
   // an SVG is text: skip a byte-order mark and an XML declaration or comment before the root
   const head = new TextDecoder().decode(b.subarray(0, 512)).replace(/^\uFEFF/, '').replace(/^\s*(?:<\?xml[^>]*\?>|<!--[\s\S]*?-->|<!DOCTYPE[^>]*>|\s)*/i, '');
@@ -63,10 +64,12 @@ async function readImage(part: string, ctx: PictureContext): Promise<{ mime: str
   return result;
 }
 
-/** `a:srcRect` in percent of the source (`l="25000"` is 25), only when it trims something; an outset (a negative edge) counts as none. */
+/** `a:srcRect` in percent of the source (`l="25000"` is 25), only when it trims something; an outset (a negative edge) counts as none, and so does a crop whose opposite edges meet or overlap. */
 function readCrop(rect: XmlElement | undefined): PptxPicture['crop'] {
   const edge = (a: string): number => Math.min(100, Math.max(0, (pct(rect?.attrs[a]) ?? 0) * 100));
   const crop = { l: edge('l'), t: edge('t'), r: edge('r'), b: edge('b') };
+  // edges that together trim the whole image (or more) leave nothing to show: ignored
+  if (crop.l + crop.r >= 100 || crop.t + crop.b >= 100) return undefined;
   return crop.l || crop.t || crop.r || crop.b ? crop : undefined;
 }
 
@@ -79,7 +82,7 @@ export async function readPicture(e: XmlElement, ctx: PictureContext): Promise<P
   const blipFill = kid(e, 'blipFill');
   const blip = kid(blipFill, 'blip');
   const rel = ctx.rels.get(blip?.rattrs?.embed ?? '');
-  const linked = !!blip?.rattrs?.link && !rel;
+  const linked = (!!blip?.rattrs?.link && !rel) || !!rel?.external;
   const image: Awaited<ReturnType<typeof readImage>> = rel && !rel.external ? await readImage(rel.target, ctx) : { unsupported: linked ? 'linked' : 'missing' };
   if ('unsupported' in image) {
     ctx.warn(`A picture ${WHY[image.unsupported]}; it is kept as a placeholder.`);
@@ -96,7 +99,7 @@ export async function readPicture(e: XmlElement, ctx: PictureContext): Promise<P
     pptxId: cNvPr?.attrs.id ?? '',
     name: (cNvPr?.attrs.name ?? '').trim(),
     ...(altText !== '' ? { altText } : {}),
-    ...(cNvPr?.attrs.hidden === '1' || cNvPr?.attrs.hidden === 'true' ? { hidden: true } : {}),
+    ...(isTrue(cNvPr?.attrs.hidden) ? { hidden: true } : {}),
     ...(placeholder ? { placeholder } : {}),
     ...(frame ? { frame } : {}),
     ...(geometry ? { geometry } : {}),

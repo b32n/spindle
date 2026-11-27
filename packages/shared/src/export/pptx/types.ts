@@ -306,7 +306,8 @@ export type PptxLink = { kind: 'url'; href: string; tooltip?: string } | { kind:
  * A picture (`p:pic`). `dataUrl` holds the embedded image (never fetched from a link); it is absent when `unsupported` says
  * why the editor cannot show it: `linked` (the file lives outside the package), `missing` (the relationship or part is
  * absent or too large) or the format (`emf`, `wmf`, ... have no browser renderer: kept as a placeholder, the part name is
- * in `part`). An SVG with a PNG fallback reads as the PNG.
+ * in `part`). An SVG with a PNG fallback reads as the PNG. An SVG `dataUrl` is the file as it is, unsanitised: show it only
+ * through an `<img>` and never inline it into the page.
  */
 export interface PptxPicture {
   kind: 'picture';
@@ -361,6 +362,7 @@ export interface PptxTable {
   altText?: string;
   hidden?: boolean;
   frame?: PptxFrame;
+  /** Widths in px. The grid is as wide as the widest row: a column the `a:tblGrid` does not list has width 0. */
   columns: number[];
   rows: { height: number; cells: PptxTableCell[] }[];
   /** The `a:tblPr` switches that are on. */

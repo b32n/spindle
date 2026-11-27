@@ -193,7 +193,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addTally('pptx.images.linked', 'linked (not embedded) picture(s)', t.linked, 'lost: the picture is not in the file, so it becomes a labelled placeholder; linked files are never fetched', true);
   addTally('pptx.images.svg', 'SVG picture(s)', t.svg, 'approximated: the PNG fallback stored beside the SVG is used', true);
   addTally('pptx.tables.merge', 'merged table cell(s)', t.merge, 'kept: spans are stored on the origin cell and the cells it covers are marked', true);
-  addTally('pptx.tables.styles', 'table(s) with a table style', t.tableStyles, 'approximated: the style is resolved into each cell (fill, borders, bold, colour) and its name kept; corner-cell rules are not applied', true);
+  addTally('pptx.tables.styles', 'table(s) with a table style', t.tableStyles, 'approximated: the style is resolved into each cell (fill, borders, bold, colour) and its name kept; corner-cell rules are not applied, and a built-in style the file does not define is not resolved', true);
   addTally('pptx.tables.banding', 'table(s) with banded rows or columns', t.banding, 'approximated: the banding is resolved into each cell\'s fill and the switch is kept', true);
 
   // ---- presentation -------------------------------------------------------
