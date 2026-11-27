@@ -31,6 +31,9 @@ export interface ShapePresetInfo {
   adj?: readonly AdjustmentSpec[];
 }
 
+/** Arrow head length (and `homePlate` point) guides: OOXML allows up to `w/ss`, so any aspect ratio up to 100:1 is unclamped; the geometry caps the head at the box. */
+const HEAD_MAX = 100;
+
 const a = (def: number, min = 0, max = 0.5): AdjustmentSpec => ({ def, min, max });
 /** A callout tail tip, relative to the shape centre in box fractions. */
 const tip = (def: number): AdjustmentSpec => a(def, -1, 2);
@@ -82,13 +85,13 @@ export const SHAPE_PRESET_INFO: Readonly<Record<ShapePreset, ShapePresetInfo>> =
 
   arrowRight: info('Arrow right', 'arrows'),
   arrowLeft: info('Arrow left', 'arrows'),
-  rightArrow: info('Right arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, 1)),
-  leftArrow: info('Left arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, 1)),
-  upArrow: info('Up arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, 1)),
-  downArrow: info('Down arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, 1)),
-  leftRightArrow: info('Left-right arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, 1)),
-  upDownArrow: info('Up-down arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, 1)),
-  homePlate: info('Pentagon arrow', 'arrows', a(0.5, 0, 1)),
+  rightArrow: info('Right arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, HEAD_MAX)),
+  leftArrow: info('Left arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, HEAD_MAX)),
+  upArrow: info('Up arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, HEAD_MAX)),
+  downArrow: info('Down arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, HEAD_MAX)),
+  leftRightArrow: info('Left-right arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, HEAD_MAX)),
+  upDownArrow: info('Up-down arrow', 'arrows', a(0.5, 0, 1), a(0.5, 0, HEAD_MAX)),
+  homePlate: info('Pentagon arrow', 'arrows', a(0.5, 0, HEAD_MAX)),
   chevron: info('Chevron', 'arrows'),
 
   star4: info('4-point star', 'stars', a(0.125)),
@@ -128,6 +131,9 @@ export const SHAPE_PRESET_INFO: Readonly<Record<ShapePreset, ShapePresetInfo>> =
 export const SHAPE_PRESETS: readonly ShapePreset[] = SHAPE_CATEGORIES.flatMap((c) =>
   (Object.keys(SHAPE_PRESET_INFO) as ShapePreset[]).filter((p) => SHAPE_PRESET_INFO[p].category === c.id),
 );
+
+/** The presets the picker offers: every preset but the two legacy arrow names, which duplicate `rightArrow` and `leftArrow`. */
+export const PICKER_PRESETS: readonly ShapePreset[] = SHAPE_PRESETS.filter((p) => p !== 'arrowRight' && p !== 'arrowLeft');
 
 export function isShapePreset(shape: string): shape is ShapePreset {
   return Object.prototype.hasOwnProperty.call(SHAPE_PRESET_INFO, shape);

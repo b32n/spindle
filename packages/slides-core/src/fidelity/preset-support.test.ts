@@ -3,6 +3,7 @@ import path from 'node:path';
 import { detectPptxLoss } from '@b32nio/spindle-io/pptx';
 import { PPTX_FIXTURES_DIR } from '../../../../scripts/pptx-fidelity';
 import { readParts } from '../../../../scripts/fidelity-core/ooxml-package';
+import { SUPPORTED_PRESETS } from '../../../io/src/pptx/slide-scan';
 import { SHAPE_PRESETS, shapePrst } from '../scene/shape-presets';
 
 // The preset deck holds every ST_ShapeType value once: the editor's preset names are checked against it, and the
@@ -23,6 +24,12 @@ describe('preset names against the OOXML preset deck', () => {
     expect(deck.size).toBe(187);
     expect(SHAPE_PRESETS.filter((p) => !deck.has(shapePrst(p)))).toEqual([]);
     expect([...LEGACY_NAMES].every((p) => deck.has(shapePrst(p as never)))).toBe(true);
+  });
+
+  it('the detector\'s supported set is exactly the library plus the line geometries', () => {
+    // both spellings of the three legacy names: the editor's own and the OOXML one
+    const expected = new Set<string>([...SHAPE_PRESETS, ...SHAPE_PRESETS.map((p) => shapePrst(p)), 'line', 'straightConnector1']);
+    expect([...SUPPORTED_PRESETS].sort()).toEqual([...expected].sort());
   });
 
   it('the detector reports exactly the presets outside the library as unsupported', async () => {

@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
 import {
+  PICKER_PRESETS,
   SHAPE_CATEGORIES,
   SHAPE_PRESETS,
   SHAPE_PRESET_INFO,
@@ -23,8 +24,8 @@ import { getCollabBlockers } from '../collab/blockers';
 import type { ShapeElement } from './types';
 
 describe('preset table', () => {
-  it('holds about 70 presets, each in a known category, listed once in picker order', () => {
-    expect(SHAPE_PRESETS.length).toBeGreaterThanOrEqual(70);
+  it('holds 76 presets, each in a known category, listed once in picker order', () => {
+    expect(SHAPE_PRESETS.length).toBe(76);
     expect(new Set(SHAPE_PRESETS).size).toBe(SHAPE_PRESETS.length);
     expect(SHAPE_PRESETS.length).toBe(Object.keys(SHAPE_PRESET_INFO).length);
     const cats = new Set(SHAPE_CATEGORIES.map((c) => c.id));
@@ -37,6 +38,20 @@ describe('preset table', () => {
     for (const p of ['rect', 'roundRect', 'ellipse', 'triangle', 'rightTriangle', 'diamond', 'pentagon', 'hexagon', 'octagon', 'star5', 'arrowRight', 'arrowLeft', 'chevron', 'parallelogram', 'trapezoid', 'plus', 'heart', 'cloud']) {
       expect(isShapePreset(p)).toBe(true);
     }
+  });
+
+  it('offers every preset in the picker but the two legacy arrow names', () => {
+    expect(PICKER_PRESETS).toHaveLength(74);
+    expect(SHAPE_PRESETS.filter((p) => !PICKER_PRESETS.includes(p))).toEqual(['arrowRight', 'arrowLeft']);
+    const labels = PICKER_PRESETS.map((p) => SHAPE_PRESET_INFO[p].label);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+
+  it('leaves arrow head guides room for wide boxes (OOXML allows up to w/ss)', () => {
+    for (const p of ['rightArrow', 'leftArrow', 'upArrow', 'downArrow', 'leftRightArrow', 'upDownArrow'] as const) {
+      expect(resolveAdjustments(p, [0.5, 4])[1]).toBe(4);
+    }
+    expect(resolveAdjustments('homePlate', [4])[0]).toBe(4);
   });
 
   it('has sane guide specs: default inside the range, ordered range', () => {
@@ -86,7 +101,7 @@ describe('resolveAdjustments', () => {
     expect(resolveAdjustments('roundRect', [-1])).toEqual([0]);
     expect(resolveAdjustments('roundRect', [NaN])).toEqual([0.15]);
     expect(resolveAdjustments('rightArrow', [0.2])).toEqual([0.2, 0.5]);
-    expect(resolveAdjustments('rightArrow', [0.2, 7, 99])).toEqual([0.2, 1]);
+    expect(resolveAdjustments('rightArrow', [0.2, 700, 99])).toEqual([0.2, 100]);
     expect(resolveAdjustments('wedgeRectCallout', [-5, 5])).toEqual([-1, 2]);
   });
 

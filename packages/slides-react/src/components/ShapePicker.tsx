@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Shapes as ShapesIcon, ChevronDown } from 'lucide-react';
-import { SHAPE_CATEGORIES, SHAPE_PRESETS, SHAPE_PRESET_INFO, type ShapePreset, type NewElementSpec } from '@b32nio/spindle-slides-core';
+import { SHAPE_CATEGORIES, PICKER_PRESETS, SHAPE_PRESET_INFO, type ShapePreset, type NewElementSpec } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { shapeGeom } from './elements/shapes';
 import { useDeck } from '../hooks';
@@ -55,7 +55,7 @@ export function ShapePicker(): React.ReactElement {
         <section key={c.id} aria-label={c.label}>
           <div style={{ font: '600 11px sans-serif', color: '#5b6673', padding: '6px 4px 2px' }}>{c.label}</div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, ${cell}px)`, gap: 6, justifyContent: 'center' }}>
-            {SHAPE_PRESETS.filter((p) => SHAPE_PRESET_INFO[p].category === c.id).map((p) => (
+            {PICKER_PRESETS.filter((p) => SHAPE_PRESET_INFO[p].category === c.id).map((p) => (
               <button
                 key={p}
                 title={SHAPE_PRESET_INFO[p].label}

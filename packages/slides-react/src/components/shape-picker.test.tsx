@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { DeckImpl, SHAPE_CATEGORIES, SHAPE_PRESETS, getBuiltinTheme, unknownShape, type ShapeElement } from '@b32nio/spindle-slides-core';
+import { DeckImpl, SHAPE_CATEGORIES, PICKER_PRESETS, getBuiltinTheme, unknownShape, type ShapeElement } from '@b32nio/spindle-slides-core';
 import { DeckProvider } from '../context/DeckContext';
 
 const addElement = jest.fn(() => ({ id: 'new' }));
@@ -60,8 +60,12 @@ describe('ShapePicker', () => {
     const html = renderToStaticMarkup(popover.props.children);
     for (const c of SHAPE_CATEGORIES) expect(html).toContain(`aria-label="${c.label}"`);
     const buttons = find(popover.props.children, (e) => e.type === 'button');
-    expect(buttons).toHaveLength(SHAPE_PRESETS.length);
+    expect(buttons).toHaveLength(PICKER_PRESETS.length);
     expect(buttons.every((b) => typeof b.props['aria-label'] === 'string' && b.props['aria-label'].length > 2)).toBe(true);
+    const labels = buttons.map((b) => b.props['aria-label']);
+    expect(new Set(labels).size).toBe(labels.length);
+    expect(labels).toContain('Right arrow');
+    expect(labels).not.toContain('Arrow right');
     // a hover highlight on the button
     const style = { background: '' };
     buttons[0].props.onMouseEnter({ currentTarget: { style } });

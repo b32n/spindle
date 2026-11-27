@@ -23,7 +23,7 @@
       "count": 5,
       "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
       "id": "pptx.shapes.unsupportedGeometry",
-      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library of about 75; those are kept under their name and drawn approximately)",
+      "label": "shape(s) with a geometry the editor lacks (custom geometry, or a preset outside its library; those are kept under their name and drawn approximately)",
       "where": [
         "custGeom"
       ]

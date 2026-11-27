@@ -96,7 +96,7 @@ interface ElementBase extends Frame {
   groupId?: string; locked?: boolean; opacity?: number;
   placeholder?: { type: PlaceholderType; idx: number };   // PPTX fidelity, in schema NOW
 }
-// union: TextElement {richText, bodyStyle, fill?, stroke?} | ShapeElement {shape: ShapePreset (~18 presets),
+// union: TextElement {richText, bodyStyle, fill?, stroke?} | ShapeElement {shape: ShapePreset (76 presets),
 // adjustments?, flipH/V, fill, stroke, richText?} | ImageElement {src, naturalW/H, flipH/V} |
 // LineElement {flipH/V (diagonal), stroke, startArrow?, endArrow?}
 

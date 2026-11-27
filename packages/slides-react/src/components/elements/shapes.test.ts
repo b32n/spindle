@@ -33,6 +33,52 @@ function points(d: string): Array<[number, number]> {
   return out;
 }
 
+/**
+ * Points along the whole outline, arcs and curves included (`points` only has the end points). Arcs follow the SVG
+ * endpoint-to-centre conversion, radii scaled up when too small; curves are sampled at 16 steps.
+ */
+function outline(d: string): Array<[number, number]> {
+  const out: Array<[number, number]> = [];
+  let cur: [number, number] = [0, 0];
+  let start: [number, number] = [0, 0];
+  const tokens = d.match(/[MLHVQCAZ]|-?\d+(?:\.\d+)?(?:e-?\d+)?/g) ?? [];
+  for (let i = 0; i < tokens.length; ) {
+    const cmd = tokens[i++];
+    const nums = tokens.slice(i, i + ARGS[cmd]).map(Number);
+    i += ARGS[cmd];
+    const from = cur;
+    if (cmd === 'Z') cur = start;
+    else if (cmd === 'H') cur = [nums[0], from[1]];
+    else if (cmd === 'V') cur = [from[0], nums[0]];
+    else if (cmd === 'A') cur = [nums[5], nums[6]];
+    else cur = [nums[nums.length - 2], nums[nums.length - 1]];
+    if (cmd === 'M') start = cur;
+    if (cmd === 'A') {
+      const [rx0, ry0, , large, sweep] = nums;
+      const [x1, y1] = [(from[0] - cur[0]) / 2, (from[1] - cur[1]) / 2];
+      const lambda = (x1 / rx0) ** 2 + (y1 / ry0) ** 2;
+      const [rx, ry] = lambda > 1 ? [rx0 * Math.sqrt(lambda), ry0 * Math.sqrt(lambda)] : [rx0, ry0];
+      const num = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1;
+      const k = (large === sweep ? -1 : 1) * Math.sqrt(Math.max(0, num / (rx * rx * y1 * y1 + ry * ry * x1 * x1)));
+      const [cx, cy] = [k * ((rx * y1) / ry) + (from[0] + cur[0]) / 2, k * ((-ry * x1) / rx) + (from[1] + cur[1]) / 2];
+      const a0 = Math.atan2((from[1] - cy) / ry, (from[0] - cx) / rx);
+      let da = Math.atan2((cur[1] - cy) / ry, (cur[0] - cx) / rx) - a0;
+      if (sweep && da < 0) da += 2 * Math.PI;
+      if (!sweep && da > 0) da -= 2 * Math.PI;
+      for (let t = 1; t <= 32; t++) out.push([cx + rx * Math.cos(a0 + (da * t) / 32), cy + ry * Math.sin(a0 + (da * t) / 32)]);
+    } else if (cmd === 'C' || cmd === 'Q') {
+      const ctrl: Array<[number, number]> = [from];
+      for (let j = 0; j < nums.length; j += 2) ctrl.push([nums[j], nums[j + 1]]);
+      for (let t = 1; t <= 16; t++) {
+        let layer = ctrl;
+        while (layer.length > 1) layer = layer.slice(1).map((q, j) => [layer[j][0] + (q[0] - layer[j][0]) * (t / 16), layer[j][1] + (q[1] - layer[j][1]) * (t / 16)] as [number, number]);
+        out.push(layer[0]);
+      }
+    } else out.push(cur);
+  }
+  return out;
+}
+
 const path = (g: ShapeGeom): Extract<ShapeGeom, { type: 'path' }> => {
   if (g.type !== 'path') throw new Error('expected a path');
   return g;
@@ -42,7 +88,7 @@ const NEW = SHAPE_PRESETS.filter((p) => !['rect', 'roundRect', 'ellipse', 'trian
 const CALLOUTS = ['wedgeRectCallout', 'wedgeRoundRectCallout', 'wedgeEllipseCallout'];
 
 describe('shapeGeom: the preset library', () => {
-  it('draws every preset as a non-empty, finite path inside its box (tails excepted)', () => {
+  it('draws every preset as a non-empty, finite path inside its box (arcs and curves sampled, tails excepted)', () => {
     for (const [w, h] of [[200, 100], [100, 200], [120, 120], [1, 1]] as const) {
       for (const p of SHAPE_PRESETS) {
         const g = shapeGeom(p, w, h);
@@ -53,7 +99,7 @@ describe('shapeGeom: the preset library', () => {
           expect([g.cx, g.cy, g.rx, g.ry].every(Number.isFinite)).toBe(true);
           continue;
         }
-        for (const [x, y] of points(d)) {
+        for (const [x, y] of [...outline(d), ...(g.strokeD ? outline(g.strokeD) : [])]) {
           const slack = CALLOUTS.includes(p) ? Math.max(w, h) : 0.51;
           expect({ p, w, h, ok: x >= -slack && x <= w + slack && y >= -slack && y <= h + slack }).toEqual({ p, w, h, ok: true });
         }
@@ -61,9 +107,15 @@ describe('shapeGeom: the preset library', () => {
     }
   });
 
-  it('adds about 58 presets to the original 18', () => {
-    expect(NEW.length).toBeGreaterThanOrEqual(50);
+  it('adds 58 presets to the original 18', () => {
+    expect(NEW.length).toBe(58);
     for (const p of NEW) expect(isShapePreset(p)).toBe(true);
+  });
+
+  it('lets a wide arrow keep a head longer than the box height', () => {
+    // head length is ss * adj2 = 100 * 3 on a 400 x 100 box, so the neck sits at x = 100
+    const xs = points(path(shapeGeom('rightArrow', 400, 100, [0.5, 3])).d).map((p) => p[0]);
+    expect(xs).toContain(100);
   });
 
   it('keeps the original 18 geometry byte for byte', () => {

@@ -180,7 +180,7 @@ export interface ElementBase extends Frame {
 }
 
 /**
- * The built-in shape presets (K5): the original 18 plus about 58 more, named after the OOXML `prst` values so an
+ * The built-in shape presets (K5): the original 18 plus 58 more (76 in all), named after the OOXML `prst` values so an
  * imported preset keeps its name. Geometry lives in `slides-react` (`shapeGeom`); `shape-presets.ts` holds the metadata.
  */
 export type ShapePreset =
