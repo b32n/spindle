@@ -13,6 +13,7 @@ import { CommentStore } from './comments';
 import { getStableCellKey, parseStableCellKey } from './utils/cell-key';
 import { generateId } from './utils/id';
 import { getRangeCells } from './utils/range';
+import type { StructuralEdit } from './formula-parser/ref-shift';
 import { coveredBeyondAnchor, laterOverlaps, normalized, overlapsAny } from './merge-regions';
 
 /** Whether two normalized numeric ranges (inclusive bounds) overlap. */
@@ -48,10 +49,10 @@ export class SheetImpl implements Sheet {
   // width, hide/show, freeze, filter, sort). The collab binding wires
   // this on attachCollab to mirror the sheet's metadata + order maps
   // into the Y.Doc. No-op when collab is detached.
-  protected structureChangeListener: ((affectsFormulas: boolean) => void) | undefined;
+  protected structureChangeListener: ((affectsFormulas: boolean, edit?: StructuralEdit) => void) | undefined;
 
   /** @internal Used by the workbook (recalc + collab mirror). */
-  __setStructureChangeListener(listener: ((affectsFormulas: boolean) => void) | undefined): void {
+  __setStructureChangeListener(listener: ((affectsFormulas: boolean, edit?: StructuralEdit) => void) | undefined): void {
     this.structureChangeListener = listener;
   }
 
@@ -60,9 +61,10 @@ export class SheetImpl implements Sheet {
    * shift cell references (insert/delete row/col) — cosmetic changes like column
    * width, row height, hide, and freeze pass false so they don't trigger a
    * full-workbook recalc (which would fire on every mousemove of a resize drag).
+   * An insert/delete also passes the `edit`, for the text of formulas that hold no stable references.
    */
-  protected notifyStructureChange(affectsFormulas = false): void {
-    this.structureChangeListener?.(affectsFormulas);
+  protected notifyStructureChange(affectsFormulas = false, edit?: StructuralEdit): void {
+    this.structureChangeListener?.(affectsFormulas, edit);
   }
 
   constructor(id: string, name: string, config: Partial<SheetConfig> = {}) {
@@ -262,27 +264,27 @@ export class SheetImpl implements Sheet {
   insertRows(startRow: number, count: number): void {
     this.shiftOrder(this.rowOrder, this.rowIdToIndex, startRow, count);
     this.rowCount += count;
-    this.notifyStructureChange(true);
+    this.notifyStructureChange(true, { axis: 'row', kind: 'insert', start: startRow, count });
   }
 
   deleteRows(startRow: number, count: number): void {
     this.removeOrderRange(this.rowOrder, this.rowIdToIndex, startRow, count, /*isRow*/ true);
     this.shiftOrder(this.rowOrder, this.rowIdToIndex, startRow + count, -count, startRow);
     this.rowCount = Math.max(0, this.rowCount - count);
-    this.notifyStructureChange(true);
+    this.notifyStructureChange(true, { axis: 'row', kind: 'delete', start: startRow, count });
   }
 
   insertCols(startCol: number, count: number): void {
     this.shiftOrder(this.colOrder, this.colIdToIndex, startCol, count);
     this.colCount += count;
-    this.notifyStructureChange(true);
+    this.notifyStructureChange(true, { axis: 'col', kind: 'insert', start: startCol, count });
   }
 
   deleteCols(startCol: number, count: number): void {
     this.removeOrderRange(this.colOrder, this.colIdToIndex, startCol, count, /*isRow*/ false);
     this.shiftOrder(this.colOrder, this.colIdToIndex, startCol + count, -count, startCol);
     this.colCount = Math.max(0, this.colCount - count);
-    this.notifyStructureChange(true);
+    this.notifyStructureChange(true, { axis: 'col', kind: 'delete', start: startCol, count });
   }
 
   /** Shift every order entry with index >= threshold by `delta`. */

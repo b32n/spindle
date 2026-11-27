@@ -77,11 +77,15 @@ is kept by the client that imported the file; the cached-only cells below are th
 **Cached-only formulas.** A formula the engine cannot evaluate is never shown as `#NAME?`: the cell is marked `cachedOnly`, shows the result the
 file saved, keeps the file's formula text exactly (prefixes included, so the formula bar shows what Excel wrote) and is written back with both
 unchanged. It is reported as `xlsx.formulas.cachedOnly`. **The value can be out of date**: a cached-only cell does not follow the cells it
-refers to, and a cell that depends on it reads its saved value. **Its references are not adjusted either**: the cell keeps its saved value and
-its original formula text unchanged, so inserting or deleting rows or columns (and sorting or moving cells) does not shift the cell references in
-that text, and the exported formula can point at other cells than before. Excel recalculates the formula when the file is reopened, possibly to a
-different result. Textual reference shifting is a follow-up (`documentation/sheets/TODO.md`). The formula bar says so ("Saved value", with the same caveat as tooltip and
-accessible name). Editing the cell (a value or a formula) removes the mark. Copying such a cell to another place copies its text, which the
+refers to, and a cell that depends on it reads its saved value. **Its references do follow structural edits**: inserting or deleting rows or columns rewrites the cell
+references in its text (`A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`, `Sheet2!A1`, `'My Sheet'!A1:B2`) with the outcome of a normal formula's, and only those
+bytes change (whitespace, case, string literals, function names, structured references and text the grammar rejects are copied as written). A
+reference into deleted rows or columns becomes `#REF!` (a range with a deleted corner becomes `#REF!` as a whole, as for a normal formula), a
+reference to another sheet only moves when that sheet is edited, and 3D references, references to sheets that do not exist and external workbook
+references stay as they are (as for a normal formula). Sorting leaves the text as it is, and the engine has no move operation: copying or filling
+a cell rebases a formula it can parse and drops the cached-only mark (below). Undo restores the original text. The saved value stays, so Excel
+recalculates the formula when the file is reopened, possibly to a different result. The formula bar says that the value is a saved one ("Saved
+value", with the caveat as tooltip and accessible name). Editing the cell (a value or a formula) removes the mark. Copying such a cell to another place copies its text, which the
 engine cannot evaluate: the copy shows `#NAME?` until the formula is changed. Defined names are not imported yet, so a formula that uses one is
 cached-only too.
 

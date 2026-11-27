@@ -124,26 +124,25 @@ describe('cached-only formulas (the engine cannot evaluate them)', () => {
     expect(item).toMatchObject({ count: 3, state: 'kept' });
     expect(item?.effect).toMatch(/out of date/);
     expect(item?.effect).toMatch(/written back unchanged/);
-    expect(item?.effect).toMatch(/references in the text are not adjusted when rows or columns are inserted or deleted/);
+    expect(item?.effect).toMatch(/references in the text follow inserted or deleted rows and columns/);
     const unsupported = loss.items.find((i) => i.id === 'xlsx.formulas.unsupported');
     expect(unsupported?.effect).toMatch(/^kept: shown from the value saved in the file/);
   });
 
-  // Known limitation (documentation/sheets/TODO.md, "cached-only reference shifting"): a cached-only cell keeps no parsed
-  // formula, so its text is not adjusted by structural edits. It keeps the saved value and the original text, and Excel
-  // recalculates it on reopen, possibly to a different result.
-  it('does NOT adjust the cell references in a cached-only formula when rows or columns are inserted or deleted', async () => {
+  // S4b: a cached-only cell keeps no parsed formula, so structural edits rewrite the references in its text (shiftFormulaRefs).
+  // It keeps the saved value; Excel recalculates it on reopen.
+  it('adjusts the cell references in a cached-only formula when rows or columns are inserted or deleted', async () => {
     const { wb } = await opened();
     wb.getSheet().insertRows(0, 1);
-    // the cell moved down one row; its text still reads A1 and A2, which now hold other cells
-    expect(cellAt(wb, 1, 1)).toMatchObject({ formula: `=${LET}`, value: 99, cachedOnly: true });
-    expect(cellAt(wb, 2, 1)).toMatchObject({ formula: '=A1+++', value: 7, cachedOnly: true });
+    // the cell moved down one row and its text follows the cells it read
+    expect(cellAt(wb, 1, 1)).toMatchObject({ formula: '=_xlfn.LET(_xlpm.x,A2,_xlpm.y,A3,_xlpm.x+_xlpm.y)', value: 99, cachedOnly: true });
+    expect(cellAt(wb, 2, 1)).toMatchObject({ formula: '=A2+++', value: 7, cachedOnly: true });
     expect(cellAt(wb, 1, 0)?.value).toBe(2);
     expect(cellAt(wb, 0, 0)).toBeUndefined();
     wb.getSheet().deleteRows(0, 1);
     expect(cellAt(wb, 0, 1)?.formula).toBe(`=${LET}`);
     wb.getSheet().insertCols(0, 1);
-    expect(cellAt(wb, 0, 2)).toMatchObject({ formula: `=${LET}`, value: 99 });
+    expect(cellAt(wb, 0, 2)).toMatchObject({ formula: `=${LET.replace('x,A1', 'x,B1').replace('y,A2', 'y,B2')}`, value: 99 });
   });
 
   it('keep a saved error result as an error value (t="e") on export, and open the same again', async () => {

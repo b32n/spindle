@@ -18,7 +18,7 @@ interface FormulaBarProps {
 
 /** What the formula-bar indicator of a cached-only cell says (also its tooltip and accessible name). */
 export const CACHED_ONLY_NOTICE =
-  "Saved value: the editor cannot calculate this formula, so it shows the value saved in the file. The value is not updated when the cells it uses change, and the cell references in the formula are not adjusted when rows or columns are inserted or deleted. The formula text is kept and saved unchanged; Excel recalculates it when the file is reopened, possibly to a different result.";
+  "Saved value: the editor cannot calculate this formula, so it shows the value saved in the file. The value is not updated when the cells it uses change. The formula text is kept and saved unchanged; Excel recalculates it when the file is reopened, possibly to a different result.";
 
 /**
  * The text shown in the formula bar for a cell. Date-formatted cells render

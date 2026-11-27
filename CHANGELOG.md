@@ -492,6 +492,16 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **References inside cached-only formulas follow inserted and deleted rows and columns (S4b).** A formula the engine cannot evaluate
+  (`cachedOnly`) keeps no parsed form, so inserting or deleting rows or columns used to leave the cell references in its text where they were.
+  They are now rewritten in the text, using the formula tokenizer, with the outcome of a normal formula's: `A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`,
+  `Sheet2!A1` and `'My Sheet'!A1` move with their cells, a reference into deleted rows or columns (or a range with a deleted corner) becomes
+  `#REF!`, a reference to another sheet only changes when that sheet is edited, and everything else in the text (whitespace, case, string
+  literals, function names, structured references, fragments the grammar rejects) is kept byte for byte. 3D references, references to sheets
+  that do not exist and external workbook references are left as they are, as for a normal formula. Undo restores the text, and with
+  collaboration the shifted text is the cell's new value. The saved value stays, and the note's "does not recalculate when the cells it uses
+  change" caveat stays. New exports of `@b32nio/spindle-sheets-core`: `shiftFormulaRefs`, `shiftIndex` and `StructuralEdit`. The
+  `xlsx.formulas.cachedOnly` effect text and `documentation/import-loss.md` changed accordingly.
 - **Sheets collaboration gate.** Sheets rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-sheets-core`: `getCollabBlockers(workbook)` (empty for now) and
@@ -1011,9 +1021,9 @@ lockstep.
   written back as the calls (`fromFileFormula`, `toFileFormula` and `FUTURE_FUNCTIONS` are new exports of `@b32nio/spindle-io/xlsx`).
   A formula the engine cannot evaluate (a function it lacks, text it cannot parse, a table, defined-name or external reference) is
   never shown as `#NAME?`: the cell keeps the file's formula text and the saved result (`cachedOnly`), shows a small "Saved value" note
-  in the formula bar (the cell keeps its saved value and its original formula text unchanged: the value does not follow the cells it refers to and the
-  references in the text are not adjusted by inserting or deleting rows or columns; Excel recalculates it when the file is reopened,
-  possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
+  in the formula bar (the cell keeps its saved value and its formula text: the value does not follow the cells it refers to; Excel recalculates it
+  when the file is reopened, possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so; the
+  references in the text follow inserted and deleted rows and columns since S4b below), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
   spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
   A legacy (CSE) array formula whose engine result differs from the results the file saved (a blank source cell reads 0 in the result, as in Excel, so it is the same as a saved 0 and only that; numbers are held to a relative 1e-9) becomes cached-only and keeps the file's values, counted in
   `xlsx.formulas.cachedOnly`; with `recalculateOnLoad` the formulas that read it are recalculated from those values. A dynamic array is not

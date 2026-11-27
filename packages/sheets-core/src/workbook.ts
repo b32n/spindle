@@ -35,6 +35,7 @@ import {
   StableRefDeletedError,
   WHOLE_AXIS_ID,
 } from './formula-parser/stable-ast';
+import { shiftFormulaRefs, type StructuralEdit } from './formula-parser/ref-shift';
 
 /** A whole-column/row range spanning more rows or columns than this is trimmed to the used range on its bounded axis too. */
 const WHOLE_AXIS_TRIM_SPAN = 1024;
@@ -2032,8 +2033,8 @@ export class WorkbookImpl implements Workbook {
    * sheets) and addSheet (for new ones).
    */
   private attachStructureListenerIfNeeded(sheet: SheetImpl): void {
-    sheet.__setStructureChangeListener((affectsFormulas) =>
-      this.onStructureChange(sheet.id, affectsFormulas),
+    sheet.__setStructureChangeListener((affectsFormulas, edit) =>
+      this.onStructureChange(sheet.id, affectsFormulas, edit),
     );
   }
 
@@ -2047,12 +2048,38 @@ export class WorkbookImpl implements Workbook {
    * the structure to collab when attached. All skipped during a remote apply (the
    * remote already carries recomputed values, and mirroring would echo it back).
    */
-  private onStructureChange(sheetId: string, affectsFormulas: boolean): void {
+  private onStructureChange(sheetId: string, affectsFormulas: boolean, edit?: StructuralEdit): void {
     if (this.isApplyingRemoteChange) return;
+    const shifted = edit && edit.count > 0 ? this.shiftCachedOnlyFormulas(sheetId, edit) : [];
     if (affectsFormulas) this.recalculateAllFormulas();
     if (this.collabHandle) {
-      this.mirrorSheetStructure(sheetId);
+      const ydoc = this.collabHandle.ydoc;
+      ydoc.transact(() => {
+        this.mirrorSheetStructure(sheetId);
+        for (const { sheetId: id, row, col } of shifted) this.mirrorCellWrite(id, row, col);
+      });
     }
+  }
+
+  /**
+   * A cached-only formula keeps no stable references, so an insert/delete of rows or columns rewrites the references in its text
+   * instead (see `shiftFormulaRefs`: the outcome of a normal formula's stable-id path). The cell's value is the file's cached one and
+   * stays. Runs on every sheet, since a formula may point at the edited one. Returns the cells whose text changed.
+   */
+  private shiftCachedOnlyFormulas(editedSheetId: string, edit: StructuralEdit): Array<{ sheetId: string; row: number; col: number }> {
+    const editedName = this.sheets.get(editedSheetId)?.name;
+    const isEditedSheet = (name: string): boolean => name === editedName;
+    const changed: Array<{ sheetId: string; row: number; col: number }> = [];
+    for (const [sheetId, sheet] of this.sheets) {
+      for (const [row, col, cell] of (sheet as SheetImpl).entries()) {
+        if (!cell.cachedOnly || !cell.formula) continue;
+        const formula = shiftFormulaRefs(cell.formula, edit, sheetId === editedSheetId, isEditedSheet);
+        if (formula === cell.formula) continue;
+        (sheet as SheetImpl).setCell(row, col, { formula });
+        changed.push({ sheetId, row, col });
+      }
+    }
+    return changed;
   }
 
   /**

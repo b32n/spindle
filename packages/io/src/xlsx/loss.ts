@@ -423,7 +423,7 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
       label: 'formula(s) the editor cannot calculate (kept as saved)',
       count: t.cachedOnly.total,
       effect:
-        "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)",
+        "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) while the cell references in the text follow inserted or deleted rows and columns (Excel recalculates the formula when the file is reopened, possibly to a different result)",
       where: t.cachedOnly.where.slice(0, MAX_WHERE),
       state: 'kept',
     });

@@ -547,7 +547,7 @@ function toSheetData(
 
 /** The effect the detector words for `xlsx.formulas.cachedOnly` (the same text, for the formulas the import keeps as saved by itself: a test holds the two together). */
 const CACHED_ONLY_EFFECT =
-  'kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)';
+  'kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) while the cell references in the text follow inserted or deleted rows and columns (Excel recalculates the formula when the file is reopened, possibly to a different result)';
 
 /** A legacy (CSE) array formula as the file had it: its text and the results it saved over its range (the anchor's value, and the cells after it). */
 interface LegacyArray {
