@@ -12,6 +12,8 @@
 // project rule).
 
 import { EventEmitter, createAttachAbortError } from '@b32nio/spindle-shared';
+import { isOpaqueHash, type OpaquePart } from '@b32nio/spindle-shared/opaque';
+import { pruneTiming } from './opaque/timing';
 import { indexBetween, indexesBetween, sortByIndex } from './scene/fractional-index';
 import { buildPlaceholderElement } from './theme/materialize';
 import { scaleElementPatch, scaleLayout } from './slide-size';
@@ -59,6 +61,13 @@ import type {
   DeckEventType,
 } from './types';
 
+/** Parts by hash; an entry that is not a well-formed part (hash, content type, bytes) is skipped. */
+function toPartMap(parts: readonly OpaquePart[] | undefined): Map<string, OpaquePart> {
+  const map = new Map<string, OpaquePart>();
+  for (const p of parts ?? []) if (isOpaqueHash(p?.hash) && typeof p.contentType === 'string' && p.bytes instanceof Uint8Array) map.set(p.hash, p);
+  return map;
+}
+
 /** A request to add a new element to a slide; the engine assigns id + z-index. */
 export type NewElementSpec =
   | ({ type: 'text' } & Omit<TextElementInput, 'containerId' | 'index'>)
@@ -89,6 +98,8 @@ export class DeckImpl {
 
   private slides: Map<string, Slide> = new Map();
   private elements: Map<string, SlideElement> = new Map();
+  /** The parts opaque elements refer to (plan K11), by hash. Immutable: never edited, only replaced as a whole. */
+  private opaqueParts: Map<string, OpaquePart> = new Map();
 
   private selection: DeckSelection = { elementIds: [] };
   private activeSlideId = '';
@@ -603,6 +614,7 @@ export class DeckImpl {
       this.emit('elementDelete', { slideId: el.containerId, elementId: id });
       this.detachConnectors(new Set([id]));
       this.relinkOrphanedGroups(tree);
+      this.pruneTimingOf([el]);
     });
   }
 
@@ -612,16 +624,39 @@ export class DeckImpl {
     const tree = this.groupTree();
     this.events.batch(() => {
       const deleted = new Set<string>();
+      const removed: SlideElement[] = [];
       for (const id of ids) {
         const el = this.elements.get(id);
         if (!el) continue;
         this.elements.delete(id);
         this.emit('elementDelete', { slideId: el.containerId, elementId: id });
         deleted.add(id);
+        removed.push(el);
       }
       this.detachConnectors(deleted);
       this.relinkOrphanedGroups(tree);
+      this.pruneTimingOf(removed);
     });
+  }
+
+  /**
+   * Drop the references of deleted elements from their slides' timing XML (`Slide.opaque.timing` names shapes by `pptxId`):
+   * the effects that animate them go, and with the last effect the whole timing. Runs in the delete's own batch and history entry.
+   */
+  private pruneTimingOf(removed: SlideElement[]): void {
+    for (const slideId of new Set(removed.map((e) => e.containerId))) {
+      const slide = this.slides.get(slideId);
+      const timing = slide?.opaque?.timing;
+      if (!slide || timing === undefined) continue;
+      const alive = new Set(this.getElementsForSlide(slideId).map((e) => e.pptxId));
+      const ids = new Set(removed.flatMap((e) => (e.containerId === slideId && e.pptxId !== undefined && !alive.has(e.pptxId) ? [e.pptxId] : [])));
+      const next = pruneTiming(timing, ids);
+      if (next === timing) continue;
+      const { timing: _t, ...rest } = slide.opaque as NonNullable<Slide['opaque']>;
+      const { opaque: _o, ...bare } = slide;
+      this.slides.set(slideId, { ...bare, ...(next !== undefined || Object.keys(rest).length > 0 ? { opaque: next !== undefined ? { ...rest, timing: next } : rest } : {}) });
+      this.emit('slideChange', { slideId, keys: ['opaque'] });
+    }
   }
 
   /**
@@ -660,6 +695,8 @@ export class DeckImpl {
     }
     delete copy.groupId;
     delete copy.parentGroupId;
+    // the copy is a new shape: the PPTX id (and the timing that names it) belongs to the original
+    delete copy.pptxId;
     this.elements.set(copy.id, copy);
     this.emit('elementAdd', { slideId: el.containerId, elementId: copy.id });
     return copy;
@@ -687,6 +724,7 @@ export class DeckImpl {
         y: el.y + 16,
       } as SlideElement;
       this.remapGroupFields(copy, groupMap);
+      delete copy.pptxId;
       if (copy.type === 'line') {
         const l = copy as LineElement;
         if (l.startPoint) l.startPoint = { x: l.startPoint.x + 16, y: l.startPoint.y + 16 };
@@ -1194,6 +1232,7 @@ export class DeckImpl {
       for (const el of elements) this.elements.set(el.id, el);
     }
     this.comments.loadJSON(data.threads);
+    this.opaqueParts = toPartMap(data.opaqueParts);
     const first = this.getSlideIds()[0] ?? '';
     if (!this.slides.has(this.activeSlideId)) this.activeSlideId = first;
     this.selection = { slideId: this.activeSlideId, elementIds: [] };
@@ -1201,6 +1240,12 @@ export class DeckImpl {
     this.emit('themeChange', { theme: this.theme });
     this.emit('activeSlideChange', { slideId: this.activeSlideId });
     this.emit('selectionChange', { selection: this.getSelection() });
+  }
+
+  /** A peer added parts to the room's opaque store (parts are only ever added): take them, then tell views that draw from them. */
+  _applyRemoteOpaqueParts(parts: OpaquePart[]): void {
+    this.opaqueParts = toPartMap([...this.opaqueParts.values(), ...parts]);
+    this.emit('deckChange', { keys: ['opaqueParts'] });
   }
 
   _applyRemoteMeta(meta: { title?: string; slideSize?: { w: number; h: number }; theme?: ThemeData; layouts?: LayoutData[] }): void {
@@ -1227,8 +1272,20 @@ export class DeckImpl {
       layouts: this.layouts.map((l) => structuredClone(l)),
       slides,
       threads: this.comments.toJSON().length ? this.comments.toJSON() : undefined,
+      // the parts are immutable and shared, not copied
+      opaqueParts: this.opaqueParts.size > 0 ? this.getOpaqueParts() : undefined,
       selection: this.getSelection(),
     };
+  }
+
+  /** The parts the deck's opaque elements refer to (shared, read-only). */
+  getOpaqueParts(): OpaquePart[] {
+    return [...this.opaqueParts.values()];
+  }
+
+  /** The stored part with this hash (see `OpaqueElement.partRefs`), or `undefined`. Shared: do not mutate its bytes. */
+  getOpaquePart(hash: string): OpaquePart | undefined {
+    return this.opaqueParts.get(hash);
   }
 
   setData(data: DeckData): void {
@@ -1250,6 +1307,7 @@ export class DeckImpl {
       }
     }
     this.comments.loadJSON(normalized.threads);
+    this.opaqueParts = toPartMap(normalized.opaqueParts);
 
     this.history.clear();
 

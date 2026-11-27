@@ -7,6 +7,7 @@ import { generateId } from '../utils/id';
 import { emptyRichText } from '../text/model';
 import { normalizeCrop } from './crop';
 import type {
+  OpaqueElement,
   Frame,
   Fill,
   Stroke,
@@ -39,6 +40,7 @@ export interface BaseElementInput extends Partial<Frame> {
   locked?: boolean;
   opacity?: number;
   placeholder?: PlaceholderMeta;
+  pptxId?: string;
 }
 
 const DEFAULT_FRAME: Record<ElementType, Frame> = {
@@ -47,6 +49,7 @@ const DEFAULT_FRAME: Record<ElementType, Frame> = {
   image: { x: 100, y: 100, w: 320, h: 240, rotation: 0 },
   line: { x: 100, y: 100, w: 300, h: 0, rotation: 0 },
   table: { x: 120, y: 160, w: 720, h: 300, rotation: 0 },
+  opaque: { x: 100, y: 100, w: 320, h: 240, rotation: 0 },
 };
 
 const DEFAULT_BODY_STYLE: BodyStyle = { vAlign: 'top', padding: 8, wrap: true };
@@ -68,6 +71,7 @@ function base(input: BaseElementInput, type: ElementType): ElementBase {
   if (input.locked !== undefined) el.locked = input.locked;
   if (input.opacity !== undefined) el.opacity = input.opacity;
   if (input.placeholder !== undefined) el.placeholder = input.placeholder;
+  if (input.pptxId !== undefined) el.pptxId = input.pptxId;
   return el;
 }
 
@@ -217,4 +221,23 @@ export function createTableElement(input: TableElementInput): TableElement {
 /** The default frame for a freshly-inserted element of a given type. */
 export function defaultFrameFor(type: ElementType): Frame {
   return { ...DEFAULT_FRAME[type] };
+}
+
+export interface OpaqueElementInput extends BaseElementInput {
+  kind: OpaqueElement['kind'];
+  partRefs: OpaqueElement['partRefs'];
+  alt?: string;
+  title?: string;
+  poster?: string;
+  props?: Record<string, string>;
+}
+
+/** An element standing for imported content the editor keeps but cannot edit or draw (a chart, SmartArt, an OLE object, a clip, ink). */
+export function createOpaqueElement(input: OpaqueElementInput): OpaqueElement {
+  const el: OpaqueElement = { ...base(input, 'opaque'), type: 'opaque', kind: input.kind, partRefs: input.partRefs.map((r) => ({ ...r })) };
+  if (input.alt) el.alt = input.alt;
+  if (input.title) el.title = input.title;
+  if (input.poster) el.poster = input.poster;
+  if (input.props && Object.keys(input.props).length > 0) el.props = { ...input.props };
+  return el;
 }

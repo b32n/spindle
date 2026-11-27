@@ -1,0 +1,137 @@
+// Pruning of a slide's timing XML (`Slide.opaque.timing`, plan K11). The timing tree names shapes by their PPTX id (`spTgt
+// spid`, and the build list `bldP spid` ...): deleting a shape must remove the effects that animate it, or the file would
+// point at a shape that is not there (PowerPoint reports such a file as damaged). The XML is not modelled otherwise, so it is
+// edited as a small tree of tags and text that serialises back to exactly what it was where nothing is removed.
+
+/** Comments, CDATA, processing instructions and DOCTYPE are text to this tree; a tag is a name and its attribute text (quotes may hold `>`). */
+const TOKEN = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<![^>]*>|<(\/?)([^\s/>]+)((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
+const SPID = /\sspid\s*=\s*(?:"([^"]*)"|'([^']*)')/;
+const PRESET_CLASS = /\spresetClass\s*=/;
+
+interface Tag {
+  tag: string;
+  local: string;
+  open: string;
+  close: string;
+  children: Array<Tag | string>;
+  parent?: Tag;
+}
+
+const localName = (qname: string): string => qname.slice(qname.indexOf(':') + 1);
+const isTag = (n: Tag | string): n is Tag => typeof n !== 'string';
+
+/** The tree of an XML text, or `undefined` when its tags do not nest (the text is then left alone). */
+function parse(xml: string): Tag | undefined {
+  const root: Tag = { tag: '', local: '', open: '', close: '', children: [] };
+  let at = root;
+  let last = 0;
+  for (const m of xml.matchAll(TOKEN)) {
+    const [whole, closing, qname, attrs] = m;
+    if (qname === undefined) continue;
+    if (m.index > last) at.children.push(xml.slice(last, m.index));
+    last = m.index + whole.length;
+    if (closing) {
+      if (at.tag !== qname) return undefined;
+      at.close = whole;
+      at = at.parent as Tag;
+    } else if (attrs.endsWith('/')) at.children.push({ tag: qname, local: localName(qname), open: whole, close: '', children: [], parent: at });
+    else {
+      const t: Tag = { tag: qname, local: localName(qname), open: whole, close: '', children: [], parent: at };
+      at.children.push(t);
+      at = t;
+    }
+  }
+  if (at !== root) return undefined;
+  if (last < xml.length) root.children.push(xml.slice(last));
+  return root;
+}
+
+const serialize = (t: Tag): string => t.open + t.children.map((c) => (isTag(c) ? serialize(c) : c)).join('') + t.close;
+
+const spidOf = (t: Tag): string | undefined => {
+  const m = SPID.exec(t.open);
+  return m ? (m[1] ?? m[2]) : undefined;
+};
+
+const BUILD = new Set(['bldP', 'bldGraphic', 'bldDgm', 'bldOleChart']);
+const BEHAVIOR = new Set(['set', 'anim', 'animEffect', 'animMotion', 'animClr', 'animScale', 'animRot', 'cmd', 'audio', 'video']);
+const CONTAINER = new Set(['par', 'seq', 'excl']);
+
+const elementChildren = (t: Tag): Tag[] => t.children.filter(isTag);
+const child = (t: Tag, local: string): Tag | undefined => elementChildren(t).find((c) => c.local === local);
+
+/** Every tag of the tree, parents before children. */
+function* walk(t: Tag): Generator<Tag> {
+  for (const c of elementChildren(t)) {
+    yield c;
+    yield* walk(c);
+  }
+}
+
+const ancestors = function* (t: Tag): Generator<Tag> {
+  for (let a = t.parent; a?.parent; a = a.parent) yield a;
+};
+
+/** The tag to remove for a reference to a deleted shape: its build entry, or the effect (or interactive sequence, or behaviour) the reference belongs to. */
+function doomed(ref: Tag): Tag | undefined {
+  if (BUILD.has(ref.local)) return ref;
+  let inCondition = false;
+  let behavior: Tag | undefined;
+  for (const a of ancestors(ref)) {
+    if (a.local === 'cond') inCondition = true;
+    else if (inCondition && CONTAINER.has(a.local)) return a;
+    else if (a.local === 'par' && PRESET_CLASS.test(child(a, 'cTn')?.open ?? '')) return a;
+    else if (!behavior && BEHAVIOR.has(a.local)) behavior = a;
+  }
+  return behavior;
+}
+
+const detach = (t: Tag): void => {
+  (t.parent as Tag).children = (t.parent as Tag).children.filter((c) => c !== t);
+};
+
+/** The shape ids (`pptxId`s) a timing XML refers to. */
+export function timingTargets(xml: string): Set<string> {
+  const out = new Set<string>();
+  const root = parse(xml);
+  if (root)
+    for (const t of walk(root)) {
+      const id = t.local === 'spTgt' || BUILD.has(t.local) ? spidOf(t) : undefined;
+      if (id !== undefined) out.add(id);
+    }
+  return out;
+}
+
+/**
+ * Remove what refers to the shapes `removed` (their `pptxId`s) from a timing XML: the effects that animate them, interactive
+ * sequences they trigger, their build entries, and every container (and finally the whole timing) that is left empty by it.
+ * Returns the pruned XML (the text itself, untouched, when nothing refers to a removed shape) or `undefined` when no animation
+ * remains. XML that does not parse is returned as it is.
+ */
+export function pruneTiming(xml: string, removed: ReadonlySet<string>): string | undefined {
+  const root = parse(xml);
+  if (!root) return xml;
+  const hits = [...walk(root)].filter((t) => (t.local === 'spTgt' || BUILD.has(t.local)) && removed.has(spidOf(t) ?? ''));
+  if (hits.length === 0) return xml;
+  const gone = new Set<Tag>();
+  for (const ref of hits) {
+    const d = doomed(ref);
+    if (d) gone.add(d);
+  }
+  if (gone.size === 0) return xml;
+  const touched = new Set<Tag>();
+  for (const d of gone) {
+    for (const a of ancestors(d)) touched.add(a);
+    detach(d);
+  }
+  // containers whose child list the removal emptied go too, innermost first (a removed container touches its own parents, so the emptiness cascades)
+  const all = [...walk(root)].reverse();
+  for (const t of all) {
+    if (!touched.has(t) || t.parent === undefined) continue;
+    const list = CONTAINER.has(t.local) ? child(child(t, 'cTn') ?? t, 'childTnLst') : t.local === 'bldLst' || t.local === 'tnLst' ? t : undefined;
+    if (list && elementChildren(list).length === 0) detach(t);
+  }
+  const timing = elementChildren(root)[0];
+  const remaining = timing && child(timing, 'tnLst');
+  return remaining && elementChildren(remaining).length > 0 ? serialize(root) : undefined;
+}

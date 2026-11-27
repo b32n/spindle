@@ -2,6 +2,7 @@
 // and the semantic event union.
 
 import type { CommentThread } from '@b32nio/spindle-shared';
+import type { OpaquePart } from '@b32nio/spindle-shared/opaque';
 import type { Fill, SlideElement } from './scene/types';
 import type { RichTextDoc } from './text/model';
 import type { ThemeData, LayoutData } from './theme/types';
@@ -19,6 +20,19 @@ export interface Slide {
   notes?: RichTextDoc;
   /** Skipped by present mode and drawn dimmed in the filmstrip (PPTX `show="0"`). */
   hidden?: boolean;
+  /** The transition and animation XML of an imported slide, kept as written (see `SlideOpaque`). */
+  opaque?: SlideOpaque;
+}
+
+/**
+ * Slide-level PPTX XML the editor does not model (plan K11), as self-contained fragments: `transition` is the
+ * `p:transition` element (or the `mc:AlternateContent` wrapping a newer one with its fallback), `timing` the `p:timing`
+ * element (animations, media playback). `timing` names shapes by `pptxId` (`spTgt spid`): when an element is deleted its
+ * references are pruned (`pruneTiming`), so the XML never points at a shape that is gone.
+ */
+export interface SlideOpaque {
+  transition?: string;
+  timing?: string;
 }
 
 /** A slide plus its elements — the nested form used by getData/setData. */
@@ -53,6 +67,8 @@ export interface DeckData {
   layouts?: LayoutData[];
   slides: SlideData[];
   threads?: SlidesCommentThread[];
+  /** The parts the opaque elements refer to (plan K11), content-addressed: kept byte for byte, one entry per distinct content. */
+  opaqueParts?: OpaquePart[];
   /** Optional local selection snapshot (round-trips but is not collab state). */
   selection?: DeckSelection;
 }

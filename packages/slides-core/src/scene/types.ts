@@ -180,6 +180,12 @@ export interface ElementBase extends Frame {
   opacity?: number;
   /** Present when this element fills a layout placeholder. */
   placeholder?: PlaceholderMeta;
+  /**
+   * The id the element had in the imported PPTX (`p:cNvPr/@id`), kept so the slide's timing XML (`Slide.opaque.timing`),
+   * which names shapes by it, can be written back and pruned when the element is deleted. Unique per slide; a copy of an
+   * element does not carry it.
+   */
+  pptxId?: string;
 }
 
 /**
@@ -479,5 +485,39 @@ export interface TableElement extends ElementBase {
   styleFlags?: TableStyleFlags;
 }
 
-export type SlideElement = TextElement | ShapeElement | ImageElement | LineElement | TableElement;
+/** What an opaque element is (PPTX content the editor keeps but cannot edit or draw). */
+export type OpaqueKind = 'chart' | 'smartArt' | 'ole' | 'media' | 'ink';
+
+/**
+ * A reference to a part kept byte for byte in the deck's opaque part store (`DeckData.opaqueParts`, keyed by `hash`):
+ * `partName` is the name it had in the source package (informational), `role` what it is for (`chart`, `package`, `image`...).
+ */
+export interface OpaquePartRef {
+  hash: string;
+  partName?: string;
+  role: string;
+}
+
+/**
+ * Content from an imported PPTX that the editor keeps but can neither edit nor draw (plan K11, decision D5): a chart, a
+ * SmartArt diagram, an OLE object or control, an audio or video clip, ink. It is drawn as a labelled placeholder ("Chart:
+ * <title> (kept, not editable)") and can be moved, resized and deleted like any element; the parts it refers to stay in the
+ * opaque part store so an export can write them back unchanged.
+ */
+export interface OpaqueElement extends ElementBase {
+  type: 'opaque';
+  kind: OpaqueKind;
+  /** The parts of the element, the root part first. */
+  partRefs: OpaquePartRef[];
+  /** Alternative text from the source. */
+  alt?: string;
+  /** The chart title, when the source states one as plain text. */
+  title?: string;
+  /** A picture drawn in the placeholder (a clip's poster frame, an OLE object's preview) as a data URL. */
+  poster?: string;
+  /** What an exporter needs to write the frame again (`progId` of an OLE object, `linkedTarget` of linked media...). */
+  props?: Record<string, string>;
+}
+
+export type SlideElement = TextElement | ShapeElement | ImageElement | LineElement | TableElement | OpaqueElement;
 export type ElementType = SlideElement['type'];

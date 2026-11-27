@@ -7,6 +7,9 @@
 //                                groupId?, parentGroupId?, locked?, opacity?, placeholder?(JSON),
 //                                props(JSON), richText?: Y.XmlFragment }>
 //   threads:  Y.Map<threadId, JSON>   — outside undo scope (Phase 6)
+//   opaqueParts: Y.Map<hash, Uint8Array> — content-addressed parts kept byte for byte (schemaVersion 10, plan K11); the
+//                value is `encodeOpaqueEntry` (content type + bytes); outside undo scope (parts are only ever added)
+//   (a slide map also carries `opaque` JSON: the transition and timing XML of an imported slide, schemaVersion 10)
 //
 // schemaVersion (meta): the version of this layout the room was written with (missing = 1, the layout above).
 // attachCollabToDeck refuses a room whose version is newer than COLLAB_SCHEMA_VERSION (see assertSchemaVersion), so an
@@ -18,6 +21,7 @@
 // y-prosemirror. Fractional `index` + jitter → concurrent reorders converge.
 
 import * as Y from 'yjs';
+import { encodeOpaqueEntry, type OpaquePart } from '@b32nio/spindle-shared/opaque';
 import { prosemirrorToYXmlFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror';
 import { slidesSchema } from '../text/schema';
 import type { SlideElement } from '../scene/types';
@@ -62,8 +66,15 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * a plain grid (covered cells shown), and its next edit of the cells would keep the keys while ignoring the spans on
  * insert/delete, so it must not join a v9 room. Table cell text is part of the same `props` JSON (last writer wins,
  * not CRDT-merged); that is an existing limit, unchanged here.
+ *
+ * 10: K11 opaque content. An element map may have `type: 'opaque'` (a chart, SmartArt diagram, OLE object, clip or ink
+ * kept but not editable, `props` carrying `kind`, `partRefs`, ...), element `props` may carry `pptxId`, a slide map
+ * carries `opaque` (transition and timing XML; the timing names shapes by `pptxId` and is pruned when a shape is deleted),
+ * and the document has a top-level `opaqueParts` map (hash to part). A v9 client would draw the element as nothing,
+ * keep `type: 'opaque'` it cannot render, and on deleting a shape leave the slide's timing pointing at it, so it must not
+ * join a v10 room.
  */
-export const COLLAB_SCHEMA_VERSION = 9;
+export const COLLAB_SCHEMA_VERSION = 10;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {
@@ -97,6 +108,8 @@ export interface DeckYTypes {
   slides: Y.Map<Y.Map<unknown>>;
   elements: Y.Map<Y.Map<unknown>>;
   threads: Y.Map<SlidesCommentThread>;
+  /** hash → `encodeOpaqueEntry` of the part (v10). */
+  opaqueParts: Y.Map<Uint8Array>;
 }
 
 /**
@@ -117,6 +130,7 @@ export function getDeckYTypes(ydoc: Y.Doc): DeckYTypes {
     slides: ydoc.getMap<Y.Map<unknown>>('slides'),
     elements: ydoc.getMap<Y.Map<unknown>>('elements'),
     threads: ydoc.getMap<SlidesCommentThread>('threads'),
+    opaqueParts: ydoc.getMap<Uint8Array>('opaqueParts'),
   };
 }
 
@@ -194,6 +208,7 @@ export function createSlideYMap(slide: Slide): Y.Map<unknown> {
   if (slide.background) m.set('background', toPlain(slide.background));
   if (slide.notes) m.set('notes', toPlain(slide.notes));
   if (slide.hidden) m.set('hidden', true);
+  if (slide.opaque) m.set('opaque', toPlain(slide.opaque));
   return m;
 }
 
@@ -203,6 +218,7 @@ export function yMapToSlide(id: string, m: Y.Map<unknown>): Slide {
   if (m.has('background')) slide.background = m.get('background') as Slide['background'];
   if (m.has('notes')) slide.notes = m.get('notes') as RichTextDoc;
   if (m.get('hidden') === true) slide.hidden = true;
+  if (m.has('opaque')) slide.opaque = m.get('opaque') as Slide['opaque'];
   return slide;
 }
 
@@ -228,6 +244,7 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DeckData): void {
     }
 
     if (data.threads) for (const t of data.threads) y.threads.set(t.id, toPlain(t));
+    for (const part of data.opaqueParts ?? []) if (!y.opaqueParts.has(part.hash)) y.opaqueParts.set(part.hash, encodeOpaqueEntry(part));
   });
 }
 
@@ -235,7 +252,8 @@ export function hydrateYDocFromData(ydoc: Y.Doc, data: DeckData): void {
 export function serializeYDocToData(
   ydoc: Y.Doc,
   selection: DeckSelection,
-  activeSlideId: string
+  activeSlideId: string,
+  opaqueParts?: OpaquePart[]
 ): DeckData {
   const y = getDeckYTypes(ydoc);
 
@@ -269,6 +287,7 @@ export function serializeYDocToData(
     layouts: y.meta.get('layouts') as DeckData['layouts'],
     slides,
     threads: threads.length ? threads : undefined,
+    opaqueParts: opaqueParts && opaqueParts.length > 0 ? opaqueParts : undefined,
     selection: { slideId: activeSlideId, elementIds: [...selection.elementIds] },
   };
 }

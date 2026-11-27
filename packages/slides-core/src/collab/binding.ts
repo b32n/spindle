@@ -24,6 +24,7 @@ import * as decoding from 'lib0/decoding';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
 import { connectAbortable, createAttachAbortError } from '@b32nio/spindle-shared';
+import { createOpaqueStore, readOpaqueParts, type OpaquePart } from '@b32nio/spindle-shared/opaque';
 
 import {
   getDeckYTypes,
@@ -105,6 +106,7 @@ export async function attachCollabToDeck(
     captureTimeout: 500,
   });
 
+  let detached = false;
   let applyingRemote = false;
   const applyRemote = (fn: () => void) => {
     applyingRemote = true;
@@ -206,6 +208,7 @@ export async function attachCollabToDeck(
         if (slide.background) m.set('background', toPlain(slide.background)); else m.delete('background');
         if (slide.notes) m.set('notes', toPlain(slide.notes)); else m.delete('notes');
         if (slide.hidden) m.set('hidden', true); else m.delete('hidden');
+        if (slide.opaque) m.set('opaque', toPlain(slide.opaque)); else m.delete('opaque');
       });
     });
 
@@ -284,7 +287,28 @@ export async function attachCollabToDeck(
     applyRemote(() => deck._applyRemoteComments([...y.threads.values()]));
   };
 
+  // The room's opaque parts, verified against their hashes (a peer's data is untrusted); an empty map needs no hashing at all.
+  const readParts = async (): Promise<OpaquePart[]> => {
+    if (y.opaqueParts.size === 0) return [];
+    const store = createOpaqueStore();
+    await readOpaqueParts(y.opaqueParts, store);
+    return store.list();
+  };
+  // Parts are only ever added; a peer's late entry is read in the background and handed to the engine. A host without
+  // SubtleCrypto (plain http) cannot verify them: the parts stay out and the placeholders draw without them.
+  const reloadParts = () =>
+    void readParts().then(
+      (parts) => {
+        if (!detached) applyRemote(() => deck._applyRemoteOpaqueParts(parts));
+      },
+      () => undefined
+    );
+  const onOpaqueParts = (_e: Y.YMapEvent<Uint8Array>, transaction: Y.Transaction) => {
+    if (transaction.origin !== LOCAL_ORIGIN) reloadParts();
+  };
+
   const attachObservers = () => {
+    y.opaqueParts.observe(onOpaqueParts);
     y.elements.observeDeep(onElements);
     y.slides.observeDeep(onSlides);
     y.meta.observe(onMeta);
@@ -347,15 +371,21 @@ export async function attachCollabToDeck(
   // or resurrect deleted content. Then reconcile the engine to exactly match
   // the Y.Doc, and only now attach the ongoing mirror + observers.
   const seedMeta = ydoc.getMap('__spindle');
+  let seeded = false;
   if (seedMeta.get('seeded') !== true && y.slides.size === 0) {
     ydoc.transact(() => {
       hydrateYDocFromData(ydoc, initialData);
       seedMeta.set('seeded', true);
     });
+    seeded = true;
   }
-  deck._resyncFromY(serializeYDocToData(ydoc, deck.getSelection(), deck.getActiveSlideId()));
+  // what this client just wrote needs no verifying; anything else in the room does
+  const opaqueParts = seeded ? initialData.opaqueParts ?? [] : await readParts();
+  deck._resyncFromY(serializeYDocToData(ydoc, deck.getSelection(), deck.getActiveSlideId(), opaqueParts));
   attachObservers();
   attachMirror();
+  // parts that arrived while they were being read (observers were not attached yet)
+  if (y.opaqueParts.size !== opaqueParts.length) reloadParts();
 
   // Contribute locally-restored state so a relay that never saw it gets it.
   // Idempotent (Yjs dedupes).
@@ -375,6 +405,8 @@ export async function attachCollabToDeck(
   });
 
   const detach = () => {
+    detached = true;
+    y.opaqueParts.unobserve(onOpaqueParts);
     removeAwarenessStates(awareness, [ydoc.clientID], 'detach');
     ydoc.off('update', onDocUpdate);
     awareness.off('update', onAwarenessUpdate);

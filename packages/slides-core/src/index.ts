@@ -24,6 +24,8 @@ export * from './scene/z-order';
 export * from './scene/group';
 export * from './scene/group-tree';
 export * from './scene/crop';
+export { opaqueLabel } from './opaque/label';
+export { pruneTiming, timingTargets } from './opaque/timing';
 
 // Rich text model + schema
 export * from './text/model';
