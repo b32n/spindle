@@ -67,11 +67,13 @@ export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML
         i = end + 3;
       } else {
         // DOCTYPE: skipped with its internal subset (where entities would be declared); nothing in it is ever used
-        const open = xml.indexOf('[', i);
+        // the `>` comes first and bounds the search for `[`: an unbounded `indexOf('[')` would rescan the rest of the text for
+        // every declaration that has none (quadratic on a part of `<!a>` items)
         const close = xml.indexOf('>', i);
         if (close < 0) return false;
-        if (open >= 0 && open < close) {
-          const subset = xml.indexOf(']', open);
+        const bracket = xml.slice(i, close).indexOf('[');
+        if (bracket >= 0) {
+          const subset = xml.indexOf(']', i + bracket);
           const end = subset < 0 ? -1 : xml.indexOf('>', subset);
           if (end < 0) return false;
           i = end + 1;

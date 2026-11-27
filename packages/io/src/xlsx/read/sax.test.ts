@@ -121,3 +121,82 @@ describe('scanXml', () => {
     expect(events).toEqual(['open a', 'open b', 'open b']);
   });
 });
+
+describe('scanXml: declarations and their brackets', () => {
+  it('looks for the internal subset of a declaration only before its own `>`', () => {
+    // the `[` after the first `>` is text, not the start of a subset: the declaration ends at its own `>`
+    const { ok, events } = scan('<a><!x>[<b/></a>');
+    expect(ok).toBe(true);
+    expect(names(events)).toEqual(['open a', '"["', 'open b', 'close b', 'close a']);
+    expect(scan('<a><!x><b/>]</a>').ok).toBe(true);
+  });
+
+  it('skips a subset that holds `>` and `[`, up to the `]>` that ends it', () => {
+    const { ok, events } = scan('<!DOCTYPE a [<!ENTITY x "a>[b">]><a>t</a>');
+    expect(ok).toBe(true);
+    expect(names(events)).toEqual(['open a', '"t"', 'close a']);
+  });
+
+  it('is damage when the subset or the declaration is never closed', () => {
+    expect(scan('<!DOCTYPE a [<!ENTITY x "1"><a/>').ok).toBe(false);
+    expect(scan('<!DOCTYPE a [<!ENTITY x "1">]').ok).toBe(false);
+    expect(scan('<a><!DOCTYPE a').ok).toBe(false);
+  });
+});
+
+// Hostile shapes of about a million items each (a file of a few KB compresses to this): every one must be read in time that grows
+// with the size of the text. The quadratic form of the first of them (an unbounded `indexOf('[')` per declaration) took 122 seconds
+// for 1.6 million of them; the limit here is a hundredth of that. `ok` is what the scanner says of the text.
+describe('scanXml: hostile shapes of a million items', () => {
+  const N = 1_000_000;
+  const open = '<worksheet xmlns="x">';
+  const shapes: Array<[name: string, xml: () => string, ok: boolean]> = [
+    ['1.6 million `<!a>` declarations with no `[` after them', () => `${open}${'<!a>'.repeat(1_600_000)}</worksheet>`, true],
+    ['a million `<!DOCTYPE a>` declarations', () => `${open}${'<!DOCTYPE a>'.repeat(N)}</worksheet>`, true],
+    ['a million `<!a>` declarations, a `[` at the very end', () => `${open}${'<!a>'.repeat(N)}</worksheet>[`, true],
+    ['a million declarations with a subset each', () => `${open}${'<!a [x]>'.repeat(N)}</worksheet>`, true],
+    ['a million processing instructions', () => `${open}${'<?x?>'.repeat(N)}</worksheet>`, true],
+    ['a million empty comments', () => `${open}${'<!---->'.repeat(N)}</worksheet>`, true],
+    ['a million CDATA sections', () => `${open}${'<![CDATA[]]>'.repeat(N)}</worksheet>`, true],
+    ['a million unterminated comment openers', () => `${open}${'<!--'.repeat(N)}`, false],
+    ['a million unterminated processing instructions', () => `${open}${'<?x'.repeat(N)}`, false],
+    ['a million unterminated CDATA openers', () => `${open}${'<![CDATA['.repeat(N)}`, false],
+    ['a million unterminated declarations', () => `${open}${'<!a'.repeat(N)}`, false],
+    ['a million unterminated subsets', () => `${open}${'<!a [>'.repeat(N)}`, false],
+    ['a million `]` after a subset opener', () => `${open}<!a [${']'.repeat(N)}`, false],
+    ['a million `<`', () => `${open}${'<'.repeat(N)}`, false],
+    ['a million stray end tags', () => `${open}${'</a>'.repeat(N)}`, false],
+    ['a million attributes on one element', () => `${open}<a ${'b="1" '.repeat(N)}/></worksheet>`, true],
+    ['a million attributes without a value', () => `${open}<a ${'b '.repeat(N)}/></worksheet>`, false],
+    ['a million unclosed attribute values', () => `${open}<a ${'b="1'.repeat(N)}/></worksheet>`, false],
+    ['a million `xmlns` declarations on one element', () => `${open}<a ${Array.from({ length: N }, (_, i) => `xmlns:p${i}="u"`).join(' ')}/></worksheet>`, true],
+    ['an attribute value of 20 million characters', () => `${open}<a b="${'x'.repeat(20_000_000)}"/></worksheet>`, true],
+    ['an attribute value of 2 million entities', () => `${open}<a b="${'&#65;'.repeat(2_000_000)}"/></worksheet>`, true],
+    ['2 million entities in text', () => `${open}<a>${'&amp;'.repeat(2_000_000)}</a></worksheet>`, true],
+    ['a million elements nested (the depth cap ends it)', () => `${open}${'<a>'.repeat(N)}`, false],
+    ['4 million characters of whitespace in a tag', () => `${open}<a${' '.repeat(4_000_000)}/></worksheet>`, true],
+    ['a million `<` in text', () => `${open}<a>${'x<'.repeat(N)}</a>`, false],
+    ['a million `/` in a tag', () => `${open}<a ${'/'.repeat(N)}>`, false],
+    ['a million `=` in a tag', () => `${open}<a ${'='.repeat(N)}>`, false],
+  ];
+
+  it.each(shapes)('%s', (_name, xml, ok) => {
+    const text = xml();
+    const t0 = Date.now();
+    const result = scanXml(text, { open: () => undefined, close: () => undefined, text: () => undefined });
+    expect(Date.now() - t0).toBeLessThan(3_000);
+    expect(result).toBe(ok);
+  }, 30_000);
+
+  it('scales with the size: four times the declarations take well under ten times as long', () => {
+    const time = (n: number) => {
+      const text = `${open}${'<!a>'.repeat(n)}</worksheet>`;
+      const t0 = process.hrtime.bigint();
+      scanXml(text, { open: () => undefined, close: () => undefined, text: () => undefined });
+      return Number(process.hrtime.bigint() - t0) / 1e6;
+    };
+    time(100_000);
+    const small = Math.max(time(200_000), 5);
+    expect(time(800_000)).toBeLessThan(small * 12);
+  });
+});
