@@ -1,6 +1,7 @@
 {
   "diff": null,
+  "error": "no exporter",
   "exportWarnings": [],
   "reimportWarnings": [],
-  "status": "skipped-import-error"
+  "status": "export-error"
 }

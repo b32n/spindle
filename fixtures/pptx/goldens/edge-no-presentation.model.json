@@ -1,5 +1,5 @@
 {
-  "importError": "no importer",
+  "importError": "This is not a PowerPoint presentation (the package has no presentation part).",
   "presentation": null,
   "warnings": []
 }

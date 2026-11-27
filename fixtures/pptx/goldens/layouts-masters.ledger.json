@@ -1,36 +1,36 @@
 {
-  "importError": true,
+  "importError": false,
   "package": "zip",
   "parts": [
     {
       "name": "[Content_Types].xml",
       "rule": "package.contentTypes",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "_rels/.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "docProps/app.xml",
       "rule": "docProps",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "docProps/core.xml",
       "rule": "docProps",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/_rels/presentation.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/handoutMasters/_rels/handoutMaster1.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "loss": [
@@ -43,244 +43,244 @@
     {
       "name": "ppt/presProps.xml",
       "rule": "presProps",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/presentation.xml",
       "rule": "presentation",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout1.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout10.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout11.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout12.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout13.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout2.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout3.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout4.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout5.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout6.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout7.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout8.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/_rels/slideLayout9.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout1.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout10.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout11.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout12.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout13.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout2.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout3.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout4.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout5.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout6.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout7.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout8.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideLayouts/slideLayout9.xml",
       "rule": "layout",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideMasters/_rels/slideMaster1.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideMasters/_rels/slideMaster2.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideMasters/slideMaster1.xml",
       "rule": "master",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slideMasters/slideMaster2.xml",
       "rule": "master",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/_rels/slide1.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/_rels/slide2.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/_rels/slide3.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/_rels/slide4.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/_rels/slide5.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/slide1.xml",
       "rule": "slide",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/slide2.xml",
       "rule": "slide",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/slide3.xml",
       "rule": "slide",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/slide4.xml",
       "rule": "slide",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/slides/slide5.xml",
       "rule": "slide",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/tableStyles.xml",
       "rule": "tableStyles",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/theme/theme1.xml",
       "rule": "theme",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/theme/theme2.xml",
       "rule": "theme",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/theme/theme3.xml",
       "rule": "theme",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "ppt/viewProps.xml",
       "rule": "presProps",
-      "status": "unaccounted"
+      "status": "mapped"
     }
   ],
   "totals": {
     "dropped": 1,
-    "mapped": 0,
+    "mapped": 53,
     "opaque": 0,
     "total": 54,
-    "unaccounted": 53
+    "unaccounted": 0
   }
 }
