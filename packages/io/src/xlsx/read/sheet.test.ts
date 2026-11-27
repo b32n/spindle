@@ -47,7 +47,7 @@ function run(xml: string | undefined, ref: XlsxSheetRef, o: Options, warnings: s
     sharedStrings: (o.strings ?? []).map((s) => (typeof s === 'string' ? { text: s } : s)),
     colors: { themeColors: DEFAULT_THEME_COLORS },
     date1904: o.date1904 ?? false,
-    maxFormulaChars: o.maxFormulaChars,
+    maxSheetFormulaChars: o.maxFormulaChars,
     warn: (m) => warnings.push(m),
   });
 }
@@ -88,7 +88,7 @@ describe('readSheet: values', () => {
 
   it('reads ISO dates (t="d") as serial numbers', () => {
     const { sheet, warnings } = read(row(1, '<c r="A1" t="d"><v>1900-01-01</v></c><c r="B1" t="d"><v>2024-03-15T12:00:00</v></c><c r="C1" t="d"><v>nonsense</v></c><c r="D1" t="d"/>'));
-    expect(cell(sheet, '0:0')?.value).toBe(2);
+    expect(cell(sheet, '0:0')?.value).toBe(1);
     expect(cell(sheet, '0:1')?.value).toBe(45366.5);
     expect(cell(sheet, '0:2')?.value).toBe('nonsense');
     expect(warnings).toEqual(['S!C1: "nonsense" is not a date; imported as text']);
@@ -163,13 +163,30 @@ describe('readSheet: values', () => {
 
 describe('isoToSerial', () => {
   it.each([
-    ['1899-12-30', 0],
-    ['1900-01-01', 2],
+    ['1900-01-01', 1],
     ['2000-01-01', 36526],
     ['2000-01-01T06:00', 36526.25],
     ['2000-01-01T06:00:30Z', 36526 + 6 / 24 + 30 / 86400],
     ['2000-01-01T00:00:01.5', 36526 + 1.5 / 86400],
   ])('%s', (text, serial) => {
+    expect(isoToSerial(text)).toBeCloseTo(serial, 9);
+  });
+
+  // Excel's 1900 leap-year bug: it has a 1900-02-29 (serial 60) that never existed, so the days before it are one lower than
+  // the days since 1899-12-30, and from 1900-03-01 (61) the two agree
+  it.each([
+    ['1900-01-01', 1],
+    ['1900-01-02', 2],
+    ['1900-01-31', 31],
+    ['1900-02-01', 32],
+    ['1900-02-28', 59],
+    ['1900-03-01', 61],
+    ['1900-03-02', 62],
+    ['1900-12-31', 366],
+    ['1901-01-01', 367],
+    ['1900-01-01T12:00', 1.5],
+    ['1900-02-28T18:00', 59.75],
+  ])('%s: the 1900 quirk is Excel\'s serial %p', (text, serial) => {
     expect(isoToSerial(text)).toBeCloseTo(serial, 9);
   });
 
@@ -184,7 +201,7 @@ describe('isoToSerial', () => {
 
   it.each([
     '2020-02-30', '2021-02-29', '1900-02-29', '2100-02-29', '2020-04-31', '2020-00-10', '2020-13-01', '2020-01-00', '2020-01-32',
-    '2020-01-01T24:00', '2020-01-01T10:60', '2020-01-01T10:00:60', '1899-12-29', '0099-12-31', '0000-01-01', '0001-01-01',
+    '2020-01-01T24:00', '2020-01-01T10:60', '2020-01-01T10:00:60', '1899-12-29', '1899-12-30', '1899-12-31', '0099-12-31', '0000-01-01', '0001-01-01',
   ])('%s is not a date: it does not exist or Excel has no serial for it (a year under 100 is not read as 19xx)', (text) => {
     expect(isoToSerial(text)).toBeUndefined();
   });
@@ -649,17 +666,15 @@ describe('readSheet: formula limits', () => {
       row(1, `<c r="A1"><f t="shared" ref="A1:A3" si="0">${longFormula(9000)}</f><v>1</v></c>`) + row(2, '<c r="A2"><f t="shared" si="0"/><v>2</v></c>') + row(3, '<c r="A3"><f t="shared" si="0"/></c>')
     );
     expect([...sheet.cells.entries()]).toEqual([['0:0', { value: 1 }], ['1:0', { value: 2 }]]);
-    expect(warnings).toEqual(['S: formulas left out, their values kept: 1 over 8192 characters (and the cells of a shared formula with such a master); 2 past the limit of 16777216 characters of expanded shared formulas.']);
+    expect(warnings).toEqual(['S: formulas left out, their values kept: 1 over 8192 characters (and the cells of a shared formula with such a master); 2 past the limit of 33554432 characters of expanded shared formulas.']);
   });
 
   it('stops expanding shared formulas at the budget of the sheet: the rest keep their values, one warning', () => {
     const children = Array.from({ length: 30 }, (_, i) => row(i + 2, `<c r="B${i + 2}"><f t="shared" si="0"/><v>${i}</v></c>`)).join('');
     const { sheet, warnings } = read(row(1, '<c r="B1"><f t="shared" ref="B1:B31" si="0">A1*2+$A$1</f><v>9</v></c>') + children, { maxFormulaChars: 100 });
     const formulas = [...sheet.cells.values()].map((c) => c.formula).filter((f): f is string => f !== undefined);
-    // the master is not part of the budget; the children use it until the next one would pass it, by at most one formula
-    const used = formulas.slice(1).reduce((n, f) => n + f.length, 0);
-    expect(used).toBeGreaterThanOrEqual(100);
-    expect(used - formulas[formulas.length - 1].length).toBeLessThan(100);
+    // the master is not part of the budget; each child costs its length (9) and FORMULA_OVERHEAD (16), so four fit in 100
+    expect(formulas).toHaveLength(1 + 4);
     expect(sheet.cells.size).toBe(31);
     expect([...sheet.cells.values()].filter((c) => c.formula === undefined)).toHaveLength(31 - formulas.length);
     expect(warnings).toEqual([`S: formulas left out, their values kept: ${31 - formulas.length} past the limit of 100 characters of expanded shared formulas.`]);
@@ -683,10 +698,10 @@ describe('readSheet: formula limits', () => {
     expect(process.memoryUsage().heapUsed - before).toBeLessThan(300 * 1024 * 1024);
     expect(sheet.cells.size).toBe(30_001);
     expect([...sheet.cells.values()].filter((c) => c.formula !== undefined)).toHaveLength(0);
-    expect(warnings).toEqual(['S: formulas left out, their values kept: 1 over 8192 characters (and the cells of a shared formula with such a master); 30000 past the limit of 16777216 characters of expanded shared formulas.']);
+    expect(warnings).toEqual(['S: formulas left out, their values kept: 1 over 8192 characters (and the cells of a shared formula with such a master); 30000 past the limit of 33554432 characters of expanded shared formulas.']);
   });
 
-  it('stops 30,000 children of a master just under the cap at the budget (about 16 Mi characters)', () => {
+  it('stops 30,000 children of a master just under the cap at the budget (about 32 Mi characters)', () => {
     const text = `${'1+'.repeat(4000)}A1`;
     const children = Array.from({ length: 30_000 }, (_, i) => `<row r="${i + 2}"><c r="A${i + 2}"><f t="shared" si="0"/><v>${i}</v></c></row>`).join('');
     const xml = `<worksheet ${MAIN_NS}><sheetData>${row(1, `<c r="A1"><f t="shared" ref="A1:A30001" si="0">${text}</f><v>0</v></c>`)}${children}</sheetData></worksheet>`;
@@ -695,8 +710,8 @@ describe('readSheet: formula limits', () => {
     const sheet = run(xml, refOf(), {}, warnings);
     expect(Date.now() - started).toBeLessThan(8000);
     const chars = [...sheet.cells.values()].reduce((n, c) => n + (c.formula?.length ?? 0), 0);
-    expect(chars).toBeGreaterThan(16_000_000);
-    expect(chars).toBeLessThan(16_777_216 + 2 * 8200);
+    expect(chars).toBeGreaterThan(33_000_000);
+    expect(chars).toBeLessThan(33_554_432 + 2 * 8200);
     expect(warnings).toHaveLength(1);
   });
 

@@ -36,14 +36,25 @@ export interface ImportLimits {
    */
   ratioFloorBytes: number;
   /**
-   * Characters of formula text one worksheet may gain by expanding shared formulas (each cell of a group gets its own copy of the
-   * master's text). Over it the remaining cells of that sheet keep their cached value and lose the formula, with one warning.
+   * Cost, in characters, of the formula text one worksheet may gain by expanding shared formulas (each cell of a group gets its
+   * own copy of the master's text; a formula costs its length plus a fixed overhead for the string itself). Over it the remaining
+   * cells of that sheet keep their cached value and lose the formula, with one warning.
    */
   maxSheetFormulaChars: number;
+  /** The same cost over the whole package: all its worksheets together draw on it, so many sheets cannot add up past it. */
+  maxFormulaChars: number;
+  /** Cells kept over all the worksheets of a package. Past it the rest of the file is not read (one warning). */
+  maxTotalCells: number;
+  /** Worksheets read from one package. Past it the other sheets are not read (one warning). */
+  maxSheets: number;
 }
 
-/** Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB,
- * 16 Mi characters of expanded shared-formula text per worksheet. */
+/**
+ * Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB,
+ * expanded shared-formula text of 32 Mi characters per worksheet and 64 Mi (128 MB of strings) per package, 5,000,000 cells and
+ * 1,000 worksheets per package. The 100,000 x 10 performance file (1,000,000 cells, 1.1 GB of process memory at the peak) is
+ * five times under the cell limit; a sheet of two million shared-formula cells of 15 characters is under the formula limits.
+ */
 export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxPackageBytes: 100 * MB,
   maxEntries: 20_000,
@@ -52,7 +63,10 @@ export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxXmlPartBytes: 256 * MB,
   maxRatio: 200,
   ratioFloorBytes: 16 * MB,
-  maxSheetFormulaChars: 16 * MB,
+  maxSheetFormulaChars: 32 * MB,
+  maxFormulaChars: 64 * MB,
+  maxTotalCells: 5_000_000,
+  maxSheets: 1_000,
 };
 
 export interface SafeZipOptions {

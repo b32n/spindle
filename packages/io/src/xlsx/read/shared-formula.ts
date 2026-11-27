@@ -20,19 +20,24 @@ import { MAX_COL, MAX_ROW, columnIndex, columnLetters } from './cell-ref';
 // a letter outside the BMP is not cut in the middle (the formula is read one UTF-16 unit at a time)
 const NAME_CHAR = /[\p{L}\p{N}_.\\\ud800-\udfff]/u;
 
-/** `formula` as it reads `rows` down and `cols` right of the cell it was written for. */
+/**
+ * `formula` as it reads `rows` down and `cols` right of the cell it was written for. The result is one flat string (joined from a
+ * list of pieces, not built by `+=`, which leaves a rope of tiny pieces that costs many times its length in memory); a formula
+ * with no reference to move comes back as the same string.
+ */
 export function shiftFormula(formula: string, rows: number, cols: number): string {
   if (rows === 0 && cols === 0) return formula;
-  let out = '';
+  // text that stays is copied as slices between the tokens that move
+  const out: string[] = [];
+  let from = 0;
   const n = formula.length;
   let i = 0;
   while (i < n) {
     const ch = formula[i];
     if (ch === '"' || ch === "'") {
-      // a quoted run, copied as is ("" or '' inside it is an escaped quote)
+      // a quoted run, left as it is ("" or '' inside it is an escaped quote)
       let j = i + 1;
       while (j < n && !(formula[j] === ch && formula[j + 1] !== ch)) j += formula[j] === ch ? 2 : 1;
-      out += formula.slice(i, j + 1);
       i = j + 1;
     } else if (ch === '[') {
       let depth = 0;
@@ -41,13 +46,10 @@ export function shiftFormula(formula: string, rows: number, cols: number): strin
         if (formula[j] === '[') depth++;
         else if (formula[j] === ']' && --depth === 0) break;
       }
-      out += formula.slice(i, j + 1);
       i = j + 1;
     } else if (ch === '#') {
       const m = /^#[A-Za-z0-9/]+[!?]?/.exec(formula.slice(i, i + 12));
-      const len = m === null ? 1 : m[0].length;
-      out += formula.slice(i, i + len);
-      i += len;
+      i += m === null ? 1 : m[0].length;
     } else if (ch === '$' || NAME_CHAR.test(ch)) {
       // one token of name characters (and `$`): decide whether it is a reference
       let j = i;
@@ -55,14 +57,17 @@ export function shiftFormula(formula: string, rows: number, cols: number): strin
       const token = formula.slice(i, j);
       // a token glued to a name character before it (`_xlfn.X1`) is part of a name, as is one that names a sheet (`Q1!A1`)
       const named = (i > 0 && NAME_CHAR.test(formula[i - 1])) || formula[j] === '!';
-      out += named ? token : moveToken(token, formula, i, j, rows, cols);
+      const moved = named ? token : moveToken(token, formula, i, j, rows, cols);
+      if (moved !== token) {
+        out.push(formula.slice(from, i), moved);
+        from = j;
+      }
       i = j;
-    } else {
-      out += ch;
-      i++;
-    }
+    } else i++;
   }
-  return out;
+  if (out.length === 0) return formula;
+  out.push(formula.slice(from));
+  return out.join('');
 }
 
 const CELL_TOKEN = /^(\$?)([A-Za-z]{1,3})(\$?)(\d{1,7})$/;

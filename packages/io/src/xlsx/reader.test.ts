@@ -291,8 +291,9 @@ describe('importXlsx: the own reader', () => {
   });
 
   it('reports the active tab of the workbook, and repeats no warning', async () => {
-    const bytes = await workbookZip(`<bookViews><workbookView activeTab="1"/></bookViews><sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="rId1"/></sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
+    const bytes = await workbookZip(`<bookViews><workbookView activeTab="1"/></bookViews><sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="rId2"/></sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId2', 'worksheet', 'worksheets/sheet2.xml']], {
       'xl/worksheets/sheet1.xml': sheetXml('<row r="1"><c r="A1" t="s"><v>5</v></c></row>'),
+      'xl/worksheets/sheet2.xml': sheetXml('<row r="1"><c r="A1" t="s"><v>5</v></c></row>'),
     });
     const result = await importXlsx(bytes);
     expect(result.activeSheetIndex).toBe(1);
@@ -340,14 +341,19 @@ describe('importXlsx: the own reader', () => {
     const bytes = await book('<sheet name="A" sheetId="1" r:id="rId1"/>', [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
       'xl/worksheets/sheet1.xml': sheetXml(`<row r="1"><c r="A1"><f t="shared" ref="A1:A11" si="0">B1+1</f><v>1</v></c></row>${children}`),
     });
-    const formulas = async (limits?: { maxSheetFormulaChars: number }) => {
+    const formulas = async (limits?: { maxSheetFormulaChars?: number; maxFormulaChars?: number }) => {
       const result = await importXlsx(bytes, limits === undefined ? {} : { limits });
       return { count: [...result.sheets[0].cells.values()].filter((c) => c.formula !== undefined).length, warnings: result.warnings };
     };
     expect(await formulas()).toEqual({ count: 11, warnings: [] });
-    const limited = await formulas({ maxSheetFormulaChars: 10 });
+    // a formula costs its length (4) and FORMULA_OVERHEAD (16)
+    const limited = await formulas({ maxSheetFormulaChars: 3 * 20 });
     expect(limited.count).toBe(1 + 3);
-    expect(limited.warnings).toEqual(['A: formulas left out, their values kept: 7 past the limit of 10 characters of expanded shared formulas.']);
+    expect(limited.warnings).toEqual(['A: formulas left out, their values kept: 7 past the limit of 60 characters of expanded shared formulas.']);
+    // the package's budget is the same cost over all its sheets
+    const packaged = await formulas({ maxFormulaChars: 3 * 20 });
+    expect(packaged.count).toBe(1 + 3);
+    expect(packaged.warnings).toHaveLength(1);
   });
 
   it('applies the limits to every sheet part it reads', async () => {

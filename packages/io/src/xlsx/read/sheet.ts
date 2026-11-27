@@ -25,7 +25,7 @@ import { scanXml, type SaxAttrs } from './sax';
 import { decodeStringEscapes } from './shared-strings';
 import { shiftFormula } from './shared-formula';
 import { boolAttr, intAttr, numAttr, parseDecimal, parseIndex, put } from './values';
-import { DEFAULT_IMPORT_LIMITS } from '../../common/safe-zip';
+import { DEFAULT_IMPORT_LIMITS, type ImportLimits } from '../../common/safe-zip';
 
 // ---------------------------------------------------------------------------
 // One worksheet part. The part's text is held as one string (the package hands it over whole); a single forward pass (`scanXml`,
@@ -39,8 +39,9 @@ import { DEFAULT_IMPORT_LIMITS } from '../../common/safe-zip';
 //     strings; an empty cell (no value and nothing of a formula) is not kept, as before
 //   - formula: text of `<f>`; shared formulas are expanded (each cell gets the master's formula moved by its distance from the
 //     master), array formulas keep their text on the anchor cell; the cached result is the value. A formula over 8192
-//     characters (Excel's own limit) is dropped, and so are the shared-formula cells past a per-sheet budget of expanded
-//     characters (`ImportLimits.maxSheetFormulaChars`): the value stays, one warning per sheet counts them. `<f/>` with no
+//     characters (Excel's own limit) is dropped, and so are the shared-formula cells past a per-sheet and a per-package budget
+//     of expanded text (`ImportLimits.maxSheetFormulaChars`, `maxFormulaChars`; a formula costs its length plus
+//     `FORMULA_OVERHEAD`, its string's own weight): the value stays, one warning per sheet counts them. `<f/>` with no
 //     text (and no `ref`/`si` meaning) is no formula: with a value the cell is a plain value, without one it is not kept
 //   - position: a cell or row without a usable `r` follows the previous one, clamped to the sheet limits (with a warning)
 //   - hyperlink: the `hyperlinks` entry for the cell, by relationship target (a `location` link is only in `details`)
@@ -48,6 +49,10 @@ import { DEFAULT_IMPORT_LIMITS } from '../../common/safe-zip';
 //     are applied by one sweep over the cells in row order (`cell-ranges.ts`), so a range of a million cells costs no more than
 //     one cell and a sheet with thousands of ranges stays near-linear
 //   - panes: `frozen` and `frozenSplit` (ECMA-376 18.3.1.66: frozen, but split before) both freeze rows and columns
+//
+// Cells past the package's cell budget (`ImportLimits.maxTotalCells`) end the scan of the part, with one warning. `<col>` elements
+// are read as they come (no tree) up to `MAX_COLS` and applied by a sweep (`applyColumns`), so a file of thousands of
+// full-width ranges costs no more than a few.
 //
 // Never throws: a damaged part gives what precedes the damage and `details.wellFormed = false`; a cell that cannot be read is a
 // warning. Everything the file names (shared string index, style index, `si`) is looked up in `Map`s or arrays by number.
@@ -59,11 +64,27 @@ export interface SheetContext {
   sharedStrings: readonly XlsxSharedString[];
   colors: ColorContext;
   date1904: boolean;
-  /** Characters of formula text the sheet may gain by expanding shared formulas (`ImportLimits.maxSheetFormulaChars`). */
-  maxFormulaChars?: number;
+  /** Cost of the formula text the sheet may gain by expanding shared formulas (`ImportLimits.maxSheetFormulaChars`). */
+  maxSheetFormulaChars?: number;
+  /** What the package may still spend, shared by all its sheets (`readBudget`); a sheet read alone gets the defaults. */
+  budget?: ReadBudget;
   /** Receives non-fatal problems. */
   warn: (message: string) => void;
 }
+
+/** What a package may still spend over all its worksheets: cells kept, and cost of expanded shared-formula text. */
+export interface ReadBudget {
+  cells: number;
+  formulaChars: number;
+}
+
+export const readBudget = (limits: ImportLimits): ReadBudget => ({ cells: limits.maxTotalCells, formulaChars: limits.maxFormulaChars });
+
+/** What an expanded formula costs beyond its characters: the string's own weight (about 32 bytes), counted as characters of 2 bytes. */
+export const FORMULA_OVERHEAD = 16;
+
+/** Most `<col>` elements read from one sheet (the sheet has 16,384 columns, and a valid file has no overlapping ones); the rest are left out with a warning. */
+export const MAX_COLS = MAX_COL;
 
 /** Most warnings one sheet adds for single cells; the rest are counted in one closing message. */
 const MAX_CELL_WARNINGS = 20;
@@ -79,8 +100,10 @@ const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 /**
  * The serial number of an ISO 8601 date or date-time (`t="d"` cells), or `undefined` when it is not one: the date must exist
- * (`2020-02-30` does not), the time be in range, and the day not lie before the epoch (1899-12-30: Excel has no serial for an
- * earlier one). A year under 100 is that year, not 19xx.
+ * (`2020-02-30` does not), the time be in range, and the day not lie before 1900-01-01 (Excel has no serial for an earlier one).
+ * A year under 100 is that year, not 19xx. Serials count as Excel does, including its 1900 leap-year bug (it has a 1900-02-29,
+ * serial 60, that never existed): 1900-01-01 is 1, 1900-02-28 is 59 and 1900-03-01 is 61, from where a serial is the days
+ * after 1899-12-30.
  */
 export function isoToSerial(text: string): number | undefined {
   const m = ISO_DATE.exec(text.trim());
@@ -92,8 +115,11 @@ export function isoToSerial(text: string): number | undefined {
   if (day > DAYS_IN_MONTH[month - 1] + (month === 2 && leap ? 1 : 0)) return undefined;
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
-  const serial = (date.getTime() + ((hour * 60 + minute) * 60 + second) * 1000 - EXCEL_EPOCH_UTC) / DAY_MS;
-  return serial < 0 ? undefined : serial;
+  const days = (date.getTime() - EXCEL_EPOCH_UTC) / DAY_MS;
+  if (days < 2) return undefined;
+  // the days before the fake 1900-02-29 sit one serial lower than the days since the epoch say
+  const shift = days < 61 ? DAY_MS : 0;
+  return (date.getTime() + ((hour * 60 + minute) * 60 + second) * 1000 - EXCEL_EPOCH_UTC - shift) / DAY_MS;
 }
 
 /** Days between the 1904 and the 1900 date systems. */
@@ -156,23 +182,66 @@ function readProperties(el: XmlElement | undefined, colors: ColorContext): XlsxS
   return props;
 }
 
-function readColumns(root: XmlElement | undefined): XlsxColumnInfo[] {
-  const out: XlsxColumnInfo[] = [];
-  for (const el of kids(root, 'col')) {
-    const min = intAttr(el.attrs.min);
-    const max = intAttr(el.attrs.max);
-    if (min === undefined || max === undefined || min < 1 || max < min) continue;
-    const col: XlsxColumnInfo = { min, max };
-    put(col, 'width', numAttr(el.attrs.width));
-    put(col, 'hidden', boolAttr(el.attrs.hidden));
-    put(col, 'customWidth', boolAttr(el.attrs.customWidth));
-    put(col, 'bestFit', boolAttr(el.attrs.bestFit));
-    put(col, 'style', intAttr(el.attrs.style));
-    put(col, 'outlineLevel', intAttr(el.attrs.outlineLevel));
-    put(col, 'collapsed', boolAttr(el.attrs.collapsed));
-    out.push(col);
+/** One `<col>` element, or `undefined` when its range is not one. */
+function readColumn(attrs: SaxAttrs): XlsxColumnInfo | undefined {
+  const min = intAttr(attrs.min);
+  const max = intAttr(attrs.max);
+  if (min === undefined || max === undefined || min < 1 || max < min) return undefined;
+  const col: XlsxColumnInfo = { min, max };
+  put(col, 'width', numAttr(attrs.width));
+  put(col, 'hidden', boolAttr(attrs.hidden));
+  put(col, 'customWidth', boolAttr(attrs.customWidth));
+  put(col, 'bestFit', boolAttr(attrs.bestFit));
+  put(col, 'style', intAttr(attrs.style));
+  put(col, 'outlineLevel', intAttr(attrs.outlineLevel));
+  put(col, 'collapsed', boolAttr(attrs.collapsed));
+  return col;
+}
+
+/**
+ * The value each column up to `maxCol` ends with for one attribute: where ranges overlap the last one that names the attribute
+ * wins. The ranges are taken last to first and each column takes the first value it meets, so a column is visited once however
+ * many ranges cover it (a "next column not yet taken" pointer with path compression skips the taken ones): near-linear in
+ * ranges plus columns, where applying every range to every column it covers is their product.
+ */
+function lastWriter<T>(columns: readonly XlsxColumnInfo[], pick: (c: XlsxColumnInfo) => T | undefined, maxCol: number): Array<T | undefined> {
+  const out = new Array<T | undefined>(maxCol + 1);
+  const next = new Int32Array(maxCol + 2).map((_, i) => i);
+  const find = (from: number): number => {
+    let root = from;
+    while (next[root] !== root) root = next[root];
+    for (let i = from; next[i] !== root; ) {
+      const after = next[i];
+      next[i] = root;
+      i = after;
+    }
+    return root;
+  };
+  for (let k = columns.length - 1; k >= 0; k--) {
+    const c = columns[k];
+    const value = pick(c);
+    if (value === undefined || c.min - 1 > maxCol) continue;
+    const last = Math.min(c.max - 1, maxCol);
+    for (let i = find(c.min - 1); i <= last; i = find(i)) {
+      out[i] = value;
+      next[i] = i + 1;
+    }
   }
   return out;
+}
+
+/** The editor's column widths and hidden columns from the `<col>` ranges, over the columns up to `maxCol` (in column order). */
+function applyColumns(columns: readonly XlsxColumnInfo[], maxCol: number): { columnWidths: Map<number, number>; hiddenCols: Set<number> } {
+  const widths = lastWriter(columns, (c) => (c.width === undefined ? undefined : excelColumnWidthToPx(c.width)), maxCol);
+  const hidden = lastWriter(columns, (c) => c.hidden, maxCol);
+  const columnWidths = new Map<number, number>();
+  const hiddenCols = new Set<number>();
+  for (let i = 0; i <= maxCol; i++) {
+    const w = widths[i];
+    if (w !== undefined) columnWidths.set(i, w);
+    if (hidden[i]) hiddenCols.add(i);
+  }
+  return { columnWidths, hiddenCols };
 }
 
 function readHyperlinks(root: XmlElement | undefined, rels: readonly XlsxRelationship[], warn: (m: string) => void): XlsxHyperlink[] {
@@ -223,18 +292,22 @@ interface Master {
 }
 
 /** The top-level elements of a worksheet that are cut out as small trees. */
-const SMALL = new Set(['sheetPr', 'dimension', 'sheetViews', 'sheetFormatPr', 'cols', 'mergeCells', 'hyperlinks']);
+const SMALL = new Set(['sheetPr', 'dimension', 'sheetViews', 'sheetFormatPr', 'mergeCells', 'hyperlinks']);
 
 /** Read one worksheet part. `text` is the part's text (`undefined` when it could not be read: an empty sheet and a warning from the package). */
 export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: SheetContext): SpreadsheetSheet {
   const { styles, sharedStrings, date1904 } = ctx;
-  const formulaBudget = ctx.maxFormulaChars ?? DEFAULT_IMPORT_LIMITS.maxSheetFormulaChars;
+  const formulaBudget = ctx.maxSheetFormulaChars ?? DEFAULT_IMPORT_LIMITS.maxSheetFormulaChars;
+  const budget = ctx.budget ?? readBudget(DEFAULT_IMPORT_LIMITS);
   const name = ref.name;
   const cells = new Map<string, SpreadsheetCell>();
   const looks = new Map<number, CellLook>();
   const masters = new Map<string, Master>();
   const rowInfo = new Map<number, XlsxRowInfo>();
   const trees = new Map<string, XmlElement>();
+  const columns: XlsxColumnInfo[] = [];
+  let columnsSeen = 0;
+  let truncated = false;
   let extLst: string | undefined;
   let maxRow = 0;
   let maxCol = 0;
@@ -250,6 +323,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
 
   // sheetData state
   let depth = 0;
+  let top = '';
   let row = -1;
   let col = -1;
   let cellAttrs: SaxAttrs | undefined;
@@ -261,6 +335,9 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   let inInline = false;
   let phonetic = 0;
   let smallStart = -1;
+
+  // a shifted formula is about as long as its master (a few characters more or less where a reference gains or loses digits)
+  const affordable = (cost: number): boolean => formulaChars + cost <= formulaBudget && cost <= budget.formulaChars;
 
   const finishCell = (): void => {
     const attrs = cellAttrs as SaxAttrs;
@@ -334,10 +411,12 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
           const master = masters.get(key);
           if (master === undefined) warnCell(address, 'shared formula without a resolvable expression; imported as a plain value');
           else if (master.formula === undefined) formulasOverBudget++;
-          else if (formulaChars >= formulaBudget) formulasOverBudget++;
+          else if (!affordable(master.formula.length + FORMULA_OVERHEAD)) formulasOverBudget++;
           else {
             formulaText = shiftFormula(master.formula, row - master.row, col - master.col);
-            formulaChars += formulaText.length;
+            const cost = formulaText.length + FORMULA_OVERHEAD;
+            formulaChars += cost;
+            budget.formulaChars -= cost;
             info = { type: 'shared', si };
           }
         }
@@ -357,6 +436,11 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     // an empty cell is not kept: no value and nothing of a formula (a formula with text and no result still is, as is an array or
     // data-table anchor; `<f/>` alone is not one)
     if (result === null && formulaText === undefined && info === undefined) return;
+    if (budget.cells <= 0) {
+      truncated = true;
+      return;
+    }
+    budget.cells--;
     out.value = result;
     if (formulaText !== undefined) out.formula = formulaText;
     if (look?.style) out.style = look.style;
@@ -376,12 +460,16 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
           open(tag, attrs, selfClosing, start, end) {
             depth++;
             if (depth === 2) {
+              top = tag;
               if (SMALL.has(tag) || tag === 'extLst') smallStart = start;
               if (selfClosing && SMALL.has(tag)) {
                 const el = trees.has(tag) ? undefined : parseXml(text.slice(start, end));
                 if (el) trees.set(tag, el);
                 smallStart = -1;
               }
+            } else if (depth === 3 && tag === 'col' && top === 'cols') {
+              const col = readColumn(attrs);
+              if (col !== undefined && columnsSeen++ < MAX_COLS) columns.push(col);
             } else if (depth === 3 && tag === 'row') {
               const r = intAttr(attrs.r);
               if (r !== undefined && r >= 1 && r <= MAX_ROW) row = r - 1;
@@ -461,7 +549,10 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
             }
             else if (sink === 't') inline += chunk;
           },
+          halted: () => truncated,
         });
+  if (truncated) ctx.warn(`${name}: the workbook has more cells than the import limit allows (maxTotalCells); the rest of this sheet, and the sheets after it, were not read (${cells.size} cells kept here).`);
+  if (columnsSeen > MAX_COLS) ctx.warn(`${name}: the sheet has ${columnsSeen} column ranges; only the first ${MAX_COLS} were read.`);
   if (!wellFormed) {
     // a cell cut off by the damage is not kept: its value may be partial
     ctx.warn(`The sheet "${name}" is not well-formed XML; it was read as far as the damage (${cells.size} cells).`);
@@ -479,7 +570,6 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
 
   const merges = readMerges(trees.get('mergeCells'));
   const hyperlinks = readHyperlinks(trees.get('hyperlinks'), ref.rels, ctx.warn);
-  const columns = readColumns(trees.get('cols'));
   const views = readViews(trees.get('sheetViews'));
 
   if (dropMergeCovered(cells, merges) > 0) {
@@ -494,15 +584,7 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
   }
   applyHyperlinks(cells, hyperlinks);
 
-  const columnWidths = new Map<number, number>();
-  const hiddenCols = new Set<number>();
-  for (const c of columns) {
-    for (let i = c.min - 1; i <= Math.min(c.max - 1, maxCol); i++) {
-      if (c.width !== undefined) columnWidths.set(i, excelColumnWidthToPx(c.width));
-      if (c.hidden) hiddenCols.add(i);
-      else if (c.hidden === false) hiddenCols.delete(i);
-    }
-  }
+  const { columnWidths, hiddenCols } = applyColumns(columns, maxCol);
   const rowHeights = new Map<number, number>();
   const hiddenRows = new Set<number>();
   for (const [r, info] of rowInfo) {

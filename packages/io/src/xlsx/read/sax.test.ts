@@ -104,4 +104,20 @@ describe('scanXml', () => {
     expect(scan(deep(300)).ok).toBe(false);
     expect(scan(deep(256)).ok).toBe(true);
   });
+
+  it('ends the scan where the handler says it is halted, and answers true', () => {
+    const events: string[] = [];
+    let stop = false;
+    const ok = scanXml('<a><b/><b/><b/></a>', {
+      open: (name) => {
+        events.push(`open ${name}`);
+        if (events.length === 3) stop = true;
+      },
+      close: () => undefined,
+      text: () => undefined,
+      halted: () => stop,
+    });
+    expect(ok).toBe(true);
+    expect(events).toEqual(['open a', 'open b', 'open b']);
+  });
 });

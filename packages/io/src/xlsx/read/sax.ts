@@ -26,6 +26,8 @@ export interface SaxHandler {
   close(name: string, end: number): void;
   /** Character data (entities decoded, CDATA included), possibly in several pieces per element. */
   text(text: string): void;
+  /** Asked before each markup item: `true` ends the scan there (a caller that has all it will take). */
+  halted?(): boolean;
 }
 
 const ATTR = /\s*([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/y;
@@ -34,12 +36,13 @@ const NAME = /[^\s/>]+/y;
 /** The local part of a possibly prefixed name. */
 const local = (name: string): string => name.slice(name.indexOf(':') + 1);
 
-/** Scan `xml`, reporting to `handler`. Returns `true` when the whole text was well-formed (balanced, within the depth cap). */
+/** Scan `xml`, reporting to `handler`. Returns `true` when the whole text was well-formed (balanced, within the depth cap), or the handler ended the scan before the damage, if any, was reached. */
 export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML_LIMITS.maxDepth): boolean {
   const stack: string[] = [];
   const n = xml.length;
   let i = 0;
   while (i < n) {
+    if (handler.halted?.()) return true;
     const lt = xml.indexOf('<', i);
     if (lt < 0) {
       // trailing text outside any element is whitespace in a sound part; elements still open are damage
