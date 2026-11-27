@@ -43,6 +43,11 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
         {defs}
         {geom.type === 'ellipse' ? (
           <ellipse cx={geom.cx} cy={geom.cy} rx={geom.rx} ry={geom.ry} {...geomProps} />
+        ) : geom.strokeD ? (
+          <>
+            <path d={geom.d} fill={fill} stroke="none" />
+            <path d={geom.strokeD} {...geomProps} fill="none" />
+          </>
         ) : (
           <path d={geom.d} {...geomProps} />
         )}
