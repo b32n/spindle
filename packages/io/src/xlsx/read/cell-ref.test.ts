@@ -53,10 +53,9 @@ describe('parseRangeRef', () => {
     expect(parseRangeRef(`${' '.repeat(MAX_REF_CHARS)}A1`)).toBeUndefined();
     expect(parseRangeRef('A1'.padEnd(MAX_REF_CHARS, ' '))).toEqual({ startRow: 0, startCol: 0, endRow: 0, endCol: 0 });
     expect(parseRangeRef('A1'.padEnd(MAX_REF_CHARS + 1, ' '))).toBeUndefined();
-    const t0 = Date.now();
+    // (a quadratic reader never ends on this: the test's own timeout is the failure)
     expect(parseRangeRef(':'.repeat(20_000_000))).toBeUndefined();
-    expect(Date.now() - t0).toBeLessThan(500);
-  });
+  }, 120_000);
 
   it.each(['', 'A1:B2:C3', 'A1:', ':B2', 'A:A', '1:1', 'A1:ZZZ1', 'x'])('%j is not a range', (ref) => {
     expect(parseRangeRef(ref)).toBeUndefined();

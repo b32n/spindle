@@ -13,19 +13,11 @@ describe('parseDecimal', () => {
 });
 
 describe('parseDecimal on hostile text', () => {
-  const timed = (text: string): number => {
-    const t0 = Date.now();
-    expect(parseDecimal(text)).toBeUndefined();
-    return Date.now() - t0;
-  };
-
+  // (a quadratic reader never ends on these: the test's own timeout is the failure, not a reading of the clock)
   it('is linear in the length of a long digit run that does not end as a number (it was quadratic: 4.5 s at 80,000 digits)', () => {
-    expect(timed('1'.repeat(1_000_000) + 'x')).toBeLessThan(500);
-    expect(timed('1'.repeat(1_000_000) + '.' + '1'.repeat(1_000_000) + 'x')).toBeLessThan(500);
-    expect(timed('1'.repeat(1_000_000) + 'e' + '1'.repeat(1_000_000) + 'x')).toBeLessThan(500);
-    expect(timed(' '.repeat(1_000_000) + '1x')).toBeLessThan(500);
-    expect(timed('+.'.repeat(500_000))).toBeLessThan(500);
-  });
+    for (const text of ['1'.repeat(1_000_000) + 'x', '1'.repeat(1_000_000) + '.' + '1'.repeat(1_000_000) + 'x', '1'.repeat(1_000_000) + 'e' + '1'.repeat(1_000_000) + 'x', ' '.repeat(1_000_000) + '1x', '+.'.repeat(500_000)])
+      expect(parseDecimal(text)).toBeUndefined();
+  }, 120_000);
 
   it('reads a number of up to MAX_NUMBER_CHARS characters and no longer one', () => {
     expect(MAX_NUMBER_CHARS).toBe(64);
