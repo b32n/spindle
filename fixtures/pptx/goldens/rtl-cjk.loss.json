@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 4,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today); text in these fonts will show in a substitute unless the host provides them",
+      "effect": "approximated: font names are kept as written, but text in these fonts will show in a substitute unless the host provides them",
       "id": "pptx.fonts.unavailable",
       "label": "font(s) the editor may not have",
       "where": [
@@ -15,7 +15,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -25,7 +25,7 @@
     },
     {
       "count": 9,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "kept: the language tag is stored on the run; it does not drive spell checking",
       "id": "pptx.text.lang",
       "label": "run(s) tagged with a language other than en-US",
       "where": [
@@ -38,7 +38,7 @@
     },
     {
       "count": 3,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the paragraph direction is kept and drawn by the browser",
       "id": "pptx.text.rtl",
       "label": "right-to-left paragraph(s)",
       "where": [
@@ -47,7 +47,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: the text direction is kept and drawn by the browser",
       "id": "pptx.text.vertical",
       "label": "text box(es) or cell(s) with vertical text",
       "where": [

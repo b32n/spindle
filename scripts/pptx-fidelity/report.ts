@@ -61,7 +61,7 @@ export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
     scoreRow(
       'L13',
       area,
-      'Ledger: 0 unaccounted package parts on every file (text parity and element mapping arrive with the slide content reader: not measurable yet)',
+      'Ledger: 0 unaccounted package parts on every file (the text parity check is in the model goldens; element mapping arrives with the picture, table and group readers)',
       `${lg.unaccounted} of ${lg.total} parts unaccounted in ${lg.filesWithUnaccounted} of ${lg.files} files (${lg.mapped} mapped, ${lg.opaque} opaque, ${lg.dropped} dropped)`,
       '0',
       lg.unaccounted === 0

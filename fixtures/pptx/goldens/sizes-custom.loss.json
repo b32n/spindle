@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 5,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
@@ -14,7 +14,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "kept: the deck keeps its own slide size",
       "id": "pptx.slideSize",
       "label": "slide size other than 16:9",
       "where": [

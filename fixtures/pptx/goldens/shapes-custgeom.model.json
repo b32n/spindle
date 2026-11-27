@@ -15,12 +15,20 @@
       "tx1": "dk1",
       "tx2": "dk2"
     },
+    "fonts": {
+      "unavailable": [],
+      "used": [
+        "Calibri",
+        "Calibri Light"
+      ]
+    },
     "layouts": [
       {
         "background": {
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "title",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -29,6 +37,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 180,
               "w": 1100.8,
@@ -186,6 +207,18 @@
             "type": "ctrTitle"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 144,
               "w": 1100.8,
@@ -200,6 +233,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -217,6 +251,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -234,6 +269,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -251,6 +287,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -268,6 +305,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -285,6 +323,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -302,6 +341,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -319,6 +359,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -336,6 +377,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -833,6 +875,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "obj",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -841,6 +884,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 129.6,
               "w": 1100.8,
@@ -998,6 +1054,18 @@
             "type": "title"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 432,
               "w": 1100.8,
@@ -1012,6 +1080,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1029,6 +1098,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1046,6 +1116,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1063,6 +1134,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1080,6 +1152,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1097,6 +1170,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1114,6 +1188,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1131,6 +1206,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1148,6 +1224,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1645,6 +1722,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "twoObj",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -1653,6 +1731,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 129.6,
               "w": 1100.8,
@@ -1810,6 +1901,18 @@
             "type": "title"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 432,
               "w": 537.6,
@@ -1824,6 +1927,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1841,6 +1945,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1858,6 +1963,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1875,6 +1981,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1892,6 +1999,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1909,6 +2017,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1926,6 +2035,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1943,6 +2053,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1960,6 +2071,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1977,6 +2089,18 @@
             "type": "obj"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 432,
               "w": 537.6,
@@ -1991,6 +2115,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2008,6 +2133,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2025,6 +2151,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2042,6 +2169,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2059,6 +2187,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2076,6 +2205,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2093,6 +2223,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2110,6 +2241,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2127,6 +2259,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2624,6 +2757,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "titleOnly",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -2632,6 +2766,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 129.6,
               "w": 1100.8,
@@ -3269,6 +3416,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "blank",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -3758,6 +3906,206 @@
     },
     "slides": [
       {
+        "elements": [
+          {
+            "frame": {
+              "h": 129.6,
+              "w": 1100.8,
+              "x": 89.6,
+              "y": 36
+            },
+            "kind": "shape",
+            "name": "Title 2",
+            "placeholder": {
+              "type": "title"
+            },
+            "pptxId": "2",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Freeform shapes"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "bullet": {
+                      "kind": "none"
+                    },
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "major",
+                    "fontSize": 44,
+                    "indent": 0,
+                    "lineHeight": 0.9,
+                    "marginLeft": 0,
+                    "spaceBeforePct": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "autofit": {
+                  "kind": "shrink"
+                },
+                "insets": {
+                  "b": 4.8,
+                  "l": 9.6,
+                  "r": 9.6,
+                  "t": 4.8
+                },
+                "vert": "horz"
+              }
+            }
+          },
+          {
+            "fill": {
+              "color": {
+                "kind": "theme",
+                "slot": "accent1"
+              },
+              "kind": "solid"
+            },
+            "frame": {
+              "h": 157.48031496062993,
+              "w": 188.9763779527559,
+              "x": 62.99212598425197,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "custom"
+            },
+            "kind": "shape",
+            "name": "Triangle path",
+            "pptxId": "3"
+          },
+          {
+            "fill": {
+              "color": {
+                "kind": "theme",
+                "slot": "accent2"
+              },
+              "kind": "solid"
+            },
+            "frame": {
+              "h": 125.98425196850394,
+              "w": 251.96850393700788,
+              "x": 293.96325459317586,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "custom"
+            },
+            "kind": "shape",
+            "name": "Bezier curves",
+            "pptxId": "4"
+          },
+          {
+            "fill": {
+              "color": {
+                "kind": "theme",
+                "slot": "accent3"
+              },
+              "kind": "solid"
+            },
+            "frame": {
+              "h": 157.48031496062993,
+              "w": 188.9763779527559,
+              "x": 587.9265091863517,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "custom"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 2
+            },
+            "name": "Arcs, two paths",
+            "pptxId": "5"
+          },
+          {
+            "fill": {
+              "color": {
+                "kind": "theme",
+                "slot": "accent4"
+              },
+              "kind": "solid"
+            },
+            "frame": {
+              "h": 157.48031496062993,
+              "w": 251.96850393700788,
+              "x": 818.8976377952756,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "custom"
+            },
+            "kind": "shape",
+            "name": "Guides and connection sites",
+            "pptxId": "6",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "text rect"
+                    }
+                  ],
+                  "style": {
+                    "align": "center",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {}
+            }
+          },
+          {
+            "fill": {
+              "color": {
+                "kind": "theme",
+                "slot": "accent5"
+              },
+              "kind": "solid"
+            },
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 188.9763779527559,
+              "x": 62.99212598425197,
+              "y": 367.4540682414698
+            },
+            "geometry": {
+              "kind": "custom"
+            },
+            "kind": "shape",
+            "name": "Hand-drawn star",
+            "pptxId": "7"
+          }
+        ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
         "partName": "ppt/slides/slide1.xml",
         "pptxId": "256"
@@ -3784,6 +4132,14 @@
       },
       "name": "Office Theme"
     }
+  },
+  "textParity": {
+    "extra": [],
+    "inErrorSlides": 0,
+    "missing": [],
+    "modelRuns": 2,
+    "outOfScope": 0,
+    "sourceRuns": 2
   },
   "warnings": []
 }

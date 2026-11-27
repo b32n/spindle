@@ -53,6 +53,18 @@ describe('OoxmlPackage', () => {
     expect(await pkg.text('missing.xml')).toBeUndefined();
   });
 
+  it('checks well-formedness while parsing, reading the part once, and serves later reads from the cache', async () => {
+    const pkg = await open({ 'good.xml': '<a><b/></a>', 'bad.xml': '<a><b></a>', 'text.txt': 'x' });
+    expect(await pkg.xmlChecked('good.xml')).toMatchObject({ root: { name: 'a' }, wellFormed: true });
+    const bad = await pkg.xmlChecked('bad.xml');
+    expect(bad.wellFormed).toBe(false);
+    expect(bad.root?.name).toBe('a');
+    expect(await pkg.xmlChecked('bad.xml')).toEqual(bad);
+    expect(await pkg.xml('bad.xml')).toBe(bad.root);
+    expect(await pkg.xmlChecked('missing.xml')).toEqual({ root: undefined, wellFormed: true });
+    expect(await pkg.xmlChecked('text.txt')).toEqual({ root: undefined, wellFormed: false });
+  });
+
   it('reads relationships, resolving internal targets and keeping external ones, and caches them', async () => {
     const pkg = await open({
       'ppt/slides/_rels/slide1.xml.rels': `<Relationships ${RELS}><Relationship Id="rId1" Type="http://x/relationships/image" Target="../media/a.png"/><Relationship Id="rId2" Type="http://x/relationships/hyperlink" Target="https://e.com/" TargetMode="External"/><Relationship Type="plain"/><Relationship Id="rId4" Target="x.xml"/></Relationships>`,

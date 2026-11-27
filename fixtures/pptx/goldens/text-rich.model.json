@@ -15,12 +15,20 @@
       "tx1": "dk1",
       "tx2": "dk2"
     },
+    "fonts": {
+      "unavailable": [],
+      "used": [
+        "Calibri",
+        "Calibri Light"
+      ]
+    },
     "layouts": [
       {
         "background": {
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "title",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -29,6 +37,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 180,
               "w": 1100.8,
@@ -186,6 +207,18 @@
             "type": "ctrTitle"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 144,
               "w": 1100.8,
@@ -200,6 +233,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -217,6 +251,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -234,6 +269,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -251,6 +287,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -268,6 +305,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -285,6 +323,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -302,6 +341,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -319,6 +359,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -336,6 +377,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -833,6 +875,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "obj",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -841,6 +884,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 129.6,
               "w": 1100.8,
@@ -998,6 +1054,18 @@
             "type": "title"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 432,
               "w": 1100.8,
@@ -1012,6 +1080,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1029,6 +1098,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1046,6 +1116,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1063,6 +1134,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1080,6 +1152,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1097,6 +1170,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1114,6 +1188,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1131,6 +1206,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1148,6 +1224,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1645,6 +1722,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "twoObj",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -1653,6 +1731,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 129.6,
               "w": 1100.8,
@@ -1810,6 +1901,18 @@
             "type": "title"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 432,
               "w": 537.6,
@@ -1824,6 +1927,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1841,6 +1945,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1858,6 +1963,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1875,6 +1981,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1892,6 +1999,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1909,6 +2017,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1926,6 +2035,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1943,6 +2053,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1960,6 +2071,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -1977,6 +2089,18 @@
             "type": "obj"
           },
           {
+            "bodyProps": {
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 432,
               "w": 537.6,
@@ -1991,6 +2115,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2008,6 +2133,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2025,6 +2151,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2042,6 +2169,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2059,6 +2187,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2076,6 +2205,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2093,6 +2223,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2110,6 +2241,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2127,6 +2259,7 @@
                   "char": "•",
                   "kind": "char"
                 },
+                "bulletFont": "Arial",
                 "color": {
                   "kind": "theme",
                   "slot": "dk1"
@@ -2624,6 +2757,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "titleOnly",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -2632,6 +2766,19 @@
         "placeholders": [
           {
             "anchor": "middle",
+            "bodyProps": {
+              "anchor": "middle",
+              "autofit": {
+                "kind": "shrink"
+              },
+              "insets": {
+                "b": 4.8,
+                "l": 9.6,
+                "r": 9.6,
+                "t": 4.8
+              },
+              "vert": "horz"
+            },
             "frame": {
               "h": 129.6,
               "w": 1100.8,
@@ -3269,6 +3416,7 @@
           "kind": "theme",
           "slot": "lt1"
         },
+        "elements": [],
         "layoutType": "blank",
         "masterName": "Office Theme",
         "masterPart": "ppt/slideMasters/slideMaster1.xml",
@@ -3758,11 +3906,1171 @@
     },
     "slides": [
       {
+        "elements": [
+          {
+            "frame": {
+              "h": 129.6,
+              "w": 1100.8,
+              "x": 89.6,
+              "y": 36
+            },
+            "kind": "shape",
+            "name": "Title 2",
+            "placeholder": {
+              "type": "title"
+            },
+            "pptxId": "2",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Tabs, columns and vertical text"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "bullet": {
+                      "kind": "none"
+                    },
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "major",
+                    "fontSize": 44,
+                    "indent": 0,
+                    "lineHeight": 0.9,
+                    "marginLeft": 0,
+                    "spaceBeforePct": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "autofit": {
+                  "kind": "shrink"
+                },
+                "insets": {
+                  "b": 4.8,
+                  "l": 9.6,
+                  "r": 9.6,
+                  "t": 4.8
+                },
+                "vert": "horz"
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 94.48818897637796,
+              "w": 671.9160104986877,
+              "x": 72,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Tab stops",
+            "pptxId": "3",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Name\tQuantity\tPrice"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0,
+                    "tabStops": [
+                      {
+                        "align": "l",
+                        "pos": 192
+                      },
+                      {
+                        "align": "ctr",
+                        "pos": 384
+                      },
+                      {
+                        "align": "r",
+                        "pos": 576
+                      }
+                    ]
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Pencil\t12\t0.35"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0,
+                    "tabStops": [
+                      {
+                        "align": "l",
+                        "pos": 192
+                      },
+                      {
+                        "align": "ctr",
+                        "pos": 384
+                      },
+                      {
+                        "align": "r",
+                        "pos": 576
+                      }
+                    ]
+                  }
+                }
+              ],
+              "props": {}
+            }
+          },
+          {
+            "frame": {
+              "h": 157.48031496062993,
+              "w": 671.9160104986877,
+              "x": 72,
+              "y": 272.96587926509187
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Two columns",
+            "pptxId": "4",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Column text 1: the quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Column text 2: the quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Column text 3: the quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Column text 4: the quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Column text 5: the quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Column text 6: the quick brown fox jumps over the lazy dog."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "columnSpacing": 28.8,
+                "columns": 2
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 293.96325459317586,
+              "w": 94.48818897637796,
+              "x": 776.9028871391076,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Rotated 90",
+            "pptxId": "5",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Rotated 90"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "vert": "vert",
+                "wrap": "square"
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 293.96325459317586,
+              "w": 94.48818897637796,
+              "x": 881.8897637795276,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Rotated 270",
+            "pptxId": "6",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Rotated 270"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "vert": "vert270",
+                "wrap": "square"
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 293.96325459317586,
+              "w": 94.48818897637796,
+              "x": 986.8766404199475,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "East Asian vertical",
+            "pptxId": "7",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "East Asian vertical"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "vert": "eaVert",
+                "wrap": "square"
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 293.96325459317586,
+              "w": 94.48818897637796,
+              "x": 1091.8635170603675,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Stacked",
+            "pptxId": "8",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Stacked"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "vert": "wordArtVert",
+                "wrap": "square"
+              }
+            }
+          }
+        ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
         "partName": "ppt/slides/slide1.xml",
         "pptxId": "256"
       },
       {
+        "elements": [
+          {
+            "frame": {
+              "h": 129.6,
+              "w": 1100.8,
+              "x": 89.6,
+              "y": 36
+            },
+            "kind": "shape",
+            "name": "Title 2",
+            "placeholder": {
+              "type": "title"
+            },
+            "pptxId": "2",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Autofit, scripts and bullets"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "bullet": {
+                      "kind": "none"
+                    },
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "major",
+                    "fontSize": 44,
+                    "indent": 0,
+                    "lineHeight": 0.9,
+                    "marginLeft": 0,
+                    "spaceBeforePct": 0
+                  }
+                }
+              ],
+              "props": {
+                "anchor": "middle",
+                "autofit": {
+                  "kind": "shrink"
+                },
+                "insets": {
+                  "b": 4.8,
+                  "l": 9.6,
+                  "r": 9.6,
+                  "t": 4.8
+                },
+                "vert": "horz"
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 125.98425196850394,
+              "w": 377.9527559055118,
+              "x": 72,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Shrink text",
+            "pptxId": "3",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 1: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 2: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 3: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 4: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 5: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 6: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 7: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shrink on overflow, line 8: this text is deliberately too long for its box."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "autofit": {
+                  "fontScale": 0.625,
+                  "kind": "shrink",
+                  "lnSpcReduction": 0.2
+                },
+                "wrap": "square"
+              }
+            }
+          },
+          {
+            "frame": {
+              "h": 62.99212598425197,
+              "w": 314.96062992125985,
+              "x": 482.9396325459318,
+              "y": 157.48031496062993
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Resize shape",
+            "pptxId": "4",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Shape grows to fit its text, however long it gets."
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "autofit": {
+                  "kind": "resize"
+                },
+                "wrap": "square"
+              }
+            }
+          },
+          {
+            "fill": {
+              "kind": "none"
+            },
+            "frame": {
+              "h": 52.493438320209975,
+              "w": 629.9212598425197,
+              "x": 482.9396325459318,
+              "y": 241.4698162729659
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "name": "Baseline",
+            "pptxId": "5",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "H"
+                    },
+                    {
+                      "baseline": -0.25,
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "2"
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "O and x"
+                    },
+                    {
+                      "baseline": 0.3,
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "2"
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": " "
+                    },
+                    {
+                      "caps": "all",
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "all caps"
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": " "
+                    },
+                    {
+                      "caps": "small",
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "small caps"
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": " "
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "spacing": 3,
+                      "text": "spaced"
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": " "
+                    },
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "spacing": -1,
+                      "text": "tight"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "autofit": {
+                  "kind": "none"
+                },
+                "wrap": "square"
+              }
+            },
+            "textBox": true
+          },
+          {
+            "frame": {
+              "h": 188.9763779527559,
+              "w": 671.9160104986877,
+              "x": 72,
+              "y": 335.95800524934384
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "Bullets",
+            "pptxId": "6",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Custom character bullet"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "bullet": {
+                      "char": "★",
+                      "kind": "char"
+                    },
+                    "bulletColor": {
+                      "hex": "#C00000",
+                      "kind": "rgb"
+                    },
+                    "bulletFont": "Arial",
+                    "bulletSizePct": 1.2,
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "indent": -36,
+                    "marginLeft": 36
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Symbol font bullet"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "bullet": {
+                      "char": "§",
+                      "kind": "char"
+                    },
+                    "bulletFont": "Wingdings",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "indent": -36,
+                    "marginLeft": 36
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Picture bullet"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "indent": -36,
+                    "marginLeft": 36
+                  }
+                },
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "Numbered, coloured, sized"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "bullet": {
+                      "kind": "auto",
+                      "scheme": "alphaUcParenR"
+                    },
+                    "bulletColor": {
+                      "hex": "#0070C0",
+                      "kind": "rgb"
+                    },
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "indent": -36,
+                    "marginLeft": 36
+                  }
+                }
+              ],
+              "props": {}
+            }
+          },
+          {
+            "frame": {
+              "h": 62.99212598425197,
+              "w": 167.97900262467192,
+              "x": 776.9028871391076,
+              "y": 335.95800524934384
+            },
+            "geometry": {
+              "kind": "preset",
+              "known": true,
+              "prst": "rect"
+            },
+            "kind": "shape",
+            "line": {
+              "fill": {
+                "color": {
+                  "hex": "#000000",
+                  "kind": "rgb"
+                },
+                "kind": "solid"
+              },
+              "join": "round",
+              "width": 1
+            },
+            "name": "No wrap",
+            "pptxId": "7",
+            "text": {
+              "paragraphs": [
+                {
+                  "level": 0,
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "A line that never wraps at the edge"
+                    }
+                  ],
+                  "style": {
+                    "align": "left",
+                    "color": {
+                      "kind": "theme",
+                      "slot": "dk1"
+                    },
+                    "font": "minor",
+                    "fontSize": 18,
+                    "marginLeft": 0
+                  }
+                }
+              ],
+              "props": {
+                "autofit": {
+                  "kind": "none"
+                },
+                "wrap": "none"
+              }
+            }
+          }
+        ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
         "partName": "ppt/slides/slide2.xml",
         "pptxId": "257"
@@ -3789,6 +5097,14 @@
       },
       "name": "Office Theme"
     }
+  },
+  "textParity": {
+    "extra": [],
+    "inErrorSlides": 0,
+    "missing": [],
+    "modelRuns": 40,
+    "outOfScope": 0,
+    "sourceRuns": 40
   },
   "warnings": []
 }

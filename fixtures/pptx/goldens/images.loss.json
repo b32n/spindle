@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.images.crop",
       "label": "cropped picture(s)",
       "where": [
@@ -12,7 +12,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.images.linked",
       "label": "linked (not embedded) picture(s)",
       "where": [
@@ -21,7 +21,7 @@
     },
     {
       "count": 4,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.images.recolor",
       "label": "recoloured picture(s)",
       "where": [
@@ -30,7 +30,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.images.svg",
       "label": "SVG picture(s)",
       "where": [
@@ -39,7 +39,7 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.images.unsupportedFormat",
       "label": "picture(s) in a format browsers cannot show (EMF, WMF)",
       "where": [
@@ -48,7 +48,7 @@
     },
     {
       "count": 4,
-      "effect": "lost: not imported (no PPTX importer exists yet, so no .pptx can be opened today)",
+      "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",
       "where": [
