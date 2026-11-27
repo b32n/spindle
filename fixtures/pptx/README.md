@@ -100,6 +100,8 @@ Every part (zip entry) of the input gets exactly one status, decided by the firs
   properties, the table style list, printer settings). When the import fails (the four rejected files) the `mapped`
   parts turn into `unaccounted`. A `mapped` part is one the reader reads; what it takes from a slide or layout grows
   over the K9 PRs, and the loss ids say what is still not carried.
+  Rules are path-based, so a comments part or notes page that no slide points at (an orphan) is `mapped` here while the
+  loss detector reports it as `lost`; the loss report is the authority for those parts.
 - `opaque`: kept byte for byte and written back on export. Always zero until the opaque part store (plan X5) exists.
 - `dropped`: not imported, and the loss report covers it. A rule only applies when the file's loss report contains one
   of the rule's ids (`pptx.masters.handoutMaster`, `pptx.charts`,
