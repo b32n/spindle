@@ -51,8 +51,13 @@ import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } f
  * 7: K6b elbow and curved connectors. A line element's `props` carry `connector` ('elbow' | 'curved') and `adjustments`
  * (the elbow's middle-leg position), and a bound anchor on an ellipse, diamond or triangle sits on the outline rather than
  * the box. A v6 client would draw these as straight lines to the wrong points, so it must not join a v7 room.
+ *
+ * 8: K6c custom geometry. A shape element's `props.shape` may be `path`, and `props.path` carries the `CustomGeometry`
+ * (paths of move/line/cubic/quad/arc/close commands, fill modes). A v7 client would draw such a shape as a plain
+ * rectangle and, on its next write of the element, keep the key but could not edit or re-export it faithfully, so it
+ * must not join a v8 room.
  */
-export const COLLAB_SCHEMA_VERSION = 7;
+export const COLLAB_SCHEMA_VERSION = 8;
 
 /** Thrown when a room was written with a newer Y deck layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

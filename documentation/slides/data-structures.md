@@ -43,7 +43,7 @@ interface ElementBase {
 The element union is `text` · `shape` · `image` · `line`:
 
 - **`TextElement`** — `richText` (ProseMirror JSON), `bodyStyle`, optional `fill` / `stroke`.
-- **`ShapeElement`** — `shape` (one of 76 presets, or `unknown:<prst>` for an OOXML preset the editor cannot draw, kept for re-export), `fill`, optional `stroke`, `adjustments`, `flipH/V`, and its own optional `richText`.
+- **`ShapeElement`** — `shape` (one of 76 presets, `unknown:<prst>` for an OOXML preset the editor cannot draw, kept for re-export, or `path` for custom geometry held in `path`, a `CustomGeometry` of paths of move/line/cubic/quad/arc/close commands), `fill`, optional `stroke`, `adjustments`, `flipH/V`, and its own optional `richText`.
 - **`ImageElement`** — `src`, `naturalW/H`, `flipH/V`.
 - **`LineElement`** — `stroke`, `startArrow?` / `endArrow?`, `flipH/V`, `startBind?` / `endBind?` (anchor on another element), and for connectors `connector?` (`'elbow'` or `'curved'`; absent = straight) with `adjustments?` (elbow middle-leg position, 0 to 1). Shape-specific connection sites (ellipse, diamond, triangle) reuse the eight anchor ids; see `scene/connector.ts`.
 

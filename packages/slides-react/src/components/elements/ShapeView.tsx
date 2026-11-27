@@ -1,6 +1,7 @@
 import React, { useId } from 'react';
-import { autofitMode, type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { autofitMode, normalizeCustomGeometry, type ShapeElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { shapeGeom } from './shapes';
+import { customPathD, pathShade } from './custom-geom';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
 import { useEditingId } from '../../hooks';
@@ -32,6 +33,9 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
     transformOrigin: 'center center',
   };
 
+  // a `path` shape with no usable geometry falls back to the rectangle `shapeGeom` gives any non-preset name
+  const custom = el.shape === 'path' ? normalizeCustomGeometry(el.path) : undefined;
+
   const geomProps = {
     fill,
     ...(stroke ? { stroke: stroke.stroke, strokeWidth: stroke.strokeWidth, strokeDasharray: stroke.strokeDasharray } : {}),
@@ -41,7 +45,19 @@ export function ShapeView({ el, theme, interactive = false }: { el: ShapeElement
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={svgStyle}>
         {defs}
-        {geom.type === 'ellipse' ? (
+        {custom ? (
+          custom.paths.map((p, i) => {
+            const d = customPathD(p, w, h);
+            const shade = pathShade(p.fill);
+            return (
+              <React.Fragment key={i}>
+                <path d={d} fill={p.fill === 'none' ? 'none' : fill} stroke="none" />
+                {shade ? <path d={d} fill={shade.color} fillOpacity={shade.opacity} stroke="none" /> : null}
+                {p.stroke === false ? null : <path d={d} {...geomProps} fill="none" />}
+              </React.Fragment>
+            );
+          })
+        ) : geom.type === 'ellipse' ? (
           <ellipse cx={geom.cx} cy={geom.cy} rx={geom.rx} ry={geom.ry} {...geomProps} />
         ) : geom.strokeD ? (
           <>

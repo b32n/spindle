@@ -90,6 +90,7 @@ export function createTextElement(input: TextElementInput): TextElement {
 
 export interface ShapeElementInput extends BaseElementInput {
   shape?: ShapeKind;
+  path?: ShapeElement['path'];
   adjustments?: number[];
   flipH?: boolean;
   flipV?: boolean;
@@ -106,6 +107,7 @@ export function createShapeElement(input: ShapeElementInput): ShapeElement {
     shape: input.shape ?? 'rect',
     fill: input.fill ?? { kind: 'solid', color: { kind: 'theme', slot: 'accent1' } },
   };
+  if (input.path) el.path = input.path;
   if (input.adjustments) el.adjustments = input.adjustments;
   if (input.flipH) el.flipH = input.flipH;
   if (input.flipV) el.flipV = input.flipV;
