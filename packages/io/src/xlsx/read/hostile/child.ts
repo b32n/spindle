@@ -1,7 +1,8 @@
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { availableParallelism, tmpdir, totalmem } from 'node:os';
 import { join, resolve } from 'node:path';
+import { randomBytes } from 'node:crypto';
 import type { ImportLossItem } from '@b32nio/spindle-shared';
 import type { ImportLimits } from '../../../common/safe-zip';
 
@@ -48,12 +49,43 @@ function alive(pid: number): boolean {
   }
 }
 
+/** What the scratch directories and the slots of this file are named (`spindle-hostile-` and what follows), and how old one must be to be swept. */
+const OWN = /^spindle-hostile-/;
+const STALE_MS = 24 * 60 * 60 * 1000;
+const swept = new Set<string>();
+
+/** Remove the directories of this file's own names (`spindle-hostile-*`) in `root` that were last changed over `maxAgeMs` ago: what a killed run leaves (its 55 MB scratch directory, a slot). Once for each `root` in a process. */
+export function sweepStale(root: string, maxAgeMs: number = STALE_MS, now: number = Date.now()): void {
+  if (swept.has(root)) return;
+  swept.add(root);
+  for (const name of readdirSync(root)) {
+    if (!OWN.test(name)) continue;
+    try {
+      if (now - statSync(join(root, name)).mtimeMs > maxAgeMs) rmSync(join(root, name), { recursive: true, force: true });
+    } catch {
+      // gone already, or somebody else's: leave it
+    }
+  }
+}
+
+const pidOf = (dir: string): number => {
+  try {
+    return Number(readFileSync(join(dir, 'pid'), 'utf8'));
+  } catch {
+    // the holder is between creating the directory and naming itself (or the slot is gone)
+    return NaN;
+  }
+};
+
 /**
  * Run `fn` holding one of `slots` machine-wide slots (a directory each, in the temp directory, that names the holder): the jest workers
- * of one run, or of two, do not each start a child of a gigabyte at the same time. A slot whose holder is gone (killed) is taken over.
- * After `waitMs` it runs anyway: a stuck neighbour must not fail the tests that wait for it.
+ * of one run, or of two, do not each start a child of a gigabyte at the same time. A slot whose holder is gone (killed) is taken over: by
+ * renaming it to a name of the taker's own (one waiter wins the rename), and removing it only when it still names the dead holder, so a
+ * waiter that was late cannot remove the slot another has just taken. After `waitMs` it runs anyway: a stuck neighbour must not fail the
+ * tests that wait for it. Directories of this file's names that a killed run left over a day ago are removed first.
  */
 export function withSlot<T>(fn: () => T, slots: number = slotCount(memoryBudget()), waitMs = 600_000, root: string = tmpdir()): T {
+  sweepStale(root);
   const deadline = Date.now() + waitMs;
   let held: string | undefined;
   while (held === undefined && Date.now() < deadline) {
@@ -65,13 +97,25 @@ export function withSlot<T>(fn: () => T, slots: number = slotCount(memoryBudget(
         held = dir;
       } catch {
         // taken: by a live process, or by one that is gone
-        let pid = NaN;
-        try {
-          pid = Number(readFileSync(join(dir, 'pid'), 'utf8'));
-        } catch {
-          // the holder is between creating the directory and naming itself
+        const pid = pidOf(dir);
+        if (!Number.isNaN(pid) && !alive(pid)) {
+          const claimed = `${dir}.reap-${randomBytes(6).toString('hex')}`;
+          try {
+            renameSync(dir, claimed);
+          } catch {
+            // another waiter won the rename
+            continue;
+          }
+          if (pidOf(claimed) === pid) rmSync(claimed, { recursive: true, force: true });
+          else {
+            // what was claimed is a slot another has taken since: put it back (the name is free unless a third has made it)
+            try {
+              renameSync(claimed, dir);
+            } catch {
+              rmSync(claimed, { recursive: true, force: true });
+            }
+          }
         }
-        if (!Number.isNaN(pid) && !alive(pid)) rmSync(dir, { recursive: true, force: true });
       }
     }
     if (held === undefined) sleep(50);
@@ -79,7 +123,8 @@ export function withSlot<T>(fn: () => T, slots: number = slotCount(memoryBudget(
   try {
     return fn();
   } finally {
-    if (held !== undefined) rmSync(held, { recursive: true, force: true });
+    // only a slot that still names this process: after a takeover it is somebody else's
+    if (held !== undefined && pidOf(held) === process.pid) rmSync(held, { recursive: true, force: true });
   }
 }
 

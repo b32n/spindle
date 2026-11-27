@@ -1,8 +1,17 @@
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import * as fs from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import JSZip from 'jszip';
-import { describeIf, endOf, heavyAllowed, importInChild, lastJson, MB, memoryBudget, runChild, slotCount, survived, SURVIVED, withSlot } from './child';
+import { describeIf, endOf, heavyAllowed, importInChild, lastJson, MB, memoryBudget, runChild, slotCount, survived, SURVIVED, sweepStale, withSlot } from './child';
+
+// `renameSync` can be made to fail or to lose a race for one call, and does what it does otherwise
+const realRename = jest.requireActual<typeof fs>('node:fs').renameSync;
+jest.mock('node:fs', () => {
+  const actual = jest.requireActual<typeof fs>('node:fs');
+  return { ...actual, renameSync: jest.fn((from: fs.PathLike, to: fs.PathLike) => actual.renameSync(from, to)) };
+});
+const renameMock = jest.mocked(fs.renameSync);
 
 const BEHAVE = resolve(__dirname, 'behave-probe.ts');
 const GB = 1024 * MB;
@@ -44,7 +53,10 @@ describe('withSlot', () => {
   beforeEach(() => {
     root = mkdtempSync(join(tmpdir(), 'slot-test-'));
   });
-  afterEach(() => rmSync(root, { recursive: true, force: true }));
+  afterEach(() => {
+    renameMock.mockReset().mockImplementation(realRename);
+    rmSync(root, { recursive: true, force: true });
+  });
 
   it('holds a slot while it runs and frees it after, also when it throws', () => {
     expect(withSlot(() => readdirSync(root), 1, 1_000, root)).toEqual(['spindle-hostile-slot-0']);
@@ -92,8 +104,96 @@ describe('withSlot', () => {
     }
   });
 
+  it('loses nothing when two waiters see the same dead holder: the one that loses the rename leaves the slot to the winner', () => {
+    const dir = join(root, 'spindle-hostile-slot-0');
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'pid'), '99999999');
+    // the other waiter has renamed it (and gone on) just before this one does
+    renameMock.mockImplementationOnce(() => {
+      throw Object.assign(new Error('gone'), { code: 'ENOENT' });
+    });
+    expect(withSlot(() => 'ran', 1, 5_000, root)).toBe('ran');
+    // the dead slot was still there for the next try: taken over, then freed
+    expect(readdirSync(root)).toEqual([]);
+  });
+
+  it('does not remove a slot that another has taken since the pid was read, and puts it back', () => {
+    const dir = join(root, 'spindle-hostile-slot-0');
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'pid'), '99999999');
+    let seen = '';
+    // between the read of the dead pid and the claim, another process took the slot (it names itself)
+    renameMock.mockImplementationOnce((from, to) => {
+      writeFileSync(join(String(from), 'pid'), String(process.pid));
+      realRename(from, to);
+    });
+    withSlot(() => {
+      seen = readFileSync(join(dir, 'pid'), 'utf8');
+    }, 1, 100, root);
+    // it was ours to find alive (a live pid), so the slot was put back and this waiter ran after its wait without it
+    expect(seen).toBe(String(process.pid));
+    expect(existsSync(dir)).toBe(true);
+    expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']);
+  });
+
+  it('removes what it claimed when it cannot put it back', () => {
+    const dir = join(root, 'spindle-hostile-slot-0');
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'pid'), '99999999');
+    renameMock
+      .mockImplementationOnce((from, to) => {
+        writeFileSync(join(String(from), 'pid'), String(process.pid));
+        realRename(from, to);
+      })
+      .mockImplementationOnce(() => {
+        throw Object.assign(new Error('taken'), { code: 'EEXIST' });
+      });
+    expect(withSlot(() => 'ran', 1, 5_000, root)).toBe('ran');
+    expect(readdirSync(root)).toEqual([]);
+  });
+
+  it('frees only a slot that still names it', () => {
+    withSlot(() => writeFileSync(join(root, 'spindle-hostile-slot-0', 'pid'), '1'), 1, 1_000, root);
+    expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']);
+  });
+
   it('uses the machine default slots in the temp directory', () => {
     expect(withSlot(() => 7)).toBe(7);
+  });
+});
+
+describe('sweepStale', () => {
+  it('removes what its own names left a day ago, and nothing else, and looks once for a directory', () => {
+    const root = mkdtempSync(join(tmpdir(), 'sweep-test-'));
+    try {
+      const old = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      for (const name of ['spindle-hostile-AAAA', 'spindle-hostile-slot-0', 'other-old', 'spindle-hostile-fresh']) mkdirSync(join(root, name));
+      writeFileSync(join(root, 'spindle-hostile-AAAA', 'big'), 'x');
+      for (const name of ['spindle-hostile-AAAA', 'spindle-hostile-slot-0', 'other-old']) utimesSync(join(root, name), old, old);
+      // a link to nothing (it is gone between the listing and the look): left alone
+      symlinkSync(join(root, 'nowhere'), join(root, 'spindle-hostile-dangling'));
+      sweepStale(root);
+      expect(readdirSync(root).sort()).toEqual(['other-old', 'spindle-hostile-dangling', 'spindle-hostile-fresh']);
+      // once for each root: a second call does not look again
+      mkdirSync(join(root, 'spindle-hostile-BBBB'));
+      utimesSync(join(root, 'spindle-hostile-BBBB'), old, old);
+      sweepStale(root);
+      expect(existsSync(join(root, 'spindle-hostile-BBBB'))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('is done by withSlot before it takes a slot', () => {
+    const root = mkdtempSync(join(tmpdir(), 'sweep-test-'));
+    try {
+      const old = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      mkdirSync(join(root, 'spindle-hostile-OLD'));
+      utimesSync(join(root, 'spindle-hostile-OLD'), old, old);
+      withSlot(() => expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']), 1, 1_000, root);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 
