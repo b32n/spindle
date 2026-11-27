@@ -9,6 +9,14 @@ import {
   resolveFont,
   resolveParagraph,
   formatOrdinal,
+  resolveRun,
+  runCss,
+  baselineCss,
+  resolveFieldText,
+  fieldMarks,
+  safeFieldKind,
+  inlineText,
+  type FieldContext,
   type RichTextDoc,
   type RichTextParagraph,
   type RichTextInline,
@@ -36,12 +44,15 @@ function sanitizeHref(href: string | null | undefined): string {
   return SAFE_HREF_SCHEMES.includes(scheme) ? value : '';
 }
 
-function inlineStyle(inline: RichTextInline, theme: ThemeData, scaled: boolean): { style: React.CSSProperties; href?: string } {
+/** What field runs (slide number, date) show: the slide being drawn and the moment. SlideView provides it. */
+export const FieldContextValue = React.createContext<FieldContext | null>(null);
+
+function inlineStyle(marks: RichTextInline['marks'], theme: ThemeData, scaled: boolean): { style: React.CSSProperties; href?: string } {
   const style: React.CSSProperties = {};
   const decorations: string[] = [];
   let href: string | undefined;
 
-  for (const mark of inline.marks ?? []) {
+  for (const mark of marks ?? []) {
     switch (mark.type) {
       case 'bold':
         style.fontWeight = 700;
@@ -78,25 +89,30 @@ function inlineStyle(inline: RichTextInline, theme: ThemeData, scaled: boolean):
     }
   }
   if (decorations.length) style.textDecoration = decorations.join(' ');
+  Object.assign(style, runCss(resolveRun(marks)));
   return { style, href };
 }
 
-function renderInline(inline: RichTextInline, theme: ThemeData, key: number, scaled: boolean): React.ReactNode {
-  const { style, href } = inlineStyle(inline, theme, scaled);
-  const span = (
-    <span key={key} style={style}>
-      {inline.text}
-    </span>
-  );
+function renderInline(inline: RichTextInline, theme: ThemeData, key: number, scaled: boolean, fields: FieldContext): React.ReactNode {
+  const marks = inline.type === 'field' ? fieldMarks(inline) : inline.marks;
+  const { style, href } = inlineStyle(marks, theme, scaled);
+  const run = resolveRun(marks);
+  let content: React.ReactNode = inline.type === 'field' ? resolveFieldText(inline.attrs, fields, inlineText(inline)) : inline.text;
+  // A raised or lowered run is an inner span (smaller, shifted) so the outer span's size stays the base for its em.
+  if (run.baselinePct !== null) content = <span style={baselineCss(run.baselinePct)}>{content}</span>;
   const safeHref = sanitizeHref(href);
   if (safeHref) {
     return (
-      <a key={key} href={safeHref} style={style} target="_blank" rel="noreferrer">
-        {inline.text}
+      <a key={key} href={safeHref} style={style} lang={run.lang ?? undefined} target="_blank" rel="noreferrer">
+        {content}
       </a>
     );
   }
-  return span;
+  return (
+    <span key={key} style={style} lang={run.lang ?? undefined} {...(inline.type === 'field' ? { 'data-field': safeFieldKind(inline.attrs?.kind) } : {})}>
+      {content}
+    </span>
+  );
 }
 
 function renderParagraph(
@@ -104,7 +120,8 @@ function renderParagraph(
   theme: ThemeData,
   key: number,
   ordinal: number,
-  scaled: boolean
+  scaled: boolean,
+  fields: FieldContext
 ): React.ReactNode {
   const attrs = p.attrs ?? {};
   const r = resolveParagraph(attrs);
@@ -119,7 +136,7 @@ function renderParagraph(
     ...(r.textIndent ? { textIndent: r.textIndent } : {}),
   };
 
-  const inlines = (p.content ?? []).map((inline, i) => renderInline(inline, theme, i, scaled));
+  const inlines = (p.content ?? []).map((inline, i) => renderInline(inline, theme, i, scaled, fields));
   const body = inlines.length ? inlines : <br />;
 
   const marker = r.marker;
@@ -160,6 +177,7 @@ function StaticRichTextImpl({ doc, theme, scaled = false }: StaticRichTextProps)
   // Per-nesting-level ordered-list counters. A numbered item continues its own
   // level's sequence and restarts any deeper levels; a non-numbered paragraph
   // breaks the list. (A single flat counter numbered nested lists continuously.)
+  const fields = React.useContext(FieldContextValue) ?? { slideNumber: null, now: new Date() };
   const counters: number[] = [];
   const children = doc.content.map((p, i) => {
     const attrs = p.attrs ?? {};
@@ -174,7 +192,7 @@ function StaticRichTextImpl({ doc, theme, scaled = false }: StaticRichTextProps)
     } else {
       counters.length = 0;
     }
-    return renderParagraph(p, theme, i, ordinal, scaled);
+    return renderParagraph(p, theme, i, ordinal, scaled, fields);
   });
   return <>{children}</>;
 }

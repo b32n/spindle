@@ -19,7 +19,11 @@ jest.mock('../hooks', () => ({
 let editingView: unknown = null;
 const applyFormatMock = jest.fn();
 jest.mock('../context/DeckContext', () => ({ useDeckContext: () => ({ editing: { getView: () => editingView } }) }));
-jest.mock('../interactions/formatting', () => ({ applyFormat: (...a: unknown[]) => applyFormatMock(...a) }));
+const insertFieldMock = jest.fn();
+jest.mock('../interactions/formatting', () => ({
+  applyFormat: (...a: unknown[]) => applyFormatMock(...a),
+  insertField: (...a: unknown[]) => insertFieldMock(...a),
+}));
 jest.mock('../text-fit', () => ({ refitElement: (...a: unknown[]) => refit(...a) }));
 jest.mock('@b32nio/spindle-shared/react', () => ({
   ...jest.requireActual('@b32nio/spindle-shared/react'),
@@ -28,7 +32,8 @@ jest.mock('@b32nio/spindle-shared/react', () => ({
 
 import { MenuRow } from '@b32nio/spindle-shared/react';
 import { ParagraphFields } from './ParagraphFields';
-import { TextOptionsButton, LiveTextBodyFields, LiveParagraphFields } from './TextOptionsButton';
+import { RunFields } from './RunFields';
+import { TextOptionsButton, LiveTextBodyFields, LiveParagraphFields, LiveRunFields } from './TextOptionsButton';
 
 type P = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const find = (node: React.ReactNode, pred: (e: React.ReactElement<P>) => boolean, out: React.ReactElement<P>[] = []) => {
@@ -89,6 +94,7 @@ describe('TextOptionsButton', () => {
     const [pop] = find(render(), (e) => e.type === Popover);
     expect(find(pop, (e) => e.type === LiveTextBodyFields)[0].props.id).toBe('t');
     expect(find(pop, (e) => e.type === LiveParagraphFields)[0].props.id).toBe('t');
+    expect(find(pop, (e) => e.type === LiveRunFields)[0].props.id).toBe('t');
     pop.props.onClose();
     expect(find(render(), (e) => e.type === Popover)).toHaveLength(0);
     find(render(), byTitle('Text box options'))[0].props.onClick();
@@ -123,6 +129,7 @@ describe('TextOptionsButton', () => {
     expect(title).toBe('Text box options');
     expect(find(content as React.ReactNode, (e) => e.type === LiveTextBodyFields)).toHaveLength(1);
     expect(find(content as React.ReactNode, (e) => e.type === LiveParagraphFields)[0].props.id).toBe('t');
+    expect(find(content as React.ReactNode, (e) => e.type === LiveRunFields)[0].props.id).toBe('t');
   });
 });
 
@@ -186,5 +193,47 @@ describe('LiveParagraphFields', () => {
     expect(applyFormatMock.mock.calls[0][0].editingView).toBe(editingView);
     editingView = { state: { selection: { $from: { parent: { type: { name: 'doc' }, attrs: {} } } } } };
     expect(fields().props.attrs).toEqual({ marginLeft: 9 });
+  });
+});
+
+describe('LiveRunFields', () => {
+  const fields = (id = 't') => LiveRunFields({ id }) as React.ReactElement<P>;
+  const bold = { type: 'text', text: 'a', marks: [{ type: 'baseline', attrs: { pct: 30 } }] };
+  afterEach(() => {
+    editingView = null;
+    applyFormatMock.mockClear();
+    insertFieldMock.mockClear();
+  });
+  it('renders nothing for a missing or non-text element', () => {
+    element = undefined;
+    expect(fields()).toBeNull();
+    element = { id: 't', type: 'image' };
+    expect(fields()).toBeNull();
+  });
+  it('idle: shows the first run, applies marks to the element, cannot insert a field, and refits', () => {
+    element = { id: 't', type: 'text', richText: { type: 'doc', content: [{ type: 'paragraph', content: [bold] }] } };
+    const tree = fields();
+    expect(tree.type).toBe(RunFields);
+    expect(tree.props.run.baselinePct).toBe(30);
+    expect(tree.props.onInsertField).toBeUndefined();
+    tree.props.onMark({ type: 'caps', attrs: { kind: 'all' } });
+    tree.props.onMark({ type: 'caps', attrs: null });
+    expect(applyFormatMock).toHaveBeenNthCalledWith(1, { editingView: null, deck: expect.anything(), elementId: 't' }, { setMark: { type: 'caps', attrs: { kind: 'all' } } });
+    expect(applyFormatMock).toHaveBeenNthCalledWith(2, expect.anything(), { removeMark: 'caps' });
+    expect(refit).toHaveBeenCalledTimes(2);
+    element = { id: 't', type: 'shape' };
+    expect(fields().props.run.baselinePct).toBeNull();
+  });
+  it('editing: shows the marks at the caret (stored marks first) and inserts fields through the view', () => {
+    element = { id: 't', type: 'text' };
+    const mk = (pct: number) => ({ type: { name: 'baseline' }, attrs: { pct } });
+    editingView = { state: { storedMarks: null, selection: { $from: { marks: () => [mk(30)] } } } };
+    expect(fields().props.run.baselinePct).toBe(30);
+    editingView = { state: { storedMarks: [mk(-25)], selection: { $from: { marks: () => [mk(30)] } } } };
+    const tree = fields();
+    expect(tree.props.run.baselinePct).toBe(-25);
+    tree.props.onInsertField({ kind: 'slidenum' });
+    expect(insertFieldMock).toHaveBeenCalledWith(editingView, { kind: 'slidenum' });
+    expect(refit).toHaveBeenCalledTimes(1);
   });
 });

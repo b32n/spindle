@@ -1,5 +1,6 @@
 import {
   emptyRichText,
+  inlineText,
   richTextFromPlainText,
   richTextToPlainText,
   isRichTextEmpty,
@@ -86,5 +87,46 @@ describe('paragraph attrs & applyTextFormat', () => {
     setParagraphAttrs(input, { align: 'center' });
     expect(input.content[0].content![0].marks).toBeUndefined();
     expect(input.content[0].attrs).toBeUndefined();
+  });
+});
+
+describe('field runs', () => {
+  const doc: RichTextDoc = {
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'Page ' }, { type: 'field', attrs: { kind: 'slidenum' }, content: [{ type: 'text', text: '7' }], marks: [{ type: 'bold' }] }] },
+      { type: 'paragraph', content: [{ type: 'field', attrs: { kind: 'footer' } }] },
+    ],
+  };
+  it('a field contributes its cached text to the plain text', () => {
+    expect(richTextToPlainText(doc)).toBe('Page 7\n');
+    expect(inlineText(doc.content[1].content![0])).toBe('');
+  });
+  it('marks apply to and are removed from a field\'s cached text, never the node', () => {
+    const marked = applyMarkToDoc(doc, { type: 'baseline', attrs: { pct: 30 } });
+    const field = marked.content[0].content![1];
+    expect(field).toMatchObject({ type: 'field', marks: [{ type: 'bold' }], content: [{ text: '7', marks: [{ type: 'baseline', attrs: { pct: 30 } }] }] });
+    // Replacing a mark type also clears a stale one on the node.
+    const bolder = applyMarkToDoc(doc, { type: 'bold', attrs: { x: 1 } });
+    expect(bolder.content[0].content![1]).toEqual({ type: 'field', attrs: { kind: 'slidenum' }, content: [{ type: 'text', text: '7', marks: [{ type: 'bold', attrs: { x: 1 } }] }] });
+    const cleared = removeMarkFromDoc(removeMarkFromDoc(marked, 'baseline'), 'bold');
+    expect(cleared.content[0].content![1]).toEqual({ type: 'field', attrs: { kind: 'slidenum' }, content: [{ type: 'text', text: '7' }] });
+    expect(cleared.content[0].content![0]).toEqual({ type: 'text', text: 'Page ' });
+  });
+  it('a field without cached text cannot hold a mark and is left alone', () => {
+    const empty: RichTextDoc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'field', attrs: { kind: 'footer' } }] }] };
+    expect(applyMarkToDoc(empty, { type: 'bold' })).toEqual(empty);
+    expect(docHasMark(empty, 'bold')).toBe(false);
+    const mixed: RichTextDoc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'field', attrs: { kind: 'footer' } }, { type: 'text', text: 'a', marks: [{ type: 'bold' }] }] }] };
+    expect(docHasMark(mixed, 'bold')).toBe(true);
+  });
+  it('docHasMark and toggle see marks on the cached text and on the node', () => {
+    const onText = applyMarkToDoc(doc, { type: 'italic' });
+    expect(docHasMark(onText, 'italic')).toBe(true);
+    const bare: RichTextDoc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'field', attrs: { kind: 'slidenum' }, content: [{ type: 'text', text: '7' }] }, { type: 'text', text: 'x' }] }] };
+    expect(docHasMark(bare, 'bold')).toBe(false);
+    expect(docHasMark(toggleMarkInDoc(bare, 'bold'), 'bold')).toBe(true);
+    expect(docHasMark(toggleMarkInDoc(doc, 'bold'), 'bold')).toBe(true);
+    expect(docHasMark(removeMarkFromDoc(toggleMarkInDoc(doc, 'bold'), 'bold'), 'bold')).toBe(false);
   });
 });

@@ -51,7 +51,8 @@ Not in the current scope; verified absent in code.
       Still open: shrink-to-fit with several columns measures the balanced column height (text can still overflow),
       `resize` does not grow vertical text or shapes (the option is offered for text boxes only), table cells have no autofit, and paragraph attributes (bullets, exact line
       height, percent spacing, margins) are done in K3b (tab stops stored but not laid out); run attributes (baseline,
-      caps, fields) are K3c.
+      caps, character spacing, language) and slide-number/date/footer fields are done in K3c (the editor shows a
+      field's stored text; a date follows the viewer's locale; footer fields have no insert control yet).
 - [ ] **Rich speaker notes** — notes are plain-text only (`NotesPanel.tsx`).
 - [ ] **Real PDF / PNG export backend** — intentionally **not** in these
       packages; export is delegated to the host app (`SlidesEditor.tsx`). A

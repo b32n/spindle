@@ -4,7 +4,7 @@
 
 import { toggleMark } from 'prosemirror-commands';
 import type { EditorView } from 'prosemirror-view';
-import type { DeckImpl, TextFormatSpec } from '@b32nio/spindle-slides-core';
+import { initialFieldText, type DateFieldFormat, type DeckImpl, type FieldKind, type TextFormatSpec } from '@b32nio/spindle-slides-core';
 
 function applyToView(view: EditorView, spec: TextFormatSpec): void {
   const { state } = view;
@@ -56,4 +56,14 @@ export function applyFormat(target: FormatTarget, spec: TextFormatSpec): void {
   if (target.editingView) applyToView(target.editingView, spec);
   else if (target.tableCells && target.tableCells.cells.length) target.deck.applyTableCellsFormat(target.tableCells.tableId, target.tableCells.cells, spec);
   else if (target.elementId) target.deck.applyTextFormat(target.elementId, spec);
+}
+
+/** Insert a field run (slide number, date, ...) at the caret, replacing the selection; it takes the caret's marks. */
+export function insertField(view: EditorView, attrs: { kind: FieldKind; format?: DateFieldFormat }): void {
+  const { schema, selection, storedMarks } = view.state;
+  const text = initialFieldText(attrs);
+  // The text is the field's cached text and carries its marks (the Y layout keeps marks on text only).
+  const node = schema.nodes.field.create({ kind: attrs.kind, format: attrs.format ?? null }, text ? schema.text(text, storedMarks ?? selection.$from.marks()) : undefined);
+  view.dispatch(view.state.tr.replaceSelectionWith(node, true).scrollIntoView());
+  view.focus();
 }

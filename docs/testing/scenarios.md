@@ -429,6 +429,8 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-RES-04 | three clients editing at once converge | covered |  |  | `e2e/slides/resilience.spec.ts` |
 | SL-RES-05 | undo under collaboration reverts only your own edit | covered |  |  | `e2e/slides/resilience.spec.ts` |
 | SL-RES-06 | a fresh room opened alone is seeded exactly once (StrictMode attach/detach, #72) | covered |  |  | `e2e/slides/resilience.spec.ts` |
+| SL-TXT-10 | baseline, caps, character spacing and language render and persist | covered |  |  | `e2e/slides/run-marks.spec.ts` |
+| SL-TXT-11 | a slide-number field shows the number of its slide; a field can be inserted while editing | covered |  |  | `e2e/slides/run-marks.spec.ts` |
 | SL-TXT-07 | shrink on overflow keeps a long text inside its box and stores the scale | covered |  |  | `e2e/slides/text-body.spec.ts` |
 | SL-TXT-08 | resize shape to fit text grows the box; insets and direction apply | covered |  |  | `e2e/slides/text-body.spec.ts` |
 | SL-INS-01 | Text box button inserts and selects a text box | covered | yes |  | `e2e/slides/tools.spec.ts` |
@@ -496,7 +498,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 431
+- covered: 433
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

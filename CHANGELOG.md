@@ -567,6 +567,19 @@ lockstep.
   (`CollabSchemaVersionError`) instead of dropping them. New slides-core exports: `Bullet`, `BulletKind`, `BulletScheme`,
   `TabStop`, `LevelStyles`, `resolveParagraph`, `flattenLevelStyles`, `formatOrdinal`, `normalizeTabStops`,
   `safeBulletChar`, `INDENT_PX`, `DEFAULT_BULLET_CHAR`, `SCHEME_COUNTER_STYLE`. Additive.
+- **Slides run marks and fields (K3c).** Text runs gain four marks: `baseline` (percent raised or lowered, drawn as a
+  smaller shifted run that does not change the line height), `caps` (`all` or `small`), `charSpacing` (px) and `lang`
+  (a BCP 47 tag). A new inline node `field` (slide number, date and time in three layouts, footer text) holds its last
+  shown text, which carries the run's formatting; the renderer shows the live slide number (the slide's place in the
+  deck, also in the filmstrip and present mode) or the current date. The "Text box options" panel gets a "Run options"
+  section (baseline, capitals, character spacing, language, insert field while editing). Every value is coerced,
+  clamped or allowlisted before it reaches CSS or the DOM. **Collaboration:** the marks and the field node ride on the
+  rich-text Y fragment, so slides `COLLAB_SCHEMA_VERSION` is now 3 and an older client refuses the room
+  (`CollabSchemaVersionError`). New slides-core exports: `RichTextText`, `RichTextField`, `FieldKind`, `FieldAttrs`,
+  `DateFieldFormat`, `FieldContext`, `ResolvedRun`, `CapsKind`, `inlineText`, `resolveRun`, `runCss`, `baselineCss`,
+  `resolveFieldText`, `initialFieldText`, `fieldMarks`, `safeLang`, `safeFieldKind`, `BASELINE_SCALE`,
+  `SLIDENUM_PLACEHOLDER`. `RichTextInline` is now the union `RichTextText | RichTextField` (hosts that read
+  `inline.text` should narrow on `type`). Additive otherwise.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

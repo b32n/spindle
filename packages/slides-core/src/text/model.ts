@@ -70,7 +70,8 @@ export interface ParagraphAttrs {
 
 /**
  * A text mark. `type` is one of the schema mark names (bold, italic,
- * underline, strikethrough, link, textColor, fontFamily, fontSize); `attrs`
+ * underline, strikethrough, link, textColor, fontFamily, fontSize, highlight,
+ * baseline, caps, charSpacing, lang); `attrs`
  * carries the mark's parameters (e.g. a Color union for textColor). Kept
  * loosely typed here so the JSON model does not depend on the scene layer.
  */
@@ -79,11 +80,35 @@ export interface RichTextMark {
   attrs?: Record<string, unknown>;
 }
 
-export interface RichTextInline {
+export interface RichTextText {
   type: 'text';
   text: string;
   marks?: RichTextMark[];
 }
+
+/** What a field run shows: the slide's number, the current date or time, or fixed footer text. */
+export type FieldKind = 'slidenum' | 'datetime' | 'footer';
+export type DateFieldFormat = 'date' | 'time' | 'datetime';
+
+export interface FieldAttrs {
+  kind: FieldKind;
+  /** Date/time layout, for `datetime` (default `date`). */
+  format?: DateFieldFormat | null;
+}
+
+/**
+ * An inline field run (PPTX `a:fld`): one unit whose text is computed when drawn. Its `content` holds the text last
+ * shown (PPTX cached text, the footer's text, the fallback when it cannot be computed) and carries the run's marks:
+ * the Y layout keeps marks on text only, so the formatting lives on that inner text, not on the field node.
+ */
+export interface RichTextField {
+  type: 'field';
+  attrs: FieldAttrs;
+  content?: RichTextText[];
+  marks?: RichTextMark[];
+}
+
+export type RichTextInline = RichTextText | RichTextField;
 
 export interface RichTextParagraph {
   type: 'paragraph';
@@ -114,10 +139,15 @@ export function richTextFromPlainText(text: string, attrs?: ParagraphAttrs): Ric
   };
 }
 
+/** The text of an inline: a run's characters, or the text a field last showed (its cached text). */
+export function inlineText(inline: RichTextInline): string {
+  return inline.type === 'field' ? (inline.content ?? []).map((t) => t.text).join('') : inline.text;
+}
+
 /** Flatten a text body to plain text; paragraphs join with newlines. */
 export function richTextToPlainText(doc: RichTextDoc): string {
   return doc.content
-    .map((p) => (p.content ?? []).map((inline) => inline.text).join(''))
+    .map((p) => (p.content ?? []).map(inlineText).join(''))
     .join('\n');
 }
 
@@ -142,13 +172,37 @@ function mapInlines(doc: RichTextDoc, fn: (inline: RichTextInline) => RichTextIn
   };
 }
 
+/** The marks an inline carries: a run's own, or those on a field's cached text (where the Y layout keeps them). */
+function inlineMarks(inline: RichTextInline): RichTextMark[] {
+  return inline.type === 'field' ? [...(inline.content?.[0]?.marks ?? []), ...(inline.marks ?? [])] : (inline.marks ?? []);
+}
+
+/**
+ * Rewrite the marks of one inline. A field's marks go on its cached text, never on the node (the Y layout keeps marks
+ * on text only); any marks on the node itself are rewritten too so a stale one cannot override. A field without cached
+ * text has nowhere to hold a mark and is left as is.
+ */
+function mapMarks(inline: RichTextInline, type: string, fn: (marks: RichTextMark[]) => RichTextMark[]): RichTextInline {
+  const apply = (t: RichTextText): RichTextText => {
+    const marks = fn(t.marks ?? []);
+    const { marks: _drop, ...rest } = t;
+    return marks.length ? { ...rest, marks } : rest;
+  };
+  if (inline.type !== 'field') return apply(inline);
+  if (!inline.content?.length) return inline;
+  const { marks: _node, ...rest } = inline;
+  const nodeMarks = (inline.marks ?? []).filter((m) => m.type !== type);
+  return { ...rest, content: inline.content.map(apply), ...(nodeMarks.length ? { marks: nodeMarks } : {}) };
+}
+
 /** Whether every text run in the body carries a mark of `type`. */
 export function docHasMark(doc: RichTextDoc, type: string): boolean {
   let sawText = false;
   for (const p of doc.content) {
     for (const inline of p.content ?? []) {
+      if (inline.type === 'field' && !inline.content?.length) continue;
       sawText = true;
-      if (!(inline.marks ?? []).some((m) => m.type === type)) return false;
+      if (!inlineMarks(inline).some((m) => m.type === type)) return false;
     }
   }
   return sawText;
@@ -156,18 +210,12 @@ export function docHasMark(doc: RichTextDoc, type: string): boolean {
 
 /** Add (or replace) a mark across the whole body. */
 export function applyMarkToDoc(doc: RichTextDoc, mark: RichTextMark): RichTextDoc {
-  return mapInlines(doc, (inline) => ({
-    ...inline,
-    marks: [...(inline.marks ?? []).filter((m) => m.type !== mark.type), mark],
-  }));
+  return mapInlines(doc, (inline) => mapMarks(inline, mark.type, (marks) => [...marks.filter((m) => m.type !== mark.type), mark]));
 }
 
 /** Remove a mark type across the whole body. */
 export function removeMarkFromDoc(doc: RichTextDoc, type: string): RichTextDoc {
-  return mapInlines(doc, (inline) => {
-    const marks = (inline.marks ?? []).filter((m) => m.type !== type);
-    return marks.length ? { ...inline, marks } : { type: 'text', text: inline.text };
-  });
+  return mapInlines(doc, (inline) => mapMarks(inline, type, (marks) => marks.filter((m) => m.type !== type)));
 }
 
 /** Toggle a boolean mark across the whole body. */

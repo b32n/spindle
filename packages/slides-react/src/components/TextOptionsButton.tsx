@@ -1,14 +1,15 @@
-// TextOptionsButton — "Text box options" (autofit, insets, direction, columns) for the selected or edited text box.
+// TextOptionsButton — "Text box options" (autofit, insets, direction, columns, paragraph and run options) for the selected or edited text box.
 // A separate toolbar item next to the text format bar: an anchored popover on the toolbar, a row plus modal inside the
 // overflow menu (an anchored popover would paint under that surface), like the image crop control.
 
 import React, { useState } from 'react';
 import { Settings2 } from 'lucide-react';
-import { autofitMode, mergeBodyStyle, type BodyStyle, type ParagraphAttrs, type RichTextDoc } from '@b32nio/spindle-slides-core';
+import { autofitMode, mergeBodyStyle, resolveRun, type BodyStyle, type ParagraphAttrs, type RichTextDoc, type RichTextMark } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { useDeckContext } from '../context/DeckContext';
-import { applyFormat } from '../interactions/formatting';
+import { applyFormat, insertField } from '../interactions/formatting';
 import { ParagraphFields } from './ParagraphFields';
+import { RunFields, type RunMarkPatch } from './RunFields';
 import { useDeck, useSelection, useEditingId, useElement } from '../hooks';
 import { ToolbarButton } from './toolbarUI';
 import { Popover } from './Popover';
@@ -52,6 +53,41 @@ export function LiveParagraphFields({ id }: { id: string }): React.ReactElement 
   return <ParagraphFields idPrefix={`para-${id}`} attrs={attrs} onChange={apply} />;
 }
 
+/**
+ * The run fields bound to one element: they show the marks at the caret (or the selection's start) while editing, else the
+ * first run, and apply to the selection while editing or to the whole body when the box is only selected. Fields can only
+ * be inserted while editing.
+ */
+export function LiveRunFields({ id }: { id: string }): React.ReactElement | null {
+  const deck = useDeck();
+  const { editing } = useDeckContext();
+  const el = useElement(id);
+  if (!el || (el.type !== 'text' && el.type !== 'shape')) return null;
+  const view = editing.getView();
+  let marks: readonly RichTextMark[] | undefined;
+  if (view) {
+    const { storedMarks, selection } = view.state;
+    marks = (storedMarks ?? selection.$from.marks()).map((m) => ({ type: m.type.name, attrs: m.attrs }));
+  } else {
+    marks = (el.richText as RichTextDoc | undefined)?.content[0]?.content?.[0]?.marks;
+  }
+  const onMark = ({ type, attrs }: RunMarkPatch) =>
+    applyFormat({ editingView: view, deck, elementId: id }, attrs ? { setMark: { type, attrs } } : { removeMark: type });
+  const refit = () => requestAnimationFrame(() => refitElement(deck, id));
+  return (
+    <RunFields
+      idPrefix={`run-${id}`}
+      run={resolveRun(marks)}
+      onMark={(p) => {
+        onMark(p);
+        // Raising, spacing and capitals change the text's width: re-measure once the new layout is on screen.
+        refit();
+      }}
+      onInsertField={view ? (f) => { insertField(view, f); refit(); } : undefined}
+    />
+  );
+}
+
 export function TextOptionsButton(): React.ReactElement | null {
   const selection = useSelection();
   const editingId = useEditingId();
@@ -72,7 +108,7 @@ export function TextOptionsButton(): React.ReactElement | null {
         icon={<Settings2 size={17} />}
         label={LABEL}
         hint={autofitMode(el.bodyStyle) === 'none' ? undefined : autofitMode(el.bodyStyle) === 'shrink' ? 'Shrink' : 'Resize'}
-        onClick={() => menu.openModal(LABEL, <><LiveTextBodyFields id={id} /><LiveParagraphFields id={id} /></>)}
+        onClick={() => menu.openModal(LABEL, <><LiveTextBodyFields id={id} /><LiveParagraphFields id={id} /><LiveRunFields id={id} /></>)}
       />
     );
   }
@@ -87,6 +123,7 @@ export function TextOptionsButton(): React.ReactElement | null {
         <Popover anchor={anchor} onClose={() => setOpenFor(null)}>
           <LiveTextBodyFields id={id} />
           <LiveParagraphFields id={id} />
+          <LiveRunFields id={id} />
         </Popover>
       )}
     </>
