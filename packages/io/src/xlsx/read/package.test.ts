@@ -28,12 +28,56 @@ describe('XlsxPackage.open', () => {
   it('opens a package whose content types are not well-formed, with a warning', async () => {
     const pkg = await XlsxPackage.open(await zipOf({ '[Content_Types].xml': '<Types><oops' }));
     expect(pkg.contentTypes.defaults.size).toBe(0);
-    expect(pkg.warnings).toEqual(['The part [Content_Types].xml is not well-formed XML and was skipped.']);
+    expect(pkg.warnings).toEqual(['The part [Content_Types].xml is not well-formed XML; it was read as far as the damage.']);
   });
   it('reads the content types', async () => {
     const pkg = await XlsxPackage.open(corpus('openpyxl-comment.xlsx'));
     expect(pkg.contentType('xl/workbook.xml')).toMatch(/spreadsheetml\.sheet\.main\+xml$/);
     expect(pkg.warnings).toEqual([]);
+  });
+});
+
+describe('XlsxPackage: the element budget and the entry budget', () => {
+  const NS = 'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
+  const pkgWith = (files: Record<string, string>, maxPartElements: number) => zipOf(files).then((bytes) => XlsxPackage.open(bytes, { limits: { maxPartElements } }));
+
+  it('builds a tree of a part of exactly maxPartElements elements and skips one element over, with one warning that names the part', async () => {
+    const pkg = await pkgWith({ 'xl/a.xml': '<a><b/><b/></a>', 'xl/b.xml': '<a><b/><b/><b/></a>' }, 3);
+    expect((await pkg.xml('xl/a.xml'))?.children).toHaveLength(2);
+    expect(pkg.warnings).toEqual([]);
+    expect(await pkg.xml('xl/b.xml')).toBeUndefined();
+    expect(pkg.warnings).toEqual(['The part xl/b.xml has more than 3 elements (the import limit maxPartElements) and was skipped.']);
+  });
+
+  it('quotes a long part name shortened', async () => {
+    const name = `xl/${'p'.repeat(500)}.xml`;
+    const pkg = await pkgWith({ [name]: '<a/><' }, 10);
+    expect(await pkg.xml(name)).toBeUndefined();
+    expect(pkg.warnings).toEqual([`The part xl/${'p'.repeat(60)}… is not well-formed XML and was skipped.`]);
+  });
+
+  it('keeps the first relationships up to the budget, with one warning', async () => {
+    const rels = `<Relationships ${NS}>${Array.from({ length: 5 }, (_, i) => `<Relationship Id="r${i}" Target="t${i}.xml"/>`).join('')}</Relationships>`;
+    const pkg = await pkgWith({ '_rels/.rels': rels, 'xl/workbook.xml': '<workbook/>' }, 3);
+    expect((await pkg.rels('')).map((r) => r.id)).toEqual(['r0', 'r1', 'r2']);
+    expect(pkg.warnings).toEqual(['The part _rels/.rels has more than 3 entries (the import limit maxPartElements); the rest were not read.']);
+  });
+
+  it('reads the relationships that precede damage, with one warning', async () => {
+    const pkg = await pkgWith({ '_rels/.rels': `<Relationships ${NS}><Relationship Id="r0" Target="t.xml"/><Relationship Id="r1"` }, 10);
+    expect((await pkg.rels('')).map((r) => r.id)).toEqual(['r0']);
+    expect(pkg.warnings).toEqual(['The part _rels/.rels is not well-formed XML; it was read as far as the damage.']);
+  });
+
+  it('keeps the first content types up to the budget, with one warning', async () => {
+    const types = `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">${Array.from({ length: 5 }, (_, i) => `<Override PartName="/p${i}.xml" ContentType="t"/>`).join('')}</Types>`;
+    const pkg = await pkgWith({ '[Content_Types].xml': types }, 2);
+    expect(pkg.contentTypes.overrides.size).toBe(2);
+    expect(pkg.warnings).toEqual(['The part [Content_Types].xml has more than 2 entries (the import limit maxPartElements); the rest were not read.']);
+  });
+
+  it('has a default budget of a million elements', async () => {
+    expect((await XlsxPackage.open(await zipOf({ 'a.xml': '<a/>' }))).limits.maxPartElements).toBe(1_000_000);
   });
 });
 

@@ -25,7 +25,7 @@ export interface SaxHandler {
   /** An end tag, or the implied one of a self-closing element. `end` is the offset just after it. */
   close(name: string, end: number): void;
   /** Character data (entities decoded, CDATA included), possibly in several pieces per element. */
-  text(text: string): void;
+  text?(text: string): void;
   /** Asked before each markup item: `true` ends the scan there (a caller that has all it will take). */
   halted?(): boolean;
 }
@@ -48,7 +48,7 @@ export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML
       // trailing text outside any element is whitespace in a sound part; elements still open are damage
       return stack.length === 0;
     }
-    if (lt > i && stack.length > 0) handler.text(decodeEntities(xml.slice(i, lt)));
+    if (lt > i && stack.length > 0 && handler.text) handler.text(decodeEntities(xml.slice(i, lt)));
     i = lt + 1;
     const c = xml.charCodeAt(i);
     if (c === 63 /* ? */) {
@@ -63,7 +63,7 @@ export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML
       } else if (xml.startsWith('![CDATA[', i)) {
         const end = xml.indexOf(']]>', i + 8);
         if (end < 0) return false;
-        if (stack.length > 0) handler.text(xml.slice(i + 8, end));
+        if (stack.length > 0 && handler.text) handler.text(xml.slice(i + 8, end));
         i = end + 3;
       } else {
         // DOCTYPE: skipped with its internal subset (where entities would be declared); nothing in it is ever used

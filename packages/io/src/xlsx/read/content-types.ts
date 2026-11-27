@@ -1,4 +1,5 @@
-import { kids, type XmlElement } from '../xml';
+import { scanXml } from './sax';
+import type { ListOptions } from './relationships';
 
 /** `[Content_Types].xml`: a default type per extension and an override per part (ECMA-376 Part 2, 10.1.2). */
 export interface ContentTypes {
@@ -10,22 +11,45 @@ export interface ContentTypes {
 
 export const EMPTY_CONTENT_TYPES: ContentTypes = { defaults: new Map(), overrides: new Map() };
 
-/** Parse the content-types root. Entries without the needed attributes are skipped; a missing root gives no types. */
-export function parseContentTypes(root: XmlElement | undefined): ContentTypes {
+/**
+ * Parse the text of `[Content_Types].xml`, read as events (memory is the entries kept, at most `options.max`). Entries without the
+ * needed attributes are skipped; no text gives no types. Damaged markup ends the read there and an entry over the limit ends it too
+ * (`options.problem`).
+ */
+export function parseContentTypes(xml: string | undefined, options: ListOptions = {}): ContentTypes {
   const defaults = new Map<string, string>();
   const overrides = new Map<string, string>();
-  for (const d of kids(root, 'Default')) {
-    const ext = d.attrs.Extension;
-    const type = d.attrs.ContentType;
-    if (ext !== undefined && type !== undefined && !defaults.has(ext.toLowerCase())) defaults.set(ext.toLowerCase(), type);
-  }
-  for (const o of kids(root, 'Override')) {
-    const name = o.attrs.PartName;
-    const type = o.attrs.ContentType;
-    if (name === undefined || type === undefined) continue;
-    const key = name.replace(/^\/+/, '').toLowerCase();
-    if (!overrides.has(key)) overrides.set(key, type);
-  }
+  if (xml === undefined) return { defaults, overrides };
+  const max = options.max ?? Infinity;
+  let depth = 0;
+  let over = false;
+  const wellFormed = scanXml(xml, {
+    open(name, attrs) {
+      depth++;
+      if (depth !== 2) return;
+      const type = attrs.ContentType;
+      if (type === undefined) return;
+      if (name === 'Default') {
+        const ext = attrs.Extension;
+        if (ext === undefined || defaults.has(ext.toLowerCase())) return;
+        if (defaults.size + overrides.size >= max) over = true;
+        else defaults.set(ext.toLowerCase(), type);
+      } else if (name === 'Override') {
+        const part = attrs.PartName;
+        if (part === undefined) return;
+        const key = part.replace(/^\/+/, '').toLowerCase();
+        if (overrides.has(key)) return;
+        if (defaults.size + overrides.size >= max) over = true;
+        else overrides.set(key, type);
+      }
+    },
+    close() {
+      depth--;
+    },
+    halted: () => over,
+  });
+  if (over) options.problem?.('over');
+  else if (!wellFormed) options.problem?.('damaged');
   return { defaults, overrides };
 }
 

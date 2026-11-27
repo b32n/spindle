@@ -1,9 +1,11 @@
 import type JSZip from 'jszip';
 import type { XlsxRelationship } from '@b32nio/spindle-shared/export/xlsx';
 import { openSafeZip, resolveLimits, type ImportLimits } from '../../common/safe-zip';
-import { parseXml, type XmlElement } from '../xml';
+import type { XmlElement } from '../xml';
+import { abbreviate } from './capped';
 import { contentTypeOf, EMPTY_CONTENT_TYPES, parseContentTypes, type ContentTypes } from './content-types';
-import { parseRelationships, relsPart } from './relationships';
+import { parseRelationships, relsPart, type ListProblem } from './relationships';
+import { parseTree } from './tree';
 
 export interface OpenXlsxOptions {
   /** Overrides of the import limits (`DEFAULT_IMPORT_LIMITS`). */
@@ -49,8 +51,8 @@ export class XlsxPackage {
   static async open(bytes: Uint8Array, options: OpenXlsxOptions = {}): Promise<XlsxPackage> {
     const zip = await openSafeZip(bytes, { limits: options.limits, target: 'an Excel workbook (.xlsx)' });
     const pkg = new XlsxPackage(zip, resolveLimits(options.limits));
-    const types = await pkg.xml('[Content_Types].xml');
-    if (types) pkg.contentTypes = parseContentTypes(types);
+    const types = await pkg.text('[Content_Types].xml');
+    if (types !== undefined) pkg.contentTypes = parseContentTypes(types, pkg.listOptions('[Content_Types].xml'));
     return pkg;
   }
 
@@ -80,7 +82,7 @@ export class XlsxPackage {
     try {
       return await (this.zip.file(exact) as JSZip.JSZipObject).async('uint8array');
     } catch {
-      this.warnings.push(`The part ${exact} could not be read.`);
+      this.warnings.push(`The part ${abbreviate(exact)} could not be read.`);
       return undefined;
     }
   }
@@ -90,16 +92,31 @@ export class XlsxPackage {
     return bytes === undefined ? undefined : decodePart(bytes);
   }
 
-  /** A part parsed into an element tree (not cached: the caller decides how long to hold it). */
+  /**
+   * A part parsed into an element tree (not cached: the caller decides how long to hold it). The tree is built from events under
+   * the element budget `limits.maxPartElements`: a part with more elements than that, or one that is not well-formed, is not read
+   * (`undefined` and one warning), and memory never exceeds the budget however long the part is.
+   */
   async xml(name: string): Promise<XmlElement | undefined> {
     const text = await this.text(name);
     if (text === undefined) return undefined;
-    const root = parseXml(text);
-    if (root === null) {
-      this.warnings.push(`The part ${name} is not well-formed XML and was skipped.`);
-      return undefined;
-    }
+    const { root, overLimit } = parseTree(text, this.limits.maxPartElements);
+    if (overLimit) this.warnings.push(`The part ${abbreviate(name)} has more than ${this.limits.maxPartElements} elements (the import limit maxPartElements) and was skipped.`);
+    else if (root === undefined) this.warnings.push(`The part ${abbreviate(name)} is not well-formed XML and was skipped.`);
     return root;
+  }
+
+  /** What a part read as a list of entries (relationships, content types) says about its problems: one warning each, naming the part. */
+  private listOptions(name: string): { max: number; problem: (what: ListProblem) => void } {
+    return {
+      max: this.limits.maxPartElements,
+      problem: (what) =>
+        this.warnings.push(
+          what === 'over'
+            ? `The part ${abbreviate(name)} has more than ${this.limits.maxPartElements} entries (the import limit maxPartElements); the rest were not read.`
+            : `The part ${abbreviate(name)} is not well-formed XML; it was read as far as the damage.`
+        ),
+    };
   }
 
   /**
@@ -110,8 +127,8 @@ export class XlsxPackage {
     const owner = part.replace(/^\/+/, '');
     const cached = this.relCache.get(owner);
     if (cached) return cached;
-    const root = await this.xml(owner === '' ? '_rels/.rels' : relsPart(owner));
-    const rels = Object.freeze(parseRelationships(root, owner).map((r) => Object.freeze(r)));
+    const relsName = owner === '' ? '_rels/.rels' : relsPart(owner);
+    const rels = Object.freeze(parseRelationships(await this.text(relsName), owner, this.listOptions(relsName)).map((r) => Object.freeze(r)));
     this.relCache.set(owner, rels);
     return rels;
   }

@@ -1,4 +1,4 @@
-import { CappedWarnings, MAX_ITEM_WARNINGS } from './capped';
+import { abbreviate, CappedWarnings, MAX_ITEM_WARNINGS, MAX_QUOTED_CHARS, truncate } from './capped';
 
 describe('CappedWarnings', () => {
   it('passes the first warnings as they are and counts the rest in one closing message', () => {
@@ -25,5 +25,43 @@ describe('CappedWarnings', () => {
     w.close();
     expect(out).toHaveLength(MAX_ITEM_WARNINGS + 1);
     expect(out[MAX_ITEM_WARNINGS]).toBe(`${1_000_000 - MAX_ITEM_WARNINGS} more things were left out.`);
+  });
+});
+
+describe('abbreviate', () => {
+  it('leaves text of up to the limit as it is', () => {
+    expect(abbreviate('')).toBe('');
+    expect(abbreviate('a'.repeat(MAX_QUOTED_CHARS))).toBe('a'.repeat(MAX_QUOTED_CHARS));
+    expect(abbreviate('abcdef', 6)).toBe('abcdef');
+  });
+
+  it('cuts longer text to the limit with an ellipsis as the last character', () => {
+    expect(abbreviate('abcdefg', 6)).toBe('abcde…');
+    const out = abbreviate('x'.repeat(10_000_000));
+    expect(out).toBe(`${'x'.repeat(MAX_QUOTED_CHARS - 1)}…`);
+    expect(out).toHaveLength(MAX_QUOTED_CHARS);
+  });
+
+  it('never leaves half a surrogate pair', () => {
+    const pairs = '\u{1F600}'.repeat(100);
+    for (const max of [6, 7, 8, 9]) {
+      const out = abbreviate(pairs, max);
+      expect(out.endsWith('…')).toBe(true);
+      expect(out.length).toBeLessThanOrEqual(max);
+      expect(out.slice(0, -1)).toBe('\u{1F600}'.repeat((out.length - 1) / 2));
+    }
+  });
+});
+
+describe('truncate', () => {
+  it('keeps text of up to the limit and cuts longer text to the limit', () => {
+    expect(truncate('abc', 3)).toBe('abc');
+    expect(truncate('abcdef', 3)).toBe('abc');
+    expect(truncate('x'.repeat(5_000_000), 4)).toBe('xxxx');
+  });
+  it('does not leave half a surrogate pair', () => {
+    expect(truncate('\u{1F600}\u{1F600}', 3)).toBe('\u{1F600}');
+    expect(truncate('\u{1F600}\u{1F600}', 2)).toBe('\u{1F600}');
+    expect(truncate('a\u{1F600}', 2)).toBe('a');
   });
 });

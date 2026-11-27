@@ -67,11 +67,11 @@ describe('hostile workbook-level parts: each costs time in proportion to its siz
       (r) => expect(r.styles?.fonts).toHaveLength(N),
     ],
     [
-      '300,000 cell formats, fills, borders and named styles',
+      '100,000 fills, borders, named styles and dxfs (800,000 elements, under the budget of a million)',
       () => ({
-        'xl/styles.xml': `<styleSheet ${MAIN_NS}><fills>${rep(N, () => '<fill><patternFill patternType="solid"><fgColor rgb="FF00FF00"/></patternFill></fill>')}</fills><borders>${rep(N, () => '<border><left style="thin"/></border>')}</borders><cellStyles>${rep(N, (i) => `<cellStyle name="n${i}" xfId="0"/>`)}</cellStyles><dxfs>${rep(N, () => '<dxf><font><b/></font></dxf>')}</dxfs></styleSheet>`,
+        'xl/styles.xml': `<styleSheet ${MAIN_NS}><fills>${rep(N / 3, () => '<fill><patternFill patternType="solid"><fgColor rgb="FF00FF00"/></patternFill></fill>')}</fills><borders>${rep(N / 3, () => '<border><left style="thin"/></border>')}</borders><cellStyles>${rep(N / 3, (i) => `<cellStyle name="n${i}" xfId="0"/>`)}</cellStyles><dxfs>${rep(N / 3, () => '<dxf><font><b/></font></dxf>')}</dxfs></styleSheet>`,
       }),
-      (r) => expect([r.styles?.fills.length, r.styles?.borders.length, r.styles?.cellStyles.length, r.styles?.dxfs.length]).toEqual([N, N, N, N]),
+      (r) => expect([r.styles?.fills.length, r.styles?.borders.length, r.styles?.cellStyles.length, r.styles?.dxfs.length]).toEqual([N / 3, N / 3, N / 3, N / 3]),
     ],
   ];
 

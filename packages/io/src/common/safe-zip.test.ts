@@ -67,6 +67,8 @@ describe('limits', () => {
       maxTotalCells: 5_000_000,
       maxSheets: 1_000,
       maxRanges: 1_048_576,
+      maxRows: 2_097_152,
+      maxPartElements: 1_000_000,
     });
     expect(resolveLimits()).toEqual(DEFAULT_IMPORT_LIMITS);
     expect(resolveLimits({ maxEntries: 3 })).toEqual({ ...DEFAULT_IMPORT_LIMITS, maxEntries: 3 });

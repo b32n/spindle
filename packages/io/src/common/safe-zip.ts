@@ -16,52 +16,76 @@ import { ImportError } from './import-error';
 
 const MB = 1024 * 1024;
 
+/**
+ * The limits of every importer. Each field says which importers honour it: the first six are the safe zip's and apply to all of
+ * them (DOCX, XLSX, PPTX); the rest are the XLSX reader's own budgets (`importXlsx`) and are ignored by the others.
+ */
 export interface ImportLimits {
-  /** Size of the file itself. */
+  /** Size of the file itself. All importers. */
   maxPackageBytes: number;
-  /** Number of zip entries (directories included). */
+  /** Number of zip entries (directories included). All importers. */
   maxEntries: number;
-  /** Uncompressed bytes over all entries. */
+  /** Uncompressed bytes over all entries. All importers. */
   maxTotalBytes: number;
-  /** Uncompressed bytes of one entry. */
+  /** Uncompressed bytes of one entry. All importers. */
   maxPartBytes: number;
-  /** Uncompressed bytes of one XML entry (`.xml`, `.rels`, `.vml`). */
+  /** Uncompressed bytes of one XML entry (`.xml`, `.rels`, `.vml`). All importers. */
   maxXmlPartBytes: number;
-  /** Largest compression ratio (uncompressed : compressed) of a part or of the whole package. */
+  /** Largest compression ratio (uncompressed : compressed) of a part or of the whole package. All importers. */
   maxRatio: number;
   /**
    * The ratio is only judged for a part (or package) that inflates to more than this. A small part can only cost this
    * much memory however well it compresses, and real files do contain tiny, extremely regular parts: without a floor they
-   * would be refused for nothing.
+   * would be refused for nothing. All importers.
    */
   ratioFloorBytes: number;
   /**
-   * Cost, in characters, of the formula text one worksheet may gain by expanding shared formulas (each cell of a group gets its
+   * XLSX only. Cost, in characters, of the formula text one worksheet may gain by expanding shared formulas (each cell of a group gets its
    * own copy of the master's text; a formula costs its length plus a fixed overhead for the string itself). Over it the remaining
    * cells of that sheet keep their cached value and lose the formula, with one warning.
    */
   maxSheetFormulaChars: number;
-  /** The same cost over the whole package: all its worksheets together draw on it, so many sheets cannot add up past it. */
+  /** XLSX only. The same cost over the whole package: all its worksheets together draw on it, so many sheets cannot add up past it. */
   maxFormulaChars: number;
-  /** Cells kept over all the worksheets of a package. Past it the rest of the file is not read (one warning). */
+  /**
+   * XLSX only. Cells kept over all the worksheets of a package. Past it the rest of the file is not read (one warning). It also bounds
+   * the shared strings read (a cell names one, so no more are of use).
+   */
   maxTotalCells: number;
   /**
-   * Worksheets read from one package. Past it the other sheets are not read (one warning). The workbook's `<sheet>` entries are
+   * XLSX only. Worksheets read from one package. Past it the other sheets are not read (one warning). The workbook's `<sheet>` entries are
    * listed up to four times this number (chart sheets, sheets without a part and repeats of a part count as entries, not as sheets read).
    */
   maxSheets: number;
   /**
-   * Merged ranges and hyperlinks kept over all the worksheets of a package (one budget for both, each of which is also capped per
+   * XLSX only. Merged ranges and hyperlinks kept over all the worksheets of a package (one budget for both, each of which is also capped per
    * sheet: 1,048,576 merges, Excel's 65,530 hyperlinks). Past it the rest are left out with one counted warning per sheet. A range
    * object is about 100 bytes, so the default is about 100 MB at most.
    */
   maxRanges: number;
+  /**
+   * XLSX only. Rows with their own settings (height, hidden, style, outline) kept over all the worksheets of a package: a row element
+   * with none of those costs nothing, and a cell-less row that has some is an entry of about 150 bytes. Past it the settings of
+   * the other rows are left out, with one counted warning per sheet (the cells are not affected). The default is two worksheets of
+   * rows, 300 MB at most.
+   */
+  maxRows: number;
+  /**
+   * XLSX only. Elements (start tags) kept from one workbook-level part: the styles, the theme and the workbook itself, as element trees;
+   * the entries of a relationships or content-types part; the rich-text runs of the shared strings. The default is five times the
+   * most a sound file has (Excel's 64,000 cell formats and as many differential formats make about 200,000 elements, and a theme or a
+   * workbook is a few hundred). A tree part over it is not read at all (one warning: its readers give their defaults), a list part
+   * keeps its first entries, runs past it are joined into their string's text without fonts. The memory a part can cost is
+   * about 420 bytes per element (measured, Node 22), so the default bounds each part at about 420 MB, however long the part is.
+   */
+  maxPartElements: number;
 }
 
 /**
  * Defaults: package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part (256 MB for XML), ratio 200:1 above 16 MB,
  * expanded shared-formula text of 32 Mi characters per worksheet and 64 Mi (128 MB of strings) per package, 5,000,000 cells and
- * 1,000 worksheets and 1,048,576 merged ranges and hyperlinks per package. The 100,000 x 10 performance file (1,000,000 cells) is
+ * 1,000 worksheets and 1,048,576 merged ranges and hyperlinks per package, 2,097,152 rows with settings and 1,000,000 elements
+ * per workbook-level part. The 100,000 x 10 performance file (1,000,000 cells) is
  * five times under the cell limit. Memory, as measured for the reader alone (`importXlsx`, Node 22): about 0.44 GB of process
  * memory (RSS) per million cells, and 5,000,000 cells took 0.7 GB of heap and 1.0 to 1.6 GB of RSS; the 1.1 GB that the
  * `--runtime` run of `npm run sheets:xlsx-fidelity` reports for the same file is that whole harness (loss detection and mapping
@@ -81,6 +105,8 @@ export const DEFAULT_IMPORT_LIMITS: ImportLimits = {
   maxTotalCells: 5_000_000,
   maxSheets: 1_000,
   maxRanges: 1_048_576,
+  maxRows: 2_097_152,
+  maxPartElements: 1_000_000,
 };
 
 export interface SafeZipOptions {

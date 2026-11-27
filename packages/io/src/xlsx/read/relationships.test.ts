@@ -1,5 +1,5 @@
 import { parseRelationships, relsOfKind, relsPart, resolveRelationshipTarget } from './relationships';
-import { el, relsXml } from './test-support';
+import { relsXml } from './test-support';
 
 describe('resolveRelationshipTarget', () => {
   it.each([
@@ -26,14 +26,14 @@ describe('relsPart', () => {
 
 describe('parseRelationships', () => {
   const rels = parseRelationships(
-    el(
+    (
       relsXml([
         ['rId1', 'worksheet', 'worksheets/sheet1.xml'],
         ['rId1', 'worksheet', 'worksheets/dup.xml'],
         ['rId2', 'hyperlink', 'https://example.com/a b', 'External'],
         ['rId3', 'http://purl.oclc.org/ooxml/officeDocument/relationships/officeDocument', '/xl/workbook.xml'],
         ['rId4', 'http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/core-properties', 'docProps/core.xml', 'external'],
-      ]).replace('</Relationships>', '<Relationship Type="x" Target="no-id"/><Relationship Id="rId9" Type="x"/><Relationship Id="rId8" Target="no-type.xml"/></Relationships>'),
+      ]).replace('</Relationships>', '<Relationship Type="x" Target="no-id"/><Relationship Id="rId9" Type="x"/><Relationship Id="rId8" Target="no-type.xml"/></Relationships>')
     ),
     'xl/workbook.xml',
   );
@@ -51,12 +51,16 @@ describe('parseRelationships', () => {
     expect(relsOfKind(rels, 'OFFICEDOCUMENT').map((r) => r.id)).toEqual(['rId3']);
     expect(relsOfKind(rels, 'nothing')).toEqual([]);
   });
-  it('is empty for a missing root', () => expect(parseRelationships(undefined, 'a.xml')).toEqual([]));
+  it('is empty for a missing part', () => expect(parseRelationships(undefined, 'a.xml')).toEqual([]));
+  it('reads only direct Relationship children of the root, and reads the same under any prefix', () => {
+    const text = '<r:Relationships xmlns:r="urn:x"><r:Relationship Id="a" Target="t.xml"/><Other><Relationship Id="b" Target="u.xml"/></Other></r:Relationships>';
+    expect(parseRelationships(text, 'xl/workbook.xml').map((r) => r.id)).toEqual(['a']);
+  });
 });
 
 describe('targets with a URI scheme', () => {
   const rels = parseRelationships(
-    el(relsXml([['rId1', 'worksheet', 'file:///x.xml'], ['rId2', 'worksheet', 'MAILTO:a@b.c'], ['rId3', 'worksheet', 'C:\\x.xml'], ['rId4', 'worksheet', 'a.b:c/x.xml']])),
+    relsXml([['rId1', 'worksheet', 'file:///x.xml'], ['rId2', 'worksheet', 'MAILTO:a@b.c'], ['rId3', 'worksheet', 'C:\\x.xml'], ['rId4', 'worksheet', 'a.b:c/x.xml']]),
     'xl/workbook.xml',
   );
   it('are kept as written and counted as external, even without TargetMode', () => {
@@ -65,5 +69,28 @@ describe('targets with a URI scheme', () => {
   it('a Windows drive letter is not a scheme (a one letter scheme is a path), a dotted scheme is', () => {
     expect(rels[2].external).toBe(false);
     expect(rels[3]).toMatchObject({ target: 'a.b:c/x.xml', external: true });
+  });
+});
+
+describe('parseRelationships: problems and the entry limit', () => {
+  const many = (n: number) => relsXml(Array.from({ length: n }, (_, i) => [`r${i}`, 'worksheet', `s${i}.xml`] as [string, string, string]));
+  it('keeps the first entries up to the limit and reports it once', () => {
+    const problems: string[] = [];
+    const rels = parseRelationships(many(10), 'xl/workbook.xml', { max: 4, problem: (w) => problems.push(w) });
+    expect(rels.map((r) => r.id)).toEqual(['r0', 'r1', 'r2', 'r3']);
+    expect(problems).toEqual(['over']);
+  });
+  it('is not over at exactly the limit, and a repeated id does not count', () => {
+    const problems: string[] = [];
+    const text = many(4).replace('</Relationships>', '<Relationship Id="r0" Target="again.xml"/></Relationships>');
+    expect(parseRelationships(text, 'xl/workbook.xml', { max: 4, problem: (w) => problems.push(w) })).toHaveLength(4);
+    expect(problems).toEqual([]);
+  });
+  it('reads what precedes damage and reports it', () => {
+    const problems: string[] = [];
+    const text = many(2).replace('</Relationships>', '<Relationship Id="x" Target="y.xml"></Oops>');
+    expect(parseRelationships(text, 'xl/workbook.xml', { problem: (w) => problems.push(w) })).toHaveLength(3);
+    expect(problems).toEqual(['damaged']);
+    expect(() => parseRelationships(text, 'xl/workbook.xml')).not.toThrow();
   });
 });

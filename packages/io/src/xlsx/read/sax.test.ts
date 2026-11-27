@@ -200,3 +200,12 @@ describe('scanXml: hostile shapes of a million items', () => {
     expect(time(800_000)).toBeLessThan(small * 12);
   });
 });
+
+describe('scanXml without a text handler', () => {
+  it('reads the same structure and skips text and CDATA, whatever they hold', () => {
+    const opened: string[] = [];
+    const ok = scanXml('<a> &amp; <b><![CDATA[x<y]]></b>tail<c/></a>', { open: (name) => void opened.push(name), close: () => undefined });
+    expect(ok).toBe(true);
+    expect(opened).toEqual(['a', 'b', 'c']);
+  });
+});
