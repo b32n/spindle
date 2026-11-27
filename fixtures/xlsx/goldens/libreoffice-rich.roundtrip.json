@@ -19,36 +19,10 @@
     },
     "byField": {
       "added sheets[].config.colWidths.*": 6,
-      "added sheets[].config.rowHeights.*": 2,
-      "removed sheets[].cells.*.style.textRotation": 5
+      "added sheets[].config.rowHeights.*": 2
     },
     "changed": 0,
     "entries": [
-      {
-        "before": "0",
-        "kind": "removed",
-        "path": "sheets[0].cells.A1.style.textRotation"
-      },
-      {
-        "before": "0",
-        "kind": "removed",
-        "path": "sheets[0].cells.B1.style.textRotation"
-      },
-      {
-        "before": "0",
-        "kind": "removed",
-        "path": "sheets[0].cells.C1.style.textRotation"
-      },
-      {
-        "before": "0",
-        "kind": "removed",
-        "path": "sheets[0].cells.D1.style.textRotation"
-      },
-      {
-        "before": "0",
-        "kind": "removed",
-        "path": "sheets[0].cells.E1.style.textRotation"
-      },
       {
         "after": "100",
         "kind": "added",
@@ -90,8 +64,8 @@
         "path": "sheets[1].config.colWidths.A"
       }
     ],
-    "removed": 5,
-    "total": 13,
+    "removed": 0,
+    "total": 8,
     "truncated": false
   },
   "exportWarnings": [],

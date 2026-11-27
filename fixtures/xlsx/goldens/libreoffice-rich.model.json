@@ -157,7 +157,6 @@
       "s1": {
         "fontFamily": "Calibri",
         "fontSize": 11,
-        "textRotation": 0,
         "verticalAlign": "bottom"
       }
     }

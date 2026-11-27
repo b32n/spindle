@@ -298,7 +298,8 @@ function fromSpreadsheetStyle(style: SpreadsheetCellStyle): CellStyle {
   if (style.horizontalAlign != null) out.textAlign = style.horizontalAlign;
   if (style.verticalAlign != null) out.verticalAlign = style.verticalAlign;
   if (style.wrapText != null) out.textWrap = style.wrapText;
-  if (style.textRotation != null) out.textRotation = style.textRotation;
+  // an explicit 0 is the default: the file writer leaves it out, so the model does not keep it either (open -> save -> open is stable)
+  if (style.textRotation) out.textRotation = style.textRotation;
 
   if (style.border) {
     if (style.border.top) out.borderTop = toCssBorder(style.border.top);
