@@ -51,12 +51,6 @@ export function ImageFormatBar(): React.ReactElement | null {
   if (!id || !el || el.type !== 'image') return null;
   const cropOpen = cropOpenFor === id;
 
-  // Overflow menu / mobile sheet: a single row that opens the modal (the anchored Popover would paint under the
-  // surface). It must be the first child: the surface measures a row by it, and a leading divider would collapse the row.
-  if (menu.inMenu) {
-    return <MenuRow icon={<Crop size={17} />} label="Crop image" onClick={() => menu.openModal('Crop image', <LiveImageCropFields id={id} />)} />;
-  }
-
   // `measureSrc` is the local data URL used to read the size; `src` is what is stored
   // (the same data URL, or the URL returned by the host's uploadImage).
   const replace = async (measureSrc: string, src: string = measureSrc) => {
@@ -89,6 +83,25 @@ export function ImageFormatBar(): React.ReactElement | null {
       imageHooks.onImageError?.(err as Error);
     }
   };
+
+  // Overflow menu / mobile sheet: one row per control (the anchored Popover would paint under the surface, so crop
+  // opens a modal). The Crop row must be the first child: the surface measures a row by it, and a leading divider would
+  // collapse the row.
+  if (menu.inMenu) {
+    const fit = el.fit ?? 'fill';
+    const nextFit = FITS[(FITS.findIndex((f) => f.v === fit) + 1) % FITS.length].v;
+    return (
+      <>
+        <MenuRow icon={<Crop size={17} />} label="Crop image" onClick={() => menu.openModal('Crop image', <LiveImageCropFields id={id} />)} />
+        <MenuRow icon={<ImageUp size={17} />} label="Replace image" onClick={() => fileRef.current?.click()} />
+        {imageHooks.resolveImage && <MenuRow icon={<Link2 size={17} />} label="Replace with URL" onClick={replaceByUrl} />}
+        <MenuRow label="Image fit" hint={FITS.find((f) => f.v === fit)?.label} onClick={() => deck.updateElement(id, { fit: nextFit })} />
+        <MenuRow icon={<FlipHorizontal2 size={17} />} label="Flip horizontal" hint={el.flipH ? 'On' : undefined} onClick={() => deck.updateElement(id, { flipH: !el.flipH })} />
+        <MenuRow icon={<FlipVertical2 size={17} />} label="Flip vertical" hint={el.flipV ? 'On' : undefined} onClick={() => deck.updateElement(id, { flipV: !el.flipV })} />
+        <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: 'none' }} />
+      </>
+    );
+  }
 
   return (
     <>
