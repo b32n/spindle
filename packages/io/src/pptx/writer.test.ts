@@ -138,6 +138,21 @@ describe('exportPptx: the package', () => {
     expect(await lintPptxPackage(bytes)).toEqual([]);
   });
 
+  it('keeps the first of two layouts that claim the same part name for the slides that name it', async () => {
+    const dup = 'ppt/slideLayouts/slideLayout1.xml';
+    const { bytes } = await exportPptx(deck({ layouts: [layout({ name: 'A' }), layout({ name: 'B' })], slides: [slide({ layoutPart: dup })] }));
+    const back = await importPptx(bytes);
+    expect(back.layouts.map((l) => l.name)).toEqual(['A', 'B']);
+    expect(back.slides[0].layoutPart).toBe(back.layouts[0].partName);
+  });
+
+  it('keeps the first slide of a repeated source id in the sections', async () => {
+    const { bytes } = await exportPptx(deck({ slides: [slide({ name: 'One' }), slide({ name: 'Two', partName: 'ppt/slides/slide2.xml' })], sections: [{ name: 'S', slideIds: ['256'] }] }));
+    const back = await importPptx(bytes);
+    expect(back.sections).toEqual([{ name: 'S', slideIds: [back.slides[0].pptxId] }]);
+    expect(back.slides[1].pptxId).not.toBe(back.slides[0].pptxId);
+  });
+
   it('keeps the colour map and the theme with its east Asian and complex fonts', async () => {
     const colorMap = { ...DEFAULT_COLOR_MAP, bg1: 'dk1' as const, tx1: 'lt1' as const };
     const theme = { ...FALLBACK_THEME, name: 'Mine & "yours"', fonts: { major: 'Georgia', minor: 'Verdana', majorEastAsian: 'MS Mincho', minorEastAsian: 'SimSun', majorComplex: 'Arial', minorComplex: 'Tahoma' } };
@@ -243,6 +258,14 @@ describe('exportPptx: what is not exported yet', () => {
     ]);
     const two = await exportPptx(deck({ slides: [slide({ error: 'e' }), slide({ pptxId: '257', error: 'e' })], layouts: [layout({ elements: [shape, shape] })] }));
     expect(two.warnings).toEqual(['2 slides could not be read at import and are written empty.', 'Not exported yet: 2 static layout shapes (K12b).']);
+  });
+});
+
+describe('exportPptx: several masters', () => {
+  it('says that the masters were merged', async () => {
+    const { warnings } = await exportPptx(deck({ layouts: [layout({ masterPart: 'ppt/slideMasters/slideMaster1.xml' }), layout({ partName: 'ppt/slideLayouts/slideLayout2.xml', masterPart: 'ppt/slideMasters/slideMaster2.xml' })] }));
+    expect(warnings).toEqual(['2 slide masters were merged into one (their layouts keep their placeholders).']);
+    expect((await exportPptx(deck())).warnings).toEqual([]);
   });
 });
 

@@ -140,13 +140,17 @@ function notExported(p: PresentationImportResult): string[] {
   ];
   const out = lines.filter(([k]) => counts[k]).map(([k, label]) => `Not exported yet: ${counts[k]} ${label}.`);
   if (failed > 0) out.unshift(`${plural(failed, 'slide')} could not be read at import and ${failed === 1 ? 'is' : 'are'} written empty.`);
+  const masters = new Set(p.layouts.map((l) => l.masterPart)).size;
+  if (masters > 1) out.unshift(`${masters} slide masters were merged into one (their layouts keep their placeholders).`);
   if (layoutShapes > 0) out.push(`Not exported yet: ${plural(layoutShapes, 'static layout shape')} (K12b).`);
   return out;
 }
 
 function presentationXml(p: PresentationImportResult, slideIds: string[], slideRels: string[], masterRel: string): string {
   const ids = slideIds.map((id, i) => `<p:sldId id="${id}" r:id="${slideRels[i]}"/>`).join('');
-  const byOld = new Map(p.slides.map((s, i) => [s.pptxId, slideIds[i]]));
+  // a repeated source id (malformed deck) keeps its first slide
+  const byOld = new Map<string, string>();
+  p.slides.forEach((s, i) => byOld.has(s.pptxId) || byOld.set(s.pptxId, slideIds[i]));
   const sections = (p.sections ?? []).map((s, i) => {
     const members = s.slideIds.flatMap((id) => (byOld.has(id) ? [`<p14:sldId id="${byOld.get(id)}"/>`] : []));
     return `<p14:section${attrs({ name: s.name, id: `{00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}}` })}><p14:sldIdLst>${members.join('')}</p14:sldIdLst></p14:section>`;
@@ -217,7 +221,9 @@ export async function exportPptx(presentation: PresentationImportResult, options
     add(relsPart(layoutParts[i]), relsXml([{ id: 'rId1', type: 'slideMaster', target: '../slideMasters/slideMaster1.xml' }]));
   });
 
-  const byPart = new Map(presentation.layouts.map((l, i) => [l.partName, layoutParts[i]]));
+  // a repeated layout part name (malformed deck) keeps its first layout
+  const byPart = new Map<string, string>();
+  presentation.layouts.forEach((l, i) => byPart.has(l.partName) || byPart.set(l.partName, layoutParts[i]));
   presentation.slides.forEach((slide, i) => {
     const layout = (slide.layoutPart !== undefined ? byPart.get(slide.layoutPart) : undefined) ?? layoutParts[0];
     add(`ppt/slides/slide${i + 1}.xml`, slideXml(slide), TYPE.slide);

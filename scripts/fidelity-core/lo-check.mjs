@@ -9,7 +9,7 @@
 // `exportPptx` into `<out>/exported/` and checks that file; it also prints the writer's own "not exported yet" notes.
 // Exit status 1 when any conversion fails or gives no pages.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -35,7 +35,10 @@ if (run('soffice', ['--version']).status !== 0) {
   process.exit(2);
 }
 
-/** The pages of a PDF: `pdfinfo` when present, else the `/Type /Page` objects. */
+/**
+ * The pages of a PDF: `pdfinfo` when present, else the `/Type /Page` objects. The fallback only sees page objects stored
+ * uncompressed, so without `pdfinfo` a count of 0 may be an undercount (a PDF with compressed object streams).
+ */
 function pageCount(pdf) {
   const info = run('pdfinfo', [pdf]);
   const m = /Pages:\s+(\d+)/.exec(info.stdout ?? '');
@@ -58,7 +61,12 @@ for (const file of files) {
   const base = path.basename(target).replace(/\.[^.]+$/, '');
   // a private profile per run, so a LibreOffice already open on the box is neither disturbed nor waited for
   const profile = mkdtempSync(path.join(os.tmpdir(), 'lo-profile-'));
-  const conv = run('soffice', [`-env:UserInstallation=file://${profile}`, '--headless', '--convert-to', 'pdf', '--outdir', out, target]);
+  let conv;
+  try {
+    conv = run('soffice', [`-env:UserInstallation=file://${profile}`, '--headless', '--convert-to', 'pdf', '--outdir', out, target]);
+  } finally {
+    rmSync(profile, { recursive: true, force: true });
+  }
   const pdf = path.join(out, `${base}.pdf`);
   let pages = 0;
   if (conv.status === 0) {
