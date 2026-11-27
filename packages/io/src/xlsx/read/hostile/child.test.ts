@@ -1,17 +1,21 @@
 import * as fs from 'node:fs';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { hostname, tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import JSZip from 'jszip';
-import { describeIf, endOf, heavyAllowed, importInChild, lastJson, MB, memoryBudget, runChild, slotCount, survived, SURVIVED, sweepStale, withSlot } from './child';
+import { alive, describeIf, endOf, heavyAllowed, importInChild, lastJson, MB, memoryBudget, runChild, slotCount, survived, SURVIVED, sweepStale, withSlot } from './child';
 
 // `renameSync` can be made to fail or to lose a race for one call, and does what it does otherwise
 const realRename = jest.requireActual<typeof fs>('node:fs').renameSync;
 jest.mock('node:fs', () => {
   const actual = jest.requireActual<typeof fs>('node:fs');
-  return { ...actual, renameSync: jest.fn((from: fs.PathLike, to: fs.PathLike) => actual.renameSync(from, to)) };
+  return { ...actual, renameSync: jest.fn((from: fs.PathLike, to: fs.PathLike) => actual.renameSync(from, to)), writeFileSync: jest.fn(actual.writeFileSync), statSync: jest.fn(actual.statSync) };
 });
 const renameMock = jest.mocked(fs.renameSync);
+const writeMock = jest.mocked(fs.writeFileSync);
+const statMock = jest.mocked(fs.statSync);
+const realStat = jest.requireActual<typeof fs>('node:fs').statSync;
+const realWrite = jest.requireActual<typeof fs>('node:fs').writeFileSync;
 
 const BEHAVE = resolve(__dirname, 'behave-probe.ts');
 const GB = 1024 * MB;
@@ -55,6 +59,8 @@ describe('withSlot', () => {
   });
   afterEach(() => {
     renameMock.mockReset().mockImplementation(realRename);
+    writeMock.mockReset().mockImplementation(realWrite);
+    statMock.mockReset().mockImplementation(realStat as typeof fs.statSync);
     rmSync(root, { recursive: true, force: true });
   });
 
@@ -77,37 +83,97 @@ describe('withSlot', () => {
     }, 2, 1_000, root);
   });
 
+  const SLOT = 'spindle-hostile-slot-0';
+  const name = (pid: string | number, host: string = hostname()) => `${pid}\n${host}\ntoken`;
+  const age = (path: string, seconds: number) => {
+    const t = new Date(Date.now() - seconds * 1000);
+    utimesSync(path, t, t);
+  };
+
   it('takes over the slot of a holder that is gone', () => {
-    const dir = join(root, 'spindle-hostile-slot-0');
+    const dir = join(root, SLOT);
     mkdirSync(dir);
     // a pid no process has (above the kernel limit)
-    writeFileSync(join(dir, 'pid'), '99999999');
+    writeFileSync(join(dir, 'pid'), name(99999999));
     expect(withSlot(() => 'ran', 1, 5_000, root)).toBe('ran');
     expect(readdirSync(root)).toEqual([]);
   });
 
-  it('waits for a holder that has not named itself yet, and one that is somebody else\'s (EPERM) is alive', () => {
-    const dir = join(root, 'spindle-hostile-slot-0');
+  it('does not take a slot of a live holder, also one that is somebody else\'s (EPERM)', () => {
+    const dir = join(root, SLOT);
     mkdirSync(dir);
-    // no pid file: not taken over, so the wait runs out
+    writeFileSync(join(dir, 'pid'), name(process.pid));
     expect(withSlot(() => 'ran', 1, 100, root)).toBe('ran');
-    expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']);
-    writeFileSync(join(dir, 'pid'), '12345');
+    expect(readdirSync(root)).toEqual([SLOT]);
+    writeFileSync(join(dir, 'pid'), name(12345));
     const kill = jest.spyOn(process, 'kill').mockImplementation(() => {
       throw Object.assign(new Error('not yours'), { code: 'EPERM' });
     });
     try {
       expect(withSlot(() => 'ran', 1, 100, root)).toBe('ran');
-      expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']);
+      expect(readdirSync(root)).toEqual([SLOT]);
     } finally {
       kill.mockRestore();
     }
   });
 
-  it('loses nothing when two waiters see the same dead holder: the one that loses the rename leaves the slot to the winner', () => {
-    const dir = join(root, 'spindle-hostile-slot-0');
+  it('is not alive for what is not a pid', () => {
+    for (const pid of [NaN, 0, -1, 1.5]) expect(alive(pid)).toBe(false);
+    expect(alive(process.pid)).toBe(true);
+  });
+
+  it.each([
+    ['no pid file', undefined],
+    ['an empty pid file', ''],
+    ['a garbage pid file', 'not a pid'],
+    ['a pid without a host', '99999999'],
+  ])('waits for a slot with %s while it is new, and takes it over when it is over 10 s old', (_n, content) => {
+    const dir = join(root, SLOT);
     mkdirSync(dir);
-    writeFileSync(join(dir, 'pid'), '99999999');
+    if (content !== undefined) writeFileSync(join(dir, 'pid'), content);
+    // new: may be about to name itself
+    expect(withSlot(() => 'ran', 1, 100, root)).toBe('ran');
+    expect(readdirSync(root)).toEqual([SLOT]);
+    age(dir, 11);
+    expect(withSlot(() => readFileSync(join(dir, 'pid'), 'utf8').split('\n')[0], 1, 5_000, root)).toBe(String(process.pid));
+    expect(readdirSync(root)).toEqual([]);
+  });
+
+  it('takes a slot of another host only after the age timeout, whatever its pid', () => {
+    const dir = join(root, SLOT);
+    mkdirSync(dir);
+    // the pid is dead here and alive nowhere we can tell: the host differs
+    writeFileSync(join(dir, 'pid'), name(99999999, 'another-container'));
+    age(dir, 60);
+    expect(withSlot(() => 'ran', 1, 100, root)).toBe('ran');
+    expect(readdirSync(root)).toEqual([SLOT]);
+    age(dir, 31 * 60);
+    expect(withSlot(() => 'ran', 1, 5_000, root)).toBe('ran');
+    expect(readdirSync(root)).toEqual([]);
+  });
+
+  it('removes the slot it made when it cannot name itself, and tries again', () => {
+    writeMock.mockImplementationOnce(() => {
+      throw Object.assign(new Error('no space'), { code: 'ENOSPC' });
+    });
+    expect(withSlot(() => readdirSync(root), 1, 5_000, root)).toEqual([SLOT]);
+    expect(readdirSync(root)).toEqual([]);
+    // and when it never can, it runs after its wait with nothing left behind
+    writeMock.mockImplementation(() => {
+      throw Object.assign(new Error('no space'), { code: 'ENOSPC' });
+    });
+    try {
+      expect(withSlot(() => readdirSync(root), 1, 100, root)).toEqual([]);
+    } finally {
+      writeMock.mockImplementation(realWrite);
+    }
+    expect(readdirSync(root)).toEqual([]);
+  });
+
+  it('loses nothing when two waiters see the same dead holder: the one that loses the rename leaves the slot to the winner', () => {
+    const dir = join(root, SLOT);
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'pid'), name(99999999));
     // the other waiter has renamed it (and gone on) just before this one does
     renameMock.mockImplementationOnce(() => {
       throw Object.assign(new Error('gone'), { code: 'ENOENT' });
@@ -117,43 +183,74 @@ describe('withSlot', () => {
     expect(readdirSync(root)).toEqual([]);
   });
 
-  it('does not remove a slot that another has taken since the pid was read, and puts it back', () => {
-    const dir = join(root, 'spindle-hostile-slot-0');
+  it('leaves a slot that vanished between the look and the age check', () => {
+    const dir = join(root, SLOT);
     mkdirSync(dir);
-    writeFileSync(join(dir, 'pid'), '99999999');
+    // no pid file, so the age is asked: the directory is gone by then
+    // (the first look is the sweep's)
+    statMock.mockImplementationOnce(realStat as typeof fs.statSync).mockImplementationOnce(() => {
+      throw Object.assign(new Error('gone'), { code: 'ENOENT' });
+    });
+    expect(withSlot(() => 'ran', 1, 100, root)).toBe('ran');
+  });
+
+  it('does not remove a slot that another has taken since the pid was read, and puts it back', () => {
+    const dir = join(root, SLOT);
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'pid'), name(99999999));
     let seen = '';
     // between the read of the dead pid and the claim, another process took the slot (it names itself)
     renameMock.mockImplementationOnce((from, to) => {
-      writeFileSync(join(String(from), 'pid'), String(process.pid));
+      writeFileSync(join(String(from), 'pid'), name(process.pid));
       realRename(from, to);
     });
     withSlot(() => {
       seen = readFileSync(join(dir, 'pid'), 'utf8');
     }, 1, 100, root);
     // it was ours to find alive (a live pid), so the slot was put back and this waiter ran after its wait without it
-    expect(seen).toBe(String(process.pid));
-    expect(existsSync(dir)).toBe(true);
-    expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']);
+    expect(seen).toBe(name(process.pid));
+    expect(readdirSync(root)).toEqual([SLOT]);
   });
 
-  it('removes what it claimed when it cannot put it back', () => {
-    const dir = join(root, 'spindle-hostile-slot-0');
+  it('drops what it claimed when a third has made the slot since, and never touches that one', () => {
+    const dir = join(root, SLOT);
     mkdirSync(dir);
-    writeFileSync(join(dir, 'pid'), '99999999');
+    writeFileSync(join(dir, 'pid'), name(99999999));
+    renameMock.mockImplementationOnce((from, to) => {
+      writeFileSync(join(String(from), 'pid'), name(process.pid));
+      realRename(from, to);
+      // the third waiter takes the free name before the put-back
+      mkdirSync(dir);
+      writeFileSync(join(dir, 'pid'), name(process.pid));
+    });
+    let seen = '';
+    withSlot(() => {
+      seen = readFileSync(join(dir, 'pid'), 'utf8');
+    }, 1, 100, root);
+    // the third's slot stands as it was, and the claimed copy is gone
+    expect(seen).toBe(name(process.pid));
+    expect(readdirSync(root)).toEqual([SLOT]);
+  });
+
+  it('leaves the directory it made for a put-back, unnamed and new, when the pid file cannot be moved', () => {
+    const dir = join(root, SLOT);
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'pid'), name(99999999));
     renameMock
       .mockImplementationOnce((from, to) => {
-        writeFileSync(join(String(from), 'pid'), String(process.pid));
+        writeFileSync(join(String(from), 'pid'), name(process.pid));
         realRename(from, to);
       })
       .mockImplementationOnce(() => {
-        throw Object.assign(new Error('taken'), { code: 'EEXIST' });
+        throw Object.assign(new Error('gone'), { code: 'ENOENT' });
       });
-    expect(withSlot(() => 'ran', 1, 5_000, root)).toBe('ran');
-    expect(readdirSync(root)).toEqual([]);
+    withSlot(() => 'ran', 1, 100, root);
+    expect(readdirSync(root)).toEqual([SLOT]);
+    expect(existsSync(join(dir, 'pid'))).toBe(false);
   });
 
   it('frees only a slot that still names it', () => {
-    withSlot(() => writeFileSync(join(root, 'spindle-hostile-slot-0', 'pid'), '1'), 1, 1_000, root);
+    withSlot(() => writeFileSync(join(root, 'spindle-hostile-slot-0', 'pid'), name(1)), 1, 1_000, root);
     expect(readdirSync(root)).toEqual(['spindle-hostile-slot-0']);
   });
 

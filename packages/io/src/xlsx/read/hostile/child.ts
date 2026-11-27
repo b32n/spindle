@@ -1,6 +1,6 @@
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { availableParallelism, tmpdir, totalmem } from 'node:os';
+import { availableParallelism, hostname, tmpdir, totalmem } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import type { ImportLossItem } from '@b32nio/spindle-shared';
@@ -38,8 +38,9 @@ export const slotCount = (budget: number, cpus: number = availableParallelism())
 const SLOT_PREFIX = 'spindle-hostile-slot-';
 const sleep = (ms: number): void => void Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
-/** Whether the process `pid` exists (signal 0 sends nothing). */
-function alive(pid: number): boolean {
+/** Whether the process `pid` exists (signal 0 sends nothing). Not a pid at all (empty, NaN, zero or negative: `kill(0, 0)` would answer for the process group) is not alive. */
+export function alive(pid: number): boolean {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
   try {
     process.kill(pid, 0);
     return true;
@@ -68,21 +69,76 @@ export function sweepStale(root: string, maxAgeMs: number = STALE_MS, now: numbe
   }
 }
 
-const pidOf = (dir: string): number => {
+/** Who a slot names: the process, the host (a container of its own has its own pids, and may share the temp directory) and a token of this process. */
+const HOST = hostname();
+const ME = `${process.pid}\n${HOST}\n${randomBytes(6).toString('hex')}`;
+/** How long a slot that names nobody (or a garbage name) may take to be named before it is dead, and how long a slot of another host may stand before it is taken over (its pid says nothing here). */
+const UNNAMED_MS = 10_000;
+const FOREIGN_MS = 30 * 60 * 1000;
+
+/** What the slot `dir` says (its `pid` file), or `undefined` when it has none (the holder is between creating the directory and naming itself, or the slot is gone). */
+const readHolder = (dir: string): string | undefined => {
   try {
-    return Number(readFileSync(join(dir, 'pid'), 'utf8'));
+    return readFileSync(join(dir, 'pid'), 'utf8');
   } catch {
-    // the holder is between creating the directory and naming itself (or the slot is gone)
-    return NaN;
+    return undefined;
   }
 };
 
+/** Whether the holder `seen` of `dir` is gone: by its pid on this host, else (another host, no name, a name that is no name) when the slot is older than that kind of slot may be. */
+function holderGone(dir: string, seen: string | undefined, now: number): boolean {
+  const [pid, host] = (seen ?? '').split('\n');
+  const named = /^\d+$/.test(pid) && host !== undefined && host !== '';
+  if (named && host === HOST) return !alive(Number(pid));
+  return now - statSync(dir).mtimeMs > (named ? FOREIGN_MS : UNNAMED_MS);
+}
+
+/**
+ * Put the slot `claimed` (taken from `dir` by a rename) back, when it turned out to be a live holder's: `dir` is made afresh (it fails when
+ * another has made it since) and the `pid` file moved into it, so no path that may be another's is renamed over or removed; `claimed` is
+ * ours alone. When `dir` is taken the claimed copy is dropped, and its holder (who frees only a slot that names it) goes on unprotected.
+ */
+function putBack(claimed: string, dir: string): void {
+  try {
+    mkdirSync(dir);
+  } catch {
+    return;
+  }
+  try {
+    renameSync(join(claimed, 'pid'), join(dir, 'pid'));
+  } catch {
+    // nothing to put (the made directory is ours, and left to the next try to find unnamed)
+  }
+}
+
+/** Take over the slot `dir` when its holder is gone: by renaming it to a name of the taker's own (one waiter wins the rename), and removing it only when it still says what was seen. */
+function reap(dir: string): void {
+  let seen: string | undefined;
+  try {
+    seen = readHolder(dir);
+    if (!holderGone(dir, seen, Date.now())) return;
+  } catch {
+    // the slot is gone already
+    return;
+  }
+  const claimed = `${dir}.reap-${randomBytes(6).toString('hex')}`;
+  try {
+    renameSync(dir, claimed);
+  } catch {
+    // another waiter won the rename
+    return;
+  }
+  // a slot another has taken since is put back, not removed
+  if (readHolder(claimed) !== seen) putBack(claimed, dir);
+  rmSync(claimed, { recursive: true, force: true });
+}
+
 /**
  * Run `fn` holding one of `slots` machine-wide slots (a directory each, in the temp directory, that names the holder): the jest workers
- * of one run, or of two, do not each start a child of a gigabyte at the same time. A slot whose holder is gone (killed) is taken over: by
- * renaming it to a name of the taker's own (one waiter wins the rename), and removing it only when it still names the dead holder, so a
- * waiter that was late cannot remove the slot another has just taken. After `waitMs` it runs anyway: a stuck neighbour must not fail the
- * tests that wait for it. Directories of this file's names that a killed run left over a day ago are removed first.
+ * of one run, or of two, do not each start a child of a gigabyte at the same time. A slot whose holder is gone (killed) is taken over
+ * (`reap`), also one that was never named (killed between `mkdir` and the write, or the disk full: dead when over 10 s old). After
+ * `waitMs` it runs anyway: a stuck neighbour must not fail the tests that wait for it. Directories of this file's names that a killed run
+ * left over a day ago are removed first.
  */
 export function withSlot<T>(fn: () => T, slots: number = slotCount(memoryBudget()), waitMs = 600_000, root: string = tmpdir()): T {
   sweepStale(root);
@@ -93,29 +149,17 @@ export function withSlot<T>(fn: () => T, slots: number = slotCount(memoryBudget(
       const dir = join(root, `${SLOT_PREFIX}${i}`);
       try {
         mkdirSync(dir);
-        writeFileSync(join(dir, 'pid'), String(process.pid));
-        held = dir;
       } catch {
         // taken: by a live process, or by one that is gone
-        const pid = pidOf(dir);
-        if (!Number.isNaN(pid) && !alive(pid)) {
-          const claimed = `${dir}.reap-${randomBytes(6).toString('hex')}`;
-          try {
-            renameSync(dir, claimed);
-          } catch {
-            // another waiter won the rename
-            continue;
-          }
-          if (pidOf(claimed) === pid) rmSync(claimed, { recursive: true, force: true });
-          else {
-            // what was claimed is a slot another has taken since: put it back (the name is free unless a third has made it)
-            try {
-              renameSync(claimed, dir);
-            } catch {
-              rmSync(claimed, { recursive: true, force: true });
-            }
-          }
-        }
+        reap(dir);
+        continue;
+      }
+      try {
+        writeFileSync(join(dir, 'pid'), ME);
+        held = dir;
+      } catch {
+        // cannot name itself (disk full): the directory is ours, and must not stand unnamed
+        rmSync(dir, { recursive: true, force: true });
       }
     }
     if (held === undefined) sleep(50);
@@ -124,7 +168,7 @@ export function withSlot<T>(fn: () => T, slots: number = slotCount(memoryBudget(
     return fn();
   } finally {
     // only a slot that still names this process: after a takeover it is somebody else's
-    if (held !== undefined && pidOf(held) === process.pid) rmSync(held, { recursive: true, force: true });
+    if (held !== undefined && readHolder(held) === ME) rmSync(held, { recursive: true, force: true });
   }
 }
 
