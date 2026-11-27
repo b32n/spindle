@@ -38,12 +38,9 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "xlsx.styles.themeColors"
-      ],
       "name": "xl/theme/theme1.xml",
       "rule": "theme",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "xl/workbook.xml",
@@ -57,8 +54,8 @@
     }
   ],
   "totals": {
-    "dropped": 1,
-    "mapped": 9,
+    "dropped": 0,
+    "mapped": 10,
     "opaque": 0,
     "total": 10,
     "unaccounted": 0

@@ -242,3 +242,124 @@ export interface XlsxWorkbookInfo {
   /** The shared-strings, styles, theme and persons (threaded-comment authors) parts, when present. */
   parts: { sharedStrings?: string; styles?: string; theme?: string; persons?: string };
 }
+
+// ---------------------------------------------------------------------------
+// A worksheet part (S2b): what the own sheet reader reads besides the cells, and a few per-cell facts. Reported through the
+// optional `SpreadsheetSheet.details` and the optional fields of `SpreadsheetCell`.
+// ---------------------------------------------------------------------------
+
+/** A `<col>` element: columns `min` to `max` (1-based, inclusive, as in the file). */
+export interface XlsxColumnInfo {
+  min: number;
+  max: number;
+  /** Width in characters of the default font, as written. */
+  width?: number;
+  hidden?: boolean;
+  customWidth?: boolean;
+  bestFit?: boolean;
+  /** Default cell format (`cellXfs` index) of the columns. */
+  style?: number;
+  outlineLevel?: number;
+  collapsed?: boolean;
+}
+
+/** The attributes of a `<row>` that differ from the defaults (a row with none of them is not listed). */
+export interface XlsxRowInfo {
+  /** 0-based. */
+  row: number;
+  /** Points, as written. */
+  height?: number;
+  hidden?: boolean;
+  customHeight?: boolean;
+  /** Default cell format (`cellXfs` index) of the row, in force when `customFormat` is true. */
+  style?: number;
+  customFormat?: boolean;
+  outlineLevel?: number;
+  collapsed?: boolean;
+}
+
+export interface XlsxSheetPane {
+  xSplit?: number;
+  ySplit?: number;
+  topLeftCell?: string;
+  activePane?: string;
+  /** `frozen`, `frozenSplit` or `split`. */
+  state?: string;
+}
+
+export interface XlsxSheetView {
+  showGridLines?: boolean;
+  showRowColHeaders?: boolean;
+  showZeros?: boolean;
+  rightToLeft?: boolean;
+  tabSelected?: boolean;
+  zoomScale?: number;
+  zoomScaleNormal?: number;
+  /** `normal`, `pageBreakPreview` or `pageLayout`. */
+  view?: string;
+  topLeftCell?: string;
+  pane?: XlsxSheetPane;
+  /** The cell references of the selections (`activeCell` of each). */
+  activeCells: string[];
+}
+
+export interface XlsxSheetFormat {
+  /** Characters of the default font. */
+  defaultColWidth?: number;
+  baseColWidth?: number;
+  /** Points. */
+  defaultRowHeight?: number;
+  customHeight?: boolean;
+  zeroHeight?: boolean;
+  outlineLevelRow?: number;
+  outlineLevelCol?: number;
+}
+
+export interface XlsxSheetProperties {
+  codeName?: string;
+  tabColor?: XlsxColor;
+  filterMode?: boolean;
+  /** `outlinePr`: summary rows below and columns right of their detail. */
+  summaryBelow?: boolean;
+  summaryRight?: boolean;
+  fitToPage?: boolean;
+}
+
+/** A `<hyperlink>` of the sheet. An external target is the relationship's target as written; an internal one is a `location` in the workbook. */
+export interface XlsxHyperlink {
+  /** The cell or range as written. */
+  ref: string;
+  /** Target of the relationship the link names (`r:id`), when it has one and the package has it. */
+  target?: string;
+  /** Location inside the workbook (`Sheet2!A1`, a defined name). */
+  location?: string;
+  display?: string;
+  tooltip?: string;
+}
+
+export interface XlsxSheetDetails {
+  /** The part the sheet was read from. */
+  part: string;
+  state: XlsxSheetState;
+  properties: XlsxSheetProperties;
+  /** `dimension` as written (`A1:D20`), when present. */
+  dimension?: string;
+  views: XlsxSheetView[];
+  format: XlsxSheetFormat;
+  columns: XlsxColumnInfo[];
+  rows: XlsxRowInfo[];
+  hyperlinks: XlsxHyperlink[];
+  /** The raw XML of the sheet's `extLst` (every extension, as written), or absent. */
+  extLst?: string;
+  /** False when the part was not well-formed XML: what precedes the damage was read. */
+  wellFormed: boolean;
+}
+
+/** How a cell's formula was written: `shared` and `array` formulas are expanded (each cell of a shared group has its own formula text). */
+export interface XlsxFormulaInfo {
+  type: 'shared' | 'array' | 'dataTable';
+  /** The range the formula covers (`ref`), on the cell that holds it (master). */
+  ref?: string;
+  /** Shared group id. */
+  si?: number;
+}

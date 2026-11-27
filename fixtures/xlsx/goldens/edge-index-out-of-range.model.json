@@ -1,5 +1,42 @@
 {
-  "importError": "The file could not be read (Cannot read properties of undefined (reading 'richText')).",
-  "warnings": [],
-  "workbook": null
+  "importError": null,
+  "warnings": [
+    "Indexes: 2 cell(s) refer to a shared string the file does not have; imported as empty.",
+    "Indexes: 1 cell(s) use a format the file does not have; imported unformatted."
+  ],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {
+          "A1": {
+            "value": "valid string"
+          },
+          "C1": {
+            "value": 5
+          }
+        },
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Indexes",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
 }

@@ -44,7 +44,6 @@ export function builtinNumberFormat(id: number): string | undefined {
 }
 
 export interface UsedStyleFacts {
-  themeColors: number;
   patternFill: number;
   gradientFill: number;
   diagonalBorder: number;
@@ -58,23 +57,11 @@ export interface StyleFacts {
   usedFacts(used: ReadonlySet<number>): UsedStyleFacts;
 }
 
-/** A colour the importer cannot read (it takes RGB only). `fontDefault` skips the colours Excel writes for plain black text. */
-function unreadableColor(color: XmlElement | undefined, fontDefault = false): boolean {
-  if (!color) return false;
-  const a = color.attrs;
-  if (a.theme !== undefined) return !(fontDefault && a.theme === '1' && a.tint === undefined);
-  if (a.indexed !== undefined) return !(a.indexed === '64' || a.indexed === '65' || (fontDefault && a.indexed === '8'));
-  return false;
-}
-
-const SIDES = ['left', 'right', 'top', 'bottom'];
-
 const list = (root: XmlElement | undefined, group: string, item: string): XmlElement[] => kids(kid(root, group), item);
 
 export function parseStyles(root: XmlElement | undefined): StyleFacts {
   const codes = new Map<number, string>();
   for (const n of list(root, 'numFmts', 'numFmt')) codes.set(Number(n.attrs.numFmtId), n.attrs.formatCode ?? '');
-  const fonts = list(root, 'fonts', 'font');
   const fills = list(root, 'fills', 'fill');
   const borders = list(root, 'borders', 'border');
   const xfs = list(root, 'cellXfs', 'xf');
@@ -95,24 +82,12 @@ export function parseStyles(root: XmlElement | undefined): StyleFacts {
       return [...seen.values()];
     },
     usedFacts(used) {
-      const out: UsedStyleFacts = { themeColors: 0, patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] };
+      const out: UsedStyleFacts = { patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] };
       for (const xf of usedXfs(used)) {
-        const font = fonts[Number(xf.attrs.fontId)];
         const fill = fills[Number(xf.attrs.fillId)];
         const border = borders[Number(xf.attrs.borderId)];
         const pattern = kid(fill, 'patternFill');
         const gradient = kid(fill, 'gradientFill');
-        const colors = [
-          unreadableColor(kid(font, 'color'), true),
-          unreadableColor(kid(pattern, 'fgColor')),
-          unreadableColor(kid(pattern, 'bgColor')),
-          ...kids(gradient, 'stop').map((s) => unreadableColor(kid(s, 'color'))),
-          ...SIDES.map((side) => {
-            const el = kid(border, side);
-            return el?.attrs.style !== undefined && unreadableColor(kid(el, 'color'));
-          }),
-        ];
-        if (colors.some(Boolean)) out.themeColors++;
         const type = pattern?.attrs.patternType;
         if (type !== undefined && type !== 'none' && type !== 'solid' && type !== 'gray125') out.patternFill++;
         if (gradient) out.gradientFill++;

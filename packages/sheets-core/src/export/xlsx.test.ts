@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import { exportToXlsx, importFromXlsx } from './xlsx';
+import { describeImportLoss, hasImportLoss } from '@b32nio/spindle-shared';
 import { WorkbookImpl } from '../workbook';
 
 async function readBack(workbook: WorkbookImpl): Promise<ExcelJS.Workbook> {
@@ -171,6 +172,46 @@ describe('importFromXlsx on files that must not be opened', () => {
   });
 });
 
+describe('importFromXlsx: what the import limits cut is in the loss it returns', () => {
+  const fourBySix = async () => {
+    const wb = freshWorkbook();
+    for (let r = 0; r < 6; r++) wb.setCellValue(undefined, r, 0, r);
+    return exportToXlsx(wb);
+  };
+
+  it('adds an xlsx.package.sizeLimit item that names what was cut and the option that raises the limit, and the cells that fit are imported', async () => {
+    const wb = freshWorkbook();
+    const { warnings, loss } = await importFromXlsx(await fourBySix(), wb, { limits: { maxTotalCells: 4 } });
+    expect(wb.getCellValue(undefined, 3, 0)).toBe(3);
+    expect(wb.getCellValue(undefined, 4, 0)).toBeFalsy();
+    expect(warnings).toEqual([expect.stringContaining('maxTotalCells, 4; raise it with the limits option')]);
+    expect(loss.format).toBe('xlsx');
+    expect(loss.items).toEqual([
+      {
+        id: 'xlsx.package.sizeLimit',
+        label: 'sheet(s) cut at the cell limit',
+        count: 1,
+        where: [expect.any(String)],
+        effect: 'lost: the cells past maxTotalCells (4) over the workbook were not imported; raise it with the `limits` option of the import',
+      },
+    ]);
+    expect(hasImportLoss(loss)).toBe(true);
+    expect(describeImportLoss(loss)).toEqual([expect.stringMatching(/^1 × sheet\(s\) cut at the cell limit \(.+\) — lost: the cells past maxTotalCells \(4\)/)]);
+  });
+
+  it('adds nothing when nothing was cut, and appends to the items the detector found otherwise', async () => {
+    const bytes = await fourBySix();
+    const { loss } = await importFromXlsx(bytes, freshWorkbook());
+    expect(loss.items.filter((i) => i.id === 'xlsx.package.sizeLimit')).toEqual([]);
+    // a limit that leaves one cell of two: the item is the last of the report, after whatever the detector found
+    const wb = freshWorkbook();
+    wb.setCellValue(undefined, 0, 0, 1);
+    wb.setCellValue(undefined, 0, 1, 2);
+    const cut = await importFromXlsx(await exportToXlsx(wb), freshWorkbook(), { limits: { maxTotalCells: 1 } });
+    expect(cut.loss.items.map((i) => i.id)).toEqual(['xlsx.package.sizeLimit']);
+  });
+});
+
 describe('exportToXlsx -> importFromXlsx round-trips', () => {
   it('exports the active sheet as the one the file opens on', async () => {
     const wb = freshWorkbook();
@@ -261,4 +302,67 @@ describe('exportToXlsx -> importFromXlsx round-trips', () => {
     expect(target.getCellValue(undefined, 0, 0)).toBe('from file');
     expect(target.getCellValue(undefined, 5, 5)).toBeNull();
   });
+});
+
+describe('importFromXlsx: merges are applied in bulk, as mergeCells would one by one', () => {
+  it('imports merges per sheet with the covered cells gone, no undo history, and the result equal to merging by hand', async () => {
+    const source = freshWorkbook();
+    source.setCellValue(undefined, 0, 0, 'a');
+    source.setCellValue(undefined, 0, 1, 'b');
+    source.setCellValue(undefined, 4, 4, 'c');
+    source.mergeCells({ startRow: 0, startCol: 0, endRow: 1, endCol: 1 });
+    source.mergeCells({ startRow: 4, startCol: 4, endRow: 4, endCol: 6 });
+    const second = source.addSheet('Second').id;
+    source.setCellValue(second, 2, 2, 'x');
+    source.mergeCells({ startRow: 2, startCol: 2, endRow: 3, endCol: 3 }, second);
+    const bytes = await exportToXlsx(source);
+
+    const target = freshWorkbook();
+    const { warnings } = await importFromXlsx(bytes, target);
+    const [first, other] = Array.from(target.sheets.values());
+    expect(first.getMergedRegions()).toEqual([
+      { startRow: 0, startCol: 0, endRow: 1, endCol: 1 },
+      { startRow: 4, startCol: 4, endRow: 4, endCol: 6 },
+    ]);
+    expect(other.getMergedRegions()).toEqual([{ startRow: 2, startCol: 2, endRow: 3, endCol: 3 }]);
+    // the covered cell is gone, the anchor stays
+    expect(first.getCell(0, 1)).toBeUndefined();
+    expect(first.getCell(0, 0)?.value).toBe('a');
+    expect(warnings).toEqual([]);
+    // a load replaces the document: nothing to undo (one step per merge would have taken the merges back one at a time)
+    expect(target.canUndo()).toBe(false);
+  });
+
+  it('applies overlapping merges as one by one would (the later wins), however many, with no warning and no loss', async () => {
+    const JSZip = (await import('jszip')).default;
+    const MAIN = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+    const RELS = 'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
+    const OD = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    const build = async (merges: string[]): Promise<Uint8Array> => {
+      const zip = new JSZip();
+      zip.file('[Content_Types].xml', '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');
+      zip.file('_rels/.rels', `<Relationships ${RELS}><Relationship Id="rId1" Type="${OD}/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
+      zip.file('xl/workbook.xml', `<workbook ${MAIN}><sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets></workbook>`);
+      zip.file('xl/_rels/workbook.xml.rels', `<Relationships ${RELS}><Relationship Id="rId1" Type="${OD}/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`);
+      zip.file('xl/worksheets/sheet1.xml', `<worksheet ${MAIN}><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData><mergeCells>${merges.map((m) => `<mergeCell ref="${m}"/>`).join('')}</mergeCells></worksheet>`);
+      return zip.generateAsync({ type: 'uint8array' });
+    };
+
+    // a few: the later merge drops the earlier it overlaps, and none is left out
+    const few = freshWorkbook();
+    const ok = await importFromXlsx(await build(['A1:C3', 'B2:D4', 'F1:G2']), few);
+    expect(few.getSheet().getMergedRegions()).toEqual([
+      { startRow: 1, startCol: 1, endRow: 3, endCol: 3 },
+      { startRow: 0, startCol: 5, endRow: 1, endCol: 6 },
+    ]);
+    expect(ok.warnings).toEqual([]);
+
+    // 20,005 in a chain, each over the next (more than the 20,000 an earlier version decided): all are decided, only the last stays
+    const chain = Array.from({ length: 20_005 }, (_, i) => `A${i * 2 + 1}:B${i * 2 + 3}`);
+    const wb = freshWorkbook();
+    const long = await importFromXlsx(await build(chain), wb);
+    expect(long.warnings).toEqual([]);
+    expect(long.loss.items.map((i) => i.id)).not.toContain('xlsx.merges.overlapping');
+    expect(wb.getSheet().getMergedRegions()).toEqual([{ startRow: 40_008, startCol: 0, endRow: 40_010, endCol: 1 }]);
+  }, 60_000);
 });

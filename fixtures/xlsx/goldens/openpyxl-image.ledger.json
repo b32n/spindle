@@ -1,36 +1,36 @@
 {
-  "importError": true,
+  "importError": false,
   "package": "zip",
   "parts": [
     {
       "name": "[Content_Types].xml",
       "rule": "package.contentTypes",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "_rels/.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "docProps/app.xml",
       "rule": "docProps",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "docProps/core.xml",
       "rule": "docProps",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/_rels/workbook.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/drawings/_rels/drawing1.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "loss": [
@@ -51,34 +51,34 @@
     {
       "name": "xl/styles.xml",
       "rule": "styles",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/theme/theme1.xml",
       "rule": "theme",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/workbook.xml",
       "rule": "workbook",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/worksheets/_rels/sheet1.xml.rels",
       "rule": "package.relationships",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/worksheets/sheet1.xml",
       "rule": "worksheet",
-      "status": "unaccounted"
+      "status": "mapped"
     }
   ],
   "totals": {
     "dropped": 2,
-    "mapped": 0,
+    "mapped": 11,
     "opaque": 0,
     "total": 13,
-    "unaccounted": 11
+    "unaccounted": 0
   }
 }

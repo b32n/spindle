@@ -120,3 +120,33 @@ describe('sheets file I/O: unsafe files', () => {
     expect(wb.getSheet().getCell(1, 0)?.value).toBe('Pens');
   });
 });
+
+describe('importWorkbookFile limits', () => {
+  it('passes the reader limits on: a file over a limit loses cells and says so in the loss it returns, with the limit that raises it', async () => {
+    const bytes = (await exportWorkbookFile(makeWorkbook(), 'xlsx')).data as Uint8Array;
+    const cut = new WorkbookImpl('w', 'W');
+    const { loss } = await importWorkbookFile(cut, asFile(bytes, 'b.xlsx'), { limits: { maxTotalCells: 2 } });
+    expect(loss.items).toContainEqual(expect.objectContaining({ id: 'xlsx.package.sizeLimit', label: 'sheet(s) cut at the cell limit', effect: expect.stringContaining('maxTotalCells (2)') }));
+    expect(cut.getSheet().getCell(1, 1)).toBeUndefined();
+
+    // the default limits (and no options at all) keep everything
+    const whole = new WorkbookImpl('w', 'W');
+    const result = await importWorkbookFile(whole, asFile(bytes, 'b.xlsx'));
+    expect(result.loss.items.filter((i) => i.id === 'xlsx.package.sizeLimit')).toEqual([]);
+    expect(whole.getSheet().getCell(1, 1)?.value).toBe(12);
+    const raised = new WorkbookImpl('w', 'W');
+    await importWorkbookFile(raised, asFile(bytes, 'b.xlsx'), { limits: { maxTotalCells: 100 } });
+    expect(raised.getSheet().getCell(1, 1)?.value).toBe(12);
+  });
+
+  it('refuses a file over a limit the host lowered, with the reader\'s own error', async () => {
+    const bytes = (await exportWorkbookFile(makeWorkbook(), 'xlsx')).data as Uint8Array;
+    await expect(importWorkbookFile(new WorkbookImpl('w', 'W'), asFile(bytes, 'b.xlsx'), { limits: { maxEntries: 1 } })).rejects.toMatchObject({ code: 'size-limit' });
+  });
+
+  it('does not use the limits for a CSV', async () => {
+    const wb = new WorkbookImpl('w', 'W');
+    await importWorkbookFile(wb, asFile('a,b\n1,2\n', 'd.csv'), { limits: { maxTotalCells: 1 } });
+    expect(wb.getSheet().getCell(1, 1)?.value).toBe(2);
+  });
+});

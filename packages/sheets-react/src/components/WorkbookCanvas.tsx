@@ -27,6 +27,7 @@ import {
   importWorkbookFile,
   inspectWorkbookFile,
   type SheetsExportFormat,
+  type SheetsFileImportOptions,
 } from '../file-io';
 
 export interface WorkbookCanvasProps {
@@ -62,7 +63,14 @@ export interface WorkbookCanvasProps {
   exportFormats?: readonly SheetsExportFormat[];
   /** Base name for downloaded files (no extension). Default: the workbook's name. */
   fileName?: string;
-  /** Called after a file was opened; `warnings` lists features the importer had to drop. */
+  /**
+   * Limits of the XLSX reader over its defaults (`{ maxTotalCells: 20_000_000 }`...), for hosts that open workbooks bigger than the
+   * defaults allow (5,000,000 cells, 1,000 sheets...). What a limit cuts is in the `loss` that `onFileOpened` gets, which names the
+   * limit that raises it. Not used for `.csv`. Pass a stable reference (a constant or a memoized object): the open handler depends on it, so an
+   * inline object re-creates the handler on every render.
+   */
+  importLimits?: SheetsFileImportOptions['limits'];
+  /** Called after a file was opened; `warnings` lists features the importer had to drop, and `loss` what the file holds that the editor cannot take, including what an import limit cut (`xlsx.package.sizeLimit`). */
   onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
   /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
   onFileError?: (error: Error, action: 'open' | 'download') => void;
@@ -81,6 +89,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   fileActions = false,
   exportFormats,
   fileName,
+  importLimits,
   onFileOpened,
   onFileError,
 }: WorkbookCanvasProps) {
@@ -519,7 +528,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     try {
       // Ask before replacing the workbook if the file has things we can't import.
       if (!(await confirmImport(file, await inspectWorkbookFile(file)))) return;
-      const { warnings, loss } = await importWorkbookFile(workbook, file);
+      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits });
       // setData swapped every sheet; drop any state pointing into the old one.
       setActiveCell(null);
       setEditingCell(null);
@@ -528,7 +537,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
-  }, [workbook, onFileOpened, onFileError, confirmImport]);
+  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits]);
 
   const handleDownload = useCallback(async (format: SheetsExportFormat) => {
     try {

@@ -62,6 +62,17 @@ describe('limits', () => {
       maxXmlPartBytes: 256 * MB,
       maxRatio: 200,
       ratioFloorBytes: 16 * MB,
+      maxSheetFormulaChars: 32 * MB,
+      maxFormulaChars: 64 * MB,
+      maxTotalCells: 5_000_000,
+      maxSheets: 1_000,
+      maxRanges: 1_048_576,
+      maxRows: 2_097_152,
+      maxPartElements: 1_000_000,
+      maxColumns: 1_048_576,
+      maxExtensionChars: 64 * MB,
+      maxRelationships: 1_048_576,
+      maxScannedElements: 16_777_216,
     });
     expect(resolveLimits()).toEqual(DEFAULT_IMPORT_LIMITS);
     expect(resolveLimits({ maxEntries: 3 })).toEqual({ ...DEFAULT_IMPORT_LIMITS, maxEntries: 3 });

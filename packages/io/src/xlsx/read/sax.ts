@@ -1,0 +1,132 @@
+import { decodeEntities } from '../xml';
+import { flat } from './capped';
+import { XML_LIMITS } from '../../common/safe-xml';
+
+// ---------------------------------------------------------------------------
+// A forward-only XML event scanner for the one part that can be large, a worksheet's `sheetData`. It reads a string and calls
+// back for each start tag, end tag and run of character data, never building a tree: what a caller holds is what it keeps from
+// the events. The text itself is held whole (the package hands a part over as one string, so memory is at least the part's size);
+// the scanner reads it once, front to back, and could be fed chunks of the same shape by a worker later (S20).
+//
+// - Names are local (the prefix is dropped), so `<x:c>` reads like `<c>`; attributes likewise (`r:id` is `id`; an unprefixed
+//   attribute of the same name wins). `xmlns` attributes are not reported.
+// - Attributes come as a null-prototype object: the names are the file's text, and `__proto__` or `constructor` must be an
+//   attribute like any other and never reach `Object.prototype`.
+// - Attribute values are copies of their own (`flat`): whatever a caller keeps of one does not keep the part's text alive.
+// - Safety: entities are never expanded or fetched (the five predefined ones and numeric references are decoded in one pass by
+//   `decodeEntities`, anything else stays as written), a DOCTYPE is skipped, nesting is capped (`XML_LIMITS.maxDepth`).
+// - Never throws. Damaged markup (a stray or mismatched end tag, an unclosed element at the end, a tag cut short) stops the scan
+//   and `scanXml` answers `false`; what was reported before that point stands. An element with more than `MAX_ATTRIBUTES` attributes
+//   is damage of this kind too (Excel writes fewer than 30): V8 stops answering once an object has some 8 million properties, and
+//   a few MB of zip can ask for that. The other per-element counts need no cap: names and values are bounded by the part's own
+//   size (a part is at most the inflated cap and is read once, front to back, each piece costing its length), children by the
+//   element budget of the tree builders (the sheet scanner keeps none), nesting by `maxDepth`, text by the part.
+// ---------------------------------------------------------------------------
+
+export type SaxAttrs = Readonly<Record<string, string>>;
+
+export interface SaxHandler {
+  /** A start tag (`selfClosing` for `<a/>`, which is followed by its own `close`). `start`/`end` are the tag's offsets in the text. */
+  open(name: string, attrs: SaxAttrs, selfClosing: boolean, start: number, end: number): void;
+  /** An end tag, or the implied one of a self-closing element. `end` is the offset just after it. */
+  close(name: string, end: number): void;
+  /** Character data (entities decoded, CDATA included), possibly in several pieces per element. */
+  text?(text: string): void;
+  /** Asked before each markup item: `true` ends the scan there (a caller that has all it will take). */
+  halted?(): boolean;
+}
+
+/** Most attributes (namespace declarations included) one element may have before the part counts as damaged. */
+export const MAX_ATTRIBUTES = 1024;
+
+const ATTR = /\s*([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/y;
+const NAME = /[^\s/>]+/y;
+
+/** The local part of a possibly prefixed name. */
+const local = (name: string): string => name.slice(name.indexOf(':') + 1);
+
+/** Scan `xml`, reporting to `handler`. Returns `true` when the whole text was well-formed (balanced, within the depth cap), or the handler ended the scan before the damage, if any, was reached. */
+export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML_LIMITS.maxDepth): boolean {
+  const stack: string[] = [];
+  const n = xml.length;
+  let i = 0;
+  while (i < n) {
+    if (handler.halted?.()) return true;
+    const lt = xml.indexOf('<', i);
+    if (lt < 0) {
+      // trailing text outside any element is whitespace in a sound part; elements still open are damage
+      return stack.length === 0;
+    }
+    if (lt > i && stack.length > 0 && handler.text) handler.text(decodeEntities(xml.slice(i, lt)));
+    i = lt + 1;
+    const c = xml.charCodeAt(i);
+    if (c === 63 /* ? */) {
+      const end = xml.indexOf('?>', i);
+      if (end < 0) return false;
+      i = end + 2;
+    } else if (c === 33 /* ! */) {
+      if (xml.startsWith('!--', i)) {
+        const end = xml.indexOf('-->', i + 3);
+        if (end < 0) return false;
+        i = end + 3;
+      } else if (xml.startsWith('![CDATA[', i)) {
+        const end = xml.indexOf(']]>', i + 8);
+        if (end < 0) return false;
+        if (stack.length > 0 && handler.text) handler.text(xml.slice(i + 8, end));
+        i = end + 3;
+      } else {
+        // DOCTYPE: skipped with its internal subset (where entities would be declared); nothing in it is ever used
+        // the `>` comes first and bounds the search for `[`: an unbounded `indexOf('[')` would rescan the rest of the text for
+        // every declaration that has none (quadratic on a part of `<!a>` items)
+        const close = xml.indexOf('>', i);
+        if (close < 0) return false;
+        const bracket = xml.slice(i, close).indexOf('[');
+        if (bracket >= 0) {
+          const subset = xml.indexOf(']', i + bracket);
+          const end = subset < 0 ? -1 : xml.indexOf('>', subset);
+          if (end < 0) return false;
+          i = end + 1;
+        } else i = close + 1;
+      }
+    } else if (c === 47 /* / */) {
+      const end = xml.indexOf('>', i);
+      if (end < 0) return false;
+      const name = local(xml.slice(i + 1, end).trim());
+      if (stack.pop() !== name) return false;
+      handler.close(name, end + 1);
+      i = end + 1;
+    } else {
+      NAME.lastIndex = i;
+      const m = NAME.exec(xml);
+      if (m === null) return false;
+      const name = local(m[0]);
+      i += m[0].length;
+      const attrs: Record<string, string> = Object.create(null);
+      for (let seen = 0; ; ) {
+        ATTR.lastIndex = i;
+        const a = ATTR.exec(xml);
+        if (a === null) break;
+        if (++seen > MAX_ATTRIBUTES) return false;
+        i += a[0].length;
+        const key = a[1];
+        if (key === 'xmlns' || key.startsWith('xmlns:')) continue;
+        const short = local(key);
+        // an unprefixed attribute beats a prefixed one of the same local name
+        if (short === key || !(short in attrs)) attrs[short] = flat(decodeEntities(a[2] ?? a[3]));
+      }
+      while (i < n && /\s/.test(xml[i])) i++;
+      const selfClosing = xml.charCodeAt(i) === 47;
+      if (selfClosing) i++;
+      if (xml.charCodeAt(i) !== 62 /* > */) return false;
+      const start = lt;
+      i++;
+      handler.open(name, attrs, selfClosing, start, i);
+      if (selfClosing) handler.close(name, i);
+      else {
+        stack.push(name);
+        if (stack.length > maxDepth) return false;
+      }
+    }
+  }
+  return stack.length === 0;
+}

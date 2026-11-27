@@ -95,6 +95,16 @@ statistical, date/time, information, financial, reference and array categories
       `FREQUENCY` (plan S11). The conformance suite
       (`formula-conformance-oracle.json`) checks them against LibreOffice values.
 
+## Known limitations — import
+
+- [ ] **Loading a formula-heavy file into the editor is slow** (found in the S2b review; engine code, outside the reader, so not fixed there;
+      candidate owner S20, the scale and worker work). `importFromXlsx` reads a file in 0.1 to 0.2 s in these shapes, then `setData`'s
+      recalculation takes: 20,000 array formulas, each `<f t="array" ref="A{i}:Z{i+999}">` (a 276 KB zip), 110 s (5,000 took 5.8 s: quadratic;
+      the time is in `getCell` and `collectDependencies`); 1,000,000 ordinary formulas (a 7 MB zip) 82 s and 2.1 GB of process memory; 1,000
+      sheets each with one formula naming the next sheet's cell 33 s (400 took 4.6 s; `applyOperator` and `getSheetIdByName`). Until then a
+      host should lower `maxTotalCells` and `maxSheets` and/or import in a worker (`documentation/import-loss.md`). Related, not a defect: a table of
+      two million shared strings peaks at 2.8 GB of process memory in the reader (five million took 1.17 GB).
+
 ## Feature parity
 
 Gaps against Excel / Google Sheets in the non-formula feature set.

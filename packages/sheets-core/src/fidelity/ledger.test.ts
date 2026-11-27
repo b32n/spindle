@@ -39,7 +39,6 @@ describe('classifyPart', () => {
     ['xl/drawings/drawing1.xml', 'drawing', 'xlsx.objects.formControls'],
     ['xl/drawings/drawing1.xml', 'drawing', 'xlsx.objects.embeddedObjects'],
     ['xl/media/image1.png', 'media', 'xlsx.objects.cellImages'],
-    ['xl/theme/theme1.xml', 'theme', 'xlsx.styles.themeColors'],
     ['xl/printerSettings/printerSettings1.bin', 'printerSettings', 'xlsx.print.setup'],
     ['xl/metadata.xml', 'metadata', 'xlsx.formulas.dynamicArray'],
     ['xl/ctrlProps/ctrlProp1.xml', 'controls', 'xlsx.objects.formControls'],
@@ -91,7 +90,6 @@ describe('classifyPart', () => {
   });
 
   it.each([
-    'xl/theme/theme1.xml',
     'xl/printerSettings/printerSettings1.bin',
     'xl/metadata.xml',
     'customXml/item1.xml',
@@ -101,6 +99,10 @@ describe('classifyPart', () => {
       name,
       status: 'unaccounted',
     });
+  });
+
+  it('maps the theme: its colours are resolved into the cell styles on import', () => {
+    expect(classifyPart('xl/theme/theme1.xml', { ...base, lossIds: [] })).toMatchObject({ status: 'mapped', rule: 'theme' });
   });
 
   it('has no rule for an empty part name, so it is unaccounted', () => {

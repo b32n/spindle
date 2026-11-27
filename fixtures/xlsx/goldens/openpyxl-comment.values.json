@@ -6,8 +6,8 @@
   "mismatchClasses": {},
   "mismatched": 0,
   "passthrough": 0,
-  "status": "skipped-import-error",
-  "uncached": 0,
+  "status": "ok",
+  "uncached": 4,
   "unreadableSheets": 0,
   "volatile": 0
 }

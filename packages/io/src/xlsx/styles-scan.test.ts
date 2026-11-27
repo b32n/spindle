@@ -40,7 +40,7 @@ describe('parseStyles number formats', () => {
 
   it('is empty for a missing or empty style sheet', () => {
     expect(parseStyles(undefined).numberFormats(ALL)).toEqual([]);
-    expect(parseStyles(sheet('')).usedFacts(ALL)).toEqual({ themeColors: 0, patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] });
+    expect(parseStyles(sheet('')).usedFacts(ALL)).toEqual({ patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] });
   });
 
   it('falls back to an empty code for a custom format without one', () => {
@@ -84,7 +84,7 @@ describe('parseStyles used facts', () => {
   const xfs = (list: Array<[number, number, number, number?]>) =>
     `<cellXfs>${list.map(([f, fi, b, x]) => `<xf fontId="${f}" fillId="${fi}" borderId="${b}" xfId="${x ?? 0}"/>`).join('')}</cellXfs>`;
 
-  it('counts the used cell formats that carry a colour the importer cannot read', () => {
+  it('counts the used cell formats with a pattern or gradient fill or a diagonal border', () => {
     const s = parseStyles(
       sheet(
         fonts + fills + borders +
@@ -106,7 +106,6 @@ describe('parseStyles used facts', () => {
       )
     );
     const facts = s.usedFacts(ALL);
-    expect(facts.themeColors).toBe(7); // xfs 1, 2, 4, 7, 9, 10, 12
     expect(facts.patternFill).toBe(1); // xf 8 (xf 12 has no pattern type)
     expect(facts.gradientFill).toBe(1);
     expect(facts.diagonalBorder).toBe(0);
@@ -114,11 +113,10 @@ describe('parseStyles used facts', () => {
 
   it('counts only the formats in use', () => {
     const s = parseStyles(sheet(fonts + fills + borders + xfs([[0, 0, 0], [2, 0, 0], [0, 5, 0], [0, 0, 4]])));
-    expect(s.usedFacts(new Set([0])).themeColors).toBe(0);
-    expect(s.usedFacts(new Set([0, 1])).themeColors).toBe(1);
+    expect(s.usedFacts(new Set([0, 1])).gradientFill).toBe(0);
     expect(s.usedFacts(new Set([2])).gradientFill).toBe(1);
     expect(s.usedFacts(new Set([3])).diagonalBorder).toBe(1);
-    expect(s.usedFacts(new Set([99])).themeColors).toBe(0);
+    expect(s.usedFacts(new Set([99]))).toEqual({ patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] });
   });
 
   it('reports diagonal borders only when they have a style', () => {

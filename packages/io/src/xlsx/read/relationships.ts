@@ -1,6 +1,6 @@
 import type { XlsxRelationship } from '@b32nio/spindle-shared/export/xlsx';
 import { relsPart, resolveTarget } from '../../common/ooxml-package';
-import { kids, type XmlElement } from '../xml';
+import { scanXml } from './sax';
 
 export { relsPart };
 
@@ -27,20 +27,69 @@ const SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]+:/;
 
 const lastSegment = (type: string): string => type.slice(type.lastIndexOf('/') + 1);
 
-/** Relationships of `owner` from its parsed `.rels` root. Entries without an `Id` or a `Target` are skipped; a repeated id keeps the first. */
-export function parseRelationships(root: XmlElement | undefined, owner: string): XlsxRelationship[] {
+/**
+ * What went wrong in a part read as a list of entries: `damaged` (not well-formed: what precedes the damage was read), `over` (more
+ * entries than the part may have: the first ones were kept) or `budget` (the package's relationship budget ran out in this part).
+ */
+export type ListProblem = 'damaged' | 'over' | 'budget';
+
+export interface ListOptions {
+  /** Most entries read from the part (`ImportLimits.maxPartElements`); the scan ends at the first one over it. */
+  max?: number;
+  /** Relationship entries that may still be read over the whole package (`ImportLimits.maxRelationships`), shared by every part: each entry read draws on it, and the scan ends when it is spent. */
+  budget?: { left: number };
+  /** Which relationships are kept, by `kind` (the last segment of the type) and id; the others are read (they count) but not kept. All when absent. */
+  keep?: (kind: string, id: string) => boolean;
+  problem?: (what: ListProblem) => void;
+}
+
+/**
+ * Relationships of `owner` from the text of its `.rels`, read as events: memory is the relationships kept (those `options.keep`
+ * names), not a tree of the part, and the ids read (at most `options.max`). Entries without an `Id` or a `Target` are skipped; a
+ * repeated id keeps the first, whatever it is. Damaged markup ends the read there (`problem('damaged')`); an entry over the part's
+ * limit ends it too (`problem('over')`), as does the package's budget running out (`problem('budget')`).
+ */
+export function parseRelationships(xml: string | undefined, owner: string, options: ListOptions = {}): XlsxRelationship[] {
   const out: XlsxRelationship[] = [];
+  if (xml === undefined) return out;
+  const max = options.max ?? Infinity;
   const seen = new Set<string>();
-  for (const r of kids(root, 'Relationship')) {
-    const id = r.attrs.Id;
-    const raw = r.attrs.Target;
-    if (id === undefined || raw === undefined || seen.has(id)) continue;
-    seen.add(id);
-    const type = r.attrs.Type ?? '';
-    // a target with a URI scheme names nothing in the package even without `TargetMode`, so it is kept as written and counts as external
-    const external = (r.attrs.TargetMode ?? '').toLowerCase() === 'external' || SCHEME.test(raw.trim());
-    out.push({ id, type, kind: lastSegment(type), target: external ? raw : resolveRelationshipTarget(owner, raw), external });
-  }
+  // the same few type URIs on every entry: one string each, not one per entry
+  const types = new Map<string, string>();
+  let depth = 0;
+  let over = false;
+  let spent = false;
+  const wellFormed = scanXml(xml, {
+    open(name, attrs) {
+      depth++;
+      const id = attrs.Id;
+      const raw = attrs.Target;
+      if (depth !== 2 || name !== 'Relationship' || id === undefined || raw === undefined || seen.has(id)) return;
+      if (seen.size >= max) {
+        over = true;
+        return;
+      }
+      if (options.budget !== undefined && options.budget.left-- <= 0) {
+        spent = true;
+        return;
+      }
+      seen.add(id);
+      const written = attrs.Type ?? '';
+      const kind = lastSegment(written);
+      if (options.keep !== undefined && !options.keep(kind, id)) return;
+      const type = types.get(written) ?? (types.set(written, written), written);
+      // a target with a URI scheme names nothing in the package even without `TargetMode`, so it is kept as written and counts as external
+      const external = (attrs.TargetMode ?? '').toLowerCase() === 'external' || SCHEME.test(raw.trim());
+      out.push({ id, type, kind, target: external ? raw : resolveRelationshipTarget(owner, raw), external });
+    },
+    close() {
+      depth--;
+    },
+    halted: () => over || spent,
+  });
+  if (spent) options.problem?.('budget');
+  else if (over) options.problem?.('over');
+  else if (!wellFormed) options.problem?.('damaged');
   return out;
 }
 

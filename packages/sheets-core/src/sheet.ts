@@ -13,6 +13,7 @@ import { CommentStore } from './comments';
 import { getStableCellKey, parseStableCellKey } from './utils/cell-key';
 import { generateId } from './utils/id';
 import { getRangeCells } from './utils/range';
+import { coveredBeyondAnchor, laterOverlaps, normalized, overlapsAny } from './merge-regions';
 
 /** Whether two normalized numeric ranges (inclusive bounds) overlap. */
 function rangesIntersect(a: Range, b: Range): boolean {
@@ -668,6 +669,70 @@ export class SheetImpl implements Sheet {
     });
     this.config.mergedRegions = kept;
     this.notifyStructureChange();
+  }
+
+  /**
+   * Merge many ranges as if by `mergeCells`, one after the other in this order, with one notification at the end and in O(n log^2 n)
+   * (`mergeCells` repeated is quadratic in the merges, for each looks at all the others). The result is the same, for any ranges and any
+   * regions already there (those that overlap each other too): the same regions in the same order, the same cells cleared. A region
+   * that is there stays unless a range overlaps it; a range stays unless a later one overlaps it.
+   */
+  mergeCellsBulk(ranges: readonly Range[]): void {
+    // a single cell cannot be merged
+    const targets = ranges.map(normalized).filter((t) => t.startRow !== t.endRow || t.startCol !== t.endCol);
+    if (targets.length === 0) return;
+    // what is there already (without the orphans, which a merge drops)
+    const existing: Array<{ region: MergedRegion; span: Range }> = [];
+    for (const region of this.config.mergedRegions ?? []) {
+      const span = this.regionToRange(region);
+      if (span !== null) existing.push({ region, span });
+    }
+    const overlapped = overlapsAny(existing.map((e) => e.span), targets);
+    const dropped = laterOverlaps(targets);
+
+    this.clearCovered(targets);
+    const kept: MergedRegion[] = [];
+    existing.forEach((e, k) => {
+      if (!overlapped[k]) kept.push(e.region);
+    });
+    targets.forEach((t, k) => {
+      // the ids of every merge are made, those of a merge a later one drops too, as `mergeCells` makes them
+      const region = {
+        startRowId: this.ensureRowId(t.startRow),
+        startColId: this.ensureColId(t.startCol),
+        endRowId: this.ensureRowId(t.endRow),
+        endColId: this.ensureColId(t.endCol),
+      };
+      if (!dropped[k]) kept.push(region);
+    });
+    this.config.mergedRegions = kept;
+    this.notifyStructureChange();
+  }
+
+  /** Clear the cells the merges cover but their first cells (what `mergeCells` does for each), by the cells of the area where that is fewer, or by one sweep over the cells. */
+  private clearCovered(merges: readonly Range[]): void {
+    if (this.cells.size === 0) return;
+    let area = 0;
+    for (const t of merges) area += (t.endRow - t.startRow + 1) * (t.endCol - t.startCol + 1);
+    if (area <= this.cells.size) {
+      for (const t of merges) {
+        for (let r = t.startRow; r <= t.endRow; r++) {
+          for (let c = t.startCol; c <= t.endCol; c++) {
+            if (r !== t.startRow || c !== t.startCol) this.deleteCell(r, c);
+          }
+        }
+      }
+      return;
+    }
+    const keys: string[] = [];
+    const at: Array<[number, number]> = [];
+    for (const key of this.cells.keys()) {
+      const pos = this.stableKeyToIndices(key);
+      if (pos === undefined) continue;
+      keys.push(key);
+      at.push([pos.row, pos.col]);
+    }
+    for (const i of coveredBeyondAnchor(at, merges)) this.cells.delete(keys[i]);
   }
 
   unmergeCells(range: Range): void {

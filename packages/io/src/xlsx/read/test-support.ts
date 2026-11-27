@@ -10,6 +10,15 @@ const CORPUS = resolve(__dirname, '../../../../../fixtures/xlsx');
 /** A corpus file's bytes. */
 export const corpus = (filename: string): Uint8Array => new Uint8Array(readFileSync(resolve(CORPUS, filename)));
 
+/**
+ * The table of number format codes the reader is checked against, as data (`fixtures/xlsx/data/number-format-cases.json`, read by this
+ * package's cell-style test and by the parity test in sheets-core, so neither imports the other's source): `[raw, editor, isDate, why]`.
+ * `raw` is the code as the file writes it, `editor` the code the editor gets (`unescapeLiterals`: the backslash goes before a character
+ * Excel shows without quotes and stays before everything else, and nothing in quotes is touched), `isDate` whether it shows dates.
+ */
+export const numberFormatCases = (): Array<[raw: string, editor: string, isDate: boolean, why: string]> =>
+  JSON.parse(readFileSync(resolve(CORPUS, 'data/number-format-cases.json'), 'utf8'));
+
 export const MAIN_NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
 export const REL_NS = 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
 const RELS_NS = 'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';

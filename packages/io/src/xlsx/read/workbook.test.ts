@@ -1,6 +1,6 @@
 import { ImportError } from '../../common/import-error';
 import { XlsxPackage } from './package';
-import { findWorkbookPart, isBinaryWorkbook, readWorkbook } from './workbook';
+import { findWorkbookPart, isBinaryWorkbook, MAX_SHEET_NAME_CHARS, readWorkbook, SHEET_ENTRY_FACTOR } from './workbook';
 import { MAIN_NS, REL_NS, relsXml, workbookZip, zipOf } from './test-support';
 
 const WB_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml';
@@ -154,7 +154,8 @@ describe('readWorkbook: sheets', () => {
   });
   it('words the warning for a sheet without a name too', async () => {
     const { pkg } = await read(await workbookZip('<sheets><sheet sheetId="1"/><sheet sheetId="2" r:id="rId2"/></sheets>', [['rId2', 'worksheet', 'gone.xml']]));
-    expect(pkg.warnings).toEqual(['The sheet "" has no usable relationship (no r:id).', 'The sheet "" points at xl/gone.xml, which the package does not contain.']);
+    // the sheet is named as it will be (Sheet1, Sheet2), as the warning for a sheet with a name does
+    expect(pkg.warnings).toEqual(['The sheet "Sheet1" has no usable relationship (no r:id).', 'The sheet "Sheet2" points at xl/gone.xml, which the package does not contain.']);
   });
   it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])('a relationship type ending in the inherited key %s keeps that text as the sheet kind', async (key) => {
     const { info } = await read(
@@ -180,12 +181,55 @@ describe('readWorkbook: sheets', () => {
       }),
     );
     expect(info.sheets[0].commentParts).toEqual({ threadedComments: [] });
+    // a part is looked at once, however many sheet entries name it: the first entry's name is the one in the warning
     expect(pkg.warnings).toEqual([
       'The sheet "A" has comments at xl/gone-c.xml, which the package does not contain.',
       'The sheet "A" has vmlDrawing at xl/gone.vml, which the package does not contain.',
-      'The sheet "" has comments at xl/gone-c.xml, which the package does not contain.',
-      'The sheet "" has vmlDrawing at xl/gone.vml, which the package does not contain.',
     ]);
+    expect(info.sheets[1].commentParts).toBe(info.sheets[0].commentParts);
+  });
+
+  describe('sheet entries are bounded', () => {
+    const entries = (n: number, rel: (i: number) => string) => Array.from({ length: n }, (_, i) => `<sheet name="S${i}" sheetId="${i + 1}" r:id="${rel(i)}"/>`).join('');
+
+    it('reads at most 4 times maxSheets entries and says so once', async () => {
+      const bytes = await workbookZip(`<sheets>${entries(30, () => 'rId1')}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' });
+      const pkg = await XlsxPackage.open(bytes, { limits: { maxSheets: 5 } });
+      const info = await readWorkbook(pkg);
+      expect(info.sheets).toHaveLength(20);
+      expect(info.sheets.map((s) => s.name).slice(-1)).toEqual(['S19']);
+      expect(pkg.warnings).toEqual(['The workbook lists 30 sheets; only the first 20 entries were read (4 times the import limit maxSheets).']);
+      expect(SHEET_ENTRY_FACTOR).toBe(4);
+    });
+
+    it('does not warn at exactly the limit, and the package carries the limits it was opened with', async () => {
+      const bytes = await workbookZip(`<sheets>${entries(20, () => 'rId1')}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' });
+      const pkg = await XlsxPackage.open(bytes, { limits: { maxSheets: 5 } });
+      expect((await readWorkbook(pkg)).sheets).toHaveLength(20);
+      expect(pkg.warnings).toEqual([]);
+      expect(pkg.limits.maxSheets).toBe(5);
+      const defaults = (await XlsxPackage.open(bytes)).limits;
+      expect([defaults.maxSheets, defaults.maxRanges]).toEqual([1_000, 1_048_576]);
+    });
+
+    it('gives the first few warnings in full and counts the rest: 100 entries with no relationship', async () => {
+      const bytes = await workbookZip(`<sheets>${entries(100, (i) => `rId${i + 5}`)}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<x/>' });
+      const pkg = await XlsxPackage.open(bytes);
+      await readWorkbook(pkg);
+      expect(pkg.warnings).toHaveLength(21);
+      expect(pkg.warnings[0]).toBe('The sheet "S0" has no usable relationship (rId5).');
+      expect(pkg.warnings[20]).toBe('80 more sheet warnings were left out.');
+    });
+
+    it('finds the relationship of an entry by id (the first of a repeated id), not by scanning them', async () => {
+      const bytes = await workbookZip(
+        `<sheets><sheet name="A" sheetId="1" r:id="rId1"/><sheet name="B" sheetId="2" r:id="constructor"/><sheet name="C" sheetId="3" r:id="__proto__"/></sheets>`,
+        [['rId1', 'worksheet', 'worksheets/sheet1.xml'], ['rId1', 'worksheet', 'worksheets/other.xml'], ['constructor', 'worksheet', 'worksheets/sheet2.xml']],
+        { 'xl/worksheets/sheet1.xml': '<x/>', 'xl/worksheets/sheet2.xml': '<x/>' }
+      );
+      const { info } = await read(bytes);
+      expect(info.sheets.map((s) => s.part)).toEqual(['xl/worksheets/sheet1.xml', 'xl/worksheets/sheet2.xml', undefined]);
+    });
   });
   it('locates the comment parts of a sheet: notes, their VML drawing and threaded comments; external ones and missing parts are not located', async () => {
     const { info } = await read(
@@ -327,5 +371,134 @@ describe('readWorkbook: namespaces', () => {
     expect((await read(prefixed)).info.sheets[0]).toMatchObject({ name: 'P', part: 'xl/worksheets/s.xml' });
     const bare = await zipOf({ 'xl/workbook.xml': '<workbook><sheets><sheet name="N" sheetId="3"/></sheets></workbook>' });
     expect((await read(bare)).info.sheets[0]).toMatchObject({ name: 'N', sheetId: 3 });
+  });
+});
+
+describe('readWorkbook: sheet names and what the warnings quote', () => {
+  const one = (name: string, extra = '', rels: Array<[string, string, string]> = [['rId1', 'worksheet', 'worksheets/sheet1.xml']]) =>
+    workbookZip(`<sheets><sheet name="${name}" sheetId="1" r:id="rId1"${extra}/></sheets>`, rels, { 'xl/worksheets/sheet1.xml': '<worksheet/>' });
+
+  it('keeps a name of up to MAX_SHEET_NAME_CHARS as it is (Excel\'s 31 is not enforced), with no warning', async () => {
+    const name = 'n'.repeat(MAX_SHEET_NAME_CHARS);
+    const { info, pkg } = await read(await one(name));
+    expect(info.sheets[0].name).toBe(name);
+    expect(pkg.warnings).toEqual([]);
+  });
+
+  it('cuts a longer name to MAX_SHEET_NAME_CHARS with one warning that quotes it shortened', async () => {
+    const name = 'n'.repeat(MAX_SHEET_NAME_CHARS + 1);
+    const { info, pkg } = await read(await one(name));
+    expect(info.sheets[0].name).toBe('n'.repeat(MAX_SHEET_NAME_CHARS));
+    expect(pkg.warnings).toEqual([`The sheet name "${'n'.repeat(63)}…" is ${MAX_SHEET_NAME_CHARS + 1} characters long (Excel allows 31); it was cut to ${MAX_SHEET_NAME_CHARS}.`]);
+  });
+
+  it('cuts a 10 MB name to MAX_SHEET_NAME_CHARS, and the warnings stay small whatever the sheet has wrong', async () => {
+    const name = 'N'.repeat(10_000_000);
+    const { info, pkg } = await read(await one(name, '', [['rId2', 'worksheet', 'worksheets/gone.xml']]));
+    expect(info.sheets[0].name).toHaveLength(MAX_SHEET_NAME_CHARS);
+    expect(pkg.warnings).toHaveLength(2);
+    expect(pkg.warnings.reduce((n, w) => n + w.length, 0)).toBeLessThan(1_000);
+    expect(pkg.warnings[1]).toBe(`The sheet "${'N'.repeat(63)}…" has no usable relationship (rId1).`);
+  });
+
+  it('does not leave half a surrogate pair at the cut', async () => {
+    const name = `${'a'.repeat(MAX_SHEET_NAME_CHARS - 1)}\u{1F600}`;
+    const { info } = await read(await one(name));
+    expect(info.sheets[0].name).toBe('a'.repeat(MAX_SHEET_NAME_CHARS - 1));
+  });
+
+  it('quotes a relationship target and a relationship id of any length shortened', async () => {
+    const { pkg } = await read(await one('S', '', [['rId1', 'worksheet', `worksheets/${'x'.repeat(5_000)}.xml`]]));
+    expect(pkg.warnings).toEqual([`The sheet "S" points at xl/worksheets/${'x'.repeat(49)}…, which the package does not contain.`]);
+    const noRel = await read(await workbookZip(`<sheets><sheet name="S" sheetId="1" r:id="${'r'.repeat(5_000)}"/></sheets>`, []));
+    expect(noRel.pkg.warnings).toEqual([`The sheet "S" has no usable relationship (${'r'.repeat(63)}…).`]);
+  });
+
+  it('quotes the sheet name and the target of a comment part the package does not contain shortened', async () => {
+    const name = 'C'.repeat(200);
+    const sheetRels = relsXml([['rId1', 'comments', `../${'c'.repeat(1_000)}.xml`]]);
+    const bytes = await workbookZip(`<sheets><sheet name="${name}" sheetId="1" r:id="rId1"/></sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], {
+      'xl/worksheets/sheet1.xml': '<worksheet/>',
+      'xl/worksheets/_rels/sheet1.xml.rels': sheetRels,
+    });
+    const { pkg } = await read(bytes);
+    expect(pkg.warnings).toHaveLength(1);
+    expect(pkg.warnings[0]).toBe(`The sheet "${'C'.repeat(63)}…" has comments at xl/${'c'.repeat(60)}…, which the package does not contain.`);
+  });
+});
+
+describe('readWorkbook: the workbook part is read once, defined names as a list under a cap, and a part that cannot be read in strict mode', () => {
+  const book = (inner: string, rels: Array<[string, string, string]> = [['rId1', 'worksheet', 'worksheets/sheet1.xml']]) =>
+    workbookZip(`<sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets>${inner}`, rels, { 'xl/worksheets/sheet1.xml': '<worksheet/>' });
+  const names = (n: number, tail = '') => `<definedNames>${Array.from({ length: n }, (_, i) => `<definedName name="n${i}">S!$A$${i + 1}</definedName>`).join('')}${tail}</definedNames>`;
+
+  it('keeps the first maxPartElements defined names, counts the rest in one warning and one loss item, and reads everything else of the workbook', async () => {
+    const pkg = await XlsxPackage.open(await book(`${names(25)}<calcPr calcId="9"/>`), { limits: { maxPartElements: 10 } });
+    const info = await readWorkbook(pkg);
+    expect(info.definedNames.map((n) => n.name)).toEqual(Array.from({ length: 10 }, (_, i) => `n${i}`));
+    expect(info.calc.calcId).toBe(9);
+    expect(info.sheets).toHaveLength(1);
+    expect(pkg.warnings).toEqual(['The workbook has more than 10 defined names (the import limit maxPartElements); 15 were not read.']);
+    expect(pkg.loss.items()).toMatchObject([{ id: 'xlsx.package.sizeLimit', label: 'defined name(s) not kept', count: 15, where: ['xl/workbook.xml'] }]);
+  });
+
+  it('is not over at exactly the cap, and the names do not draw on the budget of the tree', async () => {
+    const pkg = await XlsxPackage.open(await book(names(10)), { limits: { maxPartElements: 10 } });
+    expect((await readWorkbook(pkg)).definedNames).toHaveLength(10);
+    expect(pkg.warnings).toEqual([]);
+    // two elements besides the names (the workbook and its sheets list) fit a budget of 4 with names that alone are over it
+    const small = await XlsxPackage.open(await workbookZip(`<sheets><sheet name="S" sheetId="1" r:id="rId1"/></sheets>${names(8)}`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<worksheet/>' }), { limits: { maxPartElements: 4 } });
+    expect((await readWorkbook(small)).definedNames).toHaveLength(4);
+  });
+
+  it('reads only the first definedNames element as the list, takes the text of the name element itself (not its children) and skips nameless ones without counting them', async () => {
+    const pkg = await XlsxPackage.open(await book(`${names(1)}<definedNames><definedName name="second">x</definedName></definedNames><definedNames/>`));
+    expect((await readWorkbook(pkg)).definedNames.map((n) => n.name)).toEqual(['n0']);
+    const nested = await XlsxPackage.open(await book('<definedNames><definedName name="a">A1<x>ignored</x>:B2</definedName><definedName>nameless</definedName><definedName name=""/><other><deep/></other></definedNames>'));
+    expect((await readWorkbook(nested)).definedNames).toMatchObject([{ name: 'a', ref: 'A1:B2' }]);
+    const capped = await XlsxPackage.open(await book('<definedNames><definedName>n</definedName><definedName name="a">1</definedName><definedName name="b">2</definedName><definedName name="c">3</definedName></definedNames>'), { limits: { maxPartElements: 5 } });
+    // a nameless entry is not an entry, and the cap counts names (the list is not drawn on the tree's budget)
+    expect((await readWorkbook(capped)).definedNames.map((n) => n.name)).toEqual(['a', 'b', 'c']);
+    expect(capped.warnings).toEqual([]);
+    const over = await XlsxPackage.open(await book(`<definedNames><definedName>n</definedName>${Array.from({ length: 7 }, (_, i) => `<definedName name="d${i}">1</definedName>`).join('')}</definedNames>`), { limits: { maxPartElements: 5 } });
+    expect((await readWorkbook(over)).definedNames).toHaveLength(5);
+    expect(over.warnings).toEqual(['The workbook has more than 5 defined names (the import limit maxPartElements); 2 were not read.']);
+  });
+
+  it('strict: a workbook part that is not XML is an ImportError, and one over the element budget says "too many elements" and names the limit and the option', async () => {
+    const damaged = await XlsxPackage.open(await zipOf({ '_rels/.rels': relsXml([['rId1', 'officeDocument', 'xl/workbook.xml']]), 'xl/workbook.xml': '<workbook><oops' }));
+    await expect(readWorkbook(damaged, { strict: true })).rejects.toMatchObject({ code: 'corrupt', message: 'The workbook part of the file is damaged (it is not well-formed XML).' });
+    expect((await readWorkbook(damaged)).sheets).toEqual([]);
+    const sheets = `<sheets>${Array.from({ length: 20 }, (_, i) => `<sheet name="S${i}" sheetId="${i}" r:id="x"/>`).join('')}</sheets>`;
+    const over = await XlsxPackage.open(await workbookZip(sheets, []), { limits: { maxPartElements: 10 } });
+    await expect(readWorkbook(over, { strict: true })).rejects.toMatchObject({
+      code: 'corrupt',
+      message: 'The workbook part of the file has too many elements (more than the import limit maxPartElements, 10; raise it with the limits option).',
+    });
+    expect(over.loss.items()).toMatchObject([{ label: 'part(s) over the element limit', where: ['xl/workbook.xml'] }]);
+    // a part that cannot be inflated at all is damaged too
+    const gone = await XlsxPackage.open(await zipOf({ '_rels/.rels': relsXml([['rId1', 'officeDocument', 'xl/workbook.xml']]), 'xl/workbook.xml': '<workbook/>' }));
+    const text = gone.text.bind(gone);
+    jest.spyOn(gone, 'text').mockImplementation((name) => (name === 'xl/workbook.xml' ? Promise.resolve(undefined) : text(name)));
+    await expect(readWorkbook(gone, { strict: true })).rejects.toMatchObject({ code: 'corrupt' });
+  });
+
+  it('counts a sheet name cut at 255 characters and the sheet entries past the cap as losses', async () => {
+    const entries = ['n'.repeat(300), 'B', 'C', 'D', 'E', 'F'].map((name, i) => `<sheet name="${name}" sheetId="${i + 1}" r:id="rId1"/>`).join('');
+    const bytes = await workbookZip(`<sheets>${entries}</sheets>`, [['rId1', 'worksheet', 'worksheets/sheet1.xml']], { 'xl/worksheets/sheet1.xml': '<worksheet/>' });
+    const pkg = await XlsxPackage.open(bytes, { limits: { maxSheets: 1 } });
+    await readWorkbook(pkg);
+    expect(pkg.loss.items()).toMatchObject([
+      { label: 'worksheet(s) not read', count: 2, where: ['the sheet entries of the workbook'] },
+      { label: 'sheet name(s) cut at 255 characters', count: 1, where: [`${'n'.repeat(63)}…`] },
+    ]);
+  });
+
+  it('keeps the relationships a sheet entry names whatever their kind (the kind is the sheet kind), and no others of unused kinds', async () => {
+    const bytes = await workbookZip('<sheets><sheet name="Other" sheetId="1" r:id="rIdX"/></sheets>', [['rIdX', 'customThing', 'other/sheet1.xml'], ['rIdY', 'printerSettings', 'p.bin']], { 'xl/other/sheet1.xml': '<x/>' });
+    const pkg = await XlsxPackage.open(bytes);
+    const info = await readWorkbook(pkg);
+    expect(info.sheets[0]).toMatchObject({ kind: 'customThing', part: 'xl/other/sheet1.xml' });
+    expect(await pkg.rels('xl/workbook.xml')).toHaveLength(1);
   });
 });

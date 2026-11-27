@@ -1,4 +1,4 @@
-import { decodeEntities, descendants, isMain, isOn, isTrue, kid, kids, parseXml, walk, type XmlElement } from './xml';
+import { decodeEntities, ENTITY_WINDOW, descendants, isMain, isOn, isTrue, kid, kids, parseXml, walk, type XmlElement } from './xml';
 
 const MAIN = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
 
@@ -18,6 +18,72 @@ describe('decodeEntities', () => {
     expect(decodeEntities('&#xD800;')).toBe('&#xD800;');
     expect(decodeEntities('&#x110000;')).toBe('&#x110000;');
     expect(decodeEntities('&#128512;')).toBe('\u{1F600}');
+  });
+});
+
+/** The decoding as one `replace` over the whole text: what the windowed one must equal. */
+const WHOLE = (s: string): string =>
+  s.replace(/&(?:#(\d+)|#x([0-9a-fA-F]+)|(lt|gt|amp|quot|apos));/g, (whole, dec?: string, hex?: string, named?: string) => {
+    if (named) return { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" }[named] as string;
+    const code = dec !== undefined ? Number(dec) : parseInt(hex as string, 16);
+    return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : whole;
+  });
+
+describe('decodeEntities in windows', () => {
+  const table: Array<[text: string, decoded: string]> = [
+    ['&lt;&gt;&amp;&quot;&apos;', '<>&"\''],
+    ['&#65;&#x41;&#X41;', 'AA&#X41;'],
+    ['&#0065;&#x000041;', 'AA'],
+    ['&#128512;&#x1F600;', '\u{1F600}\u{1F600}'],
+    ['&#xD83D;&#xDE00;', '&#xD83D;&#xDE00;'],
+    ['&#55357;&#56832;', '&#55357;&#56832;'],
+    ['&#0;&#x110000;&#1114112;', '&#0;&#x110000;&#1114112;'],
+    ['&amp;lt; &amp;#65;', '&lt; &#65;'],
+    ['&lol; &amp &#; &#x; & &;', '&lol; &amp &#; &#x; & &;'],
+    ['\u{1F600}&amp;\u{1F600}', '\u{1F600}&\u{1F600}'],
+    ['&&amp;&amp;&', '&&&&'],
+  ];
+
+  it.each(table)('%j decodes to the expected text at every window size', (text, decoded) => {
+    expect(WHOLE(text)).toBe(decoded);
+    for (let size = 1; size <= text.length + 2; size++) expect(decodeEntities(text, size)).toBe(decoded);
+    expect(decodeEntities(text)).toBe(decoded);
+  });
+
+  it('equals the whole-text decoding for random entity-dense text, whatever the window (references split at every position)', () => {
+    const pieces = ['&', ';', '#', 'x', 'X', '6', '5', 'A', 'a', 'lt', 'amp', '&#65;', '&#x1F600;', '&#xD83D;', '&amp;', '&lt;x', '\u{1F600}', ' ', '&#00', '&;'];
+    let seed = 12345;
+    const next = (n: number): number => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed % n;
+    };
+    for (let round = 0; round < 300; round++) {
+      let text = '';
+      for (let i = next(40); i >= 0; i--) text += pieces[next(pieces.length)];
+      const expected = WHOLE(text);
+      for (const size of [1, 2, 3, 5, 8, 13]) expect(decodeEntities(text, size)).toBe(expected);
+    }
+  });
+
+  it('extends a window over a stretch with no semicolon, to the next one or to the end', () => {
+    const noEnd = `${'&'.repeat(100)}x`;
+    expect(decodeEntities(noEnd, 10)).toBe(noEnd);
+    const late = `${'&'.repeat(50)}#65;tail`;
+    expect(decodeEntities(late, 10)).toBe(`${'&'.repeat(49)}Atail`);
+    expect(decodeEntities(`${'a'.repeat(30)}&amp;${'b'.repeat(30)}`, 7)).toBe(`${'a'.repeat(30)}&${'b'.repeat(30)}`);
+  });
+
+  it('decodes a part far larger than a window, and a window-sized text, as the whole-text decoding does', () => {
+    const unit = '&amp;&#65;&lt;x';
+    const text = unit.repeat(ENTITY_WINDOW);
+    expect(text.length).toBeGreaterThan(10 * ENTITY_WINDOW);
+    const out = decodeEntities(text);
+    expect(out.length).toBe(ENTITY_WINDOW * 4);
+    expect(out.startsWith('&A<x&A<x')).toBe(true);
+    expect(out.endsWith('&A<x')).toBe(true);
+    const exactly = 'a'.repeat(ENTITY_WINDOW - 5) + '&amp;';
+    expect(decodeEntities(exactly)).toBe(`${'a'.repeat(ENTITY_WINDOW - 5)}&`);
+    expect(decodeEntities(`${exactly}&lt;`)).toBe(`${'a'.repeat(ENTITY_WINDOW - 5)}&<`);
   });
 });
 

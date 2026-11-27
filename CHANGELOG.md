@@ -514,6 +514,66 @@ lockstep.
   comment parts located. Additive types in `@b32nio/spindle-shared/export/xlsx` (`XlsxWorkbookInfo`, `XlsxStyles`, ...) and
   optional `workbook`, `styles`, `sharedStrings` and `theme` fields on `SpreadsheetImportResult`; nothing populates them yet. Not wired into
   `importXlsx` (the `exceljs` path is unchanged and import output is identical); the sheet reader and the switch are S2b.
+- **XLSX import uses the own reader (S2b).** `importXlsx` now reads a workbook with the own package reader (`jszip` and its own
+  forward-only XML scanner, `sax.ts`, for the workbook-level parts, `sheetData` and the small sheet elements; `fast-xml-parser` is left to
+  the loss detector; no new dependency) instead of `exceljs`; export is unchanged (still `exceljs`). New sheet reader:
+  `sheetData` read as forward-only events with no tree (the part's text is still held as one string; shared formulas
+  expanded, array formulas kept with their range, inline and shared strings, ISO dates), `sheetPr`, `dimension`, `sheetViews`, `sheetFormatPr`, `cols` (with default styles), row
+  attributes, `mergeCells`, `hyperlinks` and `extLst` (raw). Theme, indexed and tinted colours now reach cell styles as
+  `#rrggbb` (plain black text is left to the editor), so the loss id `xlsx.styles.themeColors` is removed. Workbooks
+  from openpyxl with an image, a chart or a comment now import (they made the old reader throw), as do files with a
+  shared-string or format index past the table, a damaged worksheet part (read as far as the damage, with a warning) and
+  sheets whose names clash (later ones are renamed `Name (2)` with a warning). A shared formula the old reader read as a
+  plain value now has its formula, and a saved result of 0 or FALSE is kept. A binary `.xlsb` is refused with a message
+  that says to save as `.xlsx`. Additive fields on the result: `workbook`, `styles`, `sharedStrings`, `theme`,
+  per-sheet `details` and per-cell `styleIndex`, `sharedString` and `formulaInfo`. Limits against hostile files (what each
+  costs is in `documentation/import-loss.md`): a formula over 8192 characters is dropped and shared formulas stop expanding
+  past `ImportLimits.maxSheetFormulaChars` (32 Mi per sheet) and `maxFormulaChars` (64 Mi for the whole workbook; the cells
+  keep their value, one warning), a workbook is cut off past `maxTotalCells` (5,000,000) and `maxSheets` (1,000, with the
+  `<sheet>` entries read capped at four times that), a worksheet part is read once, `<col>` ranges are applied in one sweep
+  and capped, merges and hyperlinks are read as events and applied in one sweep (thousands of huge ranges stay fast), at
+  most 1,048,576 merges and 65,530 hyperlinks per sheet and `maxRanges` (1,048,576) over the workbook, the per-item
+  warnings (a link without its relationship, a repeated sheet) are given for the first twenty and then counted, and the
+  small elements cut out of a sheet part are read up to a size (64 KiB each, 8 MiB for the raw `extLst`). The workbook-level
+  parts are bounded by what they keep: shared strings, relationships and content types are read as events, and the styles,
+  theme and workbook are element trees under a budget (`maxPartElements`, 1,000,000 elements: a part over it is not read, with
+  one warning); rows with settings are bounded by `maxRows` (2,097,152); entity-dense text is decoded in windows; a sheet name
+  is cut at 255 characters and warnings quote the file's text at 64. A cell or row
+  without an address follows the previous one; only a position past the sheet's last row or column is clamped, with a
+  warning. A number text over 64 characters is not a number, and the 1900 date quirk (serial 60) is honoured for `t="d"`
+  dates. Number format codes a file defines lose the backslash only before a character Excel shows without quotes
+  (a LibreOffice `\$#,##0.00` is `$#,##0.00` in the editor); an escape that keeps a letter, digit or `. , @ * _ % # ? " \`
+  literal stays (`0\ \d`, `0.0\"`), as does the one that keeps `/` from being a fraction or an AM/PM token (`0\/0`,
+  `AM\/PM`) and `+`/`-` from being an exponent sign (`0.00E\+00`); nothing in quotes is touched, an escaped letter is no date
+  token, and a date format is recognised in either case (`DD`, `YYYY`). The `exceljs`
+  reader dropped every escape; the differential names each code where the two now differ. Numbers are plain decimals only (no
+  `Infinity` or hex), `t="d"` dates are validated, `_xHHHH_` escapes are decoded in inline and formula strings, `<f/>`
+  without text is no formula, shared-formula names may use letters of any script, `frozenSplit` panes freeze, and
+  `activeSheetIndex` follows the sheets that were read. The `exceljs` reader stays in the tree,
+  unused, until S14; `reader-differential.test.ts` runs both over the corpus and over generated workbooks. S2 is
+  complete with this entry. Review round 5: what a limit cuts is also a loss item (`xlsx.package.sizeLimit`, in `SpreadsheetImportResult.limitLoss`
+  and appended by `importFromXlsx` to the `loss` it returns: cells past `maxTotalCells`, sheets, rows, ranges, columns, extension lists,
+  formulas, parts and defined names past `maxPartElements`, relationships; each names the option that raises it); new `ImportLimits`
+  `maxColumns`, `maxExtensionChars`, `maxRelationships` and `maxScannedElements` (package-wide budgets for `<col>`, `extLst` text,
+  relationship entries read and cell, row and column elements scanned); only the relationships the reader uses are kept; defined names are read
+  as a list under `maxPartElements` instead of refusing the workbook (a workbook over the element budget says it has too many
+  elements); a number format code over 255 characters is kept as written and never scanned (it was rescanned for every cell
+  format); every string the result keeps is a copy of its own, so a short `dimension` no longer keeps a 100 MB sheet part alive; the
+  workbook part is read once; the cells-over-limit warning names the limit and the `limits` option; a sheet after the cell budget is
+  spent is kept if it is empty. The hostile-shape tests run in a child process with a limited heap (skipped below 6 GB or with
+  `XLSX_SKIP_HOSTILE`) instead of reading the test process's heap. Review round 6: an element with more than 1,024 attributes
+  (`MAX_ATTRIBUTES` in `sax.ts`; Excel writes fewer than 30) is damage like any other (a sheet is read as far as it, a workbook-level part
+  skipped with a warning, the workbook part refused as corrupt) where nine million attributes made the engine stop answering; sheets-core
+  `importFromXlsx` applies the merges of a sheet in one pass (`WorkbookImpl.mergeCellsBulk` / `SheetImpl.mergeCellsBulk`, the same regions
+  and cleared cells as `mergeCells` one by one, one notification, and no undo step per merge: opening a file leaves nothing to undo), 20,000
+  merges in under a second where one by one took 51 s and 200,000 in a few seconds; merges that overlap (Excel writes none) are resolved as one by one
+  would resolve them, however many (100,000 blocks and one overlap lose only the two it overlaps), also over regions that already overlap each other;
+  the loss detector
+  finds the relationship of each hyperlink by id instead of by a search (120,000 external links took 45 s); the React editor can raise the
+  limits: `importWorkbookFile(workbook, file, { limits })` and the `importLimits` prop of `WorkbookCanvas`.
+  Known limitation: the reader is bounded, but loading a result with very many formulas into the editor's model is not (20,000 array formulas over
+  blocks took 110 s, 1,000,000 formulas 82 s and 2.1 GB, 1,000 chained sheets 33 s; the reader 0.1 to 0.2 s of each, and a table of two million shared
+  strings peaked at 2.8 GB): hosts should lower `maxTotalCells` and/or import in a worker; follow-up in `documentation/sheets/TODO.md`.
 - **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
   the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
   other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from

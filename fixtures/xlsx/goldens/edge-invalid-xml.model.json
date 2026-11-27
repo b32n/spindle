@@ -1,5 +1,34 @@
 {
-  "importError": "The file could not be read (2:315: unmatched closing tag: worksheet.).",
-  "warnings": [],
-  "workbook": null
+  "importError": null,
+  "warnings": [
+    "The sheet \"Broken\" is not well-formed XML; it was read as far as the damage (0 cells)."
+  ],
+  "workbook": {
+    "activeSheet": 0,
+    "defaultColWidth": 100,
+    "defaultRowHeight": 20,
+    "formats": {},
+    "sheets": [
+      {
+        "cells": {},
+        "colCount": 100,
+        "config": {
+          "colWidths": {},
+          "filters": {},
+          "frozenCols": 0,
+          "frozenRows": 0,
+          "hiddenCols": [],
+          "hiddenRows": [],
+          "merges": [],
+          "rowHeights": {},
+          "showGridLines": true,
+          "sortOrder": []
+        },
+        "name": "Broken",
+        "rowCount": 1000,
+        "threads": []
+      }
+    ],
+    "styles": {}
+  }
 }

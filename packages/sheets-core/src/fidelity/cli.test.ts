@@ -29,7 +29,7 @@ describe('xlsxCliConfig', () => {
     const sink = io();
     const code = await runCli(
       xlsxCliConfig(sourceApi),
-      ['--only', 'cell-types,openpyxl-image', '--report', 'md'],
+      ['--only', 'cell-types,edge-no-workbook', '--report', 'md'],
       sink
     );
     expect(code).toBe(0);
@@ -38,7 +38,7 @@ describe('xlsxCliConfig', () => {
     );
     expect(sink.out.join('\n')).toContain('## XLSX fidelity report');
     expect(sink.out.join('\n')).toContain('### Launch-bar scoreboard');
-    expect(sink.out.join('\n')).toContain('`openpyxl-image` | **error**');
+    expect(sink.out.join('\n')).toContain('`edge-no-workbook` | ');
   });
 
   it('prints the coverage matrix', async () => {

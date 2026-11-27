@@ -93,7 +93,7 @@
     {
       "name": "xl/theme/theme1.xml",
       "rule": "theme",
-      "status": "unaccounted"
+      "status": "mapped"
     },
     {
       "name": "xl/workbook.xml",
@@ -113,9 +113,9 @@
   ],
   "totals": {
     "dropped": 6,
-    "mapped": 11,
+    "mapped": 12,
     "opaque": 0,
     "total": 18,
-    "unaccounted": 1
+    "unaccounted": 0
   }
 }

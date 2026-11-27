@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { importXlsx } from '../reader';
+import { importXlsxExceljs } from '../reader-exceljs';
 import * as api from './index';
 import type { SpreadsheetImportResult } from '@b32nio/spindle-shared/export/xlsx';
 import { readWorkbookParts, toImportExtras, XlsxPackage } from './index';
@@ -39,7 +39,7 @@ describe('the whole corpus', () => {
     // differential on what the old reader also reports: the sheet names, in order, and the active tab
     let old;
     try {
-      old = await importXlsx(bytes);
+      old = await importXlsxExceljs(bytes);
     } catch {
       return; // the exceljs reader throws on this file (the openpyxl ones): nothing to compare with
     }
@@ -176,7 +176,7 @@ describe('the internal API surface S2b builds on', () => {
     expect(Object.keys(api).sort()).toEqual([
       'DEFAULT_INDEXED_COLORS', 'DEFAULT_THEME_COLORS', 'PRESET_COLORS', 'XlsxPackage', 'applyTint', 'contentTypeOf', 'decodePart', 'decodeStringEscapes',
       'findWorkbookPart', 'forEachSharedString', 'isBinaryWorkbook', 'numberFormatCode', 'parseContentTypes', 'parseRelationships', 'parseRgb', 'parseSharedStrings',
-      'parseStyles', 'parseTheme', 'partsWithContentType', 'readColor', 'readFont', 'readSharedString', 'readWorkbook', 'readWorkbookParts',
+      'parseStyles', 'parseTheme', 'partsWithContentType', 'readColor', 'readFont', 'readWorkbook', 'readWorkbookParts',
       'relsOfKind', 'relsPart', 'resolveColor', 'resolveRelationshipTarget', 'toImportExtras',
     ]);
     for (const value of Object.values(api)) expect(value).toBeDefined();
@@ -191,6 +191,21 @@ describe('readWorkbookParts', () => {
     expect(result.colors.themeColors).toHaveLength(12);
     expect(result.colors.indexedColors).toBeUndefined();
     expect(result.warnings).toEqual([]);
+  });
+  it('streams the shared strings under the limits: one warning each for too many strings, too many runs and damage', async () => {
+    const parts = (strings: string, limits: { maxTotalCells?: number; maxPartElements?: number }) =>
+      workbookZip('<sheets/>', [['rId1', 'sharedStrings', 'sharedStrings.xml']], { 'xl/sharedStrings.xml': `<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${strings}` }).then((bytes) =>
+        XlsxPackage.open(bytes, { limits }).then(readWorkbookParts)
+      );
+    const many = await parts('<si><t>a</t></si>'.repeat(5) + '</sst>', { maxTotalCells: 3 });
+    expect(many.sharedStrings).toHaveLength(3);
+    expect(many.warnings).toEqual(['The part xl/sharedStrings.xml has more than 3 strings (the import limit maxTotalCells, which no cell could use up); the rest were not read.']);
+    const runs = await parts('<si><r><t>a</t></r><r><t>b</t></r><r><t>c</t></r></si></sst>', { maxPartElements: 2 });
+    expect(runs.sharedStrings[0]).toEqual({ text: 'abc', runs: [{ text: 'a' }, { text: 'b' }] });
+    expect(runs.warnings).toEqual(['The part xl/sharedStrings.xml has more than 2 rich-text runs (the import limit maxPartElements); the formatting of the others was left out, their text kept.']);
+    const damaged = await parts('<si><t>a</t></si><si><t>b</t></Oops></sst>', {});
+    expect(damaged.sharedStrings.map((s) => s.text)).toEqual(['a']);
+    expect(damaged.warnings).toEqual(['The part xl/sharedStrings.xml is not well-formed XML; it was read as far as the damage.']);
   });
   it('exposes the colour context built from the theme and the workbook palette', async () => {
     const result = await readWorkbookParts(

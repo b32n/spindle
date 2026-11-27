@@ -1,4 +1,5 @@
 import type { SpreadsheetImportResult, XlsxSharedString, XlsxStyles, XlsxTheme, XlsxWorkbookInfo } from '@b32nio/spindle-shared/export/xlsx';
+import { abbreviate } from './capped';
 import type { ColorContext } from './colors';
 import { parseSharedStrings } from './shared-strings';
 import { parseStyles } from './styles';
@@ -7,18 +8,18 @@ import type { XlsxPackage } from './package';
 import { readWorkbook } from './workbook';
 
 // ---------------------------------------------------------------------------
-// The own XLSX package reader, foundation layer (S2a). Internal API, not exported from the package entry points: the sheet
-// reader and `importXlsx` (S2b) build on it, and it is not wired into `importXlsx` yet (the `exceljs` path is still in force).
+// The own XLSX package reader: the foundation layer (S2a) and, on top of it, the sheet reader (`sheet.ts`, S2b) that `importXlsx`
+// (`../reader.ts`) is built from. Internal API, not exported from the package entry points.
 //
 //   const pkg = await XlsxPackage.open(bytes, { limits });  // X4 safe zip: only ever throws ImportError
 //   const parts = await readWorkbookParts(pkg);              // workbook, theme, styles, shared strings; never throws after open,
 //                                                           //   except ImportError('corrupt') when there is no workbook part
-//   pkg.xml(sheet.part)                                      // a sheet part (S2b), with `parts.workbook.sheets[i].rels` for its relationships
+//   readSheet(await pkg.text(ref.part), ref, ctx)            // a sheet part (S2b), with `ref.rels` for its relationships
 //
 // Streaming-ready (S20): every part reader is a pure function from a parsed part to plain, structured-cloneable data, with no
-// DOM and no shared state, so the whole reader can run in a worker. Workbook-level parts are small and use the bounded element
-// tree. `sheetData` is not read here: it is read as a stream from `pkg.text()`/`pkg.bytes()` in S2b. Shared strings can be
-// large, so `forEachSharedString` pushes items to a callback instead of requiring the list.
+// DOM and no shared state, so the whole reader can run in a worker. Workbook-level parts are small and use an element
+// tree built under a budget (`tree.ts`, `maxPartElements`), or are read as events (relationships, content types, shared strings). `sheetData` is not read here: `readSheet` reads it as a forward-only event stream (`sax.ts`, no tree) from `pkg.text()`, which holds the part as one string. Shared strings can be
+// large, so `forEachSharedString` reads them as events and pushes items to a callback instead of requiring the list.
 // ---------------------------------------------------------------------------
 
 export { XlsxPackage, decodePart, type OpenXlsxOptions } from './package';
@@ -29,7 +30,7 @@ export { parseTheme } from './theme';
 export { PRESET_COLORS } from './preset-colors';
 export { parseStyles, numberFormatCode } from './styles';
 export { readFont } from './font';
-export { parseSharedStrings, forEachSharedString, readSharedString, decodeStringEscapes } from './shared-strings';
+export { parseSharedStrings, forEachSharedString, decodeStringEscapes } from './shared-strings';
 export { resolveColor, applyTint, parseRgb, readColor, DEFAULT_INDEXED_COLORS, DEFAULT_THEME_COLORS, type ColorContext } from './colors';
 
 export interface XlsxWorkbookParts {
@@ -44,17 +45,31 @@ export interface XlsxWorkbookParts {
   warnings: string[];
 }
 
-/** Read the workbook-level parts of an opened package. */
-export async function readWorkbookParts(pkg: XlsxPackage): Promise<XlsxWorkbookParts> {
-  const workbook = await readWorkbook(pkg);
+/** Read the workbook-level parts of an opened package. With `strict` a workbook part that cannot be read (damaged, or over the element budget) is an `ImportError('corrupt')`, not an empty workbook. */
+export async function readWorkbookParts(pkg: XlsxPackage, options: { strict?: boolean } = {}): Promise<XlsxWorkbookParts> {
+  const workbook = await readWorkbook(pkg, options);
   const theme = parseTheme(workbook.parts.theme === undefined ? undefined : await pkg.xml(workbook.parts.theme), pkg.warnings);
   const styles = parseStyles(workbook.parts.styles === undefined ? undefined : await pkg.xml(workbook.parts.styles), theme.colors);
   const colors: ColorContext = { themeColors: theme.colors, indexedColors: styles.indexedColors };
-  const stringsRoot = workbook.parts.sharedStrings === undefined ? undefined : await pkg.xml(workbook.parts.sharedStrings);
-  return { workbook, theme, styles, sharedStrings: parseSharedStrings(stringsRoot, colors), colors, warnings: [...pkg.warnings] };
+  const stringsPart = workbook.parts.sharedStrings;
+  const sharedStrings = parseSharedStrings(stringsPart === undefined ? undefined : await pkg.text(stringsPart), colors, {
+    maxItems: pkg.limits.maxTotalCells,
+    maxRuns: pkg.limits.maxPartElements,
+    problem: (what) => {
+      if (what !== 'damaged') pkg.loss.add('sharedStrings', stringsPart as string);
+      pkg.warnings.push(
+        what === 'items'
+          ? `The part ${abbreviate(stringsPart as string)} has more than ${pkg.limits.maxTotalCells} strings (the import limit maxTotalCells, which no cell could use up); the rest were not read.`
+          : what === 'runs'
+            ? `The part ${abbreviate(stringsPart as string)} has more than ${pkg.limits.maxPartElements} rich-text runs (the import limit maxPartElements); the formatting of the others was left out, their text kept.`
+            : `The part ${abbreviate(stringsPart as string)} is not well-formed XML; it was read as far as the damage.`
+      );
+    },
+  });
+  return { workbook, theme, styles, sharedStrings, colors, warnings: [...pkg.warnings] };
 }
 
-/** The own reader's output in the shape of the io result (`SpreadsheetImportResult`'s optional S2 fields). Not yet used by `importXlsx` (S2b). */
+/** The own reader's output in the shape of the io result (`SpreadsheetImportResult`'s optional S2 fields); `importXlsx` adds it to its result. */
 export function toImportExtras(parts: XlsxWorkbookParts): Required<Pick<SpreadsheetImportResult, 'workbook' | 'styles' | 'sharedStrings' | 'theme'>> {
   return { workbook: parts.workbook, styles: parts.styles, sharedStrings: parts.sharedStrings, theme: parts.theme };
 }

@@ -1862,6 +1862,20 @@ export class WorkbookImpl implements Workbook {
     }
   }
 
+  /**
+   * Merge many ranges of a sheet as `mergeCells` would one after the other (same regions, same cleared cells), in O(n log^2 n) and
+   * with one change notification. Records one history step, unless `history` is false (a load, which has no history of its own to
+   * undo).
+   */
+  mergeCellsBulk(ranges: readonly Range[], sheetId?: string, options: { history?: boolean } = {}): void {
+    const sheet = this.sheets.get(sheetId ?? this.activeSheetId);
+    if (!sheet) return;
+    if (options.history !== false && !this.isUndoing && !this.isRedoing && !this.isBatching) {
+      this.recordHistory();
+    }
+    (sheet as SheetImpl).mergeCellsBulk(ranges);
+  }
+
   /** Remove any merged regions intersecting the range (records history). */
   unmergeCells(range: Range, sheetId?: string): void {
     const sheet = this.sheets.get(sheetId ?? this.activeSheetId);

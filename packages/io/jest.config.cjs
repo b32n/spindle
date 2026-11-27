@@ -3,6 +3,9 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
+  // The retired `exceljs` reader (S2b): unchanged apart from its name, it only runs as the oracle of reader-differential.test.ts and is deleted
+  // with `exceljs` in S14, so measuring it would only report on code nobody maintains. Listed here, not hidden by a comment in the file.
+  coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/src/xlsx/reader-exceljs\\.ts$'],
   transform: {
     '^.+\\.ts$': [
       'ts-jest',

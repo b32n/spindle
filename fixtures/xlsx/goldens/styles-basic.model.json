@@ -108,6 +108,7 @@
         "fontSize": 12
       },
       "s2": {
+        "fontColor": "#ff0000",
         "fontFamily": "Times New Roman",
         "fontSize": 10,
         "italic": true,

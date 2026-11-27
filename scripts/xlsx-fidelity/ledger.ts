@@ -39,7 +39,8 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
   { id: 'worksheet', match: /^xl\/worksheets\/[^/]+\.xml$/, outcome: 'mapped' },
   { id: 'sharedStrings', match: /^xl\/sharedStrings\.xml$/, outcome: 'mapped' },
   { id: 'styles', match: /^xl\/styles\.xml$/, outcome: 'mapped' },
-  { id: 'theme', match: /^xl\/theme\//, outcome: { dropped: ['xlsx.styles.themeColors'] } },
+  // theme colours are resolved into the cell styles on import (S2b)
+  { id: 'theme', match: /^xl\/theme\//, outcome: 'mapped' },
   {
     id: 'printerSettings',
     match: /^xl\/printerSettings\//,

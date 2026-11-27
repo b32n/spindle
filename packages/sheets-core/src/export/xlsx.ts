@@ -161,12 +161,15 @@ function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['st
  * Replace `workbook`'s entire contents with what's in the xlsx file at
  * `bytes` — every existing sheet is discarded, matching what "import a file"
  * should mean. Merges are applied after the bulk load via the live
- * mergeCells API rather than through setData's config, since merged regions
- * (unlike cells/widths/heights) only accept stable row/col IDs, not the
- * numeric indices this adapter otherwise works in.
+ * `mergeCellsBulk` (the same result as `mergeCells` for each, in O(n log^2 n) and without history) rather than through setData's
+ * config, since merged regions (unlike cells/widths/heights) only accept stable row/col IDs, not the numeric indices this adapter
+ * otherwise works in. Overlapping merges (Excel writes none) are resolved as one by one would: the later wins.
  *
  * Throws an `ImportError` (from `@b32nio/spindle-io/xlsx`, with a `code`) for a file that cannot or must not be opened:
  * encrypted, legacy binary, not a package, over the limits (`options.limits`), or corrupt. The workbook is left untouched.
+ *
+ * `loss` is what the file holds that the editor cannot take (the detector's items) and, with id `xlsx.package.sizeLimit`, what the
+ * import limits cut from it (cells past `maxTotalCells`, sheets past `maxSheets`...), each naming the option that raises the limit.
  */
 export async function importFromXlsx(
   bytes: Uint8Array,
@@ -176,16 +179,21 @@ export async function importFromXlsx(
   const { detectXlsxLoss, importXlsx } = await loadIo();
   // the importer is the one that refuses unsafe files (an `ImportError`), so it goes first: no point scanning what is refused
   const result = await importXlsx(bytes, options);
-  const loss = await detectXlsxLoss(bytes, lossOptions());
+  const detected = await detectXlsxLoss(bytes, lossOptions());
+  // what the import limits cut is only known to the reader, so its items join the detector's: the host gets one report
+  const loss: ImportLossReport = result.limitLoss?.length ? { ...detected, items: [...detected.items, ...result.limitLoss] } : detected;
   // setData() replaces the whole workbook; a file with no worksheets (e.g. a zip that isn't
   // really a workbook) would leave it with no sheets at all, so refuse it up front.
   if (result.sheets.length === 0) throw new Error('The file contains no worksheets.');
+  const warnings = [...result.warnings];
   const { data, sheetIds } = toWorkbookData(result, workbook);
   workbook.setData(data);
+  // all the merges of a sheet at once: one by one each looked at all the others (10,000 took 12 s, 20,000 51 s). No history: a load
+  // replaces the document, and `setData` has just emptied the undo stack; one step per merge would let undo take the merges back one by one
   result.sheets.forEach((sheet, i) => {
-    sheet.mergedRanges?.forEach((range) => workbook.mergeCells(range, sheetIds[i]));
+    if (sheet.mergedRanges) workbook.mergeCellsBulk(sheet.mergedRanges, sheetIds[i], { history: false });
   });
-  return { warnings: result.warnings, loss };
+  return { warnings, loss };
 }
 
 /**
@@ -290,7 +298,8 @@ function fromSpreadsheetStyle(style: SpreadsheetCellStyle): CellStyle {
   if (style.horizontalAlign != null) out.textAlign = style.horizontalAlign;
   if (style.verticalAlign != null) out.verticalAlign = style.verticalAlign;
   if (style.wrapText != null) out.textWrap = style.wrapText;
-  if (style.textRotation != null) out.textRotation = style.textRotation;
+  // an explicit 0 is the default: the file writer leaves it out, so the model does not keep it either (open -> save -> open is stable)
+  if (style.textRotation) out.textRotation = style.textRotation;
 
   if (style.border) {
     if (style.border.top) out.borderTop = toCssBorder(style.border.top);
