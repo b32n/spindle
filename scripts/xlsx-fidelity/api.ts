@@ -1,5 +1,10 @@
 import type { LossSnapshot } from '../fidelity-core/types';
 
+/** The import options the harness uses (`recalculateOnLoad`: evaluate every formula the engine can, instead of keeping the file's saved results). */
+export interface ImportOptions {
+  recalculateOnLoad?: boolean;
+}
+
 /** The slice of a sheets-core `WorkbookImpl` the harness needs. */
 export interface WorkbookLike {
   getData(): unknown;
@@ -13,12 +18,11 @@ export interface XlsxEditorApi {
   createWorkbook(): WorkbookLike;
   importFromXlsx(
     bytes: Uint8Array,
-    workbook: WorkbookLike
+    workbook: WorkbookLike,
+    options?: ImportOptions
   ): Promise<{ warnings: string[]; loss: LossSnapshot }>;
   exportToXlsx(workbook: WorkbookLike): Promise<Uint8Array>;
   inspectXlsx(bytes: Uint8Array): Promise<LossSnapshot>;
-  /** Whether the formula engine can parse this formula text. */
-  parsesFormula(formula: string): boolean;
 }
 
 /** The parts of `@b32nio/spindle-sheets-core` the API is built from. */
@@ -26,22 +30,20 @@ export interface SheetsCoreModule {
   WorkbookImpl: new (id: string, name: string) => WorkbookLike;
   importFromXlsx(
     bytes: Uint8Array,
-    workbook: never
+    workbook: never,
+    options?: ImportOptions
   ): Promise<{ warnings: string[]; loss: LossSnapshot }>;
   exportToXlsx(workbook: never): Promise<Uint8Array>;
   inspectXlsx(bytes: Uint8Array, options?: { detail: 'full' }): Promise<LossSnapshot>;
-  FormulaParser: new () => { parse(formula: string): { error?: string } };
 }
 
 /** Bind the harness to a sheets-core module. `inspectXlsx` is asked for the `full` detail level (every loss id, not only the dialog's). */
 export function createApi(core: SheetsCoreModule): XlsxEditorApi {
-  const parser = new core.FormulaParser();
   return {
     createWorkbook: () => new core.WorkbookImpl('fixture', 'Untitled'),
-    importFromXlsx: (bytes, workbook) => core.importFromXlsx(bytes, workbook as never),
+    importFromXlsx: (bytes, workbook, options) => core.importFromXlsx(bytes, workbook as never, options),
     exportToXlsx: (workbook) => core.exportToXlsx(workbook as never),
     inspectXlsx: (bytes) => core.inspectXlsx(bytes, { detail: 'full' }),
-    parsesFormula: (formula) => parser.parse(formula).error === undefined,
   };
 }
 

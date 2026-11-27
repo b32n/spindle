@@ -16,6 +16,10 @@ interface FormulaBarProps {
   readOnly?: boolean;
 }
 
+/** What the formula-bar indicator of a cached-only cell says (also its tooltip and accessible name). */
+export const CACHED_ONLY_NOTICE =
+  "Saved value: the editor cannot calculate this formula, so it shows the value saved in the file. The value is not updated when the cells it uses change, and the cell references in the formula are not adjusted when rows or columns are inserted or deleted. The formula text is kept and saved unchanged; Excel recalculates it when the file is reopened, possibly to a different result.";
+
 /**
  * The text shown in the formula bar for a cell. Date-formatted cells render
  * their value using the cell's date pattern (so the user sees "1/12/2020",
@@ -140,6 +144,9 @@ export const FormulaBar = memo(function FormulaBar({
     [activeCell, workbook, formulaAssist]
   );
 
+  // an imported formula the engine cannot evaluate: its value is the one the file saved (read at render, so it is never older than the bar)
+  const cachedOnly = !!activeCell && !!workbook.getCell(undefined, activeCell.row, activeCell.col)?.cachedOnly;
+
   const sheet = workbook.getSheet();
   // Ignore a stale range once the active cell has moved outside of it.
   const rangeIsCurrent =
@@ -243,6 +250,29 @@ export const FormulaBar = memo(function FormulaBar({
             fontFamily: 'inherit',
           }}
         />
+        {cachedOnly && !isEditing && (
+          <span
+            className="formula-cached-only"
+            data-testid="formula-cached-only"
+            role="note"
+            tabIndex={0}
+            aria-label={CACHED_ONLY_NOTICE}
+            title={CACHED_ONLY_NOTICE}
+            style={{
+              marginLeft: '8px',
+              padding: '1px 8px',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: 'var(--spindle-note-fg, #92400e)',
+              backgroundColor: 'var(--spindle-note-bg, #fef3c7)',
+              border: '1px solid var(--spindle-note-border, #b45309)',
+              borderRadius: '999px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Saved value
+          </span>
+        )}
         {formulaAssist.mode === 'autocomplete' && (
           <FormulaAutocomplete
             suggestions={formulaAssist.suggestions}

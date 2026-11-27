@@ -1,114 +1,7 @@
 {
-  "compared": 159,
+  "cachedOnly": 6,
+  "compared": 153,
   "firstMismatches": [
-    {
-      "actual": "\"#NAME? Function _XLFN.MAXIFS not found\"",
-      "cell": "I24",
-      "expected": "9",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.AGGREGATE not found\"",
-      "cell": "I25",
-      "expected": "55",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.IFS not found\"",
-      "cell": "I32",
-      "expected": "\"b\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.SWITCH not found\"",
-      "cell": "I33",
-      "expected": "\"one\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.XOR not found\"",
-      "cell": "I36",
-      "expected": "TRUE",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.CONCAT not found\"",
-      "cell": "I52",
-      "expected": "\"ab\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.TEXTJOIN not found\"",
-      "cell": "I53",
-      "expected": "\"x,y,x\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.NUMBERVALUE not found\"",
-      "cell": "I65",
-      "expected": "1.5",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.TEXTBEFORE not found\"",
-      "cell": "I66",
-      "expected": "\"a\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.TEXTSPLIT not found\"",
-      "cell": "I67",
-      "expected": "\"a\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.DAYS not found\"",
-      "cell": "I78",
-      "expected": "31",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.ISOWEEKNUM not found\"",
-      "cell": "I80",
-      "expected": "2",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.STDEV.S not found\"",
-      "cell": "I85",
-      "expected": "3.02765035409749",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.VAR.S not found\"",
-      "cell": "I86",
-      "expected": "9.16666666666667",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.PERCENTILE.INC not found\"",
-      "cell": "I88",
-      "expected": "9.1",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.RANK.EQ not found\"",
-      "cell": "I91",
-      "expected": "8",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.XLOOKUP not found\"",
-      "cell": "I123",
-      "expected": "3",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.XMATCH not found\"",
-      "cell": "I124",
-      "expected": "3",
-      "sheet": "Data"
-    },
     {
       "actual": "\"#SPILL!\"",
       "cell": "I126",
@@ -116,22 +9,50 @@
       "sheet": "Data"
     },
     {
-      "actual": "\"#NAME? Function _XLFN._XLWS.FILTER not found\"",
+      "actual": "\"#SPILL!\"",
       "cell": "I127",
       "expected": "9",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#SPILL!\"",
+      "cell": "I128",
+      "expected": "3",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#SPILL!\"",
+      "cell": "I129",
+      "expected": "\"x\"",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#SPILL!\"",
+      "cell": "I130",
+      "expected": "1",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#SPILL!\"",
+      "cell": "I131",
+      "expected": "3",
+      "sheet": "Data"
+    },
+    {
+      "actual": "\"#SPILL!\"",
+      "cell": "I152",
+      "expected": "\"#VALUE!\"",
       "sheet": "Data"
     }
   ],
   "formulaCells": 159,
-  "matched": 130,
+  "matched": 146,
   "mismatchClasses": {
-    "boolean -> error": 1,
     "error -> error": 1,
-    "number -> error": 20,
-    "text -> error": 7
+    "number -> error": 5,
+    "text -> error": 1
   },
-  "mismatched": 29,
-  "passthrough": 0,
+  "mismatched": 7,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

@@ -4,7 +4,6 @@ import {
   type SheetsCoreModule,
 } from '../../../../scripts/xlsx-fidelity/api';
 import { WorkbookImpl } from '../workbook';
-import { FormulaParser } from '../formula-parser/parser';
 import { exportToXlsx, importFromXlsx, inspectXlsx } from '../export/xlsx';
 
 describe('createApi', () => {
@@ -29,11 +28,6 @@ describe('createApi', () => {
         calls.push(['inspect', bytes, options]),
         { format: 'xlsx', items: [] }
       ),
-      FormulaParser: class {
-        parse(formula: string) {
-          return formula.includes('[') ? { error: '#ERROR! x' } : {};
-        }
-      },
     } as unknown as SheetsCoreModule;
     const api = createApi(core);
     const wb = api.createWorkbook();
@@ -42,8 +36,6 @@ describe('createApi', () => {
     await api.importFromXlsx(bytes, wb);
     expect(await api.exportToXlsx(wb)).toEqual(new Uint8Array([7]));
     await api.inspectXlsx(bytes);
-    expect(api.parsesFormula('=A1')).toBe(true);
-    expect(api.parsesFormula('=SUM(T[a])')).toBe(false);
     expect(calls).toEqual([
       ['import', bytes, wb],
       ['export', wb],
@@ -57,10 +49,7 @@ describe('createApi', () => {
       importFromXlsx,
       exportToXlsx,
       inspectXlsx,
-      FormulaParser,
     } as unknown as SheetsCoreModule);
-    expect(api.parsesFormula('=SUM(A:A)')).toBe(true);
-    expect(api.parsesFormula('=SUM(A:')).toBe(false);
     const wb = api.createWorkbook();
     expect(wb).toBeInstanceOf(WorkbookImpl);
     expect((await api.inspectXlsx(await api.exportToXlsx(wb))).items).toEqual([]);

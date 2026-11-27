@@ -2,8 +2,18 @@
   "format": "xlsx",
   "items": [
     {
+      "count": 2,
+      "effect": "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)",
+      "id": "xlsx.formulas.cachedOnly",
+      "label": "formula(s) the editor cannot calculate (kept as saved)",
+      "state": "kept",
+      "where": [
+        "Sheet1"
+      ]
+    },
+    {
       "count": 1,
-      "effect": "approximated: imported as an ordinary formula; Excel's array metadata is dropped",
+      "effect": "approximated: spills like Excel's and is saved back as a dynamic array (with the range it spilled and Excel's dynamic-array metadata), so Excel shows it as a dynamic array",
       "id": "xlsx.formulas.dynamicArray",
       "label": "dynamic-array formula(s)",
       "where": [
@@ -12,9 +22,10 @@
     },
     {
       "count": 2,
-      "effect": "lost: cannot be calculated (the cells show #NAME?)",
+      "effect": "kept: shown from the value saved in the file, not calculated",
       "id": "xlsx.formulas.unsupported",
       "label": "formula(s) using functions the editor does not have",
+      "state": "kept",
       "where": [
         "SINGLE",
         "ANCHORARRAY"

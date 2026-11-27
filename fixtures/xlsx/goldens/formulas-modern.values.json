@@ -1,63 +1,11 @@
 {
-  "compared": 14,
-  "firstMismatches": [
-    {
-      "actual": "\"#NAME? Function _XLFN.IFS not found\"",
-      "cell": "G2",
-      "expected": "\"big\"",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.XLOOKUP not found\"",
-      "cell": "G3",
-      "expected": "7",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.CONCAT not found\"",
-      "cell": "G4",
-      "expected": "\"North-South\"",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.TEXTJOIN not found\"",
-      "cell": "G5",
-      "expected": "\"North,South,East\"",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.STDEV.S not found\"",
-      "cell": "G6",
-      "expected": "3.361547262794322",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.LET not found\"",
-      "cell": "G7",
-      "expected": "15",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.MAXIFS not found\"",
-      "cell": "G9",
-      "expected": "10",
-      "sheet": "Modern"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN._XLWS.SORT not found\"",
-      "cell": "G11",
-      "expected": "1",
-      "sheet": "Modern"
-    }
-  ],
+  "cachedOnly": 2,
+  "compared": 13,
+  "firstMismatches": [],
   "formulaCells": 15,
-  "matched": 6,
-  "mismatchClasses": {
-    "number -> error": 5,
-    "text -> error": 3
-  },
-  "mismatched": 8,
-  "passthrough": 1,
+  "matched": 13,
+  "mismatchClasses": {},
+  "mismatched": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

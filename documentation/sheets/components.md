@@ -20,7 +20,10 @@ interface WorkbookCanvasProps {
   fileActions?: boolean;       // show Open (.xlsx/.csv) and Download (XLSX/CSV) in the toolbar; default false
   exportFormats?: ('xlsx' | 'csv')[];   // formats offered by Download; default both
   fileName?: string;           // base name for downloads; default: the workbook name
-  onFileOpened?: (info: { fileName: string; warnings: string[] }) => void;
+  importLimits?: Partial<ImportLimits>;  // XLSX reader limits over the defaults (see documentation/import-loss.md)
+  maxArrayCells?: number;      // most cells the array formulas of one sheet may cover when an .xlsx opens; default 1,000,000
+  onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
+  onExportWarning?: (message: string) => void;  // what a downloaded .xlsx left out (a spilled array result over the export's caps); the editor shows nothing itself
   onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
 
@@ -276,6 +279,16 @@ const handleInputChange = (value: string) => {
   onFormulaChange?.(value);
 };
 ```
+
+**Saved-value note and theming:** next to a formula the engine cannot evaluate (a cached-only cell, see `documentation/import-loss.md`), the bar shows a short note that the value is the one saved in the file and is not updated when the cells it uses change. Its colours come from three CSS variables a host can set on the editor or any ancestor (for a dark theme, say):
+
+| Variable | Default | Used for |
+|---|---|---|
+| `--spindle-note-fg` | `#92400e` | text |
+| `--spindle-note-bg` | `#fef3c7` | background |
+| `--spindle-note-border` | `#b45309` | 1px border |
+
+The defaults give a text/background contrast of about 6.4:1 (at least 4.5:1 is required of the text; the border is about 4.5:1 against the background, 3:1 is required of it). A host's own pair should keep at least 4.5:1 for the text.
 
 ### SheetTabs
 

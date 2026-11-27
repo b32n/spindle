@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
+import { createLossReport, type ImportLossItem, type ImportLossReport, type ImportLossState } from '@b32nio/spindle-shared';
 import type { DetectXlsxLossOptions } from '@b32nio/spindle-shared/export/xlsx';
 import { scanFormula, VOLATILE_FUNCTIONS, withoutStrings, type FormulaFacts } from './formula-scan';
 import { DEFAULT_IMPORT_LIMITS } from '../common/safe-zip';
@@ -63,7 +63,7 @@ class Tally {
 
 const TALLY_KEYS = [
   'cf', 'dv', 'filter', 'protect', 'outline', 'spark', 'comments', 'charts', 'images',
-  'structured', 'unsupported', 'array', 'dynamic', 'external', 'volatile',
+  'structured', 'unsupported', 'cachedOnly', 'array', 'dynamic', 'external', 'volatile',
   'columnRowStyles', 'tabColor', 'zoom', 'rtl', 'gridlines', 'customViews',
   'printSetup', 'breaks', 'headerFooter',
   'dataBarExt', 'iconSetExt', 'formulaRule', 'stopIfTrue',
@@ -200,15 +200,17 @@ interface CellFacts {
   volatile: number;
   unsupported: number;
   unsupportedNames: string[];
+  /** Formulas the editor keeps as the value the file saved (a function it lacks, or text its engine cannot evaluate). */
+  cachedOnly: number;
   outlineRows: number;
   styledRows: number;
   styleIds: Set<number>;
   richInline: number;
   /** Facts of each shared formula's master by `si`, applied to its followers (cells with no formula text). */
-  shared: Map<string, FormulaFacts>;
+  shared: Map<string, FormulaFacts & { cachedOnly: boolean }>;
 }
 
-async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined): Promise<{ outer: string; cells: CellFacts; limited: boolean }> {
+async function scanSheetData(xml: string, options: DetectXlsxLossOptions): Promise<{ outer: string; cells: CellFacts; limited: boolean }> {
   const cells: CellFacts = {
     structuredRefs: 0,
     arrays: 0,
@@ -217,6 +219,7 @@ async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined
     volatile: 0,
     unsupported: 0,
     unsupportedNames: [],
+    cachedOnly: 0,
     outlineRows: 0,
     styledRows: 0,
     styleIds: new Set(),
@@ -266,13 +269,14 @@ async function scanSheetData(xml: string, known: ReadonlySet<string> | undefined
         cells.styledRows++;
         cells.styleIds.add(rowStyle);
       }
-      for (const c of kids(row, 'c')) readCell(c, cells, known);
+      for (const c of kids(row, 'c')) readCell(c, cells, options);
     }
   }
   return { outer, cells, limited };
 }
 
-function readCell(c: XmlElement, cells: CellFacts, known: ReadonlySet<string> | undefined): void {
+function readCell(c: XmlElement, cells: CellFacts, options: DetectXlsxLossOptions): void {
+  const known = options.knownFunctions;
   const style = Number(c.attrs.s);
   if (style >= 0) cells.styleIds.add(style);
   if (kid(kid(c, 'is'), 'r')?.children.some((e) => e.name === 'rPr')) cells.richInline++;
@@ -283,12 +287,17 @@ function readCell(c: XmlElement, cells: CellFacts, known: ReadonlySet<string> | 
     else cells.arrays++;
   }
   // a shared formula's followers have no text of their own: they count with the facts of their master
-  let facts: FormulaFacts | undefined;
+  let facts: (FormulaFacts & { cachedOnly: boolean }) | undefined;
   if (f.text !== '') {
-    facts = scanFormula(f.text);
+    const scanned = scanFormula(f.text);
+    // kept as the saved value: a function the editor lacks, or text its engine cannot evaluate (parse failure, a defined name...)
+    const cachedOnly =
+      (known !== undefined && scanned.functions.some((fn) => !known.has(fn))) || (options.isFormulaEvaluable !== undefined && !options.isFormulaEvaluable(f.text));
+    facts = { ...scanned, cachedOnly };
     if (f.attrs.t === 'shared' && f.attrs.si !== undefined) cells.shared.set(f.attrs.si, facts);
   } else if (f.attrs.t === 'shared') facts = cells.shared.get(f.attrs.si ?? '');
   if (!facts) return;
+  if (facts.cachedOnly) cells.cachedOnly++;
   if (facts.structuredRef) cells.structuredRefs++;
   if (facts.externalRef) cells.externalRefs++;
   if (facts.functions.some((fn) => VOLATILE_FUNCTIONS.has(fn))) cells.volatile++;
@@ -296,7 +305,8 @@ function readCell(c: XmlElement, cells: CellFacts, known: ReadonlySet<string> | 
     const missing = facts.functions.filter((fn) => !known.has(fn));
     if (missing.length > 0) {
       cells.unsupported++;
-      for (const fn of missing) if (!cells.unsupportedNames.includes(fn)) cells.unsupportedNames.push(fn);
+      // only the first few names are reported (`MAX_WHERE`), so only those are kept: a file of thousands of invented names stays cheap
+      for (const fn of missing) if (cells.unsupportedNames.length < MAX_WHERE && !cells.unsupportedNames.includes(fn)) cells.unsupportedNames.push(fn);
     }
   }
 }
@@ -334,13 +344,13 @@ export async function detectXlsxLoss(bytes: Uint8Array, options: DetectXlsxLossO
 
 async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: ImportLossItem[]): Promise<void> {
   const full = options.detail === 'full';
-  const add = (id: string, label: string, count: number, effect: string, where?: string[], onlyFull = false) => {
+  const add = (id: string, label: string, count: number, effect: string, where?: string[], onlyFull = false, state?: ImportLossState) => {
     if (count > 0 && (full || !onlyFull))
-      items.push({ id, label, count, effect, ...(where && where.length ? { where: where.slice(0, MAX_WHERE) } : {}) });
+      items.push({ id, label, count, effect, ...(where && where.length ? { where: where.slice(0, MAX_WHERE) } : {}), ...(state ? { state } : {}) });
   };
   /** An id that only the `full` level reports. */
-  const addFull = (id: string, label: string, count: number, effect: string, where?: string[]) =>
-    add(id, label, count, effect, where, true);
+  const addFull = (id: string, label: string, count: number, effect: string, where?: string[], state?: ImportLossState) =>
+    add(id, label, count, effect, where, true, state);
 
   if (isOleFile(bytes)) {
     if (isEncryptedOle(bytes))
@@ -380,7 +390,7 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
   add('xlsx.outline', 'grouped (outlined) row/column(s)', t.outline.total, 'approximated: groups are flattened', t.outline.where);
   add('xlsx.sparklines', 'sparkline group(s)', t.spark.total, 'lost: not imported', t.spark.where);
   add('xlsx.hiddenSheets', 'hidden sheet(s)', wb.hidden.length, 'approximated: become visible', wb.hidden);
-  add('xlsx.definedNames', 'named range(s)/name(s)', wb.names.length, 'lost: not imported; formulas using them break', wb.names);
+  add('xlsx.definedNames', 'named range(s)/name(s)', wb.names.length, 'lost: not imported; formulas using them keep their saved value and do not update', wb.names);
   add('xlsx.workbookProtection', 'workbook protection', wb.protected ? 1 : 0, 'lost: protection is dropped');
 
   // ---- parts that exist only when the feature is used ---------------------
@@ -404,9 +414,19 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
   add('xlsx.richText', 'cell(s) with mixed formatting inside the text', richShared + scan.richInline, 'approximated: imported as plain text');
 
   // ---- new summary ids ----------------------------------------------------
-  add('xlsx.formulas.structuredRefs', 'formula(s) using table (structured) references', t.structured.total, 'lost: table references are not calculated', t.structured.where);
+  add('xlsx.formulas.structuredRefs', 'formula(s) using table (structured) references', t.structured.total, 'kept: shown from the value saved in the file; table references are not calculated', t.structured.where, false, 'kept');
   if (options.knownFunctions)
-    add('xlsx.formulas.unsupported', 'formula(s) using functions the editor does not have', t.unsupported.total, 'lost: cannot be calculated (the cells show #NAME?)', scan.unsupportedNames);
+    add('xlsx.formulas.unsupported', 'formula(s) using functions the editor does not have', t.unsupported.total, 'kept: shown from the value saved in the file, not calculated', scan.unsupportedNames, false, 'kept');
+  if ((options.knownFunctions || options.isFormulaEvaluable) && t.cachedOnly.total > 0)
+    items.push({
+      id: 'xlsx.formulas.cachedOnly',
+      label: 'formula(s) the editor cannot calculate (kept as saved)',
+      count: t.cachedOnly.total,
+      effect:
+        "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)",
+      where: t.cachedOnly.where.slice(0, MAX_WHERE),
+      state: 'kept',
+    });
   if (options.isNumberFormatExact) {
     const inexact = styles.numberFormats(scan.usedStyles).filter((f) => !f.code || !options.isNumberFormatExact?.(f.code));
     add('xlsx.numberFormats.approximated', 'number format(s) the editor cannot show like Excel', inexact.length, 'approximated: kept as written and saved unchanged, but shown in General or with English month and day names because the editor cannot render the code like Excel', inexact.map((f) => f.label));
@@ -415,9 +435,9 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
   if (!full) return;
 
   // ---- full detail: formulas ---------------------------------------------
-  addFull('xlsx.formulas.array', 'array formula(s)', t.array.total, 'approximated: imported as an ordinary formula in the first cell; the other cells keep their saved values', t.array.where);
-  addFull('xlsx.formulas.dynamicArray', 'dynamic-array formula(s)', t.dynamic.total, "approximated: imported as an ordinary formula; Excel's array metadata is dropped", t.dynamic.where);
-  addFull('xlsx.formulas.externalRef', 'formula(s) referencing another workbook', t.external.total, 'lost: external references are not evaluated', t.external.where);
+  addFull('xlsx.formulas.array', 'array formula(s)', t.array.total, 'kept: imported as an array formula over its range and saved back as one; a formula the editor cannot calculate keeps the saved values of the range', t.array.where, 'kept');
+  addFull('xlsx.formulas.dynamicArray', 'dynamic-array formula(s)', t.dynamic.total, "approximated: spills like Excel's and is saved back as a dynamic array (with the range it spilled and Excel's dynamic-array metadata), so Excel shows it as a dynamic array", t.dynamic.where);
+  addFull('xlsx.formulas.externalRef', 'formula(s) referencing another workbook', t.external.total, 'kept: shown from the value saved in the file; external references are not evaluated', t.external.where, 'kept');
   addFull('xlsx.formulas.volatile', 'formula(s) using volatile functions (NOW, RAND, OFFSET...)', t.volatile.total, "approximated: recalculated on import; the file's saved value is not kept", t.volatile.where);
 
   // ---- styles -------------------------------------------------------------
@@ -557,7 +577,7 @@ async function scanSheets(pkg: Package, sheets: SheetEntry[], options: DetectXls
 
     const text = sheet.kind === 'worksheet' ? await pkg.text(sheet.path) : undefined;
     if (text !== undefined) {
-      const { outer, cells, limited } = await scanSheetData(text, options.knownFunctions);
+      const { outer, cells, limited } = await scanSheetData(text, options);
       if (limited) pkg.skipped.push(sheet.path);
       t.structured.add(name, cells.structuredRefs);
       t.array.add(name, cells.arrays);
@@ -565,9 +585,10 @@ async function scanSheets(pkg: Package, sheets: SheetEntry[], options: DetectXls
       t.external.add(name, cells.externalRefs);
       t.volatile.add(name, cells.volatile);
       t.unsupported.add(name, cells.unsupported);
+      t.cachedOnly.add(name, cells.cachedOnly);
       t.outline.add(name, cells.outlineRows);
       t.columnRowStyles.add(name, cells.styledRows);
-      for (const fn of cells.unsupportedNames) if (!scan.unsupportedNames.includes(fn)) scan.unsupportedNames.push(fn);
+      for (const fn of cells.unsupportedNames) if (scan.unsupportedNames.length < MAX_WHERE && !scan.unsupportedNames.includes(fn)) scan.unsupportedNames.push(fn);
       for (const id of cells.styleIds) scan.usedStyles.add(id);
       scan.richInline += cells.richInline;
       const root = parseXml(outer);

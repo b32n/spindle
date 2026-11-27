@@ -4,7 +4,7 @@ import type { Workbook, Sheet, Cell, Range, MergedRegion, Selection, CellValue, 
 import { SheetImpl } from './sheet';
 import { EventEmitter } from './event-emitter';
 import { FormulaGraphImpl } from './formula-graph';
-import { SpillIndex } from './spill';
+import { SpillIndex, fitToExtent } from './spill';
 import type { SpillRegion } from './spill';
 import { StylePool } from './style-pool';
 import { FormatPool } from './format-pool';
@@ -137,7 +137,7 @@ export class WorkbookImpl implements Workbook {
     const targets: Array<{ sheetId: string; row: number; col: number; formula: string }> = [];
     for (const [sheetId, sheet] of this.sheets.entries()) {
       for (const [row, col, cell] of sheet.entries()) {
-        if (cell.formula && cell.formula.toLowerCase().includes(needle)) {
+        if (cell.formula && !cell.cachedOnly && cell.formula.toLowerCase().includes(needle)) {
           targets.push({ sheetId, row, col, formula: cell.formula });
         }
       }
@@ -298,6 +298,12 @@ export class WorkbookImpl implements Workbook {
     });
   }
 
+  /** What an edit of a cell adds to its patch so the file's `cachedOnly` / `arraySpan` marks do not outlive the formula they described. */
+  private importedFormulaFlagsCleared(sheetId: string | undefined, row: number, col: number): Partial<Cell> {
+    const cell = this.getCell(sheetId, row, col);
+    return cell?.cachedOnly || cell?.arraySpan ? { cachedOnly: undefined, arraySpan: undefined } : {};
+  }
+
   setCellValue(sheetId: string | undefined, row: number, col: number, value: unknown): void {
     // Record history before making changes (unless we're undoing/redoing or in a batch)
     if (!this.isUndoing && !this.isRedoing && !this.isBatching) {
@@ -324,6 +330,7 @@ export class WorkbookImpl implements Workbook {
       value: value as string | number | boolean | null,
       formula: undefined,
       formulaAst: undefined,
+      ...this.importedFormulaFlagsCleared(sheetId, row, col),
     });
 
     // Recalculate dependents of this cell
@@ -392,6 +399,7 @@ export class WorkbookImpl implements Workbook {
       this.setCell(sheetId, row, col, {
         formula,
         formulaAst: undefined,
+        ...this.importedFormulaFlagsCleared(sheetId, row, col),
         value: parseResult.error as CellValue,
       });
       this.recalculateDependents(cellKey, sheetId);
@@ -406,7 +414,7 @@ export class WorkbookImpl implements Workbook {
 
     // Store both AST (truth) and input string (display cache; gets refreshed
     // from the AST on every evaluation).
-    this.setCell(sheetId, row, col, { formula, formulaAst });
+    this.setCell(sheetId, row, col, { formula, formulaAst, ...this.importedFormulaFlagsCleared(sheetId, row, col) });
 
     // Evaluate and store result
     this.evaluateFormula(sheetId, row, col);
@@ -503,10 +511,54 @@ export class WorkbookImpl implements Workbook {
    * Evaluate a formula and store the result
    */
   private evaluateFormula(sheetId: string | undefined, row: number, col: number): unknown {
+    const result = this.evaluateFormulaCell(sheetId, row, col);
+    this.syncArraySpan(sheetId, row, col);
+    return result;
+  }
+
+  /**
+   * A dynamic-array formula read from a file carries the extent the file gave it (`arraySpan`); once the engine has evaluated it
+   * the extent is what the engine produced (the live spill region, or one cell), so the model and a later save agree with what is shown.
+   */
+  private syncArraySpan(sheetId: string | undefined, row: number, col: number): void {
+    const span = this.getCell(sheetId, row, col)?.arraySpan;
+    // a legacy array formula keeps its extent
+    if (!span?.spill) return;
+    const region = this.getSpillIndex(sheetId).regionAt(row, col);
+    const rows = region?.rows ?? 1;
+    const cols = region?.cols ?? 1;
+    if (rows !== span.rows || cols !== span.cols) this.setCell(sheetId, row, col, { arraySpan: { rows, cols, spill: true } });
+  }
+
+  /**
+   * Gives a legacy array formula back what its file saved: the formula is a cached-only one (the file's text, the saved value at its
+   * cell, never recalculated) and the cells of its range hold the saved ones. For an import whose engine result is not the saved one.
+   * With `recalculate` the formulas reading the range are evaluated again (an import that recalculates: they were computed from the
+   * engine's result, which is no longer what the range holds).
+   */
+  keepSavedArray(sheetId: string | undefined, row: number, col: number, formula: string, anchor: Cell['value'], saved: Array<Array<Cell | undefined>>, recalculate: boolean): void {
+    this.formulaGraph.removeFormula(this.graphKey(sheetId, row, col));
+    this.releaseSpill(sheetId, row, col);
+    saved.forEach((line, r) => line.forEach((cell, c) => cell && this.setCell(sheetId, row + r, col + c, { ...cell })));
+    this.setCell(sheetId, row, col, { formula, formulaAst: undefined, value: anchor, cachedOnly: true });
+    if (!recalculate) return;
+    const members: string[] = [];
+    saved.forEach((line, r) => line.forEach((cell, c) => cell && members.push(this.graphKey(sheetId, row + r, col + c))));
+    this.recalculateDependents(this.graphKey(sheetId, row, col), sheetId, members);
+  }
+
+  /** The spill region a cell anchors (extent and values), or undefined when it does not spill. */
+  getSpillRegion(sheetId: string | undefined, row: number, col: number): { rows: number; cols: number; values: unknown[][] } | undefined {
+    const region = this.getSpillIndex(sheetId).regionAt(row, col);
+    return region && { rows: region.rows, cols: region.cols, values: region.values };
+  }
+
+  private evaluateFormulaCell(sheetId: string | undefined, row: number, col: number): unknown {
     const cellKey = this.graphKey(sheetId, row, col);
     const cell = this.getCell(sheetId, row, col);
-    
-    if (!cell?.formula) {
+
+    // A formula the engine cannot evaluate keeps the result the file saved for it (cached-only), whatever changes under it
+    if (!cell?.formula || cell.cachedOnly) {
       return cell?.value ?? null;
     }
 
@@ -623,6 +675,9 @@ export class WorkbookImpl implements Workbook {
       if (result === null || result === undefined) result = 0;
       this.evaluatingCells.delete(cellKey);
 
+      // A legacy (CSE) array formula keeps the extent it was entered over: its result is cut to it, or padded with #N/A (a scalar
+      // fills it), so a one-cell one is its first value
+      if (cell.arraySpan && !cell.arraySpan.spill) result = fitToExtent(result, cell.arraySpan);
       // An array result spills into a block of cells.
       if (Array.isArray(result)) {
         return this.applySpill(sheetId, row, col, cellKey, result as unknown[][], refreshedFormula);
@@ -1195,7 +1250,7 @@ export class WorkbookImpl implements Workbook {
     const resolver = this.buildSheetResolver();
     for (const [sheetId, sheet] of this.sheets.entries()) {
       for (const [row, col, cell] of sheet.entries()) {
-        if (!cell.formula && !cell.formulaAst) continue;
+        if ((!cell.formula && !cell.formulaAst) || cell.cachedOnly) continue;
         let ast = cell.formulaAst;
         if (!ast && cell.formula) {
           const parsed = this.formulaParser.parse(cell.formula, row, col);
@@ -1447,7 +1502,7 @@ export class WorkbookImpl implements Workbook {
   /**
    * Set complete workbook data from serialized data
    */
-  setData(data: import('./types').WorkbookData): void {
+  setData(data: import('./types').WorkbookData, options: { keepCachedValues?: boolean } = {}): void {
     // Clear existing state
     this.sheets.clear();
     this.formulaGraph = new FormulaGraphImpl();
@@ -1601,7 +1656,7 @@ export class WorkbookImpl implements Workbook {
     }
 
     // Rebuild formula graph and evaluate formulas
-    this.rebuildFormulaGraph();
+    this.rebuildFormulaGraph(options.keepCachedValues === true);
 
     // Emit change events
     this.events.emit('workbookChange', {});
@@ -1684,11 +1739,16 @@ export class WorkbookImpl implements Workbook {
   /**
    * Rebuild formula graph from current cells and evaluate all formulas
    */
-  private rebuildFormulaGraph(): void {
+  private rebuildFormulaGraph(keepCachedValues: boolean): void {
     const resolver = this.buildSheetResolver();
+    // With `keepCachedValues` (an imported file) a formula that has a saved result keeps it and is marked clean: it is
+    // recalculated when a precedent changes, not on load. Volatile formulas and array/spill anchors are still evaluated
+    // (a volatile result is stale by nature; the spill overlay exists only by evaluating its anchor), after every node is registered.
+    const evaluateNow: Array<[string, number, number]> = [];
     for (const [sheetId, sheet] of this.sheets.entries()) {
       for (const [row, col, cell] of sheet.entries()) {
-        if (!cell.formula && !cell.formulaAst) continue;
+        // a cached-only formula has no AST and no graph node: its saved result is its value
+        if ((!cell.formula && !cell.formulaAst) || cell.cachedOnly) continue;
         let ast = cell.formulaAst;
         if (!ast && cell.formula) {
           const parsed = this.formulaParser.parse(cell.formula, row, col);
@@ -1699,10 +1759,18 @@ export class WorkbookImpl implements Workbook {
         if (!ast) continue;
         const cellKey = this.graphKey(sheetId, row, col);
         const deps = collectStableDependencies(ast);
-        this.formulaGraph.addFormula(cellKey, cell.formula ?? '', deps, formulaIsVolatile(ast));
-        this.evaluateFormula(sheetId, row, col);
+        const volatile = formulaIsVolatile(ast);
+        this.formulaGraph.addFormula(cellKey, cell.formula ?? '', deps, volatile);
+        // (a one-cell array formula is a plain formula here: its saved result is its value)
+        const spills = cell.arraySpan !== undefined && cell.arraySpan.rows * cell.arraySpan.cols > 1;
+        if (keepCachedValues && !volatile && !spills && cell.value != null) {
+          this.formulaGraph.markClean(cellKey, cell.value);
+        } else {
+          evaluateNow.push([sheetId, row, col]);
+        }
       }
     }
+    for (const [sheetId, row, col] of evaluateNow) this.evaluateFormula(sheetId, row, col);
   }
 
   // ============================================

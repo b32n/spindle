@@ -44,8 +44,14 @@ import type { SheetCommentThread } from '../comments';
 /**
  * The Y layout version this client reads and writes. 1 is the layout described above (rooms written before the key
  * existed have no `schemaVersion` and read as 1). Raised by any later change an older client could not read.
+ *
+ * 2: S4 formula interchange. A cell's JSON may carry `cachedOnly: true` (an imported formula the engine cannot evaluate:
+ * `formula` is the file's text and `value` the result the file saved, never recalculated) and `arraySpan`
+ * (`{ rows, cols, spill? }`, the extent of an array formula; `spill: true` for a dynamic-array one). A v1 client would recalculate such a cell to `#NAME?` or
+ * re-evaluate its text without the mark, and on its next write of the cell keep or drop the keys unseen, so it must not join
+ * a v2 room.
  */
-export const COLLAB_SCHEMA_VERSION = 1;
+export const COLLAB_SCHEMA_VERSION = 2;
 
 /** Thrown when a room was written with a newer Y workbook layout than this client understands. */
 export class CollabSchemaVersionError extends Error {

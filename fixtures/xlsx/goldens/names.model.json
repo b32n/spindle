@@ -52,12 +52,14 @@
             "value": 4
           },
           "B8": {
+            "cachedOnly": true,
             "formula": "=SUM(Quarter1)",
-            "value": "#NAME? Name Quarter1 not found"
+            "value": 27
           },
           "B9": {
+            "cachedOnly": true,
             "formula": "=B8*(1+TaxRate)",
-            "value": "#NAME? Name TaxRate not found"
+            "value": 32.4
           },
           "C1": {
             "value": "Q2"

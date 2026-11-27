@@ -39,7 +39,7 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported; formulas using them break",
+      "effect": "lost: not imported; formulas using them keep their saved value and do not update",
       "id": "xlsx.definedNames",
       "label": "named range(s)/name(s)",
       "where": [

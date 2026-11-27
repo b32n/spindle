@@ -173,6 +173,6 @@ describe('inspectXlsx', () => {
     const target = new WorkbookImpl('t', 'T');
     const { loss } = await importFromXlsx(bytes, target);
     expect(loss).toEqual(await inspectXlsx(bytes));
-    expect(ids(loss)).toEqual(['xlsx.formulas.structuredRefs', 'xlsx.formulas.unsupported']);
+    expect(ids(loss)).toEqual(['xlsx.formulas.cachedOnly', 'xlsx.formulas.structuredRefs', 'xlsx.formulas.unsupported']);
   });
 });

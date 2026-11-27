@@ -47,6 +47,16 @@ export interface SheetsFileExport {
   mimeType: string;
 }
 
+/** What `exportWorkbookFile` takes besides the workbook and the format. */
+export interface SheetsFileExportOptions {
+  /**
+   * Told about what an .xlsx export left out: a spilled array formula result over the export's caps is written as its first rows
+   * only (Excel recalculates the formula and spills it in full). Called once for each of the first 20 results cut, then once with the
+   * count of the others; not called when nothing was cut. Not used for `.csv`.
+   */
+  onWarning?: (message: string) => void;
+}
+
 /**
  * Build the downloadable file for `format`. XLSX covers every sheet; CSV is
  * inherently single-sheet and exports the active one.
@@ -54,12 +64,13 @@ export interface SheetsFileExport {
 export async function exportWorkbookFile(
   workbook: WorkbookImpl,
   format: SheetsExportFormat,
-  baseName: string = workbook.name
+  baseName: string = workbook.name,
+  options: SheetsFileExportOptions = {}
 ): Promise<SheetsFileExport> {
   const info = SHEETS_EXPORT_FORMATS.find((f) => f.id === format);
   if (!info) throw new Error(`Unsupported export format: ${String(format)}`);
   const fileName = `${sanitizeFileName(baseName, 'Workbook')}.${info.extension}`;
-  const data = format === 'xlsx' ? await exportToXlsx(workbook) : exportToCSV(workbook);
+  const data = format === 'xlsx' ? await exportToXlsx(workbook, { onWarning: options.onWarning }) : exportToCSV(workbook);
   return { data, fileName, mimeType: info.mimeType };
 }
 
@@ -81,6 +92,18 @@ export interface SheetsFileImportOptions {
    * `loss` the import returns (id `xlsx.package.sizeLimit`), which names the option that raises it. Not used for `.csv`.
    */
   limits?: NonNullable<Parameters<typeof importFromXlsx>[2]>['limits'];
+  /**
+   * The most cells the array formulas of one sheet may cover on load (default 1,000,000): past it a formula is kept as its saved
+   * result and the `loss` says so (`xlsx.package.sizeLimit`). Raising it costs memory and time in proportion (see
+   * `documentation/import-loss.md`). Not used for `.csv`.
+   */
+  maxArrayCells?: number;
+  /**
+   * Recalculate every formula the engine can evaluate when an .xlsx opens (default `false`: the results saved in the file are shown
+   * and a formula is recalculated when a cell it refers to changes or it is edited). Formulas the engine cannot evaluate keep their
+   * saved result either way. Not used for `.csv`.
+   */
+  recalculateOnLoad?: boolean;
 }
 
 /**
@@ -93,7 +116,11 @@ export interface SheetsFileImportOptions {
 export async function importWorkbookFile(workbook: WorkbookImpl, file: File, options: SheetsFileImportOptions = {}): Promise<SheetsFileImportResult> {
   const ext = fileExtension(file.name);
   if (XLSX_READER_EXTENSIONS.includes(ext)) {
-    return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook, options.limits ? { limits: options.limits } : {});
+    return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook, {
+      ...(options.limits ? { limits: options.limits } : {}),
+      ...(options.maxArrayCells !== undefined ? { maxArrayCells: options.maxArrayCells } : {}),
+      ...(options.recalculateOnLoad ? { recalculateOnLoad: true } : {}),
+    });
   }
   if (ext === 'csv') {
     // "Open" semantics: build a fresh single-sheet workbook from the CSV and

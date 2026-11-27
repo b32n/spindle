@@ -283,7 +283,7 @@ describe('compareValues', () => {
     ]);
   });
 
-  it('counts formulas the engine cannot parse as passthrough, outside compared, matched and mismatched', () => {
+  it('counts cached-only formulas (the engine cannot evaluate them) outside compared, matched and mismatched', () => {
     const result = compareValues(
       formulas([
         ['A1', '', 23],
@@ -291,18 +291,17 @@ describe('compareValues', () => {
         ['A3', '', 7],
       ]),
       model({
-        A1: { value: 23, formula: '=SUM(T[a])' },
+        A1: { value: 23, formula: '=SUM(T[a])', cachedOnly: true },
         A2: { value: 5, formula: '=1+4' },
-        A3: { value: 0, formula: '=SUM(T[b])' },
+        A3: { value: 0, formula: '=SUM(T[b])', cachedOnly: true },
       }),
-      false,
-      (formula) => !formula.includes('[')
+      false
     );
-    expect(result).toMatchObject({ compared: 1, matched: 1, mismatched: 0, passthrough: 2 });
-    // Without a predicate every formula counts as parsed.
+    expect(result).toMatchObject({ compared: 1, matched: 1, mismatched: 0, cachedOnly: 2 });
+    // a formula the engine evaluates is compared
     expect(compareValues(formulas([['A1', '', 23]]), model({ A1: { value: 23, formula: '=SUM(T[a])' } }), false)).toMatchObject({
       matched: 1,
-      passthrough: 0,
+      cachedOnly: 0,
     });
   });
 

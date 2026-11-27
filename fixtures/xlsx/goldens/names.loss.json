@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 6,
-      "effect": "lost: not imported; formulas using them break",
+      "effect": "lost: not imported; formulas using them keep their saved value and do not update",
       "id": "xlsx.definedNames",
       "label": "named range(s)/name(s)",
       "where": [
@@ -12,6 +12,16 @@
         "TaxRate",
         "Greeting",
         "Lookup"
+      ]
+    },
+    {
+      "count": 2,
+      "effect": "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) and the cell references in the text are not adjusted when rows or columns are inserted or deleted (Excel recalculates the formula when the file is reopened, possibly to a different result)",
+      "id": "xlsx.formulas.cachedOnly",
+      "label": "formula(s) the editor cannot calculate (kept as saved)",
+      "state": "kept",
+      "where": [
+        "Data"
       ]
     },
     {

@@ -480,6 +480,8 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
         if (f.type === 'array') {
           info = { type: 'array' };
           if (f.ref !== undefined) info.ref = f.ref;
+          // `cm` (cell metadata) on the cell makes it a dynamic-array formula: it spills instead of being a legacy (CSE) array
+          if (attrs.cm !== undefined) info.dynamic = true;
         } else if (f.type === 'dataTable') {
           info = { type: 'dataTable' };
           if (f.ref !== undefined) info.ref = f.ref;

@@ -1,11 +1,11 @@
 {
+  "cachedOnly": 9,
   "compared": 0,
   "firstMismatches": [],
   "formulaCells": 9,
   "matched": 0,
   "mismatchClasses": {},
   "mismatched": 0,
-  "passthrough": 9,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

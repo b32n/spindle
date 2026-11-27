@@ -104,6 +104,17 @@ async function roundtrip(
   }
 }
 
+/** The normalised model of an import that recalculates on load; null when that import fails (the values step then reports it as skipped). */
+async function recalculatedModel(api: XlsxEditorApi, bytes: Uint8Array): Promise<Json | null> {
+  try {
+    const workbook = api.createWorkbook();
+    await api.importFromXlsx(bytes, workbook, { recalculateOnLoad: true });
+    return normalizeWorkbook(workbook.getData());
+  } catch {
+    return null;
+  }
+}
+
 /** Run one file through inspect -> import -> export -> re-import, plus the ledger and the values comparison. Never throws. */
 export async function runXlsxFixture(api: XlsxEditorApi, bytes: Uint8Array): Promise<XlsxResult> {
   const loss = await inspect(api, bytes);
@@ -119,17 +130,19 @@ export async function runXlsxFixture(api: XlsxEditorApi, bytes: Uint8Array): Pro
 
   const parts = await readParts(bytes);
   const importFailed = model.importError !== null;
+  const roundtripResult =
+    model.workbook === null ? roundtripOf('skipped-import-error') : await roundtrip(api, workbook, model.workbook);
+  // The values comparison measures the engine against the file's saved results, so it imports with every formula the engine
+  // can evaluate recalculated (the default import keeps the saved results, which would compare them with themselves).
+  const recalculated = importFailed ? null : await recalculatedModel(api, bytes);
   return {
     loss,
     model,
-    roundtrip:
-      model.workbook === null
-        ? roundtripOf('skipped-import-error')
-        : await roundtrip(api, workbook, model.workbook),
+    roundtrip: roundtripResult,
     ledger: buildLedger({ parts, lossIds: loss.items.map((i) => i.id), importFailed }),
     values:
       parts.kind === 'zip'
-        ? compareValues(readFileFormulas(parts), model.workbook, importFailed, (f) => api.parsesFormula(f))
+        ? compareValues(readFileFormulas(parts), recalculated, importFailed)
         : unreadableValues(),
   };
 }

@@ -70,8 +70,23 @@ export interface WorkbookCanvasProps {
    * inline object re-creates the handler on every render.
    */
   importLimits?: SheetsFileImportOptions['limits'];
+  /** The most cells the array formulas of one sheet may cover when an .xlsx opens (default 1,000,000; see `SheetsFileImportOptions`). Not used for `.csv`. */
+  maxArrayCells?: SheetsFileImportOptions['maxArrayCells'];
+  /**
+   * Recalculate every formula the engine can evaluate when an .xlsx opens. Default `false`: the results saved in the file are
+   * shown, and a formula is recalculated when a cell it refers to changes or it is edited. Formulas the engine cannot evaluate keep
+   * their saved result either way (the formula bar says so). Not used for `.csv`.
+   */
+  recalculateOnLoad?: boolean;
   /** Called after a file was opened; `warnings` lists features the importer had to drop, and `loss` what the file holds that the editor cannot take, including what an import limit cut (`xlsx.package.sizeLimit`). */
   onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
+  /**
+   * Called when a downloaded .xlsx does not hold everything: a spilled array formula result over the export's caps is written as its
+   * first rows only (Excel recalculates the formula and spills it in full). `message` names the cell and the cut; called once for each
+   * of the first 20, then once with the count of the others. The editor shows nothing of it by itself, so a host that wants its users
+   * to know shows it. Pass a stable reference (see `importLimits`).
+   */
+  onExportWarning?: (message: string) => void;
   /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
   onFileError?: (error: Error, action: 'open' | 'download') => void;
 }
@@ -90,7 +105,10 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   exportFormats,
   fileName,
   importLimits,
+  maxArrayCells,
+  recalculateOnLoad,
   onFileOpened,
+  onExportWarning,
   onFileError,
 }: WorkbookCanvasProps) {
   const { workbook } = useWorkbook();
@@ -528,7 +546,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     try {
       // Ask before replacing the workbook if the file has things we can't import.
       if (!(await confirmImport(file, await inspectWorkbookFile(file)))) return;
-      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits });
+      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits, maxArrayCells, recalculateOnLoad });
       // setData swapped every sheet; drop any state pointing into the old one.
       setActiveCell(null);
       setEditingCell(null);
@@ -537,16 +555,16 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
-  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits]);
+  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits, maxArrayCells, recalculateOnLoad]);
 
   const handleDownload = useCallback(async (format: SheetsExportFormat) => {
     try {
-      const file = await exportWorkbookFile(workbook, format, fileName);
+      const file = await exportWorkbookFile(workbook, format, fileName, { onWarning: onExportWarning });
       downloadFile(file.data, file.fileName, file.mimeType);
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'download');
     }
-  }, [workbook, fileName, onFileError]);
+  }, [workbook, fileName, onFileError, onExportWarning]);
 
   const handleSortColumnByDirection = useCallback((column: number, direction: 'asc' | 'desc') => {
     // Sorting would scatter merged regions — refuse, matching Excel/Sheets.

@@ -1,32 +1,20 @@
 {
-  "compared": 4,
+  "cachedOnly": 1,
+  "compared": 3,
   "firstMismatches": [
     {
-      "actual": "\"#NAME? Function _XLFN.XLOOKUP not found\"",
-      "cell": "F1",
-      "expected": "3",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.LET not found\"",
-      "cell": "F2",
-      "expected": "6",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#NAME? Function _XLFN.SORT not found\"",
+      "actual": "\"N\"",
       "cell": "F4",
       "expected": "0",
       "sheet": "Data"
     }
   ],
   "formulaCells": 4,
-  "matched": 1,
+  "matched": 2,
   "mismatchClasses": {
-    "number -> error": 3
+    "number -> text": 1
   },
-  "mismatched": 3,
-  "passthrough": 0,
+  "mismatched": 1,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

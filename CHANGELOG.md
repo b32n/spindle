@@ -1002,6 +1002,44 @@ lockstep.
   deleting an element prunes the timing that animates it. `@b32nio/spindle-slides-react` draws an opaque element as a labelled placeholder
   ("Chart: <title> (kept, not editable)"). Slides collaboration schema version 10 (`opaque` slide key, `opaqueParts` map, opaque elements):
   older clients refuse such rooms. Hosts that switch exhaustively on `SlideElement['type']` need an `'opaque'` case.
+- **XLSX formula interchange and cached values (S4).** Behaviour change: an opened .xlsx now shows the results the file saved and
+  recalculates a formula when a cell it refers to changes or it is edited, not wholesale on load (formulas without a saved result,
+  volatile ones and array formulas that spill are still evaluated on load); the host option `recalculateOnLoad` (default off; an
+  `importFromXlsx` option, an `importWorkbookFile` option and a `WorkbookCanvas` prop) evaluates every formula the engine can on load.
+  `_xlfn.`, `_xlfn._xlws.` and `_xlpm.` prefixes are read as the plain function names the engine knows (`_xlfn.IFS`, `_xlfn.XLOOKUP`,
+  `_xlfn.STDEV.S`...) and written back on export; `_xlfn.SINGLE(x)` and `_xlfn.ANCHORARRAY(A1)` are read as `@x` and `A1#` and
+  written back as the calls (`fromFileFormula`, `toFileFormula` and `FUTURE_FUNCTIONS` are new exports of `@b32nio/spindle-io/xlsx`).
+  A formula the engine cannot evaluate (a function it lacks, text it cannot parse, a table, defined-name or external reference) is
+  never shown as `#NAME?`: the cell keeps the file's formula text and the saved result (`cachedOnly`), shows a small "Saved value" note
+  in the formula bar (the cell keeps its saved value and its original formula text unchanged: the value does not follow the cells it refers to and the
+  references in the text are not adjusted by inserting or deleting rows or columns; Excel recalculates it when the file is reopened,
+  possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
+  spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
+  A legacy (CSE) array formula whose engine result differs from the results the file saved (a blank source cell reads 0 in the result, as in Excel, so it is the same as a saved 0 and only that; numbers are held to a relative 1e-9) becomes cached-only and keeps the file's values, counted in
+  `xlsx.formulas.cachedOnly`; with `recalculateOnLoad` the formulas that read it are recalculated from those values. A dynamic array is not
+  compared: the engine's spill replaces the saved one (known divergence: it spills a blank source cell as blank where Excel shows 0, so `=C2&"x"` over it gives `"x"` instead of `"0x"`; recorded in the sheets TODO). Array results are cut by the export's budget in a fixed order (sheet, then row, then
+  column; a cut array keeps its anchor), an error in a spilled result is written as an error cell (`t="e"`), and so is an error saved with a
+  legacy array's members, found within the same `maxTotalArrayCells` budget (past it they stay the text of the error).
+  New loss id `xlsx.formulas.cachedOnly` (state `kept`); `xlsx.formulas.unsupported`, `.structuredRefs` and `.externalRef` now say the
+  value is kept. Additive: `Cell.cachedOnly` and `Cell.arraySpan`, `SpreadsheetCell.cachedOnly`, `.arrayRef` and `.dynamicArray`,
+  `XlsxFormulaInfo.dynamic`, `DetectXlsxLossOptions.isFormulaEvaluable`, `ImportFromXlsxOptions`, `WorkbookImpl.getSpillRegion`. The sheets
+  collaboration layout is now version 2 (a client at version 1 refuses a version 2 room); `documentation/collaboration.md` has the rules.
+  The values golden counts `cachedOnly` formulas where it counted `passthrough` ones, and measures the engine with a recalculating import.
+  A formula whose result is an error (`#DIV/0!`, `#N/A`, `#NAME?`, `#SPILL!`, `#CALC!`...) is written as an error value (`t="e"`), not as text,
+  for cached-only and ordinary formulas alike. A legacy array formula whose range does not start at its own cell is read as a one-cell
+  formula, with a warning; a one-row or one-column result is repeated across a bigger array-entered range, as Excel does. The `_xlfn.` table gains
+  `ENCODEURL`, `VALUETOTEXT`, `IMAGE`, `STOCKHISTORY`, `GROUPBY`, `PIVOTBY` and `PERCENTOF` and loses `QUERYSTRING` (not an Excel function).
+  The array formulas of one sheet may cover 1,000,000 cells on load (`maxArrayCells` option of `importFromXlsx`; past it a formula is kept as a
+  saved value and reported as `xlsx.package.sizeLimit`), and `exportToXlsx(workbook, { maxArrayCells, onWarning })` writes at most 1,000,000 cells
+  of one spilled result (the first rows, the range cut to match, reported to `onWarning`): a file of 1.7 KB with `ref="A1:J400000"` took 44 s and 3 GB to write back.
+  A formula whose text result is an error literal (`="#N/A"`) is written as an error value: the model cannot tell them apart.
+  The array budget of an import is settable where a host opens files: `maxArrayCells` in `SheetsFileImportOptions` (`importWorkbookFile`) and a
+  `maxArrayCells` prop of `WorkbookCanvas`; the `xlsx.package.sizeLimit` effect names them.
+  An imported legacy (Ctrl+Shift+Enter) array formula is no longer written back as a dynamic array when the engine spills it: it stays `{=...}` in
+  Excel (no `cm`, no metadata part); only a dynamic array and a formula typed in the editor that spills are written as dynamic arrays.
+  `exportToXlsx` also has a budget for the whole workbook, `maxTotalArrayCells` (default 1,000,000 cells of array formula results over all formulas
+  and sheets), and reports the first 20 cuts one by one and the others as a count. The in-app download hands them to the host: the
+  `onExportWarning` prop of `WorkbookCanvas` and the `onWarning` option (`SheetsFileExportOptions`, fourth argument) of `exportWorkbookFile`.
 
 ## [0.4.0] - 2026-10-26
 

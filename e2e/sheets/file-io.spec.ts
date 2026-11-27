@@ -135,7 +135,8 @@ test.describe('sheets: file open / download round-trips', () => {
     expect(frozen.name).toBe('Frozen');
     expect(frozen.frozen).toEqual({ rows: 2, cols: 1 });
     expect(frozen.colWidths[0]).toBeGreaterThan(frozen.colWidths[1]);
-    expect(frozen.cells.D3).toMatchObject({ value: 7.5, formula: '=SUM(B3:C3)' });
+    // the file's saved result (4.5: this fixture's cached value is not B3 + C3) is what opens; it is not recalculated on load
+    expect(frozen.cells.D3).toMatchObject({ value: 4.5, formula: '=SUM(B3:C3)' });
     expect(frozen.cells.A1.style).toMatchObject({ bold: true });
   });
 
@@ -215,6 +216,49 @@ test.describe('sheets: file open / download round-trips', () => {
     const ws = (await loadXlsx((await downloadXlsx(page)).bytes)).getWorksheet('Sales')!;
     expect(ws.getCell('B2').value).toBe(99);
     expect(ws.getCell('D2').value).toMatchObject({ formula: 'B2*C2', result: 247.5 });
+  });
+
+  test('S-FIO-24 a formula the editor cannot calculate keeps its saved value, says so in the formula bar and is saved back unchanged', async ({
+    page,
+  }) => {
+    // B1 is a LET formula (not in the engine) with the result Excel saved (99, not what A1 * 2 would be); B2 is an ordinary formula
+    const LET = '_xlfn.LET(_xlpm.x,A1,_xlpm.x*2)';
+    const made = new ExcelJS.Workbook();
+    const ws = made.addWorksheet('Data');
+    ws.getCell('A1').value = 2;
+    ws.getCell('B1').value = { formula: LET, result: 99 };
+    ws.getCell('B2').value = { formula: 'A1*3', result: 6 };
+    const buffer = Buffer.from(await made.xlsx.writeBuffer());
+    await openViaChooser(page, OPEN, { name: 'let.xlsx', mimeType: XLSX_MIME, buffer });
+    // the file holds a formula the editor cannot calculate, so Open says so first, as "kept" (not "lost")
+    const dialog = page.getByRole('dialog', { name: /Import/ });
+    await expect(dialog.getByTestId('import-loss-kept-list')).toContainText('cannot calculate');
+    await expect(dialog.getByTestId('import-loss-list')).toHaveCount(0);
+    await dialog.getByRole('button', { name: 'Import anyway' }).click();
+
+    // never #NAME?: the saved value is the cell's value, the file's formula text is in the formula bar
+    await sheet.expectValue(0, 1, 99);
+    await sheet.select(0, 1);
+    await expect(sheet.formulaInput).toHaveValue(`=${LET}`);
+    const note = page.getByTestId('formula-cached-only');
+    await expect(note).toBeVisible();
+    await expect(note).toHaveText('Saved value');
+    // the staleness caveat is the tooltip and the accessible name
+    await expect(note).toHaveAttribute('title', /not updated when the cells it uses change/);
+    await expect(note).toHaveAttribute('aria-label', /not updated when the cells it uses change/);
+    // an ordinary cell has no note
+    await sheet.select(1, 1);
+    await expect(note).toHaveCount(0);
+
+    // a change of A1 recalculates B2 but not the saved value of B1
+    await sheet.enter(0, 0, '10');
+    await sheet.expectValue(1, 1, 30);
+    await sheet.expectValue(0, 1, 99);
+
+    // the download has the formula text and the saved result as they came
+    const out = (await loadXlsx((await downloadXlsx(page)).bytes)).getWorksheet('Data')!;
+    expect(out.getCell('B1').value).toMatchObject({ formula: LET, result: 99 });
+    expect(out.getCell('B2').value).toMatchObject({ formula: 'A1*3', result: 30 });
   });
 
   test('S-FIO-07 CSV with quotes, commas and newlines opens into the right cells', async ({

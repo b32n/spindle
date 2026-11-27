@@ -90,6 +90,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-FIO-04 | XLSX -> XLSX: the downloaded file keeps sheets, formulas, formats, merges and styles | covered | yes |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-05 | XLSX -> XLSX keeps frozen panes and widths | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-06 | an edit made after opening is part of the downloaded .xlsx | covered |  |  | `e2e/sheets/file-io.spec.ts` |
+| S-FIO-24 | a formula the editor cannot calculate keeps its saved value, says so in the formula bar and is saved back unchanged | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-07 | CSV with quotes, commas and newlines opens into the right cells | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-08 | CSV -> CSV: the downloaded text is valid CSV that re-opens to the same cells | covered | yes |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-09 | unicode CSV (accents, CJK, emoji, RTL, CRLF) round-trips byte for byte | covered |  |  | `e2e/sheets/file-io.spec.ts` |
@@ -507,7 +508,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 442
+- covered: 443
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6

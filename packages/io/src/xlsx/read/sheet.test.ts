@@ -331,6 +331,13 @@ describe('readSheet: formulas', () => {
     expect(warnings).toEqual(['S!J1: shared formula without a resolvable expression; imported as a plain value', 'S!K1: shared formula without a resolvable expression; imported as a plain value']);
   });
 
+  it('marks an array formula whose cell has metadata (`cm`) as dynamic', () => {
+    const { sheet } = read(row(1, '<c r="A1" cm="1"><f t="array" ref="A1:A3">SORT(B1:B3)</f><v>1</v></c><c r="B1"><f t="array" ref="B1">1+1</f><v>2</v></c><c r="C1" cm="1"><f>1+1</f><v>2</v></c>'));
+    expect(cell(sheet, '0:0')?.formulaInfo).toEqual({ type: 'array', ref: 'A1:A3', dynamic: true });
+    expect(cell(sheet, '0:1')?.formulaInfo).toEqual({ type: 'array', ref: 'B1' });
+    expect(cell(sheet, '0:2')?.formulaInfo).toBeUndefined();
+  });
+
   it('expands shared formulas: each cell of the group gets the master formula moved by its distance', () => {
     const { sheet, warnings } = read(
       row(1, '<c r="A1"><v>1</v></c><c r="B1"><f t="shared" ref="B1:B3" si="0">A1*2+$A$1</f><v>2</v></c>') +

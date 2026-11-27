@@ -228,6 +228,12 @@ overlay is never written to `sheet.cells` and never synced over the
 collaboration CRDT — each client recomputes it from the anchor formula. A
 target cell that already holds content yields `#SPILL!`.
 
+An array formula read from an .xlsx file carries `arraySpan` (`{ rows, cols, spill? }`): a legacy (CSE) array formula keeps that
+extent (its result is cut to it or padded with `#N/A`), a dynamic one (`spill: true`) spills freely and keeps `arraySpan` at the extent
+it spilled. A blank source cell inside the result of a legacy array reads 0 (as Excel shows it for `=A1:A3`); a dynamic array does not yet: the engine
+spills a blank source cell as blank (`=A1:A3` over a blank cell, and `=C2&"x"` on that spill gives `"x"` where Excel gives `"0x"`), a known
+divergence on master too (see the sheets TODO). See [import-loss](../../import-loss.md#formula-interchange-and-cached-values-s4) for how files are read and written.
+
 Recalculation runs to a fixed point: when a recomputed formula spills (or
 stops spilling), its footprint cells are fed back as recalc seeds, so a
 formula that reads a spilled cell stays in sync.

@@ -121,22 +121,18 @@
             "value": "Result"
           },
           "G11": {
-            "formula": "=_xlfn._xlws.SORT(B2:B6)",
-            "value": "#NAME? Function _XLFN._XLWS.SORT not found"
-          },
-          "G12": {
-            "value": 4
-          },
-          "G13": {
-            "value": 5
-          },
-          "G14": {
-            "value": 7
-          },
-          "G15": {
-            "value": 10
+            "arraySpan": {
+              "cols": 1,
+              "rows": 5
+            },
+            "formula": "=SORT(B2:B6)",
+            "value": 1
           },
           "G17": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
             "formula": "=SUM(B2:B6*C2:C6)",
             "value": 357
           },
@@ -145,8 +141,8 @@
             "value": 20
           },
           "G2": {
-            "formula": "=_xlfn.IFS(B2>5,\"big\",TRUE,\"small\")",
-            "value": "#NAME? Function _XLFN.IFS not found"
+            "formula": "=IFS(B2>5,\"big\",TRUE,\"small\")",
+            "value": "big"
           },
           "G20": {
             "formula": "=B3*2",
@@ -165,32 +161,34 @@
             "value": 8
           },
           "G3": {
-            "formula": "=_xlfn.XLOOKUP(\"East\",A2:A6,B2:B6)",
-            "value": "#NAME? Function _XLFN.XLOOKUP not found"
+            "formula": "=XLOOKUP(\"East\",A2:A6,B2:B6)",
+            "value": 7
           },
           "G4": {
-            "formula": "=_xlfn.CONCAT(A2,\"-\",A3)",
-            "value": "#NAME? Function _XLFN.CONCAT not found"
+            "formula": "=CONCAT(A2,\"-\",A3)",
+            "value": "North-South"
           },
           "G5": {
-            "formula": "=_xlfn.TEXTJOIN(\",\",TRUE,A2:A4)",
-            "value": "#NAME? Function _XLFN.TEXTJOIN not found"
+            "formula": "=TEXTJOIN(\",\",TRUE,A2:A4)",
+            "value": "North,South,East"
           },
           "G6": {
-            "formula": "=_xlfn.STDEV.S(B2:B6)",
-            "value": "#NAME? Function _XLFN.STDEV.S not found"
+            "formula": "=STDEV.S(B2:B6)",
+            "value": 3.361547262794
           },
           "G7": {
+            "cachedOnly": true,
             "formula": "=_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)",
-            "value": "#NAME? Function _XLFN.LET not found"
+            "value": 15
           },
           "G8": {
+            "cachedOnly": true,
             "formula": "=_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)",
             "value": 20
           },
           "G9": {
-            "formula": "=_xlfn.MAXIFS(B2:B6,A2:A6,\"?o*\")",
-            "value": "#NAME? Function _XLFN.MAXIFS not found"
+            "formula": "=MAXIFS(B2:B6,A2:A6,\"?o*\")",
+            "value": 10
           }
         },
         "colCount": 100,

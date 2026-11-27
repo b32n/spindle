@@ -362,4 +362,6 @@ export interface XlsxFormulaInfo {
   ref?: string;
   /** Shared group id. */
   si?: number;
+  /** The cell carries dynamic-array metadata (`cm`): an array formula that spills rather than a legacy (CSE) one. */
+  dynamic?: true;
 }

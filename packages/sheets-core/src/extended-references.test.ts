@@ -974,7 +974,7 @@ describe('formulas the engine cannot parse keep their saved value (review fixes)
     expect(b.v('B1', 'Renamed')).toBe(24);
   });
 
-  it('writes the saved value back on export, never an error string', async () => {
+  it('writes the saved value back on export, never an error string (an error result is an error value)', async () => {
     const b = importedBook();
     b.set('A2', 6);
     b.f('C1', '=SUM(');
@@ -987,7 +987,8 @@ describe('formulas the engine cannot parse keep their saved value (review fixes)
     const ws = wb.worksheets[0];
     expect((ws.getCell('A1').value as { result?: unknown }).result).toBe(23);
     expect(JSON.stringify(ws.getCell('C1').value)).not.toContain('ERROR');
-    expect((ws.getCell('C2').value as { result?: unknown }).result).toBe('#NAME?');
+    // an error result is an error value (t="e"), read back by exceljs as { error }
+    expect((ws.getCell('C2').value as { result?: unknown }).result).toEqual({ error: '#NAME?' });
   });
 });
 

@@ -35,8 +35,8 @@
             "value": 1
           },
           "G11": {
-            "formula": "=SUM(_xlfn.ANCHORARRAY(J1))",
-            "value": "#NAME? Function _XLFN.ANCHORARRAY not found"
+            "formula": "=SUM(J1#)",
+            "value": 6
           },
           "G12": {
             "formula": "=SUMPRODUCT(A1:A3*2)",
@@ -71,8 +71,8 @@
             "value": 11
           },
           "G2": {
-            "formula": "=_xlfn.SINGLE(A1:A3)",
-            "value": "#NAME? Function _XLFN.SINGLE not found"
+            "formula": "=@A1:A3",
+            "value": 2
           },
           "G20": {
             "formula": "=SUM((A1:A2,A4))",
@@ -100,7 +100,7 @@
           },
           "G4": {
             "formula": "=SUM(1:1)",
-            "value": 31
+            "value": 32
           },
           "G5": {
             "formula": "=A1+50%",
@@ -192,14 +192,12 @@
             "value": "range ending in INDEX"
           },
           "J1": {
-            "formula": "=_xlfn.SEQUENCE(3)",
-            "value": "#NAME? Function _XLFN.SEQUENCE not found"
-          },
-          "J2": {
-            "value": 2
-          },
-          "J3": {
-            "value": 3
+            "arraySpan": {
+              "cols": 1,
+              "rows": 3
+            },
+            "formula": "=SEQUENCE(3)",
+            "value": 1
           }
         },
         "colCount": 100,
