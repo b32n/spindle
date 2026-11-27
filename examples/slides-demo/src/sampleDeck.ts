@@ -6,6 +6,7 @@ import {
   getBuiltinTheme,
   DEFAULT_SLIDE_SIZE,
   richTextFromPlainText,
+  inlineText,
   type DeckData,
   type SlideElement,
   type RichTextDoc,
@@ -153,7 +154,7 @@ export function buildSampleDeck(): DeckData {
                 'Real-time collaboration over Yjs',
                 'Present mode and PDF export',
               ]);
-              b.content.forEach((p) => (p.content = p.content?.map((r) => run(r.text, [{ type: 'fontSize', attrs: { size: 24 } }]))));
+              b.content.forEach((p) => (p.content = p.content?.map((r) => run(inlineText(r), [{ type: 'fontSize', attrs: { size: 24 } }]))));
               return b;
             })(),
             { bodyStyle: { vAlign: 'top', padding: 8 } }
