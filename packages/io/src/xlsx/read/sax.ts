@@ -1,4 +1,5 @@
 import { decodeEntities } from '../xml';
+import { flat } from './capped';
 import { XML_LIMITS } from '../../common/safe-xml';
 
 // ---------------------------------------------------------------------------
@@ -11,6 +12,7 @@ import { XML_LIMITS } from '../../common/safe-xml';
 //   attribute of the same name wins). `xmlns` attributes are not reported.
 // - Attributes come as a null-prototype object: the names are the file's text, and `__proto__` or `constructor` must be an
 //   attribute like any other and never reach `Object.prototype`.
+// - Attribute values are copies of their own (`flat`): whatever a caller keeps of one does not keep the part's text alive.
 // - Safety: entities are never expanded or fetched (the five predefined ones and numeric references are decoded in one pass by
 //   `decodeEntities`, anything else stays as written), a DOCTYPE is skipped, nesting is capped (`XML_LIMITS.maxDepth`).
 // - Never throws. Damaged markup (a stray or mismatched end tag, an unclosed element at the end, a tag cut short) stops the scan
@@ -102,7 +104,7 @@ export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML
         if (key === 'xmlns' || key.startsWith('xmlns:')) continue;
         const short = local(key);
         // an unprefixed attribute beats a prefixed one of the same local name
-        if (short === key || !(short in attrs)) attrs[short] = decodeEntities(a[2] ?? a[3]);
+        if (short === key || !(short in attrs)) attrs[short] = flat(decodeEntities(a[2] ?? a[3]));
       }
       while (i < n && /\s/.test(xml[i])) i++;
       const selfClosing = xml.charCodeAt(i) === 47;

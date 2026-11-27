@@ -1,5 +1,6 @@
 import type { XlsxSharedString, XlsxTextRun } from '@b32nio/spindle-shared/export/xlsx';
 import { kid, kids, type XmlElement } from '../xml';
+import { flat } from './capped';
 import { scanXml } from './sax';
 import { TreeBuilder } from './tree';
 import type { ColorContext } from './colors';
@@ -17,7 +18,7 @@ export function decodeStringEscapes(text: string): string {
   });
 }
 
-const textOf = (el: XmlElement): string => decodeStringEscapes(kids(el, 't').map((t) => t.text).join(''));
+const textOf = (el: XmlElement): string => flat(decodeStringEscapes(kids(el, 't').map((t) => t.text).join('')));
 
 /** Most elements one rich-text run is read with (a run is `r`, its `rPr` and a few property elements: Excel writes up to about a dozen); the rest of a longer one is left out. */
 export const MAX_RUN_ELEMENTS = 256;
@@ -100,9 +101,9 @@ export function forEachSharedString(xml: string | undefined, ctx: ColorContext, 
       else if (inItem && level === 2) {
         inItem = false;
         // with runs the item is its runs (the direct text of an item that has runs is not shown); runs all past the limit are plain text
-        if (runCount === 0) visit(index++, { text: decodeStringEscapes(plain) });
-        else if (runs.length === 0) visit(index++, { text: joined });
-        else visit(index++, { text: runs.map((r) => r.text).join('') + joined, runs });
+        if (runCount === 0) visit(index++, { text: flat(decodeStringEscapes(plain)) });
+        else if (runs.length === 0) visit(index++, { text: flat(joined) });
+        else visit(index++, { text: flat(runs.map((r) => r.text).join('') + joined), runs });
       }
     },
     text(chunk) {

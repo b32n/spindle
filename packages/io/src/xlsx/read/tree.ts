@@ -1,4 +1,5 @@
 import type { XmlElement } from '../xml';
+import { flat } from './capped';
 import { scanXml, type SaxAttrs } from './sax';
 
 // ---------------------------------------------------------------------------
@@ -50,7 +51,11 @@ export class TreeBuilder {
 
   end(): void {
     if (this.skipped > 0) this.skipped--;
-    else this.stack.pop();
+    else {
+      // the text is complete: kept as a copy of its own, not a view of the part
+      const el = this.stack.pop() as XmlElement;
+      el.text = flat(el.text);
+    }
   }
 
   text(chunk: string): void {

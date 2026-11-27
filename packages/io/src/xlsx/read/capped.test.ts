@@ -1,4 +1,4 @@
-import { abbreviate, CappedWarnings, MAX_ITEM_WARNINGS, MAX_QUOTED_CHARS, truncate } from './capped';
+import { abbreviate, CappedWarnings, flat, MAX_ITEM_WARNINGS, MAX_QUOTED_CHARS, truncate } from './capped';
 
 describe('CappedWarnings', () => {
   it('passes the first warnings as they are and counts the rest in one closing message', () => {
@@ -63,5 +63,28 @@ describe('truncate', () => {
     expect(truncate('\u{1F600}\u{1F600}', 3)).toBe('\u{1F600}');
     expect(truncate('\u{1F600}\u{1F600}', 2)).toBe('\u{1F600}');
     expect(truncate('a\u{1F600}', 2)).toBe('a');
+  });
+});
+
+describe('flat', () => {
+  it('is the same text: short text as it is, long text copied, whatever it holds (two-byte characters, surrogate pairs, NUL)', () => {
+    for (const text of ['', 'a', 'twelve chars', 'thirteen char', `x\0y${'z'.repeat(100)}`, '\u20ac'.repeat(1000), '\u{1F600}'.repeat(50), 'A1:XFD1048576'])
+      expect(flat(text)).toBe(text);
+    const big = 'q'.repeat(5_000_000);
+    expect(flat(big.slice(10, 4_000_010))).toHaveLength(4_000_000);
+    expect(flat(`${'a'.repeat(20)}${'b'.repeat(20)}`)).toBe(`${'a'.repeat(20)}${'b'.repeat(20)}`);
+  });
+
+  it('keeps its meaning once the engine has compiled it (a string cut from a long one, a thousand times)', () => {
+    const source = 'abcdefghijklmnopqrstuvwxyz'.repeat(100);
+    for (let i = 0; i < 20_000; i++) {
+      const piece = source.slice(i % 50, (i % 50) + 13 + (i % 7));
+      if (flat(piece) !== piece) throw new Error(`flat changed ${piece}`);
+    }
+  });
+
+  it('is applied by truncate and abbreviate, whatever their length', () => {
+    expect(abbreviate('x'.repeat(40))).toBe('x'.repeat(40));
+    expect(truncate('y'.repeat(40), 40)).toBe('y'.repeat(40));
   });
 });
