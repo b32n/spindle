@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SlidesPage } from '../support/slides';
 import { fixture } from '../support/file-io';
+import { closeToolbarMenu, toolbarButton } from '../support/toolbar';
 
 test.describe('slides: image crop', () => {
   let s: SlidesPage;
@@ -22,8 +23,8 @@ test.describe('slides: image crop', () => {
     await expect(el.locator('img')).toHaveCount(1);
     await expect(el.locator('[data-image-crop]')).toHaveCount(0);
 
-    // The popover is the only crop UI, so the button is required (no model-edit fallback).
-    await page.getByRole('button', { name: 'Crop image', exact: true }).click();
+    // The popover is the only crop UI; the button may sit inline or in the "More tools" overflow menu.
+    await toolbarButton(page, 'Crop image').click();
     await page.getByTestId('image-crop-l').fill('10');
     await page.getByTestId('image-crop-t').fill('20');
     await page.getByTestId('image-crop-r').fill('30');
@@ -51,5 +52,6 @@ test.describe('slides: image crop', () => {
     await page.getByTestId('image-crop-reset').click();
     await expect(el.locator('[data-image-crop]')).toHaveCount(0);
     await expect(el.locator('img')).toHaveCount(1);
+    await closeToolbarMenu(page);
   });
 });
