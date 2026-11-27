@@ -953,8 +953,9 @@ lockstep.
   and a slide with an unclosed element is now a damaged slide instead of a partly read one (`OoxmlPackage.xmlChecked`).
   The fidelity harness gains the automated text parity check (every source `a:t` run of the shapes read so far appears
   in the model, as a multiset; 536 of 536 in the corpus) in the `model` goldens. Pictures, tables, groups, connectors and
-  custom geometry paths follow (K10). No editor change; the loss report effects stay "not imported" until the editor can
-  open a `.pptx` (K15), so the loss goldens are unchanged and only the `model` goldens changed.
+  custom geometry paths follow (K10). No editor change; the loss report effects of the ids now read say `kept` or `approximated`
+  and the rest stay `lost: not imported` until the editor can open a `.pptx` (K15), so the `loss` goldens changed
+  along with the `model` goldens.
 
 ## [0.4.0] - 2026-10-26
 
