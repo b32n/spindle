@@ -1,5 +1,5 @@
 {
-  "importError": "Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html",
+  "importError": "This is a legacy binary Office file (.xls, .ppt or .doc), which cannot be opened. Save it as an Excel workbook (.xlsx) first.",
   "warnings": [],
   "workbook": null
 }

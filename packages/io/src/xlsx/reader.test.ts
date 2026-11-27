@@ -1,5 +1,7 @@
 import { exportXlsx } from './writer';
+import JSZip from 'jszip';
 import { importXlsx } from './reader';
+import { ImportError, type ImportErrorCode } from '../common/import-error';
 import type { SpreadsheetExportInput } from '@b32nio/spindle-shared/export/xlsx';
 
 async function roundTrip(input: SpreadsheetExportInput) {
@@ -154,5 +156,69 @@ describe('importXlsx', () => {
   it('surfaces a warning list even when empty', async () => {
     const result = await roundTrip({ sheets: [{ name: 'S', cells: new Map() }] });
     expect(result.warnings).toEqual([]);
+  });
+});
+
+describe('importXlsx: the only error is an ImportError', () => {
+  const ole = (...streams: string[]) =>
+    Uint8Array.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, ...Array(512).fill(0), ...streams.flatMap((s) => [...Array.from(s).flatMap((c) => [c.charCodeAt(0), 0]), 0, 0])]);
+  const zipOf = async (files: Record<string, string>) => {
+    const zip = new JSZip();
+    for (const [name, content] of Object.entries(files)) zip.file(name, content);
+    return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  };
+  const codeOf = async (bytes: Uint8Array, options?: Parameters<typeof importXlsx>[1]): Promise<ImportErrorCode | 'no error'> =>
+    importXlsx(bytes, options).then(
+      () => 'no error',
+      (e: unknown) => {
+        expect(e).toBeInstanceOf(ImportError);
+        return (e as ImportError).code;
+      }
+    );
+
+  it.each<[string, () => Promise<Uint8Array> | Uint8Array, ImportErrorCode]>([
+    ['an empty file', () => new Uint8Array(0), 'not-a-package'],
+    ['text', () => new TextEncoder().encode('a,b,c'), 'not-a-package'],
+    ['an encrypted package', () => ole('EncryptionInfo', 'EncryptedPackage'), 'encrypted'],
+    ['a legacy .xls', () => ole('Workbook'), 'legacy-binary'],
+    ['a zip that is not a workbook', () => zipOf({ 'hello.txt': 'hi' }), 'not-a-package'],
+    ['a package with an unreadable workbook part', () => zipOf({ '[Content_Types].xml': '<Types/>', 'xl/workbook.xml': '<<<' }), 'corrupt'],
+  ])('%s', async (_name, make, code) => {
+    expect(await codeOf(await make())).toBe(code);
+  });
+
+  it('refuses a forged or corrupt mimetype entry as corrupt (an ImportError, not a plain Error)', async () => {
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
+    zip.file('mimetype', new Uint8Array(1024 * 1024));
+    const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+    const forged = bytes.slice();
+    const view = new DataView(forged.buffer);
+    for (let i = 0; i + 30 < forged.length; i++) {
+      if (view.getUint32(i, true) === 0x04034b50 && new TextDecoder().decode(forged.subarray(i + 30, i + 38)) === 'mimetype') view.setUint32(i + 22, 10, true);
+      if (view.getUint32(i, true) === 0x02014b50 && new TextDecoder().decode(forged.subarray(i + 46, i + 54)) === 'mimetype') view.setUint32(i + 24, 10, true);
+    }
+    expect(await codeOf(forged)).toBe('corrupt');
+  });
+
+  it('refuses a truncated workbook as corrupt', async () => {
+    const bytes = await exportXlsx({ sheets: [{ name: 'S', cells: new Map([['0:0', { value: 'x'.repeat(5000) }]]) }] });
+    expect(await codeOf(bytes.subarray(0, Math.floor(bytes.length / 2)))).toBe('corrupt');
+  });
+
+  it('applies the limits it is given, and the defaults otherwise', async () => {
+    const bytes = await exportXlsx({ sheets: [{ name: 'S', cells: new Map([['0:0', { value: 1 }]]) }] });
+    expect(await codeOf(bytes)).toBe('no error');
+    expect(await codeOf(bytes, { limits: { maxEntries: 2 } })).toBe('size-limit');
+    expect(await codeOf(bytes, { limits: { maxPackageBytes: 10 } })).toBe('size-limit');
+  });
+
+  it('refuses a zip bomb with a small header declaration without inflating it', async () => {
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
+    zip.file('xl/worksheets/sheet1.xml', new Uint8Array(40 * 1024 * 1024));
+    const bomb = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+    expect(bomb.length).toBeLessThan(200 * 1024);
+    expect(await codeOf(bomb)).toBe('size-limit');
   });
 });

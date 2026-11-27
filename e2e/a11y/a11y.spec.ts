@@ -28,7 +28,11 @@ test.describe('a11y (axe)', () => {
   if (UPDATE) test.describe.configure({ mode: 'serial' });
 
   async function check(page: Page, key: string) {
-    const results = await new AxeBuilder({ page })
+    // The lockfile resolves two playwright-core copies (1.64.1 under playwright, 1.65.0 for axe), so
+    // the two Page types are nominally different; they are the same object at run time.
+    const results = await new AxeBuilder({
+      page: page as unknown as ConstructorParameters<typeof AxeBuilder>[0]['page'],
+    })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
       .analyze();
     const actual: Baseline = {};

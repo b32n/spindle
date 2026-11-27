@@ -1,4 +1,5 @@
 import type { DetectXlsxLossOptions, ImportLossReport } from '@b32nio/spindle-shared/export/xlsx';
+import type { ImportXlsxOptions } from '@b32nio/spindle-io/xlsx';
 
 // The XLSX reader/writer lives in the separate @b32nio/spindle-io package; load it on first use so
 // hosts that never open or save the format don't pay for its dependencies.
@@ -163,14 +164,19 @@ function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['st
  * mergeCells API rather than through setData's config, since merged regions
  * (unlike cells/widths/heights) only accept stable row/col IDs, not the
  * numeric indices this adapter otherwise works in.
+ *
+ * Throws an `ImportError` (from `@b32nio/spindle-io/xlsx`, with a `code`) for a file that cannot or must not be opened:
+ * encrypted, legacy binary, not a package, over the limits (`options.limits`), or corrupt. The workbook is left untouched.
  */
 export async function importFromXlsx(
   bytes: Uint8Array,
-  workbook: WorkbookImpl
+  workbook: WorkbookImpl,
+  options: ImportXlsxOptions = {}
 ): Promise<{ warnings: string[]; loss: ImportLossReport }> {
   const { detectXlsxLoss, importXlsx } = await loadIo();
+  // the importer is the one that refuses unsafe files (an `ImportError`), so it goes first: no point scanning what is refused
+  const result = await importXlsx(bytes, options);
   const loss = await detectXlsxLoss(bytes, lossOptions());
-  const result = await importXlsx(bytes);
   // setData() replaces the whole workbook; a file with no worksheets (e.g. a zip that isn't
   // really a workbook) would leave it with no sheets at all, so refuse it up front.
   if (result.sheets.length === 0) throw new Error('The file contains no worksheets.');

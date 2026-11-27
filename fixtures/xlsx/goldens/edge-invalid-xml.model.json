@@ -1,5 +1,5 @@
 {
-  "importError": "2:315: unmatched closing tag: worksheet.",
+  "importError": "The file could not be read (2:315: unmatched closing tag: worksheet.).",
   "warnings": [],
   "workbook": null
 }

@@ -1,4 +1,5 @@
-import { exportToCSV, importFromCSV } from './csv';
+import { DEFAULT_CSV_MAX_CHARS, exportToCSV, importFromCSV, inspectCsv } from './csv';
+import { isImportError, csvTooLargeError } from './import-error';
 import { WorkbookImpl } from '../workbook';
 
 function freshSheet() {
@@ -82,5 +83,63 @@ describe('CSV export of formulas (#77)', () => {
     const { wb: wb2, sheet } = freshSheet();
     importFromCSV(csv, sheet);
     expect(wb2.getCellValue(undefined, 2, 0)).toBe(3);
+  });
+});
+
+describe('CSV import: byte order mark and size cap', () => {
+  it('drops a leading byte order mark instead of keeping it in the first cell', () => {
+    const { sheet } = freshSheet();
+    importFromCSV('\uFEFFName,Qty\nPens,12\n', sheet);
+    expect(sheet.getCell(0, 0)?.value).toBe('Name');
+    expect(sheet.getCell(1, 1)?.value).toBe(12);
+  });
+
+  it('keeps a byte order mark that is not at the start, and text without one', () => {
+    const { sheet } = freshSheet();
+    importFromCSV('a,b\uFEFFc\n', sheet);
+    expect(sheet.getCell(0, 1)?.value).toBe('b\uFEFFc');
+  });
+
+  it('inspects text without its byte order mark: a BOM does not hide a delimiter', () => {
+    expect(inspectCsv('\uFEFFa;b\n1;2').items).toHaveLength(1);
+    expect(inspectCsv('\uFEFFa,b\n1,2').items).toEqual([]);
+  });
+
+  it('refuses text over the cap with an ImportError-shaped error, and leaves the sheet alone', () => {
+    const { sheet } = freshSheet();
+    sheet.setCellValue(0, 0, 'keep');
+    let thrown: unknown;
+    try {
+      importFromCSV('a,b\n1,2\n', sheet, { maxChars: 5 });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({ name: 'ImportError', code: 'size-limit' });
+    expect((thrown as Error).message).toMatch(/too large to open safely/);
+    expect(sheet.getCell(0, 0)?.value).toBe('keep');
+  });
+
+  it('accepts text of exactly the cap, and has the 100 MB default', () => {
+    const { sheet } = freshSheet();
+    importFromCSV('a,b', sheet, { maxChars: 3 });
+    expect(sheet.getCell(0, 1)?.value).toBe('b');
+    expect(DEFAULT_CSV_MAX_CHARS).toBe(100 * 1024 * 1024);
+  });
+});
+
+describe('isImportError and csvTooLargeError', () => {
+  it('recognises the CSV refusal, and an ImportError-shaped error from elsewhere, but not other errors', () => {
+    expect(isImportError(csvTooLargeError(5))).toBe(true);
+    expect(isImportError(Object.assign(new Error('x'), { name: 'ImportError', code: 'corrupt' }))).toBe(true);
+    expect(isImportError(new Error('x'))).toBe(false);
+    expect(isImportError(Object.assign(new Error('x'), { name: 'ImportError' }))).toBe(false);
+    expect(isImportError({ name: 'ImportError', code: 'corrupt' })).toBe(false);
+    expect(isImportError('ImportError')).toBe(false);
+  });
+
+  it('names the limit it was given, in MB or in bytes', () => {
+    expect(csvTooLargeError(DEFAULT_CSV_MAX_CHARS).message).toMatch(/over the limit of 100 MB\)/);
+    expect(csvTooLargeError(2 * 1024 * 1024).message).toMatch(/limit of 2 MB/);
+    expect(csvTooLargeError(5)).toMatchObject({ name: 'ImportError', code: 'size-limit', message: expect.stringMatching(/limit of 5 bytes/) });
   });
 });

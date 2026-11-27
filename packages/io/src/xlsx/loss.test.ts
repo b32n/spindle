@@ -989,6 +989,20 @@ describe('package level', () => {
     expect(await detectXlsxLoss(new Uint8Array([...OLE, 0, 0, ...utf16('Workbook')]))).toEqual({ format: 'xlsx', items: [] });
   });
 
+  it('reports a file over the importers\' package size limit without scanning it (the importer refuses it)', async () => {
+    const report = await full(new Uint8Array(100 * 1024 * 1024 + 1));
+    expect(report.items).toEqual([
+      {
+        id: 'xlsx.package.sizeLimit',
+        label: 'package over the size limit',
+        count: 1,
+        effect: 'lost: not scanned, and the importer refuses it',
+        where: ['the file itself'],
+      },
+    ]);
+    expect(await detectXlsxLoss(new Uint8Array(100 * 1024 * 1024 + 1))).toEqual({ format: 'xlsx', items: [] });
+  });
+
   it('recognises a binary (.xlsb) workbook', async () => {
     const report = await full(await build({ files: { 'xl/workbook.bin': 'x' } }));
     expect(item(report, 'xlsx.package.legacyBinary')).toMatchObject({ count: 1 });

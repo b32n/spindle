@@ -1,5 +1,5 @@
 {
-  "importError": "Corrupted zip: can't find end of central directory",
+  "importError": "The file is damaged (it is not a complete zip archive).",
   "warnings": [],
   "workbook": null
 }

@@ -1,5 +1,5 @@
 {
-  "importError": "Cannot read properties of undefined (reading 'anchors')",
+  "importError": "The file could not be read (Cannot read properties of undefined (reading 'anchors')).",
   "warnings": [],
   "workbook": null
 }

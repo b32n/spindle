@@ -686,6 +686,23 @@ lockstep.
   row carries Excel's documented value, tagged unverified). `LET` and `LAMBDA` stay post-launch. The XLSX `values` golden for `formulas-core`
   improves from 127 to 130 of 159 matching and `xlsx.formulas.unsupported` shrinks again (10 to 6 formulas there); `=TRANSPOSE(A1:B2)` in that
   fixture evaluates but its spill range is blocked by the next probe row (`#SPILL!`).
+- **Safe import: limits and a named error (X4).** `importXlsx` (`@b32nio/spindle-io/xlsx`) now opens a workbook through
+  `common/safe-zip.ts` and only ever throws an `ImportError` with a stable `code`: `encrypted` (an OLE container
+  holding an encrypted package, or an encrypted zip entry), `legacy-binary` (`.xls`, `.ppt`, `.doc`, `.xlsb`),
+  `not-a-package` (empty, another format, OpenDocument, Apple iWork), `size-limit` or `corrupt` (truncated, unreadable,
+  unsafe part name). Limits are checked from the zip's metadata before anything is inflated and again while every part
+  is inflated (a forged header cannot hide a bomb): package 100 MB, 20,000 entries, 1 GB in total, 500 MB per part
+  (256 MB for XML), compression ratio 200:1 for anything over 16 MB; all are options (`importXlsx(bytes, { limits })`,
+  `importFromXlsx(bytes, workbook, { limits })`). The XML parser settings (entities never expanded, DOCTYPE removed,
+  depth cap 256; the loss detector's nesting cap rises from 100 to 256 with it) moved to `common/safe-xml.ts`. CSV import drops a leading byte order mark and refuses text over 100 MB
+  (`importFromCSV(csv, sheet, { maxChars })`; the Open action checks the file size before reading it); The CSV refusal is an error with `name` `ImportError` and `code` `size-limit`
+  but not an instance of the io package's class (CSV is synchronous and core does not load it): use `isImportError(e)`
+  (`@b32nio/spindle-sheets-core`) or match on `code`. `.xls` handed
+  to Open now gets the legacy-binary message instead of "unsupported type". Loss ids are the ones that already exist
+  (`xlsx.package.encrypted`, `.legacyBinary`, `.sizeLimit`, the last now also for a file over the package limit). The
+  `importError` text of six edge fixtures and three openpyxl fixtures in the XLSX goldens changes (nothing else does).
+  **Behavioural:** `importXlsx` / `importFromXlsx` used to fail with whatever error JSZip or exceljs raised; hosts that
+  matched on those messages should read `error.code` instead. The DOCX reader is not changed here.
 
 ## [0.4.0] - 2026-10-26
 

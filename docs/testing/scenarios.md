@@ -82,6 +82,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | S-ERR-07 | a file without an extension is rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
 | S-ERR-08 | a PNG renamed to .xlsx is rejected | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
 | S-ERR-10 | a valid zip that is not a workbook is rejected and the workbook is untouched | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
+| S-ERR-11 | an encrypted workbook and a legacy .xls each get a clear notice and the workbook is untouched | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
 | S-ERR-09 | a 0-byte .csv is a valid empty file: it opens as an empty sheet without an alert | covered |  |  | `e2e/sheets/file-errors.spec.ts` |
 | S-FIO-01 | opening a LibreOffice .xlsx shows sheets, values, formulas, formats, merges and styles | covered |  |  | `e2e/sheets/file-io.spec.ts` |
 | S-FIO-02 | sheet tabs switch between imported sheets | covered |  |  | `e2e/sheets/file-io.spec.ts` |
@@ -489,7 +490,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 424
+- covered: 425
 - fixme + bug: 7
 - not covered: 8
 - n/a: 6
