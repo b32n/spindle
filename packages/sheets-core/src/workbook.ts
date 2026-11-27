@@ -1883,6 +1883,9 @@ export class WorkbookImpl implements Workbook {
    * Awareness; the React layer reads it via getCollabHandle() to overlay
    * remote cell selections.
    *
+   * Rejects with CollabBlockedError for a workbook the shared layout cannot
+   * hold, and CollabSchemaVersionError for a room written by a newer client.
+   *
    * Idempotent guard: throws if already attached.
    */
   async attachCollab(
