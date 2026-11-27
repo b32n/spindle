@@ -565,6 +565,37 @@
       ],
       "notes": "A business-report layout with the markup noise Word writes (rsids, w14:paraId, proofErr, smartTag, lastRenderedPageBreak, _GoBack bookmark, compat/clrSchemeMapping settings), a cover-page content control, TOC, comments with a reply, tables, pictures, shapes, a SmartArt, a chart, an embedded object and form controls. Word-compatible markup written by our generator; it was not produced by Word.",
       "generator": "generators/build_corpus.py"
+    },
+    {
+      "id": "edge-entity-bomb",
+      "filename": "edge-entity-bomb.docx",
+      "title": "XML entity expansion",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.entityExpansion"
+      ],
+      "notes": "A valid document whose word/document.xml starts with a DOCTYPE declaring a billion-laughs chain (nine levels of ten references, 10^9 expansions if expanded) and an external entity (file:///etc/passwd), both referenced from a paragraph. The importer removes the DOCTYPE before parsing, so nothing expands: the references stay as literal text and the rest of the document imports. About 8 KB on disk.",
+      "generator": "generators/build_edge.py"
+    },
+    {
+      "id": "edge-zip-bomb",
+      "filename": "edge-zip-bomb.docx",
+      "title": "Zip bomb",
+      "source": {
+        "tool": "programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py)",
+        "os": "Debian GNU/Linux 13 (trixie), Linux x86_64 container"
+      },
+      "license": "Original content authored for this repository (MIT, same as the repo)",
+      "constructs": [
+        "edge.zipBomb"
+      ],
+      "notes": "A valid document plus word/media/bomb.bin, 24 MB of zeros that deflate to about 24 KB (1000:1). The import limits (compression ratio 200:1 above 16 MB) refuse the package before anything is inflated; the golden records the error. About 32 KB on disk, so it is committed rather than generated at run time.",
+      "generator": "generators/build_edge.py",
+      "expectImportError": true
     }
   ]
 }

@@ -43,6 +43,8 @@ BUILDERS = {
     "edge-malformed": build_edge.edge_malformed,
     "edge-odd-valid": build_edge.edge_odd_valid,
     "edge-no-body": build_edge.edge_no_body,
+    "edge-zip-bomb": build_edge.edge_zip_bomb,
+    "edge-entity-bomb": build_edge.edge_entity_bomb,
 }
 
 

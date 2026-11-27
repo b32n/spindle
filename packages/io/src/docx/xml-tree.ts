@@ -1,4 +1,4 @@
-import { XMLParser } from 'fast-xml-parser';
+import { createSafeXmlParser, stripDoctype } from '../common/safe-xml';
 
 // ---------------------------------------------------------------------------
 // XML tree utilities. Parsed with preserveOrder: true — required because a
@@ -10,18 +10,15 @@ import { XMLParser } from 'fast-xml-parser';
 
 export type XmlNode = Record<string, unknown> & { ':@'?: Record<string, string> };
 
-const xmlParser = new XMLParser({
-  preserveOrder: true,
-  ignoreAttributes: false,
-  attributeNamePrefix: '@_',
-  textNodeName: '#text',
-  trimValues: false,
-  parseTagValue: false,
-  parseAttributeValue: false,
-});
+// The shared safe parser (common/safe-xml.ts): depth-capped, and the DOCTYPE is cut out before parsing so a custom or
+// external entity cannot expand. The five predefined entities are decoded by the parser, as they always were here.
+const xmlParser = createSafeXmlParser(undefined, true);
 
+/** The raw tree of `xml`. Throws on malformed XML, on nesting over the cap and on a DOCTYPE that cannot be delimited. */
 export function parseXml(xml: string): XmlNode[] {
-  return xmlParser.parse(xml) as XmlNode[];
+  const clean = stripDoctype(xml);
+  if (clean === null) throw new Error('The XML has an unterminated DOCTYPE.');
+  return xmlParser.parse(clean) as XmlNode[];
 }
 
 /** The single non-attribute key of a preserveOrder node, e.g. "w:p". */

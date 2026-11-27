@@ -1,0 +1,28 @@
+{
+  "diff": {
+    "added": 0,
+    "after": {
+      "blocks": {
+        "paragraph": 4
+      },
+      "sections": 1,
+      "textChars": 258
+    },
+    "before": {
+      "blocks": {
+        "paragraph": 4
+      },
+      "sections": 1,
+      "textChars": 258
+    },
+    "byField": {},
+    "changed": 0,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
+    "truncated": false
+  },
+  "exportWarnings": [],
+  "reimportWarnings": [],
+  "status": "ok"
+}

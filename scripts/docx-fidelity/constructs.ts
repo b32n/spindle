@@ -105,4 +105,12 @@ export const CONSTRUCTS: Array<Construct<OoxmlParts>> = [
   },
   { id: 'edge.invalidXml', label: 'Part that is not well-formed XML', count: (p) => Object.entries(p.xml).filter(([, x]) => !isWellFormed(x)).length },
   { id: 'edge.missingOptionalParts', label: 'Missing optional parts (styles/settings/numbering)', count: (p) => ['word/styles.xml', 'word/settings.xml', 'word/numbering.xml'].filter((x) => !p.names.includes(x)).length },
+  {
+    id: 'edge.zipBomb',
+    label: 'Part over the import compression-ratio limit (zip bomb)',
+    // mirrors DEFAULT_IMPORT_LIMITS (packages/io/src/common/safe-zip.ts): maxRatio 200 once a part inflates past ratioFloorBytes 16 MiB.
+    // Not imported: this analyser must stay independent of the code under test and of the built io package; the edge-zip-bomb golden fails if the two drift.
+    count: (p) => Object.values(p.sizes).filter((s) => s.uncompressed > 16 * 1024 * 1024 && s.uncompressed > 200 * Math.max(s.compressed, 1)).length,
+  },
+  { id: 'edge.entityExpansion', label: 'XML entity declarations (DOCTYPE)', count: (p) => Object.values(p.xml).reduce((sum, x) => sum + n(x, /<!ENTITY\b/g), 0) },
 ];

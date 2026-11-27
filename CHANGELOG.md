@@ -492,6 +492,14 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **DOCX reader adopts the safe-import limits (X8).** `importDocx(bytes, { limits })` opens the package through
+  the shared `openSafeZip` (entry, size and compression-ratio limits, unsafe part names, encrypted, legacy and
+  other-office files recognised) and throws only an `ImportError` (`@b32nio/spindle-io`, also exported from
+  `/docx`); `detectDocxLoss` takes the same `limits` and no longer inflates a package over them. The XML parser is
+  the shared one (depth cap, DOCTYPE removed, so declared and external entities never expand; the five predefined
+  entities are decoded as before). A `.docx` without `[Content_Types].xml` is now refused as `not-a-package`. All
+  DOCX goldens are unchanged; two new edge fixtures (`edge-zip-bomb`, `edge-entity-bomb`) cover the bomb and the
+  entity expansion. Known gap: docs-core `importFromDocx` does not forward `limits` yet (follow-up).
 - **DOCX fidelity harness re-pointed to the shared core.** `scripts/docx-fidelity/` now keeps only the DOCX adapter
   and imports the generic runner, snapshot, manifest, matrix, diff and report modules from `scripts/fidelity-core/`;
   the duplicated copies are deleted. The DOCX goldens and README coverage matrix are byte-identical. The markdown

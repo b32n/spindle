@@ -170,6 +170,9 @@ npm run docs:docx-fidelity:update                              # then refresh th
 Images are tiny geometric PNGs drawn by the script, and the one embedded font is read from the
 system font directory at generation time (see its manifest entry for family, path and licence).
 `edge-malformed` is intentionally not a valid package: LibreOffice cannot open it either.
+`edge-zip-bomb` (a part that inflates 1000:1 to 24 MB, about 32 KB on disk) and `edge-entity-bomb` (a billion-laughs and an
+external-entity DOCTYPE) exercise the safe-import limits: the first is refused with a `size-limit` import error, the second imports with
+its entity references left as text. Both are small enough to commit, so neither is `generatedAtRuntime`.
 
 ## Coverage matrix
 
@@ -198,75 +201,79 @@ system font directory at generation time (see its manifest entry for family, pat
 | 19 | `tables-advanced` | Advanced tables | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py) |
 | 20 | `typography-extras` | Typography extras | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py) |
 | 21 | `word-compat-kitchen` | Quarterly harbour operations report (Word-compatible, programmatic) | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py) |
+| 22 | `edge-entity-bomb` | XML entity expansion | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py) |
+| 23 | `edge-zip-bomb` | Zip bomb | programmatic: hand-authored OOXML (Python 3 zipfile via fixtures/docx/generators/ooxml.py) |
 
-| Construct | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Tracked insertions (`revisions.insertions`) |  |  |  |  | yes |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  |  |
-| Tracked deletions (`revisions.deletions`) |  |  |  |  | yes |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  |  |
-| Tracked moves (`revisions.moves`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |
-| Tracked formatting changes (`revisions.formatting`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |
-| Revisions by 3+ authors (`revisions.multiAuthor`) |  |  |  |  |  |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  |  |
-| Comments (`comments`) |  |  |  |  |  |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  | yes |
-| Threaded comment replies (`comments.threaded`) |  |  |  |  |  |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  | yes |
-| Footnotes (`notes.footnotes`) |  |  | yes |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| Endnotes (`notes.endnotes`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes |  |  |  |  |  |  |  |
-| Table of contents field (`fields.toc`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| PAGE field (`fields.page`) |  |  |  |  | yes |  |  |  |  | yes | yes |  | yes | yes |  | yes |  |  |  | yes | yes |
-| PAGEREF field (`fields.pageref`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| REF field (`fields.ref`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| SEQ field (`fields.seq`) |  |  |  |  |  |  |  |  | yes | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| DATE field (`fields.date`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes |  |  |  |  |  |  | yes |
-| Other fields (NUMPAGES, AUTHOR, STYLEREF, ...) (`fields.other`) |  |  |  |  |  |  |  |  |  | yes |  |  |  | yes |  |  |  |  |  |  | yes |
-| Bookmarks (`fields.bookmarks`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| External hyperlinks (`hyperlinks.external`) |  |  | yes |  | yes |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| Internal hyperlinks (anchors) (`hyperlinks.internal`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |
-| Headings (`headings`) | yes | yes |  |  |  | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Numbered / bulleted lists (`lists.numbered`) |  | yes | yes |  |  |  |  | yes |  | yes | yes | yes | yes |  | yes |  | yes | yes |  |  |  |
-| Multilevel lists (`lists.multilevel`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes |  |  |  |  | yes |  |  |  |
-| List restarts / start overrides (used by a paragraph) (`lists.restart`) |  |  |  |  |  |  |  |  |  | yes |  |  | yes |  |  |  |  | yes |  |  |  |
-| Style inheritance (basedOn) (`styles.inheritance`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes | yes |  |  | yes |  |  |  |
-| Linked paragraph/character styles (`styles.linked`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes | yes |  |  | yes |  |  |  |
-| Nested tables (`tables.nested`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |
-| Horizontally merged cells (`tables.mergeH`) |  |  |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |
-| Vertically merged cells (`tables.mergeV`) |  |  |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |
-| Table / cell borders (`tables.borders`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |
-| Cell shading (`tables.shading`) |  | yes |  |  |  |  | yes |  |  | yes | yes | yes | yes |  |  |  |  |  | yes |  | yes |
-| Repeating header rows (`tables.headerRow`) |  |  |  |  |  |  |  |  |  | yes | yes | yes | yes |  | yes |  |  |  | yes |  | yes |
-| Autofit tables (`tables.autofit`) |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  | yes |  | yes |
-| Landscape sections (`sections.landscape`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  | yes |  |  |  |  |  |
-| Portrait sections (`sections.portrait`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  | yes |  |  |  |  |  |
-| Newspaper columns (`sections.columns`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes |  |  | yes |  |  |  |  |  |
-| Different first-page header/footer (`sections.firstPage`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  | yes |  |  |  |  |  |
-| Odd/even headers and footers (`sections.oddEven`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  | yes |  |  |  |  |  |
-| Page-numbering restart (`sections.pageNumberRestart`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes |  |  | yes |  |  |  |  |  |
-| Inline images (`images.inline`) |  | yes | yes |  |  |  |  |  | yes | yes | yes |  | yes |  |  |  |  |  |  |  | yes |
-| Floating images (`images.floating`) |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  | yes |
-| Wrapped (square/tight/top-bottom) images (`images.wrapped`) |  |  |  |  | yes |  |  |  | yes | yes | yes |  |  |  |  |  | yes |  |  |  | yes |
-| Cropped images (`images.cropped`) |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  | yes |
-| Drawing shapes (`shapes`) |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  | yes |
-| Text boxes (`textboxes`) |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  | yes |
-| SmartArt (with fallback drawing) (`smartart`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  | yes |
-| OMML equations (`equations`) |  |  |  |  |  | yes |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |
-| Content controls (SDT) (`sdt`) |  | yes |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  | yes |
-| Legacy form fields (`forms.legacy`) |  | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |
-| Embedded fonts (`fonts.embedded`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Theme colours / fonts used in content (`themes`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Right-to-left / bidi text (`i18n.rtl`) |  |  |  |  |  |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |
-| CJK text (`i18n.cjk`) |  |  |  |  | yes |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |
-| Symbols (`text.symbols`) |  |  |  |  |  |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |
-| Emoji (`text.emoji`) |  |  |  |  |  |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |
-| Hyphenation (`typography.hyphenation`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |
-| Tabs with leaders (`typography.tabLeaders`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |
-| Drop caps (`typography.dropCap`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |
-| Watermarks (`watermark`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |
-| Charts (`charts`) | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |
-| Embedded objects (`objects.embedded`) | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |
-| Hidden (vanish) text (`text.hidden`) |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Custom XML parts (`customXml`) |  | yes |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |
-| Long document (15,000+ words) (`doc.long`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |
-| Content in headers/footers (`headers.content`) |  |  |  |  | yes |  |  |  |  | yes | yes |  | yes |  |  | yes |  |  |  | yes | yes |
-| Relationship targets that do not exist (`edge.brokenRels`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Part that is not well-formed XML (`edge.invalidXml`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Missing optional parts (styles/settings/numbering) (`edge.missingOptionalParts`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Construct | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Tracked insertions (`revisions.insertions`) |  |  |  |  | yes |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  |  |  |  |
+| Tracked deletions (`revisions.deletions`) |  |  |  |  | yes |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  |  |  |  |
+| Tracked moves (`revisions.moves`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  |
+| Tracked formatting changes (`revisions.formatting`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  |
+| Revisions by 3+ authors (`revisions.multiAuthor`) |  |  |  |  |  |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  |  |  |  |
+| Comments (`comments`) |  |  |  |  |  |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  | yes |  |  |
+| Threaded comment replies (`comments.threaded`) |  |  |  |  |  |  |  |  |  | yes |  | yes |  |  | yes |  |  |  |  |  | yes |  |  |
+| Footnotes (`notes.footnotes`) |  |  | yes |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| Endnotes (`notes.endnotes`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes |  |  |  |  |  |  |  |  |  |
+| Table of contents field (`fields.toc`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| PAGE field (`fields.page`) |  |  |  |  | yes |  |  |  |  | yes | yes |  | yes | yes |  | yes |  |  |  | yes | yes |  |  |
+| PAGEREF field (`fields.pageref`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| REF field (`fields.ref`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| SEQ field (`fields.seq`) |  |  |  |  |  |  |  |  | yes | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| DATE field (`fields.date`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes |  |  |  |  |  |  | yes |  |  |
+| Other fields (NUMPAGES, AUTHOR, STYLEREF, ...) (`fields.other`) |  |  |  |  |  |  |  |  |  | yes |  |  |  | yes |  |  |  |  |  |  | yes |  |  |
+| Bookmarks (`fields.bookmarks`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| External hyperlinks (`hyperlinks.external`) |  |  | yes |  | yes |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| Internal hyperlinks (anchors) (`hyperlinks.internal`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes | yes |  |  |  |  |  |  | yes |  |  |
+| Headings (`headings`) | yes | yes |  |  |  | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |  |  |
+| Numbered / bulleted lists (`lists.numbered`) |  | yes | yes |  |  |  |  | yes |  | yes | yes | yes | yes |  | yes |  | yes | yes |  |  |  |  |  |
+| Multilevel lists (`lists.multilevel`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes |  |  |  |  | yes |  |  |  |  |  |
+| List restarts / start overrides (used by a paragraph) (`lists.restart`) |  |  |  |  |  |  |  |  |  | yes |  |  | yes |  |  |  |  | yes |  |  |  |  |  |
+| Style inheritance (basedOn) (`styles.inheritance`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes | yes |  |  | yes |  |  |  |  |  |
+| Linked paragraph/character styles (`styles.linked`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  | yes | yes |  |  | yes |  |  |  |  |  |
+| Nested tables (`tables.nested`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |  |  |
+| Horizontally merged cells (`tables.mergeH`) |  |  |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |  |  |
+| Vertically merged cells (`tables.mergeV`) |  |  |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |  |  |
+| Table / cell borders (`tables.borders`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  |  |  |  | yes |  | yes |  |  |
+| Cell shading (`tables.shading`) |  | yes |  |  |  |  | yes |  |  | yes | yes | yes | yes |  |  |  |  |  | yes |  | yes |  |  |
+| Repeating header rows (`tables.headerRow`) |  |  |  |  |  |  |  |  |  | yes | yes | yes | yes |  | yes |  |  |  | yes |  | yes |  |  |
+| Autofit tables (`tables.autofit`) |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  | yes |  | yes |  |  |
+| Landscape sections (`sections.landscape`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  | yes |  |  |  |  |  |  |  |
+| Portrait sections (`sections.portrait`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  | yes |  |  |  |  |  |  |  |
+| Newspaper columns (`sections.columns`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes |  |  | yes |  |  |  |  |  |  |  |
+| Different first-page header/footer (`sections.firstPage`) |  |  |  |  |  |  |  |  |  | yes | yes |  |  |  |  | yes |  |  |  |  |  |  |  |
+| Odd/even headers and footers (`sections.oddEven`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  | yes |  |  |  |  |  |  |  |
+| Page-numbering restart (`sections.pageNumberRestart`) |  |  |  |  |  |  |  |  |  | yes | yes |  | yes |  |  | yes |  |  |  |  |  |  |  |
+| Inline images (`images.inline`) |  | yes | yes |  |  |  |  |  | yes | yes | yes |  | yes |  |  |  |  |  |  |  | yes |  |  |
+| Floating images (`images.floating`) |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Wrapped (square/tight/top-bottom) images (`images.wrapped`) |  |  |  |  | yes |  |  |  | yes | yes | yes |  |  |  |  |  | yes |  |  |  | yes |  |  |
+| Cropped images (`images.cropped`) |  |  |  |  |  |  |  |  | yes | yes | yes |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Drawing shapes (`shapes`) |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  | yes |  |  |
+| Text boxes (`textboxes`) |  |  |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  | yes |  |  |
+| SmartArt (with fallback drawing) (`smartart`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  | yes |  |  |  | yes |  |  |
+| OMML equations (`equations`) |  |  |  |  |  | yes |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Content controls (SDT) (`sdt`) |  | yes |  |  | yes |  |  |  |  | yes | yes |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Legacy form fields (`forms.legacy`) |  | yes |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Embedded fonts (`fonts.embedded`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Theme colours / fonts used in content (`themes`) |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Right-to-left / bidi text (`i18n.rtl`) |  |  |  |  |  |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| CJK text (`i18n.cjk`) |  |  |  |  | yes |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Symbols (`text.symbols`) |  |  |  |  |  |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Emoji (`text.emoji`) |  |  |  |  |  |  |  | yes |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Hyphenation (`typography.hyphenation`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |
+| Tabs with leaders (`typography.tabLeaders`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |
+| Drop caps (`typography.dropCap`) |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  | yes |  |  |  |
+| Watermarks (`watermark`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |
+| Charts (`charts`) | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Embedded objects (`objects.embedded`) | yes |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Hidden (vanish) text (`text.hidden`) |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Custom XML parts (`customXml`) |  | yes |  |  | yes |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  | yes |  |  |
+| Long document (15,000+ words) (`doc.long`) |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |  |  |  |  |  |  |  |  |  |
+| Content in headers/footers (`headers.content`) |  |  |  |  | yes |  |  |  |  | yes | yes |  | yes |  |  | yes |  |  |  | yes | yes |  |  |
+| Relationship targets that do not exist (`edge.brokenRels`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Part that is not well-formed XML (`edge.invalidXml`) |  |  | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Missing optional parts (styles/settings/numbering) (`edge.missingOptionalParts`) |  |  | yes | yes |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Part over the import compression-ratio limit (zip bomb) (`edge.zipBomb`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |
+| XML entity declarations (DOCTYPE) (`edge.entityExpansion`) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | yes |  |
 
 <!-- coverage-matrix:end -->

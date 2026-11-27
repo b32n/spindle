@@ -33,6 +33,8 @@ import { ListCounter, listTypeFor, parseNumbering, type NumberingInfo } from './
 import { parsePPr, StyleSheet, toDocParagraphStyle } from './styles';
 import { applicableParts, parseBorders, parseLook, parseShading, parseVAlign, pxFromTwips } from './table-props';
 import { parseTheme, type Theme } from './theme';
+import { toImportError } from '../common/import-error';
+import { openSafeZip, type ImportLimits } from '../common/safe-zip';
 import { attrsOf, childrenOf, find, findAll, findDeep, parseXml, tagOf, type XmlNode } from './xml-tree';
 
 /** Depth-first concatenation of every #text leaf under a node (a run's <w:t>, a field's cached-result text, ...). */
@@ -1312,9 +1314,27 @@ async function readZipText(zip: JSZip, path: string): Promise<string | undefined
   return file ? file.async('string') : undefined;
 }
 
-export async function importDocx(bytes: Uint8Array): Promise<DocumentImportResult> {
+export interface ImportDocxOptions {
+  /** Overrides of the import limits (`DEFAULT_IMPORT_LIMITS`). */
+  limits?: Partial<ImportLimits>;
+}
+
+/**
+ * Read a .docx. The only error this throws is an `ImportError` (code `encrypted`, `legacy-binary`, `not-a-package`,
+ * `size-limit` or `corrupt`): the package is opened through `openSafeZip` first, and whatever the reader itself then
+ * fails on (a main document that is not XML, nested past the cap) is reported as `corrupt`.
+ */
+export async function importDocx(bytes: Uint8Array, options: ImportDocxOptions = {}): Promise<DocumentImportResult> {
+  try {
+    const zip = await openSafeZip(bytes, { limits: options.limits, target: 'a Word document (.docx)' });
+    return await readDocx(zip);
+  } catch (e) {
+    throw toImportError(e);
+  }
+}
+
+async function readDocx(zip: JSZip): Promise<DocumentImportResult> {
   const warnings: string[] = [];
-  const zip = await JSZip.loadAsync(bytes);
 
   const [documentXml, docRelsXml, stylesXml, numberingXml, commentsXml, commentsExtendedXml, peopleXml, settingsXml] = await Promise.all([
     readZipText(zip, 'word/document.xml'),

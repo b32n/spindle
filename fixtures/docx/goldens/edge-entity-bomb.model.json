@@ -1,0 +1,183 @@
+{
+  "document": {
+    "defaultPageConfig": {
+      "margins": {
+        "bottom": 96,
+        "footer": 48,
+        "header": 48,
+        "left": 96,
+        "right": 96,
+        "top": 96
+      },
+      "orientation": "portrait",
+      "size": {
+        "h": 1056,
+        "w": 816
+      }
+    },
+    "namedStyles": {
+      "BodyText": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "link": "BodyTextChar",
+        "name": "Body Text",
+        "paragraph": {
+          "alignment": "justify",
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.15
+          },
+          "spaceAfter": 8
+        }
+      },
+      "BodyTextChar": {
+        "basedOn": "DefaultParagraphFont",
+        "kind": "character",
+        "link": "BodyText",
+        "name": "Body Text Char"
+      },
+      "DefaultParagraphFont": {
+        "isDefault": true,
+        "kind": "character",
+        "name": "Default Paragraph Font"
+      },
+      "Normal": {
+        "isDefault": true,
+        "kind": "paragraph",
+        "name": "Normal",
+        "paragraph": {
+          "lineSpacing": {
+            "type": "multiple",
+            "value": 1.079
+          },
+          "spaceAfter": 10.666666666666666
+        }
+      },
+      "Subtitle": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Subtitle",
+        "next": "BodyText",
+        "text": {
+          "color": "#595959",
+          "fontSize": 14,
+          "italic": true
+        }
+      },
+      "Title": {
+        "basedOn": "Normal",
+        "kind": "paragraph",
+        "name": "Title",
+        "next": "Subtitle",
+        "paragraph": {
+          "spaceAfter": 8
+        },
+        "text": {
+          "fontFamily": "Liberation Serif",
+          "fontSize": 28
+        }
+      }
+    },
+    "paragraphStylePool": {},
+    "sections": [
+      {
+        "blocks": [
+          {
+            "content": [
+              {
+                "fontFamily": "Liberation Serif",
+                "fontSize": 28,
+                "text": "XML entity expansion",
+                "type": "text"
+              }
+            ],
+            "id": "block-1",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.079
+            },
+            "namedStyleId": "Title",
+            "spaceAfter": 8,
+            "type": "paragraph"
+          },
+          {
+            "alignment": "justify",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "The main part of this file declares a billion-laughs entity chain and an external entity. Neither may be expanded.",
+                "type": "text"
+              }
+            ],
+            "id": "block-2",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
+            "namedStyleId": "BodyText",
+            "spaceAfter": 8,
+            "type": "paragraph"
+          },
+          {
+            "alignment": "justify",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "Chain: &lol9; External: &xxe; Predefined: & <b>.",
+                "type": "text"
+              }
+            ],
+            "id": "block-3",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
+            "namedStyleId": "BodyText",
+            "spaceAfter": 8,
+            "type": "paragraph"
+          },
+          {
+            "alignment": "justify",
+            "content": [
+              {
+                "fontFamily": "Liberation Sans",
+                "fontSize": 11,
+                "text": "A paragraph after the entities, to show the import still reads the document.",
+                "type": "text"
+              }
+            ],
+            "id": "block-4",
+            "lineSpacing": {
+              "type": "multiple",
+              "value": 1.15
+            },
+            "namedStyleId": "BodyText",
+            "spaceAfter": 8,
+            "type": "paragraph"
+          }
+        ],
+        "id": "section-1",
+        "pageConfig": {
+          "margins": {
+            "bottom": 96,
+            "left": 96,
+            "right": 96,
+            "top": 96
+          },
+          "orientation": "portrait",
+          "size": {
+            "h": 1056,
+            "w": 816
+          }
+        }
+      }
+    ],
+    "textStylePool": {},
+    "threads": [],
+    "title": "XML entity expansion"
+  },
+  "importError": null,
+  "warnings": []
+}

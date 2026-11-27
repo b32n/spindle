@@ -162,7 +162,7 @@ Parse-time problems found while importing (an unresolvable image, an unsupported
 ## Files that cannot be opened at all
 
 The importers do not report these as loss: they refuse the file, with an `ImportError` (`@b32nio/spindle-io`) whose `code` hosts can switch on and
-whose `message` is fit to show a user. `importXlsx` throws nothing else. A forged or corrupt zip entry (including the `mimetype` marker) is `corrupt`, never a plain `Error`.
+whose `message` is fit to show a user. `importXlsx` and `importDocx` throw nothing else. A forged or corrupt zip entry (including the `mimetype` marker) is `corrupt`, never a plain `Error`.
 A CSV over the size limit (`importFromCSV`, `importWorkbookFile`) is refused with an error of the same shape (`name` `ImportError`, `code` `size-limit`) that is
 not an instance of the `@b32nio/spindle-io` class, because the CSV path is synchronous and does not load that package; `isImportError(e)`
 (`@b32nio/spindle-sheets-core`) recognises both, so a host handles every refusal in one place. The loss ids above (`xlsx.package.encrypted`, `.legacyBinary`, `.sizeLimit`) are
@@ -179,8 +179,13 @@ what the `full` detail level reports for the same files, so a host that inspects
 Limits (options on the importer, `limits`; defaults `DEFAULT_IMPORT_LIMITS`): package 100 MB, 20,000 entries, 1 GB uncompressed in total, 500 MB per part
 (256 MB for an XML part), compression ratio 200:1. The ratio is only judged for a part (or package) that inflates to more than 16 MB: smaller parts cannot cost more
 than that however well they compress, and legitimate files do contain tiny, very regular parts. The limits are checked from the zip's declared sizes first and then
-again while each part is inflated, so a header that lies about a size cannot get a bomb inflated. XML is parsed with entities never expanded, the DOCTYPE removed and
-nesting capped at 256. CSV: a leading byte order mark is dropped, text over 100 MB is refused (`code` `size-limit`).
+again while each part is inflated, so a header that lies about a size cannot get a bomb inflated.
+
+XML is parsed with entities never expanded, the DOCTYPE removed and nesting capped at 256.
+
+- **DOCX:** the five predefined entities are still decoded; a declared one (`&lol9;`, an external entity) stays as written text. `importDocx(bytes, { limits })` and `detectDocxLoss(bytes, { limits })` take the same options. The detector reads nothing from a package over the limits (an empty report; the import then says why). A `.docx` without `[Content_Types].xml` is `not-a-package`.
+- **Known gap:** docs-core `importFromDocx` does not forward `limits` yet, so hosts using that entry point get the defaults only (follow-up in docs-core, tracked in `documentation/docs/TODO.md`).
+- **CSV:** a leading byte order mark is dropped, text over 100 MB is refused (`code` `size-limit`).
 
 ## Confirmation dialog
 
