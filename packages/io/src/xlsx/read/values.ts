@@ -1,11 +1,16 @@
 import { isTrue } from '../xml';
 
-const DECIMAL = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+// every branch starts differently (a digit run is followed by `.` or nothing, never by more digits), so a failed match cannot retry
+// the same digits another way: the cost is linear in the text
+const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
 
-/** A finite number written as a plain decimal (`12`, `-1.5`, `.5`, `1E-3`; surrounding blanks allowed), or `undefined`: never `Infinity`, `0x10`, `1_0` or an empty text. */
+/** Longest number text read (characters): Excel writes at most 17 significant digits, an exponent and a sign; a longer text is not a number the editor holds. */
+export const MAX_NUMBER_CHARS = 64;
+
+/** A finite number written as a plain decimal (`12`, `-1.5`, `.5`, `1E-3`; surrounding blanks allowed), or `undefined`: never `Infinity`, `0x10`, `1_0`, an empty text or one over `MAX_NUMBER_CHARS`. */
 export function parseDecimal(text: string): number | undefined {
   const t = text.trim();
-  if (!DECIMAL.test(t)) return undefined;
+  if (t.length > MAX_NUMBER_CHARS || !DECIMAL.test(t)) return undefined;
   const n = Number(t);
   return Number.isFinite(n) ? n : undefined;
 }

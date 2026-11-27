@@ -1,4 +1,4 @@
-import { boolAttr, intAttr, numAttr, parseDecimal, parseIndex, put } from './values';
+import { boolAttr, intAttr, MAX_NUMBER_CHARS, numAttr, parseDecimal, parseIndex, put } from './values';
 
 describe('parseDecimal', () => {
   it.each([
@@ -9,6 +9,29 @@ describe('parseDecimal', () => {
 
   it.each(['', '  ', 'Infinity', '-Infinity', '+Infinity', 'NaN', '0x10', '0b1', '0o7', '1_000', '1,5', '+', '-', '.', 'e5', '1e', '1e+', '1 2', '--1', '1e999', '-1e999', '１２', '12abc'])('does not read %j', (text) => {
     expect(parseDecimal(text)).toBeUndefined();
+  });
+});
+
+describe('parseDecimal on hostile text', () => {
+  const timed = (text: string): number => {
+    const t0 = Date.now();
+    expect(parseDecimal(text)).toBeUndefined();
+    return Date.now() - t0;
+  };
+
+  it('is linear in the length of a long digit run that does not end as a number (it was quadratic: 4.5 s at 80,000 digits)', () => {
+    expect(timed('1'.repeat(1_000_000) + 'x')).toBeLessThan(500);
+    expect(timed('1'.repeat(1_000_000) + '.' + '1'.repeat(1_000_000) + 'x')).toBeLessThan(500);
+    expect(timed('1'.repeat(1_000_000) + 'e' + '1'.repeat(1_000_000) + 'x')).toBeLessThan(500);
+    expect(timed(' '.repeat(1_000_000) + '1x')).toBeLessThan(500);
+    expect(timed('+.'.repeat(500_000))).toBeLessThan(500);
+  });
+
+  it('reads a number of up to MAX_NUMBER_CHARS characters and no longer one', () => {
+    expect(MAX_NUMBER_CHARS).toBe(64);
+    expect(parseDecimal('1'.repeat(MAX_NUMBER_CHARS))).toBe(Number('1'.repeat(MAX_NUMBER_CHARS)));
+    expect(parseDecimal('1'.repeat(MAX_NUMBER_CHARS + 1))).toBeUndefined();
+    expect(parseDecimal(`  ${'1'.repeat(MAX_NUMBER_CHARS)}  `)).toBeDefined();
   });
 });
 

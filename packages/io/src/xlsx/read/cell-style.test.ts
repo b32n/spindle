@@ -111,3 +111,25 @@ describe('isDateFormat', () => {
     expect(isDateFormat(code)).toBe(false);
   });
 });
+
+describe('isDateFormat on hostile codes', () => {
+  it('skips bracket groups and quoted runs, and keeps an unclosed one as it is', () => {
+    expect(isDateFormat('[Red]0.00')).toBe(false);
+    expect(isDateFormat('[h]:00')).toBe(false);
+    expect(isDateFormat('"d" 0')).toBe(false);
+    expect(isDateFormat('"d" 0 y')).toBe(true);
+    expect(isDateFormat('[$-409]d')).toBe(true);
+    expect(isDateFormat('0 "xxx')).toBe(false);
+    expect(isDateFormat('0 "xxx d')).toBe(true);
+    expect(isDateFormat('[unclosed y')).toBe(true);
+    expect(isDateFormat('"a" [x] "b" m')).toBe(true);
+  });
+
+  it('is linear in the length of a code that is a long run of unclosed brackets or quotes (the regex form was quadratic)', () => {
+    for (const unit of ['[', '"', '["', '[]"', '"[']) {
+      const t0 = Date.now();
+      isDateFormat(unit.repeat(1_000_000) + 'y');
+      expect(Date.now() - t0).toBeLessThan(1000);
+    }
+  });
+});

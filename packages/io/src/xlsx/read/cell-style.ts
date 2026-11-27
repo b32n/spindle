@@ -53,8 +53,20 @@ function rotationOf(value: number | undefined): number | undefined {
  * A built-in id's code comes from the table as it is.
  */
 function editorFormatCode(styles: XlsxStyles, id: number): string | undefined {
-  const defined = id === 0 ? undefined : styles.numFmts.find((n) => n.id === id);
-  return defined === undefined ? numberFormatCode(styles, id) : defined.code.replace(/\\(.)/g, '$1');
+  const defined = id === 0 ? undefined : definedCodes(styles).get(id);
+  return defined === undefined ? numberFormatCode(styles, id) : defined.replace(/\\(.)/g, '$1');
+}
+
+/** The codes a workbook's `numFmts` define, by id (the first of a repeated id wins), built once per workbook: a lookup per format must not scan the table. */
+const DEFINED = new WeakMap<XlsxStyles, Map<number, string>>();
+function definedCodes(styles: XlsxStyles): Map<number, string> {
+  let codes = DEFINED.get(styles);
+  if (codes === undefined) {
+    codes = new Map();
+    for (const n of styles.numFmts) if (!codes.has(n.id)) codes.set(n.id, n.code);
+    DEFINED.set(styles, codes);
+  }
+  return codes;
 }
 
 export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolean): CellLook {
@@ -108,5 +120,28 @@ export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolea
  */
 export function isDateFormat(code: string | undefined): boolean {
   if (!code) return false;
-  return /[ymdhMsb]/.test(code.replace(/\[[^\]]*]/g, '').replace(/"[^"]*"/g, ''));
+  return /[ymdhMsb]/.test(withoutGroups(code));
+}
+
+/** `code` without its `[...]` groups and `"..."` runs (an unclosed one is kept as it is), in one pass: the regex forms of this are quadratic on a long run of `[`. */
+function withoutGroups(code: string): string {
+  let out = '';
+  let i = 0;
+  // once a closer is not found after some point it is not found after any later one: no second scan of the rest
+  let noBracket = false;
+  let noQuote = false;
+  while (i < code.length) {
+    const ch = code[i];
+    let end = -1;
+    if (ch === '[' && !noBracket) {
+      end = code.indexOf(']', i + 1);
+      noBracket = end < 0;
+    } else if (ch === '"' && !noQuote) {
+      end = code.indexOf('"', i + 1);
+      noQuote = end < 0;
+    }
+    if (end < 0) out += code[i++];
+    else i = end + 1;
+  }
+  return out;
 }
