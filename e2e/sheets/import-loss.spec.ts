@@ -139,4 +139,25 @@ test.describe('sheets: import loss report and confirmation', () => {
     await sheet.expectValue(0, 0, 'Frozen header');
     await expect(dialog(page)).toHaveCount(0);
   });
+
+  test('S-FIO-23 a report with kept parts groups "kept, not editable" apart from "will be lost"', async ({
+    page,
+  }) => {
+    await sheet.goto('?importConfirmation=host-kept');
+    await openViaChooser(page, OPEN, await lossyXlsx());
+    await expect(dialog(page)).toBeVisible();
+    await expect(dialog(page).getByText('Will be lost:')).toBeVisible();
+    await expect(
+      dialog(page).getByText('Kept, not editable (saved back unchanged):')
+    ).toBeVisible();
+    const lost = dialog(page).getByTestId('import-loss-list').locator('li');
+    await expect(lost).toHaveCount(2);
+    await expect(lost.filter({ hasText: 'conditional formatting' })).toHaveCount(1);
+    await expect(lost.filter({ hasText: 'chart' })).toHaveCount(1);
+    const kept = dialog(page).getByTestId('import-loss-kept-list').locator('li');
+    await expect(kept).toHaveText([/3 × chart\(s\) — kept: stored unchanged/]);
+    await dialog(page).getByRole('button', { name: 'Cancel' }).click();
+    await expect(dialog(page)).toBeHidden();
+    await sheet.expectValue(0, 0, 'Product'); // Cancel kept the open workbook
+  });
 });

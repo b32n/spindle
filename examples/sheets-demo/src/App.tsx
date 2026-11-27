@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react';
-import { WorkbookProvider, WorkbookCanvas } from '@b32nio/spindle-sheets-react';
+import { useState, useEffect, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { WorkbookProvider, WorkbookCanvas, ImportConfirmDialog } from '@b32nio/spindle-sheets-react';
 import { WorkbookImpl, FilterManager } from '@b32nio/spindle-sheets-core';
+import type { ImportLossReport } from '@b32nio/spindle-sheets-react';
 import type { CommentAuthor, SheetCommentEvent } from '@b32nio/spindle-sheets-core';
 import { InMemoryProvider, type CollabIdentity, type CollabStatus } from '@b32nio/spindle-shared';
 import { WebSocketProvider } from '@b32nio/spindle-transport-websocket';
 import './App.css';
 /** e2e hook: `?fontSource=local` or `?fontSource=css:<stylesheet url>` (default: the library's own default). */
-/** e2e hook: `?importConfirmation=never|host-yes|host-no` (default: the built-in dialog). */
+/**
+ * e2e hook: `?importConfirmation=never|host-yes|host-no|host-kept` (default: the built-in dialog).
+ * `host-kept` is a host UI that shows the shared dialog for the real report plus one synthetic
+ * `state: 'kept'` item (no importer emits one yet), to exercise the dialog's grouping.
+ */
 const importConfirmation = (() => {
   const v = new URLSearchParams(window.location.search).get('importConfirmation');
   if (v === 'never') return 'never' as const;
@@ -18,6 +24,27 @@ const importConfirmation = (() => {
       ];
       return v === 'host-yes';
     };
+  }
+  if (v === 'host-kept') {
+    return (report: ImportLossReport, file: File) =>
+      new Promise<boolean>((resolve) => {
+        const host = document.body.appendChild(document.createElement('div'));
+        const root = createRoot(host);
+        const settle = (ok: boolean) => {
+          root.unmount();
+          host.remove();
+          resolve(ok);
+        };
+        const kept = { id: 'demo.charts', label: 'chart(s)', count: 3, effect: 'kept: stored unchanged and saved back, not editable', state: 'kept' as const };
+        root.render(
+          createElement(ImportConfirmDialog, {
+            fileName: file.name,
+            report: { ...report, items: [...report.items, kept] },
+            onConfirm: () => settle(true),
+            onCancel: () => settle(false),
+          })
+        );
+      });
   }
   return undefined;
 })();

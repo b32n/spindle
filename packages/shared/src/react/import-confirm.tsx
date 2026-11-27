@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { describeImportLoss, type ImportLossReport } from '../export/loss';
+import { describeImportLoss, groupImportLoss, type ImportLossItem, type ImportLossReport } from '../export/loss';
 
 /**
  * How an editor's "Open" reacts to a file whose import would lose something:
@@ -24,6 +24,18 @@ export interface ImportConfirmDialogProps {
 export function ImportConfirmDialog({ fileName, report, onConfirm, onCancel }: ImportConfirmDialogProps): React.ReactElement {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const lines = describeImportLoss(report);
+  // Grouping only appears once an importer sets a state; a report without states renders exactly as before.
+  const grouped = report.items.some((i) => i.state !== undefined);
+  const groups = groupImportLoss(report);
+  const lineOf = (item: ImportLossItem) => lines[report.items.indexOf(item)];
+  const list = (items: ImportLossItem[], testId: string) => (
+    <ul data-testid={testId} style={{ margin: '0 0 16px', paddingLeft: 20, fontSize: 14, color: '#3c4043' }}>
+      {items.map((item, i) => (
+        <li key={`${item.id}:${i}`} style={{ margin: '4px 0' }}>{lineOf(item)}</li>
+      ))}
+    </ul>
+  );
+  const intro = { margin: '12px 0 8px', fontSize: 14, color: '#3c4043' };
 
   useEffect(() => {
     cancelRef.current?.focus();
@@ -56,14 +68,40 @@ export function ImportConfirmDialog({ fileName, report, onConfirm, onCancel }: I
         <h2 id="spindle-import-confirm-title" style={{ margin: 0, fontSize: 18, fontWeight: 500 }}>
           Import “{fileName}”?
         </h2>
-        <p id="spindle-import-confirm-desc" style={{ margin: '12px 0 8px', fontSize: 14, color: '#3c4043' }}>
-          This file contains things that can’t be imported. The current content will be replaced, and the following will be lost:
-        </p>
-        <ul data-testid="import-loss-list" style={{ margin: '0 0 16px', paddingLeft: 20, fontSize: 14, color: '#3c4043' }}>
-          {lines.map((line, i) => (
-            <li key={report.items[i]?.id ?? i} style={{ margin: '4px 0' }}>{line}</li>
-          ))}
-        </ul>
+        {grouped ? (
+          <div id="spindle-import-confirm-desc">
+            <p style={intro}>This file contains things that can’t be fully imported. The current content will be replaced.</p>
+            {groups.lost.length > 0 && (
+              <>
+                <p style={intro}>Will be lost:</p>
+                {list(groups.lost, 'import-loss-list')}
+              </>
+            )}
+            {groups.approximated.length > 0 && (
+              <>
+                <p style={intro}>Imported approximately:</p>
+                {list(groups.approximated, 'import-loss-approximated-list')}
+              </>
+            )}
+            {groups.kept.length > 0 && (
+              <>
+                <p style={intro}>Kept, not editable (saved back unchanged):</p>
+                {list(groups.kept, 'import-loss-kept-list')}
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            <p id="spindle-import-confirm-desc" style={intro}>
+              This file contains things that can’t be imported. The current content will be replaced, and the following will be lost:
+            </p>
+            <ul data-testid="import-loss-list" style={{ margin: '0 0 16px', paddingLeft: 20, fontSize: 14, color: '#3c4043' }}>
+              {lines.map((line, i) => (
+                <li key={report.items[i]?.id ?? i} style={{ margin: '4px 0' }}>{line}</li>
+              ))}
+            </ul>
+          </>
+        )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button ref={cancelRef} type="button" onClick={onCancel} style={{ ...button, color: '#5f6368', background: 'transparent', border: '1px solid #dadce0' }}>
             Cancel

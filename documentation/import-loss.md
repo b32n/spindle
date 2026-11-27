@@ -19,8 +19,10 @@ Docs: `inspectDocumentFile(file)` / `importDocumentFile(doc, file)` from `@b32ni
 from `@b32nio/spindle-io/{xlsx,docx}` (XLSX/DOCX) and `@b32nio/spindle-shared/export/csv`. PPTX: `detectPptxLoss(bytes, { detail })` from
 `@b32nio/spindle-io/pptx` (slides has no importer yet, so there is no `inspectPptx` or dialog flow; see the PPTX table below).
 
-`ImportLossReport` is `{ format, items: ImportLossItem[] }`; an item is `{ id, label, count, where?, effect }` with a stable `id` such as
-`xlsx.conditionalFormatting`. An empty `items` list means nothing detectable is lost. The scan is a cheap pre-pass over the zip (no workbook
+`ImportLossReport` is `{ format, items: ImportLossItem[] }`; an item is `{ id, label, count, where?, effect, state? }` with a stable `id` such as
+`xlsx.conditionalFormatting`. `state` (`'lost'` when absent, `'approximated'`, or `'kept'`: stored and saved back unchanged but not editable) lets the dialog list
+"Kept, not editable" apart from "Will be lost"; ids stay stable and only counts, effect text and state change as constructs become preserved.
+Parts an importer keeps opaquely live in the `@b32nio/spindle-shared/opaque` store (content-addressed, size-capped; a part over the cap is reported as `lost: too large`). An empty `items` list means nothing detectable is lost. The scan is a cheap pre-pass over the zip (no workbook
 model is built) and never throws on a malformed file; the import itself reports that error. The XLSX fidelity harness (`fixtures/xlsx/`,
 `npm run sheets:xlsx-fidelity`) records this report for every corpus file next to a package ledger that accounts for each part of the file.
 
