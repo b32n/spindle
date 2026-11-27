@@ -14,3 +14,11 @@ export {
   yMapToElement,
 } from './y-schema';
 export type { DeckYTypes } from './y-schema';
+export {
+  COLLAB_SCHEMA_VERSION,
+  CollabSchemaVersionError,
+  readSchemaVersion,
+  assertSchemaVersion,
+} from './y-schema';
+export { getCollabBlockers, CollabBlockedError } from './blockers';
+export type { CollabBlocker } from './blockers';

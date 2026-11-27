@@ -8,6 +8,10 @@
 //                                props(JSON), richText?: Y.XmlFragment }>
 //   threads:  Y.Map<threadId, JSON>   — outside undo scope (Phase 6)
 //
+// schemaVersion (meta): the version of this layout the room was written with (missing = 1, the layout above).
+// attachCollabToDeck refuses a room whose version is newer than COLLAB_SCHEMA_VERSION (see assertSchemaVersion), so an
+// older client never re-saves a room and drops keys it does not know.
+//
 // Frame fields are individual Y.Map keys so concurrent move/rotate/z-reorder on
 // one element merge per-key. Type-specific styling lives in one `props` JSON
 // key (LWW, v1-acceptable). The rich-text body is a Y.XmlFragment bound via
@@ -19,6 +23,39 @@ import { slidesSchema } from '../text/schema';
 import type { SlideElement } from '../scene/types';
 import type { RichTextDoc } from '../text/model';
 import type { DeckData, Slide, SlideData, SlidesCommentThread, DeckSelection } from '../types';
+
+/**
+ * The Y layout version this client reads and writes. 1 is the layout described above (rooms written before the key
+ * existed have no `schemaVersion` and read as 1). Raised by any later change an older client could not read.
+ */
+export const COLLAB_SCHEMA_VERSION = 1;
+
+/** Thrown when a room was written with a newer Y deck layout than this client understands. */
+export class CollabSchemaVersionError extends Error {
+  readonly roomVersion: number;
+  readonly supportedVersion: number;
+  constructor(roomVersion: number, supportedVersion: number = COLLAB_SCHEMA_VERSION) {
+    super(
+      `This collaboration room uses deck schema version ${roomVersion}, but this editor only supports up to ` +
+        `version ${supportedVersion}. Update the editor to join the room.`,
+    );
+    this.name = 'CollabSchemaVersionError';
+    this.roomVersion = roomVersion;
+    this.supportedVersion = supportedVersion;
+  }
+}
+
+/** The schema version a Y.Doc was written with (1 when the key is absent or not a number). */
+export function readSchemaVersion(ydoc: Y.Doc): number {
+  const v = ydoc.getMap<unknown>('meta').get('schemaVersion');
+  return typeof v === 'number' && Number.isFinite(v) && v >= 1 ? v : 1;
+}
+
+/** Throw a CollabSchemaVersionError when the Y.Doc was written with a newer schema than this client supports. */
+export function assertSchemaVersion(ydoc: Y.Doc, supported: number = COLLAB_SCHEMA_VERSION): void {
+  const version = readSchemaVersion(ydoc);
+  if (version > supported) throw new CollabSchemaVersionError(version, supported);
+}
 
 export interface DeckYTypes {
   meta: Y.Map<unknown>;
@@ -133,6 +170,7 @@ export function yMapToSlide(id: string, m: Y.Map<unknown>): Slide {
 export function hydrateYDocFromData(ydoc: Y.Doc, data: DeckData): void {
   const y = getDeckYTypes(ydoc);
   ydoc.transact(() => {
+    y.meta.set('schemaVersion', COLLAB_SCHEMA_VERSION);
     y.meta.set('id', data.id);
     y.meta.set('title', data.title);
     y.meta.set('slideSize', toPlain(data.slideSize));

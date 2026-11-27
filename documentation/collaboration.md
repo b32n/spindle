@@ -282,6 +282,11 @@ edits, and the inverse operations broadcast to peers like any other edit.
   version does not know) and `attachCollab` rejects with a `CollabBlockedError`
   carrying that list, instead of silently dropping it. The list is empty for
   every document the importers produce today.
+- **Slides: version gate and blockers.** A slides room records the layout version in `meta.schemaVersion`
+  (a room without the key reads as 1, so existing rooms keep working). `attachCollab` refuses a room written by a
+  newer client with a `CollabSchemaVersionError` that names both versions, before it seeds or edits anything.
+  `getCollabBlockers(deck)` and `CollabBlockedError` mirror the documents API; the list is empty today, and a later
+  deck construct either gets its own Y keys or registers a blocker.
 - **Content controls.** A Word content control is a ProseMirror node
   (`content_control` around blocks, `content_control_inline` in a paragraph), so it
   syncs like any other content and does not block attach. Concurrent edits merge as

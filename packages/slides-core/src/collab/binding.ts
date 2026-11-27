@@ -29,6 +29,7 @@ import {
   getDeckYTypes,
   hydrateYDocFromData,
   serializeYDocToData,
+  assertSchemaVersion,
   createElementYMap,
   populateElementRichText,
   createSlideYMap,
@@ -322,6 +323,9 @@ export async function attachCollabToDeck(
 
   try {
     await connectAbortable(provider, roomId, options.signal);
+    // The room (or the state restored from persistence) may have been written by a newer client whose keys this one
+    // would silently drop. Refuse before seeding or editing anything.
+    assertSchemaVersion(ydoc);
   } catch (err) {
     // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
     ydoc.off('update', onDocUpdate);
