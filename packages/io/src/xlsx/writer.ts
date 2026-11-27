@@ -100,6 +100,18 @@ function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): Set<
 /** Engine-internal marker for a circular reference; not a value Excel knows, so it is never written. */
 const INTERNAL_CIRCULAR = '#CIRCULAR!';
 
+/** The error values a cell can hold in a file (`t="e"`): the seven of every version, and the ones the dynamic-array and data-type features added. */
+const ERROR_LITERALS: ReadonlySet<string> = new Set([
+  '#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A',
+  '#GETTING_DATA', '#SPILL!', '#CALC!', '#FIELD!', '#BLOCKED!', '#UNKNOWN!', '#CONNECT!', '#PYTHON!', '#BUSY!',
+]);
+
+/** A formula's result as the file stores it: an error literal is an error value (`t="e"`), not the text of it. */
+function toResult(value: SpreadsheetCell['value']): number | string | boolean | ExcelJS.CellErrorValue | undefined {
+  if (typeof value === 'string' && ERROR_LITERALS.has(value)) return { error: value } as ExcelJS.CellErrorValue;
+  return value ?? undefined;
+}
+
 /** An A1 cell or range: all the writer accepts as the extent of an array formula. */
 const ARRAY_REF = /^[A-Z]{1,3}[0-9]{1,7}(?::[A-Z]{1,3}[0-9]{1,7})?$/;
 
@@ -114,8 +126,8 @@ function writeCell(excelCell: ExcelJS.Cell, cell: SpreadsheetCell): void {
     const formula = cell.cachedOnly ? cell.formula : toFileFormula(cell.formula);
     excelCell.value =
       cell.arrayRef === undefined || !ARRAY_REF.test(cell.arrayRef)
-        ? { formula, result: cell.value ?? undefined }
-        : ({ formula, result: cell.value ?? undefined, shareType: 'array', ref: cell.arrayRef } as unknown as ExcelJS.CellValue);
+        ? { formula, result: toResult(cell.value) }
+        : ({ formula, result: toResult(cell.value), shareType: 'array', ref: cell.arrayRef } as unknown as ExcelJS.CellValue);
   } else if (cell.hyperlink) {
     // exceljs's hyperlink cell value can't also carry a formula — a cell with
     // both is a rare combination we don't attempt to represent.

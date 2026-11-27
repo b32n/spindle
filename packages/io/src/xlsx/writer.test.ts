@@ -128,6 +128,45 @@ describe('exportXlsx', () => {
     expect(back.sheets[1].cells.get('0:0')?.formulaInfo).toEqual({ type: 'array', ref: 'A1:A2', dynamic: true });
   });
 
+  it.each(['#NULL!', '#DIV/0!', '#VALUE!', '#REF!', '#NAME?', '#NUM!', '#N/A', '#GETTING_DATA', '#SPILL!', '#CALC!', '#FIELD!', '#BLOCKED!', '#UNKNOWN!', '#CONNECT!', '#PYTHON!', '#BUSY!'])(
+    'writes the result %s of a formula (plain, array and cached-only) as an error value, not as text',
+    async (error) => {
+      const JSZip = (await import('jszip')).default;
+      const bytes = await exportXlsx({
+        sheets: [
+          {
+            name: 'A',
+            cells: new Map([
+              ['0:0', { value: error, formula: '1/0' }],
+              ['0:1', { value: error, formula: 'SUM(A1:A2)', arrayRef: 'B1' }],
+              ['0:2', { value: error, formula: '_xlfn.LET(_xlpm.x,1,_xlpm.x)', cachedOnly: true }],
+              ['0:3', { value: error }],
+            ]),
+          },
+        ],
+      });
+      const xml = await (await JSZip.loadAsync(bytes)).file('xl/worksheets/sheet1.xml')!.async('string');
+      expect(xml).toContain(`<c r="A1" t="e"><f>1/0</f><v>${error.replace('&', '&amp;')}</v></c>`);
+      expect(xml).toMatch(new RegExp(`<c r="B1" t="e"><f t="array" ref="B1">SUM\\(A1:A2\\)</f><v>`));
+      expect(xml).toMatch(new RegExp(`<c r="C1" t="e"><f>_xlfn\\.LET\\(_xlpm\\.x,1,_xlpm\\.x\\)</f><v>`));
+      // a plain text cell that reads like an error stays text
+      expect(xml).toMatch(/<c r="D1" t="(s|inlineStr)"/);
+      const { importXlsx } = await import('./reader');
+      const back = await importXlsx(bytes);
+      for (const key of ['0:0', '0:1', '0:2']) expect(back.sheets[0].cells.get(key)?.value).toBe(error);
+    }
+  );
+
+  it('keeps a formula result that merely starts like an error as text', async () => {
+    const JSZip = (await import('jszip')).default;
+    const bytes = await exportXlsx({ sheets: [{ name: 'A', cells: new Map([['0:0', { value: '#N/A is text', formula: '"#N/A is text"' }], ['0:1', { value: 'x', formula: '"x"' }], ['0:2', { value: 3, formula: '1+2' }], ['0:3', { value: true, formula: 'TRUE' }]]) }] });
+    const xml = await (await JSZip.loadAsync(bytes)).file('xl/worksheets/sheet1.xml')!.async('string');
+    expect(xml).toMatch(/<c r="A1" t="str"><f>[^<]*<\/f><v>#N\/A is text<\/v><\/c>/);
+    expect(xml).toContain('<c r="B1" t="str">');
+    expect(xml).toContain('<c r="C1"><f>1+2</f><v>3</v></c>');
+    expect(xml).toContain('<c r="D1" t="b">');
+  });
+
   it('writes a number format code', async () => {
     const workbook = await readBack({
       sheets: [{ name: 'S', cells: new Map([['0:0', { value: 1234.5, numberFormat: { code: '#,##0.00' } }]]) }],

@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import ExcelJS from 'exceljs';
 import { exportToXlsx, importFromXlsx } from './xlsx';
-import { fcell, ncell, xlsxWith } from './test-xlsx';
+import { ecell, fcell, ncell, xlsxWith } from './test-xlsx';
 import { WorkbookImpl } from '../workbook';
 import type { Cell } from '../types';
 
@@ -144,6 +144,38 @@ describe('cached-only formulas (the engine cannot evaluate them)', () => {
     expect(cellAt(wb, 0, 1)?.formula).toBe(`=${LET}`);
     wb.getSheet().insertCols(0, 1);
     expect(cellAt(wb, 0, 2)).toMatchObject({ formula: `=${LET}`, value: 99 });
+  });
+
+  it('keep a saved error result as an error value (t="e") on export, and open the same again', async () => {
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 0), ecell('B1', '_xlfn.LET(_xlpm.x,1/A1,_xlpm.x)', '#DIV/0!'), ecell('C1', 'NOSUCHFN(A1)', '#NAME?'), ecell('D1', '1/A1', '#DIV/0!')],
+    });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 0, 1)).toMatchObject({ value: '#DIV/0!', cachedOnly: true });
+    expect(cellAt(wb, 0, 2)).toMatchObject({ value: '#NAME?', cachedOnly: true });
+    const xml = await sheetXml(await exportToXlsx(wb));
+    expect(xml).toMatch(/<c r="B1" t="e"><f>_xlfn\.LET\(_xlpm\.x,1\/A1,_xlpm\.x\)<\/f><v>#DIV\/0!<\/v><\/c>/);
+    expect(xml).toMatch(/<c r="C1" t="e"><f>NOSUCHFN\(A1\)<\/f><v>#NAME\?<\/v><\/c>/);
+    expect(xml).not.toMatch(/t="str"/);
+    const again = await open(await exportToXlsx(wb));
+    for (const col of [1, 2]) expect(cellAt(again.wb, 0, col)).toMatchObject({ value: cellAt(wb, 0, col)?.value, cachedOnly: true, formula: cellAt(wb, 0, col)?.formula });
+  });
+
+  it('writes the error an ordinary formula evaluates to (=1/0, an unknown function, a spill blocked by a value) as an error value', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setFormula(undefined, 0, 0, '=1/0');
+    wb.setFormula(undefined, 0, 1, '=NOSUCHFN(1)');
+    wb.setCellValue(undefined, 2, 0, 'in the way');
+    wb.setFormula(undefined, 1, 0, '=SEQUENCE(3)');
+    expect(cellAt(wb, 0, 0)?.value).toBe('#DIV/0!');
+    expect(cellAt(wb, 1, 0)?.value).toBe('#SPILL!');
+    const xml = await sheetXml(await exportToXlsx(wb));
+    expect(xml).toMatch(/<c r="A1" t="e"><f>1\/0<\/f><v>#DIV\/0!<\/v><\/c>/);
+    expect(xml).toMatch(/<c r="B1" t="e"><f>NOSUCHFN\(1\)<\/f><v>#NAME\?<\/v><\/c>/);
+    expect(xml).toMatch(/<c r="A2" t="e"><f>_xlfn\.SEQUENCE\(3\)<\/f><v>#SPILL!<\/v><\/c>/);
+    const again = await open(await exportToXlsx(wb));
+    expect(cellAt(again.wb, 0, 0)?.value).toBe('#DIV/0!');
+    expect(cellAt(again.wb, 0, 1)?.value).toBe('#NAME?');
   });
 
   it('are written back unchanged, formula and result, and stay cached-only on the next open', async () => {
