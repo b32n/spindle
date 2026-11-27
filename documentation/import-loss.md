@@ -162,7 +162,10 @@ Parse-time problems found while importing (an unresolvable image, an unsupported
 ## Files that cannot be opened at all
 
 The importers do not report these as loss: they refuse the file, with an `ImportError` (`@b32nio/spindle-io`) whose `code` hosts can switch on and
-whose `message` is fit to show a user. `importXlsx` throws nothing else. The loss ids above (`xlsx.package.encrypted`, `.legacyBinary`, `.sizeLimit`) are
+whose `message` is fit to show a user. `importXlsx` throws nothing else. A forged or corrupt zip entry (including the `mimetype` marker) is `corrupt`, never a plain `Error`.
+A CSV over the size limit (`importFromCSV`, `importWorkbookFile`) is refused with an error of the same shape (`name` `ImportError`, `code` `size-limit`) that is
+not an instance of the `@b32nio/spindle-io` class, because the CSV path is synchronous and does not load that package; `isImportError(e)`
+(`@b32nio/spindle-sheets-core`) recognises both, so a host handles every refusal in one place. The loss ids above (`xlsx.package.encrypted`, `.legacyBinary`, `.sizeLimit`) are
 what the `full` detail level reports for the same files, so a host that inspects first can say the same thing before trying.
 
 | `code` | When |

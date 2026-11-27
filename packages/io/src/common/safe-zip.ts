@@ -67,6 +67,8 @@ const startsWith = (bytes: Uint8Array, magic: number[]) => bytes.length >= magic
 const isZip = (bytes: Uint8Array): boolean => startsWith(bytes, ZIP_MAGIC) && (bytes[2] === 3 || bytes[2] === 5) && (bytes[3] === 4 || bytes[3] === 6);
 
 const ODF_TYPE = /^application\/vnd\.oasis\.opendocument\./;
+/** Longest `mimetype` entry looked at (an ODF marker is ~60 bytes); a longer one is not a marker. */
+const MIMETYPE_MAX_BYTES = 255;
 const IWORK_PART = /^(?:Index\/[^/]*\.iwa|Index\.zip|index\.apxl|index\.xml\.gz)$/;
 
 // ---- the zip end-of-central-directory record ---------------------------------------------------------------------
@@ -119,8 +121,8 @@ interface Hit {
   limit: string;
 }
 
-/** Inflate an entry and throw its bytes away, stopping as soon as `stop(total)` says so. Resolves to the bytes counted and why it stopped. */
-function drain(file: JSZip.JSZipObject, stop: (total: number) => Hit | undefined): Promise<{ total: number; stopped?: Hit; failed?: boolean }> {
+/** Inflate an entry, handing each chunk to `stop(total, chunk)` and stopping as soon as it says so (the bytes are otherwise thrown away). Resolves to the bytes counted and why it stopped. */
+function drain(file: JSZip.JSZipObject, stop: (total: number, chunk: Uint8Array) => Hit | undefined): Promise<{ total: number; stopped?: Hit; failed?: boolean }> {
   return new Promise((resolve) => {
     let total = 0;
     let done = false;
@@ -133,7 +135,7 @@ function drain(file: JSZip.JSZipObject, stop: (total: number) => Hit | undefined
     stream
       .on('data', (chunk: Uint8Array) => {
         total += chunk.length;
-        const stopped = stop(total);
+        const stopped = stop(total, chunk);
         if (stopped) {
           stream.pause();
           finish({ stopped });
@@ -190,8 +192,16 @@ export async function openSafeZip(bytes: Uint8Array, options: SafeZipOptions = {
 /** OpenDocument, iWork and binary-workbook packages are zips too: say what they are instead of "damaged". */
 async function rejectOtherFormats(zip: JSZip, names: string[], target: string): Promise<void> {
   const mimetype = zip.file('mimetype');
-  if (mimetype && entryData(mimetype).uncompressedSize < 256) {
-    const type = (await mimetype.async('string')).trim();
+  if (mimetype) {
+    // read through the same bounded stream as the guard, whatever the header declares: an ODF marker is a few dozen bytes
+    const chunks: number[] = [];
+    const { stopped, failed } = await drain(mimetype, (total, chunk) => {
+      if (total > MIMETYPE_MAX_BYTES) return { what: 'the mimetype entry', limit: `${MIMETYPE_MAX_BYTES} bytes` };
+      chunks.push(...chunk);
+      return undefined;
+    });
+    if (failed) throw new ImportError('corrupt', 'The file is damaged (a part cannot be read).');
+    const type = stopped ? '' : new TextDecoder().decode(Uint8Array.from(chunks)).trim();
     if (ODF_TYPE.test(type)) throw new ImportError('not-a-package', `This is an OpenDocument file (.ods, .odp or .odt). Save it as ${target} first.`);
   }
   if (names.some((n) => IWORK_PART.test(n))) throw new ImportError('not-a-package', `This is an Apple Numbers, Keynote or Pages file. Export it as ${target} first.`);

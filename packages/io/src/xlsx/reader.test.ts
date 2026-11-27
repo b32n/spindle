@@ -187,6 +187,20 @@ describe('importXlsx: the only error is an ImportError', () => {
     expect(await codeOf(await make())).toBe(code);
   });
 
+  it('refuses a forged or corrupt mimetype entry as corrupt (an ImportError, not a plain Error)', async () => {
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', '<Types/>');
+    zip.file('mimetype', new Uint8Array(1024 * 1024));
+    const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+    const forged = bytes.slice();
+    const view = new DataView(forged.buffer);
+    for (let i = 0; i + 30 < forged.length; i++) {
+      if (view.getUint32(i, true) === 0x04034b50 && new TextDecoder().decode(forged.subarray(i + 30, i + 38)) === 'mimetype') view.setUint32(i + 22, 10, true);
+      if (view.getUint32(i, true) === 0x02014b50 && new TextDecoder().decode(forged.subarray(i + 46, i + 54)) === 'mimetype') view.setUint32(i + 24, 10, true);
+    }
+    expect(await codeOf(forged)).toBe('corrupt');
+  });
+
   it('refuses a truncated workbook as corrupt', async () => {
     const bytes = await exportXlsx({ sheets: [{ name: 'S', cells: new Map([['0:0', { value: 'x'.repeat(5000) }]]) }] });
     expect(await codeOf(bytes.subarray(0, Math.floor(bytes.length / 2)))).toBe('corrupt');

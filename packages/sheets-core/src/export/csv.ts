@@ -1,4 +1,5 @@
 import { exportCsv, importCsv, detectCsvLoss, type CsvCellValue, type ImportLossReport } from '@b32nio/spindle-shared/export/csv';
+import { csvTooLargeError } from './import-error';
 import type { Sheet } from '../types';
 import type { WorkbookImpl } from '../workbook';
 
@@ -59,15 +60,12 @@ export function inspectCsv(csv: string): ImportLossReport {
 
 /**
  * Put CSV text into `sheet`. A leading byte order mark is dropped. Throws an error named `ImportError` with `code`
- * `size-limit` (the same shape as the XLSX importer's) for text over `options.maxChars`.
+ * `size-limit` (the shape of the XLSX importer's `ImportError`, recognised by `isImportError`) for text over `options.maxChars`.
  */
 export function importFromCSV(csv: string, sheet: Sheet, options: ImportCsvOptions = {}): void {
   const maxChars = options.maxChars ?? DEFAULT_CSV_MAX_CHARS;
   if (csv.length > maxChars) {
-    throw Object.assign(new Error(`The file is too large to open safely (the text is over the limit of ${Math.round(maxChars / (1024 * 1024))} MB).`), {
-      name: 'ImportError',
-      code: 'size-limit',
-    });
+    throw csvTooLargeError(maxChars);
   }
   const { rows } = importCsv(stripBom(csv));
   // A sheet starts with 1000 rows x 100 columns; grow it so a larger file stays reachable

@@ -22,8 +22,8 @@ export interface ImportXlsxOptions {
  * fails on is reported as `corrupt`.
  */
 export async function importXlsx(bytes: Uint8Array, options: ImportXlsxOptions = {}): Promise<SpreadsheetImportResult> {
-  await openSafeZip(bytes, { limits: options.limits, target: 'an Excel workbook (.xlsx)' });
   try {
+    await openSafeZip(bytes, { limits: options.limits, target: 'an Excel workbook (.xlsx)' });
     return await readWorkbook(bytes);
   } catch (e) {
     throw toImportError(e);

@@ -1,4 +1,5 @@
 import { DEFAULT_CSV_MAX_CHARS, exportToCSV, importFromCSV, inspectCsv } from './csv';
+import { isImportError, csvTooLargeError } from './import-error';
 import { WorkbookImpl } from '../workbook';
 
 function freshSheet() {
@@ -123,5 +124,22 @@ describe('CSV import: byte order mark and size cap', () => {
     importFromCSV('a,b', sheet, { maxChars: 3 });
     expect(sheet.getCell(0, 1)?.value).toBe('b');
     expect(DEFAULT_CSV_MAX_CHARS).toBe(100 * 1024 * 1024);
+  });
+});
+
+describe('isImportError and csvTooLargeError', () => {
+  it('recognises the CSV refusal, and an ImportError-shaped error from elsewhere, but not other errors', () => {
+    expect(isImportError(csvTooLargeError(5))).toBe(true);
+    expect(isImportError(Object.assign(new Error('x'), { name: 'ImportError', code: 'corrupt' }))).toBe(true);
+    expect(isImportError(new Error('x'))).toBe(false);
+    expect(isImportError(Object.assign(new Error('x'), { name: 'ImportError' }))).toBe(false);
+    expect(isImportError({ name: 'ImportError', code: 'corrupt' })).toBe(false);
+    expect(isImportError('ImportError')).toBe(false);
+  });
+
+  it('names the limit it was given, in MB or in bytes', () => {
+    expect(csvTooLargeError(DEFAULT_CSV_MAX_CHARS).message).toMatch(/over the limit of 100 MB\)/);
+    expect(csvTooLargeError(2 * 1024 * 1024).message).toMatch(/limit of 2 MB/);
+    expect(csvTooLargeError(5)).toMatchObject({ name: 'ImportError', code: 'size-limit', message: expect.stringMatching(/limit of 5 bytes/) });
   });
 });

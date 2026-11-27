@@ -5,6 +5,7 @@ import {
   importFromCSV,
   importFromXlsx,
   DEFAULT_CSV_MAX_CHARS,
+  csvTooLargeError,
   inspectCsv,
   inspectXlsx,
 } from '@b32nio/spindle-sheets-core';
@@ -68,7 +69,7 @@ const XLSX_READER_EXTENSIONS = ['xlsx', 'xls'];
 /** A CSV over the importers' size limit is refused before it is read into memory (an error with `code` `size-limit`, like the XLSX reader's `ImportError`). */
 function assertCsvSize(file: File): void {
   if (file.size > DEFAULT_CSV_MAX_CHARS) {
-    throw Object.assign(new Error('The file is too large to open safely (over the limit of 100 MB).'), { name: 'ImportError', code: 'size-limit' });
+    throw csvTooLargeError(DEFAULT_CSV_MAX_CHARS);
   }
 }
 

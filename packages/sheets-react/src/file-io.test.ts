@@ -115,6 +115,7 @@ describe('sheets file I/O: unsafe files', () => {
     Object.defineProperty(big, 'size', { value: 100 * 1024 * 1024 + 1 });
     const wb = makeWorkbook();
     await expect(importWorkbookFile(wb, big)).rejects.toMatchObject({ name: 'ImportError', code: 'size-limit' });
+    await expect(importWorkbookFile(wb, big)).rejects.toThrow(/over the limit of 100 MB/);
     await expect(inspectWorkbookFile(big)).rejects.toMatchObject({ code: 'size-limit' });
     expect(wb.getSheet().getCell(1, 0)?.value).toBe('Pens');
   });

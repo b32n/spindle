@@ -35,6 +35,20 @@ function forgeSizes(zip: Uint8Array, uncompressedSize: number, names: string[]):
   return out;
 }
 
+/** Overwrite the compressed data of the entry `name` with bytes that are not valid deflate: corrupt data under a good header. */
+function corruptData(zip: Uint8Array, name: string): Uint8Array {
+  const out = zip.slice();
+  const view = new DataView(out.buffer);
+  for (let i = 0; i + 30 < out.length; i++) {
+    if (view.getUint32(i, true) !== 0x04034b50) continue;
+    const nameLength = view.getUint16(i + 26, true);
+    if (new TextDecoder().decode(out.subarray(i + 30, i + 30 + nameLength)) !== name) continue;
+    const at = i + 30 + nameLength + view.getUint16(i + 28, true);
+    out.fill(0xff, at, at + view.getUint32(i + 18, true));
+  }
+  return out;
+}
+
 const utf16 = (s: string) => Array.from(s).flatMap((c) => [c.charCodeAt(0), 0]);
 const ole = (...streams: string[]) => Uint8Array.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, ...Array(512).fill(0), ...streams.flatMap((s) => [...utf16(s), 0, 0])]);
 
@@ -174,6 +188,22 @@ describe('openSafeZip: what the file is', () => {
 
   it('does not read a mimetype entry that is large (not an ODF marker)', async () => {
     await expect(openSafeZip(await build({ mimetype: 'application/vnd.oasis.opendocument.text'.padEnd(1000, ' ') }))).resolves.toBeDefined();
+  });
+
+  it('does not trust the declared size of a mimetype entry: a forged header cannot make it inflate unbounded', async () => {
+    const bomb = await build({ mimetype: new Uint8Array(3 * MB) }); // really 3 MB of zeros, declared as 10 bytes
+    const forged = forgeSizes(bomb, 10, ['mimetype']);
+    // the entry is read through the bounded stream (stopped at 255 bytes), then the guard finds the mismatch
+    await expectRefused(forged, 'corrupt', /damaged/);
+  });
+
+  it('refuses a forged mimetype header that really holds an ODF marker', async () => {
+    const forged = forgeSizes(await build({ mimetype: 'application/vnd.oasis.opendocument.text' }), 10, ['mimetype']);
+    await expectRefused(forged, 'corrupt', /damaged/);
+  });
+
+  it('reports corrupt data in the mimetype entry as damaged (an ImportError, not a plain Error)', async () => {
+    await expectRefused(corruptData(await build({ mimetype: 'application/vnd.oasis.opendocument.text' }), 'mimetype'), 'corrupt', /damaged/);
   });
 
   it.each([['Index/Document.iwa'], ['Index.zip'], ['index.apxl'], ['index.xml.gz']])('recognises an iWork package by %s', async (part) => {
