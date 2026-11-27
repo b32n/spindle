@@ -417,11 +417,47 @@ export interface LineElement extends ElementBase {
   endPoint?: { x: number; y: number };
 }
 
-/** One cell of a table: its own rich-text body, optional fill and vertical align. */
+/** The four sides of a cell. */
+export type CellSide = 'l' | 't' | 'r' | 'b';
+
+/**
+ * Per-side cell borders. A side that is absent inherits the table's grid line (`TableElement.border`); `null` is an
+ * explicit "no line". The value of a shared edge may sit on either neighbour; `resolveCellEdges` settles which wins.
+ */
+export type CellBorders = Partial<Record<CellSide, Stroke | null>>;
+
+/**
+ * One cell of a table: its own rich-text body, optional fill, vertical align and margins (`bodyStyle.vAlign`,
+ * `bodyStyle.insets`). The grid is always rows x cols; a merged region is one origin cell (top-left) carrying
+ * `gridSpan`/`rowSpan`, and every other cell it covers carries `hMerge` (covered by a cell to its left) and/or
+ * `vMerge` (covered by a cell above) and is not drawn, as in OOXML `a:tc`.
+ */
 export interface TableCell {
   richText: RichTextDoc;
   fill?: Fill;
   bodyStyle?: BodyStyle;
+  /** Columns this origin cell spans (absent = 1). */
+  gridSpan?: number;
+  /** Rows this origin cell spans (absent = 1). */
+  rowSpan?: number;
+  /** Covered by a cell to the left. */
+  hMerge?: boolean;
+  /** Covered by a cell above. */
+  vMerge?: boolean;
+  borders?: CellBorders;
+}
+
+/**
+ * The table-style switches of a table (`a:tblPr`). The resolved look of the style (fills, borders, bold) is stored on
+ * each cell, so these only record which regions the source style treated specially (kept for re-export).
+ */
+export interface TableStyleFlags {
+  firstRow?: boolean;
+  firstCol?: boolean;
+  lastRow?: boolean;
+  lastCol?: boolean;
+  bandRow?: boolean;
+  bandCol?: boolean;
 }
 
 export interface TableElement extends ElementBase {
@@ -440,6 +476,7 @@ export interface TableElement extends ElementBase {
   cells: TableCell[][];
   /** Grid line style (applied to every cell edge). */
   border?: Stroke;
+  styleFlags?: TableStyleFlags;
 }
 
 export type SlideElement = TextElement | ShapeElement | ImageElement | LineElement | TableElement;

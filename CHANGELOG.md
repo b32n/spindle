@@ -846,6 +846,16 @@ lockstep.
   on a plain element tree (for the PPTX reader and writer), `normalizeCustomGeometry` validates untrusted data with caps
   on paths and commands. Guide formulas are not evaluated: a geometry using them stays an `unknown:custGeom`
   passthrough. Slides collaboration schema version 8 (a v7 client refuses a v8 room).
+- **Slides tables: merge, per-cell borders, style flags (K7).** `TableCell` gains `gridSpan`, `rowSpan`, `hMerge`,
+  `vMerge` (OOXML `a:tc` semantics: the grid stays rows x cols, the top-left cell of a merged region is its origin, the
+  cells it covers are not drawn) and `borders` (`l`/`t`/`r`/`b`, a `Stroke`, `null` for no line, absent to inherit the
+  grid line); `TableElement` gains `styleFlags` (first/last row and column, banded rows and columns, kept for re-export;
+  the resolved fill and borders live on each cell). Cell margins and vertical anchor are `bodyStyle.insets` and
+  `bodyStyle.vAlign`, now honoured in the cell. New slides-core `scene/table.ts` exports `mergeCells`, `splitCell`,
+  `setCellBorders`, `resolveCellEdges`, `spanRects`, `spanAt`, `expandRange`, `normalizeSpans`; the deck gains
+  `mergeTableCells`, `splitTableCell` and `setTableCellBorders`, and row/column insert and delete keep merged regions
+  intact. The cell right-click menu gains Merge cells, Split cell and border commands. Slides collaboration schema
+  version 9 (a v8 client refuses a v9 room); table cell text stays last-writer-wins, not CRDT-merged.
 
 ## [0.4.0] - 2026-10-26
 
