@@ -982,6 +982,14 @@ lockstep.
   copy and the two runs of the damaged slide are set aside). The loss effects of `pptx.shapes.custGeom`, `.groups.nested`
   and `.connectors.elbowCurved` now say what the reader does. The box guides `ss` and `ls` and the angle constants
   (`cd2`, `cd4`, `cd8`, `3cd4`...) are read in custom geometry. Notes and comments follow (K10c). No editor change.
+- **PPTX reader, step 4c (K10c): speaker notes and comments.** `importPptx` now reads the body placeholder of each slide's
+  notes page into `PptxSlide.notes` (a text body with the notes' run and paragraph formatting, its styles inherited from the
+  notes master's `p:notesStyle` and body placeholder) and comments into `PptxSlide.threads` (`PptxCommentThread` and
+  `PptxComment`, new additive types): legacy `ppt/comments/*.xml` (author list, position, replies by `p15:parentCm`) and
+  modern comments (authors part, replies, `resolved` and `closed` status, anchored to the slide or to the shape a
+  `*MkLst` marks). `pptx.comments` is removed from the loss report, `pptx.notes` narrows to notes with formatting
+  (`approximated`) and `pptx.masters.notesMaster` is `approximated`; the summary ids are now 15. The text parity check covers the
+  notes body runs. No editor change.
 
 ## [0.4.0] - 2026-10-26
 

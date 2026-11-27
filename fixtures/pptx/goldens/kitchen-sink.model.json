@@ -4051,7 +4051,28 @@
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout1.xml",
         "partName": "ppt/slides/slide1.xml",
-        "pptxId": "256"
+        "pptxId": "256",
+        "threads": [
+          {
+            "anchor": {
+              "kind": "slide"
+            },
+            "comments": [
+              {
+                "author": "Reviewer One",
+                "body": "Check the subtitle.",
+                "createdAt": "2026-01-15T09:00:00.000Z",
+                "initials": "R1"
+              }
+            ],
+            "format": "legacy",
+            "id": "256-0.1",
+            "position": {
+              "x": 166.67,
+              "y": 133.33
+            }
+          }
+        ]
       },
       {
         "elements": [
@@ -4317,6 +4338,71 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout2.xml",
+        "notes": {
+          "paragraphs": [
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "bold": true,
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Notes: "
+                },
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "text slide"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "kind": "none"
+                },
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": 0,
+                "lineHeight": 0.9,
+                "marginLeft": 0,
+                "spaceBefore": 6
+              }
+            },
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "lang": "en-US",
+                  "text": "Second line"
+                }
+              ],
+              "style": {
+                "align": "left",
+                "bullet": {
+                  "char": "•",
+                  "kind": "char"
+                },
+                "bulletFont": "Arial",
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "indent": -36,
+                "lineHeight": 0.9,
+                "marginLeft": 36,
+                "spaceBefore": 6
+              }
+            }
+          ],
+          "props": {}
+        },
         "partName": "ppt/slides/slide2.xml",
         "pptxId": "257"
       },
@@ -5792,9 +5878,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 31,
+    "modelRuns": 34,
     "outOfScope": 0,
-    "sourceRuns": 31
+    "sourceRuns": 34
   },
   "warnings": [
     "2 fonts the editor may not have (MS Gothic, MS Mincho) are used; text in them shows in a substitute and may reflow."

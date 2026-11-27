@@ -28,20 +28,14 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/authors.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/comments/modernComment_100_3E8.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "ppt/presProps.xml",
@@ -150,8 +144,8 @@
     }
   ],
   "totals": {
-    "dropped": 2,
-    "mapped": 26,
+    "dropped": 0,
+    "mapped": 28,
     "opaque": 0,
     "total": 28,
     "unaccounted": 0

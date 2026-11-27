@@ -2,15 +2,6 @@
   "format": "pptx",
   "items": [
     {
-      "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
-      "id": "pptx.comments",
-      "label": "comment(s)",
-      "where": [
-        "Slide 1"
-      ]
-    },
-    {
       "count": 2,
       "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",

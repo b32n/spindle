@@ -3,16 +3,6 @@
   "items": [
     {
       "count": 3,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
-      "id": "pptx.comments",
-      "label": "comment(s)",
-      "where": [
-        "Slide 1",
-        "Slide 3"
-      ]
-    },
-    {
-      "count": 3,
       "effect": "approximated: flattened, the placeholder keeps the position and size it inherits as its own",
       "id": "pptx.masters.layoutInheritance",
       "label": "placeholder(s) that take their position from the layout (flattened on import)",

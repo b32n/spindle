@@ -28,28 +28,19 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/commentAuthors.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/comments/comment1.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/comments/comment3.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "ppt/presProps.xml",
@@ -168,8 +159,8 @@
     }
   ],
   "totals": {
-    "dropped": 3,
-    "mapped": 28,
+    "dropped": 0,
+    "mapped": 31,
     "opaque": 0,
     "total": 31,
     "unaccounted": 0

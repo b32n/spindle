@@ -41,20 +41,14 @@
       "status": "dropped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/commentAuthors.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.comments"
-      ],
       "name": "ppt/comments/comment1.xml",
       "rule": "comments",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "loss": [
@@ -88,12 +82,9 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.masters.notesMaster"
-      ],
       "name": "ppt/notesMasters/notesMaster1.xml",
       "rule": "notesMaster",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "ppt/notesSlides/_rels/notesSlide1.xml.rels",
@@ -101,12 +92,9 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.notes"
-      ],
       "name": "ppt/notesSlides/notesSlide1.xml",
       "rule": "notesSlide",
-      "status": "dropped"
+      "status": "mapped"
     },
     {
       "name": "ppt/presProps.xml",
@@ -285,8 +273,8 @@
     }
   ],
   "totals": {
-    "dropped": 7,
-    "mapped": 45,
+    "dropped": 3,
+    "mapped": 49,
     "opaque": 0,
     "total": 52,
     "unaccounted": 0

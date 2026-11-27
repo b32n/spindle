@@ -6,6 +6,7 @@ import { openSafeZip, type ImportLimits } from '../common/safe-zip';
 import { descendants, isOn, kid, kids, type XmlElement } from '../xlsx/xml';
 import { DEFAULT_COLOR_MAP, parseColorMap } from './color';
 import { isAvailableFont } from './fonts';
+import { readAuthors } from './comments';
 import { readLayouts } from './layouts';
 import { readSlideContent } from './slides';
 import { FALLBACK_THEME, parseTheme } from './theme';
@@ -84,7 +85,7 @@ async function readPptx(zip: JSZip): Promise<PresentationImportResult> {
   const fonts = new Set<string>();
   const defaultStyle = kid(presentation, 'defaultTextStyle');
   const layouts = await readLayouts(pkg, await masterParts(pkg, presentation, rels, slides), defaultStyle, warn, fonts);
-  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts, [...rels.values()].find((r) => r.type === 'tableStyles' && !r.external)?.target);
+  await readSlideContent(pkg, slides, layouts, defaultStyle, warn, fonts, await readAuthors(pkg, [...rels.values()]), [...rels.values()].find((r) => r.type === 'tableStyles' && !r.external)?.target);
   const sections = readSections(presentation, slides);
   for (const part of pkg.skipped) warn(`${part} was too large to read and was skipped.`);
   return {

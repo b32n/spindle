@@ -17,7 +17,7 @@ export class Tally {
 
 export const TALLY_KEYS = [
   // summary ids
-  'charts', 'smartArt', 'media', 'embedded', 'transitions', 'animations', 'comments', 'hidden', 'notes',
+  'charts', 'smartArt', 'media', 'embedded', 'transitions', 'animations', 'hidden', 'notes',
   'geometry', 'unsupportedImages',
   // full ids
   'layoutInheritance', 'colorMap', 'fontScheme', 'effectScheme',

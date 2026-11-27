@@ -186,26 +186,15 @@ describe('summary ids', () => {
     expect(item(await build({ slides: [{ tail: media }] }).then(full), 'pptx.animations')).toBeUndefined();
   });
 
-  it('counts comment threads in legacy and modern parts, per slide', async () => {
-    const legacy = `<p:cmLst ${NS}><p:cm authorId="0" dt="2024-01-01T00:00:00.000" idx="1"><p:pos x="1" y="1"/><p:text>a</p:text></p:cm><p:cm authorId="0" idx="2"><p:text>b</p:text></p:cm></p:cmLst>`;
+  it('does not report comments: the reader keeps them as threads (K10c)', async () => {
+    const legacy = `<p:cmLst ${NS}><p:cm authorId="0" dt="2024-01-01T00:00:00.000" idx="1"><p:pos x="1" y="1"/><p:text>a</p:text></p:cm></p:cmLst>`;
     const modern = `<p188:cmLst xmlns:p188="http://schemas.microsoft.com/office/powerpoint/2018/8/main"><p188:cm id="{1}" authorId="{2}"><p188:reply id="{3}"/></p188:cm></p188:cmLst>`;
     const r = await build({
       slides: [{ rels: [rel('rId1', 'comments', '../comments/comment1.xml')] }, { rels: [rel('rId1', 'comments', '../comments/modernComment_1.xml')] }],
-      files: { 'ppt/comments/comment1.xml': legacy, 'ppt/comments/modernComment_1.xml': modern, 'ppt/commentAuthors.xml': '<x/>' },
+      files: { 'ppt/comments/comment1.xml': legacy, 'ppt/comments/modernComment_1.xml': modern, 'ppt/commentAuthors.xml': '<x/>', 'ppt/comments/comment7.xml': legacy },
     }).then(full);
-    expect(item(r, 'pptx.comments')).toMatchObject({ count: 3, where: ['Slide 1', 'Slide 2'] });
-  });
-
-  it('does not count a legacy reply (a comment with a parentCm) as a thread', async () => {
-    const parent = '<p:extLst><p:ext uri="x"><p15:threadingInfo xmlns:p15="http://schemas.microsoft.com/office/powerpoint/2012/main"><p15:parentCm authorId="0" idx="1"/></p15:threadingInfo></p:ext></p:extLst>';
-    const legacy = `<p:cmLst ${NS}><p:cm authorId="0" idx="1"><p:text>a</p:text></p:cm><p:cm authorId="1" idx="1"><p:text>reply</p:text>${parent}</p:cm></p:cmLst>`;
-    const r = await build({ slides: [{ rels: [rel('rId1', 'comments', '../comments/comment1.xml')] }], files: { 'ppt/comments/comment1.xml': legacy } }).then(full);
-    expect(item(r, 'pptx.comments')?.count).toBe(1);
-  });
-
-  it('counts comment parts that no slide points at, by file name', async () => {
-    const r = await build({ files: { 'ppt/comments/comment7.xml': `<p:cmLst ${NS}><p:cm/></p:cmLst>`, 'ppt/comments/empty.xml': '<x/>' } }).then(full);
-    expect(item(r, 'pptx.comments')).toMatchObject({ count: 1, where: ['comment7.xml'] });
+    expect(item(r, 'pptx.comments')).toBeUndefined();
+    expect(item(r, 'pptx.package.unaccountedParts')).toBeUndefined();
   });
 
   it('counts the macro project once', async () => {
@@ -219,26 +208,29 @@ describe('summary ids', () => {
     expect(item(r, 'pptx.hiddenSlides')).toMatchObject({ count: 2, where: ['Slide 1', 'Slide 3'] });
   });
 
-  it('counts the slides whose notes page has text, not empty pages or the slide number placeholder', async () => {
-    const notes = (shapes: string) => `<p:notes ${NS}><p:cSld><p:spTree><p:nvGrpSpPr/><p:grpSpPr/>${shapes}</p:spTree></p:cSld></p:notes>`;
-    const ph = (type: string, t: string) => sp({ ph: `<p:ph type="${type}"/>`, body: para('', `<a:r><a:t>${t}</a:t></a:r>`) });
-    const noType = `<p:sp><p:nvSpPr><p:cNvPr id="9" name="x"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:txBody><a:bodyPr/><a:p><a:r><a:t>loose text</a:t></a:r></a:p></p:txBody></p:sp>`;
+  it('counts the slides whose notes carry formatting (bold, italic, underline, bullets, numbering), not plain notes', async () => {
+    const notes = (para: string) => `<p:notes ${NS}><p:cSld><p:spTree><p:nvGrpSpPr/><p:grpSpPr/>${sp({ ph: '<p:ph type="body"/>', body: para })}</p:spTree></p:cSld></p:notes>`;
+    const run = (rPr: string) => `<a:p><a:r>${rPr}<a:t>x</a:t></a:r></a:p>`;
+    const cases = [
+      run('<a:rPr b="1"/>'), // 1: bold
+      run('<a:rPr i="true"/>'), // 2: italic
+      run('<a:rPr u="sng"/>'), // 3: underline
+      `<a:p><a:pPr><a:buChar char="-"/></a:pPr><a:r><a:t>x</a:t></a:r></a:p>`, // 4: bullet
+      `<a:p><a:pPr><a:buAutoNum type="arabicPeriod"/></a:pPr><a:r><a:t>x</a:t></a:r></a:p>`, // 5: numbering
+      run('<a:rPr b="0" i="0" u="none" lang="en-US"/>'), // 6: explicitly plain
+      run(''), // 7: no properties
+    ];
     const r = await build({
-      slides: ['1', '2', '3', '4', '5'].map((n) => ({ rels: [rel('rId1', 'notesSlide', `../notesSlides/notesSlide${n}.xml`)] })),
-      files: {
-        'ppt/notesSlides/notesSlide1.xml': notes(ph('body', 'speak')),
-        'ppt/notesSlides/notesSlide2.xml': notes(ph('sldNum', '2') + ph('sldImg', 'img') + ph('hdr', 'h') + ph('ftr', 'f') + ph('dt', 'd')),
-        'ppt/notesSlides/notesSlide3.xml': notes(ph('body', '   ')),
-        'ppt/notesSlides/notesSlide4.xml': notes(noType),
-        // slide 5's notes page does not exist
-      },
+      slides: cases.map((_, i) => ({ rels: [rel('rId1', 'notesSlide', `../notesSlides/notesSlide${i + 1}.xml`)] })),
+      files: Object.fromEntries(cases.map((c, i) => [`ppt/notesSlides/notesSlide${i + 1}.xml`, notes(c)])),
     }).then(full);
-    expect(item(r, 'pptx.notes')).toMatchObject({ count: 2, where: ['Slide 1', 'Slide 4'] });
+    expect(item(r, 'pptx.notes')).toMatchObject({ count: 5, where: ['Slide 1', 'Slide 2', 'Slide 3', 'Slide 4', 'Slide 5'] });
+    expect(item(r, 'pptx.notes')?.effect).toMatch(/^approximated:/);
   });
 
-  it('finds notes pages no slide points at, by file name', async () => {
+  it('finds formatted notes pages no slide points at, by file name', async () => {
     const r = await build({
-      files: { 'ppt/notesSlides/notesSlide3.xml': `<p:notes ${NS}><p:cSld><p:spTree>${sp({ ph: '<p:ph type="body"/>', body: para() })}</p:spTree></p:cSld></p:notes>` } }).then(full);
+      files: { 'ppt/notesSlides/notesSlide3.xml': `<p:notes ${NS}><p:cSld><p:spTree>${sp({ ph: '<p:ph type="body"/>', body: '<a:p><a:r><a:rPr b="1"/><a:t>x</a:t></a:r></a:p>' })}</p:spTree></p:cSld></p:notes>`, 'ppt/notesSlides/notesSlide4.xml': `<p:notes ${NS}/>` } }).then(full);
     expect(item(r, 'pptx.notes')).toMatchObject({ count: 1, where: ['notesSlide3.xml'] });
   });
 
@@ -1016,6 +1008,8 @@ describe('detectPptxLoss: the state of each id after the reader (K9c, K10a)', ()
     'pptx.fonts.unavailable': 'approximated',
     'pptx.shapes.unsupportedGeometry': 'approximated',
     'pptx.hiddenSlides': 'kept',
+    'pptx.notes': 'approximated',
+    'pptx.masters.notesMaster': 'approximated',
     'pptx.masters.layoutInheritance': 'approximated',
     'pptx.theme.colorMap': 'approximated',
     'pptx.theme.fontScheme': 'approximated',

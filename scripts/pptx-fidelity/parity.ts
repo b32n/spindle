@@ -4,7 +4,9 @@
  * reader bug cannot hide itself. The check covers the shapes the reader reads so far (`p:sp`, `p:pic` and table `p:graphicFrame`s, at any depth of `p:grpSp` groups, table cells included);
  * the `mc:Fallback` copies of alternate content that also has a `mc:Choice` (the reader enters the Choice, else the Fallback) are counted as `outOfScope`, so the number shows what the check does not yet cover. An `a:t` outside every container the tokeniser
  * knows (outside any shape at all, or in an element no reader step owns) is in scope and so reported as `missing`: such text
- * would be silently dropped by the reader, which is what the check exists to show.
+ * would be silently dropped by the reader, which is what the check exists to show. Speaker notes (K10c) count too: the runs of the
+ * body placeholder of the notes page each (non-failed) slide points at must be the runs of `Slide.notes`; the other text of a notes page (header, footer, date,
+ * slide number, other shapes) and a notes page no slide points at are `outOfScope`.
  */
 import type { OoxmlParts } from '../fidelity-core/ooxml-package';
 import type { Json } from '../fidelity-core/types';
@@ -26,6 +28,7 @@ export interface TextParity {
 
 const MAX_LISTED = 20;
 const SLIDE = /^ppt\/slides\/slide\d+\.xml$/;
+const NOTES_REL = /<Relationship\b(?:"[^"]*"|'[^']*'|[^>"'])*?>/g;
 const TAG = /<(\/?)([A-Za-z_][\w.-]*:[\w.-]+)(?:"[^"]*"|'[^']*'|[^>"'])*?(\/?)>|<!--[\s\S]*?-->/g;
 const NAMED: Record<string, string> = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
@@ -74,6 +77,26 @@ export function sourceRuns(xml: string): { inScope: string[]; outOfScope: string
   return { inScope: inScope.filter((t) => t !== ''), outOfScope: outOfScope.filter((t) => t !== '') };
 }
 
+/** The `a:t` texts of one notes page: those of its body placeholders (what `Slide.notes` holds) and the rest. */
+export function notesRuns(xml: string): { inScope: string[]; outOfScope: string[] } {
+  const all = sourceRuns(xml);
+  const body: string[] = [];
+  for (const sp of xml.match(/<p:sp\b[\s\S]*?<\/p:sp>/g) ?? []) if (/<p:ph\b(?:"[^"]*"|'[^']*'|[^>"'])*?\btype\s*=\s*["']body["']/.test(sp)) body.push(...sourceRuns(sp).inScope);
+  const left = multisetDiff(all.inScope, body);
+  return { inScope: body, outOfScope: [...left, ...all.outOfScope] };
+}
+
+/** The notes part a slide's relationships name (`.../notesSlide`), resolved against `ppt/slides/`. */
+function notesPartOf(parts: OoxmlParts, slidePart: string): string | undefined {
+  const rels = parts.xml[slidePart.replace(/([^/]+)$/, '_rels/$1.rels')];
+  for (const tag of rels?.match(NOTES_REL) ?? []) {
+    const target = /\bTarget\s*=\s*"([^"]*)"/.exec(tag)?.[1];
+    if (/\bType\s*=\s*"[^"]*\/notesSlide"/.test(tag) && target !== undefined && !/TargetMode\s*=\s*"External"/.test(tag))
+      return target.startsWith('/') ? target.slice(1) : `ppt/${target.replace(/^(\.\.\/)+/, '')}`;
+  }
+  return undefined;
+}
+
 type TextBody = { paragraphs?: { runs?: { kind?: string; text?: string }[] }[] };
 
 type ParityElement = { text?: TextBody; rows?: { cells?: { text?: TextBody }[] }[]; children?: unknown };
@@ -94,9 +117,9 @@ export function modelRuns(model: Json): string[] {
   const out: string[] = [];
   const slides = (model as { slides?: unknown }).slides;
   if (!Array.isArray(slides)) return out;
-  for (const slide of slides as { elements?: unknown }[]) {
-    if (!Array.isArray(slide?.elements)) continue;
-    collectRuns(slide.elements, out);
+  for (const slide of slides as { elements?: unknown; notes?: TextBody }[]) {
+    if (Array.isArray(slide?.elements)) collectRuns(slide.elements, out);
+    if (slide?.notes) collectRuns([{ text: slide.notes }], out);
   }
   return out;
 }
@@ -127,11 +150,27 @@ export function textParity(parts: OoxmlParts, model: Json): TextParity {
   const failed = errorSlides(model);
   let outOfScope = 0;
   let inErrorSlides = 0;
+  const notesOf = new Map<string, boolean>();
   for (const name of Object.keys(parts.xml).sort()) {
     if (!SLIDE.test(name)) continue;
     const runs = sourceRuns(parts.xml[name]);
+    const notes = notesPartOf(parts, name);
+    if (notes !== undefined && !notesOf.has(notes)) notesOf.set(notes, failed.has(name));
     if (failed.has(name)) {
       inErrorSlides += runs.inScope.length + runs.outOfScope.length;
+      continue;
+    }
+    source.push(...runs.inScope);
+    outOfScope += runs.outOfScope.length;
+  }
+  for (const name of Object.keys(parts.xml).sort()) {
+    if (!/^ppt\/notesSlides\/[^/]+\.xml$/.test(name)) continue;
+    const runs = notesRuns(parts.xml[name]);
+    const orphan = !notesOf.has(name);
+    const inFailed = notesOf.get(name) === true;
+    if (inFailed || orphan) {
+      if (inFailed) inErrorSlides += runs.inScope.length + runs.outOfScope.length;
+      else outOfScope += runs.inScope.length + runs.outOfScope.length;
       continue;
     }
     source.push(...runs.inScope);

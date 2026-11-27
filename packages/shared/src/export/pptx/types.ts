@@ -75,7 +75,34 @@ export interface PptxSlide {
   background?: PptxFill;
   /** The `p:sp` shapes, `p:pic` pictures, table `p:graphicFrame`s, `p:cxnSp` connectors and `p:grpSp` groups in drawing order; the other shape kinds arrive with the later reader steps. Absent for a slide that failed. */
   elements?: PptxElement[];
+  /** The speaker notes (plan K10c): the body placeholder of the slide's notes page, its text styles inherited from the notes master. Absent when the slide has no notes text. */
+  notes?: PptxTextBody;
+  /** The comment threads of the slide (plan K10c), legacy and modern, in file order. Absent when it has none. */
+  threads?: PptxCommentThread[];
   error?: string;
+}
+
+/** One comment of a thread: the author as the file names them (`Unknown author` when its list does not), the plain text of the body (paragraphs joined by a line break) and the time as UTC ISO-8601 when the file states one. */
+export interface PptxComment {
+  author: string;
+  initials?: string;
+  body: string;
+  createdAt?: string;
+}
+
+/**
+ * A comment thread of a slide (plan K10c). `format` says which file format it came from. A legacy comment (`p:cm`) and its
+ * replies (a `cm` with `p15:parentCm`) and a modern one (`p188:cm` with `p188:reply`) both become `comments` with the
+ * root first. `anchor` is the slide, or the element whose `pptxId` it is (modern comments only; an id the slide does not hold anchors to the slide).
+ * `position` is a legacy comment's marker position on the slide in px.
+ */
+export interface PptxCommentThread {
+  id: string;
+  format: 'legacy' | 'modern';
+  anchor: { kind: 'slide' } | { kind: 'element'; pptxId: string };
+  position?: { x: number; y: number };
+  resolved?: boolean;
+  comments: PptxComment[];
 }
 
 /** A rectangle in px (1 px = 9525 EMU); `rot` is degrees clockwise and left out when 0; the flips are left out when off. */

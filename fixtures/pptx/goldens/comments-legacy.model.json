@@ -3967,7 +3967,47 @@
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
         "partName": "ppt/slides/slide1.xml",
-        "pptxId": "256"
+        "pptxId": "256",
+        "threads": [
+          {
+            "anchor": {
+              "kind": "slide"
+            },
+            "comments": [
+              {
+                "author": "Reviewer One",
+                "body": "Please check this title.",
+                "createdAt": "2026-01-15T09:00:00.000Z",
+                "initials": "R1"
+              }
+            ],
+            "format": "legacy",
+            "id": "256-0.1",
+            "position": {
+              "x": 200,
+              "y": 150
+            }
+          },
+          {
+            "anchor": {
+              "kind": "slide"
+            },
+            "comments": [
+              {
+                "author": "Reviewer Two",
+                "body": "Agreed, shorten it.",
+                "createdAt": "2026-01-15T09:00:00.000Z",
+                "initials": "R2"
+              }
+            ],
+            "format": "legacy",
+            "id": "256-1.1",
+            "position": {
+              "x": 500,
+              "y": 250
+            }
+          }
+        ]
       },
       {
         "elements": [
@@ -4095,7 +4135,28 @@
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
         "partName": "ppt/slides/slide3.xml",
-        "pptxId": "258"
+        "pptxId": "258",
+        "threads": [
+          {
+            "anchor": {
+              "kind": "slide"
+            },
+            "comments": [
+              {
+                "author": "Reviewer Two",
+                "body": "Add a source here.",
+                "createdAt": "2026-01-15T09:00:00.000Z",
+                "initials": "R2"
+              }
+            ],
+            "format": "legacy",
+            "id": "258-1.2",
+            "position": {
+              "x": 133.33,
+              "y": 100
+            }
+          }
+        ]
       }
     ],
     "theme": {

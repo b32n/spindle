@@ -49,12 +49,9 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
   { id: 'layout', match: /^ppt\/slideLayouts\/[^/]+\.xml$/, outcome: 'mapped' },
   { id: 'master', match: /^ppt\/slideMasters\/[^/]+\.xml$/, outcome: 'mapped' },
   { id: 'theme', match: /^ppt\/theme\//, outcome: 'mapped' },
-  { id: 'notesSlide', match: /^ppt\/notesSlides\//, outcome: { dropped: ['pptx.notes'] } },
-  {
-    id: 'notesMaster',
-    match: /^ppt\/notesMasters\//,
-    outcome: { dropped: ['pptx.masters.notesMaster'] },
-  },
+  // notes pages and the notes master (the base of the notes text's styles) are read (K10c); what of the page is not kept is reported by `pptx.notes` and `pptx.masters.notesMaster`
+  { id: 'notesSlide', match: /^ppt\/notesSlides\//, outcome: 'mapped' },
+  { id: 'notesMaster', match: /^ppt\/notesMasters\//, outcome: 'mapped' },
   {
     id: 'handoutMaster',
     match: /^ppt\/handoutMasters\//,
@@ -80,11 +77,8 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
     match: /^ppt\/activeX\//,
     outcome: { dropped: ['pptx.embeddedObjects'] },
   },
-  {
-    id: 'comments',
-    match: /^ppt\/(?:comments\/|commentAuthors\.xml$|authors\.xml$)/,
-    outcome: { dropped: ['pptx.comments'] },
-  },
+  // legacy and modern comments become threads of their slide (K10c)
+  { id: 'comments', match: /^ppt\/(?:comments\/|commentAuthors\.xml$|authors\.xml$)/, outcome: 'mapped' },
   { id: 'ink', match: /^ppt\/ink\//, outcome: { dropped: ['pptx.ink'] } },
   {
     id: 'macro',

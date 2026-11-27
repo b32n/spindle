@@ -4389,6 +4389,47 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout8.xml",
+        "notes": {
+          "paragraphs": [
+            {
+              "endSize": 20,
+              "level": 0,
+              "runs": [
+                {
+                  "bold": false,
+                  "color": {
+                    "hex": "#000000",
+                    "kind": "rgb"
+                  },
+                  "font": "Arial",
+                  "kind": "text",
+                  "lang": "en-US",
+                  "size": 20,
+                  "text": "Speaker notes written by python-pptx."
+                }
+              ],
+              "style": {
+                "bullet": {
+                  "kind": "none"
+                },
+                "indent": 0,
+                "lineHeight": 1
+              }
+            }
+          ],
+          "props": {
+            "anchor": "top",
+            "autofit": {
+              "kind": "none"
+            },
+            "insets": {
+              "b": 4.8,
+              "l": 9.6,
+              "r": 9.6,
+              "t": 4.8
+            }
+          }
+        },
         "partName": "ppt/slides/slide3.xml",
         "pptxId": "258"
       },
@@ -4496,9 +4537,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 22,
-    "outOfScope": 0,
-    "sourceRuns": 22
+    "modelRuns": 23,
+    "outOfScope": 1,
+    "sourceRuns": 23
   },
   "warnings": []
 }

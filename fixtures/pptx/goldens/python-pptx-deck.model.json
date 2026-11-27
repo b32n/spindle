@@ -8734,6 +8734,30 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout6.xml",
+        "notes": {
+          "paragraphs": [
+            {
+              "level": 0,
+              "runs": [
+                {
+                  "kind": "text",
+                  "text": "Speaker notes written by python-pptx."
+                }
+              ],
+              "style": {
+                "align": "left",
+                "color": {
+                  "kind": "theme",
+                  "slot": "dk1"
+                },
+                "font": "minor",
+                "fontSize": 12,
+                "marginLeft": 0
+              }
+            }
+          ],
+          "props": {}
+        },
         "partName": "ppt/slides/slide3.xml",
         "pptxId": "258"
       },
@@ -8825,9 +8849,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 22,
+    "modelRuns": 23,
     "outOfScope": 0,
-    "sourceRuns": 22
+    "sourceRuns": 23
   },
   "warnings": [
     "A table uses the style {5C22544A-7EE6-4342-B048-85BDC9FD1C3A}, which the file does not define; its cells keep only their own formatting.",
