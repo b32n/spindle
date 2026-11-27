@@ -26,7 +26,7 @@ export function LiveTextBodyFields({ id }: { id: string }): React.ReactElement |
       requestAnimationFrame(() => refitElement(deck, id));
     }
   };
-  return <TextBodyFields idPrefix={`text-body-${id}`} body={el.bodyStyle} onChange={apply} />;
+  return <TextBodyFields idPrefix={`text-body-${id}`} body={el.bodyStyle} onChange={apply} allowResize={el.type === 'text'} />;
 }
 
 export function TextOptionsButton(): React.ReactElement | null {

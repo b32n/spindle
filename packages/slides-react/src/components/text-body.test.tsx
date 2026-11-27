@@ -4,11 +4,13 @@ import { DeckImpl, getBuiltinTheme, type BodyStyle, type RichTextDoc } from '@b3
 import { DeckProvider } from '../context/DeckContext';
 import { SlideView } from './SlideView';
 import { StaticRichText } from './elements/StaticRichText';
-import { bodyBoxStyle, bodyOverflow, columnVars, columnsStyle, scaleVars } from './elements/body';
+import { bodyBoxStyle, bodyOverflow, centresBlock, columnVars, columnsStyle, scaleVars } from './elements/body';
 import { bodyDefaults } from './elements/TextView';
-import { TextBodyFields, AUTOFIT_OPTIONS } from './TextBodyFields';
+import { TextBodyFields, DraftNumber, AUTOFIT_OPTIONS } from './TextBodyFields';
 import {
   createFitController,
+  endSession,
+  fitPlugin,
   measureContentHeight,
   measureShrink,
   overflows,
@@ -36,6 +38,11 @@ const doc: RichTextDoc = {
 };
 
 describe('body layout helpers', () => {
+  it('centresBlock: a centred block shrinks to its content, except with columns', () => {
+    expect(centresBlock(undefined)).toBe(false);
+    expect(centresBlock({ anchorCtr: true })).toBe(true);
+    expect(centresBlock({ anchorCtr: true, columns: { count: 2, gap: 4 } })).toBe(false);
+  });
   it('bodyBoxStyle: insets, anchor, centred block and writing mode', () => {
     expect(bodyBoxStyle(undefined)).toMatchObject({ padding: '8px 8px 8px 8px', justifyContent: 'flex-start', display: 'flex', flexDirection: 'column' });
     expect(bodyBoxStyle({ padding: 2 }, 'middle')).toMatchObject({ padding: '2px 2px 2px 2px', justifyContent: 'center' });
@@ -99,7 +106,7 @@ describe('rendered text bodies', () => {
   const text = (bodyStyle?: BodyStyle) => (d: DeckImpl, s: string) => {
     d.addElement(s, { type: 'text', x: 0, y: 0, w: 200, h: 80, richText: doc, ...(bodyStyle ? { bodyStyle } : {}) });
   };
-  it('default text box markup is unchanged: clipped, 8px padding, no scale variables', () => {
+  it('default text box renders as before: clipped, 8px padding on every side, no scale variables', () => {
     const h = renderDeck(text());
     expect(h).toContain('overflow:hidden');
     expect(h).toContain('padding:8px 8px 8px 8px');
@@ -144,6 +151,36 @@ describe('rendered text bodies', () => {
   });
 });
 
+describe('DraftNumber', () => {
+  let slots: unknown[] = [];
+  let n = 0;
+  beforeEach(() => {
+    slots = [];
+    jest.spyOn(React, 'useState').mockImplementation(((init: unknown) => {
+      const i = n++;
+      if (!(i in slots)) slots[i] = init;
+      return [slots[i], (v: unknown) => { slots[i] = v; }];
+    }) as never);
+  });
+  afterEach(() => jest.restoreAllMocks());
+  const render = (value: number, onValue: (n: number) => void) => {
+    n = 0;
+    return DraftNumber({ value, onValue, id: 'x', min: 0 }) as React.ReactElement<P>;
+  };
+  it('shows the stored value, keeps a cleared field empty, reports only finite numbers, resets on blur', () => {
+    const onValue = jest.fn();
+    expect(render(5, onValue).props).toMatchObject({ value: '5', type: 'number', id: 'x', min: 0 });
+    render(5, onValue).props.onChange({ target: { value: '', valueAsNumber: NaN } });
+    expect(onValue).not.toHaveBeenCalled();
+    expect(render(5, onValue).props.value).toBe(''); // the user can retype
+    render(5, onValue).props.onChange({ target: { value: '7', valueAsNumber: 7 } });
+    expect(onValue).toHaveBeenCalledWith(7);
+    expect(render(5, onValue).props.value).toBe('7');
+    render(5, onValue).props.onBlur();
+    expect(render(5, onValue).props.value).toBe('5');
+  });
+});
+
 describe('TextBodyFields', () => {
   it('shows the current values with labels', () => {
     const tree = TextBodyFields({ body: { insets: { l: 1, t: 2, r: 3, b: 4 }, autofit: { mode: 'shrink' }, vert: 'vert', columns: { count: 3, gap: 7 }, anchorCtr: true }, onChange: jest.fn() });
@@ -161,6 +198,12 @@ describe('TextBodyFields', () => {
     expect(find(defaults, byTestId('text-column-gap'))[0].props.disabled).toBe(true);
     expect(find(defaults, byTestId('text-anchor-ctr'))[0].props.checked).toBe(false);
   });
+  it('offers resizing only to text boxes, but keeps an imported choice on a shape', () => {
+    const values = (tree: React.ReactNode) => find(tree, byTestId('text-autofit'))[0].props.children.map((o: React.ReactElement<P>) => o.props.value);
+    expect(values(TextBodyFields({ body: undefined, onChange: jest.fn() }))).toEqual(['none', 'shrink', 'resize']);
+    expect(values(TextBodyFields({ body: undefined, onChange: jest.fn(), allowResize: false }))).toEqual(['none', 'shrink']);
+    expect(values(TextBodyFields({ body: { autofit: { mode: 'resize' } }, onChange: jest.fn(), allowResize: false }))).toEqual(['none', 'shrink', 'resize']);
+  });
   it('reports each change as a patch', () => {
     const onChange = jest.fn();
     const body: BodyStyle = { padding: 4, columns: { count: 2, gap: 5 } };
@@ -172,23 +215,17 @@ describe('TextBodyFields', () => {
     expect(onChange).toHaveBeenLastCalledWith({ vert: 'eaVert' });
     find(tree, byTestId('text-vert'))[0].props.onChange(ev({ value: 'horz' }));
     expect(onChange).toHaveBeenLastCalledWith({ vert: undefined });
-    find(tree, byTestId('text-inset-l'))[0].props.onChange(ev({ valueAsNumber: 12 }));
+    find(tree, byTestId('text-inset-l'))[0].props.onValue(12);
     expect(onChange).toHaveBeenLastCalledWith({ insets: { l: 12, t: 4, r: 4, b: 4 } });
-    find(tree, byTestId('text-inset-r'))[0].props.onChange(ev({ valueAsNumber: -3 }));
+    find(tree, byTestId('text-inset-r'))[0].props.onValue(-3);
     expect(onChange).toHaveBeenLastCalledWith({ insets: { l: 4, t: 4, r: 0, b: 4 } });
-    find(tree, byTestId('text-inset-b'))[0].props.onChange(ev({ valueAsNumber: NaN }));
-    expect(onChange).toHaveBeenLastCalledWith({ insets: { l: 4, t: 4, r: 4, b: 0 } });
-    find(tree, byTestId('text-columns'))[0].props.onChange(ev({ valueAsNumber: 3 }));
+    find(tree, byTestId('text-columns'))[0].props.onValue(3);
     expect(onChange).toHaveBeenLastCalledWith({ columns: { count: 3, gap: 5 } });
-    find(tree, byTestId('text-columns'))[0].props.onChange(ev({ valueAsNumber: 1 }));
+    find(tree, byTestId('text-columns'))[0].props.onValue(1);
     expect(onChange).toHaveBeenLastCalledWith({ columns: undefined });
-    find(tree, byTestId('text-columns'))[0].props.onChange(ev({ valueAsNumber: NaN }));
-    expect(onChange).toHaveBeenLastCalledWith({ columns: undefined });
-    find(tree, byTestId('text-column-gap'))[0].props.onChange(ev({ valueAsNumber: 9 }));
+    find(tree, byTestId('text-column-gap'))[0].props.onValue(9);
     expect(onChange).toHaveBeenLastCalledWith({ columns: { count: 2, gap: 9 } });
-    find(tree, byTestId('text-column-gap'))[0].props.onChange(ev({ valueAsNumber: NaN }));
-    expect(onChange).toHaveBeenLastCalledWith({ columns: { count: 2, gap: 0 } });
-    find(tree, byTestId('text-column-gap'))[0].props.onChange(ev({ valueAsNumber: -2 }));
+    find(tree, byTestId('text-column-gap'))[0].props.onValue(-2);
     expect(onChange).toHaveBeenLastCalledWith({ columns: { count: 2, gap: 0 } });
     find(tree, byTestId('text-anchor-ctr'))[0].props.onChange(ev({ checked: true }));
     expect(onChange).toHaveBeenLastCalledWith({ anchorCtr: true });
@@ -348,7 +385,37 @@ describe('stage registry', () => {
   });
 });
 
+describe('fitPlugin and endSession', () => {
+  it('reports only real document changes', () => {
+    const live = jest.fn();
+    const view = (fitPlugin({ live }).spec.view as never as () => { update: (v: unknown, prev: unknown) => void })();
+    const same = { doc: { eq: () => true } };
+    view.update({ state: same }, same);
+    expect(live).not.toHaveBeenCalled();
+    view.update({ state: same }, { doc: { eq: () => false } });
+    expect(live).toHaveBeenCalledTimes(1);
+  });
+  it('writes the document first when asked, then flushes the fit', () => {
+    const order: string[] = [];
+    endSession({ flush: () => order.push('flush') }, () => order.push('write'));
+    endSession({ flush: () => order.push('flush') });
+    expect(order).toEqual(['write', 'flush', 'flush']);
+  });
+});
+
 describe('createFitController', () => {
+  it('settle leaves a stored scale alone until the text was edited in the session', () => {
+    const d = fakeDeck({ type: 'text', h: 100, bodyStyle: { autofit: { mode: 'shrink', fontScale: 0.625, lnSpcReduction: 0.2 } } });
+    const c = createFitController(d as never, 'e', fakeBox(200, 100), false);
+    c.settle(); // opened and left without typing
+    expect(d.updateElement).not.toHaveBeenCalled();
+    c.live();
+    c.settle();
+    expect(d.updateElement).toHaveBeenCalledTimes(1);
+    d.updateElement.mockClear();
+    c.settle(); // already settled
+    expect(d.updateElement).not.toHaveBeenCalled();
+  });
   it('live rescales through variables only; flush stores the last live result without measuring', () => {
     const d = fakeDeck({ type: 'text', h: 100, bodyStyle: { autofit: { mode: 'shrink' } } });
     const box = fakeBox(200, 100);

@@ -127,10 +127,15 @@ describe('LiveTextBodyFields', () => {
     element = { id: 't', type: 'image' };
     expect(fields()).toBeNull();
   });
+  it('allows resizing for a text box', () => {
+    element = { id: 't', type: 'text' };
+    expect(fields().props.allowResize).toBe(true);
+  });
   it('applies a patch merged into the stored body and refits when layout changes', () => {
     element = { id: 't', type: 'shape', bodyStyle: { padding: 3 } as BodyStyle };
     const tree = fields();
     expect(tree.type).toBe(TextBodyFields);
+    expect(tree.props.allowResize).toBe(false); // a shape does not resize to its text
     tree.props.onChange({ autofit: { mode: 'shrink' } });
     expect(updateElement).toHaveBeenLastCalledWith('t', { bodyStyle: { padding: 3, autofit: { mode: 'shrink' } } });
     expect(refit).toHaveBeenCalledTimes(1);

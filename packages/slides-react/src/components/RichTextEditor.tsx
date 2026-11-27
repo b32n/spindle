@@ -16,7 +16,7 @@
 // Never unmounts mid-IME (composing guard on blur).
 
 import React, { useEffect, useRef } from 'react';
-import { EditorState, Plugin, TextSelection } from 'prosemirror-state';
+import { EditorState, TextSelection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
@@ -25,8 +25,8 @@ import { ySyncPlugin, yUndoPlugin, undo as yUndo, redo as yRedo } from 'y-prosem
 import { slidesSchema, resolveColor, resolveFont, emptyRichText, autofitMode, type ThemeData, type BodyStyle, type RichTextDoc } from '@b32nio/spindle-slides-core';
 import { useDeck } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
-import { bodyBoxStyle, columnVars, scaleVars } from './elements/body';
-import { createFitController } from '../text-fit';
+import { bodyBoxStyle, centresBlock, columnVars, scaleVars } from './elements/body';
+import { createFitController, endSession, fitPlugin } from '../text-fit';
 
 // Inject the editor's rendering rules once: no focus outline, list markers via
 // ::before (the flat PM schema has no list nodes; StaticRichText draws markers
@@ -36,7 +36,8 @@ function ensureEditorStyles(): void {
   const style = document.createElement('style');
   style.id = 'spindle-pm-styles';
   style.textContent = `
-.spindle-pm-editor .ProseMirror { outline: none; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
+.spindle-pm-editor .ProseMirror { width: 100%; outline: none; white-space: pre-wrap; word-break: break-word; line-height: 1.2; }
+.spindle-pm-editor[data-ctr] .ProseMirror { width: auto; min-width: 1px; }
 .spindle-pm-editor .ProseMirror p { margin: 0; }
 .spindle-pm-editor .ProseMirror { column-count: var(--spindle-cols, 1); column-gap: var(--spindle-colgap, 0px); }
 .spindle-pm-editor .ProseMirror { counter-reset: pm-list; }
@@ -97,13 +98,7 @@ export function RichTextEditor({
     // Shrink-to-fit follows the user's edits: each document change rescales the text live and the commit stores the
     // result (see createFitController). Table cells have no autofit.
     const fit = createFitController(deck, elementId, mount, !!cell);
-    const fitPlugin = new Plugin({
-      view: () => ({
-        update: (v, prev) => {
-          if (!prev.doc.eq(v.state.doc)) fit.live();
-        },
-      }),
-    });
+    const fitWatch = fitPlugin(fit);
 
     const commit = () => {
       const doc = view.state.doc.toJSON() as RichTextDoc;
@@ -131,7 +126,7 @@ export function RichTextEditor({
         schema: slidesSchema,
         plugins: [
           ySyncPlugin(fragment!),
-          fitPlugin,
+          fitWatch,
           yUndoPlugin({ undoManager: handle!.undoManager }),
           keymap({ ...markKeys, 'Mod-z': yUndo, 'Mod-y': yRedo, 'Shift-Mod-z': yRedo }),
           keymap(baseKeymap),
@@ -144,7 +139,7 @@ export function RichTextEditor({
         doc: slidesSchema.nodeFromJSON(initialDoc),
         plugins: [
           history(),
-          fitPlugin,
+          fitWatch,
           keymap({ ...markKeys, 'Mod-z': undo, 'Mod-y': redo, 'Shift-Mod-z': redo }),
           keymap(baseKeymap),
         ],
@@ -162,7 +157,6 @@ export function RichTextEditor({
     pmDom.style.outline = 'none';
     pmDom.style.minHeight = '1em';
     pmDom.style.flexShrink = '0'; // content height must not be squeezed by the box (shrink-to-fit measures it)
-    pmDom.style.width = '100%';
     pmDom.style.whiteSpace = 'pre-wrap';
     pmDom.style.wordBreak = 'break-word';
 
@@ -188,15 +182,17 @@ export function RichTextEditor({
     return () => {
       cancelAnimationFrame(raf);
       view.dom.removeEventListener('blur', onBlur);
-      if (collab) {
-        handle!.awareness.setLocalStateField('editing', null);
-      } else if (editing.getView() === view) {
-        // Commit any uncommitted edits (e.g. slide switch) before tearing down.
-        const doc = view.state.doc.toJSON() as RichTextDoc;
-        if (cell) deck.setTableCellRichText(elementId, cell[0], cell[1], doc);
-        else deck.setElementRichText(elementId, doc);
-        fit.flush();
-      }
+      if (collab) handle!.awareness.setLocalStateField('editing', null);
+      // Commit any uncommitted edits (e.g. slide switch) before tearing down; the last live fit is stored in a room too.
+      const writeDoc =
+        !collab && editing.getView() === view
+          ? () => {
+              const doc = view.state.doc.toJSON() as RichTextDoc;
+              if (cell) deck.setTableCellRichText(elementId, cell[0], cell[1], doc);
+              else deck.setElementRichText(elementId, doc);
+            }
+          : undefined;
+      endSession(fit, writeDoc);
       if (editing.getView() === view) editing.setView(null);
       view.destroy();
     };
@@ -217,6 +213,8 @@ export function RichTextEditor({
       onPointerDown={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
       ref={mountRef}
+      // a centred text block shrinks to its content (the box centres it), as the idle renderer lays it out
+      data-ctr={centresBlock(bodyStyle) ? '' : undefined}
       style={{
         ...(themeVars as React.CSSProperties),
         width: '100%',

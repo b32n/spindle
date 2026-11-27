@@ -43,6 +43,11 @@ export function bodyBoxStyle(body: BodyStyle | undefined, defaultVAlign: keyof t
   };
 }
 
+/** Whether the live editor should let its text block shrink to the content so `anchorCtr` can centre it (not with columns). */
+export function centresBlock(body: BodyStyle | undefined): boolean {
+  return !!body?.anchorCtr && resolveColumns(body).count < 2;
+}
+
 /** Overflow of the element box: a body that declares autofit shows its text in full; an unset body keeps clipping. */
 export function bodyOverflow(body: BodyStyle | undefined): 'hidden' | 'visible' {
   return hasAutofit(body) ? 'visible' : 'hidden';

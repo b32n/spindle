@@ -49,7 +49,7 @@ Not in the current scope; verified absent in code.
       render in text boxes and shapes and in the live editor. `shrink` recomputes only when the user edits (a
       2.5 percent step search); `resize` fits the box height on commit. Edited from the "Text box options" control.
       Still open: shrink-to-fit with several columns measures the balanced column height (text can still overflow),
-      `resize` does not grow vertical text, table cells have no autofit, and paragraph/run attributes (bullets,
+      `resize` does not grow vertical text or shapes (the option is offered for text boxes only), table cells have no autofit, and paragraph/run attributes (bullets,
       spacing forms, baseline, caps, fields) are K3b/K3c.
 - [ ] **Rich speaker notes** — notes are plain-text only (`NotesPanel.tsx`).
 - [ ] **Real PDF / PNG export backend** — intentionally **not** in these

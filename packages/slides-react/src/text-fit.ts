@@ -2,6 +2,7 @@
 // the live DOM: it sets the autofit variables on a text body, asks the browser whether the text overflows, and keeps a
 // registry of the interactive text bodies so a toolbar action can refit an element that is not being edited.
 
+import { Plugin } from 'prosemirror-state';
 import {
   autofitMode,
   fitShrinkScale,
@@ -88,28 +89,38 @@ export function refitElement(deck: Pick<DeckImpl, 'getElement' | 'updateElement'
   if (box?.isConnected) persistFit(deck, id, box);
 }
 
+export interface FitController {
+  live: () => void;
+  settle: () => void;
+  flush: () => void;
+}
+
 /**
  * Fit bookkeeping for one live editor session. Each document change calls `live()` (rescale through the CSS variables
- * only, so typing stays cheap); the commit calls `settle()` while the editor is attached (it needs layout) to store the
- * scale or resize the box; teardown calls `flush()`, which stores the last live scale without measuring because the
- * node may already be detached.
+ * only, so typing stays cheap, and mark the session edited); the commit calls `settle()` while the editor is attached
+ * (it needs layout) to store the scale or resize the box, but only once the text changed, so opening and leaving a box
+ * leaves an imported scale as stored; teardown calls `flush()`, which stores the last live scale without measuring
+ * because the node may already be detached.
  */
 export function createFitController(
   deck: Pick<DeckImpl, 'getElement' | 'updateElement'>,
   id: string,
   box: HTMLElement,
   disabled: boolean
-): { live: () => void; settle: () => void; flush: () => void } {
+): FitController {
   let pending: ShrinkResult | null = null;
+  let edited = false;
   const bodyOf = (): BodyStyle | undefined => (deck.getElement(id) as { bodyStyle?: BodyStyle } | undefined)?.bodyStyle;
   return {
     live: () => {
+      edited = true;
       const body = bodyOf();
       if (disabled || autofitMode(body) !== 'shrink') return;
       pending = measureShrink(box, textVert(body) !== 'horz');
     },
     settle: () => {
-      if (disabled) return;
+      if (disabled || !edited) return;
+      edited = false;
       persistFit(deck, id, box);
       pending = null;
     },
@@ -119,6 +130,23 @@ export function createFitController(
       pending = null;
     },
   };
+}
+
+/** The editor plugin that reports each document change to the fit controller. */
+export function fitPlugin(fit: Pick<FitController, 'live'>): Plugin {
+  return new Plugin({
+    view: () => ({
+      update: (v, prev) => {
+        if (!prev.doc.eq(v.state.doc)) fit.live();
+      },
+    }),
+  });
+}
+
+/** End an editor session: write the last document when asked (non-collab teardown), then store the last live fit. */
+export function endSession(fit: Pick<FitController, 'flush'>, writeDoc?: () => void): void {
+  writeDoc?.();
+  fit.flush();
 }
 
 /** A ref callback that registers the stage's text body for an element (React 19 runs the returned cleanup on detach). */
