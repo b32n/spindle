@@ -184,11 +184,16 @@ test.describe('sheets: file open / download round-trips', () => {
     ).toEqual(['A7:D8']);
     expect(ws.getColumn(1).width ?? 0).toBeGreaterThan(ws.getColumn(2).width ?? 0);
 
-    // Re-open the downloaded file through the UI: the model must match the first open.
+    // Re-open the downloaded file through the UI: the model must match the first open. Opening is asynchronous and the
+    // model still holds the first open until it finishes, so a poll on equality alone would pass on the stale model.
+    // Replace the model with a different file first, then wait for the re-open to land (cell A1 changes back to
+    // 'Item') before comparing.
+    await openFixture(page, 'exceljs-frozen.xlsx');
+    await sheet.expectValue(0, 0, 'Frozen header');
+    expect(JSON.stringify(await dumpWorkbook(page))).not.toBe(JSON.stringify(original));
     await openViaChooser(page, OPEN, asUpload(file, XLSX_MIME));
-    await expect
-      .poll(async () => JSON.stringify(await dumpWorkbook(page)))
-      .toBe(JSON.stringify(original));
+    await sheet.expectValue(0, 0, 'Item');
+    expect(await dumpWorkbook(page)).toEqual(original);
   });
 
   test('S-FIO-05 XLSX -> XLSX keeps frozen panes and widths', async ({ page }) => {
