@@ -139,4 +139,14 @@ describe('pruneTiming', () => {
     expect(ids(out)).toEqual(['2']);
     expect(out.match(/<p:par>/g)).toHaveLength(3);
   });
+
+  it('prunes many references under one par outside any bldLst in linear time', () => {
+    const n = 50000;
+    const hostile = `<p:par><p:cTn/>${'<p:set><p:spTgt spid="1"/></p:set>'.repeat(n)}</p:par>`;
+    const start = Date.now();
+    const out = pruneTiming(timing(click(3, par(4, '2')) + hostile), new Set(['1']));
+    expect(Date.now() - start).toBeLessThan(1000);
+    expect(out).toBeDefined();
+    expect(out).not.toContain('spid="1"');
+  });
 });

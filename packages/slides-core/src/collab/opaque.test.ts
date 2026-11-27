@@ -4,7 +4,7 @@ import { encodeOpaqueEntry, hashBytes, type OpaquePart } from '@b32nio/spindle-s
 import { DeckImpl } from '../deck';
 import { createOpaqueElement } from '../scene/elements';
 import type { OpaqueElement } from '../scene/types';
-import { COLLAB_SCHEMA_VERSION, CollabSchemaVersionError, assertSchemaVersion, getDeckYTypes, hydrateYDocFromData, readSchemaVersion, serializeYDocToData, yMapToElement } from './y-schema';
+import { COLLAB_SCHEMA_VERSION, CollabSchemaVersionError, assertSchemaVersion, getDeckYTypes, hydrateYDocFromData, readSchemaVersion, serializeYDocToData, yMapToElement, yMapToSlide } from './y-schema';
 
 // Opaque content in collaboration (plan K11, schema v10): the element, the slide's transition and timing, the part map.
 
@@ -243,5 +243,22 @@ describe('an opaque deck in a room', () => {
     expect(b.getOpaqueParts()).toHaveLength(1);
     ha.detach();
     hb.detach();
+  });
+});
+
+describe('a peer-written slide opaque value', () => {
+  const read = (v: unknown): unknown => {
+    const ydoc = new Y.Doc();
+    const m = ydoc.getMap<unknown>('s');
+    m.set('index', 'a0');
+    m.set('opaque', v);
+    return yMapToSlide('s1', m).opaque;
+  };
+  it('keeps only string transition and timing, and drops anything else', () => {
+    expect(read({ transition: '<t/>', timing: '<p/>', extra: 1 })).toEqual({ transition: '<t/>', timing: '<p/>' });
+    expect(read({ timing: '<p/>' })).toEqual({ timing: '<p/>' });
+    expect(read({ transition: '<t/>', timing: 5 })).toEqual({ transition: '<t/>' });
+    expect(read({ transition: 7, timing: {} })).toBeUndefined();
+    for (const v of [5, 'x', null, true]) expect(read(v)).toBeUndefined();
   });
 });

@@ -122,15 +122,25 @@ const ancestors = function* (t: Tag): Generator<Tag> {
   for (let a = t.parent; a?.parent; a = a.parent) yield a;
 };
 
+/** Whether a `par` is a preset effect; its `cTn` is looked up once per `par` (a lookup per hit is quadratic on a hostile sibling list). */
+function isPreset(par: Tag, cache: Map<Tag, boolean>): boolean {
+  let v = cache.get(par);
+  if (v === undefined) {
+    v = PRESET_CLASS.test(child(par, 'cTn')?.open ?? '');
+    cache.set(par, v);
+  }
+  return v;
+}
+
 /** The tag to remove for a reference to a deleted shape: its build entry, or the effect (or interactive sequence, or behaviour) the reference belongs to. */
-function doomed(ref: Tag): Tag | undefined {
+function doomed(ref: Tag, presets: Map<Tag, boolean>): Tag | undefined {
   if (BUILD.has(ref.local)) return ref;
   let inCondition = false;
   let behavior: Tag | undefined;
   for (const a of ancestors(ref)) {
     if (a.local === 'cond') inCondition = true;
     else if (inCondition && CONTAINER.has(a.local)) return a;
-    else if (a.local === 'par' && PRESET_CLASS.test(child(a, 'cTn')?.open ?? '')) return a;
+    else if (a.local === 'par' && isPreset(a, presets)) return a;
     else if (!behavior && BEHAVIOR.has(a.local)) behavior = a;
   }
   return behavior;
@@ -160,8 +170,9 @@ export function pruneTiming(xml: string, removed: ReadonlySet<string>): string |
   const hits = [...walk(root)].filter((t) => (t.local === 'spTgt' || BUILD.has(t.local)) && removed.has(spidOf(t) ?? ''));
   if (hits.length === 0) return xml;
   const gone = new Set<Tag>();
+  const presets = new Map<Tag, boolean>();
   for (const ref of hits) {
-    const d = doomed(ref);
+    const d = doomed(ref, presets);
     if (d) gone.add(d);
   }
   if (gone.size === 0) return xml;

@@ -218,7 +218,15 @@ export function yMapToSlide(id: string, m: Y.Map<unknown>): Slide {
   if (m.has('background')) slide.background = m.get('background') as Slide['background'];
   if (m.has('notes')) slide.notes = m.get('notes') as RichTextDoc;
   if (m.get('hidden') === true) slide.hidden = true;
-  if (m.has('opaque')) slide.opaque = m.get('opaque') as Slide['opaque'];
+  const opaque = m.get('opaque');
+  if (typeof opaque === 'object' && opaque !== null) {
+    // a peer controls this value: keep only the string members
+    const { transition, timing } = opaque as { transition?: unknown; timing?: unknown };
+    const kept: NonNullable<Slide['opaque']> = {};
+    if (typeof transition === 'string') kept.transition = transition;
+    if (typeof timing === 'string') kept.timing = timing;
+    if (kept.transition !== undefined || kept.timing !== undefined) slide.opaque = kept;
+  }
   return slide;
 }
 
