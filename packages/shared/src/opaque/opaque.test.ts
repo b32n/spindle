@@ -382,6 +382,36 @@ describe('readOpaqueParts size pre-checks', () => {
     }
   });
 
+  it.each([
+    ['oversized', 100],
+    ['normal-sized', 3],
+  ])(
+    'counts a %s peer entry under a key the store already holds as loaded, without slicing or hashing it',
+    async (_n, size) => {
+      const held = await entryFor(bytes(1, 2, 3));
+      const store = createOpaqueStore({ maxPartBytes: 10 });
+      await readOpaqueParts(mapOf(new Map([held])), store);
+      const peer = encodeOpaqueEntry({
+        hash: held[0],
+        contentType: CT,
+        bytes: new Uint8Array(size),
+      });
+      const sliceSpy = jest.spyOn(peer, 'slice');
+      const digest = jest.spyOn(globalThis.crypto.subtle, 'digest');
+      try {
+        expect(await readOpaqueParts(mapOf(new Map([[held[0], peer]])), store)).toEqual({
+          loaded: 1,
+          rejected: [],
+        });
+        expect(sliceSpy).not.toHaveBeenCalled();
+        expect(digest).not.toHaveBeenCalled();
+        expect(store.size).toBe(1);
+      } finally {
+        digest.mockRestore();
+      }
+    }
+  );
+
   it('propagates a missing SubtleCrypto as an error rather than rejecting the peer entries', async () => {
     const real = Object.getOwnPropertyDescriptor(globalThis, 'crypto')!;
     const e = await entryFor(bytes(1));

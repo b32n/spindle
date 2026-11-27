@@ -65,7 +65,7 @@ export function writeOpaqueParts(store: OpaqueStore, map: OpaqueYMap): number {
 }
 
 export interface OpaqueReadResult {
-  /** Entries whose key, encoding and SHA-256 are valid, and that fit the store's caps. */
+  /** Entries whose key, encoding and SHA-256 are valid and that fit the store's caps, plus those under keys the store already held. */
   loaded: number;
   /** Keys of entries that were malformed, whose bytes do not hash to the key, or that did not fit. They are skipped, never thrown on. */
   rejected: string[];
@@ -74,6 +74,7 @@ export interface OpaqueReadResult {
 /**
  * Load every valid part of the map into the store. A remote peer's data is untrusted: an entry is rejected from its header, before any
  * copy or hash, when its part is over the per-part cap or would not fit the store, and otherwise re-hashed against its key.
+ * An entry under a key the store already holds is counted as loaded without being read.
  * Rejects (does not skip) only when SubtleCrypto is unavailable, which is the host's problem, not the peer's.
  */
 export async function readOpaqueParts(
@@ -85,8 +86,13 @@ export async function readOpaqueParts(
   map.forEach((v, k) => entries.push([k, v]));
   const result: OpaqueReadResult = { loaded: 0, rejected: [] };
   for (const [key, value] of entries) {
+    if (isOpaqueHash(key) && store.has(key)) {
+      // Already held (and verified when it went in): the peer's copy is neither sliced nor hashed, whatever its size.
+      result.loaded++;
+      continue;
+    }
     const part = isOpaqueHash(key)
-      ? decodeOpaqueEntry(key, value, (n) => store.has(key) || !trusted.refusal(n))
+      ? decodeOpaqueEntry(key, value, (n) => !trusted.refusal(n))
       : undefined;
     if (!part || (await hashBytes(part.bytes)) !== key || !trusted.insertVerified(part))
       result.rejected.push(key);
