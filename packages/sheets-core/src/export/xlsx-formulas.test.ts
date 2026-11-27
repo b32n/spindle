@@ -1,4 +1,4 @@
-import { isFormulaEvaluable, rangeSpan, spanRef } from './xlsx-formulas';
+import { isFormulaEvaluable, parseRange, rangeSpan, spanRef } from './xlsx-formulas';
 
 describe('isFormulaEvaluable', () => {
   it.each([
@@ -34,6 +34,22 @@ describe('isFormulaEvaluable', () => {
   it('looks for names and unknown functions in every operand', () => {
     expect(isFormulaEvaluable('1+(2*SUM(A1,B1:B2))-Name')).toBe(false);
     expect(isFormulaEvaluable('-SUM(1)%')).toBe(true);
+  });
+});
+
+describe('parseRange', () => {
+  it.each([
+    ['G11:G15', { row: 10, col: 6, rows: 5, cols: 1 }],
+    ['A1', { row: 0, col: 0, rows: 1, cols: 1 }],
+    ['$B$2:$D$3', { row: 1, col: 1, rows: 2, cols: 3 }],
+    ['aa10:ab12', { row: 9, col: 26, rows: 3, cols: 2 }],
+  ])('reads the first cell and size of %s', (ref, range) => {
+    expect(parseRange(ref)).toEqual(range);
+  });
+
+  it('does not read what is not a range', () => {
+    expect(parseRange('B1:A1')).toBeUndefined();
+    expect(parseRange('nonsense')).toBeUndefined();
   });
 });
 

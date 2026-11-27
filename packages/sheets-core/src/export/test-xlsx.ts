@@ -27,4 +27,3 @@ export async function xlsxWith(cellsByRow: Record<number, string[]>): Promise<Ui
   zip.file('xl/worksheets/sheet1.xml', sheet);
   return zip.generateAsync({ type: 'uint8array' });
 }
-

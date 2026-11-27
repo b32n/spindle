@@ -20,7 +20,7 @@ import { generateId } from '../utils/id';
 import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
 import { isFaithfulFormatCode } from '../number-format';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
-import { isFormulaEvaluable, rangeSpan, spanRef } from './xlsx-formulas';
+import { isFormulaEvaluable, parseRange, spanRef } from './xlsx-formulas';
 
 type IoXlsx = Awaited<ReturnType<typeof loadIo>>;
 
@@ -230,7 +230,12 @@ export async function importFromXlsx(
   // really a workbook) would leave it with no sheets at all, so refuse it up front.
   if (result.sheets.length === 0) throw new Error('The file contains no worksheets.');
   const warnings = [...result.warnings];
-  const { data, sheetIds, spanBudgetCut } = toWorkbookData(result, workbook, io);
+  // one warning per array formula the file gave a range that does not start at its cell, counted after a small cap (the file chooses how many)
+  let misplaced = 0;
+  const { data, sheetIds, spanBudgetCut } = toWorkbookData(result, workbook, io, (message) => {
+    if (misplaced++ < MAX_ARRAY_WARNINGS) warnings.push(message);
+  });
+  if (misplaced > MAX_ARRAY_WARNINGS) warnings.push(`${misplaced - MAX_ARRAY_WARNINGS} more array formulas whose range does not start at their cell were read as one-cell formulas.`);
   if (spanBudgetCut > 0) loss.items.push(spanBudgetItem(spanBudgetCut));
   // the file's saved results are the values (the engine recalculates a formula when its precedents change), unless the host asks for a recalculation
   workbook.setData(data, { keepCachedValues: recalculateOnLoad !== true });
@@ -274,14 +279,15 @@ export function inspectXlsx(bytes: Uint8Array, options: Pick<DetectXlsxLossOptio
 function toWorkbookData(
   result: SpreadsheetImportResult,
   workbook: WorkbookImpl,
-  io: IoXlsx
+  io: IoXlsx,
+  warn: (message: string) => void
 ): { data: WorkbookData; sheetIds: string[]; spanBudgetCut: number } {
   const stylePool = new StylePool();
   const formatPool = new FormatPool();
   const sheetIds = result.sheets.map(() => generateId());
   let spanBudgetCut = 0;
   const sheets: SheetData[] = result.sheets.map((sheet, i) => {
-    const converted = toSheetData(sheet, sheetIds[i], stylePool, formatPool, io);
+    const converted = toSheetData(sheet, sheetIds[i], stylePool, formatPool, io, warn);
     spanBudgetCut += converted.spanBudgetCut;
     return converted.data;
   });
@@ -307,12 +313,16 @@ function toWorkbookData(
  */
 const ARRAY_CLEAR_BUDGET = 5_000_000;
 
+/** Warnings about array ranges that do not start at their cell that an import lists before it only counts the rest. */
+const MAX_ARRAY_WARNINGS = 20;
+
 function toSheetData(
   sheet: SpreadsheetSheet,
   id: string,
   stylePool: StylePool,
   formatPool: FormatPool,
-  io: IoXlsx
+  io: IoXlsx,
+  warn: (message: string) => void
 ): { data: SheetData; spanBudgetCut: number } {
   const cells: SheetData['cells'] = [];
   let maxRow = 0;
@@ -334,10 +344,15 @@ function toSheetData(
         cell.cachedOnly = true;
       }
       const info = spreadsheetCell.formulaInfo;
-      const span = info?.type === 'array' && info.ref !== undefined ? rangeSpan(info.ref) : undefined;
-      if (span) {
-        cell.arraySpan = info?.dynamic ? { ...span, spill: true } : span;
-        arrays.push({ row: Number(rowStr), col: Number(colStr), ...span, cell });
+      const range = info?.type === 'array' && info.ref !== undefined ? parseRange(info.ref) : undefined;
+      if (range) {
+        const row = Number(rowStr);
+        const col = Number(colStr);
+        if (range.row === row && range.col === col) {
+          const span = { rows: range.rows, cols: range.cols };
+          cell.arraySpan = info?.dynamic ? { ...span, spill: true } : span;
+          arrays.push({ row, col, ...span, cell });
+        } else warn(`${sheet.name.slice(0, 64)}!${spanRef(row, col, 1, 1)}: the array formula's range ${info?.ref} does not start at the cell, so it is read as a one-cell formula.`);
       }
     }
     if (spreadsheetCell.hyperlink) cell.hyperlink = spreadsheetCell.hyperlink;

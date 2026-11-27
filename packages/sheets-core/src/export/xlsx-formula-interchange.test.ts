@@ -263,6 +263,45 @@ describe('array and dynamic-array formulas', () => {
     expect(cellAt(wb, 0, 2)?.arraySpan).toBeUndefined();
   });
 
+  it("reads an array whose range does not start at its cell as a one-cell formula, keeps the plain cells around it and warns", async () => {
+    // F5 claims A1:B2: the extent is not F5:G6, so G5 and F6 are not part of it and must not be dropped
+    const bytes = await xlsxWith({
+      5: [fcell('F5', '1+1', 2, 't="array" ref="A1:B2"'), ncell('G5', 55)],
+      6: [ncell('F6', 66)],
+    });
+    const { wb, warnings } = await open(bytes);
+    expect(cellAt(wb, 4, 5)).toMatchObject({ formula: '=1+1', value: 2 });
+    expect(cellAt(wb, 4, 5)?.arraySpan).toBeUndefined();
+    expect(cellAt(wb, 4, 6)?.value).toBe(55);
+    expect(cellAt(wb, 5, 5)?.value).toBe(66);
+    expect(wb.getSpillRegion(undefined, 4, 5)).toBeUndefined();
+    expect(warnings.filter((w) => /does not start at the cell/.test(w))).toEqual([
+      "Sheet1!F5: the array formula's range A1:B2 does not start at the cell, so it is read as a one-cell formula.",
+    ]);
+  });
+
+  it.each([
+    ['row only', 'B2', 'B1:C2'],
+    ['column only', 'B2', 'C2:D3'],
+    ['a range that ends at the cell', 'B2', 'A1:B2'],
+    ['a cell elsewhere', 'B2', 'A1'],
+  ])('reads %s of an array ref off its anchor as a one-cell formula', async (_name, anchor, ref) => {
+    const { wb, warnings } = await open(await xlsxWith({ 2: [fcell(anchor, '1+1', 2, `t="array" ref="${ref}"`, ' cm="1"'), ncell('C2', 7)], 3: [ncell('B3', 8)] }));
+    expect(cellAt(wb, 1, 1)?.arraySpan).toBeUndefined();
+    expect(cellAt(wb, 1, 2)?.value).toBe(7);
+    expect(cellAt(wb, 2, 1)?.value).toBe(8);
+    expect(warnings.some((w) => /does not start at the cell/.test(w))).toBe(true);
+  });
+
+  it('counts the warnings for misplaced array ranges after a small cap', async () => {
+    const rows: Record<number, string[]> = {};
+    for (let i = 2; i < 28; i++) rows[i] = [fcell(`B${i}`, '1+1', 2, 't="array" ref="A1:B2"')];
+    const { warnings } = await open(await xlsxWith(rows));
+    const mine = warnings.filter((w) => /does not start at the cell|whose range does not start/.test(w));
+    expect(mine).toHaveLength(21);
+    expect(mine[20]).toBe('6 more array formulas whose range does not start at their cell were read as one-cell formulas.');
+  });
+
   it('keeps a legacy array formula over a huge extent as saved values and says so (xlsx.package.sizeLimit)', async () => {
     const bytes = await xlsxWith({ 1: [ncell('A1', 1), fcell('B1', 'SUM(A1:A1)', 1, 't="array" ref="B1:XFD1048576"')] });
     const { wb, loss } = await open(bytes);
@@ -273,7 +312,7 @@ describe('array and dynamic-array formulas', () => {
   it('keeps dynamic arrays past the clearing budget as saved values and says so', async () => {
     // 2,600 dynamic-array formulas over a huge extent each, on a sheet of 2,600 cells: each costs the cell count to clear, together past 5,000,000
     const rows: Record<number, string[]> = {};
-    for (let i = 0; i < 2600; i++) rows[i + 1] = [fcell(`A${i + 1}`, 'SUM(1,2)', 3, 't="array" ref="A1:Z1000000"', ' cm="1"')];
+    for (let i = 0; i < 2600; i++) rows[i + 1] = [fcell(`A${i + 1}`, 'SUM(1,2)', 3, `t="array" ref="A${i + 1}:Z1000000"`, ' cm="1"')];
     const { wb, loss } = await open(await xlsxWith(rows));
     const cut = loss.items.find((i) => i.id === 'xlsx.package.sizeLimit' && /array formula/.test(i.label));
     expect(cut?.count).toBeGreaterThan(0);

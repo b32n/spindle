@@ -33,8 +33,8 @@ export function isFormulaEvaluable(formula: string): boolean {
 
 const RANGE = /^\$?([A-Z]{1,3})\$?([0-9]{1,7})(?::\$?([A-Z]{1,3})\$?([0-9]{1,7}))?$/i;
 
-/** Rows and columns of an A1 range or cell (`G11:G15` is 5 x 1); undefined when it is not one. */
-export function rangeSpan(ref: string): { rows: number; cols: number } | undefined {
+/** First cell (0-based) and size of an A1 range or cell (`G11:G15` starts at row 10, column 6 and is 5 x 1); undefined when it is not one. */
+export function parseRange(ref: string): { row: number; col: number; rows: number; cols: number } | undefined {
   const m = RANGE.exec(ref);
   if (!m) return undefined;
   const r1 = Number(m[2]);
@@ -42,7 +42,13 @@ export function rangeSpan(ref: string): { rows: number; cols: number } | undefin
   const r2 = m[4] === undefined ? r1 : Number(m[4]);
   const c2 = m[3] === undefined ? c1 : columnLabelToIndex(m[3].toUpperCase());
   if (r1 < 1 || r2 < r1 || c2 < c1) return undefined;
-  return { rows: r2 - r1 + 1, cols: c2 - c1 + 1 };
+  return { row: r1 - 1, col: c1, rows: r2 - r1 + 1, cols: c2 - c1 + 1 };
+}
+
+/** Rows and columns of an A1 range or cell (`G11:G15` is 5 x 1); undefined when it is not one. */
+export function rangeSpan(ref: string): { rows: number; cols: number } | undefined {
+  const range = parseRange(ref);
+  return range && { rows: range.rows, cols: range.cols };
 }
 
 /** The A1 range of `rows` x `cols` cells whose first cell is at (`row`, `col`), both 0-based (a single cell for 1 x 1). */

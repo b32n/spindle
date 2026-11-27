@@ -18,12 +18,12 @@ function cell(i: number): string {
   switch (shape) {
     // array formulas over a block of 26,000 cells each (a legacy one keeps its extent, a dynamic one clears what its saved result occupies)
     case 'arrays-legacy':
-      return `<c r="${ref}"><f t="array" ref="A1:Z1000">SUM(1,2)</f><v>3</v></c>`;
+      return `<c r="${ref}"><f t="array" ref="${ref}:Z${i + 1000}">SUM(1,2)</f><v>3</v></c>`;
     case 'arrays-dynamic':
-      return `<c r="${ref}" cm="1"><f t="array" ref="A1:Z1000">SUM(1,2)</f><v>3</v></c>`;
+      return `<c r="${ref}" cm="1"><f t="array" ref="${ref}:Z${i + 1000}">SUM(1,2)</f><v>3</v></c>`;
     // one array formula over the whole sheet
     case 'array-huge':
-      return `<c r="${ref}"><f t="array" ref="A1:XFD1048576">SUM(1,2)</f><v>3</v></c>`;
+      return `<c r="${ref}"><f t="array" ref="${ref}:XFD1048576">SUM(1,2)</f><v>3</v></c>`;
     // 8,000 characters of nesting: parsed or refused, never a stack overflow
     case 'nested':
       return `<c r="${ref}"><f>${esc('('.repeat(4000) + '1' + ')'.repeat(4000))}</f><v>1</v></c>`;
@@ -55,6 +55,7 @@ async function main(): Promise<void> {
   let cachedOnly = 0;
   for (const [, , c] of sheet.entries()) if (c.cachedOnly) cachedOnly++;
   const names = loss.items.find((i) => i.id === 'xlsx.formulas.unsupported');
+  // the JSON line on stdout is how this child process reports to its parent (formula-hostile.test.ts), so console.log is intended here
   console.log(
     JSON.stringify({
       ms,
