@@ -16,7 +16,11 @@ import { XML_LIMITS } from '../../common/safe-xml';
 // - Safety: entities are never expanded or fetched (the five predefined ones and numeric references are decoded in one pass by
 //   `decodeEntities`, anything else stays as written), a DOCTYPE is skipped, nesting is capped (`XML_LIMITS.maxDepth`).
 // - Never throws. Damaged markup (a stray or mismatched end tag, an unclosed element at the end, a tag cut short) stops the scan
-//   and `scanXml` answers `false`; what was reported before that point stands.
+//   and `scanXml` answers `false`; what was reported before that point stands. An element with more than `MAX_ATTRIBUTES` attributes
+//   is damage of this kind too (Excel writes fewer than 30): V8 stops answering once an object has some 8 million properties, and
+//   a few MB of zip can ask for that. The other per-element counts need no cap: names and values are bounded by the part's own
+//   size (a part is at most the inflated cap and is read once, front to back, each piece costing its length), children by the
+//   element budget of the tree builders (the sheet scanner keeps none), nesting by `maxDepth`, text by the part.
 // ---------------------------------------------------------------------------
 
 export type SaxAttrs = Readonly<Record<string, string>>;
@@ -31,6 +35,9 @@ export interface SaxHandler {
   /** Asked before each markup item: `true` ends the scan there (a caller that has all it will take). */
   halted?(): boolean;
 }
+
+/** Most attributes (namespace declarations included) one element may have before the part counts as damaged. */
+export const MAX_ATTRIBUTES = 1024;
 
 const ATTR = /\s*([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/y;
 const NAME = /[^\s/>]+/y;
@@ -95,10 +102,11 @@ export function scanXml(xml: string, handler: SaxHandler, maxDepth: number = XML
       const name = local(m[0]);
       i += m[0].length;
       const attrs: Record<string, string> = Object.create(null);
-      for (;;) {
+      for (let seen = 0; ; ) {
         ATTR.lastIndex = i;
         const a = ATTR.exec(xml);
         if (a === null) break;
+        if (++seen > MAX_ATTRIBUTES) return false;
         i += a[0].length;
         const key = a[1];
         if (key === 'xmlns' || key.startsWith('xmlns:')) continue;

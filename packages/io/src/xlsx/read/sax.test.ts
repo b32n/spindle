@@ -1,4 +1,4 @@
-import { scanXml, type SaxAttrs } from './sax';
+import { MAX_ATTRIBUTES, scanXml, type SaxAttrs } from './sax';
 
 type Event = ['open', string, SaxAttrs, boolean] | ['close', string] | ['text', string];
 
@@ -166,10 +166,10 @@ describe('scanXml: hostile shapes of a million items', () => {
     ['a million `]` after a subset opener', () => `${open}<!a [${']'.repeat(N)}`, false],
     ['a million `<`', () => `${open}${'<'.repeat(N)}`, false],
     ['a million stray end tags', () => `${open}${'</a>'.repeat(N)}`, false],
-    ['a million attributes on one element', () => `${open}<a ${'b="1" '.repeat(N)}/></worksheet>`, true],
+    ['a million attributes on one element (past the cap: damage)', () => `${open}<a ${'b="1" '.repeat(N)}/></worksheet>`, false],
     ['a million attributes without a value', () => `${open}<a ${'b '.repeat(N)}/></worksheet>`, false],
     ['a million unclosed attribute values', () => `${open}<a ${'b="1'.repeat(N)}/></worksheet>`, false],
-    ['a million `xmlns` declarations on one element', () => `${open}<a ${Array.from({ length: N }, (_, i) => `xmlns:p${i}="u"`).join(' ')}/></worksheet>`, true],
+    ['a million `xmlns` declarations on one element (past the cap: damage)', () => `${open}<a ${Array.from({ length: N }, (_, i) => `xmlns:p${i}="u"`).join(' ')}/></worksheet>`, false],
     ['an attribute value of 20 million characters', () => `${open}<a b="${'x'.repeat(20_000_000)}"/></worksheet>`, true],
     ['an attribute value of 2 million entities', () => `${open}<a b="${'&#65;'.repeat(2_000_000)}"/></worksheet>`, true],
     ['2 million entities in text', () => `${open}<a>${'&amp;'.repeat(2_000_000)}</a></worksheet>`, true],
@@ -190,6 +190,36 @@ describe('scanXml: hostile shapes of a million items', () => {
   it('reads 800,000 declarations (it was quadratic in them)', () => {
     expect(scanXml(`${open}${'<!a>'.repeat(800_000)}</worksheet>`, { open: () => undefined, close: () => undefined, text: () => undefined })).toBe(true);
   }, 120_000);
+});
+
+describe('scanXml: the attribute cap', () => {
+  const attrs = (n: number, prefix = 'a'): string => Array.from({ length: n }, (_, i) => ` ${prefix}${i}="v"`).join('');
+
+  it('reads an element of exactly MAX_ATTRIBUTES attributes', () => {
+    const { ok, events } = scan(`<r><c${attrs(MAX_ATTRIBUTES)}/></r>`);
+    expect(ok).toBe(true);
+    expect(Object.keys(events[1][2] as SaxAttrs)).toHaveLength(MAX_ATTRIBUTES);
+  });
+
+  it('answers false for one attribute more, and the element is not reported (what came before stands)', () => {
+    const { ok, events } = scan(`<r><b/><c${attrs(MAX_ATTRIBUTES + 1)}/><d/></r>`);
+    expect(ok).toBe(false);
+    expect(names(events)).toEqual(['open r', 'open b', 'close b']);
+  });
+
+  it('counts namespace declarations, which are not reported, and prefixed names too', () => {
+    expect(scan(`<c${attrs(MAX_ATTRIBUTES, 'xmlns:p')}/>`).ok).toBe(true);
+    expect(scan(`<c${attrs(MAX_ATTRIBUTES + 1, 'xmlns:p')}/>`).ok).toBe(false);
+    expect(scan(`<c${attrs(MAX_ATTRIBUTES / 2, 'xmlns:p')}${attrs(MAX_ATTRIBUTES / 2 + 1, 'x:a')}/>`).ok).toBe(false);
+  });
+
+  it('counts per element, not per part: many elements of 1,024 each are read', () => {
+    expect(scan(`<r>${`<c${attrs(MAX_ATTRIBUTES)}/>`.repeat(20)}</r>`).ok).toBe(true);
+  });
+
+  it('is the cap for repeats of one name as well (they cost a scan each, and the cap bounds that)', () => {
+    expect(scan(`<c${' a="1"'.repeat(MAX_ATTRIBUTES + 1)}/>`).ok).toBe(false);
+  });
 });
 
 describe('scanXml without a text handler', () => {
