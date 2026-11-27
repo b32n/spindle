@@ -134,6 +134,9 @@ export function normalizeWorkbook(data: unknown): JsonObject {
             : value,
       };
       if (typeof cell.formula === 'string') json.formula = cell.formula;
+      if (cell.cachedOnly === true) json.cachedOnly = true;
+      const span = asObj(cell.arraySpan);
+      if (typeof span.rows === 'number' && typeof span.cols === 'number') json.arraySpan = { rows: span.rows, cols: span.cols };
       if (cell.styleId) json.style = refOf(cell.styleId, stylePool, styles, 's', outStyles);
       if (cell.formatId) json.format = refOf(cell.formatId, formatPool, formats, 'f', outFormats);
       if (cell.hyperlink !== undefined) json.hyperlink = digestBinaries(cell.hyperlink);

@@ -89,3 +89,15 @@ export class SpillIndex {
     this.coverage.clear();
   }
 }
+
+/**
+ * What a legacy (CSE) array formula shows over its extent (`span`, the rows and columns of the range it was entered over): the
+ * result cut to it, padded with `#N/A` where it is smaller, a single value filling all of it, and for a one-cell extent the first value.
+ */
+export function fitToExtent(result: unknown, span: { rows: number; cols: number }): unknown {
+  const matrix = Array.isArray(result) ? (result as unknown[][]) : [[result]];
+  const first = matrix[0]?.[0] ?? '#N/A';
+  if (span.rows * span.cols === 1) return first;
+  const fill = matrix.length === 1 && matrix[0].length === 1;
+  return Array.from({ length: span.rows }, (_, r) => Array.from({ length: span.cols }, (_, c) => (fill ? first : (matrix[r]?.[c] ?? '#N/A'))));
+}

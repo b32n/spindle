@@ -79,11 +79,15 @@ export function scanFormula(text: string): FormulaFacts {
   const noQuoted = mask(text, true, false);
   const plain = mask(text, true, true);
   const functions: string[] = [];
+  const seen = new Set<string>();
   for (const m of plain.matchAll(CALL)) {
     // `_xlpm.name(...)` calls a LET/LAMBDA parameter, which is a name and not a function.
     if (/^_xlpm\./i.test(m[1])) continue;
     const fn = normalizeFunctionName(m[1]);
-    if (!functions.includes(fn)) functions.push(fn);
+    if (!seen.has(fn)) {
+      seen.add(fn);
+      functions.push(fn);
+    }
   }
   return {
     functions,

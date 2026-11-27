@@ -291,6 +291,7 @@ const SUMMARY_IDS = [
   'xlsx.dataValidation',
   'xlsx.definedNames',
   'xlsx.externalLinks',
+  'xlsx.formulas.cachedOnly',
   'xlsx.formulas.structuredRefs',
   'xlsx.formulas.unsupported',
   'xlsx.hiddenSheets',
@@ -419,6 +420,30 @@ describe('formulas', () => {
       '</row>';
     const report = await detectXlsxLoss(await build({ sheets: [{ name: 'F', rows }] }), { knownFunctions: KNOWN });
     expect(item(report, 'xlsx.formulas.unsupported')).toMatchObject({ count: 2, where: ['IFS', 'SORT', 'STDEV.S', 'LET'] });
+  });
+
+  it('reports formulas kept as the saved value (xlsx.formulas.cachedOnly) by function, by what the engine can evaluate, and for shared followers', async () => {
+    const rows =
+      '<row r="1">' +
+      cell('A1', '<f>SUM(1)+LET(x,1,x)</f><v>1</v>') + // a function the editor lacks
+      cell('A2', '<f>SUM(1)</f><v>1</v>') + // evaluable
+      cell('A3', '<f>SUM(1)+++</f><v>1</v>') + // known functions, not evaluable
+      cell('A4', '<f t="shared" ref="A4:A6" si="0">SUM(Quarter1)</f><v>1</v>') +
+      cell('A5', '<f t="shared" si="0"/><v>1</v>') +
+      cell('A6', '<f t="shared" si="0"/><v>1</v>') +
+      '</row>';
+    const bytes = await build({ sheets: [{ name: 'F', rows }, { name: 'G', rows: f('SUM(1)') }] });
+    const evaluable = (text: string) => !text.includes('+++') && !text.includes('Quarter1');
+    const both = await detectXlsxLoss(bytes, { knownFunctions: KNOWN, isFormulaEvaluable: evaluable });
+    expect(item(both, 'xlsx.formulas.cachedOnly')).toMatchObject({ count: 5, where: ['F'], state: 'kept' });
+    expect(item(both, 'xlsx.formulas.cachedOnly')?.effect).toMatch(/out of date/);
+    expect(item(both, 'xlsx.formulas.unsupported')).toMatchObject({ count: 1, where: ['LET'] });
+    // functions only: a formula the engine cannot parse is not found
+    expect(item(await detectXlsxLoss(bytes, { knownFunctions: KNOWN }), 'xlsx.formulas.cachedOnly')?.count).toBe(1);
+    // the predicate only: the editor's own verdict decides
+    expect(item(await detectXlsxLoss(bytes, { isFormulaEvaluable: evaluable }), 'xlsx.formulas.cachedOnly')?.count).toBe(4);
+    // neither option: nothing to say
+    expect(item(await detectXlsxLoss(bytes), 'xlsx.formulas.cachedOnly')).toBeUndefined();
   });
 
   it('counts every cell of a shared formula with the facts of its master', async () => {

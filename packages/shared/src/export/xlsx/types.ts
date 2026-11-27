@@ -62,6 +62,15 @@ export interface SpreadsheetCell {
   sharedString?: number;
   /** Set on a cell whose formula was shared or an array formula (own reader, S2). */
   formulaInfo?: XlsxFormulaInfo;
+  /**
+   * The formula is written exactly as given: the engine could not evaluate it, so it keeps the text the file had (future-function
+   * prefixes included) next to the result the file saved for it (S4). Without it the writer adds the prefixes the file format needs.
+   */
+  cachedOnly?: true;
+  /** A1 range the formula is an array formula over (`t="array"`, written from the anchor cell; a single cell for a one-cell array formula). */
+  arrayRef?: string;
+  /** With `arrayRef`: a dynamic-array formula (spills), written with the cell metadata (`cm`) Excel marks it with; without it a legacy (CSE) array formula. */
+  dynamicArray?: true;
 }
 
 export interface SpreadsheetMergedRange {
@@ -122,4 +131,9 @@ export interface DetectXlsxLossOptions {
   knownFunctions?: ReadonlySet<string>;
   /** True when the editor reproduces a number format code exactly; without it `xlsx.numberFormats.approximated` is not reported. */
   isNumberFormatExact?: (code: string) => boolean;
+  /**
+   * True when the formula engine can evaluate a formula (the text as the file has it, no leading `=`); the rest are kept as their
+   * saved value and reported as `xlsx.formulas.cachedOnly`. Without it only the functions `knownFunctions` lacks make a formula cached-only.
+   */
+  isFormulaEvaluable?: (formula: string) => boolean;
 }

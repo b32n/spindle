@@ -33,7 +33,6 @@ const api = (over: Partial<XlsxEditorApi> = {}): XlsxEditorApi => ({
   importFromXlsx: async () => ({ warnings: ['w'], loss: okLoss }),
   exportToXlsx: async () => new Uint8Array([1]),
   inspectXlsx: async () => okLoss,
-  parsesFormula: () => true,
   ...over,
 });
 const bytes = new Uint8Array([1, 2, 3]);

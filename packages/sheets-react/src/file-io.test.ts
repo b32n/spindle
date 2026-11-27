@@ -144,6 +144,24 @@ describe('importWorkbookFile limits', () => {
     await expect(importWorkbookFile(new WorkbookImpl('w', 'W'), asFile(bytes, 'b.xlsx'), { limits: { maxEntries: 1 } })).rejects.toMatchObject({ code: 'size-limit' });
   });
 
+  it('keeps the results the file saved unless the host asks to recalculate on load', async () => {
+    // a file whose saved result for B1 is not what the engine computes
+    const JSZip = (await import('jszip')).default;
+    const zip = await JSZip.loadAsync((await exportWorkbookFile(makeWorkbook(), 'xlsx')).data as Uint8Array);
+    const xml = await zip.file('xl/worksheets/sheet1.xml')!.async('string');
+    zip.file(
+      'xl/worksheets/sheet1.xml',
+      xml.replace(/<sheetData>[\s\S]*<\/sheetData>/, '<sheetData><row r="1"><c r="A1"><v>10</v></c><c r="B1" t="str"><f>A1*2</f><v>SAVED</v></c></row></sheetData>')
+    );
+    const bytes = await zip.generateAsync({ type: 'uint8array' });
+    const kept = new WorkbookImpl('w', 'W');
+    await importWorkbookFile(kept, asFile(bytes, 'f.xlsx'));
+    expect(kept.getSheet().getCell(0, 1)?.value).toBe('SAVED');
+    const recalculated = new WorkbookImpl('w', 'W');
+    await importWorkbookFile(recalculated, asFile(bytes, 'f.xlsx'), { recalculateOnLoad: true });
+    expect(recalculated.getSheet().getCell(0, 1)?.value).toBe(20);
+  });
+
   it('does not use the limits for a CSV', async () => {
     const wb = new WorkbookImpl('w', 'W');
     await importWorkbookFile(wb, asFile('a,b\n1,2\n', 'd.csv'), { limits: { maxTotalCells: 1 } });

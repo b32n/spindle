@@ -18,6 +18,8 @@ function dumpWorkbook(wb: WorkbookImpl): unknown {
         if (!cell) continue;
         const out: Record<string, unknown> = { value: wb.getCellCalculatedValue(sd.id, r, c) ?? cell.value ?? null };
         if (cell.formula) out.formula = cell.formula;
+        if (cell.cachedOnly) out.cachedOnly = true;
+        if (cell.arraySpan) out.arraySpan = cell.arraySpan;
         if (cell.styleId) out.style = wb.getStylePool().get(cell.styleId);
         if (cell.formatId) out.format = wb.getFormatPool().get(cell.formatId);
         if (out.value !== null || out.formula || out.style || out.format) cells[`${String.fromCharCode(65 + c)}${r + 1}`] = out;

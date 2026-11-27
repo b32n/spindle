@@ -1,0 +1,294 @@
+import JSZip from 'jszip';
+import ExcelJS from 'exceljs';
+import { exportToXlsx, importFromXlsx } from './xlsx';
+import { fcell, ncell, xlsxWith } from './test-xlsx';
+import { WorkbookImpl } from '../workbook';
+import type { Cell } from '../types';
+
+// S4: formula interchange. Files are made by replacing the sheet data of a workbook this editor exported, so every case is a
+// small hand-written <sheetData>: what Excel writes (`_xlfn.` prefixes, `t="array"` with `cm`), with the results Excel saved.
+
+async function open(bytes: Uint8Array, options: Parameters<typeof importFromXlsx>[2] = {}) {
+  const wb = new WorkbookImpl('wb', 'WB');
+  const result = await importFromXlsx(bytes, wb, options);
+  return { wb, ...result };
+}
+
+const cellAt = (wb: WorkbookImpl, row: number, col: number): Cell | undefined => wb.getCell(undefined, row, col);
+
+async function sheetXml(bytes: Uint8Array): Promise<string> {
+  const zip = await JSZip.loadAsync(bytes);
+  return zip.file('xl/worksheets/sheet1.xml')!.async('string');
+}
+
+describe('prefixed functions the engine knows (_xlfn., _xlws.)', () => {
+  it('are read by their plain name, keep the saved result, and recalculate when a precedent changes', async () => {
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 10), fcell('B1', '_xlfn.IFS(A1>5,"big",TRUE,"small")', 'SAVED')],
+      2: [fcell('A2', '_xlfn.CONCAT(B1,"!")', 'SAVED!')],
+    });
+    const { wb, loss } = await open(bytes);
+    expect(cellAt(wb, 0, 1)).toMatchObject({ formula: '=IFS(A1>5,"big",TRUE,"small")', value: 'SAVED' });
+    expect(cellAt(wb, 0, 1)?.cachedOnly).toBeUndefined();
+    expect(cellAt(wb, 1, 0)).toMatchObject({ formula: '=CONCAT(B1,"!")', value: 'SAVED!' });
+    // not a formula the editor lacks: nothing to report
+    expect(loss.items.map((i) => i.id)).not.toContain('xlsx.formulas.cachedOnly');
+    expect(loss.items.map((i) => i.id)).not.toContain('xlsx.formulas.unsupported');
+
+    wb.setCellValue(undefined, 0, 0, 1);
+    expect(cellAt(wb, 0, 1)?.value).toBe('small');
+    expect(cellAt(wb, 1, 0)?.value).toBe('small!');
+  });
+
+  it('are recalculated on load when the host asks (recalculateOnLoad)', async () => {
+    const bytes = await xlsxWith({ 1: [ncell('A1', 10), fcell('B1', '_xlfn.IFS(A1>5,"big",TRUE,"small")', 'SAVED')] });
+    expect((await open(bytes, { recalculateOnLoad: true })).wb.getCellValue(undefined, 0, 1)).toBe('big');
+    expect((await open(bytes, { recalculateOnLoad: false })).wb.getCellValue(undefined, 0, 1)).toBe('SAVED');
+  });
+
+  it('keep a formula with no saved result evaluated, and a volatile one recalculated, on load', async () => {
+    const bytes = await xlsxWith({ 1: [ncell('A1', 4), fcell('B1', 'A1*2', null), fcell('C1', 'TODAY()', 1)] });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 0, 1)?.value).toBe(8);
+    expect(cellAt(wb, 0, 2)?.value).not.toBe(1);
+  });
+
+  it('are written back with their prefixes, and the file reads the same again', async () => {
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 3), fcell('B1', '_xlfn.IFS(A1>5,"big",TRUE,"small")', 'small'), fcell('C1', 'SUM(1,2)', 3), fcell('D1', '_xlfn._xlws.SORT(A1:A1)', 3)],
+    });
+    const { wb } = await open(bytes);
+    const out = await exportToXlsx(wb);
+    const xml = await sheetXml(out);
+    expect(xml).toContain('<f>_xlfn.IFS(A1&gt;5,&quot;big&quot;,TRUE,&quot;small&quot;)</f>');
+    expect(xml).toMatch(/<f>SUM\(1,2\)<\/f>/);
+    expect(xml).toMatch(/_xlfn\._xlws\.SORT\(A1:A1\)/);
+    const again = await open(out);
+    expect(again.wb.getData().sheets[0].cells.map((c) => c.cell.formula).sort()).toEqual(
+      wb.getData().sheets[0].cells.map((c) => c.cell.formula).sort(),
+    );
+  });
+});
+
+describe('implicit intersection and spill references', () => {
+  it('maps _xlfn.SINGLE and _xlfn.ANCHORARRAY both ways', async () => {
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 5), ncell('A2', 6)],
+      3: [fcell('C3', '_xlfn.SINGLE(A1:A2)', 5), fcell('D3', 'SUM(_xlfn.ANCHORARRAY(C3))', 5)],
+    });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 2, 2)).toMatchObject({ formula: '=@A1:A2', value: 5 });
+    expect(cellAt(wb, 2, 3)).toMatchObject({ formula: '=SUM(C3#)' });
+    expect(cellAt(wb, 2, 2)?.cachedOnly).toBeUndefined();
+    const xml = await sheetXml(await exportToXlsx(wb));
+    expect(xml).toMatch(/<f>_xlfn\.SINGLE\(A1:A2\)<\/f>/);
+    expect(xml).toMatch(/<f>SUM\(_xlfn\.ANCHORARRAY\(C3\)\)<\/f>/);
+    expect(xml).not.toContain('@A1');
+    expect(xml).not.toMatch(/C3#/);
+  });
+
+  it('writes a formula typed with @ and # the same way', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    wb.setCellValue(undefined, 0, 0, 5);
+    wb.setFormula(undefined, 0, 1, '=@A1:A2');
+    const xml = await sheetXml(await exportToXlsx(wb));
+    expect(xml).toMatch(/<f>_xlfn\.SINGLE\(A1:A2\)<\/f>/);
+  });
+});
+
+describe('cached-only formulas (the engine cannot evaluate them)', () => {
+  const LET = '_xlfn.LET(_xlpm.x,A1,_xlpm.y,A2,_xlpm.x+_xlpm.y)';
+
+  async function opened() {
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 2), fcell('B1', LET, 99)],
+      2: [ncell('A2', 3), fcell('B2', 'A1+++', 7), fcell('C2', 'Quarter1*2', 54), fcell('D2', 'B1+1', 100)],
+    });
+    return open(bytes);
+  }
+
+  it('keep the file text and the saved result, whatever changes under them, and are reported', async () => {
+    const { wb, loss } = await opened();
+    expect(cellAt(wb, 0, 1)).toMatchObject({ formula: `=${LET}`, value: 99, cachedOnly: true });
+    expect(cellAt(wb, 1, 1)).toMatchObject({ formula: '=A1+++', value: 7, cachedOnly: true });
+    expect(cellAt(wb, 1, 2)).toMatchObject({ formula: '=Quarter1*2', value: 54, cachedOnly: true });
+    expect(cellAt(wb, 0, 1)?.formulaAst).toBeUndefined();
+
+    // nothing shows #NAME?; a formula that reads a cached-only cell reads its saved result
+    wb.setCellValue(undefined, 0, 0, 40);
+    expect(cellAt(wb, 0, 1)?.value).toBe(99);
+    expect(cellAt(wb, 1, 1)?.value).toBe(7);
+    expect(wb.getCellCalculatedValue(undefined, 1, 3)).toBe(100);
+    wb.getSheet().insertRows(0, 1);
+    expect(cellAt(wb, 1, 1)?.formula).toBe(`=${LET}`);
+    expect(cellAt(wb, 2, 1)?.formula).toBe('=A1+++');
+
+    const item = loss.items.find((i) => i.id === 'xlsx.formulas.cachedOnly');
+    expect(item).toMatchObject({ count: 3, state: 'kept' });
+    expect(item?.effect).toMatch(/out of date/);
+    expect(item?.effect).toMatch(/written back unchanged/);
+    const unsupported = loss.items.find((i) => i.id === 'xlsx.formulas.unsupported');
+    expect(unsupported?.effect).toMatch(/^kept: shown from the value saved in the file/);
+  });
+
+  it('are written back unchanged, formula and result, and stay cached-only on the next open', async () => {
+    const { wb } = await opened();
+    const out = await exportToXlsx(wb);
+    const xml = await sheetXml(out);
+    expect(xml).toContain(`<f>${LET}</f>`);
+    expect(xml).toMatch(/<f>A1\+\+\+<\/f>/);
+    expect(xml).toMatch(/<f>Quarter1\*2<\/f>/);
+    expect(xml).toMatch(/<v>99<\/v>/);
+    const again = await open(out);
+    const flags = (w: WorkbookImpl) =>
+      w
+        .getData()
+        .sheets[0].cells.map((c) => [c.cell.formula, c.cell.value, c.cell.cachedOnly])
+        .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+    expect(flags(again.wb)).toEqual(flags(wb));
+    const reader = new ExcelJS.Workbook();
+    // @ts-expect-error -- Buffer<ArrayBuffer> vs exceljs's plain Buffer type
+    await reader.xlsx.load(Buffer.from(out));
+    expect(reader.worksheets[0].getCell('B1').result).toBe(99);
+  });
+
+  it('lose the mark when the user edits the cell, as a value or as a formula', async () => {
+    const { wb } = await opened();
+    wb.setFormula(undefined, 0, 1, '=A1+A2');
+    expect(cellAt(wb, 0, 1)).toMatchObject({ value: 5 });
+    expect(cellAt(wb, 0, 1)?.cachedOnly).toBeUndefined();
+    wb.setCellValue(undefined, 1, 1, 'typed');
+    expect(cellAt(wb, 1, 1)?.cachedOnly).toBeUndefined();
+    expect(cellAt(wb, 1, 1)?.formula).toBeUndefined();
+    wb.setFormula(undefined, 1, 2, '=A1+++');
+    expect(cellAt(wb, 1, 2)?.cachedOnly).toBeUndefined();
+  });
+
+  it('survive undo, redo and renaming or adding a sheet', async () => {
+    const { wb } = await opened();
+    wb.setCellValue(undefined, 5, 5, 1);
+    wb.undo();
+    expect(cellAt(wb, 0, 1)).toMatchObject({ value: 99, cachedOnly: true, formula: `=${LET}` });
+    wb.redo();
+    expect(cellAt(wb, 0, 1)).toMatchObject({ value: 99, cachedOnly: true });
+    wb.addSheet('Quarter1');
+    expect(cellAt(wb, 1, 2)).toMatchObject({ value: 54, cachedOnly: true, formula: '=Quarter1*2' });
+  });
+});
+
+describe('array and dynamic-array formulas', () => {
+  const sorted = (extra: string[] = []) =>
+    xlsxWith({
+      1: [ncell('A1', 5), ncell('B1', 1), fcell('D1', '_xlfn._xlws.SORT(A1:A3)', 1, 't="array" ref="D1:D3"', ' cm="1"')],
+      2: [ncell('A2', 3), ncell('D2', 3)],
+      3: [ncell('A3', 4), ncell('D3', 4), ...extra],
+    });
+
+  it('keep an array formula the engine evaluates as a spill: the saved result cells are the spill, not cells', async () => {
+    const { wb } = await open(await sorted());
+    expect(cellAt(wb, 0, 3)).toMatchObject({ formula: '=SORT(A1:A3)', arraySpan: { rows: 3, cols: 1 } });
+    expect(cellAt(wb, 1, 3)).toBeUndefined();
+    expect(wb.getSpillRegion(undefined, 0, 3)).toMatchObject({ rows: 3, cols: 1, values: [[3], [4], [5]] });
+    expect(wb.getCellValue(undefined, 0, 3)).toBe(3);
+    // and follows its precedents
+    wb.setCellValue(undefined, 0, 0, 0);
+    expect(wb.getSpillRegion(undefined, 0, 3)?.values).toEqual([[0], [3], [4]]);
+  });
+
+  it('write an array formula back with its extent, and the spilled values next to it', async () => {
+    const { wb } = await open(await sorted());
+    const out = await exportToXlsx(wb);
+    const xml = await sheetXml(out);
+    expect(xml).toMatch(/<c r="D1" cm="1"><f t="array" ref="D1:D3">_xlfn\._xlws\.SORT\(A1:A3\)<\/f><v>3<\/v><\/c>/);
+    expect(xml).toMatch(/<c r="D2"><v>4<\/v><\/c>/);
+    expect(xml).toMatch(/<c r="D3"><v>5<\/v><\/c>/);
+    const again = await open(out);
+    expect(again.wb.getData()).toEqual(expect.objectContaining({}));
+    expect(cellAt(again.wb, 0, 3)).toMatchObject({ formula: '=SORT(A1:A3)', arraySpan: { rows: 3, cols: 1 } });
+    expect(again.wb.getSpillRegion(undefined, 0, 3)?.values).toEqual([[3], [4], [5]]);
+  });
+
+  it('keep a one-cell array formula as one, so the file still says array', async () => {
+    const bytes = await xlsxWith({ 1: [ncell('A1', 2), ncell('B1', 3), fcell('C1', 'SUM(A1:B1*A1:B1)', 13, 't="array" ref="C1"')] });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 0, 2)).toMatchObject({ formula: '=SUM(A1:B1*A1:B1)', value: 13, arraySpan: { rows: 1, cols: 1 } });
+    expect(await sheetXml(await exportToXlsx(wb))).toMatch(/<f t="array" ref="C1">SUM\(A1:B1\*A1:B1\)<\/f>/);
+  });
+
+  it('keep an array formula the engine cannot evaluate as saved values: formula, result cells and extent unchanged', async () => {
+    const f = '_xlfn.LET(_xlpm.x,A1:A3,_xlfn._xlws.SORT(_xlpm.x))';
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 5), fcell('D1', f, 3, 't="array" ref="D1:D3"', ' cm="1"')],
+      2: [ncell('A2', 3), ncell('D2', 4)],
+      3: [ncell('A3', 4), ncell('D3', 5)],
+    });
+    const { wb, loss } = await open(bytes);
+    expect(cellAt(wb, 0, 3)).toMatchObject({ formula: `=${f}`, value: 3, cachedOnly: true, arraySpan: { rows: 3, cols: 1 } });
+    expect(cellAt(wb, 1, 3)).toMatchObject({ value: 4 });
+    expect(cellAt(wb, 2, 3)).toMatchObject({ value: 5 });
+    expect(loss.items.find((i) => i.id === 'xlsx.formulas.cachedOnly')?.count).toBe(1);
+    const xml = await sheetXml(await exportToXlsx(wb));
+    expect(xml).toContain(`<f t="array" ref="D1:D3">${f}</f>`);
+    expect(xml).toMatch(/<c r="D2"><v>4<\/v><\/c>/);
+  });
+
+  it('write a formula typed as a spill as an array formula over what it spilled', async () => {
+    const wb = new WorkbookImpl('wb', 'WB');
+    for (let r = 0; r < 3; r++) wb.setCellValue(undefined, r, 0, 3 - r);
+    wb.setFormula(undefined, 0, 2, '=SORT(A1:A3)');
+    const xml = await sheetXml(await exportToXlsx(wb));
+    expect(xml).toMatch(/<f t="array" ref="C1:C3">_xlfn\._xlws\.SORT\(A1:A3\)<\/f>/);
+  });
+
+  it('give an unreadable or reversed ref no extent, and keep the formula', async () => {
+    const bytes = await xlsxWith({ 1: [ncell('A1', 1), fcell('B1', 'A1+1', 2, 't="array" ref="B1:A1"'), fcell('C1', 'A1+2', 3, 't="array" ref="nonsense"')] });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 0, 1)).toMatchObject({ formula: '=A1+1', value: 2 });
+    expect(cellAt(wb, 0, 1)?.arraySpan).toBeUndefined();
+    expect(cellAt(wb, 0, 2)?.arraySpan).toBeUndefined();
+  });
+
+  it('keeps a legacy array formula over a huge extent as saved values and says so (xlsx.package.sizeLimit)', async () => {
+    const bytes = await xlsxWith({ 1: [ncell('A1', 1), fcell('B1', 'SUM(A1:A1)', 1, 't="array" ref="B1:XFD1048576"')] });
+    const { wb, loss } = await open(bytes);
+    expect(cellAt(wb, 0, 1)).toMatchObject({ formula: '=SUM(A1:A1)', value: 1, cachedOnly: true });
+    expect(loss.items.find((i) => i.id === 'xlsx.package.sizeLimit' && /array formula/.test(i.label))).toMatchObject({ count: 1 });
+  });
+
+  it('keeps dynamic arrays past the clearing budget as saved values and says so', async () => {
+    // 2,600 dynamic-array formulas over a huge extent each, on a sheet of 2,600 cells: each costs the cell count to clear, together past 5,000,000
+    const rows: Record<number, string[]> = {};
+    for (let i = 0; i < 2600; i++) rows[i + 1] = [fcell(`A${i + 1}`, 'SUM(1,2)', 3, 't="array" ref="A1:Z1000000"', ' cm="1"')];
+    const { wb, loss } = await open(await xlsxWith(rows));
+    const cut = loss.items.find((i) => i.id === 'xlsx.package.sizeLimit' && /array formula/.test(i.label));
+    expect(cut?.count).toBeGreaterThan(0);
+    expect(cut?.count).toBeLessThan(2600);
+    expect(cellAt(wb, 2599, 0)).toMatchObject({ cachedOnly: true, value: 3 });
+  }, 120_000);
+
+  it('cuts a legacy array formula to its extent: a one-cell one shows the first value, a bigger one pads with #N/A', async () => {
+    const bytes = await xlsxWith({
+      1: [ncell('A1', 1), ncell('A2', 2), fcell('B1', 'A1:A2*10', 10, 't="array" ref="B1"'), fcell('C1', 'A1:A2*10', 10, 't="array" ref="C1:E2"'), ncell('D2', 99)],
+    });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 0, 1)).toMatchObject({ value: 10, arraySpan: { rows: 1, cols: 1 } });
+    // C1:E2 is 2 x 3 over a 2 x 1 result: the rest is #N/A, as Excel shows it; the plain cell D2 inside the extent is part of the result, not kept
+    expect(wb.getSpillRegion(undefined, 0, 2)).toMatchObject({ rows: 2, cols: 3, values: [[10, '#N/A', '#N/A'], [20, '#N/A', '#N/A']] });
+    expect(cellAt(wb, 1, 3)).toBeUndefined();
+  });
+
+  it('fills the extent of a legacy array formula with a scalar result', async () => {
+    const { wb } = await open(await xlsxWith({ 1: [fcell('A1', '1+1', 2, 't="array" ref="A1:B2"')] }));
+    expect(wb.getSpillRegion(undefined, 0, 0)).toMatchObject({ rows: 2, cols: 2, values: [[2, 2], [2, 2]] });
+    expect(cellAt(wb, 0, 0)).toMatchObject({ arraySpan: { rows: 2, cols: 2 } });
+  });
+
+  it('keeps a dynamic array formula whose saved extent is one cell as its saved value until a precedent changes', async () => {
+    const bytes = await xlsxWith({ 1: [ncell('A1', 1), ncell('A2', 2), fcell('B1', 'A1:A2*10', 777, 't="array" ref="B1"', ' cm="1"')] });
+    const { wb } = await open(bytes);
+    expect(cellAt(wb, 0, 1)).toMatchObject({ value: 777, arraySpan: { rows: 1, cols: 1, spill: true } });
+    wb.setCellValue(undefined, 0, 0, 3);
+    expect(wb.getSpillRegion(undefined, 0, 1)).toMatchObject({ rows: 2, cols: 1, values: [[30], [20]] });
+    expect(cellAt(wb, 0, 1)?.arraySpan).toEqual({ rows: 2, cols: 1, spill: true });
+  });
+});

@@ -81,6 +81,12 @@ export interface SheetsFileImportOptions {
    * `loss` the import returns (id `xlsx.package.sizeLimit`), which names the option that raises it. Not used for `.csv`.
    */
   limits?: NonNullable<Parameters<typeof importFromXlsx>[2]>['limits'];
+  /**
+   * Recalculate every formula the engine can evaluate when an .xlsx opens (default `false`: the results saved in the file are shown
+   * and a formula is recalculated when a cell it refers to changes or it is edited). Formulas the engine cannot evaluate keep their
+   * saved result either way. Not used for `.csv`.
+   */
+  recalculateOnLoad?: boolean;
 }
 
 /**
@@ -93,7 +99,10 @@ export interface SheetsFileImportOptions {
 export async function importWorkbookFile(workbook: WorkbookImpl, file: File, options: SheetsFileImportOptions = {}): Promise<SheetsFileImportResult> {
   const ext = fileExtension(file.name);
   if (XLSX_READER_EXTENSIONS.includes(ext)) {
-    return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook, options.limits ? { limits: options.limits } : {});
+    return importFromXlsx(new Uint8Array(await file.arrayBuffer()), workbook, {
+      ...(options.limits ? { limits: options.limits } : {}),
+      ...(options.recalculateOnLoad ? { recalculateOnLoad: true } : {}),
+    });
   }
   if (ext === 'csv') {
     // "Open" semantics: build a fresh single-sheet workbook from the CSV and

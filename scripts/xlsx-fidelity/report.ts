@@ -42,7 +42,7 @@ export function toReportFile(o: HarnessReport<XlsxResult>['fixtures'][number]): 
       compared: r.values.compared,
       matched: r.values.matched,
       mismatched: r.values.mismatched,
-      passthrough: r.values.passthrough,
+      cachedOnly: r.values.cachedOnly,
       firstMismatches: r.values.firstMismatches,
     },
   };

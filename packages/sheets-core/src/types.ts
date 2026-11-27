@@ -81,6 +81,20 @@ export interface Cell {
    * to avoid pulling formula-parser types into every consumer of Cell.
    */
   formulaAst?: import('./formula-parser/stable-ast').StableFormulaNode;
+  /**
+   * An imported formula the engine cannot evaluate (a function it lacks, syntax it cannot parse): `formula` keeps the file's
+   * text exactly, `value` the result the file saved for it. It is never recalculated, so it does not follow its precedents
+   * (the formula bar says so); it is written back unchanged. Editing the cell clears it.
+   */
+  cachedOnly?: true;
+  /**
+   * The cell holds an array formula that covers this many rows and columns from the cell, as the file said. A legacy
+   * (CSE) array formula keeps exactly that extent: its result is cut or padded (`#N/A`) to it. With `spill` (a
+   * dynamic-array formula, `cm` in the file) the extent is only what the file saw: the engine spills the whole result and
+   * keeps `rows`/`cols` at what it spilled. It is also what a cached-only array formula (whose result cells are plain values) is
+   * written back with, and what marks a one-cell array formula as one.
+   */
+  arraySpan?: { rows: number; cols: number; spill?: true };
   styleId?: string; // Reference to shared style in StylePool
   formatId?: string; // Reference to shared format in FormatPool
   hyperlink?: string;

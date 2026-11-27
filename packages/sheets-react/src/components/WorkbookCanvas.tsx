@@ -70,6 +70,12 @@ export interface WorkbookCanvasProps {
    * inline object re-creates the handler on every render.
    */
   importLimits?: SheetsFileImportOptions['limits'];
+  /**
+   * Recalculate every formula the engine can evaluate when an .xlsx opens. Default `false`: the results saved in the file are
+   * shown, and a formula is recalculated when a cell it refers to changes or it is edited. Formulas the engine cannot evaluate keep
+   * their saved result either way (the formula bar says so). Not used for `.csv`.
+   */
+  recalculateOnLoad?: boolean;
   /** Called after a file was opened; `warnings` lists features the importer had to drop, and `loss` what the file holds that the editor cannot take, including what an import limit cut (`xlsx.package.sizeLimit`). */
   onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
   /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached…). */
@@ -90,6 +96,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
   exportFormats,
   fileName,
   importLimits,
+  recalculateOnLoad,
   onFileOpened,
   onFileError,
 }: WorkbookCanvasProps) {
@@ -528,7 +535,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     try {
       // Ask before replacing the workbook if the file has things we can't import.
       if (!(await confirmImport(file, await inspectWorkbookFile(file)))) return;
-      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits });
+      const { warnings, loss } = await importWorkbookFile(workbook, file, { limits: importLimits, recalculateOnLoad });
       // setData swapped every sheet; drop any state pointing into the old one.
       setActiveCell(null);
       setEditingCell(null);
@@ -537,7 +544,7 @@ export const WorkbookCanvas = memo(function WorkbookCanvas({
     } catch (err) {
       onFileError?.(err instanceof Error ? err : new Error(String(err)), 'open');
     }
-  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits]);
+  }, [workbook, onFileOpened, onFileError, confirmImport, importLimits, recalculateOnLoad]);
 
   const handleDownload = useCallback(async (format: SheetsExportFormat) => {
     try {

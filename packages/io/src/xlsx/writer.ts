@@ -1,4 +1,6 @@
 import ExcelJS from 'exceljs';
+import JSZip from 'jszip';
+import { toFileFormula } from './future-functions';
 import type {
   SpreadsheetBorder,
   SpreadsheetCell,
@@ -9,7 +11,13 @@ import type {
 
 export async function exportXlsx(input: SpreadsheetExportInput): Promise<Uint8Array> {
   const workbook = new ExcelJS.Workbook();
-  input.sheets.forEach((sheet) => writeSheet(workbook.addWorksheet(sheet.name), sheet));
+  // the cells of each sheet (by part name) that are dynamic-array formulas: exceljs cannot write their cell metadata, so it is added to the package
+  const dynamic = new Map<string, Set<string>>();
+  input.sheets.forEach((sheet) => {
+    const worksheet = workbook.addWorksheet(sheet.name);
+    const addresses = writeSheet(worksheet, sheet);
+    if (addresses.size > 0) dynamic.set(`xl/worksheets/sheet${worksheet.id}.xml`, addresses);
+  });
 
   // The sheet that was active in the editor is the one Excel opens on.
   const last = input.sheets.length - 1;
@@ -18,14 +26,52 @@ export async function exportXlsx(input: SpreadsheetExportInput): Promise<Uint8Ar
     workbook.views = [{ x: 0, y: 0, width: 28800, height: 17000, firstSheet: 0, activeTab: active, visibility: 'visible' }];
   }
   const buffer = await workbook.xlsx.writeBuffer();
-  return new Uint8Array(buffer);
+  const bytes = new Uint8Array(buffer);
+  return dynamic.size > 0 ? addDynamicArrayMetadata(bytes, dynamic) : bytes;
 }
 
-function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): void {
+/** The metadata part Excel writes for dynamic-array formulas (`XLDAPR`): every cell marked `cm="1"` refers to its one entry. */
+const DYNAMIC_ARRAY_METADATA =
+  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+  '<metadata xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:xda="http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray">' +
+  '<metadataTypes count="1"><metadataType name="XLDAPR" minSupportedVersion="120000" copy="1" pasteAll="1" pasteValues="1" merge="1" splitFirst="1" rowColShift="1" clearFormats="1" clearComments="1" assign="1" coerce="1" cellMeta="1"/></metadataTypes>' +
+  '<futureMetadata name="XLDAPR" count="1"><bk><extLst><ext uri="{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}"><xda:dynamicArrayProperties fDynamic="1" fCollapsed="0"/></ext></extLst></bk></futureMetadata>' +
+  '<cellMetadata count="1"><bk><rc t="1" v="0"/></bk></cellMetadata></metadata>';
+
+/** Add the dynamic-array metadata part and mark the given cells (addresses per sheet part) with it. */
+async function addDynamicArrayMetadata(bytes: Uint8Array, dynamic: Map<string, Set<string>>): Promise<Uint8Array> {
+  const zip = await JSZip.loadAsync(bytes);
+  for (const [part, addresses] of dynamic) {
+    // (exceljs wrote the part: the name comes from the worksheet it was made for)
+    const xml = await zip.file(part)!.async('string');
+    zip.file(
+      part,
+      xml.replace(/<c r="([A-Z]{1,3}[0-9]+)"/g, (whole, address: string) => (addresses.has(address) ? `<c r="${address}" cm="1"` : whole))
+    );
+  }
+  zip.file('xl/metadata.xml', DYNAMIC_ARRAY_METADATA);
+  const types = await zip.file('[Content_Types].xml')!.async('string');
+  zip.file(
+    '[Content_Types].xml',
+    types.replace('</Types>', '<Override PartName="/xl/metadata.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheetMetadata+xml"/></Types>')
+  );
+  const rels = await zip.file('xl/_rels/workbook.xml.rels')!.async('string');
+  zip.file(
+    'xl/_rels/workbook.xml.rels',
+    rels.replace('</Relationships>', '<Relationship Id="rIdMetadata1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sheetMetadata" Target="metadata.xml"/></Relationships>')
+  );
+  return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+}
+
+/** Write a sheet; returns the addresses of its dynamic-array formula cells. */
+function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): Set<string> {
+  const dynamicCells = new Set<string>();
   for (const [key, cell] of sheet.cells) {
     const [row, col] = key.split(':').map(Number);
     // exceljs is 1-based; our grid is 0-based.
-    writeCell(worksheet.getCell(row + 1, col + 1), cell);
+    const excelCell = worksheet.getCell(row + 1, col + 1);
+    writeCell(excelCell, cell);
+    if (cell.formula && cell.dynamicArray && cell.arrayRef !== undefined && ARRAY_REF.test(cell.arrayRef)) dynamicCells.add(excelCell.address);
   }
 
   sheet.columnWidths?.forEach((px, col) => {
@@ -48,10 +94,14 @@ function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): void
   sheet.mergedRanges?.forEach((range) => {
     worksheet.mergeCells(range.startRow + 1, range.startCol + 1, range.endRow + 1, range.endCol + 1);
   });
+  return dynamicCells;
 }
 
 /** Engine-internal marker for a circular reference; not a value Excel knows, so it is never written. */
 const INTERNAL_CIRCULAR = '#CIRCULAR!';
+
+/** An A1 cell or range: all the writer accepts as the extent of an array formula. */
+const ARRAY_REF = /^[A-Z]{1,3}[0-9]{1,7}(?::[A-Z]{1,3}[0-9]{1,7})?$/;
 
 function writeCell(excelCell: ExcelJS.Cell, cell: SpreadsheetCell): void {
   // Excel evaluates a circular reference to 0.
@@ -60,7 +110,12 @@ function writeCell(excelCell: ExcelJS.Cell, cell: SpreadsheetCell): void {
     // exceljs caches a formula's last-known result alongside its expression;
     // `undefined` result is fine (recalculated on open) but we have it, so
     // pass it through.
-    excelCell.value = { formula: cell.formula, result: cell.value ?? undefined };
+    // a formula the engine could not evaluate is written as the file had it; any other gets the prefixes the file format needs
+    const formula = cell.cachedOnly ? cell.formula : toFileFormula(cell.formula);
+    excelCell.value =
+      cell.arrayRef === undefined || !ARRAY_REF.test(cell.arrayRef)
+        ? { formula, result: cell.value ?? undefined }
+        : ({ formula, result: cell.value ?? undefined, shareType: 'array', ref: cell.arrayRef } as unknown as ExcelJS.CellValue);
   } else if (cell.hyperlink) {
     // exceljs's hyperlink cell value can't also carry a formula — a cell with
     // both is a rare combination we don't attempt to represent.

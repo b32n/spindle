@@ -1,4 +1,4 @@
-import { SpillIndex } from './spill';
+import { SpillIndex, fitToExtent } from './spill';
 import { WorkbookImpl } from './workbook';
 
 describe('SpillIndex', () => {
@@ -162,5 +162,27 @@ describe('#SPILL! recovery', () => {
     expect(a1Spill(wb)).toBe('#SPILL!');
     wb.getSheet().deleteRows(1, 1);
     expect(a1Spill(wb)).toBe(1);
+  });
+});
+
+describe('fitToExtent (a legacy array formula over its entered range)', () => {
+  it('cuts a bigger result to the extent', () => {
+    expect(fitToExtent([[1, 2, 3], [4, 5, 6]], { rows: 1, cols: 2 })).toEqual([[1, 2]]);
+    expect(fitToExtent([[1], [2], [3]], { rows: 2, cols: 1 })).toEqual([[1], [2]]);
+  });
+  it('pads a smaller result with #N/A', () => {
+    expect(fitToExtent([[1], [2]], { rows: 2, cols: 2 })).toEqual([[1, '#N/A'], [2, '#N/A']]);
+    expect(fitToExtent([[1, 2]], { rows: 2, cols: 2 })).toEqual([[1, 2], ['#N/A', '#N/A']]);
+  });
+  it('fills the extent with a single value, a scalar or a one-cell array', () => {
+    expect(fitToExtent(7, { rows: 2, cols: 2 })).toEqual([[7, 7], [7, 7]]);
+    expect(fitToExtent([[0]], { rows: 1, cols: 3 })).toEqual([[0, 0, 0]]);
+    expect(fitToExtent('x', { rows: 2, cols: 1 })).toEqual([['x'], ['x']]);
+  });
+  it('is the first value for a one-cell extent', () => {
+    expect(fitToExtent([[1, 2], [3, 4]], { rows: 1, cols: 1 })).toBe(1);
+    expect(fitToExtent(5, { rows: 1, cols: 1 })).toBe(5);
+    expect(fitToExtent([], { rows: 1, cols: 1 })).toBe('#N/A');
+    expect(fitToExtent([], { rows: 1, cols: 2 })).toEqual([['#N/A', '#N/A']]);
   });
 });
