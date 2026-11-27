@@ -71,8 +71,9 @@ attributes, attribute values of millions of characters or entities, entities in 
 in `sheet.ts` the merge, hyperlink, view, extension and warning counts above; in `workbook.ts` the relationship lookup by id and the
 comment-part lookup per part; in `cell-style.ts` the number format scan and the table lookup by id; in `shared-formula.ts`,
 `values.ts`, `cell-ref.ts`, `relationships.ts` and `content-types.ts` the regular expressions (anchored, bounded or linear). The
-workbook-level parts (shared strings, styles, workbook, theme, relationships) are element trees, linear in time but costing some tens
-of times the size of the part in memory; their only bound is the 256 MB limit on an XML part (a streaming reader is future work).
+workbook-level parts are bounded by element counts, not by their size: the trees of `tree.ts` (styles, theme, `workbook.xml` but its
+`definedNames`) cost some tens of times the size of the part in memory and are refused over `maxPartElements`; shared strings,
+relationships, content types and defined names are read as events and keep at most the entries the limits allow.
 
 Bounds of the reader, not of the editor: every hostile shape tested here is read in seconds and within the memory the limits give (a table of two
 million shared strings peaked at 2.8 GB of process memory, five million took 1.17 GB). Loading a result with very many formulas into the editor's
