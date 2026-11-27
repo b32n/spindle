@@ -7,6 +7,10 @@ export {
   ensureSheetYMap,
   hydrateYDocFromData,
   serializeYDocToData,
+  COLLAB_SCHEMA_VERSION,
+  CollabSchemaVersionError,
+  readSchemaVersion,
+  assertSchemaVersion,
   type WorkbookYTypes,
   type SheetYTypes,
 } from './y-schema';
@@ -16,3 +20,5 @@ export {
   type CollabHandle,
   type AttachCollabOptions,
 } from './binding';
+
+export { getCollabBlockers, CollabBlockedError, type CollabBlocker } from './blockers';

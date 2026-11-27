@@ -492,6 +492,11 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **Sheets collaboration gate.** Sheets rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
+  `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
+  New additive exports from `@b32nio/spindle-sheets-core`: `getCollabBlockers(workbook)` (empty for now) and
+  `CollabBlockedError`; the `/collab` subpath also exports `COLLAB_SCHEMA_VERSION`, `CollabSchemaVersionError`,
+  `readSchemaVersion` and `assertSchemaVersion`.
 - **Opaque part store and loss state (X5).** New additive subpath `@b32nio/spindle-shared/opaque`: a
   content-addressed, size-capped store for package parts kept byte for byte (`createOpaqueStore`, `hashBytes`
   (SHA-256 via SubtleCrypto), `OpaquePart`, `OpaqueRef`, defaults 25 MiB per part and 200 MiB per store), a

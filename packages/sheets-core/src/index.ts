@@ -4,6 +4,8 @@ export * from './types';
 export * from './comments';
 export { WorkbookImpl } from './workbook';
 export { SheetImpl } from './sheet';
+export { getCollabBlockers, CollabBlockedError } from './collab/blockers';
+export type { CollabBlocker } from './collab/blockers';
 export { StylePool } from './style-pool';
 export { FormulaGraphImpl } from './formula-graph';
 export { EventEmitter } from './event-emitter';

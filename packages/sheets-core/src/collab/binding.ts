@@ -34,7 +34,14 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 import type { CollabIdentity, CollabProvider } from '@b32nio/spindle-shared';
 import { connectAbortable, createAttachAbortError } from '@b32nio/spindle-shared';
 
-import { getWorkbookYTypes, hydrateYDocFromData, serializeYDocToData } from './y-schema';
+import {
+  COLLAB_SCHEMA_VERSION,
+  assertSchemaVersion,
+  getWorkbookYTypes,
+  hydrateYDocFromData,
+  readSchemaVersion,
+  serializeYDocToData,
+} from './y-schema';
 import type { WorkbookData } from '../types';
 import type { WorkbookImpl } from '../workbook';
 
@@ -130,6 +137,10 @@ export async function attachCollabToWorkbook(
 
   const roomId = options.roomId ?? initialData.id;
 
+  // True until connect() has replayed the room and its schema version has been checked. A room written by a newer
+  // client is refused, so its replayed state must not be loaded into the local workbook on the way.
+  let verifyingRoom = true;
+
   // --- Outbound + remote-reload dispatcher ---------------------------------
 
   const onDocUpdate = (update: Uint8Array, origin: unknown): void => {
@@ -146,6 +157,7 @@ export async function attachCollabToWorkbook(
       syncProtocol.writeUpdate(encoder, update);
       provider.send('doc', encoding.toUint8Array(encoder));
     }
+    if (isRemote && verifyingRoom && readSchemaVersion(ydoc) > COLLAB_SCHEMA_VERSION) return;
     if (isRemote || isOurUndo) {
       // Y.Doc has new state that the workbook's internal Maps don't reflect
       // yet — remote came in via the network, or our undo just rewrote Y.
@@ -199,6 +211,10 @@ export async function attachCollabToWorkbook(
   // so it lands on the wire (via onDocUpdate) but stays out of the undo stack.
   try {
     await connectAbortable(provider, roomId, options.signal);
+    // The room (or the state restored from persistence) may have been written by a newer client whose keys this one
+    // would silently drop. Refuse before seeding or editing anything.
+    assertSchemaVersion(ydoc);
+    verifyingRoom = false;
   } catch (err) {
     // Aborted (or failed) before we seeded anything: leave no listeners, socket or doc behind.
     ydoc.off('update', onDocUpdate);
