@@ -5,7 +5,9 @@ test.describe('slides: table merge and borders', () => {
   let s: SlidesPage;
   test.beforeEach(async ({ page }) => {
     s = new SlidesPage(page);
-    await s.goto();
+    // System fonts only: the default web font swaps in after first paint and can shift the toolbar
+    // buttons under a pressed pointer (Firefox then drops the click). No web font, no swap.
+    await s.goto('?fontSource=local');
     await s.toolbar('Table (3×3)').click();
     await expect.poll(async () => (await s.els()).some((e) => e.type === 'table')).toBe(true);
   });
