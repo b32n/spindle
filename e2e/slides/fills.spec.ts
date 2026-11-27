@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { SlidesPage } from '../support/slides';
+import { closeToolbarMenu } from '../support/toolbar';
 
-// The slides toolbar collapses into a "More tools" menu below ~1500px; the shape fill controls are asserted inline.
+// The contextual shape format bar sits past the toolbar's overflow point at any width, so its fill controls are
+// reached through the "More tools" menu; a wide window keeps the Background label inline.
 test.use({ viewport: { width: 1900, height: 900 } });
 
 test.describe('slides: gradient and picture fills', () => {
@@ -21,7 +23,9 @@ test.describe('slides: gradient and picture fills', () => {
     await expect.poll(async () => (await s.els()).length).toBe(before.length + 1);
     const created = (await s.els()).find((e) => !before.includes(e.id))!;
 
-    await page.getByTestId('shape-fill-gradient').selectOption('horizontal');
+    await page.getByRole('button', { name: 'More tools', exact: true }).click();
+    await page.getByRole('menu').getByTestId('shape-fill-gradient').selectOption('horizontal');
+    await closeToolbarMenu(page);
     const el = s.stage.locator(`[data-element-id="${created.id}"]`);
     // The shape paints through an SVG paint server, so the DOM carries the gradient and the path references it.
     const fill = await el.locator('svg path, svg ellipse').first().getAttribute('fill');
