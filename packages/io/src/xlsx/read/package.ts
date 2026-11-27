@@ -100,12 +100,12 @@ export class XlsxPackage {
 
   /** The relationships of a part (`''` for the package itself): empty when it has none or its `.rels` is unreadable. */
   async rels(part: string): Promise<XlsxRelationship[]> {
-    const cached = this.relCache.get(part);
-    if (cached) return cached;
     const owner = part.replace(/^\/+/, '');
+    const cached = this.relCache.get(owner);
+    if (cached) return cached;
     const root = await this.xml(owner === '' ? '_rels/.rels' : relsPart(owner));
     const rels = parseRelationships(root, owner);
-    this.relCache.set(part, rels);
+    this.relCache.set(owner, rels);
     return rels;
   }
 }

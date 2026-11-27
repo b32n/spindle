@@ -1,4 +1,4 @@
-import { DEFAULT_THEME_COLORS } from './colors';
+import { DEFAULT_THEME_COLORS, hlsToRgb } from './colors';
 import { el } from './test-support';
 import { parseTheme } from './theme';
 
@@ -19,20 +19,60 @@ describe('parseTheme', () => {
     expect(theme.majorFont).toBe('Cambria');
     expect(theme.minorFont).toBe('Calibri');
   });
+  const warnings: string[] = [];
   it('falls back per slot: system colour without lastClr, unknown colour element, bad value, missing slot', () => {
     const theme = parseTheme(
       el(`<a:theme ${A}><a:themeElements><a:clrScheme name="x">
         <a:dk1><a:sysClr val="windowText"/></a:dk1><a:lt1><a:sysClr val="window"/></a:lt1>
-        <a:dk2><a:sysClr val="other"/></a:dk2><a:lt2><a:prstClr val="red"/></a:lt2>
+        <a:dk2><a:sysClr val="other"/></a:dk2><a:lt2><a:prstClr val="nothing"/></a:lt2>
         <a:accent1><a:srgbClr val="nope"/></a:accent1><a:accent2/><a:accent3><a:sysClr/></a:accent3>
+        <a:accent4><a:schemeClr val="accent1"/></a:accent4><a:accent5><a:scrgbClr r="1" g="2"/></a:accent5><a:accent6><a:hslClr hue="x" sat="1" lum="1"/></a:accent6>
       </a:clrScheme></a:themeElements></a:theme>`),
+      warnings,
     );
     expect(theme.colors).toEqual([
       '#ffffff', '#000000', DEFAULT_THEME_COLORS[2], DEFAULT_THEME_COLORS[3], DEFAULT_THEME_COLORS[4], DEFAULT_THEME_COLORS[5],
       ...DEFAULT_THEME_COLORS.slice(6),
     ]);
+    expect(warnings).toEqual([
+      'The theme colour lt2 (prstClr) could not be read; the Office default is used.',
+      'The theme colour dk2 (sysClr) could not be read; the Office default is used.',
+      'The theme colour accent1 (srgbClr) could not be read; the Office default is used.',
+      'The theme colour accent3 (sysClr) could not be read; the Office default is used.',
+      'The theme colour accent4 (schemeClr) could not be read; the Office default is used.',
+      'The theme colour accent5 (scrgbClr) could not be read; the Office default is used.',
+      'The theme colour accent6 (hslClr) could not be read; the Office default is used.',
+    ]);
     expect(theme.majorFont).toBeUndefined();
     expect(theme.minorFont).toBeUndefined();
   });
   it('is the Office theme for a missing part', () => expect(parseTheme(undefined).colors).toEqual([...DEFAULT_THEME_COLORS]));
+  it('resolves prstClr (incl. dk/lt/grey spellings), scrgbClr (linear light) and hslClr slots', () => {
+    const slot = (name: string, inner: string) => `<a:${name}>${inner}</a:${name}>`;
+    const warnings: string[] = [];
+    const theme = parseTheme(
+      el(`<a:theme ${A}><a:themeElements><a:clrScheme name="x">${[
+        slot('dk1', '<a:prstClr val="darkBlue"/>'),
+        slot('lt1', '<a:prstClr val="ltGrey"/>'),
+        slot('dk2', '<a:scrgbClr r="100000" g="0" b="0"/>'),
+        slot('lt2', '<a:scrgbClr r="0" g="100000" b="0.5"/>'),
+        slot('accent1', '<a:hslClr hue="0" sat="100000" lum="50000"/>'),
+        slot('accent2', '<a:hslClr hue="7200000" sat="100000" lum="50000"/>'),
+        slot('accent3', '<a:hslClr hue="-14400000" sat="100000" lum="50000"/>'),
+        slot('accent4', '<a:hslClr hue="0" sat="0" lum="50000"/>'),
+        slot('accent5', '<a:scrgbClr r="50000" g="50000" b="50000"/>'),
+        slot('accent6', '<a:scrgbClr r="0.1" g="0.1" b="0.1"/>'),
+      ].join('')}</a:clrScheme></a:themeElements></a:theme>`),
+      warnings,
+    );
+    // hue 7200000 is 120 degrees (green); a negative hue wraps (-240 degrees is 120 as well)
+    expect(theme.colors.slice(0, 10)).toEqual(['#d3d3d3', '#00008b', '#00ff00', '#ff0000', '#ff0000', '#00ff00', '#00ff00', '#808080', '#bcbcbc', '#000000']);
+    expect(warnings).toEqual([]);
+  });
+  it('hlsToRgb is the HLS to RGB conversion the tint uses', () => expect(hlsToRgb(0, 0.5, 1)).toBe('#ff0000'));
+  it('a prstClr without a name is unreadable', () => {
+    const warnings: string[] = [];
+    parseTheme(el(`<a:theme ${A}><a:themeElements><a:clrScheme name="x"><a:dk1><a:prstClr/></a:dk1></a:clrScheme></a:themeElements></a:theme>`), warnings);
+    expect(warnings).toEqual(['The theme colour dk1 (prstClr) could not be read; the Office default is used.']);
+  });
 });

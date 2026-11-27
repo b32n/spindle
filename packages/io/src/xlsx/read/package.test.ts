@@ -95,6 +95,7 @@ describe('XlsxPackage parts', () => {
     const first = await pkg.rels('xl/book.xml');
     expect(first.map((r) => r.target)).toEqual(['xl/Worksheets/Sheet1.xml']);
     expect(await pkg.rels('xl/book.xml')).toBe(first);
+    expect(await pkg.rels('/xl/book.xml')).toBe(first); // the leading slash is the same part: one cache entry
     expect(await pkg.rels('xl/text.txt')).toEqual([]);
   });
   it('keeps the first of two entries whose names differ only by case', async () => {

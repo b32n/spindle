@@ -72,7 +72,7 @@ describe('resolveColor', () => {
   });
   it('uses the workbook palette over the default one', () => {
     expect(resolveColor({ indexed: 2 }, { ...ctx, indexedColors: ['#000000', '#ffffff', '#123456'] })).toBe('#123456');
-    expect(resolveColor({ indexed: 3 }, { ...ctx, indexedColors: ['#000000'] })).toBeUndefined();
+    expect(resolveColor({ indexed: 3 }, { ...ctx, indexedColors: ['#000000'] })).toBe('#00ff00'); // beyond a short palette: the default
   });
   it('gives nothing for auto, an unreadable rgb, an unknown index, or an empty colour', () => {
     expect(resolveColor({ auto: true }, ctx)).toBeUndefined();
@@ -103,5 +103,16 @@ describe('readColor', () => {
   it('ignores attributes that are not numbers and gives undefined for no element', () => {
     expect(readColor(el('<color theme="x" tint="" indexed="1.5e400"/>'), ctx)).toEqual({});
     expect(readColor(undefined, ctx)).toBeUndefined();
+  });
+});
+
+describe('a custom palette shorter than 64 entries', () => {
+  const short = { themeColors: DEFAULT_THEME_COLORS, indexedColors: ['#123456', '#654321'] };
+  it('uses the workbook entry where it has one and the default palette per index beyond it', () => {
+    expect(resolveColor({ indexed: 0 }, short)).toBe('#123456');
+    expect(resolveColor({ indexed: 1 }, short)).toBe('#654321');
+    for (let i = 2; i < 64; i++) expect(resolveColor({ indexed: i }, short)).toBe(DEFAULT_INDEXED_COLORS[i]);
+    expect(resolveColor({ indexed: 64 }, short)).toBe('#000000');
+    expect(resolveColor({ indexed: 200 }, short)).toBeUndefined();
   });
 });

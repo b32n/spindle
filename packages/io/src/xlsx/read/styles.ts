@@ -24,7 +24,7 @@ import { boolAttr, intAttr, numAttr, put } from './values';
 
 const list = (root: XmlElement | undefined, group: string, item: string): XmlElement[] => kids(kid(root, group), item);
 
-/** The workbook's own `indexedColors`; an entry that is not a colour keeps the default for its index. `undefined` when there is none. */
+/** The workbook's own `indexedColors`; an entry that is not a colour keeps the default for its index. `undefined` when there is none. A short palette stays short: `resolveColor` falls back to the default per index. */
 function readPalette(root: XmlElement | undefined): string[] | undefined {
   const entries = list(kid(root, 'colors'), 'indexedColors', 'rgbColor');
   if (entries.length === 0) return undefined;

@@ -7,10 +7,13 @@ export { relsPart };
 /**
  * The part a relationship target names, resolved against the part that owns the relationships ('' for the package's own
  * `_rels/.rels`). Handles what producers write besides Excel's relative form: absolute (`/xl/worksheets/sheet1.xml`, openpyxl),
- * `./` and `..` segments, backslashes, and percent-encoded names. A target that climbs above the root stays at the root.
+ * `./` and `..` segments, backslashes, and percent-encoded names. A target that climbs above the root stays at the root. A
+ * fragment (`sheet1.xml#a`) is not part of a part name and is dropped.
  */
 export function resolveRelationshipTarget(owner: string, target: string): string {
   let t = target.trim().replace(/\\/g, '/');
+  const hash = t.indexOf('#');
+  if (hash >= 0) t = t.slice(0, hash);
   try {
     t = decodeURIComponent(t);
   } catch {
@@ -18,6 +21,9 @@ export function resolveRelationshipTarget(owner: string, target: string): string
   }
   return resolveTarget(owner, t);
 }
+
+/** A URI scheme of two or more characters (`file:`, `mailto:`, `http:`); one letter is a Windows drive. */
+const SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]+:/;
 
 const lastSegment = (type: string): string => type.slice(type.lastIndexOf('/') + 1);
 
@@ -31,7 +37,8 @@ export function parseRelationships(root: XmlElement | undefined, owner: string):
     if (id === undefined || raw === undefined || seen.has(id)) continue;
     seen.add(id);
     const type = r.attrs.Type ?? '';
-    const external = (r.attrs.TargetMode ?? '').toLowerCase() === 'external';
+    // a target with a URI scheme names nothing in the package even without `TargetMode`, so it is kept as written and counts as external
+    const external = (r.attrs.TargetMode ?? '').toLowerCase() === 'external' || SCHEME.test(raw.trim());
     out.push({ id, type, kind: lastSegment(type), target: external ? raw : resolveRelationshipTarget(owner, raw), external });
   }
   return out;

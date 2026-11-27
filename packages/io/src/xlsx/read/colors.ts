@@ -8,7 +8,7 @@ import { numAttr } from './values';
 // - rgb: `AARRGGBB` (alpha ignored: Excel writes `FF`, and a cell colour has no transparency) or a bare `RRGGBB`.
 // - theme: index into the theme's colour scheme in Excel's order (lt1, dk1, lt2, dk2, accent1..6, hlink, folHlink: the first
 //   two pairs are swapped against the order the theme part lists them in).
-// - indexed: the workbook's own palette if it has one, else the default palette; 64 and 65 are the system foreground
+// - indexed: the workbook's own palette if it has one (an index it does not reach uses the default palette), else the default palette; 64 and 65 are the system foreground
 //   (black) and background (white).
 // - tint: lightness adjustment in HLS space (ECMA-376 18.3.1.15): a negative tint darkens (L * (1 + tint)), a positive one
 //   lightens (L * (1 - tint) + tint). Excel does this in integer HLS arithmetic; this is floating point and lands within 2 of
@@ -38,7 +38,7 @@ const SYSTEM_BACKGROUND = 65;
 export interface ColorContext {
   /** 12 `#rrggbb` entries in a cell colour's `theme` index order. */
   themeColors: readonly string[];
-  /** The workbook's own palette, when it has one. */
+  /** The workbook's own palette, when it has one; a palette shorter than 64 falls back to the default per index. */
   indexedColors?: readonly string[];
 }
 
@@ -70,7 +70,7 @@ function rgbToHls(hex: string): [number, number, number] {
   return [h / 6, l, s];
 }
 
-function hlsToRgb(h: number, l: number, s: number): string {
+export function hlsToRgb(h: number, l: number, s: number): string {
   const channel = (p: number, q: number, t0: number): number => {
     const t = t0 < 0 ? t0 + 1 : t0 > 1 ? t0 - 1 : t0;
     if (t < 1 / 6) return p + (q - p) * 6 * t;
@@ -108,7 +108,7 @@ export function resolveColor(color: Pick<XlsxColor, 'rgb' | 'theme' | 'indexed' 
   else if (color.indexed !== undefined) {
     if (color.indexed === SYSTEM_FOREGROUND) base = '#000000';
     else if (color.indexed === SYSTEM_BACKGROUND) base = '#ffffff';
-    else base = (ctx.indexedColors ?? DEFAULT_INDEXED_COLORS)[color.indexed];
+    else base = ctx.indexedColors?.[color.indexed] ?? DEFAULT_INDEXED_COLORS[color.indexed];
   }
   return base === undefined ? undefined : applyTint(base, color.tint ?? 0);
 }

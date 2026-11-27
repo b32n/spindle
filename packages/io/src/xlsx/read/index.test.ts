@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { importXlsx } from '../reader';
 import * as api from './index';
-import { readWorkbookParts, XlsxPackage } from './index';
+import type { SpreadsheetImportResult } from '@b32nio/spindle-shared/export/xlsx';
+import { readWorkbookParts, toImportExtras, XlsxPackage } from './index';
 import { corpus, workbookZip } from './test-support';
 
 interface Entry {
@@ -127,17 +128,20 @@ describe('workbook facts from the corpus', () => {
     expect(warnings).toEqual(['The sheet "Dangling" has no usable relationship (rId99).']);
     expect(workbook.parts.sharedStrings).toBe('xl/sharedStrings.xml'); // the relationship climbs out of the package: conventional name
     expect(theme.colors).toHaveLength(12);
-    expect(sharedStrings).toBeDefined();
+    expect(sharedStrings.length).toBeGreaterThan(0);
   });
-  it('invalid XML in a sheet part is not this layer\'s business, but an invalid shared-strings part is skipped with a warning', async () => {
+  it('invalid XML in a sheet part is not this layer\'s business: the workbook-level parts still read, without warnings', async () => {
     const result = await parts('edge-invalid-xml.xlsx');
     expect(result.workbook.sheets.map((s) => s.name)).toEqual(['Broken']);
-    expect(Array.isArray(result.sharedStrings)).toBe(true);
+    // the damage in this fixture is in the sheet (a stray element); the lenient X4 parser still reads every part, so the strings are all there and nothing warns
+    expect(result.sharedStrings.map((s) => s.text)).toEqual(['a', 'b', 'c']);
+    expect(result.warnings).toEqual([]);
   });
   it('XML entities (DOCTYPE with entity declarations) are inert', async () => {
     const { sharedStrings, warnings } = await parts('edge-xml-entities.xlsx');
     expect(JSON.stringify(sharedStrings)).not.toMatch(/root:|\/etc\/passwd/);
-    expect(Array.isArray(warnings)).toBe(true);
+    expect(sharedStrings).toEqual([{ text: 'plain' }]);
+    expect(warnings).toEqual([]);
   });
 });
 
@@ -170,10 +174,10 @@ describe('theme, indexed and tint colours resolve (styles-theme.xlsx)', () => {
 describe('the internal API surface S2b builds on', () => {
   it('exports the part readers, the package and the colour helpers', () => {
     expect(Object.keys(api).sort()).toEqual([
-      'DEFAULT_INDEXED_COLORS', 'DEFAULT_THEME_COLORS', 'XlsxPackage', 'applyTint', 'contentTypeOf', 'decodePart', 'decodeStringEscapes',
+      'DEFAULT_INDEXED_COLORS', 'DEFAULT_THEME_COLORS', 'PRESET_COLORS', 'XlsxPackage', 'applyTint', 'contentTypeOf', 'decodePart', 'decodeStringEscapes',
       'findWorkbookPart', 'forEachSharedString', 'numberFormatCode', 'parseContentTypes', 'parseRelationships', 'parseRgb', 'parseSharedStrings',
       'parseStyles', 'parseTheme', 'partsWithContentType', 'readColor', 'readFont', 'readSharedString', 'readWorkbook', 'readWorkbookParts',
-      'relsOfKind', 'relsPart', 'resolveColor', 'resolveRelationshipTarget',
+      'relsOfKind', 'relsPart', 'resolveColor', 'resolveRelationshipTarget', 'toImportExtras',
     ]);
     for (const value of Object.values(api)) expect(value).toBeDefined();
   });
@@ -197,5 +201,38 @@ describe('readWorkbookParts', () => {
       ),
     );
     expect(result.colors.indexedColors).toEqual(['#123456']);
+  });
+});
+
+describe('the reader output in the io result shape', () => {
+  it('toImportExtras carries workbook, styles, shared strings (rich runs kept) and theme, structured-cloneable', async () => {
+    const result = await parts('rich-text.xlsx');
+    const extras = toImportExtras(result);
+    expect(Object.keys(extras).sort()).toEqual(['sharedStrings', 'styles', 'theme', 'workbook']);
+    expect(extras.sharedStrings).toBe(result.sharedStrings);
+    expect(extras.theme.colors).toHaveLength(12);
+    expect(extras.sharedStrings.some((s) => s.runs !== undefined && s.runs.length > 1)).toBe(true);
+    const assignable: Pick<SpreadsheetImportResult, 'workbook' | 'styles' | 'sharedStrings' | 'theme'> = extras;
+    expect(structuredClone(assignable)).toEqual(extras);
+  });
+  it('warnings is a snapshot: reading more parts afterwards does not change it', async () => {
+    const pkg = await XlsxPackage.open(corpus('edge-bad-rels.xlsx'));
+    const result = await readWorkbookParts(pkg);
+    const before = [...result.warnings];
+    await pkg.xml('xl/nothing-here.xml');
+    pkg.warnings.push('later');
+    expect(result.warnings).toEqual(before);
+    expect(result.warnings).not.toBe(pkg.warnings);
+  });
+  it('a theme slot that cannot be read is a warning in the result', async () => {
+    const result = await readWorkbookParts(
+      await XlsxPackage.open(
+        await workbookZip('<sheets/>', [['rId1', 'theme', 'theme/theme1.xml']], {
+          'xl/theme/theme1.xml': '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:themeElements><a:clrScheme name="x"><a:dk1><a:schemeClr val="tx1"/></a:dk1></a:clrScheme></a:themeElements></a:theme>',
+        }),
+      ),
+    );
+    expect(result.warnings).toEqual(['The theme colour dk1 (schemeClr) could not be read; the Office default is used.']);
+    expect(result.theme.colors[1]).toBe('#000000');
   });
 });

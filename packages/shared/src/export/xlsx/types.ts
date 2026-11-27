@@ -4,7 +4,7 @@
 // their types. Callers resolve their own pooled styles/formats down to
 // concrete values before calling exportXlsx.
 
-import type { XlsxStyles, XlsxWorkbookInfo } from './package-types';
+import type { XlsxSharedString, XlsxStyles, XlsxTheme, XlsxWorkbookInfo } from './package-types';
 
 export type SpreadsheetCellValue = string | number | boolean | null;
 
@@ -92,6 +92,10 @@ export interface SpreadsheetImportResult {
   workbook?: XlsxWorkbookInfo;
   /** The style tables with theme, indexed and tint colours resolved (S2). Absent from the `exceljs` path. */
   styles?: XlsxStyles;
+  /** The shared-strings table in file order, rich runs kept (S2). Absent from the `exceljs` path. */
+  sharedStrings?: XlsxSharedString[];
+  /** The theme: its 12 colours in a cell colour's `theme` order, and the major/minor fonts (S2). Absent from the `exceljs` path. */
+  theme?: XlsxTheme;
 }
 
 /** Options for the loss detector (`detectXlsxLoss`, and `inspectXlsx` in sheets-core). All optional. */
