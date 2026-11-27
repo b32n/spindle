@@ -2,7 +2,7 @@
 // render time. Renderers call these on every paint, so a theme switch is a
 // single re-render with no data migration.
 
-import type { Color, Fill } from '../scene/types';
+import type { Color } from '../scene/types';
 import type { ThemeData, PlaceholderStyle } from './types';
 
 /** Parse '#RGB' or '#RRGGBB' into [r, g, b] (0–255). */
@@ -20,15 +20,9 @@ function clamp255(v: number): number {
   return Math.max(0, Math.min(255, Math.round(v)));
 }
 
-/**
- * Resolve a Color to a CSS color string. Theme slots are looked up in the
- * theme; PPTX luminance transforms (lumMod scales, lumOff shifts toward white)
- * are applied per channel; alpha (0–1) produces an rgba() string.
- */
-export function resolveColor(color: Color, theme: ThemeData): string {
+/** Resolve a Color to its red, green, blue (0–255) and alpha (0–1) channels. */
+export function colorChannels(color: Color, theme: ThemeData): [number, number, number, number] {
   let rgb: [number, number, number];
-  const alpha = color.alpha;
-
   if (color.kind === 'rgb') {
     rgb = hexToRgb(color.hex);
   } else {
@@ -43,17 +37,19 @@ export function resolveColor(color: Color, theme: ThemeData): string {
       ];
     }
   }
-
-  if (alpha !== undefined && alpha < 1) {
-    return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${Math.max(0, Math.min(1, alpha))})`;
-  }
-  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+  const alpha = color.alpha === undefined ? 1 : Math.max(0, Math.min(1, color.alpha));
+  return [rgb[0], rgb[1], rgb[2], alpha];
 }
 
-/** Resolve a fill to a CSS color, or `null` for no fill. */
-export function resolveFill(fill: Fill, theme: ThemeData): string | null {
-  if (fill.kind === 'none') return null;
-  return resolveColor(fill.color, theme);
+/**
+ * Resolve a Color to a CSS color string. Theme slots are looked up in the
+ * theme; PPTX luminance transforms (lumMod scales, lumOff shifts toward white)
+ * are applied per channel; alpha (0–1) produces an rgba() string.
+ */
+export function resolveColor(color: Color, theme: ThemeData): string {
+  const [r, g, b, a] = colorChannels(color, theme);
+  if (color.alpha !== undefined && color.alpha < 1) return `rgba(${r}, ${g}, ${b}, ${a})`;
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 /**

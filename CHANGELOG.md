@@ -514,6 +514,16 @@ lockstep.
   the duplicated copies are deleted. The DOCX goldens and README coverage matrix are byte-identical. The markdown
   report lists the block counts as part of one line ("1 sections, 1 heading, 10 paragraph, 589 textChars") and a
   per-file run is limited to 60 seconds (`--timeout`). No library or runtime behaviour changes.
+- **Slides fills (K1).** `Fill` gains `gradient` (linear, radial and path gradients, stops with per-stop alpha),
+  `picture` (stretch or tile, alpha, data URLs only; any other source paints nothing) and `pattern` (kept in the
+  model, painted as the solid blend of its two colours) on shapes, text boxes, table cells and slide backgrounds
+  (layout backgrounds are carried the same way). They are stored in the existing element and slide JSON, so
+  collaboration carries them with no Y change. New slides-core exports: `GradientFill`, `GradientStop`, `PictureFill`,
+  `PatternFill`, `colorChannels`, `fillToPaint`, `fillToCss`, `paintToCss`, `linearGradientVector`,
+  `cssGradientAngle`, `patternBlend`, `patternCoverage`, `isSafePictureSrc`, `GRADIENT_PRESETS`. The shape,
+  table-cell and slide-background controls get gradient presets and an image fill. **Compile-time note:** widening
+  `Fill` can break a host's exhaustive `switch (fill.kind)`; `resolveFill` now returns the first stop for a gradient,
+  the blend for a pattern and `null` for a picture.
 - **Slides collaboration gate.** Slides rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-slides-core`: `getCollabBlockers(deck)` (empty for now) and

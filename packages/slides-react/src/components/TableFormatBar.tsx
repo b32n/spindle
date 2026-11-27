@@ -9,6 +9,7 @@ import {
   BetweenHorizontalStart, BetweenHorizontalEnd, BetweenVerticalStart, BetweenVerticalEnd,
   Trash2, PaintBucket,
 } from 'lucide-react';
+import { FillExtras } from './FillExtras';
 import { resolveColor, type Color, type Stroke, type TableElement } from '@b32nio/spindle-slides-core';
 import { useDeck, useTheme, useSelection, useElement } from '../hooks';
 import { useDeckContext } from '../context/DeckContext';
@@ -93,6 +94,7 @@ export function TableFormatBar(): React.ReactElement | null {
         onChange={(e) => setFill({ kind: 'solid', color: { kind: 'rgb', hex: e.target.value } })}
         style={{ ...field, width: 34, padding: 3, opacity: canFill ? 1 : 0.4, cursor: canFill ? 'pointer' : 'default' }}
       />
+      <FillExtras onPick={setFill} disabled={!canFill} testId="cell-fill" />
       <ToolbarButton title="Clear fill" disabled={!canFill} onClick={() => setFill(undefined)}>
         <span style={{ fontSize: 13, fontWeight: 700 }}>⦸</span>
       </ToolbarButton>

@@ -3,9 +3,10 @@
 // model already carries `fill` and `stroke`; this is the UI for them.
 
 import React from 'react';
-import { resolveColor, type Color, type ShapeElement, type StrokeDash, type ThemeData } from '@b32nio/spindle-slides-core';
+import { resolveColor, type Color, type Fill, type ShapeElement, type StrokeDash, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeck, useSelection, useElement, useTheme } from '../hooks';
 import { ToolbarButton, ToolbarDivider } from './toolbarUI';
+import { FillExtras } from './FillExtras';
 
 const field: React.CSSProperties = {
   height: 30, border: '1px solid rgba(0,0,0,0.1)', borderRadius: 8,
@@ -37,12 +38,13 @@ export function ShapeFormatBar(): React.ReactElement | null {
   const el = useElement(id ?? '') as ShapeElement | undefined;
   if (!id || !el || el.type !== 'shape') return null;
 
-  const hasFill = el.fill.kind === 'solid';
+  const hasFill = el.fill.kind !== 'none';
   const fillHex = el.fill.kind === 'solid' ? colorToHex(el.fill.color, theme) : '#cccccc';
   const stroke = el.stroke;
   const strokeHex = stroke ? colorToHex(stroke.color, theme) : '#334155';
 
   const setFill = (color: string) => deck.updateElement(id, { fill: { kind: 'solid', color: { kind: 'rgb', hex: color } } });
+  const setFillObj = (fill: Fill) => deck.updateElement(id, { fill });
   const noFill = () => deck.updateElement(id, { fill: { kind: 'none' } });
   const setStroke = (patch: Partial<{ color: Color; width: number; dash: StrokeDash }>) =>
     deck.updateElement(id, { stroke: { color: { kind: 'rgb', hex: strokeHex }, width: 2, ...stroke, ...patch } });
@@ -62,6 +64,7 @@ export function ShapeFormatBar(): React.ReactElement | null {
           style={{ ...swatch, opacity: hasFill ? 1 : 0.4 }}
         />
       </span>
+      <FillExtras onPick={setFillObj} testId="shape-fill" />
       <ToolbarButton title="No fill" active={!hasFill} onClick={noFill}>
         <span style={{ fontSize: 13, fontWeight: 700 }}>⦸</span>
       </ToolbarButton>

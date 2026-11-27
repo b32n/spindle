@@ -5,11 +5,12 @@
 
 import React, { useState } from 'react';
 import { Plus, Palette, ChevronDown, SquareDashed } from 'lucide-react';
-import { BUILTIN_THEMES, getBuiltinTheme } from '@b32nio/spindle-slides-core';
+import { BUILTIN_THEMES, getBuiltinTheme, type Fill } from '@b32nio/spindle-slides-core';
 import { useToolbarMenu, MenuRow } from '@b32nio/spindle-shared/react';
 import { useDeck, useActiveSlideId, useTheme, useSlide } from '../hooks';
 import { Popover } from './Popover';
 import { LayoutThumb } from './LayoutThumb';
+import { FillExtras } from './FillExtras';
 import { TB } from './toolbarUI';
 
 const btn: React.CSSProperties = TB.dropdownButton;
@@ -26,10 +27,11 @@ export function DeckControls(): React.ReactElement {
   const theme = useTheme();
   const slide = useSlide(activeSlideId);
   const menu = useToolbarMenu();
-  const [open, setOpen] = useState<null | 'layout' | 'theme'>(null);
+  const [open, setOpen] = useState<null | 'layout' | 'theme' | 'bg'>(null);
   // Callback refs into state: the Popover needs the anchor element at render time.
   const [layoutEl, setLayoutEl] = useState<HTMLButtonElement | null>(null);
   const [themeEl, setThemeEl] = useState<HTMLButtonElement | null>(null);
+  const [bgEl, setBgEl] = useState<HTMLLabelElement | null>(null);
 
   const layouts = deck.getLayouts();
   const slideSize = deck.getSlideSize();
@@ -37,6 +39,7 @@ export function DeckControls(): React.ReactElement {
 
   const hover = (e: React.MouseEvent, on: boolean) => ((e.currentTarget as HTMLElement).style.background = on ? '#f1f4f8' : 'transparent');
   const addSlide = (layoutId: string) => { const s = deck.addSlide({ afterSlideId: activeSlideId, layoutId }); deck.setActiveSlide(s.id); };
+  const setBgFill = (fill: Fill) => deck.setSlideBackground(activeSlideId, fill);
   const setBg = (hex: string) => deck.setSlideBackground(activeSlideId, { kind: 'solid', color: { kind: 'rgb', hex } });
 
   const layoutGrid = (onPick: (id: string) => void) => (
@@ -78,6 +81,9 @@ export function DeckControls(): React.ReactElement {
         <input type="color" value={bgHex} onChange={(e) => setBg(e.target.value)} style={{ width: 40, height: 32, border: '1px solid #d5d9e0', borderRadius: 6, background: 'none', padding: 2, cursor: 'pointer' }} />
         Custom color
       </label>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <FillExtras onPick={(f) => { setBgFill(f); onDone(); }} testId="slide-bg" />
+      </div>
     </div>
   );
 
@@ -114,10 +120,16 @@ export function DeckControls(): React.ReactElement {
         </Popover>
       )}
 
-      <label style={{ ...btn, gap: 6 }} title="Slide background">
+      {/* The label looks the same as before; the full background panel (gradient, image) opens on right-click. */}
+      <label ref={setBgEl} style={{ ...btn, gap: 6 }} title="Slide background" onContextMenu={(e) => { e.preventDefault(); setOpen('bg'); }}>
         Background
         <input type="color" value={bgHex} onChange={(e) => setBg(e.target.value)} style={{ width: 22, height: 22, border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} />
       </label>
+      {open === 'bg' && (
+        <Popover anchor={bgEl} onClose={() => setOpen(null)}>
+          <div style={{ width: 300 }}>{bgPanel(() => setOpen(null))}</div>
+        </Popover>
+      )}
     </div>
   );
 }

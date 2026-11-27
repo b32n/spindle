@@ -47,7 +47,47 @@ export type Color =
   | { kind: 'theme'; slot: ThemeColorSlot; alpha?: number; lumMod?: number; lumOff?: number }
   | { kind: 'rgb'; hex: string; alpha?: number };
 
-export type Fill = { kind: 'none' } | { kind: 'solid'; color: Color };
+/** One colour stop of a gradient; `pos` is 0–1 along the gradient, the colour's `alpha` gives per-stop transparency. */
+export interface GradientStop {
+  pos: number;
+  color: Color;
+}
+
+/** A gradient fill. `linear` runs along `angle` (degrees, clockwise from left-to-right, as in DrawingML `a:lin`);
+ *  `radial` is an ellipse from the box centre; `path` is the DrawingML path gradient, stop 0 at the centre. */
+export interface GradientFill {
+  kind: 'gradient';
+  type: 'linear' | 'radial' | 'path';
+  /** Degrees; only meaningful for `linear` (default 90, top to bottom is 90). */
+  angle?: number;
+  stops: GradientStop[];
+}
+
+/** A picture fill. `src` is a data URL (no network fetch ever); `tile` is the tile size in px when `mode` is `tile`. */
+export interface PictureFill {
+  kind: 'picture';
+  src: string;
+  mode: 'stretch' | 'tile';
+  tile?: { w: number; h: number };
+  /** 0–1; omitted means opaque. */
+  alpha?: number;
+}
+
+/** A DrawingML pattern fill (`prst` is the preset name, e.g. `pct50`, `dkHorz`). Rendered as the solid blend of
+ *  its two colours (approximated; the pattern itself is kept in the model). */
+export interface PatternFill {
+  kind: 'pattern';
+  preset: string;
+  fg: Color;
+  bg: Color;
+}
+
+export type Fill =
+  | { kind: 'none' }
+  | { kind: 'solid'; color: Color }
+  | GradientFill
+  | PictureFill
+  | PatternFill;
 
 export type StrokeDash = 'solid' | 'dash' | 'dot';
 

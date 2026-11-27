@@ -5,8 +5,19 @@
 
 import React from 'react';
 import { resolveFill } from '@b32nio/spindle-slides-core';
+import { htmlFill } from './elements/fill';
 import { useDeck, useSlide, useSlideElementIds, useTheme } from '../hooks';
 import { ElementView } from './elements/ElementView';
+
+/**
+ * Gradients and colours own the whole `background`; pictures set only longhands, so the theme colour goes under them
+ * (a transparent PNG still shows it). With nothing paintable the theme colour alone is the background.
+ */
+function slideBackgroundStyle(style: React.CSSProperties, fallback: string): React.CSSProperties {
+  if (style.background) return style;
+  if (style.backgroundImage) return { backgroundColor: fallback, ...style };
+  return { background: fallback };
+}
 
 export function SlideView({
   slideId,
@@ -21,10 +32,9 @@ export function SlideView({
   const elementIds = useSlideElementIds(slideId);
   const { w, h } = deck.getSlideSize();
 
-  const background =
-    (slide?.background && resolveFill(slide.background, theme)) ??
-    resolveFill({ kind: 'solid', color: { kind: 'theme', slot: 'lt1' } }, theme) ??
-    '#ffffff';
+  const bg = htmlFill(slide?.background, theme);
+  // No usable background (absent, none, unsafe picture): the theme's light colour, as before.
+  const fallback = resolveFill({ kind: 'solid', color: { kind: 'theme', slot: 'lt1' } }, theme) ?? '#ffffff';
 
   return (
     <div
@@ -33,10 +43,12 @@ export function SlideView({
         position: 'relative',
         width: w,
         height: h,
-        background,
+        ...slideBackgroundStyle(bg.style, fallback),
+        ...(bg.layer ? { isolation: 'isolate' } : {}),
         overflow: 'hidden',
       }}
     >
+      {bg.layer}
       {elementIds.map((id) => (
         <ElementView key={id} elementId={id} interactive={interactive} />
       ))}

@@ -6,15 +6,17 @@
 // cell being edited. Grid lines use the element's border stroke.
 
 import React, { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import { resolveColor, resolveFill, type Color, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
+import { resolveColor, type Color, type TableElement, type ThemeData } from '@b32nio/spindle-slides-core';
 import { useDeckContext } from '../../context/DeckContext';
 import { inSelection } from '../../interactions/table-selection-store';
 import { StaticRichText } from './StaticRichText';
 import { RichTextEditor } from '../RichTextEditor';
+import { htmlFill } from './fill';
 
 // Translucent tint painted over a selected cell (sits above its own fill, below
 // the text) via a huge inset shadow the cell's overflow:hidden clips flat.
 const SELECT_TINT = 'inset 0 0 0 9999px rgba(45,127,249,0.20)';
+const SELECT_TINT_COLOR = 'rgba(45,127,249,0.20)';
 
 // Cell text metrics. StaticRichText inherits font-size from the <td>, so we set
 // it explicitly to the SAME values the live editor uses — otherwise text would
@@ -80,7 +82,7 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
           // A row's manual minimum height (px); content can still push it taller.
           <tr key={r} style={{ height: el.rowHeights?.[r] ? el.rowHeights[r] : undefined }}>
             {row.map((cell, c) => {
-              const bg = cell.fill ? resolveFill(cell.fill, theme) : null;
+              const { style: fillStyle, layer: fillLayer } = htmlFill(cell.fill, theme);
               const isEditing = !!editingCell && editingCell[0] === r && editingCell[1] === c;
               const isSelected = !!cellSel && !isEditing && inSelection(cellSel, r, c);
               // Fill in cell defaults so the static <td> and the live editor
@@ -99,13 +101,22 @@ export function TableView({ el, theme, interactive = false }: { el: TableElement
                     border,
                     verticalAlign: cellStyle.vAlign,
                     fontSize: cellStyle.fontSize,
-                    background: bg ?? undefined,
-                    boxShadow: isSelected ? SELECT_TINT : undefined,
+                    ...fillStyle,
+                    // A cell with a fill layer paints the tint as an overlay above that layer (a box-shadow would sit beneath it).
+                    boxShadow: isSelected && !fillLayer ? SELECT_TINT : undefined,
                     padding: isEditing ? 0 : cellStyle.padding,
                     overflow: 'hidden',
                     boxSizing: 'border-box',
                   }}
                 >
+                  {fillLayer}
+                  {isSelected && fillLayer && (
+                    <div
+                      aria-hidden
+                      data-select-tint=""
+                      style={{ position: 'absolute', inset: 0, zIndex: -1, pointerEvents: 'none', background: SELECT_TINT_COLOR }}
+                    />
+                  )}
                   {isEditing ? (
                     <RichTextEditor elementId={el.id} theme={theme} cell={[r, c]} bodyStyle={cellStyle} />
                   ) : (
