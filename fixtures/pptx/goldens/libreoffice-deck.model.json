@@ -2720,6 +2720,16 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 5166,
+          "sha256": "d4dabbe6d26f4c31f10c4758bbb46e65aafb7c5441c0329b813f3922eb71400d"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "d4dabbe6d26f4c31f10c4758bbb46e65aafb7c5441c0329b813f3922eb71400d"
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 960
@@ -2876,6 +2886,9 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout1.xml",
+        "opaque": {
+          "transition": "<mc:AlternateContent xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p14=\"http://schemas.microsoft.com/office/powerpoint/2010/main\" xmlns:p15=\"http://schemas.microsoft.com/office/powerpoint/2012/main\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"><mc:Choice Requires=\"p14\"><p:transition spd=\"slow\" p14:dur=\"2000\"></p:transition></mc:Choice><mc:Fallback><p:transition spd=\"slow\"></p:transition></mc:Fallback></mc:AlternateContent>"
+        },
         "partName": "ppt/slides/slide1.xml",
         "pptxId": "256"
       },
@@ -3129,6 +3142,9 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
+        "opaque": {
+          "transition": "<mc:AlternateContent xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p14=\"http://schemas.microsoft.com/office/powerpoint/2010/main\" xmlns:p15=\"http://schemas.microsoft.com/office/powerpoint/2012/main\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"><mc:Choice Requires=\"p14\"><p:transition spd=\"slow\" p14:dur=\"2000\"></p:transition></mc:Choice><mc:Fallback><p:transition spd=\"slow\"></p:transition></mc:Fallback></mc:AlternateContent>"
+        },
         "partName": "ppt/slides/slide2.xml",
         "pptxId": "257"
       },
@@ -4430,6 +4446,9 @@
             }
           }
         },
+        "opaque": {
+          "transition": "<mc:AlternateContent xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p14=\"http://schemas.microsoft.com/office/powerpoint/2010/main\" xmlns:p15=\"http://schemas.microsoft.com/office/powerpoint/2012/main\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"><mc:Choice Requires=\"p14\"><p:transition spd=\"slow\" p14:dur=\"2000\"></p:transition></mc:Choice><mc:Fallback><p:transition spd=\"slow\"></p:transition></mc:Fallback></mc:AlternateContent>"
+        },
         "partName": "ppt/slides/slide3.xml",
         "pptxId": "258"
       },
@@ -4504,9 +4523,31 @@
                 }
               }
             }
+          },
+          {
+            "frame": {
+              "h": 479.96220472440945,
+              "w": 767.9622047244095,
+              "x": 96,
+              "y": 153.6
+            },
+            "kind": "opaque",
+            "name": "Chart 2",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "d4dabbe6d26f4c31f10c4758bbb46e65aafb7c5441c0329b813f3922eb71400d",
+                "partName": "ppt/charts/chart1.xml",
+                "role": "chart"
+              }
+            ],
+            "pptxId": "77"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout8.xml",
+        "opaque": {
+          "transition": "<mc:AlternateContent xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p14=\"http://schemas.microsoft.com/office/powerpoint/2010/main\" xmlns:p15=\"http://schemas.microsoft.com/office/powerpoint/2012/main\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"><mc:Choice Requires=\"p14\"><p:transition spd=\"slow\" p14:dur=\"2000\"></p:transition></mc:Choice><mc:Fallback><p:transition spd=\"slow\"></p:transition></mc:Fallback></mc:AlternateContent>"
+        },
         "partName": "ppt/slides/slide4.xml",
         "pptxId": "259"
       }

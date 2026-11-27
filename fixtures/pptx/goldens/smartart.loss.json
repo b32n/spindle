@@ -12,9 +12,10 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the diagram parts are stored unchanged and saved back; the editor shows a labelled placeholder (the diagram's cached drawing is not drawn) and cannot edit it",
       "id": "pptx.smartArt",
       "label": "SmartArt diagram(s)",
+      "state": "kept",
       "where": [
         "Slide 1"
       ]

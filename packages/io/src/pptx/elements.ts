@@ -4,15 +4,17 @@ import { isTrue, kid, type XmlElement } from '../xlsx/xml';
 import { readConnector } from './connectors';
 import { parseFill } from './fill';
 import { frameOf } from './levels';
-import { readPicture, type PictureContext } from './pictures';
+import { mediaClip, opaqueFrameKind, readInk, readMedia, readOpaqueFrame, type OpaqueElementContext } from './opaque';
+import { readPicture } from './pictures';
 import { readShape, treeChildren, type ShapeContext } from './shapes';
 import { readTable, tableOf, type TableContext } from './tables';
 import { emuToPx } from './units';
 
 // The elements of a slide's shape tree in drawing order (plan K9c, K10): `p:sp` shapes, `p:pic` pictures, the table
-// `p:graphicFrame`s, `p:cxnSp` connectors and `p:grpSp` groups (K10b). A `p:graphicFrame` of any other kind (chart, SmartArt, OLE: K11) is not read yet.
+// `p:graphicFrame`s, `p:cxnSp` connectors and `p:grpSp` groups (K10b), and the content kept as it is (K11): charts, SmartArt and OLE objects (`p:graphicFrame`),
+// audio and video clips (`p:pic`) and ink (`p:contentPart`).
 
-export type ElementContext = ShapeContext & PictureContext & TableContext;
+export type ElementContext = ShapeContext & OpaqueElementContext & TableContext;
 
 /** How deep groups are followed: a deeper group is dropped with a warning (a legitimate deck never nests this far). */
 export const MAX_GROUP_DEPTH = 64;
@@ -52,14 +54,19 @@ export async function readElements(tree: XmlElement | undefined, ctx: ElementCon
   const place = <T extends { frame?: PptxFrame }>(el: T): T => (el.frame ? { ...el, frame: composed(el.frame, chain) } : el);
   for (const c of treeChildren(tree)) {
     if (c.name === 'sp') out.push(place(readShape(c, ctx)));
-    else if (c.name === 'pic') out.push(place(await readPicture(c, ctx)));
+    else if (c.name === 'pic') {
+      const clip = mediaClip(c);
+      out.push(place(clip ? await readMedia(c, clip, ctx) : await readPicture(c, ctx)));
+    } else if (c.name === 'contentPart') out.push(place(await readInk(c, ctx)));
     else if (c.name === 'cxnSp') out.push(place(readConnector(c, ctx)));
     else if (c.name === 'grpSp') {
       const group = await readGroup(c, ctx, chain, depth);
       if (group) out.push(group);
     } else if (c.name === 'graphicFrame') {
       const tbl = tableOf(c);
+      const kind = opaqueFrameKind(c);
       if (tbl) out.push(place(readTable(c, tbl, ctx)));
+      else if (kind) out.push(place(await readOpaqueFrame(c, kind, ctx)));
     }
   }
   return out;

@@ -27,6 +27,7 @@ module.exports = {
             '@b32nio/spindle-shared/export/xlsx': ['../shared/src/export/xlsx/index.ts'],
             '@b32nio/spindle-shared/export/docx': ['../shared/src/export/docx/index.ts'],
             '@b32nio/spindle-shared/export/pptx': ['../shared/src/export/pptx/index.ts'],
+            '@b32nio/spindle-shared/opaque': ['../shared/src/opaque/index.ts'],
           },
         },
       },
@@ -37,5 +38,6 @@ module.exports = {
   moduleNameMapper: {
     '^@b32nio/spindle-shared$': '<rootDir>/../shared/src/index.ts',
     '^@b32nio/spindle-shared/export/(csv|xlsx|docx|pptx)$': '<rootDir>/../shared/src/export/$1/index.ts',
+    '^@b32nio/spindle-shared/opaque$': '<rootDir>/../shared/src/opaque/index.ts',
   },
 };

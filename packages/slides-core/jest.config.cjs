@@ -8,6 +8,7 @@ module.exports = {
     '^@b32nio/spindle-io/pptx$': '<rootDir>/../io/src/pptx/index.ts',
     '^@b32nio/spindle-shared$': '<rootDir>/../shared/src/index.ts',
     '^@b32nio/spindle-shared/export/pptx$': '<rootDir>/../shared/src/export/pptx/index.ts',
+    '^@b32nio/spindle-shared/opaque$': '<rootDir>/../shared/src/opaque/index.ts',
   },
   transform: {
     '^.+\\.ts$': [
@@ -28,6 +29,7 @@ module.exports = {
             '@b32nio/spindle-io/pptx': ['../io/src/pptx/index.ts'],
             '@b32nio/spindle-shared': ['../shared/src/index.ts'],
             '@b32nio/spindle-shared/export/pptx': ['../shared/src/export/pptx/index.ts'],
+            '@b32nio/spindle-shared/opaque': ['../shared/src/opaque/index.ts'],
           },
         },
       },

@@ -3900,6 +3900,80 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 3155,
+          "sha256": "8138d3790525f1b655d551e43fa734b86889a6c28a2f848f06beb74d75ea98c5"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "8138d3790525f1b655d551e43fa734b86889a6c28a2f848f06beb74d75ea98c5"
+      },
+      {
+        "bytes": {
+          "bytes": 315,
+          "sha256": "6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4"
+        },
+        "contentType": "application/vnd.openxmlformats-package.relationships+xml",
+        "hash": "6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4"
+      },
+      {
+        "bytes": {
+          "bytes": 1675,
+          "sha256": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150"
+      },
+      {
+        "bytes": {
+          "bytes": 3340,
+          "sha256": "424336d14dc0f6ca84db878755115c6f255e24591ae42fe7ddcd9a37280f33e8"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "424336d14dc0f6ca84db878755115c6f255e24591ae42fe7ddcd9a37280f33e8"
+      },
+      {
+        "bytes": {
+          "bytes": 315,
+          "sha256": "54003405cc44d15eccda8fc03bcc37e84c752cda37685f2b7c6260d881a1fae9"
+        },
+        "contentType": "application/vnd.openxmlformats-package.relationships+xml",
+        "hash": "54003405cc44d15eccda8fc03bcc37e84c752cda37685f2b7c6260d881a1fae9"
+      },
+      {
+        "bytes": {
+          "bytes": 1622,
+          "sha256": "0b3e4efeab4dc986979067456c1b0e989c58510ddae1b8b9217927416a13d898"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "0b3e4efeab4dc986979067456c1b0e989c58510ddae1b8b9217927416a13d898"
+      },
+      {
+        "bytes": {
+          "bytes": 315,
+          "sha256": "73a0e5ce2f8eeed422cfe2f97700d5d3dbdc337f6c465ff6a26746947be6afa6"
+        },
+        "contentType": "application/vnd.openxmlformats-package.relationships+xml",
+        "hash": "73a0e5ce2f8eeed422cfe2f97700d5d3dbdc337f6c465ff6a26746947be6afa6"
+      },
+      {
+        "bytes": {
+          "bytes": 3204,
+          "sha256": "f69b9be80d6b4ec54a0c3f77b7078fac168a1d50ab59b4cade260e03151fda8e"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "f69b9be80d6b4ec54a0c3f77b7078fac168a1d50ab59b4cade260e03151fda8e"
+      },
+      {
+        "bytes": {
+          "bytes": 315,
+          "sha256": "1d7288d10bb2cad437712536e74f972fc18f103d59b0d2f13659ddd964d36218"
+        },
+        "contentType": "application/vnd.openxmlformats-package.relationships+xml",
+        "hash": "1d7288d10bb2cad437712536e74f972fc18f103d59b0d2f13659ddd964d36218"
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 1280
@@ -3963,6 +4037,36 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 451.4435695538058,
+              "w": 839.8950131233596,
+              "x": 157.48031496062993,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Bar chart",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "8138d3790525f1b655d551e43fa734b86889a6c28a2f848f06beb74d75ea98c5",
+                "partName": "ppt/charts/chart1.xml",
+                "role": "chart"
+              },
+              {
+                "hash": "6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4",
+                "partName": "ppt/charts/_rels/chart1.xml.rels",
+                "role": "rels"
+              },
+              {
+                "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150",
+                "partName": "ppt/embeddings/Microsoft_Excel_Sheet1.xlsx",
+                "role": "package"
+              }
+            ],
+            "pptxId": "3",
+            "title": "Bar chart"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4027,6 +4131,36 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 451.4435695538058,
+              "w": 839.8950131233596,
+              "x": 157.48031496062993,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Line chart",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "424336d14dc0f6ca84db878755115c6f255e24591ae42fe7ddcd9a37280f33e8",
+                "partName": "ppt/charts/chart2.xml",
+                "role": "chart"
+              },
+              {
+                "hash": "54003405cc44d15eccda8fc03bcc37e84c752cda37685f2b7c6260d881a1fae9",
+                "partName": "ppt/charts/_rels/chart2.xml.rels",
+                "role": "rels"
+              },
+              {
+                "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150",
+                "partName": "ppt/embeddings/Microsoft_Excel_Sheet2.xlsx",
+                "role": "package"
+              }
+            ],
+            "pptxId": "3",
+            "title": "Line chart"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4091,6 +4225,36 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 451.4435695538058,
+              "w": 839.8950131233596,
+              "x": 157.48031496062993,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Pie chart",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "0b3e4efeab4dc986979067456c1b0e989c58510ddae1b8b9217927416a13d898",
+                "partName": "ppt/charts/chart3.xml",
+                "role": "chart"
+              },
+              {
+                "hash": "73a0e5ce2f8eeed422cfe2f97700d5d3dbdc337f6c465ff6a26746947be6afa6",
+                "partName": "ppt/charts/_rels/chart3.xml.rels",
+                "role": "rels"
+              },
+              {
+                "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150",
+                "partName": "ppt/embeddings/Microsoft_Excel_Sheet3.xlsx",
+                "role": "package"
+              }
+            ],
+            "pptxId": "3",
+            "title": "Pie chart"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -4155,6 +4319,36 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 451.4435695538058,
+              "w": 839.8950131233596,
+              "x": 157.48031496062993,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Scatter chart",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "f69b9be80d6b4ec54a0c3f77b7078fac168a1d50ab59b4cade260e03151fda8e",
+                "partName": "ppt/charts/chart4.xml",
+                "role": "chart"
+              },
+              {
+                "hash": "1d7288d10bb2cad437712536e74f972fc18f103d59b0d2f13659ddd964d36218",
+                "partName": "ppt/charts/_rels/chart4.xml.rels",
+                "role": "rels"
+              },
+              {
+                "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150",
+                "partName": "ppt/embeddings/Microsoft_Excel_Sheet4.xlsx",
+                "role": "package"
+              }
+            ],
+            "pptxId": "3",
+            "title": "Scatter chart"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",

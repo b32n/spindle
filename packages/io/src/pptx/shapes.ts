@@ -31,12 +31,17 @@ export function readPlaceholder(ph: XmlElement | undefined): { type: string; idx
   return ph ? { type: ph.attrs.type || 'obj', ...(num(ph.attrs.idx) !== undefined ? { idx: num(ph.attrs.idx) as number } : {}) } : undefined;
 }
 
-/** The children of a shape tree, those inside `mc:AlternateContent` (its `Choice`, else its `Fallback`) included, in drawing order. */
+/** A choice that needs the `a14` extension (equations, whose math the editor does not read) is passed over for the fallback, which carries the plain text. */
+const needsMath = (choice: XmlElement): boolean => (choice.attrs.Requires ?? '').split(/\s+/).includes('a14');
+
+/** The children of a shape tree, those inside `mc:AlternateContent` (its `Choice`, else its `Fallback`; the fallback of an `a14` choice) included, in drawing order. */
 export function treeChildren(tree: XmlElement | undefined): XmlElement[] {
   const out: XmlElement[] = [];
   for (const c of tree?.children ?? []) {
     if (c.name === 'AlternateContent' && c.ns === 'mc') {
-      const branch = c.children.find((b) => b.name === 'Choice') ?? c.children.find((b) => b.name === 'Fallback');
+      const choice = c.children.find((b) => b.name === 'Choice');
+      const fallback = c.children.find((b) => b.name === 'Fallback');
+      const branch = choice && !(fallback && needsMath(choice)) ? choice : fallback;
       out.push(...treeChildren(branch));
     } else out.push(c);
   }

@@ -34,24 +34,18 @@
     },
     {
       "name": "ppt/charts/_rels/chart1.xml.rels",
-      "rule": "package.relationships",
-      "status": "mapped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.charts"
-      ],
       "name": "ppt/charts/chart1.xml",
-      "rule": "chart",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.charts"
-      ],
       "name": "ppt/embeddings/Microsoft_Excel_Sheet1.xlsx",
-      "rule": "embedding",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
       "name": "ppt/media/image1.png",
@@ -275,9 +269,9 @@
     }
   ],
   "totals": {
-    "dropped": 2,
-    "mapped": 51,
-    "opaque": 0,
+    "dropped": 0,
+    "mapped": 50,
+    "opaque": 3,
     "total": 53,
     "unaccounted": 0
   }

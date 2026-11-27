@@ -3,9 +3,10 @@
   "items": [
     {
       "count": 4,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the chart, its workbook and its style parts are stored unchanged and saved back; the editor shows a labelled placeholder and cannot edit or draw it",
       "id": "pptx.charts",
       "label": "chart(s)",
+      "state": "kept",
       "where": [
         "Slide 1",
         "Slide 2",

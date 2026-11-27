@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { createLossReport, type ImportLossItem, type ImportLossReport } from '@b32nio/spindle-shared';
+import { DEFAULT_OPAQUE_LIMITS, droppedLossItem, keptLossItem } from '@b32nio/spindle-shared/opaque';
 import type { DetectPptxLossOptions } from '@b32nio/spindle-shared/export/pptx';
 import { OoxmlPackage, PACKAGE_LIMITS } from '../common/ooxml-package';
 import { isEncryptedOle, isOleFile } from '../xlsx/package-kind';
@@ -15,6 +16,15 @@ export type { DetectPptxLossOptions };
 export { PACKAGE_LIMITS };
 
 const MAX_WHERE = 5;
+
+/** Parts of opaque elements: the ones the opaque store keeps whole. */
+const OPAQUE_PARTS = /^ppt\/(?:charts|diagrams|media|embeddings|ink|activeX)\//;
+const KEPT_CHART = 'kept: the chart, its workbook and its style parts are stored unchanged and saved back; the editor shows a labelled placeholder and cannot edit or draw it';
+const KEPT_SMARTART = 'kept: the diagram parts are stored unchanged and saved back; the editor shows a labelled placeholder (the diagram\'s cached drawing is not drawn) and cannot edit it';
+const KEPT_MEDIA = 'kept: the clip and its poster frame are stored unchanged and saved back; the editor shows the poster in a labelled placeholder and does not play it (linked clips are never fetched)';
+const KEPT_OLE = 'kept: the object and its preview picture are stored unchanged and saved back; the editor shows the preview in a labelled placeholder and cannot open or edit it';
+const KEPT_TRANSITION = 'kept: the transition is stored as written and saved back; the editor does not play or edit it';
+const KEPT_ANIMATION = 'kept: the animations are stored as written and saved back; the editor does not play or edit them, and an effect on a shape you delete is removed';
 
 /** The default effect: the reader (`importPptx`) does not read the construct yet. Ids it does read say how, below. */
 const NOT_IMPORTED = 'lost: not imported (the PPTX reader does not read this yet)';
@@ -50,7 +60,11 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   /** An id that only the `full` level reports. */
   const addFull = (id: string, label: string, count: number, effect: string, where?: string[]) =>
     add(id, label, count, effect, where, true);
-  const addTally = (id: string, label: string, tally: Tally, effect = NOT_IMPORTED, onlyFull = false) =>
+  /** Content the reader keeps as it is (opaque parts, transition and timing XML): saved back unchanged, not editable. */
+  const addKept = (id: string, label: string, count: number, effect: string, where: string[], onlyFull = false) => {
+    if (count > 0 && (full || !onlyFull)) items.push(keptLossItem({ id, label, count, effect, where: where.slice(0, MAX_WHERE) }));
+  };
+  const addTally = (id: string, label: string, tally: Tally, effect: string, onlyFull = false) =>
     add(id, label, tally.total, effect, tally.where, onlyFull);
 
   if (isOleFile(bytes)) {
@@ -136,12 +150,18 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
 
   // ---- summary ids --------------------------------------------------------
   const unavailable = distinctFonts(fonts).filter((f) => !isAvailableFont(f)).sort();
-  add('pptx.charts', 'chart(s)', t.charts.total > 0 ? t.charts.total : countParts(/^ppt\/charts\/chart\d*\.xml$/), NOT_IMPORTED, t.charts.where);
-  add('pptx.smartArt', 'SmartArt diagram(s)', t.smartArt.total > 0 ? t.smartArt.total : countParts(/^ppt\/diagrams\/data\d*\.xml$/), NOT_IMPORTED, t.smartArt.where);
-  addTally('pptx.media', 'audio or video clip(s)', t.media);
-  addTally('pptx.embeddedObjects', 'embedded object(s) (OLE) and control(s)', t.embedded);
-  addTally('pptx.transitions', 'slide(s) with a transition', t.transitions);
-  addTally('pptx.animations', 'animation effect(s)', t.animations);
+  // a chart or diagram a slide shows is kept (opaque); the parts of one no slide shows are not read
+  const keepOrNot = (id: string, label: string, tally: Tally, orphans: number, effect: string) =>
+    tally.total > 0 ? addKept(id, label, tally.total, effect, tally.where) : add(id, label, orphans, NOT_IMPORTED);
+  keepOrNot('pptx.charts', 'chart(s)', t.charts, countParts(/^ppt\/charts\/chart\d*\.xml$/), KEPT_CHART);
+  keepOrNot('pptx.smartArt', 'SmartArt diagram(s)', t.smartArt, countParts(/^ppt\/diagrams\/data\d*\.xml$/), KEPT_SMARTART);
+  addKept('pptx.media', 'audio or video clip(s)', t.media.total, KEPT_MEDIA, t.media.where);
+  addKept('pptx.embeddedObjects', 'embedded object(s) (OLE) and control(s)', t.embedded.total, KEPT_OLE, t.embedded.where);
+  addKept('pptx.transitions', 'slide(s) with a transition', t.transitions.total, KEPT_TRANSITION, t.transitions.where);
+  addKept('pptx.animations', 'animation effect(s)', t.animations.total, KEPT_ANIMATION, t.animations.where);
+  // parts the opaque store would refuse (over the per-part cap); the reader reports the same parts when it imports
+  const tooLarge = names.filter((n) => OPAQUE_PARTS.test(n) && pkg.declaredSize(n) > DEFAULT_OPAQUE_LIMITS.maxPartBytes);
+  if (tooLarge.length > 0) items.push(droppedLossItem('pptx.opaque.tooLarge', 'kept part(s) (chart workbooks, media, embedded objects) over the size limit', tooLarge.map((partName) => ({ reason: 'too-large' as const, size: pkg.declaredSize(partName), role: 'opaque', partName }))));
   add('pptx.macros', 'macro project', countParts(/^ppt\/vbaProject\.bin$/), 'lost: macros are never run or kept');
   addTally('pptx.hiddenSlides', 'hidden slide(s)', t.hidden, 'kept: imported as a hidden slide');
   addTally('pptx.comments', 'comment(s) in a comments part no slide points at', t.comments, 'lost: comments are read through the slide that owns them, so these are not imported');
@@ -200,7 +220,8 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
   addFull('pptx.customShows', 'custom show(s)', customShows, NOT_IMPORTED);
   addFull('pptx.slideSize', 'slide size other than 16:9', oddSize ? 1 : 0, 'kept: the deck keeps its own slide size', oddSize ? [`${Math.round(cx / 12700)} x ${Math.round(cy / 12700)} pt`] : []);
   addTally('pptx.zoom', 'slide or section zoom object(s)', t.zoom, NOT_IMPORTED, true);
-  add('pptx.ink', 'ink drawing(s)', t.ink.total > 0 ? t.ink.total : countParts(/^ppt\/ink\/[^/]+\.xml$/), NOT_IMPORTED, t.ink.where, true);
+  if (t.ink.total > 0) addKept('pptx.ink', 'ink drawing(s)', t.ink.total, 'kept: the ink is stored unchanged and saved back; the editor shows a labelled placeholder and cannot draw or edit it', t.ink.where, true);
+  else add('pptx.ink', 'ink drawing(s)', countParts(/^ppt\/ink\/[^/]+\.xml$/), NOT_IMPORTED, undefined, true);
   addTally('pptx.equations', 'equation(s)', t.equations, NOT_IMPORTED, true);
   addFull('pptx.signatures', 'digital signature(s)', countParts(/^_xmlsignatures\/[^/]+\.xml$/), 'lost: signatures are not kept, and any edit would invalidate them anyway');
   addFull('pptx.externalLinks', 'external link target(s) (web pages, files, linked media)', externalLinks, 'approximated: http, https, mailto and tel links are kept and any other scheme is dropped; linked files and media are never fetched', t.externalLinks.where);

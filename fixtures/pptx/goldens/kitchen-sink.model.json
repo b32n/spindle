@@ -3905,6 +3905,32 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 3167,
+          "sha256": "5f7866c780fbd59943d6082410c5f9c42ea5b290afd5c3a982a8dd7b5b1b2575"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.chart+xml",
+        "hash": "5f7866c780fbd59943d6082410c5f9c42ea5b290afd5c3a982a8dd7b5b1b2575"
+      },
+      {
+        "bytes": {
+          "bytes": 315,
+          "sha256": "6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4"
+        },
+        "contentType": "application/vnd.openxmlformats-package.relationships+xml",
+        "hash": "6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4"
+      },
+      {
+        "bytes": {
+          "bytes": 1675,
+          "sha256": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150"
+      }
+    ],
     "sections": [
       {
         "name": "Content",
@@ -4050,6 +4076,9 @@
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout1.xml",
+        "opaque": {
+          "transition": "<p:transition xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" spd=\"med\"><p:fade/></p:transition>"
+        },
         "partName": "ppt/slides/slide1.xml",
         "pptxId": "256",
         "threads": [
@@ -5313,6 +5342,36 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 451.4435695538058,
+              "w": 839.8950131233596,
+              "x": 157.48031496062993,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Bar chart",
+            "opaqueKind": "chart",
+            "parts": [
+              {
+                "hash": "5f7866c780fbd59943d6082410c5f9c42ea5b290afd5c3a982a8dd7b5b1b2575",
+                "partName": "ppt/charts/chart1.xml",
+                "role": "chart"
+              },
+              {
+                "hash": "6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4",
+                "partName": "ppt/charts/_rels/chart1.xml.rels",
+                "role": "rels"
+              },
+              {
+                "hash": "79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150",
+                "partName": "ppt/embeddings/Microsoft_Excel_Sheet1.xlsx",
+                "role": "package"
+              }
+            ],
+            "pptxId": "3",
+            "title": "Chart with a workbook"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
@@ -5690,6 +5749,10 @@
         ],
         "hidden": true,
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",
+        "opaque": {
+          "timing": "<p:timing xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\"><p:tnLst><p:par><p:cTn id=\"1\" dur=\"indefinite\" restart=\"never\" nodeType=\"tmRoot\"><p:childTnLst><p:seq concurrent=\"1\" nextAc=\"seek\"><p:cTn id=\"2\" dur=\"indefinite\" nodeType=\"mainSeq\"><p:childTnLst><p:par><p:cTn id=\"3\" fill=\"hold\"><p:stCondLst><p:cond delay=\"indefinite\"/></p:stCondLst><p:childTnLst><p:par><p:cTn id=\"4\" fill=\"hold\"><p:stCondLst><p:cond delay=\"0\"/></p:stCondLst><p:childTnLst><p:par><p:cTn id=\"5\" presetID=\"10\" presetClass=\"entr\" presetSubtype=\"0\" fill=\"hold\" grpId=\"0\" nodeType=\"clickEffect\"><p:stCondLst><p:cond delay=\"0\"/></p:stCondLst><p:childTnLst><p:set><p:cBhvr><p:cTn id=\"6\" dur=\"1\" fill=\"hold\"><p:stCondLst><p:cond delay=\"0\"/></p:stCondLst></p:cTn><p:tgtEl><p:spTgt spid=\"3\"/></p:tgtEl><p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr><p:to><p:strVal val=\"visible\"/></p:to></p:set><p:animEffect transition=\"in\" filter=\"fade\"><p:cBhvr><p:cTn id=\"7\" dur=\"500\"/><p:tgtEl><p:spTgt spid=\"3\"/></p:tgtEl></p:cBhvr></p:animEffect></p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn></p:par></p:childTnLst></p:cTn><p:prevCondLst><p:cond evt=\"onPrev\" delay=\"0\"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst><p:nextCondLst><p:cond evt=\"onNext\" delay=\"0\"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst></p:seq></p:childTnLst></p:cTn></p:par></p:tnLst><p:bldLst><p:bldP spid=\"3\" grpId=\"0\" animBg=\"1\"/></p:bldLst></p:timing>",
+          "transition": "<p:transition xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\" spd=\"slow\" advTm=\"3000\"><p:push dir=\"u\"/></p:transition>"
+        },
         "partName": "ppt/slides/slide7.xml",
         "pptxId": "262"
       },

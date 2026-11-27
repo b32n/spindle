@@ -3900,6 +3900,32 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 941,
+          "sha256": "980ebf817f204fff9a9069747675a57a62cdb6f0601908c93b525518953c69e8"
+        },
+        "contentType": "application/inkml+xml",
+        "hash": "980ebf817f204fff9a9069747675a57a62cdb6f0601908c93b525518953c69e8"
+      },
+      {
+        "bytes": {
+          "bytes": 108,
+          "sha256": "d4eb7fcb1ad5d21793e68bf101723e750964b2bf59257af46eb55335d7947b11"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.oleObject",
+        "hash": "d4eb7fcb1ad5d21793e68bf101723e750964b2bf59257af46eb55335d7947b11"
+      },
+      {
+        "bytes": {
+          "bytes": 224,
+          "sha256": "e7a74ce0393b4d20209e02b0aa09042c07192a32763f922883a45fb28d989290"
+        },
+        "contentType": "image/png",
+        "hash": "e7a74ce0393b4d20209e02b0aa09042c07192a32763f922883a45fb28d989290"
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 1280
@@ -4137,6 +4163,25 @@
             }
           },
           {
+            "frame": {
+              "h": 94.48818897637796,
+              "w": 314.96062992125985,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Ink 2",
+            "opaqueKind": "ink",
+            "parts": [
+              {
+                "hash": "980ebf817f204fff9a9069747675a57a62cdb6f0601908c93b525518953c69e8",
+                "partName": "ppt/ink/ink1.xml",
+                "role": "customXml"
+              }
+            ],
+            "pptxId": "3"
+          },
+          {
             "fill": {
               "kind": "none"
             },
@@ -4158,7 +4203,13 @@
               "paragraphs": [
                 {
                   "level": 0,
-                  "runs": [],
+                  "runs": [
+                    {
+                      "kind": "text",
+                      "lang": "en-US",
+                      "text": "x = (-b ± sqrt(b^2 - 4ac)) / 2a"
+                    }
+                  ],
                   "style": {
                     "align": "left",
                     "color": {
@@ -4239,6 +4290,39 @@
                 },
                 "vert": "horz"
               }
+            }
+          },
+          {
+            "frame": {
+              "h": 167.97900262467192,
+              "w": 251.96850393700788,
+              "x": 73.49081364829397,
+              "y": 157.48031496062993
+            },
+            "kind": "opaque",
+            "name": "Embedded worksheet",
+            "opaqueKind": "ole",
+            "parts": [
+              {
+                "hash": "d4eb7fcb1ad5d21793e68bf101723e750964b2bf59257af46eb55335d7947b11",
+                "partName": "ppt/embeddings/oleObject1.bin",
+                "role": "oleObject"
+              },
+              {
+                "hash": "e7a74ce0393b4d20209e02b0aa09042c07192a32763f922883a45fb28d989290",
+                "partName": "ppt/media/ole-preview.png",
+                "role": "image"
+              }
+            ],
+            "poster": {
+              "bytes": 224,
+              "dataUrl": "image/png",
+              "sha256": "e7a74ce0393b4d20209e02b0aa09042c07192a32763f922883a45fb28d989290"
+            },
+            "pptxId": "3",
+            "props": {
+              "oleName": "Worksheet",
+              "progId": "Excel.Sheet.12"
             }
           },
           {
@@ -4377,9 +4461,9 @@
     "extra": [],
     "inErrorSlides": 0,
     "missing": [],
-    "modelRuns": 7,
-    "outOfScope": 1,
-    "sourceRuns": 7
+    "modelRuns": 8,
+    "outOfScope": 0,
+    "sourceRuns": 8
   },
   "warnings": []
 }

@@ -3,18 +3,20 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the animations are stored as written and saved back; the editor does not play or edit them, and an effect on a shape you delete is removed",
       "id": "pptx.animations",
       "label": "animation effect(s)",
+      "state": "kept",
       "where": [
         "Slide 7"
       ]
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the chart, its workbook and its style parts are stored unchanged and saved back; the editor shows a labelled placeholder and cannot edit or draw it",
       "id": "pptx.charts",
       "label": "chart(s)",
+      "state": "kept",
       "where": [
         "Slide 5"
       ]
@@ -225,9 +227,10 @@
     },
     {
       "count": 2,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the transition is stored as written and saved back; the editor does not play or edit it",
       "id": "pptx.transitions",
       "label": "slide(s) with a transition",
+      "state": "kept",
       "where": [
         "Slide 1",
         "Slide 7"

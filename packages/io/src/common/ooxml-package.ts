@@ -107,6 +107,11 @@ export class OoxmlPackage {
     return this.zip.file(name) !== null;
   }
 
+  /** The uncompressed size the entry's header declares (a cheap first look: the real size is counted when the part is read); 0 when the part is absent. */
+  declaredSize(name: string): number {
+    return (this.zip.file(name) as unknown as { _data: { uncompressedSize: number } } | null)?._data.uncompressedSize ?? 0;
+  }
+
   /**
    * The bytes of a part, or `undefined` when it is absent, over the limits or unreadable. Never throws. The declared size
    * is a cheap first check; the inflated bytes are counted as they come out and the stream is stopped at the limit, so a

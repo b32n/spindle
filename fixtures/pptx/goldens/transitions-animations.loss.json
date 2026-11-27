@@ -3,9 +3,10 @@
   "items": [
     {
       "count": 7,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the animations are stored as written and saved back; the editor does not play or edit them, and an effect on a shape you delete is removed",
       "id": "pptx.animations",
       "label": "animation effect(s)",
+      "state": "kept",
       "where": [
         "Slide 5",
         "Slide 6"
@@ -26,9 +27,10 @@
     },
     {
       "count": 4,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
+      "effect": "kept: the transition is stored as written and saved back; the editor does not play or edit it",
       "id": "pptx.transitions",
       "label": "slide(s) with a transition",
+      "state": "kept",
       "where": [
         "Slide 1",
         "Slide 2",

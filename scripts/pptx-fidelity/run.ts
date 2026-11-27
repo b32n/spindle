@@ -122,11 +122,27 @@ async function importModel(
   }
 }
 
+/** The package part names the importer stored in the opaque part store: every part reference of every opaque element, groups included. */
+export function opaquePartNames(presentation: unknown): Set<string> {
+  const names = new Set<string>();
+  const walk = (elements: unknown): void => {
+    if (!Array.isArray(elements)) return;
+    for (const e of elements as Array<Record<string, unknown>>) {
+      if (e.kind === 'opaque') {
+        for (const p of e.parts as Array<{ partName?: string }>) if (p.partName) names.add(p.partName);
+      } else if (e.kind === 'group') walk(e.children);
+    }
+  };
+  for (const slide of ((presentation as { slides?: Array<{ elements?: unknown }> } | null)?.slides ?? [])) walk(slide.elements);
+  return names;
+}
+
 /** Run one file through inspect -> import -> export -> re-import, plus the ledger. Never throws. */
 export async function runPptxFixture(api: PptxEditorApi, bytes: Uint8Array): Promise<PptxResult> {
   const loss = await inspect(api, bytes);
   const { model, raw } = await importModel(api, bytes);
   const parts = await readParts(bytes);
+  const opaque = opaquePartNames(raw);
   if (model.presentation !== null) model.textParity = textParity(parts, model.presentation);
   return {
     loss,
@@ -139,6 +155,7 @@ export async function runPptxFixture(api: PptxEditorApi, bytes: Uint8Array): Pro
       parts,
       lossIds: loss.items.map((i) => i.id),
       importFailed: model.importError !== null,
+      isOpaque: (name) => opaque.has(name),
     }),
   };
 }

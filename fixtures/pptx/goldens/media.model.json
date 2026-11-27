@@ -3900,6 +3900,32 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 32,
+          "sha256": "de17900c6e6225de65eec7b1970c03636113a98dc8a9c0e9ea5e937fa7ad32f8"
+        },
+        "contentType": "video/mp4",
+        "hash": "de17900c6e6225de65eec7b1970c03636113a98dc8a9c0e9ea5e937fa7ad32f8"
+      },
+      {
+        "bytes": {
+          "bytes": 209,
+          "sha256": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b"
+        },
+        "contentType": "image/png",
+        "hash": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b"
+      },
+      {
+        "bytes": {
+          "bytes": 144,
+          "sha256": "421a2ff8af9dc9971057324353b1324d629c72ab244c0615edc222b463c2dd0c"
+        },
+        "contentType": "audio/wav",
+        "hash": "421a2ff8af9dc9971057324353b1324d629c72ab244c0615edc222b463c2dd0c"
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 1280
@@ -3966,27 +3992,36 @@
           },
           {
             "altText": "An inert video file (not playable)",
-            "dataUrl": {
-              "bytes": 209,
-              "dataUrl": "image/png",
-              "sha256": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b"
-            },
             "frame": {
               "h": 230.9711286089239,
               "w": 314.96062992125985,
               "x": 157.48031496062993,
               "y": 178.47769028871392
             },
-            "geometry": {
-              "kind": "preset",
-              "known": true,
-              "prst": "rect"
-            },
-            "kind": "picture",
-            "mime": "image/png",
+            "kind": "opaque",
             "name": "Video 1",
-            "part": "ppt/media/poster.png",
-            "pptxId": "3"
+            "opaqueKind": "media",
+            "parts": [
+              {
+                "hash": "de17900c6e6225de65eec7b1970c03636113a98dc8a9c0e9ea5e937fa7ad32f8",
+                "partName": "ppt/media/clip.mp4",
+                "role": "video"
+              },
+              {
+                "hash": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b",
+                "partName": "ppt/media/poster.png",
+                "role": "image"
+              }
+            ],
+            "poster": {
+              "bytes": 209,
+              "dataUrl": "image/png",
+              "sha256": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b"
+            },
+            "pptxId": "3",
+            "props": {
+              "clip": "videoFile"
+            }
           },
           {
             "fill": {
@@ -4041,27 +4076,36 @@
           },
           {
             "altText": "An inert audio file (not playable)",
-            "dataUrl": {
-              "bytes": 209,
-              "dataUrl": "image/png",
-              "sha256": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b"
-            },
             "frame": {
               "h": 230.9711286089239,
               "w": 314.96062992125985,
               "x": 682.4146981627297,
               "y": 178.47769028871392
             },
-            "geometry": {
-              "kind": "preset",
-              "known": true,
-              "prst": "rect"
-            },
-            "kind": "picture",
-            "mime": "image/png",
+            "kind": "opaque",
             "name": "Audio 2",
-            "part": "ppt/media/poster.png",
-            "pptxId": "4"
+            "opaqueKind": "media",
+            "parts": [
+              {
+                "hash": "421a2ff8af9dc9971057324353b1324d629c72ab244c0615edc222b463c2dd0c",
+                "partName": "ppt/media/sound.wav",
+                "role": "audio"
+              },
+              {
+                "hash": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b",
+                "partName": "ppt/media/poster.png",
+                "role": "image"
+              }
+            ],
+            "poster": {
+              "bytes": 209,
+              "dataUrl": "image/png",
+              "sha256": "b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b"
+            },
+            "pptxId": "4",
+            "props": {
+              "clip": "audioFile"
+            }
           },
           {
             "fill": {

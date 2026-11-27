@@ -226,8 +226,8 @@ describe('p:pic', () => {
     const els = await elementsOf(tree, { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } });
     expect(els.map((e) => [e.kind, e.pptxId])).toEqual([['shape', '2'], ['picture', '5'], ['shape', '2']]);
     const fallback = await elementsOf(`<mc:AlternateContent><mc:Fallback>${pic({ id: 6 })}</mc:Fallback></mc:AlternateContent><p:grpSp/><p:cxnSp/><p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="8" name="Chart"/></p:nvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"/></a:graphic></p:graphicFrame>`, { slideRels: [image('../media/a.png')], extra: { 'ppt/media/a.png': PNG } });
-    // the empty group and connector are read too (K10b); the chart is not (K11)
-    expect(fallback.map((e) => [e.kind, e.pptxId])).toEqual([['picture', '6'], ['group', ''], ['connector', '']]);
+    // the empty group and connector are read too (K10b), and the chart is kept as an opaque element (K11)
+    expect(fallback.map((e) => [e.kind, e.pptxId])).toEqual([['picture', '6'], ['group', ''], ['connector', ''], ['opaque', '8']]);
   });
 });
 
@@ -392,9 +392,10 @@ describe('tables', () => {
     expect(bad.rows[0].height).toBe(0);
   });
 
-  it('skips a graphic frame that holds no table', async () => {
+  it('skips a graphic frame that holds nothing the reader keeps, and keeps a chart as opaque (K11)', async () => {
     const frame = (uri: string, inner = ''): string => `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="4" name="G"/></p:nvGraphicFramePr><a:graphic><a:graphicData uri="${uri}">${inner}</a:graphicData></a:graphic></p:graphicFrame>`;
-    expect(await elementsOf(frame('http://schemas.openxmlformats.org/drawingml/2006/chart'))).toEqual([]);
+    expect(await elementsOf(frame('http://schemas.microsoft.com/office/2014/unknown'))).toEqual([]);
+    expect((await elementsOf(frame('http://schemas.openxmlformats.org/drawingml/2006/chart'))).map((e) => e.kind)).toEqual(['opaque']);
     // a table uri without a table inside has nothing to read
     expect(await elementsOf(frame('http://schemas.openxmlformats.org/drawingml/2006/table'))).toEqual([]);
     expect(await elementsOf('<p:graphicFrame/>')).toEqual([]);

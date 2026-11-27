@@ -3900,6 +3900,48 @@
         "staticShapes": 0
       }
     ],
+    "opaqueParts": [
+      {
+        "bytes": {
+          "bytes": 3839,
+          "sha256": "31264ec4799326f8eee5350f9a95380c845c7f244d5a5d2f7647860c450c739d"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.diagramData+xml",
+        "hash": "31264ec4799326f8eee5350f9a95380c845c7f244d5a5d2f7647860c450c739d"
+      },
+      {
+        "bytes": {
+          "bytes": 1802,
+          "sha256": "b2562b24c33d3c9043f214b39d88c29393d9fa03cecaed48890cdf8cd877f431"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.diagramLayout+xml",
+        "hash": "b2562b24c33d3c9043f214b39d88c29393d9fa03cecaed48890cdf8cd877f431"
+      },
+      {
+        "bytes": {
+          "bytes": 916,
+          "sha256": "1a82986ad0f25ab2e0d045b4daec167b6d1102269df3a43b69ed5e4a52770bca"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.diagramStyle+xml",
+        "hash": "1a82986ad0f25ab2e0d045b4daec167b6d1102269df3a43b69ed5e4a52770bca"
+      },
+      {
+        "bytes": {
+          "bytes": 652,
+          "sha256": "120899877c1f9df22521fb1483a77d80c9e791574622895bdd070f43aff107b6"
+        },
+        "contentType": "application/vnd.openxmlformats-officedocument.drawingml.diagramColors+xml",
+        "hash": "120899877c1f9df22521fb1483a77d80c9e791574622895bdd070f43aff107b6"
+      },
+      {
+        "bytes": {
+          "bytes": 3288,
+          "sha256": "39fc7c1b78afb6c7bb569f25c8caf9be5a2aba56988f49b4b8acc04ef6aaeca1"
+        },
+        "contentType": "application/vnd.ms-office.drawingml.diagramDrawing+xml",
+        "hash": "39fc7c1b78afb6c7bb569f25c8caf9be5a2aba56988f49b4b8acc04ef6aaeca1"
+      }
+    ],
     "slideSize": {
       "h": 720,
       "w": 1280
@@ -3963,6 +4005,45 @@
                 "vert": "horz"
               }
             }
+          },
+          {
+            "frame": {
+              "h": 163.7795275590551,
+              "w": 913.3858267716536,
+              "x": 104.98687664041995,
+              "y": 188.9763779527559
+            },
+            "kind": "opaque",
+            "name": "Diagram",
+            "opaqueKind": "smartArt",
+            "parts": [
+              {
+                "hash": "31264ec4799326f8eee5350f9a95380c845c7f244d5a5d2f7647860c450c739d",
+                "partName": "ppt/diagrams/data1.xml",
+                "role": "diagramData"
+              },
+              {
+                "hash": "b2562b24c33d3c9043f214b39d88c29393d9fa03cecaed48890cdf8cd877f431",
+                "partName": "ppt/diagrams/layout1.xml",
+                "role": "diagramLayout"
+              },
+              {
+                "hash": "1a82986ad0f25ab2e0d045b4daec167b6d1102269df3a43b69ed5e4a52770bca",
+                "partName": "ppt/diagrams/quickStyle1.xml",
+                "role": "diagramQuickStyle"
+              },
+              {
+                "hash": "120899877c1f9df22521fb1483a77d80c9e791574622895bdd070f43aff107b6",
+                "partName": "ppt/diagrams/colors1.xml",
+                "role": "diagramColors"
+              },
+              {
+                "hash": "39fc7c1b78afb6c7bb569f25c8caf9be5a2aba56988f49b4b8acc04ef6aaeca1",
+                "partName": "ppt/diagrams/drawing1.xml",
+                "role": "diagramDrawing"
+              }
+            ],
+            "pptxId": "3"
           }
         ],
         "layoutPart": "ppt/slideLayouts/slideLayout4.xml",

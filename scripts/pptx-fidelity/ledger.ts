@@ -7,8 +7,9 @@
  *                the slide, layout and master parts it reads; what it reads from a slide or a layout grows over the K9
  *                PRs (the slide list and theme first, layouts and slide content next), so `mapped` says "this kind of
  *                part is read", not "everything in it is carried": the loss ids say what is not.
- *   opaque       the part is kept byte-for-byte and written back on export. Nothing is opaque until the opaque
- *                part store (plan X5) exists: `opaque` is the hook that will decide it.
+ *   opaque       the part is kept byte-for-byte in the opaque part store and written back on export (plan K11: the parts of
+ *                charts, SmartArt, OLE objects and controls, audio and video, ink, and their relationship parts). The reader
+ *                names them in its result; `isOpaque` carries that to the ledger and wins over every rule below.
  *   dropped      the part is not imported and the loss report says so: a loss id covers it (`loss` lists the ids).
  *   unaccounted  nothing accounts for the part: it is not read and no reported loss covers it. The count is
  *                recorded as is (plan row L13 wants 0). A part no rule knows is covered by the detector's
@@ -57,9 +58,9 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
     match: /^ppt\/handoutMasters\//,
     outcome: { dropped: ['pptx.masters.handoutMaster'] },
   },
-  { id: 'chart', match: /^ppt\/charts\//, outcome: { dropped: ['pptx.charts'] } },
-  { id: 'diagram', match: /^ppt\/diagrams\//, outcome: { dropped: ['pptx.smartArt'] } },
-  { id: 'audioVideo', match: new RegExp(`^ppt/media/.*${AUDIO_VIDEO.source}`, 'i'), outcome: { dropped: ['pptx.media'] } },
+  { id: 'chart', match: /^ppt\/charts\//, outcome: { dropped: ['pptx.charts', 'pptx.opaque.tooLarge'] } },
+  { id: 'diagram', match: /^ppt\/diagrams\//, outcome: { dropped: ['pptx.smartArt', 'pptx.opaque.tooLarge'] } },
+  { id: 'audioVideo', match: new RegExp(`^ppt/media/.*${AUDIO_VIDEO.source}`, 'i'), outcome: { dropped: ['pptx.media', 'pptx.opaque.tooLarge'] } },
   {
     id: 'vectorPicture',
     match: new RegExp(`^ppt/media/.*${VECTOR.source}`, 'i'),
@@ -70,16 +71,16 @@ export const LEDGER_RULES: readonly LedgerRule[] = [
   {
     id: 'embedding',
     match: /^ppt\/embeddings\//,
-    outcome: { dropped: ['pptx.embeddedObjects', 'pptx.charts'] },
+    outcome: { dropped: ['pptx.embeddedObjects', 'pptx.charts', 'pptx.opaque.tooLarge'] },
   },
   {
     id: 'controls',
     match: /^ppt\/activeX\//,
-    outcome: { dropped: ['pptx.embeddedObjects'] },
+    outcome: { dropped: ['pptx.embeddedObjects', 'pptx.opaque.tooLarge'] },
   },
   // legacy and modern comments become threads of their slide (K10c)
   { id: 'comments', match: /^ppt\/(?:comments\/|commentAuthors\.xml$|authors\.xml$)/, outcome: 'mapped' },
-  { id: 'ink', match: /^ppt\/ink\//, outcome: { dropped: ['pptx.ink'] } },
+  { id: 'ink', match: /^ppt\/ink\//, outcome: { dropped: ['pptx.ink', 'pptx.opaque.tooLarge'] } },
   {
     id: 'macro',
     match: /^ppt\/vbaProject(?:Signature)?\.bin$/,
@@ -116,7 +117,7 @@ export interface LedgerInput {
   /** Ids of the loss items reported for the file. */
   lossIds: string[];
   importFailed: boolean;
-  /** Part names stored in the opaque part store (none today). */
+  /** Part names stored in the opaque part store (the reader's `opaqueParts` and the elements' part references). */
   isOpaque?: (name: string) => boolean;
 }
 

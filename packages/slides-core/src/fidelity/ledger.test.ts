@@ -120,6 +120,13 @@ describe('classifyPart', () => {
     );
   });
 
+  it('covers a kept-content part the store refused by the too-large item, and by nothing else it would not mention', () => {
+    for (const part of ['ppt/charts/chart1.xml', 'ppt/diagrams/data1.xml', 'ppt/media/a.mp4', 'ppt/embeddings/o.bin', 'ppt/activeX/a.bin', 'ppt/ink/ink1.xml']) {
+      expect(classifyPart(part, { lossIds: ['pptx.opaque.tooLarge'], importFailed: false })).toMatchObject({ status: 'dropped', loss: ['pptx.opaque.tooLarge'] });
+      expect(classifyPart(part, { lossIds: [], importFailed: false }).status).toBe('unaccounted');
+    }
+  });
+
   it('has unique rule ids, and only pptx loss ids', () => {
     const ids = LEDGER_RULES.map((r) => r.id);
     expect(new Set(ids).size).toBe(ids.length);

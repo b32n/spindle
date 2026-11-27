@@ -398,7 +398,9 @@ describe('summary versus full', () => {
     const r = await build({ slides: [{ shapes, attrs: 'show="0"', rels: [rel('rId1', 'hyperlink', 'https://example.com/a', true)] }], files: { 'ppt/vbaProject.bin': 'x', 'ppt/odd/part.bin': 'x' } }).then(full);
     expect(r.items.length).toBeGreaterThan(5);
     for (const i of r.items) expect(i.effect).toMatch(/^(lost|approximated|kept): /);
-    expect(item(r, 'pptx.charts')?.effect).toMatch(/the PPTX reader does not read this yet/);
+    expect(item(r, 'pptx.charts')?.effect).toMatch(/^kept: /);
+    expect(item(r, 'pptx.shapes.scene3d')).toBeUndefined();
+    expect(item(r, 'pptx.macros')?.effect).toMatch(/^lost: /);
     expect(item(r, 'pptx.hiddenSlides')?.effect).toMatch(/^kept: /);
   });
 
@@ -1018,12 +1020,19 @@ describe('presentation level', () => {
   });
 });
 
-describe('detectPptxLoss: the state of each id after the reader (K9c, K10a)', () => {
+describe('detectPptxLoss: the state of each id after the reader (K9c, K10a, K11)', () => {
   // the ids `importPptx` reads say how (kept or approximated); the rest are still lost
   const READ: Record<string, 'kept' | 'approximated'> = {
     'pptx.fonts.unavailable': 'approximated',
     'pptx.shapes.unsupportedGeometry': 'approximated',
     'pptx.hiddenSlides': 'kept',
+    'pptx.charts': 'kept',
+    'pptx.smartArt': 'kept',
+    'pptx.media': 'kept',
+    'pptx.embeddedObjects': 'kept',
+    'pptx.transitions': 'kept',
+    'pptx.animations': 'kept',
+    'pptx.ink': 'kept',
     'pptx.notes': 'approximated',
     'pptx.masters.notesMaster': 'approximated',
     'pptx.masters.layoutInheritance': 'approximated',

@@ -64,6 +64,12 @@ async function readImage(part: string, ctx: PictureContext): Promise<{ mime: str
   return result;
 }
 
+/** An embedded image as a data URL, or `undefined` when it is missing, in a format browsers cannot show or has no renderer (cached per part, like pictures). */
+export async function imageDataUrl(part: string, ctx: PictureContext): Promise<string | undefined> {
+  const image = await readImage(part, ctx);
+  return 'dataUrl' in image ? image.dataUrl : undefined;
+}
+
 /** `a:srcRect` in percent of the source (`l="25000"` is 25), only when it trims something; an outset (a negative edge) counts as none, and so does a crop whose opposite edges meet or overlap. */
 function readCrop(rect: XmlElement | undefined): PptxPicture['crop'] {
   const edge = (a: string): number => Math.min(100, Math.max(0, (pct(rect?.attrs[a]) ?? 0) * 100));

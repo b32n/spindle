@@ -33,12 +33,9 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.charts"
-      ],
       "name": "ppt/charts/chart1.xml",
-      "rule": "chart",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
       "name": "ppt/media/image1.png",
@@ -247,9 +244,9 @@
     }
   ],
   "totals": {
-    "dropped": 1,
+    "dropped": 0,
     "mapped": 47,
-    "opaque": 0,
+    "opaque": 1,
     "total": 48,
     "unaccounted": 0
   }

@@ -28,44 +28,29 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.smartArt"
-      ],
       "name": "ppt/diagrams/colors1.xml",
-      "rule": "diagram",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.smartArt"
-      ],
       "name": "ppt/diagrams/data1.xml",
-      "rule": "diagram",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.smartArt"
-      ],
       "name": "ppt/diagrams/drawing1.xml",
-      "rule": "diagram",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.smartArt"
-      ],
       "name": "ppt/diagrams/layout1.xml",
-      "rule": "diagram",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.smartArt"
-      ],
       "name": "ppt/diagrams/quickStyle1.xml",
-      "rule": "diagram",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
       "name": "ppt/presProps.xml",
@@ -164,9 +149,9 @@
     }
   ],
   "totals": {
-    "dropped": 5,
+    "dropped": 0,
     "mapped": 24,
-    "opaque": 0,
+    "opaque": 5,
     "total": 29,
     "unaccounted": 0
   }

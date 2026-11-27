@@ -71,8 +71,10 @@ describe('PPTX fidelity corpus (io source)', () => {
       }
       expect(o.importExpectation).toBe('as-expected');
       expect(o.result.loss.items.map((i) => i.id).filter((i) => i.startsWith('harness.'))).toEqual([]);
-      // nothing is kept opaque without the part store
-      expect(o.result.ledger.totals.opaque).toBe(0);
+      // the parts of the kept content (charts, SmartArt, OLE, clips, ink) are opaque and nothing else is
+      const opaqueParts = o.result.ledger.parts.filter((p) => p.status === 'opaque');
+      expect(opaqueParts).toHaveLength(o.result.ledger.totals.opaque);
+      expect(opaqueParts.every((p) => p.rule === 'opaque')).toBe(true);
     }
   });
 
@@ -145,7 +147,7 @@ describe('PPTX fidelity corpus (io source)', () => {
       if (o.result.model.importError !== null) continue;
       for (const p of o.result.ledger.parts) {
         if (p.status === 'dropped') expect(p.loss?.length).toBe(1);
-        else expect({ id: o.entry.id, part: p.name, status: p.status }).toEqual({ id: o.entry.id, part: p.name, status: 'mapped' });
+        else expect({ id: o.entry.id, part: p.name, status: p.status === 'opaque' ? 'mapped' : p.status }).toEqual({ id: o.entry.id, part: p.name, status: 'mapped' });
       }
       expect(o.result.ledger.totals.unaccounted).toBe(0);
     }

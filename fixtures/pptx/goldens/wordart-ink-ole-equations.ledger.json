@@ -28,25 +28,19 @@
       "status": "mapped"
     },
     {
-      "loss": [
-        "pptx.embeddedObjects"
-      ],
       "name": "ppt/embeddings/oleObject1.bin",
-      "rule": "embedding",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
-      "loss": [
-        "pptx.ink"
-      ],
       "name": "ppt/ink/ink1.xml",
-      "rule": "ink",
-      "status": "dropped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
       "name": "ppt/media/ole-preview.png",
-      "rule": "picture",
-      "status": "mapped"
+      "rule": "opaque",
+      "status": "opaque"
     },
     {
       "name": "ppt/presProps.xml",
@@ -165,9 +159,9 @@
     }
   ],
   "totals": {
-    "dropped": 2,
-    "mapped": 29,
-    "opaque": 0,
+    "dropped": 0,
+    "mapped": 28,
+    "opaque": 3,
     "total": 31,
     "unaccounted": 0
   }
