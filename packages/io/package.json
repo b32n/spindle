@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@b32nio/spindle-shared": "^0.4.1",
-    "docx": "^9.15.4",
+    "docx": "^9.16.0",
     "exceljs": "^4.4.0",
     "fast-xml-parser": "^5.12.1",
     "jszip": "^3.10.2"
