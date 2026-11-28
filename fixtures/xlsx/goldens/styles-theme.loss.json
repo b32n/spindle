@@ -2,6 +2,17 @@
   "format": "xlsx",
   "items": [
     {
+      "count": 2,
+      "effect": "approximated: the line style is kept and saved back; on screen hair is a fine dotted line and slantDashDot a dash-dot line",
+      "id": "xlsx.styles.borderStyles",
+      "label": "cell format(s) with a border line style drawn approximately",
+      "state": "approximated",
+      "where": [
+        "hair",
+        "slantDashDot"
+      ]
+    },
+    {
       "count": 1,
       "effect": "lost: diagonal borders are dropped",
       "id": "xlsx.styles.diagonalBorder",
@@ -9,15 +20,17 @@
     },
     {
       "count": 1,
-      "effect": "lost: gradient fills are dropped",
+      "effect": "approximated: drawn as its first colour stop, and saved back as a solid fill of that colour",
       "id": "xlsx.styles.gradientFill",
-      "label": "cell format(s) with a gradient fill"
+      "label": "cell format(s) with a gradient fill",
+      "state": "approximated"
     },
     {
       "count": 2,
       "effect": "approximated: formatting is kept per cell; the style names are not",
       "id": "xlsx.styles.namedStyles",
       "label": "named cell style(s) in use",
+      "state": "approximated",
       "where": [
         "Good",
         "Spindle Emphasis"
@@ -25,9 +38,10 @@
     },
     {
       "count": 12,
-      "effect": "lost: pattern fills are dropped (only solid fills are imported)",
+      "effect": "approximated: drawn as one flat colour (the pattern's average); the pattern and its colours are kept and saved back",
       "id": "xlsx.styles.patternFill",
-      "label": "cell format(s) with a pattern fill"
+      "label": "cell format(s) with a pattern fill",
+      "state": "approximated"
     }
   ]
 }

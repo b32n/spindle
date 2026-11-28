@@ -20,6 +20,7 @@ import {
   getWorkbookYTypes,
   getSheetYTypes,
   ensureSheetYMap,
+  ensureLineStyleMaps,
   threadKey,
   mergedRegionKey,
 } from './collab/y-schema';
@@ -1190,6 +1191,8 @@ export class WorkbookImpl implements Workbook {
         ...sheet.config,
         rowHeights: sheet.config.rowHeights ? new Map(sheet.config.rowHeights) : undefined,
         colWidths: sheet.config.colWidths ? new Map(sheet.config.colWidths) : undefined,
+        colStyles: sheet.config.colStyles ? new Map(sheet.config.colStyles) : undefined,
+        rowStyles: sheet.config.rowStyles ? new Map(sheet.config.rowStyles) : undefined,
         hiddenRows: sheet.config.hiddenRows ? new Set(sheet.config.hiddenRows) : undefined,
         hiddenCols: sheet.config.hiddenCols ? new Set(sheet.config.hiddenCols) : undefined,
         mergedRegions: sheet.config.mergedRegions
@@ -1468,6 +1471,12 @@ export class WorkbookImpl implements Workbook {
         colWidths: sheet.config.colWidths
           ? Array.from(sheet.config.colWidths.entries()) as Array<[string, number]>
           : undefined,
+        colStyles: sheet.config.colStyles
+          ? Array.from(sheet.config.colStyles.entries()) as Array<[string, import('./types').LineFormat]>
+          : undefined,
+        rowStyles: sheet.config.rowStyles
+          ? Array.from(sheet.config.rowStyles.entries()) as Array<[string, import('./types').LineFormat]>
+          : undefined,
         hiddenRows: sheet.config.hiddenRows
           ? Array.from(sheet.config.hiddenRows) as string[]
           : undefined,
@@ -1613,6 +1622,20 @@ export class WorkbookImpl implements Workbook {
         for (const [key, w] of sheetData.config.colWidths) {
           const colId = useStable ? (key as string) : sheet.ensureColId(key as number);
           sheet.config.colWidths.set(colId, w);
+        }
+      }
+      if (sheetData.config.colStyles) {
+        sheet.config.colStyles = new Map();
+        for (const [key, format] of sheetData.config.colStyles) {
+          const colId = useStable ? (key as string) : sheet.ensureColId(key as number);
+          sheet.config.colStyles.set(colId, format);
+        }
+      }
+      if (sheetData.config.rowStyles) {
+        sheet.config.rowStyles = new Map();
+        for (const [key, format] of sheetData.config.rowStyles) {
+          const rowId = useStable ? (key as string) : sheet.ensureRowId(key as number);
+          sheet.config.rowStyles.set(rowId, format);
         }
       }
       if (sheetData.config.hiddenRows) {
@@ -2313,6 +2336,17 @@ export class WorkbookImpl implements Workbook {
       // Dimension maps + hidden sets + filters: rebuild from sheet config.
       syncMapToY(t.rowHeights, sheet.config.rowHeights);
       syncMapToY(t.colWidths, sheet.config.colWidths);
+      // default formats of columns and rows: a sheet from before schema 3 gets its maps only when there is something to put in them
+      const lines = t.colStyles && t.rowStyles ? t : sheet.config.colStyles?.size || sheet.config.rowStyles?.size ? ensureLineStyleMaps(ySheetMap) : undefined;
+      if (lines?.colStyles) syncMapToY(lines.colStyles, sheet.config.colStyles);
+      if (lines?.rowStyles) syncMapToY(lines.rowStyles, sheet.config.rowStyles);
+      // the styles and formats they name must be in the shared pools too (a cell write does the same for its own)
+      for (const format of [...(sheet.config.colStyles?.values() ?? []), ...(sheet.config.rowStyles?.values() ?? [])]) {
+        const style = format.styleId ? this.stylePool.get(format.styleId) : undefined;
+        if (format.styleId && style && !yTypes.stylePool.has(format.styleId)) yTypes.stylePool.set(format.styleId, { ...style });
+        const numberFormat = format.formatId ? this.formatPool.get(format.formatId) : undefined;
+        if (format.formatId && numberFormat && !yTypes.formatPool.has(format.formatId)) yTypes.formatPool.set(format.formatId, { ...numberFormat });
+      }
       syncSetToYMap(t.hiddenRows, sheet.config.hiddenRows);
       syncSetToYMap(t.hiddenCols, sheet.config.hiddenCols);
       syncMapToY(t.filters, sheet.config.filters);

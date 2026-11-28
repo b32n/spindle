@@ -5,20 +5,20 @@ import type { ImportXlsxOptions } from '@b32nio/spindle-io/xlsx';
 // hosts that never open or save the format don't pay for its dependencies.
 const loadIo = () => import('@b32nio/spindle-io/xlsx');
 import type {
-  SpreadsheetBorder,
   SpreadsheetCell,
-  SpreadsheetCellStyle,
+  SpreadsheetDefaultFormat,
   SpreadsheetImportResult,
   SpreadsheetMergedRange,
   SpreadsheetSheet,
 } from '@b32nio/spindle-shared/export/xlsx';
-import type { Cell, CellStyle, SheetData, Sheet, WorkbookData } from '../types';
+import type { Cell, LineFormat, SheetData, Sheet, WorkbookData } from '../types';
 import type { WorkbookImpl } from '../workbook';
 import { StylePool } from '../style-pool';
 import { FormatPool } from '../format-pool';
 import { generateId } from '../utils/id';
-import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
+import { toExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
 import { isFaithfulFormatCode } from '../number-format';
+import { MAX_IMPORTED_STYLES, StyleImport, toDefaultFormat, toSpreadsheetStyle } from './xlsx-style';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
 import { isFormulaEvaluable, parseRange, spanRef, withImplicitIntersection, withoutImplicitIntersection } from './xlsx-formulas';
 
@@ -138,6 +138,9 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
     } else if (span) markArrayMembers(cells, row, col, span, state);
   }
 
+  const columnStyles = defaultFormats(sheet.config.colStyles, (id) => sheet.getColIndex(id), stylePool, formatPool);
+  const rowStyles = defaultFormats(sheet.config.rowStyles, (id) => sheet.getRowIndex(id), stylePool, formatPool);
+
   const columnWidths = new Map<number, number>();
   const hiddenCols = new Set<number>();
   for (let col = 0; col <= maxCol; col++) {
@@ -166,10 +169,36 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
     rowHeights,
     hiddenCols,
     hiddenRows,
+    columnStyles,
+    rowStyles,
+    // only a default that is not the editor's is written: the file then says what the sheet has, and a sheet with the editor's reads back the same
+    defaultColumnWidth: sheet.config.defaultColWidth !== undefined && sheet.config.defaultColWidth !== DEFAULT_COL_WIDTH ? sheet.config.defaultColWidth : undefined,
+    defaultRowHeight: sheet.config.defaultRowHeight !== undefined && sheet.config.defaultRowHeight !== DEFAULT_ROW_HEIGHT ? sheet.config.defaultRowHeight : undefined,
     frozenRows: sheet.getFrozenRows(),
     frozenCols: sheet.getFrozenCols(),
     mergedRanges,
   };
+}
+
+/** The editor's default column width and row height (pixels): a sheet that has none of its own is written with them. */
+const DEFAULT_COL_WIDTH = 100;
+const DEFAULT_ROW_HEIGHT = 20;
+
+/** The default formats of a sheet's columns or rows (`config.colStyles` / `rowStyles`, by stable id) by current index; `undefined` when there are none. */
+function defaultFormats(
+  lines: Map<string, LineFormat> | undefined,
+  indexOf: (id: string) => number | undefined,
+  stylePool: ReturnType<WorkbookImpl['getStylePool']>,
+  formatPool: ReturnType<WorkbookImpl['getFormatPool']>
+): Map<number, SpreadsheetDefaultFormat> | undefined {
+  if (!lines) return undefined;
+  const out = new Map<number, SpreadsheetDefaultFormat>();
+  for (const [id, line] of lines) {
+    const index = indexOf(id);
+    const format = index === undefined ? undefined : toDefaultFormat(line, stylePool, formatPool);
+    if (index !== undefined && format) out.set(index, format);
+  }
+  return out.size > 0 ? out : undefined;
 }
 
 /**
@@ -232,55 +261,6 @@ function toFileValue(value: SpreadsheetCell['value']): SpreadsheetCell['value'] 
   return value;
 }
 
-function toSpreadsheetStyle(style: CellStyle): SpreadsheetCellStyle {
-  const out: SpreadsheetCellStyle = {};
-  if (style.bold != null) out.bold = style.bold;
-  if (style.italic != null) out.italic = style.italic;
-  if (style.textDecoration === 'underline') out.underline = true;
-  if (style.textDecoration === 'line-through') out.strikethrough = true;
-  if (style.fontFamily != null) out.fontFamily = style.fontFamily;
-  if (style.fontSize != null) out.fontSize = style.fontSize;
-  if (style.fontColor != null) out.fontColor = style.fontColor;
-  if (style.backgroundColor != null) out.backgroundColor = style.backgroundColor;
-  if (style.textAlign != null) out.horizontalAlign = style.textAlign;
-  if (style.verticalAlign != null) out.verticalAlign = style.verticalAlign;
-  if (style.textWrap != null) out.wrapText = style.textWrap;
-  if (style.textRotation != null) out.textRotation = style.textRotation;
-
-  if (style.borderTop || style.borderRight || style.borderBottom || style.borderLeft) {
-    out.border = {
-      top: parseBorder(style.borderTop),
-      right: parseBorder(style.borderRight),
-      bottom: parseBorder(style.borderBottom),
-      left: parseBorder(style.borderLeft),
-    };
-  }
-  return out;
-}
-
-// CellStyle's border fields are CSS shorthand strings, e.g. "1px solid #000000".
-const CSS_BORDER = /^(\d+)px\s+(\w+)\s+(#[0-9a-fA-F]{3,8}|\w+)$/;
-
-function parseBorder(value: string | undefined): SpreadsheetBorder | undefined {
-  if (!value) return undefined;
-  const match = value.match(CSS_BORDER);
-  if (!match) return { style: 'thin' };
-  const [, widthStr, cssStyle, color] = match;
-  return {
-    style: toBorderStyle(Number(widthStr), cssStyle),
-    color: color.startsWith('#') ? color : undefined,
-  };
-}
-
-function toBorderStyle(widthPx: number, cssStyle: string): SpreadsheetBorder['style'] {
-  if (cssStyle === 'dashed') return 'dashed';
-  if (cssStyle === 'dotted') return 'dotted';
-  if (cssStyle === 'double') return 'double';
-  if (widthPx >= 3) return 'thick';
-  if (widthPx === 2) return 'medium';
-  return 'thin';
-}
-
 // ---------------------------------------------------------------------------
 // Import
 // ---------------------------------------------------------------------------
@@ -333,11 +313,12 @@ export async function importFromXlsx(
   const warnings = [...result.warnings];
   // one warning per array formula the file gave a range that does not start at its cell, counted after a small cap (the file chooses how many)
   let misplaced = 0;
-  const { data, sheetIds, spanBudgetCut, legacy } = toWorkbookData(result, workbook, io, maxArrayCells, (message) => {
+  const { data, sheetIds, spanBudgetCut, styleCuts, legacy } = toWorkbookData(result, workbook, io, maxArrayCells, (message) => {
     if (misplaced++ < MAX_ARRAY_WARNINGS) warnings.push(message);
   });
   if (misplaced > MAX_ARRAY_WARNINGS) warnings.push(`${misplaced - MAX_ARRAY_WARNINGS} more array formulas whose range does not start at their cell were read as one-cell formulas.`);
   if (spanBudgetCut > 0) loss.items.push(spanBudgetItem(spanBudgetCut, maxArrayCells));
+  loss.items.push(...styleCutItems(styleCuts));
   // the file's saved results are the values (the engine recalculates a formula when its precedents change), unless the host asks for a recalculation
   workbook.setData(data, { keepCachedValues: recalculateOnLoad !== true });
   // a legacy array the engine does not evaluate to what the file saved keeps what the file saved (the engine's result is the worse one)
@@ -393,14 +374,15 @@ function toWorkbookData(
   io: IoXlsx,
   maxArrayCells: number,
   warn: (message: string) => void
-): { data: WorkbookData; sheetIds: string[]; spanBudgetCut: number; legacy: Array<LegacyArray & { sheetIndex: number }> } {
+): { data: WorkbookData; sheetIds: string[]; spanBudgetCut: number; styleCuts: StyleImport['cut']; legacy: Array<LegacyArray & { sheetIndex: number }> } {
   const stylePool = new StylePool();
   const formatPool = new FormatPool();
+  const styles = new StyleImport(stylePool, formatPool);
   const sheetIds = result.sheets.map(() => generateId());
   let spanBudgetCut = 0;
   const legacy: Array<LegacyArray & { sheetIndex: number }> = [];
   const sheets: SheetData[] = result.sheets.map((sheet, i) => {
-    const converted = toSheetData(sheet, sheetIds[i], stylePool, formatPool, io, maxArrayCells, warn);
+    const converted = toSheetData(sheet, sheetIds[i], styles, io, maxArrayCells, warn);
     spanBudgetCut += converted.spanBudgetCut;
     for (const array of converted.legacy) legacy.push({ ...array, sheetIndex: i });
     return converted.data;
@@ -417,7 +399,7 @@ function toWorkbookData(
     formatPool: Object.fromEntries(formatPool.getAllFormats()),
     sheets,
   };
-  return { data, sheetIds, spanBudgetCut, legacy };
+  return { data, sheetIds, spanBudgetCut, styleCuts: styles.cut, legacy };
 }
 
 /**
@@ -435,8 +417,7 @@ const MAX_ARRAY_WARNINGS = 20;
 function toSheetData(
   sheet: SpreadsheetSheet,
   id: string,
-  stylePool: StylePool,
-  formatPool: FormatPool,
+  styles: StyleImport,
   io: IoXlsx,
   maxArrayCells: number,
   warn: (message: string) => void
@@ -474,10 +455,13 @@ function toSheetData(
       }
     }
     if (spreadsheetCell.hyperlink) cell.hyperlink = spreadsheetCell.hyperlink;
-    if (spreadsheetCell.style) cell.styleId = stylePool.getOrCreate(fromSpreadsheetStyle(spreadsheetCell.style));
+    if (spreadsheetCell.style) {
+      const styleId = styles.style(spreadsheetCell.style);
+      if (styleId) cell.styleId = styleId;
+    }
     if (spreadsheetCell.numberFormat) {
-      const format = fromExcelNumberFormatCode(spreadsheetCell.numberFormat.code);
-      if (format.type) cell.formatId = formatPool.getOrCreate(format);
+      const formatId = styles.format(spreadsheetCell.numberFormat);
+      if (formatId) cell.formatId = formatId;
     }
     cells.push({ key, cell });
   }
@@ -527,6 +511,16 @@ function toSheetData(
     frozenRows: sheet.frozenRows,
     frozenCols: sheet.frozenCols,
   };
+  // (the editor's own default is not repeated: a file that spells it out and one that does not give the same sheet)
+  if (sheet.defaultColumnWidth !== undefined && sheet.defaultColumnWidth !== DEFAULT_COL_WIDTH) config.defaultColWidth = sheet.defaultColumnWidth;
+  if (sheet.defaultRowHeight !== undefined && sheet.defaultRowHeight !== DEFAULT_ROW_HEIGHT) config.defaultRowHeight = sheet.defaultRowHeight;
+  // the sheet's extent as the editor shows it: the cells, at least the default size of a new sheet
+  const rowCount = Math.max(maxRow + 1, 1000);
+  const colCount = Math.max(maxCol + 1, 100);
+  const colStyles = lineFormats(sheet.columnStyles, colCount, styles);
+  const rowStyles = lineFormats(sheet.rowStyles, rowCount, styles);
+  if (colStyles) config.colStyles = colStyles;
+  if (rowStyles) config.rowStyles = rowStyles;
   if (sheet.rowHeights?.size) config.rowHeights = Array.from(sheet.rowHeights.entries());
   if (sheet.columnWidths?.size) config.colWidths = Array.from(sheet.columnWidths.entries());
   if (sheet.hiddenRows?.size) config.hiddenRows = Array.from(sheet.hiddenRows);
@@ -540,12 +534,30 @@ function toSheetData(
       config,
       // Same generous default as a freshly-created sheet, at least as large as
       // the imported data.
-      rowCount: Math.max(maxRow + 1, 1000),
-      colCount: Math.max(maxCol + 1, 100),
+      rowCount,
+      colCount,
     },
     spanBudgetCut,
     legacy,
   };
+}
+
+/**
+ * The default formats of a sheet's columns or rows within its extent (the editor draws and walks no more), as the model's `[index, format]`
+ * entries. What lies beyond the extent is counted in `styles.cut.lines`, and so are the formats the pools had no room for.
+ */
+function lineFormats(formats: Map<number, SpreadsheetDefaultFormat> | undefined, extent: number, styles: StyleImport): Array<[number, LineFormat]> | undefined {
+  if (!formats) return undefined;
+  const out: Array<[number, LineFormat]> = [];
+  for (const [index, format] of formats) {
+    if (index >= extent) {
+      styles.cut.lines++;
+      continue;
+    }
+    const line = styles.line(format);
+    if (line) out.push([index, line]);
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 /** The effect the detector words for `xlsx.formulas.cachedOnly` (the same text, for the formulas the import keeps as saved by itself: a test holds the two together). */
@@ -607,6 +619,33 @@ function addCachedOnly(loss: ImportLossReport, count: number, where: string[]): 
   });
 }
 
+/** The loss items for what the pools and the sheet's extent left out of the cell, column and row formats (`xlsx.package.sizeLimit`). */
+function styleCutItems(cut: StyleImport['cut']): ImportLossItem[] {
+  const items: ImportLossItem[] = [];
+  if (cut.styles > 0)
+    items.push({
+      id: 'xlsx.package.sizeLimit',
+      label: 'cell format(s) past the style limit',
+      count: cut.styles,
+      effect: `approximated: the file has more than ${MAX_IMPORTED_STYLES} distinct cell formats (Excel allows 64,000); the cells and the column and row defaults of the others are imported without formatting`,
+    });
+  if (cut.formats > 0)
+    items.push({
+      id: 'xlsx.package.sizeLimit',
+      label: 'number format(s) past the format limit',
+      count: cut.formats,
+      effect: `approximated: the file has more than ${MAX_IMPORTED_STYLES} distinct number formats; the cells that use the others are shown in General`,
+    });
+  if (cut.lines > 0)
+    items.push({
+      id: 'xlsx.package.sizeLimit',
+      label: 'column/row default format(s) past the last used row or column',
+      count: cut.lines,
+      effect: 'approximated: the formats of columns and rows past the sheet (the last cell, or the first 100 columns and 1000 rows) are not kept; the cells in the sheet keep theirs',
+    });
+  return items;
+}
+
 /** The loss item for array formulas the load budget kept as saved values (see DEFAULT_MAX_ARRAY_CELLS). */
 function spanBudgetItem(count: number, maxArrayCells: number): ImportLossItem {
   return {
@@ -615,40 +654,4 @@ function spanBudgetItem(count: number, maxArrayCells: number): ImportLossItem {
     count,
     effect: `approximated: the cells they cover are too many to take on load (over ${maxArrayCells} cells of array formulas on a sheet; the maxArrayCells option of the import raises it: importFromXlsx, importWorkbookFile, the maxArrayCells prop of WorkbookCanvas), so they keep their saved results and are not recalculated`,
   };
-}
-
-function fromSpreadsheetStyle(style: SpreadsheetCellStyle): CellStyle {
-  const out: CellStyle = {};
-  if (style.bold != null) out.bold = style.bold;
-  if (style.italic != null) out.italic = style.italic;
-  if (style.underline) out.textDecoration = 'underline';
-  else if (style.strikethrough) out.textDecoration = 'line-through';
-  if (style.fontFamily != null) out.fontFamily = style.fontFamily;
-  if (style.fontSize != null) out.fontSize = style.fontSize;
-  if (style.fontColor != null) out.fontColor = style.fontColor;
-  if (style.backgroundColor != null) out.backgroundColor = style.backgroundColor;
-  if (style.horizontalAlign != null) out.textAlign = style.horizontalAlign;
-  if (style.verticalAlign != null) out.verticalAlign = style.verticalAlign;
-  if (style.wrapText != null) out.textWrap = style.wrapText;
-  // an explicit 0 is the default: the file writer leaves it out, so the model does not keep it either (open -> save -> open is stable)
-  if (style.textRotation) out.textRotation = style.textRotation;
-
-  if (style.border) {
-    if (style.border.top) out.borderTop = toCssBorder(style.border.top);
-    if (style.border.right) out.borderRight = toCssBorder(style.border.right);
-    if (style.border.bottom) out.borderBottom = toCssBorder(style.border.bottom);
-    if (style.border.left) out.borderLeft = toCssBorder(style.border.left);
-  }
-  return out;
-}
-
-const BORDER_WIDTH_PX: Record<SpreadsheetBorder['style'], number> = {
-  thin: 1, medium: 2, thick: 3, dashed: 1, dotted: 1, double: 3,
-};
-const BORDER_CSS_STYLE: Record<SpreadsheetBorder['style'], string> = {
-  thin: 'solid', medium: 'solid', thick: 'solid', dashed: 'dashed', dotted: 'dotted', double: 'double',
-};
-
-function toCssBorder(border: SpreadsheetBorder): string {
-  return `${BORDER_WIDTH_PX[border.style]}px ${BORDER_CSS_STYLE[border.style]} ${border.color ?? '#000000'}`;
 }

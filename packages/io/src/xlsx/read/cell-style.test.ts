@@ -13,7 +13,7 @@ const look = (xf: string, tables = '', isDefault = false) => {
 describe('lookOf', () => {
   it('maps fonts, with the colour resolved', () => {
     const l = look('<xf fontId="1"/>', '<fonts><font/><font><b/><i/><u val="double"/><strike/><sz val="12"/><name val="Arial"/><color theme="4"/></font></fonts>');
-    expect(l.style).toEqual({ bold: true, italic: true, underline: true, strikethrough: true, fontFamily: 'Arial', fontSize: 12, fontColor: '#4472c4' });
+    expect(l.style).toEqual({ bold: true, italic: true, underline: true, strikethrough: true, fontFamily: 'Arial', fontSize: 12, fontColor: '#4472c4', underlineStyle: 'double' });
   });
 
   it('applies the tint of a theme colour and resolves indexed and rgb colours', () => {
@@ -32,13 +32,22 @@ describe('lookOf', () => {
     expect(look('<xf/>', fonts('indexed="65"')).style?.fontColor).toBe('#ffffff');
   });
 
-  it('maps solid fills only, with the colour resolved', () => {
+  it('maps solid fills, pattern fills (pattern, its colour, the colour behind it) and gradient fills (first stop), with the colours resolved', () => {
     const fill = (inner: string) => `<fills><fill>${inner}</fill></fills>`;
     expect(look('<xf/>', fill('<patternFill patternType="solid"><fgColor theme="5" tint="0.4"/></patternFill>')).style?.backgroundColor).toBe('#f4b183');
     expect(look('<xf/>', fill('<patternFill patternType="solid"><fgColor rgb="FF112233"/></patternFill>')).style?.backgroundColor).toBe('#112233');
     expect(look('<xf/>', fill('<patternFill patternType="solid"/>')).style).toBeUndefined();
-    expect(look('<xf/>', fill('<patternFill patternType="lightGray"><fgColor rgb="FF112233"/></patternFill>')).style).toBeUndefined();
-    expect(look('<xf/>', fill('<gradientFill><stop position="0"><color rgb="FF112233"/></stop></gradientFill>')).style).toBeUndefined();
+    expect(look('<xf/>', fill('<patternFill patternType="lightGray"><fgColor rgb="FF112233"/></patternFill>')).style).toEqual({ fillPattern: 'lightGray', patternColor: '#112233' });
+    expect(look('<xf/>', fill('<patternFill patternType="darkGrid"><fgColor rgb="FF112233"/><bgColor rgb="FFEEDDCC"/></patternFill>')).style).toEqual({
+      fillPattern: 'darkGrid', patternColor: '#112233', backgroundColor: '#eeddcc',
+    });
+    // a pattern without a colour has nothing to draw, and "none" is no fill
+    expect(look('<xf/>', fill('<patternFill patternType="lightGray"/>')).style).toBeUndefined();
+    expect(look('<xf/>', fill('<patternFill patternType="none"><fgColor rgb="FF112233"/></patternFill>')).style).toBeUndefined();
+    // a gradient is its stop with the lowest position, whatever the order they are written in
+    expect(look('<xf/>', fill('<gradientFill><stop position="0"><color rgb="FF112233"/></stop></gradientFill>')).style).toEqual({ backgroundColor: '#112233' });
+    expect(look('<xf/>', fill('<gradientFill><stop position="1"><color rgb="FF000001"/></stop><stop position="0.25"><color rgb="FF445566"/></stop><stop position="0.5"><color rgb="FF000002"/></stop></gradientFill>')).style).toEqual({ backgroundColor: '#445566' });
+    expect(look('<xf/>', fill('<gradientFill/>')).style).toBeUndefined();
   });
 
   it('maps alignment: known horizontal and vertical values (center is middle), wrap, rotation', () => {
@@ -50,6 +59,23 @@ describe('lookOf', () => {
     expect(a('horizontal="fill"')).toBeUndefined();
   });
 
+  it('maps indent (levels, whole) and shrink-to-fit', () => {
+    const a = (attrs: string) => look(`<xf><alignment ${attrs}/></xf>`).style;
+    expect(a('horizontal="left" indent="2"')).toEqual({ horizontalAlign: 'left', indent: 2 });
+    expect(a('indent="0"')).toBeUndefined();
+    expect(a('indent="1.9"')).toBeUndefined(); // (the reader takes whole numbers only)
+    expect(a('shrinkToFit="1"')).toEqual({ shrinkToFit: true });
+    expect(a('shrinkToFit="0"')).toBeUndefined();
+  });
+
+  it('maps underline variants next to the plain flag, and strike-through', () => {
+    const u = (value: string) => look('<xf fontId="1"/>', `<fonts><font/><font><u${value}/></font></fonts>`).style;
+    expect(u('')).toEqual({ underline: true });
+    expect(u(' val="single"')).toEqual({ underline: true });
+    for (const kind of ['double', 'singleAccounting', 'doubleAccounting']) expect(u(` val="${kind}"`)).toEqual({ underline: true, underlineStyle: kind });
+    expect(look('<xf fontId="1"/>', '<fonts><font/><font><strike/></font></fonts>').style).toEqual({ strikethrough: true });
+  });
+
   it('maps rotation to -90..90: 91 to 180 turn clockwise, 255 (stacked) is not modelled', () => {
     const rot = (v: string) => look(`<xf><alignment textRotation="${v}"/></xf>`).style?.textRotation;
     expect([rot('0'), rot('45'), rot('90')]).toEqual([0, 45, 90]);
@@ -59,15 +85,20 @@ describe('lookOf', () => {
     expect(look('<xf><alignment/></xf>').style).toBeUndefined();
   });
 
-  it('maps borders: known styles, others thin, the colour when it resolves', () => {
+  it('maps borders: the thirteen styles, an unknown one thin, the colour when it resolves', () => {
     const b = (sides: string) => look('<xf borderId="0"/>', `<borders><border>${sides}</border></borders>`).style?.border;
     expect(b('<left style="thin"><color rgb="FFFF0000"/></left><right style="double"/><top style="dashed"/><bottom style="hair"><color auto="1"/></bottom>')).toEqual({
       left: { style: 'thin', color: '#ff0000' },
       right: { style: 'double' },
       top: { style: 'dashed' },
-      bottom: { style: 'thin' },
+      bottom: { style: 'hair' },
     });
-    expect(b('<left style="mediumDashDot"/>')).toEqual({ left: { style: 'thin' } });
+    expect(b('<left style="mediumDashDot"/><right style="bogus"/>')).toEqual({ left: { style: 'mediumDashDot' }, right: { style: 'thin' } });
+    // all thirteen styles of the file format are kept as written, each side with its own colour
+    const all = ['thin', 'hair', 'dotted', 'dashed', 'dashDot', 'dashDotDot', 'double', 'medium', 'mediumDashed', 'mediumDashDot', 'mediumDashDotDot', 'slantDashDot', 'thick'];
+    for (const style of all) expect(b(`<left style="${style}"><color rgb="FF0000FF"/></left><top style="${style}"><color rgb="FF00FF00"/></top>`)).toEqual({
+      left: { style, color: '#0000ff' }, top: { style, color: '#00ff00' },
+    });
     expect(b('<left/><right><color rgb="FF000000"/></right>')).toBeUndefined();
   });
 

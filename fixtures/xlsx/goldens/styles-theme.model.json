@@ -14,35 +14,35 @@
             "value": "theme colour + tint"
           },
           "A10": {
-            "style": "s4",
+            "style": "s16",
             "value": "darkDown"
           },
           "A11": {
-            "style": "s4",
+            "style": "s18",
             "value": "darkUp"
           },
           "A12": {
-            "style": "s4",
+            "style": "s20",
             "value": "darkGrid"
           },
           "A13": {
-            "style": "s4",
+            "style": "s22",
             "value": "darkTrellis"
           },
           "A14": {
-            "style": "s4",
+            "style": "s24",
             "value": "lightHorizontal"
           },
           "A15": {
-            "style": "s4",
+            "style": "s26",
             "value": "lightVertical"
           },
           "A16": {
-            "style": "s4",
+            "style": "s28",
             "value": "lightGrid"
           },
           "A19": {
-            "style": "s4",
+            "style": "s31",
             "value": "diagonal borders"
           },
           "A2": {
@@ -58,55 +58,55 @@
             "value": "gradient fill"
           },
           "A5": {
-            "style": "s4",
+            "style": "s6",
             "value": "darkGray"
           },
           "A6": {
-            "style": "s4",
+            "style": "s8",
             "value": "mediumGray"
           },
           "A7": {
-            "style": "s4",
+            "style": "s10",
             "value": "lightGray"
           },
           "A8": {
-            "style": "s4",
+            "style": "s12",
             "value": "darkHorizontal"
           },
           "A9": {
-            "style": "s4",
+            "style": "s14",
             "value": "darkVertical"
           },
           "C10": {
-            "style": "s11",
+            "style": "s17",
             "value": "double"
           },
           "C11": {
-            "style": "s6",
+            "style": "s19",
             "value": "hair"
           },
           "C12": {
-            "style": "s6",
+            "style": "s21",
             "value": "mediumDashed"
           },
           "C13": {
-            "style": "s6",
+            "style": "s23",
             "value": "dashDot"
           },
           "C14": {
-            "style": "s6",
+            "style": "s25",
             "value": "mediumDashDot"
           },
           "C15": {
-            "style": "s6",
+            "style": "s27",
             "value": "dashDotDot"
           },
           "C16": {
-            "style": "s6",
+            "style": "s29",
             "value": "mediumDashDotDot"
           },
           "C17": {
-            "style": "s6",
+            "style": "s30",
             "value": "slantDashDot"
           },
           "C4": {
@@ -114,23 +114,23 @@
             "value": "named style (Spindle Emphasis)"
           },
           "C5": {
-            "style": "s6",
+            "style": "s7",
             "value": "thin"
           },
           "C6": {
-            "style": "s7",
+            "style": "s9",
             "value": "medium"
           },
           "C7": {
-            "style": "s8",
+            "style": "s11",
             "value": "dashed"
           },
           "C8": {
-            "style": "s9",
+            "style": "s13",
             "value": "dotted"
           },
           "C9": {
-            "style": "s10",
+            "style": "s15",
             "value": "thick"
           }
         },
@@ -163,6 +163,43 @@
         "fontSize": 11
       },
       "s10": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "lightGray",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s11": {
+        "borderBottom": "1px dashed #000000",
+        "borderLeft": "1px dashed #000000",
+        "borderRight": "1px dashed #000000",
+        "borderTop": "1px dashed #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s12": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkHorizontal",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s13": {
+        "borderBottom": "1px dotted #000000",
+        "borderLeft": "1px dotted #000000",
+        "borderRight": "1px dotted #000000",
+        "borderTop": "1px dotted #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s14": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkVertical",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s15": {
         "borderBottom": "3px solid #000000",
         "borderLeft": "3px solid #000000",
         "borderRight": "3px solid #000000",
@@ -170,11 +207,37 @@
         "fontFamily": "Calibri",
         "fontSize": 11
       },
-      "s11": {
+      "s16": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkDown",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s17": {
         "borderBottom": "3px double #000000",
         "borderLeft": "3px double #000000",
         "borderRight": "3px double #000000",
         "borderTop": "3px double #000000",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s18": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkUp",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s19": {
+        "borderBottom": "1px dotted #000000",
+        "borderBottomKind": "hair",
+        "borderLeft": "1px dotted #000000",
+        "borderLeftKind": "hair",
+        "borderRight": "1px dotted #000000",
+        "borderRightKind": "hair",
+        "borderTop": "1px dotted #000000",
+        "borderTopKind": "hair",
         "fontFamily": "Calibri",
         "fontSize": 11
       },
@@ -184,13 +247,125 @@
         "fontFamily": "Calibri",
         "fontSize": 11
       },
+      "s20": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkGrid",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s21": {
+        "borderBottom": "2px dashed #000000",
+        "borderBottomKind": "mediumDashed",
+        "borderLeft": "2px dashed #000000",
+        "borderLeftKind": "mediumDashed",
+        "borderRight": "2px dashed #000000",
+        "borderRightKind": "mediumDashed",
+        "borderTop": "2px dashed #000000",
+        "borderTopKind": "mediumDashed",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s22": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkTrellis",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s23": {
+        "borderBottom": "1px dashed #000000",
+        "borderBottomKind": "dashDot",
+        "borderLeft": "1px dashed #000000",
+        "borderLeftKind": "dashDot",
+        "borderRight": "1px dashed #000000",
+        "borderRightKind": "dashDot",
+        "borderTop": "1px dashed #000000",
+        "borderTopKind": "dashDot",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s24": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "lightHorizontal",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s25": {
+        "borderBottom": "2px dashed #000000",
+        "borderBottomKind": "mediumDashDot",
+        "borderLeft": "2px dashed #000000",
+        "borderLeftKind": "mediumDashDot",
+        "borderRight": "2px dashed #000000",
+        "borderRightKind": "mediumDashDot",
+        "borderTop": "2px dashed #000000",
+        "borderTopKind": "mediumDashDot",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s26": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "lightVertical",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s27": {
+        "borderBottom": "1px dashed #000000",
+        "borderBottomKind": "dashDotDot",
+        "borderLeft": "1px dashed #000000",
+        "borderLeftKind": "dashDotDot",
+        "borderRight": "1px dashed #000000",
+        "borderRightKind": "dashDotDot",
+        "borderTop": "1px dashed #000000",
+        "borderTopKind": "dashDotDot",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s28": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "lightGrid",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s29": {
+        "borderBottom": "2px dashed #000000",
+        "borderBottomKind": "mediumDashDotDot",
+        "borderLeft": "2px dashed #000000",
+        "borderLeftKind": "mediumDashDotDot",
+        "borderRight": "2px dashed #000000",
+        "borderRightKind": "mediumDashDotDot",
+        "borderTop": "2px dashed #000000",
+        "borderTopKind": "mediumDashDotDot",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
       "s3": {
         "backgroundColor": "#c6efce",
         "fontColor": "#006100",
         "fontFamily": "Calibri",
         "fontSize": 11
       },
+      "s30": {
+        "borderBottom": "2px dashed #000000",
+        "borderBottomKind": "slantDashDot",
+        "borderLeft": "2px dashed #000000",
+        "borderLeftKind": "slantDashDot",
+        "borderRight": "2px dashed #000000",
+        "borderRightKind": "slantDashDot",
+        "borderTop": "2px dashed #000000",
+        "borderTopKind": "slantDashDot",
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s31": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
       "s4": {
+        "backgroundColor": "#ffffff",
         "fontFamily": "Calibri",
         "fontSize": 11
       },
@@ -200,6 +375,13 @@
         "fontSize": 11
       },
       "s6": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "darkGray",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s7": {
         "borderBottom": "1px solid #000000",
         "borderLeft": "1px solid #000000",
         "borderRight": "1px solid #000000",
@@ -207,27 +389,18 @@
         "fontFamily": "Calibri",
         "fontSize": 11
       },
-      "s7": {
+      "s8": {
+        "backgroundColor": "#ffffff",
+        "fillPattern": "mediumGray",
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "patternColor": "#1f4e78"
+      },
+      "s9": {
         "borderBottom": "2px solid #000000",
         "borderLeft": "2px solid #000000",
         "borderRight": "2px solid #000000",
         "borderTop": "2px solid #000000",
-        "fontFamily": "Calibri",
-        "fontSize": 11
-      },
-      "s8": {
-        "borderBottom": "1px dashed #000000",
-        "borderLeft": "1px dashed #000000",
-        "borderRight": "1px dashed #000000",
-        "borderTop": "1px dashed #000000",
-        "fontFamily": "Calibri",
-        "fontSize": 11
-      },
-      "s9": {
-        "borderBottom": "1px dotted #000000",
-        "borderLeft": "1px dotted #000000",
-        "borderRight": "1px dotted #000000",
-        "borderTop": "1px dotted #000000",
         "fontFamily": "Calibri",
         "fontSize": 11
       }

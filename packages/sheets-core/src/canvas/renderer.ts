@@ -724,7 +724,12 @@ export class CanvasRenderer {
         }
 
         const cell = state.cells.get(cellKey);
-        const style = cell?.styleId ? state.styles.get(cell.styleId) : undefined;
+        // an empty cell shows the default format of its row, or else of its column (a filled one has its own style)
+        const style = cell?.styleId
+          ? state.styles.get(cell.styleId)
+          : cell === undefined
+            ? (state.rowFormats?.get(row) ?? state.colFormats?.get(col))?.style
+            : undefined;
         const format = cell?.formatId ? state.formats.get(cell.formatId) : undefined;
 
         const bounds: Rect = { x, y, width: colWidth, height: rowHeight };

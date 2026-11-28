@@ -1,6 +1,8 @@
 // Grid Renderer - Handles grid lines and cell borders
 
 import type { CanvasTheme, Viewport, BorderStyle, CellBorders, Rect } from './types';
+import type { BorderKind } from '../types';
+import { BORDER_PAINT, borderKindOf } from './style-paint';
 
 /**
  * Renders grid lines and cell borders
@@ -92,7 +94,7 @@ export class GridRenderer {
   /**
    * Parse a CSS border string into a BorderStyle object
    */
-  parseBorderString(border: string | undefined): BorderStyle | undefined {
+  parseBorderString(border: string | undefined, kind?: BorderKind): BorderStyle | undefined {
     if (!border || border === 'none') {
       return undefined;
     }
@@ -112,7 +114,7 @@ export class GridRenderer {
       return undefined;
     }
     
-    return { width, style, color };
+    return { width, style, color, kind: borderKindOf(border, kind) };
   }
   
   /**
@@ -155,33 +157,30 @@ export class GridRenderer {
     style: BorderStyle
   ): void {
     ctx.strokeStyle = style.color;
-    ctx.lineWidth = style.width;
-    
-    // Set line dash pattern based on style
-    switch (style.style) {
-      case 'dashed':
-        ctx.setLineDash([4, 2]);
-        break;
-      case 'dotted':
-        ctx.setLineDash([1, 1]);
-        break;
-      case 'solid':
-      default:
-        ctx.setLineDash([]);
-        break;
+
+    // The stroke of the exact line style when the file had one, else of the CSS style
+    const paint = style.kind ? BORDER_PAINT[style.kind] : undefined;
+    const width = paint ? paint.width : style.width;
+    ctx.setLineDash(paint ? [...paint.dash] : style.style === 'dashed' ? [4, 2] : style.style === 'dotted' ? [1, 1] : []);
+
+    const horizontal = y1 === y2;
+    // A double line is two thin lines either side of the edge, the way Excel draws it
+    const offsets = paint?.double || style.style === 'double' ? [-1, 1] : [0];
+    ctx.lineWidth = offsets.length > 1 ? 1 : width;
+
+    for (const offset of offsets) {
+      ctx.beginPath();
+
+      // Snap to pixel grid for crisp lines
+      const snapX1 = Math.round(x1) + 0.5 + (horizontal ? 0 : offset);
+      const snapY1 = Math.round(y1) + 0.5 + (horizontal ? offset : 0);
+      const snapX2 = Math.round(x2) + 0.5 + (horizontal ? 0 : offset);
+      const snapY2 = Math.round(y2) + 0.5 + (horizontal ? offset : 0);
+
+      ctx.moveTo(snapX1, snapY1);
+      ctx.lineTo(snapX2, snapY2);
+      ctx.stroke();
     }
-    
-    ctx.beginPath();
-    
-    // Snap to pixel grid for crisp lines
-    const snapX1 = Math.round(x1) + 0.5;
-    const snapY1 = Math.round(y1) + 0.5;
-    const snapX2 = Math.round(x2) + 0.5;
-    const snapY2 = Math.round(y2) + 0.5;
-    
-    ctx.moveTo(snapX1, snapY1);
-    ctx.lineTo(snapX2, snapY2);
-    ctx.stroke();
     
     // Reset line dash
     ctx.setLineDash([]);

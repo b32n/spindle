@@ -38,6 +38,12 @@ import { exportXlsx } from './writer';
 //                           `DDDD`: codes are case-insensitive, so these are the same tokens as `dd`, `yyyy`, `h`, `s`) is moved by
 //                           1462 days: the old reader looked for `y m d h M s b` only, took the number for a plain number and
 //                           left it in the 1904 system
+//   patternFill             a pattern fill (`darkGray`, `lightGrid`...) the old reader dropped: the style has `fillPattern` and `patternColor`
+//   borderStyle             a border side of one of the seven line styles the old reader's set lacked (`hair`, `dashDot`, `dashDotDot`,
+//                           `mediumDashed`, `mediumDashDot`, `mediumDashDotDot`, `slantDashDot`), which it read as `thin`
+//   textLayout              an underline variant (`underlineStyle`), an indent or shrink-to-fit the old reader dropped
+//   lineFormats             a sheet's column and row default formats and its default column width and row height (the old
+//                           reader had no such fields)
 //   newWarning              a warning the old reader did not have, of one of the kinds listed in NEW_WARNINGS (a missing
 //                           relationship, a duplicate sheet name, a damaged sheet, a cell that is not a number or a date); any
 //                           other new warning is a difference that fails the test
@@ -65,6 +71,10 @@ type Category =
   | 'linkOnRange'
   | 'builtinFormat'
   | 'dateFloat'
+  | 'patternFill'
+  | 'borderStyle'
+  | 'textLayout'
+  | 'lineFormats'
   | 'escapeKept'
   | 'escapedLetterNotDate'
   | 'upperCaseDate'
@@ -124,8 +134,8 @@ const BUILTIN_RENAMES: Record<string, string> = {
   'mmss.0': 'mm:ss.0',
 };
 
-/** What the e2e files show of the named improvements: nothing, they are all identical. */
-const E2E_IMPROVEMENTS: Record<string, number> = {};
+/** What the e2e files show of the named improvements: the files with column or row default formats or a default column width (S6), the rest are identical. */
+const E2E_IMPROVEMENTS: Record<string, number> = { lineFormats: 5 };
 
 const addressOf = (key: string): string => {
   const [r, c] = key.split(':').map(Number);
@@ -143,23 +153,44 @@ const plain = (c: SpreadsheetCell | undefined): SpreadsheetCell | undefined => {
 
 const COLOUR_KEYS = ['fontColor', 'backgroundColor'] as const;
 
+/** The border line styles the old reader's set lacked (it read them as `thin`). */
+const NEW_BORDER_STYLES: ReadonlySet<string> = new Set(['hair', 'dashDot', 'dashDotDot', 'mediumDashed', 'mediumDashDot', 'mediumDashDotDot', 'slantDashDot']);
+
 function compareStyle(o: SpreadsheetCellStyle | undefined, n: SpreadsheetCellStyle | undefined, seen: Category[]): string | undefined {
-  const strip = (s: SpreadsheetCellStyle | undefined): Record<string, unknown> => {
+  const strip = (s: SpreadsheetCellStyle | undefined, isNew: boolean): Record<string, unknown> => {
     if (s === undefined) return {};
     const { fontColor: _a, backgroundColor: _b, border, ...rest } = s;
     const out: Record<string, unknown> = { ...rest };
+    if (isNew) {
+      // the named improvements: what the old reader had no field for (taken out, and counted)
+      if (out.fillPattern !== undefined) {
+        delete out.fillPattern;
+        delete out.patternColor;
+        seen.push('patternFill');
+      }
+      for (const key of ['underlineStyle', 'indent', 'shrinkToFit']) {
+        if (out[key] !== undefined) {
+          delete out[key];
+          seen.push('textLayout');
+        }
+      }
+    }
     if (border) {
       const sides: Record<string, unknown> = {};
       for (const side of ['top', 'right', 'bottom', 'left'] as const) {
         const b = border[side];
-        if (b) sides[side] = { style: b.style };
+        if (!b) continue;
+        if (isNew && NEW_BORDER_STYLES.has(b.style)) {
+          sides[side] = { style: 'thin' };
+          seen.push('borderStyle');
+        } else sides[side] = { style: b.style };
       }
       out.border = sides;
     }
     return out;
   };
-  const so = strip(o);
-  const sn = strip(n);
+  const so = strip(o, false);
+  const sn = strip(n, true);
   if (JSON.stringify(so) !== JSON.stringify(sn)) return `style ${JSON.stringify(so)} vs ${JSON.stringify(sn)}`;
   // colours: what the old reader had, the new one has too, and it may have more
   let added = false;
@@ -250,6 +281,8 @@ function compare(o: SpreadsheetImportResult, n: SpreadsheetImportResult): { unex
         if (problem) unexplained.push(problem);
       }
     }
+    // (the 15 points / 20 pixels every file spells out is the editor's own default, not a difference)
+    if (ns.columnStyles || ns.rowStyles || ns.defaultColumnWidth !== undefined || (ns.defaultRowHeight !== undefined && ns.defaultRowHeight !== 20)) seen.push('lineFormats');
     const asJson = (v: unknown) => JSON.stringify(v, (_k, x) => (x instanceof Map ? [...x] : x instanceof Set ? [...x] : x));
     for (const field of ['columnWidths', 'rowHeights', 'hiddenCols', 'hiddenRows', 'frozenRows', 'frozenCols', 'mergedRanges'] as const) {
       if (asJson(os[field] ?? null) !== asJson(ns[field] ?? null)) unexplained.push(`${os.name}.${field} ${asJson(os[field])} vs ${asJson(ns[field])}`);
@@ -343,7 +376,9 @@ describe('differential: own reader against the exceljs reader, over the corpus',
       if ('r' in o && 'r' in n) seen.push(...compare(o.r, n.r).seen);
     }
     // (falsyResult was 7 until the xlsxwriter-rich SORT probe saved its real result "N" instead of xlsxwriter's placeholder 0)
-    expect(tally(seen)).toEqual({ builtinFormat: 8, colourResolved: 3, falsyResult: 6, newWarning: 1, sharedFormulaExpanded: 4 });
+    // (S6: the styles-theme and styles-basic files carry the pattern fills, border styles, indent and shrink-to-fit the old reader dropped; a pattern
+    // or gradient fill's colours count as resolved colours too)
+    expect(tally(seen)).toEqual({ borderStyle: 28, builtinFormat: 8, colourResolved: 16, falsyResult: 6, lineFormats: 4, newWarning: 1, patternFill: 12, sharedFormulaExpanded: 4, textLayout: 2 });
   });
 
   it('lists the files the old reader could not read: the own reader reads them or refuses them with an ImportError', async () => {

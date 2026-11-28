@@ -9,8 +9,13 @@ import type { XlsxFormulaInfo, XlsxSharedString, XlsxSheetDetails, XlsxStyles, X
 
 export type SpreadsheetCellValue = string | number | boolean | null;
 
+/** The thirteen border line styles of the file format. */
+export type SpreadsheetBorderStyle =
+  | 'thin' | 'hair' | 'dotted' | 'dashed' | 'dashDot' | 'dashDotDot' | 'double'
+  | 'medium' | 'mediumDashed' | 'mediumDashDot' | 'mediumDashDotDot' | 'slantDashDot' | 'thick';
+
 export interface SpreadsheetBorder {
-  style: 'thin' | 'medium' | 'thick' | 'dashed' | 'dotted' | 'double';
+  style: SpreadsheetBorderStyle;
   /** #rrggbb */
   color?: string;
 }
@@ -19,16 +24,26 @@ export interface SpreadsheetCellStyle {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  /** With `underline`: a variant other than a single line (`double`, `singleAccounting`, `doubleAccounting`). */
+  underlineStyle?: 'double' | 'singleAccounting' | 'doubleAccounting';
   strikethrough?: boolean;
   fontFamily?: string;
   fontSize?: number;
   /** #rrggbb */
   fontColor?: string;
-  /** #rrggbb */
+  /** #rrggbb. A solid fill's colour; with `fillPattern` the colour behind the pattern. */
   backgroundColor?: string;
+  /** A pattern fill other than solid (`darkGray`, `lightGrid`, ... as the file names it); drawn as a flat colour by the editor. */
+  fillPattern?: string;
+  /** #rrggbb, the colour of the pattern's lines (the file's foreground colour), with `fillPattern`. */
+  patternColor?: string;
   horizontalAlign?: 'left' | 'center' | 'right';
   verticalAlign?: 'top' | 'middle' | 'bottom';
   wrapText?: boolean;
+  /** Indent levels (a level is about three spaces), 1 or more. */
+  indent?: number;
+  /** Shrink the text to fit the cell's width. */
+  shrinkToFit?: boolean;
   /** Degrees, -90..90. */
   textRotation?: number;
   border?: {
@@ -75,6 +90,12 @@ export interface SpreadsheetCell {
   inArray?: true;
 }
 
+/** The default format of a column or a row: what a cell typed there starts with. */
+export interface SpreadsheetDefaultFormat {
+  style?: SpreadsheetCellStyle;
+  numberFormat?: SpreadsheetNumberFormat;
+}
+
 export interface SpreadsheetMergedRange {
   /** 0-based, inclusive. */
   startRow: number;
@@ -91,6 +112,13 @@ export interface SpreadsheetSheet {
   rowHeights?: Map<number, number>;
   hiddenRows?: Set<number>;
   hiddenCols?: Set<number>;
+  /** Default format per column (0-based; only columns that have one). */
+  columnStyles?: Map<number, SpreadsheetDefaultFormat>;
+  /** Default format per row (0-based; only rows that have one). */
+  rowStyles?: Map<number, SpreadsheetDefaultFormat>;
+  /** Pixels; the sheet's default column width and row height (`sheetFormatPr`). Absent: the editor's. */
+  defaultColumnWidth?: number;
+  defaultRowHeight?: number;
   frozenRows?: number;
   frozenCols?: number;
   mergedRanges?: SpreadsheetMergedRange[];

@@ -1,6 +1,6 @@
 // Canvas rendering types for Spindle Sheets
 
-import type { Cell, CellStyle, CellFormat, Selection, ColumnFilter, Range } from '../types';
+import type { BorderKind, Cell, CellStyle, CellFormat, Selection, ColumnFilter, Range } from '../types';
 
 /**
  * Rectangle bounds
@@ -54,6 +54,14 @@ export interface TextStyle {
   textAlign: 'left' | 'center' | 'right';
   verticalAlign: 'top' | 'middle' | 'bottom';
   textDecoration?: 'none' | 'underline' | 'line-through';
+  /** An underline other than a single line (`double`, `singleAccounting`, `doubleAccounting`). */
+  underlineKind?: 'double' | 'singleAccounting' | 'doubleAccounting';
+  /** Strike-through drawn together with an underline. */
+  strikethrough?: boolean;
+  /** Indent levels from the edge the text is aligned to. */
+  indent?: number;
+  /** Scale the text down to fit the width of the cell (single line only). */
+  shrinkToFit?: boolean;
   textRotation?: number; // degrees, -90..90; 0/undefined = horizontal
 }
 
@@ -63,7 +71,9 @@ export interface TextStyle {
 export interface BorderStyle {
   width: number;
   color: string;
-  style: 'solid' | 'dashed' | 'dotted';
+  style: 'solid' | 'dashed' | 'dotted' | 'double';
+  /** The exact line style (one of the thirteen the file format has); how it is stroked comes from `BORDER_PAINT`. */
+  kind?: BorderKind;
 }
 
 /**
@@ -240,6 +250,12 @@ export interface RenderState {
   commentedCells?: Set<string>;
   /** Merged cell regions as numeric ranges (resolved from stable IDs). */
   mergedRegions?: Range[];
+  /**
+   * Default formats of columns and rows (index -> style, and number format): what an empty cell there shows (fill and borders). A row's
+   * wins over its column's. Only the formatted ones are in the maps.
+   */
+  colFormats?: Map<number, { style?: CellStyle; format?: CellFormat }>;
+  rowFormats?: Map<number, { style?: CellStyle; format?: CellFormat }>;
 }
 
 /**

@@ -20,6 +20,11 @@ export class StylePool {
     return id;
   }
 
+  /** Whether a style with these properties is in the pool already (so `getOrCreate` would not add one). */
+  has(style: CellStyle): boolean {
+    return this.styleToId.has(this.getStyleKey(style));
+  }
+
   get(styleId: string): CellStyle | undefined {
     return this.styles.get(styleId);
   }

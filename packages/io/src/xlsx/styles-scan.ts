@@ -47,6 +47,10 @@ export interface UsedStyleFacts {
   patternFill: number;
   gradientFill: number;
   diagonalBorder: number;
+  /** Cell formats with a border side drawn only approximately (`hair`, `slantDashDot`), and the styles they use. */
+  approximateBorders: { count: number; styles: string[] };
+  /** Cell formats that shrink their text to fit the cell. */
+  shrinkToFit: number;
   /** Names of the named cell styles (other than Normal) the used formats are built on. */
   namedStyles: string[];
 }
@@ -82,7 +86,7 @@ export function parseStyles(root: XmlElement | undefined): StyleFacts {
       return [...seen.values()];
     },
     usedFacts(used) {
-      const out: UsedStyleFacts = { patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] };
+      const out: UsedStyleFacts = { patternFill: 0, gradientFill: 0, diagonalBorder: 0, approximateBorders: { count: 0, styles: [] }, shrinkToFit: 0, namedStyles: [] };
       for (const xf of usedXfs(used)) {
         const fill = fills[Number(xf.attrs.fillId)];
         const border = borders[Number(xf.attrs.borderId)];
@@ -92,6 +96,12 @@ export function parseStyles(root: XmlElement | undefined): StyleFacts {
         if (type !== undefined && type !== 'none' && type !== 'solid' && type !== 'gray125') out.patternFill++;
         if (gradient) out.gradientFill++;
         if (kid(border, 'diagonal')?.attrs.style !== undefined) out.diagonalBorder++;
+        const approximate = ['left', 'right', 'top', 'bottom'].map((side) => kid(border, side)?.attrs.style).filter((style): style is string => style === 'hair' || style === 'slantDashDot');
+        if (approximate.length > 0) {
+          out.approximateBorders.count++;
+          for (const style of approximate) if (!out.approximateBorders.styles.includes(style)) out.approximateBorders.styles.push(style);
+        }
+        if (kid(xf, 'alignment')?.attrs.shrinkToFit === '1' || kid(xf, 'alignment')?.attrs.shrinkToFit === 'true') out.shrinkToFit++;
         const style = named.find((s) => s.attrs.xfId === xf.attrs.xfId && xf.attrs.xfId !== '0');
         if (style?.attrs.name && style.attrs.name !== 'Normal' && !out.namedStyles.includes(style.attrs.name)) out.namedStyles.push(style.attrs.name);
       }
