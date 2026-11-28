@@ -1054,12 +1054,12 @@ lockstep.
 - **PPTX writer A: slides with text boxes and shapes (K12b).** `exportPptx` now writes each slide's `p:sp` shapes and text boxes: preset geometry
   by its name with its adjustments (`unknown:<prst>` written as the preset name), placeholders, solid, gradient and pattern fills,
   outlines (width, dash, cap, join, arrow heads), text bodies with the body properties, paragraph levels and spacing, bullets, tab stops,
-  run marks, fields and line breaks, hyperlinks (shape and run, `http`, `https`, `mailto` and `tel` only; slide jumps point at the slide's new
+  run marks, fields and line breaks, hyperlinks (shape and run, `http`, `https`, `mailto` and `tel` only, plus the slide-jump and file actions without a target; slide jumps point at the slide's new
   number), slide backgrounds and the layouts' static shapes. `pptxId`s are kept when usable and unique, else allocated. The level style
   every paragraph of a level shares goes into the shape's list style, so PowerPoint (which ignores run defaults on a paragraph) shows the same text.
   Custom geometry, picture fills and custom dash patterns are not written yet and the warnings say so. The PPTX round-trip report now aligns
   elements by kind and name and allows half a pixel on frames; decks of shapes and text read back with no differences, and the
-  round-trip differences over the corpus fall from 846 to 138, all of them content still to come (K13, K14).
+  round-trip differences over the corpus fall from 846 to 140, all of them content still to come (K13, K14) or macro actions dropped on purpose.
 
 ## [0.4.0] - 2026-10-26
 

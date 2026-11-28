@@ -75,6 +75,7 @@ function runXml(run: PptxRun, ctx: WriteContext): string {
   return `<a:r>${props()}<a:t>${esc(run.text)}</a:t></a:r>`;
 }
 
+/** Known limit: a paragraph property that differs from its level's shared style is written in `a:pPr/a:defRPr`, which PowerPoint ignores, so such a difference may not render there (it reads back equal); check with the real-app run (D8). */
 function paragraphXml(p: PptxParagraph, shared: PptxLevelStyles, ctx: WriteContext): string {
   const level = levelOf(p);
   const pPr = levelPropsXml('a:pPr', styleDifference(shared[level], p.style), { lvl: level > 0 ? level : undefined, rtl: p.rtl ? 1 : undefined });

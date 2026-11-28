@@ -246,17 +246,20 @@ describe('hyperlinks', () => {
 
   it('writes a jump to another slide as a relationship to the slide as it is numbered now, and other actions as written', async () => {
     const jump = { kind: 'action' as const, target: 'ppaction://hlinksldjump', slidePart: 'ppt/slides/slide2.xml' };
-    const first = slide({ elements: [shape({ link: jump }), shape({ pptxId: '3', link: { kind: 'action', target: 'ppaction://hlinksldjump', slidePart: 'ppt/slides/gone.xml' } }), shape({ pptxId: '4', link: { kind: 'action', target: 'ppaction://hlinkshowjump?jump=nextslide' } }), shape({ pptxId: '5', link: { kind: 'action', target: 'file:///tmp/x.txt' } })] });
+    const first = slide({ elements: [shape({ link: jump }), shape({ pptxId: '3', link: { kind: 'action', target: 'ppaction://hlinksldjump', slidePart: 'ppt/slides/gone.xml' } }), shape({ pptxId: '4', link: { kind: 'action', target: 'ppaction://hlinkshowjump?jump=nextslide' } }), shape({ pptxId: '5', link: { kind: 'action', target: 'file:///tmp/x.txt' } }), shape({ pptxId: '6', link: { kind: 'action', target: 'ppaction://macro?name=Evil' } }), shape({ pptxId: '7', link: { kind: 'action', target: 'ppaction://hlinkfile' } }), shape({ pptxId: '8', link: { kind: 'action', target: 'ppaction://hlinksldjumpX' } })] });
     const second = slide({ pptxId: '257', partName: 'ppt/slides/slide2.xml' });
     const { bytes, warnings } = await exportPptx(deck([first, second]));
-    expect(warnings).toEqual([]);
+    expect(warnings).toEqual(['Changed on export: hyperlinks with an address the editor does not allow left out (3).']);
     expect(await lintPptxPackage(bytes)).toEqual([]);
     const back = await importPptx(bytes);
     expect((back.slides[0].elements as PptxShape[]).map((s) => s.link)).toEqual([
       { kind: 'action', target: 'ppaction://hlinksldjump', slidePart: 'ppt/slides/slide2.xml' },
       { kind: 'action', target: 'ppaction://hlinksldjump' },
       { kind: 'action', target: 'ppaction://hlinkshowjump?jump=nextslide' },
-      { kind: 'action', target: 'file:///tmp/x.txt' },
+      undefined,
+      undefined,
+      { kind: 'action', target: 'ppaction://hlinkfile' },
+      undefined,
     ]);
   });
 });
@@ -264,9 +267,9 @@ describe('hyperlinks', () => {
 describe('element ids', () => {
   const el = (pptxId: string): PptxElement => shape({ pptxId });
   it('keeps usable ids and gives the others the next free number', () => {
-    const list = [el('5'), el('5'), el(''), el('1'), el('abc'), el('7'), el('99999999999'), el('3')];
+    const list = [el('5'), el('5'), el(''), el('1'), el('abc'), el('7'), el('99999999999'), el('3'), el('0')];
     const ids = allocateElementIds(list);
-    expect(list.map((e) => ids.get(e))).toEqual([5, 2, 4, 6, 8, 7, 9, 3]);
+    expect(list.map((e) => ids.get(e))).toEqual([5, 2, 4, 6, 8, 7, 9, 3, 10]);
   });
   it('numbers the children of groups with the rest and keeps what it reserves', () => {
     const [a, b] = [el('2'), el('4')];

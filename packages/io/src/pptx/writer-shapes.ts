@@ -31,7 +31,7 @@ export function allocateElementIds(elements: PptxElement[], reserved = 1): Map<P
   const pending: PptxElement[] = [];
   for (const e of all) {
     const n = /^\d+$/.test(e.pptxId) ? Number(e.pptxId) : NaN;
-    if (Number.isSafeInteger(n) && n <= MAX_ID && !taken.has(n)) {
+    if (Number.isSafeInteger(n) && n >= 1 && n <= MAX_ID && !taken.has(n)) {
       taken.add(n);
       out.set(e, n);
     } else pending.push(e);

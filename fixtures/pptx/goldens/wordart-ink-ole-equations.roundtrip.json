@@ -11,7 +11,8 @@
     },
     "byField": {
       "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 2
+      "removed slides[].elements[]": 2,
+      "removed slides[].elements[].link": 1
     },
     "changed": 0,
     "entries": [
@@ -39,14 +40,20 @@
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"ole\",\"pptxId\":\"3\",\"name\":\"Embedded worksheet\",...",
         "kind": "removed",
         "path": "slides[2].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"action\",\"target\":\"ppaction://macro?name=Module1.Hello\"}",
+        "kind": "removed",
+        "path": "slides[2].elements[3].link"
       }
     ],
-    "removed": 5,
-    "total": 5,
+    "removed": 6,
+    "total": 6,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 2 charts, diagrams, objects, media and ink (K14)."
+    "Not exported yet: 2 charts, diagrams, objects, media and ink (K14).",
+    "Changed on export: hyperlinks with an address the editor does not allow left out (1)."
   ],
   "reimportWarnings": [],
   "status": "ok"

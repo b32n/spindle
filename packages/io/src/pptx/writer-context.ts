@@ -48,6 +48,9 @@ export interface WriteContext {
   nextFieldId: () => string;
 }
 
+/** The actions the editor understands; others (macros, programs) are not written, and a `file:` target is never made a live link. */
+const ACTIONS = /^ppaction:\/\/(hlinksldjump|hlinkshowjump|hlinkfile)(\?|$)/i;
+
 /** The `a:hlinkClick` of a link, or an empty string when the link cannot be written (an address the editor's link rules do not allow). */
 export function hlinkXml(link: PptxLink | undefined, ctx: WriteContext): string {
   if (!link) return '';
@@ -60,11 +63,10 @@ export function hlinkXml(link: PptxLink | undefined, ctx: WriteContext): string 
     }
     return `<a:hlinkClick${attrs({ 'r:id': ctx.rels.add('hyperlink', link.href, true), tooltip })}/>`;
   }
-  if (/^ppaction:\/\//i.test(link.target)) {
+  if (ACTIONS.test(link.target)) {
     const slide = link.slidePart !== undefined ? ctx.slideTarget(link.slidePart) : undefined;
     return `<a:hlinkClick${attrs({ 'r:id': slide !== undefined ? ctx.rels.add('slide', slide) : undefined, action: link.target, tooltip })}/>`;
   }
-  if (schemeOf(link.target) === 'file') return `<a:hlinkClick${attrs({ 'r:id': ctx.rels.add('hyperlink', link.target, true), tooltip })}/>`;
   ctx.lossy('link');
   return '';
 }

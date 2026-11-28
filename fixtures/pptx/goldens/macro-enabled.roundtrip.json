@@ -9,14 +9,24 @@
       "elements": 2,
       "slides": 1
     },
-    "byField": {},
+    "byField": {
+      "removed slides[].elements[].link": 1
+    },
     "changed": 0,
-    "entries": [],
-    "removed": 0,
-    "total": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"action\",\"target\":\"ppaction://macro?name=Module1.Hello\"}",
+        "kind": "removed",
+        "path": "slides[0].elements[1].link"
+      }
+    ],
+    "removed": 1,
+    "total": 1,
     "truncated": false
   },
-  "exportWarnings": [],
+  "exportWarnings": [
+    "Changed on export: hyperlinks with an address the editor does not allow left out (1)."
+  ],
   "reimportWarnings": [],
   "status": "ok"
 }
