@@ -216,8 +216,11 @@ test.describe('docs: Suggesting mode', () => {
     await banner.getByRole('button', { name: 'Switch to All markup' }).click();
     await expect(banner).toHaveCount(0);
     await doc.clickText('Hello world');
-    await doc.press('Home');
-    await doc.typeText('ZZ');
+    // Not doc.typeText: it waits for the caret to sit right after the typed text, but the mirrored
+    // caret settles in front of the next run of text once the insertion mark is rendered, so that
+    // wait only passes if it polls before the re-sync (it timed out on Firefox). The caret position
+    // is not what this checks: the suggestion existing in the document is.
+    await page.keyboard.type('ZZ');
     await expect(insertions().filter({ hasText: 'ZZ' })).toHaveCount(1);
   });
 });
