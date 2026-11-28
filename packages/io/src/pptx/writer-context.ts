@@ -37,7 +37,7 @@ export const LOSSY: Record<LossyKey, string> = {
   link: 'hyperlinks with an address the editor does not allow left out',
   geometryName: 'shapes with an unusable preset name written as rectangles',
   underline: 'underline styles outside the format written as single',
-  picture: 'pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF or SVG without a PNG) left out',
+  picture: 'pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF, WebP, AVIF or SVG without a PNG) left out',
   modernComment: 'modern comments written as legacy comments on the slide (status and the shape a comment was anchored to are not kept)',
 };
 

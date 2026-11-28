@@ -135,3 +135,6 @@ export function resolveCellStyle(style: TableStyle, at: CellPosition, flags: Tab
   }
   return out;
 }
+
+/** The built-in table styles PowerPoint resolves by id without a definition in the file: the writer lists none for them (an empty definition would shadow them) and the reader does not warn about them. */
+export const BUILT_IN_TABLE_STYLES = new Set(['{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}', '{2D5ABB26-0587-4C30-8999-92F81FD0307C}', '{5940675A-B579-460E-94D1-54222C63F5DA}', '{073A0DAA-6AF3-43AB-8588-CEC1D06C72B9}', '{21E4AEA4-8DFA-4A89-87EB-49C32662AFE0}', '{F5AB1C69-6EDB-4FF4-983F-18BD219EF322}', '{00A15C55-8517-42AA-B614-E9B94910E393}', '{7DF18680-E054-41AD-8BC1-D1AEF772440D}', '{93296810-A885-4BE3-A3E7-6D5BEEA58F35}']);

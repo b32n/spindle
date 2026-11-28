@@ -4,7 +4,7 @@ import { parseFill, parseLine } from './fill';
 import { frameOf, mergeLevel } from './levels';
 import { readTextBody } from './text';
 import { type ShapeContext } from './shapes';
-import { resolveCellStyle, type TableFlags, type TableStyle } from './table-styles';
+import { BUILT_IN_TABLE_STYLES, resolveCellStyle, type TableFlags, type TableStyle } from './table-styles';
 import { emuToPx, num } from './units';
 
 // Tables (plan K7 and K10): `a:tbl` in a `p:graphicFrame`, with spans, per-cell borders, margins, anchors and the table style
@@ -82,7 +82,7 @@ export function readTable(frame: XmlElement, tbl: XmlElement, ctx: TableContext)
   };
   const styleId = (kid(pr, 'tableStyleId')?.text ?? '').trim();
   const style = styleId !== '' ? ctx.styles.get(styleId) : undefined;
-  if (styleId !== '' && !style) ctx.warn(`A table uses the style ${styleId}, which the file does not define; its cells keep only their own formatting.`);
+  if (styleId !== '' && !style && !BUILT_IN_TABLE_STYLES.has(styleId.toUpperCase())) ctx.warn(`A table uses the style ${styleId}, which the file does not define; its cells keep only their own formatting.`);
   // the grid is rectangular and as wide as the widest row: a shorter row is padded with empty cells, and columns the grid
   // does not list are added with width 0
   const cols = Math.max(columns.length, ...trs.map((tr) => kids(tr, 'tc').length));

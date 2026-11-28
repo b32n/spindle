@@ -35,7 +35,7 @@
     "truncated": false
   },
   "exportWarnings": [
-    "Changed on export: pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF or SVG without a PNG) left out (3)."
+    "Changed on export: pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF, WebP, AVIF or SVG without a PNG) left out (3)."
   ],
   "reimportWarnings": [],
   "status": "ok"

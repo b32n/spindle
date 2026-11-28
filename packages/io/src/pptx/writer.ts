@@ -3,6 +3,7 @@ import { relsPart } from '../common/ooxml-package';
 import { baseName } from './parts';
 import type { PptxElement, PptxLayout, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
 import { BLANK_LAYOUT, layoutXml, MASTER_ID, masterXml } from './writer-layouts';
+import { BUILT_IN_TABLE_STYLES } from './table-styles';
 import { LOSSY, PartRels, type LossyKey, type WriteContext } from './writer-context';
 import { CommentAuthors, commentsXml } from './writer-comments';
 import { elementIds, elementsXml } from './writer-elements';
@@ -65,12 +66,9 @@ export interface PptxExportResult {
   warnings: string[];
 }
 
-/** The file extension and content type of each image format a data URL can carry; SVG is left out (PowerPoint needs a PNG beside it). */
-// only the formats every PowerPoint version displays; WebP and AVIF are left out (reported as a dropped picture)
+/** The file extension of each image format a data URL can carry that every PowerPoint version displays; SVG (PowerPoint needs a PNG beside it), WebP and AVIF are left out and reported as a dropped picture. */
 const IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/gif': 'gif', 'image/bmp': 'bmp' };
 const MEDIA_PART = /^ppt\/media\/[A-Za-z0-9._-]+\.(?:png|jpe?g|gif|bmp)$/i;
-// the built-in table styles PowerPoint resolves by id: an empty definition here would shadow them
-const BUILT_IN_TABLE_STYLES = new Set(['{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}', '{2D5ABB26-0587-4C30-8999-92F81FD0307C}', '{5940675A-B579-460E-94D1-54222C63F5DA}', '{073A0DAA-6AF3-43AB-8588-CEC1D06C72B9}', '{21E4AEA4-8DFA-4A89-87EB-49C32662AFE0}', '{F5AB1C69-6EDB-4FF4-983F-18BD219EF322}', '{00A15C55-8517-42AA-B614-E9B94910E393}', '{7DF18680-E054-41AD-8BC1-D1AEF772440D}', '{93296810-A885-4BE3-A3E7-6D5BEEA58F35}']);
 const DATA_URL = /^data:([^;,]+);base64,([A-Za-z0-9+/]*={0,2})$/;
 
 /** The bytes of base64 text, or `undefined` when it is not valid base64 (a length no encoder writes). */

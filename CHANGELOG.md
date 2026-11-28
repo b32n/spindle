@@ -1067,7 +1067,7 @@ lockstep.
   each child's slide-space frame is mapped back through the group's rotation and flips, nested groups included), connectors with
   `a:stCxn` and `a:endCxn` glued to the shapes' new ids, custom geometry paths, speaker notes (a notes master and a notes slide per slide that has notes)
   and comments (legacy format with authors and replies; modern comments are written as legacy ones and the warnings say so). Pictures with no
-  embedded image PowerPoint can show (linked, missing, EMF, WMF, an SVG without a PNG) are left out and reported. Opaque parts, transitions and
+  embedded image PowerPoint can show (linked, missing, EMF, WMF, WebP, AVIF, an SVG without a PNG) are left out and reported. Opaque parts, transitions and
   timing stay K14. The PPTX round-trip differences over the corpus fall further: pictures, tables, groups, connectors, notes, comments and custom
   geometry now read back with no differences; what is left is opaque content (K14), picture fills, dropped pictures and the modern-comment conversion.
 

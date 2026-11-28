@@ -88,7 +88,7 @@ describe('pictures', () => {
       picture({ pptxId: '7', dataUrl: 'not a data url' }),
     ]);
     expect(els).toEqual([]);
-    expect(warnings).toEqual(['Changed on export: pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF or SVG without a PNG) left out (5).']);
+    expect(warnings).toEqual(['Changed on export: pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF, WebP, AVIF or SVG without a PNG) left out (5).']);
   });
 
   it('writes a picture with no frame, geometry or outline', async () => {
