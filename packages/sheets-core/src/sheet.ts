@@ -51,6 +51,15 @@ export class SheetImpl implements Sheet {
   // into the Y.Doc. No-op when collab is detached.
   protected structureChangeListener: ((affectsFormulas: boolean, edit?: StructuralEdit) => void) | undefined;
 
+  // Called with the edit before a delete drops its row/column ids, while they still resolve (the workbook moves the range corners that
+  // sit in the deleted rows/columns onto the nearest survivors).
+  protected beforeDeleteListener: ((edit: StructuralEdit) => void) | undefined;
+
+  /** @internal Used by the workbook (range corners of formulas, before a delete). */
+  __setBeforeDeleteListener(listener: ((edit: StructuralEdit) => void) | undefined): void {
+    this.beforeDeleteListener = listener;
+  }
+
   /** @internal Used by the workbook (recalc + collab mirror). */
   __setStructureChangeListener(listener: ((affectsFormulas: boolean, edit?: StructuralEdit) => void) | undefined): void {
     this.structureChangeListener = listener;
@@ -268,6 +277,7 @@ export class SheetImpl implements Sheet {
   }
 
   deleteRows(startRow: number, count: number): void {
+    this.beforeDeleteListener?.({ axis: 'row', kind: 'delete', start: startRow, count });
     this.removeOrderRange(this.rowOrder, this.rowIdToIndex, startRow, count, /*isRow*/ true);
     this.shiftOrder(this.rowOrder, this.rowIdToIndex, startRow + count, -count, startRow);
     this.rowCount = Math.max(0, this.rowCount - count);
@@ -281,6 +291,7 @@ export class SheetImpl implements Sheet {
   }
 
   deleteCols(startCol: number, count: number): void {
+    this.beforeDeleteListener?.({ axis: 'col', kind: 'delete', start: startCol, count });
     this.removeOrderRange(this.colOrder, this.colIdToIndex, startCol, count, /*isRow*/ false);
     this.shiftOrder(this.colOrder, this.colIdToIndex, startCol + count, -count, startCol);
     this.colCount = Math.max(0, this.colCount - count);

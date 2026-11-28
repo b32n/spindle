@@ -28,7 +28,7 @@ describe('shiftIndex', () => {
   });
 });
 
-describe('shiftFormulaRefs: oracle table (the outcome of a normal formula on the edited sheet)', () => {
+describe('shiftFormulaRefs: oracle table (the outcome of a normal formula on the edited sheet, Excel\'s rule)', () => {
   // [formula, edit, expected]
   const table: Array<[string, StructuralEdit, string]> = [
     // single cells
@@ -55,13 +55,13 @@ describe('shiftFormulaRefs: oracle table (the outcome of a normal formula on the
     ['=A05', rows('insert', 9), '=A05'],
     ['=XFD1', cols('insert', 0), '=#REF!'],
     ['=A1048576', rows('insert', 0), '=#REF!'],
-    // ranges: both corners move; a deleted corner makes the whole range #REF! (as the engine does)
+    // ranges: both corners move; a range keeps its surviving rows/columns and is #REF! only when all of them are deleted
     ['=SUM(A1:A5)', rows('insert', 2), '=SUM(A1:A6)'],
     ['=SUM(A1:A5)', rows('insert', 0), '=SUM(A2:A6)'],
     ['=SUM(A1:A5)', rows('insert', 5), '=SUM(A1:A5)'],
     ['=SUM(A1:A5)', rows('delete', 1), '=SUM(A1:A4)'],
-    ['=SUM(A1:A5)', rows('delete', 4), '=SUM(#REF!)'],
-    ['=SUM(A1:A5)', rows('delete', 0), '=SUM(#REF!)'],
+    ['=SUM(A1:A5)', rows('delete', 4), '=SUM(A1:A4)'],
+    ['=SUM(A1:A5)', rows('delete', 0), '=SUM(A1:A4)'],
     ['=SUM(B2:C3)', cols('delete', 0), '=SUM(A2:B3)'],
     ['=SUM(B2:C3)', cols('delete', 1, 2), '=SUM(#REF!)'],
     ['=SUM($B$2:$C$3)', cols('insert', 1), '=SUM($C$2:$D$3)'],
@@ -74,12 +74,12 @@ describe('shiftFormulaRefs: oracle table (the outcome of a normal formula on the
     ['=SUM(B:C)', cols('delete', 0), '=SUM(A:B)'],
     ['=SUM($B:$C)', cols('insert', 2), '=SUM($B:$D)'],
     ['=SUM(b:c)', cols('insert', 0), '=SUM(c:d)'],
-    ['=SUM(B:C)', cols('delete', 1), '=SUM(#REF!)'],
-    ['=SUM(B:C)', cols('delete', 2), '=SUM(#REF!)'],
+    ['=SUM(B:C)', cols('delete', 1), '=SUM(B:B)'],
+    ['=SUM(B:C)', cols('delete', 2), '=SUM(B:B)'],
     ['=SUM(1:1)', rows('insert', 0), '=SUM(2:2)'],
     ['=SUM(2:3)', rows('insert', 2), '=SUM(2:4)'],
     ['=SUM($2:$3)', rows('delete', 0), '=SUM($1:$2)'],
-    ['=SUM(2:3)', rows('delete', 1), '=SUM(#REF!)'],
+    ['=SUM(2:3)', rows('delete', 1), '=SUM(2:2)'],
     ['=SUM(2:3)', cols('insert', 0), '=SUM(2:3)'],
     ['=SUM(2:3)', cols('delete', 0), '=SUM(2:3)'],
     // spill references
@@ -91,11 +91,11 @@ describe('shiftFormulaRefs: oracle table (the outcome of a normal formula on the
     ["='Main'!A5", rows('insert', 0), "='Main'!A6"],
     ['=Main!A5', rows('delete', 4), '=#REF!'],
     ['=Main!A1:B5', rows('insert', 1), '=Main!A1:B6'],
-    ['=Main!A1:B5', rows('delete', 4), '=#REF!'],
+    ['=Main!A1:B5', rows('delete', 4), '=Main!A1:B4'],
     ['=Main!A1:Main!B5', rows('insert', 1), '=Main!A1:Main!B6'],
-    ['=Main!A1:Main!B5', rows('delete', 0), '=#REF!'],
+    ['=Main!A1:Main!B5', rows('delete', 0), '=Main!A1:Main!B4'],
     ['=Main!A:B', cols('insert', 0), '=Main!B:C'],
-    ['=Main!A:B', cols('delete', 0), '=#REF!'],
+    ['=Main!A:B', cols('delete', 0), '=Main!A:A'],
     ['=Main!1:2', rows('insert', 0), '=Main!2:3'],
     ['=Main!A5#', rows('insert', 0), '=Main!A6#'],
     ['=Main!A1:B2 + A3', rows('insert', 0), '=Main!A2:B3 + A4'],
@@ -118,11 +118,11 @@ describe('shiftFormulaRefs: oracle table (the outcome of a normal formula on the
     ['=A1:Other!B2', rows('insert', 0), '=A2:Other!B2'],
     ['=Other!A1:B2:C3', rows('insert', 0), '=Other!A1:B2:C4'],
     ['=A1:B2:C3', rows('insert', 0), '=A2:B3:C4'],
-    ['=A1:B2:C3', rows('delete', 0), '=#REF!:C2'],
+    ['=A1:B2:C3', rows('delete', 0), '=A1:B1:C2'],
     ['=A1:B2:C3', rows('delete', 2), '=A1:B2:#REF!'],
     ['=INDEX(A1:A5,1):B2', rows('insert', 0), '=INDEX(A2:A6,1):B3'],
     ['=INDEX(A1:A5,1):B2:C3', rows('insert', 0), '=INDEX(A2:A6,1):B3:C4'],
-    ['=A1:INDEX(A1:A5,1)', rows('delete', 0), '=#REF!:INDEX(#REF!,1)'],
+    ['=A1:INDEX(A1:A5,1)', rows('delete', 0), '=#REF!:INDEX(A1:A4,1)'],
     ['=A1:B2#', rows('delete', 1), '=A1:#REF!#'],
     ['=A1 B1:C1', rows('insert', 0), '=A2 B2:C2'],
     ['=@A1:B2', rows('insert', 0), '=@A2:B3'],
@@ -164,7 +164,8 @@ describe('shiftFormulaRefs: the formula is on another sheet than the edited one'
   it('leaves unprefixed references alone and shifts the ones that name the edited sheet', () => {
     expect(onOther('=A5+B2:C3+1:2+A:B', rows('insert', 0))).toBe('=A5+B2:C3+1:2+A:B');
     expect(onOther('=Main!A5+A5+Main!B2:C3', rows('insert', 0))).toBe('=Main!A6+A5+Main!B3:C4');
-    expect(onOther('=Main!A:B', cols('delete', 0))).toBe('=#REF!');
+    expect(onOther('=Main!A:B', cols('delete', 0))).toBe('=Main!A:A');
+    expect(onOther('=Main!A:A', cols('delete', 0))).toBe('=#REF!');
     expect(onOther("=SUM('Main'!A1:A5)", rows('delete', 1))).toBe("=SUM('Main'!A1:A4)");
     expect(onOther('=Main!A5#', rows('delete', 4))).toBe('=#REF!#');
   });

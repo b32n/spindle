@@ -17,7 +17,8 @@ function prng(seed: number): () => number {
 }
 
 const SHEETS = ['Main', 'Other', 'My Sheet'];
-const PREFIXES = ['', '', '', 'Other!', "'My Sheet'!", 'Main!', 'Ghost!'];
+// sheet names are case-insensitive: `other!` and `MAIN!` name the sheets `Other` and `Main`
+const PREFIXES = ['', '', '', 'Other!', "'My Sheet'!", 'Main!', 'Ghost!', 'other!', 'MAIN!', "'my sheet'!"];
 const COLS = 'ABCDEFGH';
 
 const pick = <T,>(rand: () => number, items: readonly T[]): T => items[Math.floor(rand() * items.length)];
@@ -34,7 +35,7 @@ function operand(rand: () => number): string {
   if (kind <= 4) return `${prefix}${cell(rand)}:${cell(rand)}`;
   if (kind === 5) return `${prefix}${rand() < 0.3 ? '$' : ''}${pick(rand, COLS.split(''))}:${rand() < 0.3 ? '$' : ''}${pick(rand, COLS.split(''))}`;
   if (kind === 6) return `${prefix}${rand() < 0.3 ? '$' : ''}${1 + int(rand, 10)}:${rand() < 0.3 ? '$' : ''}${1 + int(rand, 10)}`;
-  return pick(rand, ["Other:'My Sheet'!A5", `${cell(rand)}#`, '"A1 in a string"', '42', 'TRUE']);
+  return pick(rand, ["Other:'My Sheet'!A5", `${cell(rand)}#`, '"A1 in a string"', '42']);
 }
 
 function formula(rand: () => number): string {
@@ -96,13 +97,17 @@ describe('cached-only reference shifting agrees with the normal formula path', (
 
   it('gives the same text for 6000 random formulas and sequences of 1 to 3 insert/delete row/column edits', () => {
     let compared = 0;
+    let skipped = 0;
     let moved = 0;
     let deleted = 0;
     for (const c of cases) {
       const normal = build(c.owner, c.text, false);
       const kept = build(c.owner, c.text, true);
       // only formulas the engine writes back as typed can be compared: the generator emits that form
-      if (formulaTexts(normal)[0] !== c.text) continue;
+      if (formulaTexts(normal)[0] !== c.text) {
+        skipped++;
+        continue;
+      }
       for (const e of c.edits) {
         applyEdit(normal, c.sheet, e);
         applyEdit(kept, c.sheet, e);
@@ -115,7 +120,8 @@ describe('cached-only reference shifting agrees with the normal formula path', (
       if (finalText?.includes('#REF!')) deleted++;
     }
     // the corpus really exercises the paths: most formulas compared, many moved, many hit deleted rows/columns
-    expect(compared).toBeGreaterThan(5000);
+    expect(skipped).toBe(0); // the generator only emits what the engine writes back as typed
+    expect(compared).toBe(cases.length);
     expect(moved).toBeGreaterThan(1000);
     expect(deleted).toBeGreaterThan(200);
   });

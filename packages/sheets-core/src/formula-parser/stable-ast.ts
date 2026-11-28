@@ -15,6 +15,7 @@ import { columnIndexToLabel } from './cell-reference';
 import { volatileFunctions } from './functions';
 import { MAX_SHEET_COLS, MAX_SHEET_ROWS } from './types';
 import type { CellReference, ParsedFormulaNode } from './types';
+import { shiftPair, type StructuralEdit } from './ref-shift';
 
 export interface StableCellRef {
   rowId: string;
@@ -467,13 +468,51 @@ export function walkStableAst(node: StableFormulaNode, visit: (n: StableFormulaN
   if (node.right) walkStableAst(node.right, visit);
 }
 
+/**
+ * Before a delete of rows/columns of `sheet` drops their ids: move each range corner that sits in the deleted rows/columns onto the
+ * nearest surviving one, so a range keeps what survives of it (`A2:A5` without row 5 is `A2:A4`) and only becomes `#REF!` when all of
+ * its rows/columns are deleted, as in Excel (the span rule is `shiftSpan`, shared with the cached-only text shifter). Whole-column/row
+ * ranges are moved on their bounded axis. A single cell, a range of the other sheets, a positional (3D / not-yet-existing sheet) one
+ * and a range on the axis the edit does not touch are left alone. Returns whether the AST changed.
+ */
+export function retargetRangesForDelete(root: StableFormulaNode, sheet: Sheet, edit: StructuralEdit): boolean {
+  const isRow = edit.axis === 'row';
+  const indexOf = (id: string): number | undefined => (isRow ? sheet.getRowIndex(id) : sheet.getColIndex(id));
+  let changed = false;
+  walkStableAst(root, (n) => {
+    const range = n.rangeRef;
+    if (!range || n.type === 'ref3d') return;
+    const [first, second] = [range.start, range.end].map((c) => (isRow ? c.rowId : c.colId));
+    const [a, b] = [indexOf(first), indexOf(second)];
+    if (a === undefined || b === undefined) return; // the other axis (whole), another sheet's ids, or already gone
+    const next = shiftPair(a, b, edit);
+    if (next === undefined) return; // every row/column of it is deleted: its ids go and it is #REF!
+    // the row/column that holds position `p` after the delete is the one at `p` before it, or `count` further on
+    const survivor = (p: number): string => {
+      const before = p < edit.start ? p : p + edit.count;
+      return isRow ? sheet.ensureRowId(before) : sheet.ensureColId(before);
+    };
+    [range.start, range.end].forEach((corner, i) => {
+      const old = [a, b][i];
+      if (old < edit.start || old >= edit.start + edit.count) return;
+      const id = survivor(next[i]);
+      if (isRow) corner.rowId = id;
+      else corner.colId = id;
+      changed = true;
+    });
+  });
+  return changed;
+}
+
 /** Point every reference to sheet `oldName` (including a 3D span's endpoints) at `newName`. */
 export function renameSheetInAst(root: StableFormulaNode, oldName: string, newName: string): void {
+  // sheet names are case-insensitive: `sheet2!A1` follows the rename of `Sheet2`
+  const lower = oldName.toLowerCase();
+  const named = (name: string | undefined): boolean => name !== undefined && name.toLowerCase() === lower;
   walkStableAst(root, (n) => {
-    if (n.cellRef?.sheetName === oldName) n.cellRef.sheetName = newName;
-    if (n.rangeRef?.start.sheetName === oldName) n.rangeRef.start.sheetName = newName;
-    if (n.rangeRef?.end.sheetName === oldName) n.rangeRef.end.sheetName = newName;
-    if (n.sheetEnd === oldName) n.sheetEnd = newName;
+    const corners = [n.cellRef, n.rangeRef?.start, n.rangeRef?.end];
+    for (const ref of corners) if (ref && named(ref.sheetName)) ref.sheetName = newName;
+    if (named(n.sheetEnd)) n.sheetEnd = newName;
   });
 }
 

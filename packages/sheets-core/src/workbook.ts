@@ -33,6 +33,7 @@ import {
   renameSheetInAst,
   shrinkThreeDSpansForDelete,
   StableRefDeletedError,
+  retargetRangesForDelete,
   WHOLE_AXIS_ID,
 } from './formula-parser/stable-ast';
 import { shiftFormulaRefs, type StructuralEdit } from './formula-parser/ref-shift';
@@ -227,6 +228,11 @@ export class WorkbookImpl implements Workbook {
       if (sheet.name === sheetName) {
         return id;
       }
+    }
+    // Sheet names are case-insensitive (Excel): `sheet2!A1` points at `Sheet2` when no sheet is named exactly so
+    const lower = sheetName.toLowerCase();
+    for (const [id, sheet] of this.sheets.entries()) {
+      if (sheet.name.toLowerCase() === lower) return id;
     }
     return undefined;
   }
@@ -2036,6 +2042,7 @@ export class WorkbookImpl implements Workbook {
     sheet.__setStructureChangeListener((affectsFormulas, edit) =>
       this.onStructureChange(sheet, affectsFormulas, edit),
     );
+    sheet.__setBeforeDeleteListener((edit) => this.retargetRangeCorners(sheet, edit));
   }
 
   /**
@@ -2063,12 +2070,33 @@ export class WorkbookImpl implements Workbook {
   }
 
   /**
+   * Before a delete drops rows/columns: every formula's range corners inside them move onto the nearest surviving ones
+   * (`retargetRangesForDelete`), and the dependency graph follows (its range keys are those corners). Not for a remote change: the
+   * remote peer sends the formulas' recomputed text, which is parsed afresh.
+   */
+  private retargetRangeCorners(edited: SheetImpl, edit: StructuralEdit): void {
+    if (this.isApplyingRemoteChange || edit.count <= 0) return;
+    for (const [sheetId, sheet] of this.sheets) {
+      for (const [row, col, cell] of (sheet as SheetImpl).entries()) {
+        if (!cell.formulaAst || cell.cachedOnly) continue;
+        if (!retargetRangesForDelete(cell.formulaAst, edited, edit)) continue;
+        this.formulaGraph.addFormula(
+          this.graphKey(sheetId, row, col),
+          cell.formula ?? '',
+          collectStableDependencies(cell.formulaAst),
+          formulaIsVolatile(cell.formulaAst),
+        );
+      }
+    }
+  }
+
+  /**
    * A cached-only formula keeps no stable references, so an insert/delete of rows or columns rewrites the references in its text
    * instead (see `shiftFormulaRefs`: the outcome of a normal formula's stable-id path). The cell's value is the file's cached one and
    * stays. Runs on every sheet, since a formula may point at the edited one. Returns the cells whose text changed.
    */
   private shiftCachedOnlyFormulas(edited: SheetImpl, edit: StructuralEdit): Array<{ sheetId: string; row: number; col: number }> {
-    const isEditedSheet = (name: string): boolean => name === edited.name;
+    const isEditedSheet = (name: string): boolean => this.getSheetIdByName(name) === edited.id;
     const changed: Array<{ sheetId: string; row: number; col: number }> = [];
     for (const [sheetId, sheet] of this.sheets) {
       for (const [row, col, cell] of (sheet as SheetImpl).entries()) {

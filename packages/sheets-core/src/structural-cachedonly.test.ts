@@ -32,9 +32,11 @@ describe('a cached-only formula follows structural edits', () => {
     expect(cellAt(wb, 11, 6)?.formula).toBe('=_xlfn.LET(_xlpm.x,A3,_xlpm.y,C4:D5,_xlpm.x+_xlpm.y)');
     sheet.deleteRows(0, 1);
     expect(cellAt(wb, 10, 6)?.formula).toBe('=_xlfn.LET(_xlpm.x,A2,_xlpm.y,C3:D4,_xlpm.x+_xlpm.y)');
-    sheet.deleteCols(2, 1); // C is a corner of the range: the range is gone
-    expect(cellAt(wb, 10, 5)?.formula).toBe('=_xlfn.LET(_xlpm.x,A2,_xlpm.y,#REF!,_xlpm.x+_xlpm.y)');
-    expect(cellAt(wb, 10, 5)).toMatchObject({ value: 99, cachedOnly: true });
+    sheet.deleteCols(2, 1); // C is a corner of the range: the range keeps D, now C
+    expect(cellAt(wb, 10, 5)?.formula).toBe('=_xlfn.LET(_xlpm.x,A2,_xlpm.y,C3:C4,_xlpm.x+_xlpm.y)');
+    sheet.deleteCols(2, 1); // its last column goes: the range is gone
+    expect(cellAt(wb, 10, 4)?.formula).toBe('=_xlfn.LET(_xlpm.x,A2,_xlpm.y,#REF!,_xlpm.x+_xlpm.y)');
+    expect(cellAt(wb, 10, 4)).toMatchObject({ value: 99, cachedOnly: true });
   });
 
   it('shifts the references of every sheet that point at the edited one, and only those', () => {
