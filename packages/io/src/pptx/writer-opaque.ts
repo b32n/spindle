@@ -30,7 +30,7 @@ const CLIPS = new Set(['audioFile', 'videoFile', 'quickTimeFile']);
 const RESERVED = /^(?:\[content_types\]\.xml$|_rels\/|docprops\/|ppt\/(?:_rels\/|slides\/|slidelayouts\/|slidemasters\/|notesslides\/|notesmasters\/|comments\/|theme\/theme\d+\.xml$|(?:presentation|presprops|viewprops|tablestyles|commentauthors)\.xml$))/i;
 /** What a part name may hold to be written as it is: no space, no percent escape, no climbing out of the package. */
 const SAFE_NAME = /^(?!\/)(?!.*(?:^|\/)\.\.?(?:\/|$))[A-Za-z0-9._\-/]+$/;
-const REL_TAG = /<Relationship\b(?:"[^"]*"|'[^']*'|[^>"'])*\/>/g;
+const REL_TAG = /<Relationship\b(?:"[^"]*"|'[^']*'|[^>"'])*>(?:\s*<\/Relationship\s*>)?/g;
 const ATTR = (name: string): RegExp => new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`);
 const DECODER = new TextDecoder();
 const ENCODER = new TextEncoder();
@@ -204,7 +204,7 @@ export class OpaqueParts {
     const ok =
       e.opaqueKind === 'chart' ? has('chart') : e.opaqueKind === 'smartArt' ? has('diagramData') : e.opaqueKind === 'ink' ? placed.length > 0 : placed.some((r) => r.role !== 'image');
     if (!ok) {
-      lossy('opaque');
+      lossy(e.opaqueKind === 'chart' && has('chartEx') ? 'opaqueChartEx' : 'opaque');
       return undefined;
     }
     let dropped = missing;

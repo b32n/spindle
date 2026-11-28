@@ -1081,8 +1081,9 @@ lockstep.
   its name unless the package has another use for it (then it moves under `ppt/opaque/` or gets a number) and the relationship parts are
   rewritten only where a target changed or points at a part that was not kept. Transitions (with their `mc:AlternateContent` fallback) and the
   timing tree are written as read, after `p:clrMapOvr`; a timing that names a shape the slide does not hold under the same id, a malformed
-  fragment and a sound the file does not carry are left out and reported. Linked media and objects and ActiveX controls are not written
-  (a link is never written) and are reported. The lints of the writer now also report a part no relationship targets, and accept the id 0
+  fragment and a sound the file does not carry are left out and reported. Linked media and objects, ActiveX controls and extended
+  charts (`chartEx`) are not written and are reported (no link to linked media is written on the slide; the external relationships inside a
+  kept part's own relationship part, such as a chart's linked workbook, are kept as they were, inert). The lints of the writer now also report a part no relationship targets, and accept the id 0
   of an OLE preview picture and an empty relationship id (`r:blip=""`). The PPTX round-trip differences for opaque content, transitions and
   animations fall to zero over the corpus. No collab schema change (no new model fields).
 

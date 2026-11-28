@@ -50,11 +50,12 @@ export class PartRels {
 }
 
 /** What a writer can leave out or change within an element it writes, as keys of `LOSSY`. */
-export type LossyKey = 'opaque' | 'opaqueLinked' | 'opaqueControl' | 'opaquePart' | 'transition' | 'timing' | 'customGeometry' | 'pictureFill' | 'customDash' | 'link' | 'geometryName' | 'underline' | 'picture' | 'modernComment';
+export type LossyKey = 'opaque' | 'opaqueChartEx' | 'opaqueLinked' | 'opaqueControl' | 'opaquePart' | 'transition' | 'timing' | 'customGeometry' | 'pictureFill' | 'customDash' | 'link' | 'geometryName' | 'underline' | 'picture' | 'modernComment';
 
 export const LOSSY: Record<LossyKey, string> = {
   opaque: 'charts, diagrams, objects, media and ink left out because the parts they are made of are missing',
-  opaqueLinked: 'media and objects linked from outside the file left out (the link is never written)',
+  opaqueChartEx: 'extended charts (waterfall, treemap, funnel and the like) left out (they are not written yet)',
+  opaqueLinked: 'media and objects linked from outside the file left out (no link to them is written on the slide)',
   opaqueControl: 'ActiveX controls left out (their binary parts are not written)',
   opaquePart: 'relationships of kept content to parts that are missing left out',
   transition: 'transitions left out (the XML is malformed or holds a sound the file does not carry)',

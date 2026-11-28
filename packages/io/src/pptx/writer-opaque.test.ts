@@ -148,6 +148,33 @@ describe('relationship rewriting', () => {
     expect(out.warnings).toEqual(['Changed on export: relationships of kept content to parts that are missing left out (1).']);
   });
 
+  it('reads a relationship written with a closing tag: it is a target to rewrite or to drop, and not a root', async () => {
+    const long = (id: string, target: string) => `<Relationship Id="${id}" Type="${R}/image" Target="${target}"></Relationship>`;
+    const relsXml = `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${long('rId1', '../slides/slide1.xml')}${long('rId2', '../embeddings/gone.bin')}</Relationships>`;
+    const p = parts([
+      ['chart', 'ppt/charts/chart1.xml', '<c:chartSpace xmlns:c="c"/>'],
+      ['rels', 'ppt/charts/_rels/chart1.xml.rels', relsXml],
+      ['image', 'ppt/slides/slide1.xml', '<img/>'],
+    ]);
+    const out = await write([slide([opaque({ opaqueKind: 'chart' }, p.refs)])], p.store);
+    expect(out.lint).toEqual([]);
+    const text = await out.text('ppt/charts/_rels/chart1.xml.rels');
+    expect(text).toContain(`Target="../opaque/slide1.xml"></Relationship>`);
+    expect(text).not.toContain('gone.bin');
+    expect(text).not.toContain('</Relationship></Relationship>');
+    // the image is pointed at by the chart, so the slide relates to the chart alone
+    expect(out.slideRels.match(/<Relationship /g)).toHaveLength(2);
+    expect(out.warnings).toEqual(['Changed on export: relationships of kept content to parts that are missing left out (1).']);
+  });
+
+  it('reports an extended chart (chartEx) under its own message, not as a missing part', async () => {
+    const p = parts([['chartEx', 'ppt/charts/chartEx1.xml', '<cx:chartSpace xmlns:cx="cx"/>']]);
+    const out = await write([slide([opaque({ opaqueKind: 'chart' }, p.refs)])], p.store);
+    expect(out.lint).toEqual([]);
+    expect(out.slideXml).not.toContain('graphicFrame');
+    expect(out.warnings).toEqual(['Changed on export: extended charts (waterfall, treemap, funnel and the like) left out (they are not written yet) (1).']);
+  });
+
   it('reports a part the store no longer holds and one whose relationship part has no usable name', async () => {
     const lost = parts([['chart', 'ppt/charts/chart1.xml', '<c:chartSpace xmlns:c="c"/>'], ['package', 'ppt/embeddings/w.xlsx', 'x']]);
     const orphanRels = { hash: 'orphan', role: 'rels' };
@@ -198,7 +225,7 @@ describe('elements that cannot be written', () => {
     expect(out.slideRels).not.toContain('file:');
     expect(out.warnings).toEqual([
       'Changed on export: ActiveX controls left out (their binary parts are not written) (1).',
-      'Changed on export: media and objects linked from outside the file left out (the link is never written) (1).',
+      'Changed on export: media and objects linked from outside the file left out (no link to them is written on the slide) (1).',
     ]);
   });
 

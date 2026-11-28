@@ -319,5 +319,7 @@ and objects are never fetched: the address is kept inert. A slide's transition a
 `Slide.opaque` in the editor; the timing names shapes by `pptxId` and is pruned when the shape is deleted. `exportPptx` (plan K14) writes them
 back: each part byte for byte from the store (under its own name where the package has no use for it, else renamed, with the relationship
 parts rewritten to match), the frame that names them, and the transition and timing XML of each slide. Left out and reported: linked clips
-and objects (a link is never written), ActiveX controls, a timing that names a shape the slide does not hold under the same id, and the sound of a
-transition. The loss report says `kept` because the parts are stored, and the placeholder in the editor says "(kept, not editable)".
+and objects (no link to them is written on the slide), ActiveX controls, extended charts (`chartEx`, a follow-up), a timing that names a shape the slide does not hold under the same id, and the sound of a
+transition. External relationships inside a kept part's own relationship part (a chart's linked workbook, a hyperlink) stay as they were:
+they are inert, nothing is fetched. The loss report says `kept` because the parts are stored (an export writes back what it can, and says what it
+leaves out; the exceptions above are reported as changes on export), and the placeholder in the editor says "(kept, not editable)".
