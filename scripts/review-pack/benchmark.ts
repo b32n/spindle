@@ -6,13 +6,17 @@
  *
  * The decks are written by fixtures/pptx/generators/build_bench.py (deterministic, never committed). Each import runs in
  * its own process (`--worker`) so the peak resident set is that run's; the filmstrip time is measured in Chromium
- * against the slides demo, from the file chosen in the Open dialog until the filmstrip holds every slide. The medians are
- * checked against the L17 budget (helpers.ts) and the table is printed as Markdown.
+ * against the slides demo, from the file handed to the file chooser until the filmstrip holds every slide. That is the Vite
+ * dev server (unminified, with its module loading), so the figure is a conservative upper bound for a built demo; the
+ * browser's own memory is not measured (the RSS is the import process's). The medians are checked against the L17
+ * budget (helpers.ts) and the table is printed as Markdown; `--no-browser` skips the filmstrip (n/a, not checked).
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { demoPage, launch, openFile, ROOT, serveDemo } from './browser';
+import type { Browser } from '@playwright/test';
+import { demoPage, launch, longestTaskSince, openFile, pageNow, ROOT, serveDemo } from './browser';
 import { overBudget, resultsTable, summarize, type DeckResult } from './helpers';
 
 const DECKS = [
@@ -51,10 +55,17 @@ async function main(): Promise<void> {
   });
   if (gen.status !== 0) throw new Error(`generator failed: ${gen.stderr}`);
 
-  const server = args.includes('--no-browser') ? undefined : await serveDemo();
-  const browser = server ? await launch() : undefined;
+  const noBrowser = args.includes('--no-browser');
+  let server: { stop: () => void } | undefined;
+  let browser: Browser | undefined;
+  let browserVersion: string | null = null;
   const results: DeckResult[] = [];
   try {
+    if (!noBrowser) {
+      server = await serveDemo();
+      browser = await launch();
+      browserVersion = browser.version();
+    }
     for (const { deck, slides } of DECKS) {
       const file = path.join(out, `${deck}.pptx`);
       const importMs: number[] = [];
@@ -79,17 +90,16 @@ async function main(): Promise<void> {
         rssMiB.push(r.rssMiB);
         if (browser) {
           const page = await demoPage(browser);
-          const t0 = Date.now();
-          await openFile(page, file);
+          const mark = await pageNow(page);
+          let t0 = 0;
+          await openFile(page, file, () => (t0 = Date.now()));
           await page.waitForFunction(
             (n) => document.querySelectorAll('[data-slide-thumb]').length >= n,
             slides,
             { timeout: 120_000, polling: 'raf' }
           );
           filmstripMs.push(Date.now() - t0);
-          longestTaskMs.push(
-            await page.evaluate(() => (window as unknown as { __longest: number }).__longest)
-          );
+          longestTaskMs.push(await longestTaskSince(page, mark));
           await page.close();
         }
       }
@@ -99,8 +109,8 @@ async function main(): Promise<void> {
         bytes: statSync(file).size,
         importMs: summarize(importMs),
         rssMiB: summarize(rssMiB),
-        filmstripMs: summarize(filmstripMs.length ? filmstripMs : [0]),
-        longestTaskMs: summarize(longestTaskMs.length ? longestTaskMs : [0]),
+        filmstripMs: browser ? summarize(filmstripMs) : null,
+        longestTaskMs: browser ? summarize(longestTaskMs) : null,
       });
     }
   } finally {
@@ -110,11 +120,26 @@ async function main(): Promise<void> {
   const table = resultsTable(results);
   const over = results.flatMap((r) => overBudget(r));
   console.log(table);
+  if (noBrowser)
+    console.log(
+      '--no-browser: filmstrip and longest task not measured, only import and memory are checked.'
+    );
   console.log(over.length ? `OVER BUDGET:\n${over.join('\n')}` : 'Within the L17 budget.');
   if (jsonFile)
     writeFileSync(
       jsonFile,
-      JSON.stringify({ runs, node: process.version, results }, null, 2) + '\n'
+      JSON.stringify(
+        {
+          runs,
+          node: process.version,
+          os: `${os.type()} ${os.release()}`,
+          cpus: { count: os.cpus().length, model: os.cpus()[0]?.model ?? 'unknown' },
+          browser: browserVersion,
+          results,
+        },
+        null,
+        2
+      ) + '\n'
     );
   process.exitCode = over.length ? 1 : 0;
 }

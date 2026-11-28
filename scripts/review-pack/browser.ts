@@ -51,10 +51,11 @@ export async function demoPage(browser: Browser): Promise<Page> {
   await page.route(/fonts\.b32n\.io/, (r) => r.abort());
   page.on('dialog', (d) => void d.accept());
   await page.addInitScript(() => {
-    const w = window as unknown as { __longest: number };
-    w.__longest = 0;
+    const w = window as unknown as { __tasks: { start: number; duration: number }[] };
+    w.__tasks = [];
     new PerformanceObserver((list) => {
-      for (const e of list.getEntries()) w.__longest = Math.max(w.__longest, e.duration);
+      for (const e of list.getEntries())
+        w.__tasks.push({ start: e.startTime, duration: e.duration });
     }).observe({ type: 'longtask', buffered: true });
   });
   await page.goto(`${DEMO_URL}/?importConfirmation=never`);
@@ -62,8 +63,22 @@ export async function demoPage(browser: Browser): Promise<Page> {
   return page;
 }
 
-/** Open a file through the toolbar's Open button (or the "More tools" menu when the toolbar has collapsed it). */
-export async function openFile(page: Page, file: string): Promise<void> {
+/** The page clock now: the mark for `longestTaskSince`, taken just before a file is chosen. */
+export const pageNow = (page: Page): Promise<number> => page.evaluate(() => performance.now());
+
+/** The longest main-thread task (ms) that started at or after the mark (the demo's own load is not counted). */
+export function longestTaskSince(page: Page, mark: number): Promise<number> {
+  return page.evaluate((m) => {
+    const tasks = (window as unknown as { __tasks: { start: number; duration: number }[] }).__tasks;
+    return tasks.reduce((max, t) => (t.start >= m ? Math.max(max, t.duration) : max), 0);
+  }, mark);
+}
+
+/**
+ * Open a file through the toolbar's Open button (or the "More tools" menu when the toolbar has collapsed it);
+ * `onChosen` runs right before the file is handed to the file chooser (the benchmark starts its clock there).
+ */
+export async function openFile(page: Page, file: string, onChosen?: () => void): Promise<void> {
   const name = 'Open file (.pptx)';
   const button = page.getByRole('button', { name, exact: true });
   const [chooser] = await Promise.all([
@@ -80,5 +95,6 @@ export async function openFile(page: Page, file: string): Promise<void> {
       } else await button.click();
     })(),
   ]);
+  onChosen?.();
   await chooser.setFiles(file);
 }

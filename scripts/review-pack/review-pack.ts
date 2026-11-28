@@ -9,11 +9,11 @@
  * Default files: fixtures/pptx/*.pptx except the edge-* files (they are rejected by design, nothing to look at).
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import type { Page } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 import { demoPage, launch, openFile, ROOT, serveDemo } from './browser';
-import { pairPages, stem } from './helpers';
+import { countsEqual, pairPages, stem, unsafeOut, visibleNumbers } from './helpers';
 
 const args = process.argv.slice(2);
 const option = (name: string): string | undefined => {
@@ -68,8 +68,15 @@ function libreOfficeRender(file: string, dir: string, profile: string): number {
   return png(dir).length;
 }
 
-/** Spindle's slides: `spindle/<stem>/slide-NNN.png`. Returns the slide count of the deck as imported. */
-async function spindleRender(page: Page, file: string, dir: string): Promise<number> {
+/**
+ * Spindle's slides: `spindle/<stem>/slide-NNN.png`, numbered like LibreOffice's pages: a hidden slide is not rendered
+ * (LibreOffice skips it) and does not take a number. Returns the slide count of the deck as imported and how many are visible.
+ */
+async function spindleRender(
+  page: Page,
+  file: string,
+  dir: string
+): Promise<{ slides: number; visible: number }> {
   mkdirSync(dir, { recursive: true });
   await openFile(page, file);
   await page.waitForFunction(
@@ -81,15 +88,21 @@ async function spindleRender(page: Page, file: string, dir: string): Promise<num
   );
   const thumbs = page.locator('[data-slide-thumb]');
   const count = await thumbs.count();
-  for (let i = 0; i < Math.min(count, maxSlides); i++) {
+  const hidden = await thumbs.evaluateAll((els) =>
+    els.map((e) => /\(hidden\)$/.test(e.getAttribute('aria-label') ?? ''))
+  );
+  const numbers = visibleNumbers(hidden);
+  for (let i = 0; i < count; i++) {
+    const n = numbers[i];
+    if (n === null || n > maxSlides) continue;
     await thumbs.nth(i).click();
     await page.waitForTimeout(150);
     await page
       .locator('[data-slide-stage] [data-slide-id]')
       .first()
-      .screenshot({ path: path.join(dir, `slide-${pad(i + 1, 3)}.png`) });
+      .screenshot({ path: path.join(dir, `slide-${pad(n, 3)}.png`) });
   }
-  return count;
+  return { slides: count, visible: numbers.filter((n) => n !== null).length };
 }
 
 /** Runs in the page (plain JavaScript, a string so the TypeScript runner adds no helpers to it): draws the two images and returns the PNG. */
@@ -143,22 +156,33 @@ async function sideBySide(
   return Buffer.from(data, 'base64');
 }
 
+const MARKER = '.review-pack';
+
 async function main(): Promise<void> {
+  const problem = unsafeOut(out, ROOT, existsSync(out) ? readdirSync(out) : null, MARKER);
+  if (problem) {
+    console.error(`refusing to clear the output directory: ${problem}`);
+    process.exit(2);
+  }
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
+  writeFileSync(path.join(out, MARKER), 'written by npm run slides:review-pack; safe to clear\n');
   const profile = path.join(out, '.lo-profile');
-  const server = await serveDemo();
-  const browser = await launch();
+  let server: { stop: () => void } | undefined;
+  let browser: Browser | undefined;
   const rows: string[] = [];
   try {
+    server = await serveDemo();
+    browser = await launch();
     const page = await demoPage(browser);
     for (const file of files) {
       const name = stem(file);
       process.stdout.write(`${name} ... `);
       let slides = 0;
+      let visible = 0;
       let note = '';
       try {
-        slides = await spindleRender(page, file, path.join(out, 'spindle', name));
+        ({ slides, visible } = await spindleRender(page, file, path.join(out, 'spindle', name)));
       } catch (e) {
         note = `Spindle: ${(e as Error).message.split('\n')[0]}`;
       }
@@ -184,19 +208,19 @@ async function main(): Promise<void> {
         writeFileSync(path.join(out, 'side-by-side', `${name}-${pad(p.page, 3)}.png`), buf);
       }
       rows.push(
-        `| ${name} | ${slides} | ${pages} | ${slides === pages ? 'yes' : 'NO'} | ${pairs.length} | ${note} |  |  |`
+        `| ${name} | ${slides} (${visible} visible) | ${pages} | ${countsEqual(visible, pages, maxSlides) ? 'yes' : 'NO'} | ${pairs.length} | ${note} |  |  |`
       );
       console.log(`${slides} slides, ${pages} LibreOffice pages, ${pairs.length} pairs`);
     }
   } finally {
-    await browser.close();
-    server.stop();
+    await browser?.close();
+    server?.stop();
     rmSync(profile, { recursive: true, force: true });
   }
   const md = [
     '# PPTX visual review pack',
     '',
-    `Slides rendered: the first ${maxSlides} of each deck. Side-by-side images: \`side-by-side/<fixture>-<page>.png\` (Spindle left, LibreOffice right).`,
+    `Slides rendered: the first ${maxSlides} visible slides of each deck (hidden slides are skipped, as LibreOffice skips them; the page number is the visible-slide number). Side-by-side images: \`side-by-side/<fixture>-<page>.png\` (Spindle left, LibreOffice right).`,
     '',
     '| Fixture | Spindle slides | LibreOffice pages | Counts equal | Pairs | Note | Verdict (acceptable / listed) | Listed differences |',
     '| --- | --- | --- | --- | --- | --- | --- | --- |',

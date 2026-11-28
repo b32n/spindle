@@ -1,6 +1,7 @@
 import {
   BUDGET_100,
   budgetFor,
+  countsEqual,
   fmt,
   overBudget,
   pageNumber,
@@ -9,6 +10,8 @@ import {
   resultsTable,
   stem,
   summarize,
+  unsafeOut,
+  visibleNumbers,
   type DeckResult,
   type Summary,
 } from '../../../../scripts/review-pack/helpers';
@@ -77,8 +80,47 @@ describe('formatting', () => {
     expect(table[2]).toBe(
       '| bench-100-slides | 100 | 123 KiB | 200 (300) | 1500 (2000) | 80 | 250 |'
     );
-    expect(resultsTable([])).toHaveLength(resultsTable([]).length);
     expect(resultsTable([]).split('\n')).toHaveLength(2);
+  });
+});
+
+describe('without a browser', () => {
+  const r = result({ filmstripMs: null, longestTaskMs: null });
+  it('is not checked against the filmstrip budget and prints n/a', () => {
+    expect(overBudget(r)).toEqual([]);
+    expect(resultsTable([r]).split('\n')[2]).toBe(
+      '| bench-100-slides | 100 | 123 KiB | 200 (300) | n/a | n/a | 250 |'
+    );
+  });
+});
+
+describe('output directory safety', () => {
+  const root = '/work/spindle';
+  it('refuses the project, a parent of it, and a directory of other files', () => {
+    expect(unsafeOut('/work/spindle', root, null, '.m')).toContain('contains, the project');
+    expect(unsafeOut('/work', root, [], '.m')).toContain('contains, the project');
+    expect(unsafeOut('/', root, [], '.m')).toContain('contains, the project');
+    expect(unsafeOut('/home/me/docs', root, ['a.txt'], '.m')).toContain('not empty');
+  });
+  it('allows a new, empty, marked or nested directory', () => {
+    expect(unsafeOut('/tmp/x', root, null, '.m')).toBeNull();
+    expect(unsafeOut('/tmp/x', root, [], '.m')).toBeNull();
+    expect(unsafeOut('/tmp/x', root, ['.m', 'lo'], '.m')).toBeNull();
+    expect(unsafeOut('/work/spindle/review-pack-output/review', root, ['.m'], '.m')).toBeNull();
+    expect(unsafeOut('/work/spindle2', root, [], '.m')).toBeNull();
+  });
+});
+
+describe('hidden slides', () => {
+  it('numbers the visible slides, as LibreOffice numbers its pages', () => {
+    expect(visibleNumbers([false, true, false, false, true])).toEqual([1, null, 2, 3, null]);
+    expect(visibleNumbers([])).toEqual([]);
+  });
+  it('compares the visible slides, capped, with the pages', () => {
+    expect(countsEqual(4, 4, 12)).toBe(true);
+    expect(countsEqual(30, 12, 12)).toBe(true);
+    expect(countsEqual(4, 3, 12)).toBe(false);
+    expect(countsEqual(30, 11, 12)).toBe(false);
   });
 });
 

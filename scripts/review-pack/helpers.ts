@@ -3,6 +3,7 @@
  * benchmark, and the pairing of the Spindle and LibreOffice page images. Everything with a side effect (browser, soffice,
  * files) lives in `benchmark.ts` and `review-pack.ts`.
  */
+import path from 'node:path';
 
 export interface Summary {
   n: number;
@@ -40,10 +41,10 @@ export interface DeckResult {
   slides: number;
   bytes: number;
   importMs: Summary;
-  /** From the file chosen in the Open dialog until the filmstrip shows every slide. */
-  filmstripMs: Summary;
-  /** The longest main-thread task during that open. */
-  longestTaskMs: Summary;
+  /** From the file chosen in the Open dialog until the filmstrip shows every slide; null without a browser (`--no-browser`). */
+  filmstripMs: Summary | null;
+  /** The longest main-thread task that started after the file was chosen; null without a browser. */
+  longestTaskMs: Summary | null;
   /** Peak resident set of the import process, MiB. */
   rssMiB: Summary;
 }
@@ -72,7 +73,7 @@ export function overBudget(r: DeckResult, budget: Budget = budgetFor(r.slides)):
   const out: string[] = [];
   if (r.importMs.median > budget.importMs)
     out.push(`${r.deck}: import ${fmt(r.importMs.median)} ms is over ${fmt(budget.importMs)} ms`);
-  if (r.filmstripMs.median > budget.filmstripMs)
+  if (r.filmstripMs && r.filmstripMs.median > budget.filmstripMs)
     out.push(
       `${r.deck}: filmstrip ${fmt(r.filmstripMs.median)} ms is over ${fmt(budget.filmstripMs)} ms`
     );
@@ -83,12 +84,12 @@ export function overBudget(r: DeckResult, budget: Budget = budgetFor(r.slides)):
 
 export const fmt = (n: number): string => String(Math.round(n));
 
-/** The results as a Markdown table (medians; the slowest run in brackets for the times). */
+/** The results as a Markdown table (medians; the slowest run in brackets for the times; n/a where nothing was measured). */
 export function resultsTable(results: readonly DeckResult[]): string {
   const rows = results.map(
     (r) =>
       `| ${r.deck} | ${r.slides} | ${(r.bytes / 1024).toFixed(0)} KiB | ${fmt(r.importMs.median)} (${fmt(r.importMs.max)}) | ` +
-      `${fmt(r.filmstripMs.median)} (${fmt(r.filmstripMs.max)}) | ${fmt(r.longestTaskMs.median)} | ${fmt(r.rssMiB.median)} |`
+      `${r.filmstripMs ? `${fmt(r.filmstripMs.median)} (${fmt(r.filmstripMs.max)})` : 'n/a'} | ${r.longestTaskMs ? fmt(r.longestTaskMs.median) : 'n/a'} | ${fmt(r.rssMiB.median)} |`
   );
   return [
     '| Deck | Slides | Size | Import ms (max) | Filmstrip ms (max) | Longest task ms | Peak RSS MiB |',
@@ -128,3 +129,29 @@ export function pairPages(spindle: readonly string[], libreOffice: readonly stri
 
 /** A safe file stem from a fixture file name (`text-basic.pptx` -> `text-basic`). */
 export const stem = (file: string): string => file.replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '');
+
+/** Why `--out` must not be cleared, or null when it may be: it holds the project, or files of something else (no pack marker). */
+export function unsafeOut(
+  out: string,
+  root: string,
+  entries: readonly string[] | null,
+  marker: string
+): string | null {
+  const inside = path.relative(out, root); // the project is out itself or below it
+  if (!inside.startsWith('..') && !path.isAbsolute(inside))
+    return `${out} is, or contains, the project`;
+  if (entries && entries.length > 0 && !entries.includes(marker))
+    return `${out} is not empty and was not written by the review pack (no ${marker} in it)`;
+  return null;
+}
+
+/** The slides to compare: LibreOffice skips hidden slides, so the visible ones are numbered 1, 2, ... (null for a hidden slide). */
+export function visibleNumbers(hidden: readonly boolean[]): (number | null)[] {
+  let n = 0;
+  return hidden.map((h) => (h ? null : ++n));
+}
+
+/** Whether the pack rendered every visible slide the other side has: the Spindle slides are capped like the LibreOffice pages. */
+export function countsEqual(visibleSlides: number, pages: number, max: number): boolean {
+  return Math.min(visibleSlides, max) === pages;
+}

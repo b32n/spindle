@@ -149,30 +149,35 @@ python3 fixtures/pptx/generators/build_bench.py --out DIR      # just write the 
   per slide, the first 12 by default) and converted by LibreOffice (`soffice` to PDF, `pdftoppm`); the two renders are
   paired by page number into `side-by-side/<fixture>-<page>.png` (Spindle left, LibreOffice right) and `index.md` is the
   sign-off ledger with a blank verdict column. Output goes to `review-pack-output/` (git-ignored; nothing is committed).
-  LibreOffice skips hidden slides, so `hidden-sections` (5 slides, 4 pages) and `kitchen-sink` (8, 7) show a count
-  difference that is expected.
+  LibreOffice skips hidden slides, so the pack skips them too and numbers the visible slides 1, 2, ... (`hidden-sections`
+  has 5 slides, 4 visible; `kitchen-sink` 8, 7); "Counts equal" compares the visible slides, capped at `--max-slides`,
+  with LibreOffice's pages. `--out` is cleared before the run, so it must be new, empty or a previous pack's directory
+  (marked with `.review-pack`); the project directory or a directory of other files is refused.
 - **Benchmark** (launch-bar row L17): `build_bench.py` writes `bench-100-slides.pptx` and `bench-200-slides.pptx`
   (deterministic: a title, a four-line body and two shapes per slide, a picture every fifth slide, a nine-cell grid every
   tenth; about 123 and 235 KiB). Each run measures the import in its own Node process (`importFromPptx`; time and peak
   resident set of that process, which includes about 200 MiB of the runtime itself) and, in Chromium against the slides
-  demo, the time from the file chosen in the Open dialog until the filmstrip holds every slide and the longest main-thread
-  task meanwhile. Medians of 5 runs are compared with the budget below (exit status 1 when over).
+  demo (the Vite dev server, unminified: an upper bound for a built demo), the time from the file handed to the file chooser
+  until the filmstrip holds every slide and the longest main-thread task that started after that. The browser's own memory
+  is not measured, and `--no-browser` skips the filmstrip (n/a, not checked against the budget). Medians of 5 runs are compared with the budget below (exit status 1 when over).
 
-**L17 budget** (set in K17; limits on the median, linear in the slide count above 100; deliberately loose, about 5x the
-numbers measured on the build box, so that only a real regression (not a slower machine) trips it):
+**L17 budget** (set in K17; limits on the median, linear in the slide count above 100; deliberately loose: 5x to 12x the
+times measured on the build box, so that only a real regression (not a slower machine) trips it. Memory is tighter, 1.6x
+(100 slides) and 2.9x (200): the peak has a fixed baseline of about 200 MiB (the runtime) that does not grow with the
+deck, so the linear limit is loosest for the small deck and the 800 MiB limit for 200 slides is the one to revisit):
 
 | Deck | Import | Filmstrip | Peak RSS |
 | --- | --- | --- | --- |
 | 100 slides | 1,500 ms | 5,000 ms | 400 MiB |
 | 200 slides | 3,000 ms | 10,000 ms | 800 MiB |
 
-Recorded on the build box (8 CPUs, Node 24.22.1, Chromium from `/usr/bin/google-chrome`, medians of 5 runs; the full
-numbers are in `benchmark-results.json`, timings are not reproducible so nothing compares against them):
+Recorded on the build box (8 CPUs, Node 24.22.1, Chrome 156.0.8078.47 from `/usr/bin/google-chrome`, medians of 5 runs; the full
+numbers, with the CPU model, OS and browser version, are in `benchmark-results.json`, timings are not reproducible so nothing compares against them):
 
 | Deck | Slides | Size | Import ms | Filmstrip ms | Longest task ms | Peak RSS MiB |
 | --- | --- | --- | --- | --- | --- | --- |
-| bench-100-slides | 100 | 123 KiB | 266 | 655 | 217 | 246 |
-| bench-200-slides | 200 | 235 KiB | 379 | 921 | 323 | 261 |
+| bench-100-slides | 100 | 123 KiB | 281 | 605 | 230 | 242 |
+| bench-200-slides | 200 | 235 KiB | 414 | 865 | 320 | 273 |
 
 ## Coverage matrix
 
