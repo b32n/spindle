@@ -289,7 +289,8 @@ describe('whole-column and whole-row references in a workbook', () => {
       expect(b.text('C1')).toBe('=SUM(#REF!)');
       expect(b.v('C2')).toBe(30);
       expect(b.text('C2')).toBe('=SUM(A:A)');
-      expect(b.shown('C3')).toBe('#REF!'); // a corner of the span is gone, as for A1:B2
+      expect(b.shown('C3')).toBe(30); // the span keeps its surviving column (Excel: =SUM(A:B) without A is =SUM(A:A))
+      expect(b.text('C3')).toBe('=SUM(A:A)');
     });
 
     it('is unaffected by inserted or deleted columns for a whole-row reference, and follows its row', () => {

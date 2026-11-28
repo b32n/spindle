@@ -492,6 +492,24 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **References inside cached-only formulas follow inserted and deleted rows and columns (S4b).** A formula the engine cannot evaluate
+  (`cachedOnly`) keeps no parsed form, so inserting or deleting rows or columns used to leave the cell references in its text where they were.
+  They are now rewritten in the text, using the formula tokenizer, with the outcome of a normal formula's: `A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`,
+  `Sheet2!A1` and `'My Sheet'!A1` move with their cells, a reference into deleted rows or columns becomes
+  `#REF!`, a range keeps the rows or columns of it that survive (and is `#REF!` only when all of them are deleted), a reference to another sheet only changes when that sheet is edited, and everything else in the text (whitespace, case, string
+  literals, function names, structured references, fragments the grammar rejects) is kept byte for byte. 3D references, references to sheets
+  that do not exist and external workbook references are left as they are, as for a normal formula. Undo restores the text, and with
+  collaboration the shifted text is the cell's new value. The saved value stays, and the note's "does not recalculate when the cells it uses
+  change" caveat stays. The wording everywhere now says: the saved value and the formula are kept; the formula's cell references follow row and column insert and delete (they do not follow anything else, and the value does not update when the cells it refers to change); the S4 phrases "written back unchanged" and "saved unchanged" for these cells are gone from the note, the loss effect, the docs and the goldens. New exports of `@b32nio/spindle-sheets-core`: `shiftFormulaRefs`, `shiftIndex`, `shiftSpan`, `shiftPair` and `StructuralEdit`. The
+  `xlsx.formulas.cachedOnly` effect text and `documentation/import-loss.md` changed accordingly.
+- **A range keeps its surviving rows and columns when part of it is deleted (fix, found in the S4b review).** Deleting the first or last row or
+  column of a range, or a column or row that is a boundary of it, made the whole range `#REF!` (`=SUM(A2:A5)` without row 5), although deleting
+  one in the middle shrank it: the engine disagreed with itself and with Excel. A range now keeps the rows and columns of it that survive
+  (`A2:A5` without row 5 or without row 2 is `A2:A4`, `2:4` without row 2 is `2:3`, `B:D` without `B` is `B:C`) and is `#REF!` only when all of
+  them are deleted; a single cell into deleted rows or columns is still `#REF!`. Inserting before the first row shifts a range, after its last
+  row leaves it, inside it extends it. It applies to normal formulas (stable ids: the range boundary moves onto the nearest surviving row or
+  column before the delete; undo restores it) and to the text of cached-only formulas alike. Sheet names in references are case-insensitive
+  (`sheet2!A1` points at `Sheet2` and follows its rename and edits). A workbook saved with such a `#REF!` keeps it; only new deletes change.
 - **Sheets collaboration gate.** Sheets rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-sheets-core`: `getCollabBlockers(workbook)` (empty for now) and
@@ -1011,9 +1029,9 @@ lockstep.
   written back as the calls (`fromFileFormula`, `toFileFormula` and `FUTURE_FUNCTIONS` are new exports of `@b32nio/spindle-io/xlsx`).
   A formula the engine cannot evaluate (a function it lacks, text it cannot parse, a table, defined-name or external reference) is
   never shown as `#NAME?`: the cell keeps the file's formula text and the saved result (`cachedOnly`), shows a small "Saved value" note
-  in the formula bar (the cell keeps its saved value and its original formula text unchanged: the value does not follow the cells it refers to and the
-  references in the text are not adjusted by inserting or deleting rows or columns; Excel recalculates it when the file is reopened,
-  possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so), and is written back unchanged. The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
+  in the formula bar (the cell keeps its saved value and its formula text: the value does not follow the cells it refers to; Excel recalculates it
+  when the file is reopened, possibly to a different result; the note, its tooltip, the loss effect and `documentation/import-loss.md` say so; the
+  references in the text follow inserted and deleted rows and columns since S4b below), and is written back with the saved value and the formula kept (S4 wrote it back unchanged; since S4b the references in its text follow insert and delete). The note's colours are the CSS variables `--spindle-note-fg`, `--spindle-note-bg` and `--spindle-note-border` (defaults: at least 4.5:1 contrast, about 6.4:1 for the text and background pair, and 4.5:1 for the border), so a dark host theme can set its own. Array formulas keep their range: a legacy array formula keeps its extent, a dynamic-array one
   spills, a one-cell one stays an array formula, and export writes `t="array"` with the range and the cell metadata for dynamic arrays.
   A legacy (CSE) array formula whose engine result differs from the results the file saved (a blank source cell reads 0 in the result, as in Excel, so it is the same as a saved 0 and only that; numbers are held to a relative 1e-9) becomes cached-only and keeps the file's values, counted in
   `xlsx.formulas.cachedOnly`; with `recalculateOnLoad` the formulas that read it are recalculated from those values. A dynamic array is not

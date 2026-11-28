@@ -31,10 +31,10 @@ statistical, date/time, information, financial, reference and array categories
 
 - [ ] **Defined names and table references** — `Quarter1` evaluates to `#NAME?` and
       `Sales[Q1]` does not parse (the text of an imported formula is kept; plan S8).
-- [ ] **Shrinking ranges on a corner delete** — deleting the first or last row or
-      column of a range (`A1:A5`, and now `A:C` / `1:3` too) gives `#REF!`; Excel
-      shrinks the range. 3D references are positional and do not follow row or
-      column edits on their sheets.
+- [ ] **3D references and structural edits** — a 3D reference (`Sheet1:Sheet3!A1`) is
+      positional and does not follow row or column edits on its sheets (normal and
+      cached-only formulas alike); sheet names inside it are matched exactly, not
+      case-insensitively (a 3D span and its sheet-delete shrinking).
 
 - [ ] **Hidden rows and nested subtotals in `AGGREGATE` / `SUBTOTAL`** — `AGGREGATE`
       (all 19 functions, both forms) skips errors for options 2, 3, 6 and 7, but
@@ -111,11 +111,14 @@ statistical, date/time, information, financial, reference and array categories
       A legacy (CSE) array formula read from a file already reads 0 (`fitToExtent`). Fix: coerce a null member of a plain range-reference spill to 0 in the
       spill path, without changing `=A1:A3*1`-style results; it is an engine semantics change, so it is not part of the interchange PR.
 
-- [ ] **Textual reference shifting for cached-only formulas** (found in the S4 review; S13 or later). A cached-only formula (one the engine cannot
-      evaluate) keeps no parsed form, so inserting or deleting rows or columns, sorting and moving cells do not adjust the cell references in its text.
-      Repro: open a file with `B1 = _xlfn.LET(_xlpm.x,A1,_xlpm.x*2)` (saved result 4, A1 = 2), insert a row above row 1: the cell is now B2, still
-      reads `A1` (now an empty cell) and is exported that way, so Excel recalculates a different result on reopen. Fix: a tokenizer-level shifter
-      over the formula text (A1, ranges, whole rows and columns, sheet-qualified names) that applies the same edits as the engine's.
+- [x] **Textual reference shifting for cached-only formulas** (found in the S4 review; done in S4b). Inserting or deleting rows or columns now rewrites
+      the references in a cached-only formula's text (`formula-parser/ref-shift.ts`, on the lenient tokenizer), by the same rule as a normal formula.
+      Repro that failed: `B1 = _xlfn.LET(_xlpm.x,A1,_xlpm.x*2)`, insert a row above row 1: B2 now reads `A2`. The review of S4b also fixed the engine's
+      own stable-id path: a range with a deleted boundary was `#REF!` whole (while an interior delete shrank it); both paths now share `shiftSpan`
+      (Excel: the surviving rows/columns stay, `#REF!` only when all of the range is deleted), and sheet names are case-insensitive in references
+      (`sheet2!A1` is `Sheet2`). Open items: the engine has no cell-move operation (copy/fill/paste rebases through the parser and drops the
+      cached-only mark); two collaborators editing the structure at once: structure sync is last writer wins and the text follows the edit that
+      survives; named ranges, conditional formats and data validation hold no sheet references in the engine today, so nothing there follows a delete.
 
 ## Feature parity
 

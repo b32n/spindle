@@ -9,3 +9,4 @@ export * from './stable-ast';
 export * from './functions/catalog';
 export * from './formula-context';
 
+export * from './ref-shift';

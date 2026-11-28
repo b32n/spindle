@@ -1,4 +1,4 @@
-import { tokenize, syntaxError, type Token } from './tokenizer';
+import { tokenize, tokenizeLenient, syntaxError, type Token } from './tokenizer';
 
 /** Tokens without their positions, for compact expectations. */
 function kinds(text: string): Array<Record<string, unknown>> {
@@ -166,5 +166,59 @@ describe('tokenize', () => {
 
   it('builds syntax errors with the #ERROR! prefix', () => {
     expect(syntaxError('x').message).toBe('#ERROR! x');
+  });
+});
+
+describe('tokenizeLenient', () => {
+  /** Kind and source text of each token. */
+  const pieces = (text: string): Array<[string, string]> => {
+    const tokens = tokenizeLenient(text);
+    return tokens.slice(0, -1).map((t, k) => [t.kind, text.slice(t.pos, t.kind === 'raw' ? t.end : tokens[k + 1].pos).trim()]);
+  };
+
+  it('gives the same tokens as tokenize for text the grammar accepts', () => {
+    for (const text of ['A1+B2', 'SUM(Sheet1!A1:B2, "x")', "'My Sheet'!$A:$C", '{1,2;3,4}+1.5e3', 'A5#', '1:3 A:B']) {
+      expect(tokenizeLenient(text)).toEqual(tokenize(text));
+    }
+  });
+
+  it('turns what the grammar rejects into raw tokens and goes on', () => {
+    expect(pieces('A1+@@')).toEqual([['cell', 'A1'], ['op', '+'], ['op', '@'], ['op', '@']]);
+    expect(pieces('A1+€+B2')).toEqual([['cell', 'A1'], ['op', '+'], ['raw', '€'], ['op', '+'], ['cell', 'B2']]);
+    expect(pieces('A1+"open B2')).toEqual([['cell', 'A1'], ['op', '+'], ['raw', '"open B2']]);
+    expect(pieces("A1+'open B2")).toEqual([['cell', 'A1'], ['op', '+'], ['raw', "'open B2"]]);
+    expect(pieces("''!B2")).toEqual([['raw', "''!"], ['cell', 'B2']]);
+    expect(pieces('#BOGUS')).toEqual([['raw', '#'], ['ident', 'BOGUS']]);
+    expect(pieces('1:99999999')).toEqual([['raw', '1:99999999']]);
+    expect(pieces('1e999 .')).toEqual([['raw', '1e999'], ['raw', '.']]);
+    expect(pieces('AAAA:AAAA')).toEqual([['ident', 'AAAA'], ['op', ':'], ['ident', 'AAAA']]);
+    expect(pieces('A:XFE')).toEqual([['raw', 'A:XFE']]);
+    expect(pieces('$')).toEqual([['raw', '$']]);
+  });
+
+  it('keeps a structured reference whole: nested brackets, and a quote escapes the next character', () => {
+    expect(pieces('T[a]+A1')).toEqual([['ident', 'T'], ['raw', '[a]'], ['op', '+'], ['cell', 'A1']]);
+    expect(pieces('T[[#This Row],[B7]]+A1')).toEqual([['ident', 'T'], ['raw', '[[#This Row],[B7]]'], ['op', '+'], ['cell', 'A1']]);
+    expect(pieces("T[a'[b']]+A1")).toEqual([['ident', 'T'], ['raw', "[a'[b']]"], ['op', '+'], ['cell', 'A1']]);
+    expect(pieces('T[a+A1')).toEqual([['ident', 'T'], ['raw', '[a+A1']]);
+    expect(pieces("T[a'")).toEqual([['ident', 'T'], ['raw', "[a'"]]);
+  });
+
+  it('strict mode still throws on all of these', () => {
+    for (const text of ['@@€', '"open', "'open", "''!B2", '#BOGUS', '1:99999999', '1e999', 'A:XFE', '$', 'T[a]']) {
+      expect(() => tokenize(text)).toThrow('#ERROR!');
+    }
+  });
+});
+
+describe('sheet prefix search is bounded', () => {
+  it('does not look for a sheet prefix through a long run of words', () => {
+    const words = 'ab '.repeat(5000);
+    expect(tokenize(`${words}A1`).filter((t) => t.kind === 'ident')).toHaveLength(5000);
+    // a prefix of a name of the longest length the importer keeps is still found
+    const name = 'n'.repeat(255);
+    expect(tokenize(`${name}!A1`)[0]).toMatchObject({ kind: 'sheet', start: name });
+    // a `!` far beyond any name is not a prefix (the name is read as an identifier, and the `!` is rejected)
+    expect(() => tokenize(`${'n'.repeat(600)}!A1`)).toThrow('Unexpected "!"');
   });
 });

@@ -36,6 +36,8 @@ export type Token =
   | (Positioned & { kind: 'rowrange'; r1: number; r2: number; abs1: boolean; abs2: boolean })
   | (Positioned & { kind: 'sheet'; start: string; end?: string })
   | (Positioned & { kind: 'op'; text: string })
+  /** Lenient mode only: a stretch the grammar does not know (a structured reference, an unterminated string, a stray character), kept as written. */
+  | (Positioned & { kind: 'raw'; end: number })
   | (Positioned & { kind: 'eof' });
 
 export function syntaxError(message: string): Error {
@@ -56,7 +58,9 @@ const CELL_ADDRESS = /^[A-Za-z]{1,3}\d+$/;
  * must be quoted. (At the start of an operand `A1 Sheet2!B2` reads as the sheet "A1 Sheet2".)
  */
 function sheetPrefixAt(rest: string, prev: Token | undefined): RegExpExecArray | null {
-  const m = SHEET_PREFIX.exec(rest);
+  // No name is longer than MAX_PREFIX_CHARS, so a longer run of name characters is no prefix: bounding the match keeps a
+  // formula of many short words (`a a a a ...`) from rescanning the whole run at every word.
+  const m = SHEET_PREFIX.exec(rest.length > MAX_PREFIX_CHARS ? rest.slice(0, MAX_PREFIX_CHARS) : rest);
   if (!m) return null;
   const names = m[2] === undefined ? [m[1]] : [m[1], m[2]];
   // A name of several words can only start where an operand starts: after `Sheet1!A1 ` the words are the
@@ -67,6 +71,8 @@ function sheetPrefixAt(rest: string, prev: Token | undefined): RegExpExecArray |
   if (m[2] !== undefined && names.some((n) => CELL_ADDRESS.test(n) || n.includes(' '))) return null;
   return m;
 }
+/** Two names of 255 characters (the longest the importer keeps) joined by `:`, and the `!`. */
+const MAX_PREFIX_CHARS = 2 * 255 + 2;
 const COL_RANGE = /^(\$?)([A-Za-z]{1,3}):(\$?)([A-Za-z]{1,3})(?![\w.(])/;
 const ROW_RANGE = /^(\$?)(\d+):(\$?)(\d+)(?![\w.])/;
 const NUMBER = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/;
@@ -99,9 +105,46 @@ function cellFromMatch(m: RegExpExecArray, pos: number, space: boolean): CellTok
   return { kind: 'cell', pos, space, row, col, rowAbs: m[3] === '$', colAbs: m[1] === '$' };
 }
 
+/** The end of the structured reference (`Table1[[#This Row],[Col]]`) whose `[` is at `start`: brackets nest and `'` escapes the next character. */
+function bracketEnd(text: string, start: number): number {
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === "'") i++;
+    else if (ch === '[') depth++;
+    else if (ch === ']' && --depth === 0) return i + 1;
+  }
+  return text.length;
+}
+
+/** Tokens of a formula (without its `=`); throws a syntax error on anything the grammar does not know. */
 export function tokenize(text: string): Token[] {
+  return scan(text, false);
+}
+
+/**
+ * Like `tokenize`, but never throws: what the grammar does not know becomes a `raw` token (a structured reference up to its closing
+ * bracket, an unterminated string or quote up to the end, anything else one character) and the scan goes on. For code that rewrites
+ * the references of a formula the engine cannot parse and leaves the rest as it is.
+ */
+export function tokenizeLenient(text: string): Token[] {
+  return scan(text, true);
+}
+
+function scan(text: string, lenient: boolean): Token[] {
   const tokens: Token[] = [];
   let i = 0;
+  let bang = -2; // the next `!` at or after `i` (-1 when there is none): a sheet prefix needs one, so most words skip the prefix match
+  const prefixPossible = (): boolean => {
+    if (bang !== -1 && bang < i) bang = text.indexOf('!', i);
+    return bang !== -1 && bang - i < MAX_PREFIX_CHARS;
+  };
+  // A stretch the grammar rejects: an error, or in lenient mode a raw token over it. Returns where the scan goes on.
+  const bad = (message: string, pos: number, space: boolean, to: number): number => {
+    if (!lenient) throw syntaxError(message);
+    tokens.push({ kind: 'raw', end: to, pos, space });
+    return to;
+  };
   while (i < text.length) {
     const start = i;
     while (i < text.length && /\s/.test(text[i])) i++;
@@ -114,7 +157,10 @@ export function tokenize(text: string): Token[] {
 
     if (ch === '"') {
       const s = scanQuoted(text, i, '"');
-      if (!s) throw syntaxError(`Unterminated string starting at position ${pos}`);
+      if (!s) {
+        i = bad(`Unterminated string starting at position ${pos}`, pos, space, text.length);
+        continue;
+      }
       tokens.push({ kind: 'str', value: s.value, pos, space });
       i = s.end;
       continue;
@@ -122,12 +168,18 @@ export function tokenize(text: string): Token[] {
 
     if (ch === "'") {
       const s = scanQuoted(text, i, "'");
-      if (!s) throw syntaxError(`Unterminated quote starting at position ${pos}`);
+      if (!s) {
+        i = bad(`Unterminated quote starting at position ${pos}`, pos, space, text.length);
+        continue;
+      }
       if (text[s.end] === '!') {
         // 'Sheet 1'!  or  'Sheet 1:Sheet 3'!  (a colon is illegal in a sheet name, so it spans sheets)
         const colon = s.value.indexOf(':');
         const [first, last] = colon < 0 ? [s.value] : [s.value.slice(0, colon), s.value.slice(colon + 1)];
-        if (first === '' || last === '') throw syntaxError(`Empty sheet name at position ${pos}`);
+        if (first === '' || last === '') {
+          i = bad(`Empty sheet name at position ${pos}`, pos, space, s.end + 1);
+          continue;
+        }
         tokens.push({ kind: 'sheet', start: first, end: last, pos, space });
         i = s.end + 1;
       } else {
@@ -145,7 +197,10 @@ export function tokenize(text: string): Token[] {
         continue;
       }
       const m = ERROR_LITERAL.exec(rest);
-      if (!m) throw syntaxError(`Unknown error literal at position ${pos}`);
+      if (!m) {
+        i = bad(`Unknown error literal at position ${pos}`, pos, space, i + 1);
+        continue;
+      }
       tokens.push({ kind: 'err', value: m[0].toUpperCase(), pos, space });
       i += m[0].length;
       continue;
@@ -156,7 +211,8 @@ export function tokenize(text: string): Token[] {
       if (rr) {
         const [r1, r2] = [parseInt(rr[2], 10) - 1, parseInt(rr[4], 10) - 1];
         if (r1 < 0 || r2 < 0 || r1 >= MAX_SHEET_ROWS || r2 >= MAX_SHEET_ROWS) {
-          throw syntaxError(`Row out of range at position ${pos}`);
+          i = bad(`Row out of range at position ${pos}`, pos, space, i + rr[0].length);
+          continue;
         }
         tokens.push({ kind: 'rowrange', r1, r2, abs1: rr[1] === '$', abs2: rr[3] === '$', pos, space });
         i += rr[0].length;
@@ -165,23 +221,29 @@ export function tokenize(text: string): Token[] {
     }
 
     if (/[\d.]/.test(ch)) {
-      const sheet = sheetPrefixAt(rest, prev); // a sheet named with digits: 2024!A1
+      const sheet = prefixPossible() ? sheetPrefixAt(rest, prev) : null; // a sheet named with digits: 2024!A1
       if (sheet) {
         tokens.push({ kind: 'sheet', start: sheet[1], end: sheet[2], pos, space });
         i += sheet[0].length;
         continue;
       }
       const m = NUMBER.exec(rest);
-      if (!m) throw syntaxError(`Unexpected "${ch}" at position ${pos}`);
+      if (!m) {
+        i = bad(`Unexpected "${ch}" at position ${pos}`, pos, space, i + 1);
+        continue;
+      }
       const value = Number(m[0]);
-      if (!Number.isFinite(value)) throw syntaxError(`Number out of range at position ${pos}`);
+      if (!Number.isFinite(value)) {
+        i = bad(`Number out of range at position ${pos}`, pos, space, i + m[0].length);
+        continue;
+      }
       tokens.push({ kind: 'num', value, pos, space });
       i += m[0].length;
       continue;
     }
 
     if (ch === '$' || /[\p{L}_\\]/u.test(ch)) {
-      const sp = sheetPrefixAt(rest, prev);
+      const sp = prefixPossible() ? sheetPrefixAt(rest, prev) : null;
       if (sp) {
         tokens.push({ kind: 'sheet', start: sp[1], end: sp[2], pos, space });
         i += sp[0].length;
@@ -190,7 +252,10 @@ export function tokenize(text: string): Token[] {
       const cr = COL_RANGE.exec(rest);
       if (cr) {
         const [c1, c2] = [columnLabelToIndex(cr[2]), columnLabelToIndex(cr[4])];
-        if (c1 >= MAX_SHEET_COLS || c2 >= MAX_SHEET_COLS) throw syntaxError(`Column out of range at position ${pos}`);
+        if (c1 >= MAX_SHEET_COLS || c2 >= MAX_SHEET_COLS) {
+          i = bad(`Column out of range at position ${pos}`, pos, space, i + cr[0].length);
+          continue;
+        }
         tokens.push({ kind: 'colrange', c1, c2, abs1: cr[1] === '$', abs2: cr[3] === '$', pos, space });
         i += cr[0].length;
         continue;
@@ -203,7 +268,10 @@ export function tokenize(text: string): Token[] {
         continue;
       }
       const id = IDENT.exec(rest);
-      if (!id) throw syntaxError(`Unexpected "${ch}" at position ${pos}`);
+      if (!id) {
+        i = bad(`Unexpected "${ch}" at position ${pos}`, pos, space, i + 1);
+        continue;
+      }
       tokens.push({ kind: 'ident', text: id[0], pos, space });
       i += id[0].length;
       continue;
@@ -220,7 +288,7 @@ export function tokenize(text: string): Token[] {
       i++;
       continue;
     }
-    throw syntaxError(`Unexpected "${ch}" at position ${pos}`);
+    i = bad(`Unexpected "${ch}" at position ${pos}`, pos, space, ch === '[' ? bracketEnd(text, i) : i + 1);
   }
   tokens.push({ kind: 'eof', pos: text.length, space: false });
   return tokens;
