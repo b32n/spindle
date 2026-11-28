@@ -235,9 +235,18 @@ target cell that already holds content yields `#SPILL!`.
 **Legacy formulas and `@`.** A formula an .xlsx file saved without the array or dynamic-array mark is a legacy one: where it uses a range of several
 cells as an operand of its own operators (`=A1:A3*2`, `=-A1:A3`, `=A1:A3&"x"`), Excel takes the one cell of the range in the formula's row (a column
 range) or column (a row range), and `#VALUE!` when the formula is outside the range. The import does the same by writing the `@` Excel 365 shows
-(`=@A1:A3*2`, saved back as `_xlfn.SINGLE(A1:A3)*2`). Only operands outside every call and group are changed: what a function does with a range argument depends on the
-function (`SUM(A1:A3*2)` in a legacy formula is also intersected in Excel; here it still sums the array), so those formulas are the known difference. A formula typed in
-the editor, and an array formula, still spill.
+(`=@A1:A3*2`; in a shared formula each cell gets its own range, `G3` reading `A2:A4` shows `=@A2:A4`). The export takes that `@` out again: a formula written without
+`t="array"` and `cm` has the bare range in the file (`A1:A3*2`), because Excel applies the same intersection to it, in Excel 2016, 365 and LibreOffice, and the old
+`_xlfn.SINGLE(A1:A3)` would show `#NAME?` in Excel 2016. The same holds for a formula typed in the editor as `=@A1:A3*2`. An `@` before anything else keeps `_xlfn.SINGLE(...)`
+(`@INDEX(...)`, `@A1#`, a name or a table reference, an `@` inside a call or a group, and any `@` in a formula that is written as a dynamic array, where a bare range would spill).
+Structural edits shift the references inside `@A1:A3*2` like any other (the `@` stays).
+
+Only operands outside every call and group are intersected on import. What a function does with a range argument depends on the function (`SUM(A1:A3*2)` in a
+legacy formula is also intersected in Excel; here it still sums the array), and the engine has no table of which parameters of its functions are scalar, so
+**these are known differences, where the engine can return a wrong value** (not only a missing intersection): `SUM(A1:A3*2)` sums the array (Excel: the cell's double, `#VALUE!` outside the range's rows),
+`LEN(A1:A3)` is 5 (Excel: the length of the cell in the row, `#VALUE!` outside), `IF(A1:A3>1,1,0)` is 1 (Excel: the cell's result, `#VALUE!` outside), `ABS(A1:A3)` is `#VALUE!` inside the range's rows (Excel: the cell's absolute value).
+Named ranges and structured (table) references are not intersected either. A formula typed in the editor, and an array formula, still spill. The cases are pinned as known
+divergences in `xlsx-implicit-intersection.test.ts` and listed in `documentation/sheets/TODO.md`.
 
 An array formula read from an .xlsx file carries `arraySpan` (`{ rows, cols, spill? }`): a legacy (CSE) array formula keeps that
 extent (its result is cut to it or padded with `#N/A`), a dynamic one (`spill: true`) spills freely and keeps `arraySpan` at the extent

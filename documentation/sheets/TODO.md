@@ -111,6 +111,15 @@ statistical, date/time, information, financial, reference and array categories
       A legacy (CSE) array formula read from a file already reads 0 (`fitToExtent`). Fix: coerce a null member of a plain range-reference spill to 0 in the
       spill path, without changing `=A1:A3*1`-style results; it is an engine semantics change, so it is not part of the interchange PR.
 
+- [ ] **Implicit intersection of ranges inside calls in legacy formulas** (found in the SA-gap review; S5 or S11). A formula saved without the array mark gets Excel's
+      intersection only for range operands outside every call and group (`=A1:A3*2`, shown `=@A1:A3*2`). Excel also intersects a range passed to a scalar parameter or used
+      in the arithmetic of a call's argument; the engine has no table of which parameters are scalar (the function catalog has names only), so it can return a wrong value.
+      Repros (data A1:A3 = 1, 2, 3; the formula is in a file without `cm` and `t="array"`): `F5 = LEN(A1:A3)` gives 5 (Excel `#VALUE!`; in F2 Excel 1),
+      `F5 = IF(A1:A3>1,1,0)` gives 1 (Excel `#VALUE!`; F1 gives 0), `F2 = SUM(A1:A3*2)` gives 12 (Excel 4), `F2 = ABS(A1:A3)` gives `#VALUE!` (Excel 2). Fix: a
+      scalar/array flag per parameter in the catalog, checked against Excel's documentation, then `@` before range operands in scalar slots on import (nested
+      comparison and arithmetic included) and on export the same bare-range rule only at the top level. The repros are `known divergence` tests in
+      `xlsx-implicit-intersection.test.ts`. Named ranges and structured references are not intersected either.
+
 - [x] **Textual reference shifting for cached-only formulas** (found in the S4 review; done in S4b). Inserting or deleting rows or columns now rewrites
       the references in a cached-only formula's text (`formula-parser/ref-shift.ts`, on the lenient tokenizer), by the same rule as a normal formula.
       Repro that failed: `B1 = _xlfn.LET(_xlpm.x,A1,_xlpm.x*2)`, insert a row above row 1: B2 now reads `A2`. The review of S4b also fixed the engine's

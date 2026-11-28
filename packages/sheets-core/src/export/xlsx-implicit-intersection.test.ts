@@ -103,6 +103,27 @@ describe('a legacy formula over a multi-cell range is intersected with its own r
     expect(await valueAt(at, f)).toEqual(expected);
   });
 
+  // KNOWN DIVERGENCE (documentation/sheets/TODO.md, S5/S11): in a legacy formula Excel also intersects a range given to a scalar parameter
+  // or used inside the arithmetic of a call's argument; the engine has no table of which parameters are scalar, so it leaves the calls alone
+  // and returns a value where Excel gives the intersected cell or #VALUE!. The Excel column is from Excel's documented behaviour (and
+  // a LibreOffice recalculation of the same formulas agrees with every row of the Excel column); these cases pin what the engine does today, so a fix shows up as a failing test to update.
+  const divergent: Array<[string, string, unknown, unknown]> = [
+    // at, formula, Excel, engine today
+    ['F5', 'LEN(A1:A3)', '#VALUE!', 5],
+    ['F5', 'IF(A1:A3>1,1,0)', '#VALUE!', 1],
+    ['F2', 'LEN(A1:A3)', 1, 5],
+    ['F2', 'IF(A1:A3>1,1,0)', 1, 1],
+    ['F3', 'IF(A1:A3>1,1,0)', 1, 1],
+    ['F1', 'IF(A1:A3>1,1,0)', 0, 1],
+    ['F2', 'SUM(A1:A3*2)', 4, 12],
+    ['F9', 'SUM(A1:A3*2)', '#VALUE!', 12],
+    ['F2', 'ABS(A1:A3)', 2, '#VALUE!'], // the engine does not intersect a range for a scalar math parameter either: an error where Excel has the cell
+    ['F5', 'ABS(A1:A3)', '#VALUE!', '#VALUE!'],
+  ];
+  it.each(divergent)('known divergence: %s =%s is %p in Excel, the engine gives %p', async (at, f, _excel, engine) => {
+    expect(await valueAt(at, f)).toEqual(engine);
+  });
+
   it('shows the `@` in the formula bar and writes the bare range back, as the file had it', async () => {
     const wb = new WorkbookImpl('wb', 'WB');
     await importFromXlsx(await xlsxWith(rows('F5', 'A1:A3*2')), wb);

@@ -495,7 +495,7 @@ lockstep.
 - **The nine remaining values-golden mismatches are gone (SA-gap).** (1) A circular reference met while a workbook is calculated on load (`recalculateOnLoad`, the
   values harness) is settled like one met by a full recalculation: the cells on the cycle take the circular value, 0 by default, instead of `#VALUE!`.
   (2) A formula an .xlsx file saved without the array mark is intersected, as Excel does, where it uses a multi-cell range as an operand of its own operators
-  (`=A1:A3*2` in row 152 is `#VALUE!`, in row 2 it is `A2*2`); it is shown with the `@` Excel 365 shows and saved back as `_xlfn.SINGLE(...)`. (3) The
+  (`=A1:A3*2` in row 152 is `#VALUE!`, in row 2 it is `A2*2`); it is shown with the `@` Excel 365 shows and saved back as the bare range the file had (`A1:A3*2`, not `_xlfn.SINGLE(A1:A3)*2`, which Excel 2016 reads as `#NAME?`); an `@` before a call, a name or a spill reference, and in a dynamic array, still writes `_xlfn.SINGLE`. A range inside a call's arguments is still not intersected (`LEN(A1:A3)`, `IF(A1:A3>1,...)`, `SUM(A1:A3*2)` can return a value where Excel gives `#VALUE!`; documented and pinned as known divergences). A formula whose result is an error now keeps its reference text in step with row and column insert and delete (it stayed stale, and was exported so). (3) The
   `formulas-core` and `xlsxwriter-rich` fixtures were wrong, not the engine: the dynamic-array probes sat one under the other, so every spill was blocked
   by the next probe (Excel recalculating the file gives `#SPILL!` too), and a SORT spill carried xlsxwriter's placeholder 0. The generators now give each spill room,
   its true range and its results. Values golden: 195 of 204 matched before, 204 of 204 now (cached-only 21, unchanged).

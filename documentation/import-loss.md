@@ -112,6 +112,18 @@ a file of 1.7 KB with `ref="A1:J400000"` (4 million cells) now imports in 0.2 s 
 cells (`A1:J100000`) imports in 1.1 s and exports in 8.9 s (a 2 MB file); a 2,000,000 cell range a host lets through takes 2.4 s to import and 7.7 s to
 export (written as 1,000,000 cells, 2 GB heap). Before the limit, `A1:J400000` took 5 s and 955 MB to import and 44 s and 3 GB to export.
 
+**Legacy formulas and `@`.** A formula saved without the array or dynamic-array mark is a legacy one: where it uses a range of several cells as an operand of its
+own operators (`A1:A3*2`, `-A1:A3`, `A1:A3&"x"`, `Sheet2!A:A*2`, in a shared formula too) Excel intersects the range with the formula's row or column (`#VALUE!` outside it). The import
+shows and evaluates that with the `@` Excel 365 shows (`=@A1:A3*2`) and the export writes it back **as the file had it, the bare range** (`A1:A3*2`, never
+`_xlfn.SINGLE(A1:A3)*2`, which Excel 2016 and earlier read as `#NAME?`): in a formula without the array mark Excel applies the same intersection to a bare range operand, so the file means
+the same in Excel 2016, 365 and LibreOffice and a plain open and save does not change the text. The rule is an `@` directly before a multi-cell range operand outside every call and group,
+in a formula that is written without `t="array"` and `cm`. Every other `@` keeps `_xlfn.SINGLE(...)` (before a call, a name, a spill reference or inside a call, where a bare range would not mean the same, and in
+a dynamic-array formula, where a bare range would spill); a formula typed in the editor with `@A1:A3` is written bare in the same way. One difference from the source text: a file that already
+had `_xlfn.SINGLE(A1:A3)` over a range operand in a formula without the array mark (written by Excel 365 for a typed `@`) is written back as the bare range, which means the same. **Known divergence** (sheets TODO): the engine does not
+intersect a range inside a call's arguments, so in a legacy formula `SUM(A1:A3*2)` sums the array (Excel intersects the range and gives the cell's double or `#VALUE!`), `LEN(A1:A3)` gives 5 and
+`IF(A1:A3>1,1,0)` gives 1 where Excel gives `#VALUE!` outside the range's rows (the cell's result inside them), and `ABS(A1:A3)` is `#VALUE!` where Excel gives the intersected cell's absolute value inside the range's rows. The saved
+results are kept unless the workbook is recalculated on load. A name or a structured reference is not intersected either.
+
 A formula whose genuine text result equals an error literal (`="#N/A"`) is written as an error value (`t="e"`): the model keeps a result as a
 value and cannot tell the text `#N/A` from the error, so the two are the same on export.
 
