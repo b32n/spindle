@@ -1,8 +1,10 @@
 import JSZip from 'jszip';
 import { relsPart } from '../common/ooxml-package';
 import { baseName } from './parts';
-import type { PptxElement, PptxGroup, PptxLayout, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
+import type { PptxLayout, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
 import { BLANK_LAYOUT, layoutXml, MASTER_ID, masterXml } from './writer-layouts';
+import { LOSSY, PartRels, type LossyKey, type WriteContext } from './writer-context';
+import { allocateElementIds, fillXml, shapesXml } from './writer-shapes';
 import { themeXml } from './writer-theme';
 import { attrs, emu, esc, NS_CT, NS_P, NS_PKG_REL, relsXml, ROOT_NS, TREE_HEADER, XML_DECLARATION, type RelEntry } from './writer-xml';
 
@@ -11,9 +13,10 @@ import { attrs, emu, esc, NS_CT, NS_P, NS_PKG_REL, relsXml, ROOT_NS, TREE_HEADER
 // the theme, one master with the deck's layouts, one part per slide and `docProps`. Parts are written in one fixed order with a
 // fixed zip timestamp, so the same deck gives the same bytes.
 //
-// K12a writes the package, theme, master and layouts, and the slides as empty shells that keep their name, layout, visibility
-// and id. Slide content arrives with K12b (text and shapes) and K13 (pictures, tables, groups, connectors, notes, comments)
-// and K14 (opaque parts); until then `exportPptx` says in `warnings` what it left out, so nothing is dropped silently.
+// K12a wrote the package, theme, master and layouts; K12b adds the slides' text boxes and shapes (text, fills, outlines, hyperlinks),
+// slide backgrounds and the layouts' static shapes. Pictures, tables, groups, connectors, notes and comments arrive with K13 and
+// opaque parts, transitions and timing with K14; until then `exportPptx` says in `warnings` what it left out, so nothing is
+// dropped silently.
 
 const CT_ROOT = 'application/vnd.openxmlformats-officedocument.presentationml';
 const TYPE = {
@@ -100,13 +103,6 @@ function allocateLayoutParts(layouts: PptxLayout[]): string[] {
   });
 }
 
-function walkElements(list: PptxElement[] | undefined, visit: (e: PptxElement) => void): void {
-  for (const e of list ?? []) {
-    visit(e);
-    if (e.kind === 'group') walkElements((e as PptxGroup).children, visit);
-  }
-}
-
 const plural = (n: number, one: string, many = `${one}s`): string => `${n} ${n === 1 ? one : many}`;
 
 /** What this writer does not export yet, one sentence per kind, so the report never says "clean" about a deck it emptied. */
@@ -116,23 +112,20 @@ function notExported(p: PresentationImportResult): string[] {
     counts[k] = (counts[k] ?? 0) + n;
   };
   for (const s of p.slides) {
-    walkElements(s.elements, (e) => bump(e.kind));
-    if (s.background) bump('background');
+    // a group's children are lost with the group (counted in its line)
+    for (const e of s.elements ?? []) if (e.kind !== 'shape') bump(e.kind);
     if (s.notes) bump('notes');
     if (s.threads?.length) bump('threads', s.threads.length);
     if (s.opaque?.transition) bump('transition');
     if (s.opaque?.timing) bump('timing');
   }
   const failed = p.slides.filter((s) => s.error !== undefined).length;
-  const layoutShapes = p.layouts.reduce((n, l) => n + l.elements.length, 0);
   const lines: [string, string][] = [
-    ['shape', 'shapes and text boxes (K12b)'],
     ['picture', 'pictures (K13)'],
     ['table', 'tables (K13)'],
     ['connector', 'connectors (K13)'],
     ['group', 'groups (K13)'],
     ['opaque', 'charts, diagrams, objects, media and ink (K14)'],
-    ['background', 'slide backgrounds (K12b)'],
     ['notes', 'speaker notes (K13)'],
     ['threads', 'comment threads (K13)'],
     ['transition', 'transitions (K14)'],
@@ -142,7 +135,6 @@ function notExported(p: PresentationImportResult): string[] {
   if (failed > 0) out.unshift(`${plural(failed, 'slide')} could not be read at import and ${failed === 1 ? 'is' : 'are'} written empty.`);
   const masters = new Set(p.layouts.map((l) => l.masterPart)).size;
   if (masters > 1) out.unshift(`${masters} slide masters were merged into one (their layouts keep their placeholders).`);
-  if (layoutShapes > 0) out.push(`Not exported yet: ${plural(layoutShapes, 'static layout shape')} (K12b).`);
   return out;
 }
 
@@ -162,9 +154,12 @@ function presentationXml(p: PresentationImportResult, slideIds: string[], slideR
   );
 }
 
-function slideXml(slide: PptxSlide): string {
+function slideXml(slide: PptxSlide, ctx: WriteContext): string {
+  const ids = allocateElementIds(slide.elements ?? []);
+  const bg = slide.background ? fillXml(slide.background, ctx) : '';
+  const background = bg === '' ? '' : `<p:bg><p:bgPr>${bg}<a:effectLst/></p:bgPr></p:bg>`;
   return (
-    `${XML_DECLARATION}<p:sld ${ROOT_NS}${attrs({ show: slide.hidden ? 0 : undefined })}><p:cSld${attrs({ name: slide.name })}><p:spTree>${TREE_HEADER}</p:spTree></p:cSld>` +
+    `${XML_DECLARATION}<p:sld ${ROOT_NS}${attrs({ show: slide.hidden ? 0 : undefined })}><p:cSld${attrs({ name: slide.name })}>${background}<p:spTree>${TREE_HEADER}${shapesXml(slide.elements ?? [], ids, ctx)}</p:spTree></p:cSld>` +
     '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>'
   );
 }
@@ -189,6 +184,19 @@ export async function exportPptx(presentation: PresentationImportResult, options
   const layoutParts = allocateLayoutParts(layouts);
   const slideIds = allocateSlideIds(presentation.slides);
   const entries: Entry[] = [];
+  const lossy = new Map<LossyKey, number>();
+  const context = (rels: PartRels, slideTarget: (part: string) => string | undefined): WriteContext => {
+    let field = 0;
+    return {
+      rels,
+      slideTarget,
+      lossy: (key) => lossy.set(key, (lossy.get(key) ?? 0) + 1),
+      nextFieldId: () => `{F1E1D000-0000-4000-8000-${String(++field).padStart(12, '0')}}`,
+    };
+  };
+  const slideParts = new Map<string, number>();
+  presentation.slides.forEach((slide, i) => slideParts.has(slide.partName) || slideParts.set(slide.partName, i + 1));
+  const slideTarget = (prefix: string) => (part: string): string | undefined => (slideParts.has(part) ? `${prefix}slide${slideParts.get(part)}.xml` : undefined);
   const add = (name: string, data: string, type?: string) => entries.push({ name, data, type });
 
   const presentationRels: RelEntry[] = [{ id: 'rId1', type: 'slideMaster', target: 'slideMasters/slideMaster1.xml' }];
@@ -217,8 +225,9 @@ export async function exportPptx(presentation: PresentationImportResult, options
     { id: `rId${layouts.length + 1}`, type: 'theme', target: '../theme/theme1.xml' },
   ]));
   layouts.forEach((layout, i) => {
-    add(layoutParts[i], layoutXml(layout), TYPE.layout);
-    add(relsPart(layoutParts[i]), relsXml([{ id: 'rId1', type: 'slideMaster', target: '../slideMasters/slideMaster1.xml' }]));
+    const rels = new PartRels({ id: 'rId1', type: 'slideMaster', target: '../slideMasters/slideMaster1.xml' });
+    add(layoutParts[i], layoutXml(layout, context(rels, slideTarget('../slides/'))), TYPE.layout);
+    add(relsPart(layoutParts[i]), relsXml(rels.entries));
   });
 
   // a repeated layout part name (malformed deck) keeps its first layout
@@ -226,8 +235,9 @@ export async function exportPptx(presentation: PresentationImportResult, options
   presentation.layouts.forEach((l, i) => byPart.has(l.partName) || byPart.set(l.partName, layoutParts[i]));
   presentation.slides.forEach((slide, i) => {
     const layout = (slide.layoutPart !== undefined ? byPart.get(slide.layoutPart) : undefined) ?? layoutParts[0];
-    add(`ppt/slides/slide${i + 1}.xml`, slideXml(slide), TYPE.slide);
-    add(`ppt/slides/_rels/slide${i + 1}.xml.rels`, relsXml([{ id: 'rId1', type: 'slideLayout', target: `../slideLayouts/${baseName(layout)}` }]));
+    const rels = new PartRels({ id: 'rId1', type: 'slideLayout', target: `../slideLayouts/${baseName(layout)}` });
+    add(`ppt/slides/slide${i + 1}.xml`, slideXml(slide, context(rels, slideTarget(''))), TYPE.slide);
+    add(`ppt/slides/_rels/slide${i + 1}.xml.rels`, relsXml(rels.entries));
   });
 
   add('docProps/core.xml', corePropertiesXml(options.metadata), TYPE.core);
@@ -242,5 +252,6 @@ export async function exportPptx(presentation: PresentationImportResult, options
   zip.file('[Content_Types].xml', contentTypes, { date: ZIP_DATE });
   for (const e of entries) zip.file(e.name, e.data, { date: ZIP_DATE });
   const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+  for (const [key, n] of [...lossy].sort(([a], [b]) => a.localeCompare(b))) warnings.push(`Changed on export: ${LOSSY[key]} (${n}).`);
   return { bytes, warnings };
 }

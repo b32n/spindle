@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 11,
       "slides": 4
     },
     "before": {
@@ -10,24 +10,14 @@
       "slides": 4
     },
     "byField": {
-      "removed slides[].elements[]": 28
+      "removed slides[].elements[]": 17
     },
     "changed": 0,
     "entries": [
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"PNG picture\",\"altText\":\"A small PNG pi...",
         "kind": "removed",
         "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Label 10\",\"textBox\":true,\"frame\":{\"x\":7...",
-        "kind": "removed",
-        "path": "slides[0].elements[2]"
       },
       {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"JPEG picture\",\"altText\":\"A small JPEG ...",
@@ -35,24 +25,9 @@
         "path": "slides[0].elements[3]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"Label 11\",\"textBox\":true,\"frame\":{\"x\":4...",
-        "kind": "removed",
-        "path": "slides[0].elements[4]"
-      },
-      {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"5\",\"name\":\"GIF picture\",\"altText\":\"A small GIF pi...",
         "kind": "removed",
         "path": "slides[0].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"Label 12\",\"textBox\":true,\"frame\":{\"x\":8...",
-        "kind": "removed",
-        "path": "slides[0].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
       },
       {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"SVG with PNG fallback\",\"altText\":\"Vect...",
@@ -68,26 +43,6 @@
         "before": "{\"kind\":\"picture\",\"pptxId\":\"5\",\"name\":\"WMF picture\",\"altText\":\"An empty Windo...",
         "kind": "removed",
         "path": "slides[1].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Label 10\",\"textBox\":true,\"frame\":{\"x\":7...",
-        "kind": "removed",
-        "path": "slides[1].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"Label 11\",\"textBox\":true,\"frame\":{\"x\":4...",
-        "kind": "removed",
-        "path": "slides[1].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"Label 12\",\"textBox\":true,\"frame\":{\"x\":8...",
-        "kind": "removed",
-        "path": "slides[1].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[2].elements[0]"
       },
       {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"Cropped\",\"frame\":{\"x\":52.4934383202099...",
@@ -140,27 +95,16 @@
         "path": "slides[2].elements[10]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[3].elements[0]"
-      },
-      {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"Linked picture\",\"altText\":\"A picture t...",
         "kind": "removed",
         "path": "slides[3].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Note\",\"textBox\":true,\"frame\":{\"x\":356.95...",
-        "kind": "removed",
-        "path": "slides[3].elements[2]"
       }
     ],
-    "removed": 28,
-    "total": 28,
+    "removed": 17,
+    "total": 17,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 11 shapes and text boxes (K12b).",
     "Not exported yet: 17 pictures (K13)."
   ],
   "reimportWarnings": [],

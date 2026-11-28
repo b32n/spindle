@@ -1,7 +1,10 @@
+import { diffValues } from '../../../../scripts/fidelity-core/diff';
 import {
   countPresentation,
   diffField,
+  elementSignatures,
   normalizePresentation,
+  positionTolerance,
   scrubMessage,
 } from '../../../../scripts/pptx-fidelity/normalize';
 
@@ -70,5 +73,35 @@ describe('diffField and scrubMessage', () => {
 
   it('replaces the longest root first and ignores empty roots', () => {
     expect(scrubMessage('at /a/b/c and /a/x', ['/a', '/a/b', ''])).toBe('at <repo>/c and <repo>/x');
+  });
+});
+
+describe('round-trip comparison', () => {
+  const frame = (x: number) => ({ frame: { x, y: 0, w: 10, h: 10 }, rot: 90 });
+  const model = (...elements: object[]) => normalizePresentation({ slides: [{ elements }] });
+  const diff = (a: ReturnType<typeof model>, b: ReturnType<typeof model>) =>
+    diffValues(a, b, { counts: countPresentation, field: diffField, signatures: elementSignatures, tolerance: positionTolerance });
+
+  it('allows half a pixel on a frame position or size and nothing elsewhere', () => {
+    expect(positionTolerance('slides[0].elements[1].frame.w')).toBe(0.5);
+    expect(positionTolerance('slides[0].elements[1].frame.rot')).toBe(0);
+    expect(positionTolerance('slides[0].elements[1].name')).toBe(0);
+    const base = { kind: 'shape', name: 'a', ...frame(100) };
+    expect(diff(model(base), model({ ...base, frame: { x: 100.5, y: 0, w: 10, h: 10 } })).total).toBe(0);
+    expect(diff(model(base), model({ ...base, frame: { x: 100.6, y: 0, w: 10, h: 10 } })).total).toBe(1);
+    expect(diff(model(base), model({ ...base, rot: 91 })).total).toBe(1);
+    expect(diff(model(base), model({ ...base, name: 'b' })).total).toBe(2);
+  });
+
+  it('aligns the elements of slides, layouts and groups by kind and name, so a missing element is one difference', () => {
+    const a = { kind: 'shape', name: 'a' };
+    const p = { kind: 'picture', name: 'p' };
+    const b = { kind: 'shape', name: 'b', text: 'x' };
+    const d = diff(model(a, p, b), model(a, b));
+    expect([d.total, d.removed]).toEqual([1, 1]);
+    expect(elementSignatures('slides[0].elements', [], [])).toEqual({ before: [], after: [] });
+    expect(elementSignatures('layouts[2].elements', [{ kind: 'shape', name: 'n' }, 5], [])).toEqual({ before: ['shape:n', ''], after: [] });
+    expect(elementSignatures('slides[0].elements[1].children', [], [])).not.toBeNull();
+    expect(elementSignatures('slides[0].notes.paragraphs', [], [])).toBeNull();
   });
 });

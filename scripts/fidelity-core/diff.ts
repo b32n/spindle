@@ -49,6 +49,8 @@ export interface DiffOptions {
   ) => { before: string[]; after: string[] } | null;
   /** Folds a path into the key used for `byField` (default: array indexes stripped). */
   field?: (path: string) => string;
+  /** Absolute tolerance for two numbers at `path` (e.g. positions within half a pixel): numbers that differ by no more are equal. Default: exact. */
+  tolerance?: (path: string) => number;
   /** Entries kept in the report (default 40); totals always count everything. */
   cap?: number;
 }
@@ -125,6 +127,7 @@ export function diffValues(before: Json, after: Json, options: DiffOptions): Dif
       for (const key of keys) walk(b[key], a[key], path ? `${path}.${key}` : key);
       return;
     }
+    if (typeof b === 'number' && typeof a === 'number' && Math.abs(b - a) <= (options.tolerance?.(path) ?? 0)) return;
     if (JSON.stringify(b) !== JSON.stringify(a)) record(path, 'changed', b, a);
   };
 

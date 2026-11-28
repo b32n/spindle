@@ -2,96 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 14,
       "slides": 2
     },
     "before": {
       "elements": 14,
       "slides": 2
     },
-    "byField": {
-      "removed slides[].elements[]": 14
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Outer shadow\",\"frame\":{\"x\":62.9921259842...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Inner shadow\",\"frame\":{\"x\":356.955380577...",
-        "kind": "removed",
-        "path": "slides[0].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Preset shadow\",\"frame\":{\"x\":650.91863517...",
-        "kind": "removed",
-        "path": "slides[0].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Glow\",\"frame\":{\"x\":944.8818897637796,\"y\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"Reflection\",\"frame\":{\"x\":62.992125984251...",
-        "kind": "removed",
-        "path": "slides[0].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"Soft edges\",\"frame\":{\"x\":356.95538057742...",
-        "kind": "removed",
-        "path": "slides[0].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"9\",\"name\":\"Blur\",\"frame\":{\"x\":650.9186351706037,\"y\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[7]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Shadow and glow\",\"frame\":{\"x\":944.88188...",
-        "kind": "removed",
-        "path": "slides[0].elements[8]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Extruded and bevelled\",\"frame\":{\"x\":83.9...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Rotated in 3-D\",\"frame\":{\"x\":440.9448818...",
-        "kind": "removed",
-        "path": "slides[1].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Text with shadow\",\"frame\":{\"x\":797.90026...",
-        "kind": "removed",
-        "path": "slides[1].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Style reference effect\",\"frame\":{\"x\":83....",
-        "kind": "removed",
-        "path": "slides[1].elements[4]"
-      }
-    ],
-    "removed": 14,
-    "total": 14,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 14 shapes and text boxes (K12b)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

@@ -59,3 +59,27 @@ export function scrubMessage(message: string, roots: string[]): string {
     .sort((a, b) => b.length - a.length)
     .reduce((m, root) => m.split(root).join('<repo>'), message);
 }
+
+/** Positions and sizes of a shape's frame may differ by this many px between the two imports (the writer rounds to whole EMU, 1 px = 9525 EMU). */
+export const POSITION_TOLERANCE_PX = 0.5;
+
+/** The tolerance of a diff path: half a pixel for the x, y, width and height of a frame, none elsewhere. */
+export const positionTolerance = (path: string): number =>
+  /\.frame\.(?:x|y|w|h)$/.test(path) ? POSITION_TOLERANCE_PX : 0;
+
+const isElementList = (path: string): boolean => /(^|\.)(?:slides\[\d+\]\.elements|layouts\[\d+\]\.elements|children)$/.test(path);
+
+/**
+ * Aligns the elements of a slide, a layout or a group by kind and name, so an element the writer does not export yet is one
+ * difference and not a shift of every element after it. Other arrays are compared by index.
+ */
+export function elementSignatures(
+  path: string,
+  before: Json[],
+  after: Json[]
+): { before: string[]; after: string[] } | null {
+  if (!isElementList(path)) return null;
+  const sig = (e: Json): string =>
+    isObj(e) ? `${String(e.kind)}:${String(e.name)}` : '';
+  return { before: before.map(sig), after: after.map(sig) };
+}

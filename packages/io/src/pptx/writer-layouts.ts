@@ -1,4 +1,6 @@
 import type { PptxColorMap, PptxLayout, PptxPlaceholder } from '@b32nio/spindle-shared/export/pptx';
+import type { WriteContext } from './writer-context';
+import { allocateElementIds, shapesXml } from './writer-shapes';
 import { bodyPrXml, lstStyleXml, plainParagraphsXml } from './writer-text';
 import { attrs, esc, ROOT_NS, solidFillXml, TREE_HEADER, XML_DECLARATION, xfrmXml } from './writer-xml';
 
@@ -57,12 +59,14 @@ function layoutPlaceholder(p: PptxPlaceholder, id: number): string {
   });
 }
 
-export function layoutXml(layout: PptxLayout): string {
+/** A layout: its placeholders (ids 2 and up), then its static shapes, which follow them in the shape tree. */
+export function layoutXml(layout: PptxLayout, ctx: WriteContext): string {
   const { layoutType } = layout;
+  const ids = allocateElementIds(layout.elements, layout.placeholders.length + 1);
   const background = layout.background ? `<p:bg><p:bgPr>${solidFillXml(layout.background)}<a:effectLst/></p:bgPr></p:bg>` : '';
   return (
     `${XML_DECLARATION}<p:sldLayout ${ROOT_NS}${attrs({ type: layoutType && LAYOUT_TYPES.has(layoutType) ? layoutType : undefined, showMasterSp: layout.hideMasterShapes ? 0 : undefined, preserve: 1 })}>` +
-    `<p:cSld name="${esc(layout.name)}">${background}<p:spTree>${TREE_HEADER}${layout.placeholders.map((p, i) => layoutPlaceholder(p, i + 2)).join('')}</p:spTree></p:cSld>` +
+    `<p:cSld name="${esc(layout.name)}">${background}<p:spTree>${TREE_HEADER}${layout.placeholders.map((p, i) => layoutPlaceholder(p, i + 2)).join('')}${shapesXml(layout.elements, ids, ctx)}</p:spTree></p:cSld>` +
     '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>'
   );
 }

@@ -13,7 +13,7 @@ import { readParts } from '../fidelity-core/ooxml-package';
 import type { Json, LossSnapshot, RoundtripSnapshot } from '../fidelity-core/types';
 import { NO_IMPORTER, type PptxEditorApi } from './api';
 import { buildLedger, type LedgerSnapshot } from './ledger';
-import { countPresentation, diffField, normalizePresentation, scrubMessage } from './normalize';
+import { countPresentation, diffField, elementSignatures, normalizePresentation, positionTolerance, scrubMessage } from './normalize';
 import { textParity, type TextParity } from './parity';
 
 export const PPTX_KINDS = ['model', 'loss', 'roundtrip', 'ledger'] as const;
@@ -96,6 +96,8 @@ async function roundtrip(
       diff: diffValues(imported, normalizePresentation(second.presentation), {
         counts: countPresentation,
         field: diffField,
+        signatures: elementSignatures,
+        tolerance: positionTolerance,
       }),
     });
   } catch (e) {

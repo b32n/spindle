@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 10,
       "slides": 4
     },
     "before": {
@@ -11,7 +11,7 @@
     },
     "byField": {
       "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 13,
+      "removed slides[].elements[]": 3,
       "removed slides[].notes": 1
     },
     "changed": 0,
@@ -32,31 +32,6 @@
         "path": "opaqueParts[2]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"ctrTitle...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Subtitle 2\",\"placeholder\":{\"type\":\"subTi...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Content Placeholder 2\",\"placeholder\":{\"t...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[2].elements[0]"
-      },
-      {
         "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Table 2\",\"frame\":{\"x\":48,\"y\":153.6,\"w\":3...",
         "kind": "removed",
         "path": "slides[2].elements[1]"
@@ -67,34 +42,9 @@
         "path": "slides[2].elements[2]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Rounded Rectangle 4\",\"frame\":{\"x\":48,\"y\"...",
-        "kind": "removed",
-        "path": "slides[2].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"5-Point Star 5\",\"frame\":{\"x\":201.6,\"y\":3...",
-        "kind": "removed",
-        "path": "slides[2].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"Right Arrow 6\",\"frame\":{\"x\":355.2,\"y\":38...",
-        "kind": "removed",
-        "path": "slides[2].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"TextBox 7\",\"textBox\":true,\"frame\":{\"x\":4...",
-        "kind": "removed",
-        "path": "slides[2].elements[6]"
-      },
-      {
         "before": "{\"props\":{},\"paragraphs\":[{\"level\":0,\"style\":{\"fontSize\":12,\"color\":{\"kind\":\"...",
         "kind": "removed",
         "path": "slides[2].notes"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[3].elements[0]"
       },
       {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Chart 2\",\"frame\":{...",
@@ -102,12 +52,11 @@
         "path": "slides[3].elements[1]"
       }
     ],
-    "removed": 17,
-    "total": 17,
+    "removed": 7,
+    "total": 7,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 10 shapes and text boxes (K12b).",
     "Not exported yet: 1 pictures (K13).",
     "Not exported yet: 1 tables (K13).",
     "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
