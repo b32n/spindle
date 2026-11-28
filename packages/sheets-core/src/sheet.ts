@@ -29,7 +29,9 @@ function rangesIntersect(a: Range, b: Range): boolean {
 /**
  * The cell store, remembering whether a formula or a cached-only formula may be in it: set on every write that carries one and
  * cleared only by a caller that has scanned every cell, so the flags are never stale-low and a structural edit can skip the scan of
- * a sheet with none.
+ * a sheet with none. "Clear flag means no formula or cached-only cell" holds for the cells reachable through `entries()` and the
+ * order maps: an orphan cell whose ids left the order maps can sit in the store with a clear flag (also before this flag existed);
+ * nothing scans such a cell.
  */
 export class CellMap extends Map<string, Cell> {
   maybeFormulas = false;

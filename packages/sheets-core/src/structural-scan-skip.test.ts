@@ -142,5 +142,21 @@ describe('the scan skip of structural edits', () => {
       wb.getSheet().deleteRows(4, 1);
       expect(at(wb, 8, 1)?.formulaAst).not.toBe(formulaAst);
     });
+
+    it('an AST-only cell written onto a sheet that never held a formula raises the flag on its own', () => {
+      const donor = book('donor');
+      for (let r = 0; r < 5; r++) donor.setCellValue(undefined, r, 0, r + 1);
+      donor.setFormula(undefined, 9, 1, '=SUM(A2:A5)');
+      const { formulaAst } = at(donor, 9, 1) as Cell;
+      // the same sheet, flags reset: no formula write has been seen since, so only the AST can raise the flag
+      const store = donor.getSheet() as unknown as { cells: { maybeFormulas: boolean } };
+      donor.getSheet().setCell(9, 1, { formula: undefined, formulaAst: undefined, value: 0 as Cell['value'] });
+      store.cells.maybeFormulas = false;
+      donor.getSheet().setCell(9, 2, { value: 10 as Cell['value'], formulaAst });
+      expect(at(donor, 9, 2)?.formula).toBeUndefined();
+      expect(flags(donor)[0]).toBe(true);
+      donor.getSheet().deleteRows(4, 1);
+      expect(at(donor, 8, 2)?.formulaAst).not.toBe(formulaAst);
+    });
   });
 });
