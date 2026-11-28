@@ -21,6 +21,6 @@ module.exports = {
   roots: ['<rootDir>/packages/slides-core/src/fidelity'],
   moduleNameMapper,
   transform: { [pattern]: ['ts-jest', { ...options, tsconfig: { ...options.tsconfig, paths } }] },
-  collectCoverageFrom: ['scripts/pptx-fidelity/**/*.ts'],
+  collectCoverageFrom: ['scripts/pptx-fidelity/**/*.ts', 'scripts/review-pack/helpers.ts'],
   coverageDirectory: path.resolve(__dirname, 'coverage'),
 };

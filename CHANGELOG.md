@@ -492,6 +492,12 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **Slides: local review pack and benchmark (K17).** Two opt-in scripts, outside CI and the jest runs: `npm run slides:review-pack` writes a
+  side-by-side PNG per slide (Spindle in the demo beside LibreOffice via `soffice` and `pdftoppm`) for every non-edge file of the PPTX corpus,
+  with a sign-off ledger, into the git-ignored `review-pack-output/`; `npm run slides:bench` imports and shows 100- and 200-slide decks
+  (written by `fixtures/pptx/generators/build_bench.py`) and reports import time, peak memory, filmstrip time and the longest main-thread task.
+  Launch-bar row L17 budget: for 100 slides, median import at most 1,500 ms, filmstrip at most 5,000 ms, peak memory at most 400 MiB, linear for
+  larger decks. Measured on the build box: 100 slides 281 ms, 605 ms, 242 MiB; 200 slides 414 ms, 865 ms, 273 MiB. No library change.
 - **The nine remaining values-golden mismatches are gone (SA-gap).** (1) A circular reference met while a workbook is calculated on load (`recalculateOnLoad`, the
   values harness) is settled like one met by a full recalculation: the cells on the cycle take the circular value, 0 by default, instead of `#VALUE!`.
   (2) A formula an .xlsx file saved without the array mark is intersected, as Excel does, where it uses a multi-cell range as an operand of its own operators
