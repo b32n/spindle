@@ -26,7 +26,7 @@ describe('a legacy array formula the engine evaluates only as a scalar keeps the
     expect(cellAt(wb, 0, 0)?.arraySpan?.spill).toBeUndefined();
     expect(wb.getSpillRegion(undefined, 0, 0)).toBeUndefined();
     expect(cachedOnlyItem(loss)).toMatchObject({ count: 1, where: ['Sheet1'], state: 'kept' });
-    expect(cachedOnlyItem(loss)?.effect).toMatch(/^kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date/);
+    expect(cachedOnlyItem(loss)?.effect).toMatch(/^kept: shown from the value saved in the file; the saved value and the formula are kept and written back, and the formula's cell references follow row and column insert and delete/);
   });
 
   it('writes the saved results back, and a second import reads the same', async () => {

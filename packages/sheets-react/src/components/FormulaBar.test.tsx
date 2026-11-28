@@ -49,7 +49,9 @@ describe('FormulaBar cached-only indicator', () => {
     expect(CACHED_ONLY_NOTICE).toMatch(/not updated when the cells it uses change/);
     // references in the text follow inserted and deleted rows and columns now (S4b), so the note no longer says they do not
     expect(CACHED_ONLY_NOTICE).not.toMatch(/adjust/);
-    expect(CACHED_ONLY_NOTICE).toMatch(/kept and saved unchanged/);
+    expect(CACHED_ONLY_NOTICE).toMatch(/saved value and the formula are kept/);
+    expect(CACHED_ONLY_NOTICE).toMatch(/cell references follow row and column insert and delete \(they do not follow anything else\)/);
+    expect(CACHED_ONLY_NOTICE).not.toMatch(/unchanged/);
     expect(html.match(/aria-label="[^"]*not updated when the cells it uses change[^"]*"/)).not.toBeNull();
     expect(html.match(/title="[^"]*not updated when the cells it uses change[^"]*"/)).not.toBeNull();
   });

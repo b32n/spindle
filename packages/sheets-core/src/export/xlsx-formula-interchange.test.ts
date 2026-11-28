@@ -123,8 +123,9 @@ describe('cached-only formulas (the engine cannot evaluate them)', () => {
     const item = loss.items.find((i) => i.id === 'xlsx.formulas.cachedOnly');
     expect(item).toMatchObject({ count: 3, state: 'kept' });
     expect(item?.effect).toMatch(/out of date/);
-    expect(item?.effect).toMatch(/written back unchanged/);
-    expect(item?.effect).toMatch(/references in the text follow inserted or deleted rows and columns/);
+    expect(item?.effect).toMatch(/the saved value and the formula are kept and written back/);
+    expect(item?.effect).toMatch(/cell references follow row and column insert and delete \(they do not follow anything else/);
+    expect(item?.effect).not.toMatch(/unchanged/);
     const unsupported = loss.items.find((i) => i.id === 'xlsx.formulas.unsupported');
     expect(unsupported?.effect).toMatch(/^kept: shown from the value saved in the file/);
   });

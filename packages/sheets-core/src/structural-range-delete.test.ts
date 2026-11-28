@@ -180,8 +180,10 @@ describe('collaboration: a delete under a range formula', () => {
   // Structure sync is last writer wins (pre-existing): a concurrent structural edit may be lost, and which one survives depends on the
   // clients' random ids. So the check is convergence (identical documents) and that the surviving formula text is one of the results of a
   // single edit, or SUM(#REF!) when the surviving structure and the surviving text disagree about the deleted corner (seen when the corner
-  // row is deleted next to a value edit or an interior delete; for the latter master gave SUM(A2:A4): both are LWW artefacts, not measured
-  // for the former on master).
+  // row is deleted next to a value edit or an interior delete; for the latter master gave SUM(A2:A4): both are LWW artefacts). Measured by
+  // the reviewer (5 gated scenarios x both release orders x 12 reps on master and on this branch): corner delete + value edit gave
+  // SUM(#REF!) 24/24 on master and 12/24 here (the other 12 SUM(A2:A4)); first row + formula edit gave SUM(#REF!) 10/24 on master and
+  // SUM(A1:A2) or SUM(A2:A4) here. Both clients always converged, so SUM(#REF!) is the old master result, not a regression.
   it.each([
     ['A deletes the corner row while B edits the formula', delRow(4), editFormula, []],
     ['A deletes the first row while B edits the formula', delRow(1), editFormula, ['=SUM(A1:A2)']], // B's new text with A's delete applied

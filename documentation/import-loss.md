@@ -75,8 +75,8 @@ instead. Two limits: undo and redo, and a collaborator who joins a room, recalcu
 is kept by the client that imported the file; the cached-only cells below are the same everywhere).
 
 **Cached-only formulas.** A formula the engine cannot evaluate is never shown as `#NAME?`: the cell is marked `cachedOnly`, shows the result the
-file saved, keeps the file's formula text exactly (prefixes included, so the formula bar shows what Excel wrote) and is written back with both
-unchanged. It is reported as `xlsx.formulas.cachedOnly`. **The value can be out of date**: a cached-only cell does not follow the cells it
+file saved, keeps the file's formula text exactly (prefixes included, so the formula bar shows what Excel wrote) and is written back with both:
+the saved value and the formula are kept; the formula's cell references follow row and column insert and delete (they do not follow anything else, see below). It is reported as `xlsx.formulas.cachedOnly`. **The value can be out of date**: a cached-only cell does not follow the cells it
 refers to, and a cell that depends on it reads its saved value. **Its references do follow structural edits**: inserting or deleting rows or columns rewrites the cell
 references in its text (`A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`, `Sheet2!A1`, `'My Sheet'!A1:B2`) with the outcome of a normal formula's, and only those
 bytes change (whitespace, case, string literals, function names, structured references and text the grammar rejects are copied as written). A

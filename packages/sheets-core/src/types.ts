@@ -84,7 +84,7 @@ export interface Cell {
   /**
    * An imported formula the engine cannot evaluate (a function it lacks, syntax it cannot parse): `formula` keeps the file's
    * text exactly, `value` the result the file saved for it. It is never recalculated, so it does not follow its precedents
-   * (the formula bar says so); it is written back unchanged. Editing the cell clears it.
+   * (the formula bar says so); the saved value and the formula are written back, and the formula's cell references follow row/column insert and delete (S4b). Editing the cell clears it.
    */
   cachedOnly?: true;
   /**

@@ -3,7 +3,7 @@
   "items": [
     {
       "count": 9,
-      "effect": "kept: shown from the value saved in the file and written back unchanged with the original formula text; the value may be out of date (it does not change when the cells it refers to change) while the cell references in the text follow inserted or deleted rows and columns (Excel recalculates the formula when the file is reopened, possibly to a different result)",
+      "effect": "kept: shown from the value saved in the file; the saved value and the formula are kept and written back, and the formula's cell references follow row and column insert and delete (they do not follow anything else, and the value does not update when the cells it refers to change, so it may be out of date; Excel recalculates the formula when the file is reopened, possibly to a different result)",
       "id": "xlsx.formulas.cachedOnly",
       "label": "formula(s) the editor cannot calculate (kept as saved)",
       "state": "kept",
