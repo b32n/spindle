@@ -31,11 +31,11 @@ async function importedWorkbook(): Promise<WorkbookImpl> {
 describe('formula marks in the Y layout (schema version 2)', () => {
   afterEach(() => __resetInMemoryRooms());
 
-  it('is at version 2, stamped on a hydrated room', async () => {
-    expect(COLLAB_SCHEMA_VERSION).toBe(2);
+  it('is at version 2 or later, stamped on a hydrated room (S6 raised it to 3)', async () => {
+    expect(COLLAB_SCHEMA_VERSION).toBeGreaterThanOrEqual(2);
     const ydoc = new Y.Doc();
     hydrateYDocFromData(ydoc, (await importedWorkbook()).getData());
-    expect(readSchemaVersion(ydoc)).toBe(2);
+    expect(readSchemaVersion(ydoc)).toBe(COLLAB_SCHEMA_VERSION);
   });
 
   it('carries cachedOnly and arraySpan through hydrate and serialize', async () => {
@@ -70,6 +70,8 @@ describe('formula marks in the Y layout (schema version 2)', () => {
   it('a version 1 client refuses a room that carries the marks; a version 2 client joins it', async () => {
     const ydoc = new Y.Doc();
     hydrateYDocFromData(ydoc, (await importedWorkbook()).getData());
+    // a room as a version 2 client wrote it (the layout S6 added column and row formats to is the next one)
+    ydoc.getMap('meta').set('schemaVersion', 2);
     expect(() => assertSchemaVersion(ydoc, 1)).toThrow(CollabSchemaVersionError);
     expect(() => assertSchemaVersion(ydoc, 2)).not.toThrow();
     try {

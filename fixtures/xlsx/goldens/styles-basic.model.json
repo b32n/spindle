@@ -38,7 +38,7 @@
           },
           "A2": {
             "format": "f1",
-            "style": "s6",
+            "style": "s7",
             "value": 1234.5
           },
           "B1": {
@@ -47,7 +47,7 @@
           },
           "B2": {
             "format": "f2",
-            "style": "s6",
+            "style": "s7",
             "value": 0.256
           },
           "C1": {
@@ -56,7 +56,7 @@
           },
           "C2": {
             "format": "f3",
-            "style": "s6",
+            "style": "s7",
             "value": 12345.678
           },
           "D1": {
@@ -65,7 +65,7 @@
           },
           "D2": {
             "format": "f4",
-            "style": "s6",
+            "style": "s7",
             "value": -1234
           },
           "E1": {
@@ -79,6 +79,11 @@
         },
         "colCount": 100,
         "config": {
+          "colStyles": {
+            "G": {
+              "style": "s8"
+            }
+          },
           "colWidths": {
             "A": 131
           },
@@ -112,6 +117,7 @@
         "fontFamily": "Times New Roman",
         "fontSize": 10,
         "italic": true,
+        "strikethrough": true,
         "textDecoration": "underline"
       },
       "s3": {
@@ -132,10 +138,21 @@
       "s5": {
         "fontFamily": "Calibri",
         "fontSize": 11,
+        "indent": 1,
         "textAlign": "left",
         "textRotation": 45
       },
       "s6": {
+        "fontFamily": "Calibri",
+        "fontSize": 11,
+        "shrinkToFit": true
+      },
+      "s7": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s8": {
+        "backgroundColor": "#fff2cc",
         "fontFamily": "Calibri",
         "fontSize": 11
       }

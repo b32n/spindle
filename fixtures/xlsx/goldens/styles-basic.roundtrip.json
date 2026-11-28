@@ -7,7 +7,7 @@
       "formulas": 0,
       "merges": 0,
       "sheets": 1,
-      "styles": 6
+      "styles": 8
     },
     "before": {
       "cells": 10,
@@ -15,7 +15,7 @@
       "formulas": 0,
       "merges": 0,
       "sheets": 1,
-      "styles": 6
+      "styles": 8
     },
     "byField": {
       "added sheets[].config.colWidths.*": 5,

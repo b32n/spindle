@@ -5,6 +5,7 @@ import type {
   SpreadsheetBorder,
   SpreadsheetCell,
   SpreadsheetCellStyle,
+  SpreadsheetDefaultFormat,
   SpreadsheetExportInput,
   SpreadsheetSheet,
 } from '@b32nio/spindle-shared/export/xlsx';
@@ -74,11 +75,20 @@ function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): Set<
     if (cell.formula && cell.dynamicArray && cell.arrayRef !== undefined && ARRAY_REF.test(cell.arrayRef)) dynamicCells.add(excelCell.address);
   }
 
+  if (sheet.defaultColumnWidth !== undefined) worksheet.properties.defaultColWidth = pxToExcelColumnWidth(sheet.defaultColumnWidth);
+  if (sheet.defaultRowHeight !== undefined) worksheet.properties.defaultRowHeight = pxToPoints(sheet.defaultRowHeight);
   sheet.columnWidths?.forEach((px, col) => {
     worksheet.getColumn(col + 1).width = pxToExcelColumnWidth(px);
   });
   sheet.rowHeights?.forEach((px, row) => {
     worksheet.getRow(row + 1).height = pxToPoints(px);
+  });
+  sheet.columnStyles?.forEach((format, col) => Object.assign(worksheet.getColumn(col + 1), { style: toExcelDefaultStyle(format) }));
+  sheet.rowStyles?.forEach((format, row) => {
+    const excelRow = worksheet.getRow(row + 1);
+    Object.assign(excelRow, { style: toExcelDefaultStyle(format) });
+    // exceljs leaves out a row with no cell and no height, which would drop its format: such a row gets the sheet's default height
+    if (excelRow.height === undefined) excelRow.height = pxToPoints(sheet.defaultRowHeight ?? DEFAULT_ROW_HEIGHT_PX);
   });
   sheet.hiddenCols?.forEach((col) => {
     worksheet.getColumn(col + 1).hidden = true;
@@ -143,32 +153,78 @@ function applyStyle(excelCell: ExcelJS.Cell, style: SpreadsheetCellStyle): void 
   const font: Partial<ExcelJS.Font> = {};
   if (style.bold != null) font.bold = style.bold;
   if (style.italic != null) font.italic = style.italic;
-  if (style.underline != null) font.underline = style.underline;
+  if (style.underline != null) font.underline = style.underline && style.underlineStyle ? style.underlineStyle : style.underline;
   if (style.strikethrough != null) font.strike = style.strikethrough;
   if (style.fontFamily != null) font.name = style.fontFamily;
   if (style.fontSize != null) font.size = style.fontSize;
   if (style.fontColor != null) font.color = { argb: toArgb(style.fontColor) };
   if (Object.keys(font).length > 0) excelCell.font = font;
 
-  if (style.backgroundColor) {
-    excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: toArgb(style.backgroundColor) } };
-  }
+  const fill = toExcelFill(style);
+  if (fill) excelCell.fill = fill;
 
+  const alignment = toExcelAlignment(style);
+  if (alignment) excelCell.alignment = alignment;
+
+  const border = toExcelBorders(style);
+  if (border) excelCell.border = border;
+}
+
+function toExcelFill(style: SpreadsheetCellStyle): ExcelJS.Fill | undefined {
+  if (style.fillPattern && style.patternColor) {
+    const fill: ExcelJS.FillPattern = { type: 'pattern', pattern: style.fillPattern as ExcelJS.FillPatterns, fgColor: { argb: toArgb(style.patternColor) } };
+    if (style.backgroundColor) fill.bgColor = { argb: toArgb(style.backgroundColor) };
+    return fill;
+  }
+  return style.backgroundColor ? { type: 'pattern', pattern: 'solid', fgColor: { argb: toArgb(style.backgroundColor) } } : undefined;
+}
+
+function toExcelAlignment(style: SpreadsheetCellStyle): Partial<ExcelJS.Alignment> | undefined {
   const alignment: Partial<ExcelJS.Alignment> = {};
   if (style.horizontalAlign) alignment.horizontal = style.horizontalAlign;
   if (style.verticalAlign) alignment.vertical = style.verticalAlign;
   if (style.wrapText != null) alignment.wrapText = style.wrapText;
+  if (style.indent != null) alignment.indent = style.indent;
+  if (style.shrinkToFit) alignment.shrinkToFit = true;
   if (style.textRotation != null) alignment.textRotation = style.textRotation;
-  if (Object.keys(alignment).length > 0) excelCell.alignment = alignment;
+  return Object.keys(alignment).length > 0 ? alignment : undefined;
+}
 
-  if (style.border) {
-    excelCell.border = {
-      top: toExcelBorder(style.border.top),
-      right: toExcelBorder(style.border.right),
-      bottom: toExcelBorder(style.border.bottom),
-      left: toExcelBorder(style.border.left),
-    };
+function toExcelBorders(style: SpreadsheetCellStyle): Partial<ExcelJS.Borders> | undefined {
+  if (!style.border) return undefined;
+  return {
+    top: toExcelBorder(style.border.top),
+    right: toExcelBorder(style.border.right),
+    bottom: toExcelBorder(style.border.bottom),
+    left: toExcelBorder(style.border.left),
+  };
+}
+
+/** The style parts of a column's or a row's default format, as exceljs takes them (`column.style`, `row.style`). */
+function toExcelDefaultStyle(format: SpreadsheetDefaultFormat): Partial<ExcelJS.Style> {
+  const out: Partial<ExcelJS.Style> = {};
+  const style = format.style;
+  if (style) {
+    const probe: Partial<ExcelJS.Style> = {};
+    const font: Partial<ExcelJS.Font> = {};
+    if (style.bold != null) font.bold = style.bold;
+    if (style.italic != null) font.italic = style.italic;
+    if (style.underline != null) font.underline = style.underline && style.underlineStyle ? style.underlineStyle : style.underline;
+    if (style.strikethrough != null) font.strike = style.strikethrough;
+    if (style.fontFamily != null) font.name = style.fontFamily;
+    if (style.fontSize != null) font.size = style.fontSize;
+    if (style.fontColor != null) font.color = { argb: toArgb(style.fontColor) };
+    if (Object.keys(font).length > 0) probe.font = font;
+    const fill = toExcelFill(style);
+    if (fill) probe.fill = fill;
+    const alignment = toExcelAlignment(style);
+    if (alignment) probe.alignment = alignment;
+    const border = toExcelBorders(style);
+    if (border) probe.border = border;
+    Object.assign(out, probe);
   }
+  if (format.numberFormat) out.numFmt = format.numberFormat.code;
+  return out;
 }
 
 function toExcelBorder(border: SpreadsheetBorder | undefined): Partial<ExcelJS.Border> | undefined {
@@ -189,6 +245,9 @@ const EXCEL_MAX_DIGIT_WIDTH = 7;
 function pxToExcelColumnWidth(px: number): number {
   return Math.round((((px - 5) / EXCEL_MAX_DIGIT_WIDTH) * 100 + 0.5)) / 100;
 }
+
+/** The editor's default row height in pixels, for a row that has a format and nothing else. */
+const DEFAULT_ROW_HEIGHT_PX = 20;
 
 // Excel row height is in points (1/72in); our grid stores CSS pixels (96dpi).
 function pxToPoints(px: number): number {

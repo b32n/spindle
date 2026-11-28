@@ -7,6 +7,9 @@ const ROOT = path.resolve(__dirname, '../../../..');
 const DUMP_ROWS = 12;
 const DUMP_COLS = 8;
 
+const lineOf = (wb: WorkbookImpl, line: { styleId?: string; formatId?: string } | undefined): unknown =>
+  line && { style: line.styleId && wb.getStylePool().get(line.styleId), format: line.formatId && wb.getFormatPool().get(line.formatId) };
+
 /** The model the way e2e/support/sheets-dump.ts reads it in the browser: what S-FIO-04 compares between the first open and the re-open. */
 function dumpWorkbook(wb: WorkbookImpl): unknown {
   return wb.getData().sheets.map((sd) => {
@@ -31,6 +34,10 @@ function dumpWorkbook(wb: WorkbookImpl): unknown {
       merges: sheet.getMergedRegions().map((m) => [m.startRow, m.startCol, m.endRow, m.endCol]),
       frozen: { rows: sheet.getFrozenRows(), cols: sheet.getFrozenCols() },
       colWidths: Array.from({ length: DUMP_COLS }, (_, c) => sheet.getColWidth(c)),
+      // S6: the sheet's default sizes and the default formats of its columns and rows
+      defaults: { colWidth: sheet.config.defaultColWidth, rowHeight: sheet.config.defaultRowHeight },
+      colFormats: Array.from({ length: DUMP_COLS }, (_, c) => lineOf(wb, sheet.getColFormat(c))),
+      rowFormats: Array.from({ length: DUMP_ROWS }, (_, r) => lineOf(wb, sheet.getRowFormat(r))),
     };
   });
 }

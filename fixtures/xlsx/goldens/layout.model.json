@@ -96,6 +96,8 @@
             "C": 107,
             "D": 107
           },
+          "defaultColWidth": 107,
+          "defaultRowHeight": 24,
           "filters": {},
           "frozenCols": 1,
           "frozenRows": 1,

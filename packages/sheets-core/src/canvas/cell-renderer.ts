@@ -5,6 +5,7 @@ import type { Cell, CellStyle, CellFormat } from '../types';
 import { TextRenderer } from './text-renderer';
 import { GridRenderer } from './grid-renderer';
 import { formatNumber } from '../utils/format-utils';
+import { fillColorOf } from './style-paint';
 
 /**
  * Renders cell content including backgrounds, text, and borders
@@ -49,19 +50,22 @@ export class CellRenderer {
     }
     
     // 3. Render borders (if any)
-    if (style) {
-      const borders = this.cellStyleToBorders(style);
-      if (borders.top || borders.right || borders.bottom || borders.left) {
-        this.gridRenderer.renderCellBorders(ctx, bounds, borders);
-      }
+    if (style) this.renderBorders(ctx, bounds, style);
+  }
+
+  private renderBorders(ctx: CanvasRenderingContext2D, bounds: Rect, style: CellStyle): void {
+    const borders = this.cellStyleToBorders(style);
+    if (borders.top || borders.right || borders.bottom || borders.left) {
+      this.gridRenderer.renderCellBorders(ctx, bounds, borders);
     }
   }
   
   /**
    * Render an empty cell (just background)
    */
-  renderEmptyCell(ctx: CanvasRenderingContext2D, bounds: Rect): void {
-    this.renderBackground(ctx, bounds, undefined);
+  renderEmptyCell(ctx: CanvasRenderingContext2D, bounds: Rect, style?: CellStyle): void {
+    this.renderBackground(ctx, bounds, style);
+    if (style) this.renderBorders(ctx, bounds, style);
   }
 
   /**
@@ -89,7 +93,7 @@ export class CellRenderer {
     bounds: Rect,
     style: CellStyle | undefined
   ): void {
-    const bgColor = style?.backgroundColor ?? this.theme.cellBackgroundColor;
+    const bgColor = fillColorOf(style) ?? this.theme.cellBackgroundColor;
     
     ctx.fillStyle = bgColor;
     ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -146,6 +150,11 @@ export class CellRenderer {
       textAlign: style.textAlign,
       verticalAlign: style.verticalAlign,
       textDecoration: style.textDecoration,
+      underlineKind: style.underlineKind,
+      strikethrough: style.strikethrough,
+      indent: style.indent,
+      // (shrinking is for one line: wrapped text and rotated text keep their size)
+      shrinkToFit: style.shrinkToFit && !style.textWrap && !style.textRotation ? true : undefined,
       textRotation: style.textRotation,
     };
   }
@@ -155,10 +164,10 @@ export class CellRenderer {
    */
   private cellStyleToBorders(style: CellStyle): CellBorders {
     return {
-      top: this.gridRenderer.parseBorderString(style.borderTop),
-      right: this.gridRenderer.parseBorderString(style.borderRight),
-      bottom: this.gridRenderer.parseBorderString(style.borderBottom),
-      left: this.gridRenderer.parseBorderString(style.borderLeft),
+      top: this.gridRenderer.parseBorderString(style.borderTop, style.borderTopKind),
+      right: this.gridRenderer.parseBorderString(style.borderRight, style.borderRightKind),
+      bottom: this.gridRenderer.parseBorderString(style.borderBottom, style.borderBottomKind),
+      left: this.gridRenderer.parseBorderString(style.borderLeft, style.borderLeftKind),
     };
   }
   
@@ -188,12 +197,7 @@ export class CellRenderer {
     }
     
     // Render borders
-    if (style) {
-      const borders = this.cellStyleToBorders(style);
-      if (borders.top || borders.right || borders.bottom || borders.left) {
-        this.gridRenderer.renderCellBorders(ctx, bounds, borders);
-      }
-    }
+    if (style) this.renderBorders(ctx, bounds, style);
   }
 }
 

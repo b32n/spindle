@@ -20,6 +20,11 @@ export class FormatPool {
     return id;
   }
 
+  /** Whether a format with these properties is in the pool already (so `getOrCreate` would not add one). */
+  has(format: CellFormat): boolean {
+    return this.formatToId.has(this.getFormatKey(format));
+  }
+
   get(formatId: string): CellFormat | undefined {
     return this.formats.get(formatId);
   }

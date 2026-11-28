@@ -24,47 +24,47 @@
     "changed": 0,
     "entries": [
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.1"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.10"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.2"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.4"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.5"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.6"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.7"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.8"
       },
       {
-        "after": "20",
+        "after": "24",
         "kind": "added",
         "path": "sheets[0].config.rowHeights.9"
       },

@@ -104,6 +104,7 @@
         "colCount": 100,
         "config": {
           "colWidths": {},
+          "defaultColWidth": 66,
           "filters": {},
           "frozenCols": 1,
           "frozenRows": 1,
@@ -136,6 +137,7 @@
         "colCount": 100,
         "config": {
           "colWidths": {},
+          "defaultColWidth": 66,
           "filters": {},
           "frozenCols": 0,
           "frozenRows": 0,

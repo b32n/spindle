@@ -20,6 +20,8 @@
 //   colWidths:  Y.Map<colId, number>
 //   hiddenRows: Y.Map<rowId, true>   — used as a set
 //   hiddenCols: Y.Map<colId, true>
+//   colStyles:  Y.Map<colId, LineFormat>  — default style/format ids of a column (schema 3; absent in sheets written before)
+//   rowStyles:  Y.Map<rowId, LineFormat>  — the same for a row (schema 3)
 //   filters:    Y.Map<colId, ColumnFilter JSON>
 //
 // Cells are stored as plain JSON inside the Y.Map. Concurrent writes to
@@ -33,6 +35,7 @@ import type {
   CellFormat,
   CellStyle,
   ColumnFilter,
+  LineFormat,
   MergedRegion,
   Selection,
   SheetData,
@@ -50,8 +53,15 @@ import type { SheetCommentThread } from '../comments';
  * (`{ rows, cols, spill? }`, the extent of an array formula; `spill: true` for a dynamic-array one). A v1 client would recalculate such a cell to `#NAME?` or
  * re-evaluate its text without the mark, and on its next write of the cell keep or drop the keys unseen, so it must not join
  * a v2 room.
+ *
+ * 3: S6 styles. A sheet's Y.Map may carry `colStyles` and `rowStyles` (`colId`/`rowId` -> `{ styleId?, formatId? }`, the default
+ * format of a column or row: a cell typed there starts with it), and a style in the pool may carry the fields `underlineKind`,
+ * `strikethrough`, `indent`, `shrinkToFit`, `fillPattern`, `patternColor` and `border*Kind`. A v2 client would not see the column
+ * and row formats, and on its next structural write drop them (it rewrites only the maps it knows), so it must not join a v3 room.
+ * A sheet written before schema 3 has no such maps: readers treat them as empty, and the first client that needs them adds them
+ * (`ensureLineStyleMaps`).
  */
-export const COLLAB_SCHEMA_VERSION = 2;
+export const COLLAB_SCHEMA_VERSION = 3;
 
 /** Thrown when a room was written with a newer Y workbook layout than this client understands. */
 export class CollabSchemaVersionError extends Error {
@@ -98,6 +108,9 @@ export interface SheetYTypes {
   hiddenRows: Y.Map<true>;
   hiddenCols: Y.Map<true>;
   filters: Y.Map<ColumnFilter>;
+  /** Default format per column / row. `undefined` in a sheet written before schema 3 (see `ensureLineStyleMaps`). */
+  colStyles: Y.Map<LineFormat> | undefined;
+  rowStyles: Y.Map<LineFormat> | undefined;
   /**
    * Merged cell regions, keyed by the composite stable-ID corner key
    * (see `mergedRegionKey`). Per-region keying lets concurrent merges of
@@ -163,6 +176,8 @@ export function getSheetYTypes(sheetMap: Y.Map<unknown>): SheetYTypes {
     hiddenRows: sheetMap.get('hiddenRows') as Y.Map<true>,
     hiddenCols: sheetMap.get('hiddenCols') as Y.Map<true>,
     filters: sheetMap.get('filters') as Y.Map<ColumnFilter>,
+    colStyles: sheetMap.get('colStyles') as Y.Map<LineFormat> | undefined,
+    rowStyles: sheetMap.get('rowStyles') as Y.Map<LineFormat> | undefined,
     mergedRegions: sheetMap.get('mergedRegions') as Y.Map<MergedRegion>,
   };
 }
@@ -196,8 +211,21 @@ export function ensureSheetYMap(
   sheetMap.set('hiddenRows', new Y.Map<true>());
   sheetMap.set('hiddenCols', new Y.Map<true>());
   sheetMap.set('filters', new Y.Map<ColumnFilter>());
+  sheetMap.set('colStyles', new Y.Map<LineFormat>());
+  sheetMap.set('rowStyles', new Y.Map<LineFormat>());
   sheetMap.set('mergedRegions', new Y.Map<MergedRegion>());
   return sheetMap;
+}
+
+/**
+ * Add the `colStyles` / `rowStyles` maps to a sheet written before schema 3 and return its types. Call inside a transaction, only when
+ * there is something to write (two clients adding the same missing map at once keep one of the two: the next structural write of the
+ * other puts its entries back, since the maps are rebuilt from the local sheet).
+ */
+export function ensureLineStyleMaps(sheetMap: Y.Map<unknown>): SheetYTypes {
+  if (!sheetMap.has('colStyles')) sheetMap.set('colStyles', new Y.Map<LineFormat>());
+  if (!sheetMap.has('rowStyles')) sheetMap.set('rowStyles', new Y.Map<LineFormat>());
+  return getSheetYTypes(sheetMap);
 }
 
 /** @deprecated kept as an alias during the transition; prefer ensureSheetYMap. */
@@ -215,6 +243,8 @@ export const createSheetYMap = (): Y.Map<unknown> => {
   sheetMap.set('hiddenRows', new Y.Map<true>());
   sheetMap.set('hiddenCols', new Y.Map<true>());
   sheetMap.set('filters', new Y.Map<ColumnFilter>());
+  sheetMap.set('colStyles', new Y.Map<LineFormat>());
+  sheetMap.set('rowStyles', new Y.Map<LineFormat>());
   sheetMap.set('mergedRegions', new Y.Map<MergedRegion>());
   return sheetMap;
 };
@@ -337,6 +367,18 @@ function hydrateSheetYMap(sheetMap: Y.Map<unknown>, data: SheetData): void {
       if (typeof key === 'string') t.filters.set(key, filter);
     }
   }
+  if (data.config.colStyles) {
+    const maps = ensureLineStyleMaps(sheetMap);
+    for (const [key, format] of data.config.colStyles) {
+      if (typeof key === 'string') maps.colStyles?.set(key, format);
+    }
+  }
+  if (data.config.rowStyles) {
+    const maps = ensureLineStyleMaps(sheetMap);
+    for (const [key, format] of data.config.rowStyles) {
+      if (typeof key === 'string') maps.rowStyles?.set(key, format);
+    }
+  }
 }
 
 /**
@@ -450,6 +492,11 @@ function serializeSheetYMap(sheetMap: Y.Map<unknown>): SheetData {
   const filters: Array<[string, ColumnFilter]> = [];
   for (const [k, v] of t.filters.entries()) filters.push([k, v]);
 
+  const colStyles: Array<[string, LineFormat]> = [];
+  for (const [k, v] of t.colStyles?.entries() ?? []) colStyles.push([k, v]);
+  const rowStyles: Array<[string, LineFormat]> = [];
+  for (const [k, v] of t.rowStyles?.entries() ?? []) rowStyles.push([k, v]);
+
   // Read merged regions back as an array, sorted by composite key so every
   // peer agrees on iteration order (drives selection / first-match lookups).
   const mergedRegionEntries: Array<[string, MergedRegion]> = [];
@@ -475,6 +522,8 @@ function serializeSheetYMap(sheetMap: Y.Map<unknown>): SheetData {
       defaultColWidth: t.meta.get('defaultColWidth') as number | undefined,
       sortOrder: t.meta.get('sortOrder') as SortOrder[] | undefined,
       filters: filters.length ? filters : undefined,
+      colStyles: colStyles.length ? colStyles : undefined,
+      rowStyles: rowStyles.length ? rowStyles : undefined,
       mergedRegions: mergedRegions.length ? mergedRegions : undefined,
     },
     rowCount: (t.meta.get('rowCount') as number) ?? 1000,

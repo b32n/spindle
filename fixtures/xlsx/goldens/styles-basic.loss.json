@@ -3,12 +3,10 @@
   "items": [
     {
       "count": 1,
-      "effect": "lost: only cells present in the file keep their formatting",
-      "id": "xlsx.styles.columnRowStyles",
-      "label": "column/row default style(s)",
-      "where": [
-        "Styles"
-      ]
+      "effect": "approximated: kept and saved back; on screen the text is scaled down to the cell width, the scale is not Excel's",
+      "id": "xlsx.styles.shrinkToFit",
+      "label": "cell format(s) that shrink the text to fit",
+      "state": "approximated"
     }
   ]
 }

@@ -40,7 +40,7 @@ describe('parseStyles number formats', () => {
 
   it('is empty for a missing or empty style sheet', () => {
     expect(parseStyles(undefined).numberFormats(ALL)).toEqual([]);
-    expect(parseStyles(sheet('')).usedFacts(ALL)).toEqual({ patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] });
+    expect(parseStyles(sheet('')).usedFacts(ALL)).toEqual({ patternFill: 0, gradientFill: 0, diagonalBorder: 0, approximateBorders: { count: 0, styles: [] }, shrinkToFit: 0, namedStyles: [] });
   });
 
   it('falls back to an empty code for a custom format without one', () => {
@@ -116,7 +116,7 @@ describe('parseStyles used facts', () => {
     expect(s.usedFacts(new Set([0, 1])).gradientFill).toBe(0);
     expect(s.usedFacts(new Set([2])).gradientFill).toBe(1);
     expect(s.usedFacts(new Set([3])).diagonalBorder).toBe(1);
-    expect(s.usedFacts(new Set([99]))).toEqual({ patternFill: 0, gradientFill: 0, diagonalBorder: 0, namedStyles: [] });
+    expect(s.usedFacts(new Set([99]))).toEqual({ patternFill: 0, gradientFill: 0, diagonalBorder: 0, approximateBorders: { count: 0, styles: [] }, shrinkToFit: 0, namedStyles: [] });
   });
 
   it('reports diagonal borders only when they have a style', () => {

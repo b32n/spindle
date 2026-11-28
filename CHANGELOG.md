@@ -498,6 +498,14 @@ lockstep.
   (written by `fixtures/pptx/generators/build_bench.py`) and reports import time, peak memory, filmstrip time and the longest main-thread task.
   Launch-bar row L17 budget: for 100 slides, median import at most 1,500 ms, filmstrip at most 5,000 ms, peak memory at most 400 MiB, linear for
   larger decks. Measured on the build box: 100 slides 281 ms, 605 ms, 242 MiB; 200 slides 414 ms, 865 ms, 273 MiB. No library change.
+- **Styles, defaults and column and row formats (S6).** A column's or a row's default format (`<col style>`, `<row s customFormat>`) is imported, shown (fill and borders of empty
+  cells), written back, kept through insert and delete, and a cell typed there starts with it (the row's wins). A sheet's default column width and row height
+  (`sheetFormatPr`) are imported and written when they are not the editor's. All thirteen border line styles are kept per side with their colour and drawn on the canvas (double
+  as two lines, each dash pattern its own; `hair` and `slantDashDot` approximated and reported as `xlsx.styles.borderStyles`); pattern fills are drawn as a flat colour and
+  written back as the pattern, gradient fills as their first stop; underline variants, strike next to underline, indent and shrink-to-fit are kept. The loss id
+  `xlsx.styles.columnRowStyles` is removed; `patternFill`, `gradientFill`, `namedStyles` are `approximated`, new `xlsx.styles.borderStyles` and `.shrinkToFit`. The style pool is capped at 65,536 styles
+  and formats per import (reported as `xlsx.package.sizeLimit`). Collaboration schema version 3: sheets carry `colStyles` and `rowStyles`; a version 2 client refuses a version 3 room.
+
 - **The nine remaining values-golden mismatches are gone (SA-gap).** (1) A circular reference met while a workbook is calculated on load (`recalculateOnLoad`, the
   values harness) is settled like one met by a full recalculation: the cells on the cycle take the circular value, 0 by default, instead of `#VALUE!`.
   (2) A formula an .xlsx file saved without the array mark is intersected, as Excel does, where it uses a multi-cell range as an operand of its own operators

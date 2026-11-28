@@ -8,7 +8,7 @@
 //     Cells stay attached to their stable IDs across inserts and sorts; the
 //     numeric index a cell appears at changes, but its identity does not.
 
-import type { Sheet, SheetConfig, Cell, Range, SortOrder, MergedRegion } from './types';
+import type { Sheet, SheetConfig, Cell, Range, SortOrder, MergedRegion, LineFormat } from './types';
 import { CommentStore } from './comments';
 import { getStableCellKey, parseStableCellKey } from './utils/cell-key';
 import { generateId } from './utils/id';
@@ -176,7 +176,9 @@ export class SheetImpl implements Sheet {
     if (existing) {
       this.cells.set(key, { ...existing, ...cell });
     } else {
-      this.cells.set(key, { value: cell.value ?? null, ...cell });
+      // a cell typed into a formatted row or column starts with that format (the row's wins), unless the caller says its own
+      const inherited = 'styleId' in cell || 'formatId' in cell ? undefined : this.config.rowStyles?.get(rowId) ?? this.config.colStyles?.get(colId);
+      this.cells.set(key, { value: cell.value ?? null, ...inherited, ...cell });
     }
   }
 
@@ -284,6 +286,40 @@ export class SheetImpl implements Sheet {
     this.notifyStructureChange();
   }
 
+  /** The default format of a column, or `undefined` (a new cell in it starts unformatted). */
+  getColFormat(col: number): LineFormat | undefined {
+    const colId = this.colOrder.get(col);
+    return colId ? this.config.colStyles?.get(colId) : undefined;
+  }
+
+  setColFormat(col: number, format: LineFormat | undefined): void {
+    if (!format || (!format.styleId && !format.formatId)) {
+      const colId = this.colOrder.get(col);
+      if (colId) this.config.colStyles?.delete(colId);
+    } else {
+      if (!this.config.colStyles) this.config.colStyles = new Map();
+      this.config.colStyles.set(this.ensureColId(col), format);
+    }
+    this.notifyStructureChange();
+  }
+
+  /** The default format of a row, or `undefined`. */
+  getRowFormat(row: number): LineFormat | undefined {
+    const rowId = this.rowOrder.get(row);
+    return rowId ? this.config.rowStyles?.get(rowId) : undefined;
+  }
+
+  setRowFormat(row: number, format: LineFormat | undefined): void {
+    if (!format || (!format.styleId && !format.formatId)) {
+      const rowId = this.rowOrder.get(row);
+      if (rowId) this.config.rowStyles?.delete(rowId);
+    } else {
+      if (!this.config.rowStyles) this.config.rowStyles = new Map();
+      this.config.rowStyles.set(this.ensureRowId(row), format);
+    }
+    this.notifyStructureChange();
+  }
+
   // ============================================
   // Insert / delete (mutate order maps only)
   // ============================================
@@ -385,9 +421,11 @@ export class SheetImpl implements Sheet {
     if (ids.size === 0) return;
     if (isRow) {
       if (this.config.rowHeights) for (const id of ids) this.config.rowHeights.delete(id);
+      if (this.config.rowStyles) for (const id of ids) this.config.rowStyles.delete(id);
       if (this.config.hiddenRows) for (const id of ids) this.config.hiddenRows.delete(id);
     } else {
       if (this.config.colWidths) for (const id of ids) this.config.colWidths.delete(id);
+      if (this.config.colStyles) for (const id of ids) this.config.colStyles.delete(id);
       if (this.config.hiddenCols) for (const id of ids) this.config.hiddenCols.delete(id);
       if (this.config.filters) for (const id of ids) this.config.filters.delete(id);
     }

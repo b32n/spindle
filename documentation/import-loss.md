@@ -135,7 +135,7 @@ Full-only ids:
 | Group | Ids (what is counted) |
 |---|---|
 | Formulas | `xlsx.formulas.array` (`t="array"`: kept as an array formula over its range), `.dynamicArray` (array formula with `cm` metadata: spills, written back as a dynamic array), `.externalRef` (`[1]Sheet!A1`), `.volatile` (`NOW`, `TODAY`, `RAND*`, `OFFSET`, `INDIRECT`, `INFO`) |
-| Styles | `xlsx.styles.patternFill`, `.gradientFill`, `.diagonalBorder`, `.namedStyles` (named styles in use), `.columnRowStyles` (column and row default formats) |
+| Styles | `xlsx.styles.patternFill` (approximated: a flat colour on screen, the pattern kept and saved), `.gradientFill` (approximated: the first stop), `.diagonalBorder` (lost), `.borderStyles` (approximated: `hair` and `slantDashDot` are drawn as a fine dotted and a dash-dot line, the style is kept), `.shrinkToFit` (approximated), `.namedStyles` (approximated: named styles in use are flattened into the cells). Column and row default formats are imported since S6 (`xlsx.styles.columnRowStyles` is gone); formats past the sheet's extent, or past the style pool limit, are reported as `xlsx.package.sizeLimit`. Colours resolved at import are saved as fixed RGB: theme references are not recreated |
 | Sheet | `xlsx.sheet.tabColor`, `.zoom` (other than 100), `.rtl`, `.gridlines` (turned off), `.veryHidden`, `.customViews` |
 | Print | `xlsx.print.setup` (a sheet whose orientation, paper size, scale, fit to page, print options or margins differ from Excel's defaults), `.areas`, `.titles`, `.breaks`, `.headersFooters` |
 | Conditional formatting | `xlsx.cf.dataBarExt`, `.iconSetExt` (Excel 2010 extensions), `.formulaRule`, `.stopIfTrue` |

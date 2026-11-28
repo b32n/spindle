@@ -5,6 +5,7 @@ import type {
   XlsxBorderSide,
   XlsxCellFormat,
   XlsxColor,
+  XlsxGradientFill,
   XlsxStyles,
 } from '@b32nio/spindle-shared/export/xlsx';
 import { builtinNumberFormat } from '../styles-scan';
@@ -24,7 +25,12 @@ export interface CellLook {
 
 const HORIZONTAL: ReadonlyMap<string, 'left' | 'center' | 'right'> = new Map([['left', 'left'], ['center', 'center'], ['right', 'right']]);
 const VERTICAL: ReadonlyMap<string, 'top' | 'middle' | 'bottom'> = new Map([['top', 'top'], ['center', 'middle'], ['bottom', 'bottom']]);
-const BORDER_STYLES: ReadonlySet<string> = new Set(['thin', 'medium', 'thick', 'dashed', 'dotted', 'double']);
+const BORDER_STYLES: ReadonlySet<string> = new Set([
+  'thin', 'hair', 'dotted', 'dashed', 'dashDot', 'dashDotDot', 'double',
+  'medium', 'mediumDashed', 'mediumDashDot', 'mediumDashDotDot', 'slantDashDot', 'thick',
+]);
+type XlsxGradientStop = XlsxGradientFill['stops'][number];
+const UNDERLINES: ReadonlySet<string> = new Set(['double', 'singleAccounting', 'doubleAccounting']);
 
 /** Plain black text as Excel writes it: theme colour 1 (Text 1, untinted) or indexed 8 or 64. That is the application's default text colour, not a choice, so a dark theme still works. */
 const isDefaultTextColor = (c: XlsxColor | undefined): boolean =>
@@ -128,7 +134,10 @@ export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolea
   if (font !== undefined) {
     if (font.bold) style.bold = true;
     if (font.italic) style.italic = true;
-    if (font.underline) style.underline = true;
+    if (font.underline) {
+      style.underline = true;
+      if (UNDERLINES.has(font.underline)) style.underlineStyle = font.underline as 'double' | 'singleAccounting' | 'doubleAccounting';
+    }
     if (font.strike) style.strikethrough = true;
     // the default format's font is the workbook's default font: not repeated on every cell
     if (font.name && !isDefault) style.fontFamily = font.name;
@@ -141,6 +150,21 @@ export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolea
   if (fill?.type === 'pattern' && fill.pattern === 'solid') {
     const color = colorOf(fill.fg);
     if (color !== undefined) style.backgroundColor = color;
+  } else if (fill?.type === 'pattern' && fill.pattern !== 'none') {
+    // a pattern: its two colours and its name (the editor draws it as one flat colour, the file keeps the pattern)
+    const color = colorOf(fill.fg);
+    const behind = colorOf(fill.bg);
+    if (color !== undefined) {
+      style.fillPattern = fill.pattern;
+      style.patternColor = color;
+      if (behind !== undefined) style.backgroundColor = behind;
+    }
+  } else if (fill?.type === 'gradient') {
+    // a gradient is drawn as its first stop
+    let first: XlsxGradientStop | undefined;
+    for (const stop of fill.stops) if (first === undefined || stop.position < first.position) first = stop;
+    const color = colorOf(first?.color);
+    if (color !== undefined) style.backgroundColor = color;
   }
 
   const alignment = xf.alignment;
@@ -151,6 +175,8 @@ export function lookOf(xf: XlsxCellFormat, styles: XlsxStyles, isDefault: boolea
     // (the default format does not repeat the defaults: bottom, upright)
     if (vertical !== undefined && !(isDefault && vertical === 'bottom')) style.verticalAlign = vertical;
     if (alignment.wrapText) style.wrapText = true;
+    if (alignment.indent !== undefined && alignment.indent >= 1) style.indent = alignment.indent;
+    if (alignment.shrinkToFit) style.shrinkToFit = true;
     const rotation = rotationOf(alignment.textRotation);
     if (rotation !== undefined && !(isDefault && rotation === 0)) style.textRotation = rotation;
   }

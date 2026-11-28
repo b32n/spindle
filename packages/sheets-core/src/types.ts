@@ -4,6 +4,17 @@ import type { CommentStore, SheetCommentThread } from './comments';
 
 export type CellValue = string | number | boolean | null;
 
+/**
+ * The thirteen border line styles of the file format. A side's `border*` field holds the CSS shorthand the canvas can draw
+ * (`1px dashed #000`); `border*Kind` is the exact kind it was made from, kept so a file's `dashDot` or `hair` is written back as it was.
+ * A kind whose CSS no longer matches the shorthand (the shorthand was edited after) is ignored.
+ */
+export type BorderKind =
+  | 'thin' | 'hair' | 'dotted' | 'dashed' | 'dashDot' | 'dashDotDot' | 'double'
+  | 'medium' | 'mediumDashed' | 'mediumDashDot' | 'mediumDashDotDot' | 'slantDashDot' | 'thick';
+
+export type UnderlineKind = 'double' | 'singleAccounting' | 'doubleAccounting';
+
 export interface CellStyle {
   bold?: boolean;
   italic?: boolean;
@@ -19,7 +30,29 @@ export interface CellStyle {
   borderLeft?: string;
   textWrap?: boolean;
   textDecoration?: 'none' | 'underline' | 'line-through';
+  /** With `textDecoration: 'underline'`: a variant other than a single line. */
+  underlineKind?: UnderlineKind;
+  /** Strike-through next to an underline (`textDecoration` holds only one of the two). */
+  strikethrough?: boolean;
   textRotation?: number; // degrees, -90..90; 0/undefined = horizontal
+  /** Indent levels (about three spaces each) from the text's edge, 1 or more. */
+  indent?: number;
+  /** Shrink the text to fit the cell's width (drawn by scaling the font down; never enlarged). */
+  shrinkToFit?: boolean;
+  /** Pattern fill other than solid, as the file names it (`darkGray`, `lightGrid`...); with `patternColor`. Drawn as one flat colour. */
+  fillPattern?: string;
+  /** Colour of the pattern's lines; `backgroundColor` is the colour behind them. */
+  patternColor?: string;
+  borderTopKind?: BorderKind;
+  borderRightKind?: BorderKind;
+  borderBottomKind?: BorderKind;
+  borderLeftKind?: BorderKind;
+}
+
+/** The default format of a column or a row: the style and number format a cell typed there starts with. */
+export interface LineFormat {
+  styleId?: string;
+  formatId?: string;
 }
 
 export type FormatType =
@@ -163,6 +196,8 @@ export interface SheetConfig {
   sortOrder?: SortOrder[];           // criteria still reference numeric columns (revisit in v2)
   filters?: Map<string, ColumnFilter>; // colId -> filter
   mergedRegions?: MergedRegion[];    // merged cell regions, keyed by stable IDs
+  colStyles?: Map<string, LineFormat>; // colId -> default format of the column
+  rowStyles?: Map<string, LineFormat>; // rowId -> default format of the row
 }
 
 export interface Sheet {
@@ -197,6 +232,11 @@ export interface Sheet {
   setRowHeight(row: number, height: number): void;
   getColWidth(col: number): number;
   setColWidth(col: number, width: number): void;
+  /** The default format of a column / row (what a cell typed there starts with); the row's wins over the column's. */
+  getColFormat(col: number): LineFormat | undefined;
+  setColFormat(col: number, format: LineFormat | undefined): void;
+  getRowFormat(row: number): LineFormat | undefined;
+  setRowFormat(row: number, format: LineFormat | undefined): void;
   insertRows(startRow: number, count: number): void;
   deleteRows(startRow: number, count: number): void;
   insertCols(startCol: number, count: number): void;
@@ -335,6 +375,8 @@ export interface SheetData {
     showGridLines?: boolean;
     sortOrder?: SortOrder[];
     filters?: Array<[number | string, ColumnFilter]>;
+    colStyles?: Array<[number | string, LineFormat]>;
+    rowStyles?: Array<[number | string, LineFormat]>;
     /** Merged regions, always keyed by stable IDs (no numeric legacy form). */
     mergedRegions?: MergedRegion[];
   };

@@ -1,6 +1,10 @@
 // Text Renderer - Handles text measurement and rendering
 
 import type { CanvasTheme, TextStyle, Rect } from './types';
+import { INDENT_PX } from './style-paint';
+
+/** Whether the style asks for an underline or a strike-through line. */
+const hasDecoration = (style: Partial<TextStyle>): boolean => (style.textDecoration !== undefined && style.textDecoration !== 'none') || style.strikethrough === true;
 
 /**
  * Cached text metrics for a specific font configuration
@@ -133,22 +137,30 @@ export class TextRenderer {
     padding: number = 4
   ): void {
     if (!text) return;
-    
+
+    // Rotated text follows a separate path (clipped to the cell, not truncated).
+    const rotation = style.textRotation ?? 0;
+    if (rotation === 0 && style.shrinkToFit) style = this.shrunkToFit(text, style, bounds.width - padding * 2 - this.indentOf(style));
+
     const font = this.buildFontString(style);
     const metrics = this.getFontMetrics(font);
 
     ctx.font = font;
     ctx.fillStyle = style.color ?? this.theme.cellTextColor;
 
-    // Rotated text follows a separate path (clipped to the cell, not truncated).
-    const rotation = style.textRotation ?? 0;
     if (rotation !== 0) {
       this.renderRotatedText(ctx, text, bounds, style, metrics, rotation);
       return;
     }
 
+    // Indent moves the text in from the edge it is aligned to (centred text has none)
+    const indent = this.indentOf(style);
+    const align = style.textAlign ?? 'left';
+    const leftPad = padding + (align === 'left' ? indent : 0);
+    const rightPad = padding + (align === 'right' ? indent : 0);
+
     // Calculate available width for text
-    const availableWidth = bounds.width - padding * 2;
+    const availableWidth = bounds.width - leftPad - rightPad;
     
     // Truncate if necessary
     const displayText = this.truncateText(text, availableWidth, style);
@@ -164,12 +176,12 @@ export class TextRenderer {
         break;
       case 'right':
         ctx.textAlign = 'right';
-        x = bounds.x + bounds.width - padding;
+        x = bounds.x + bounds.width - rightPad;
         break;
       case 'left':
       default:
         ctx.textAlign = 'left';
-        x = bounds.x + padding;
+        x = bounds.x + leftPad;
         break;
     }
     
@@ -194,7 +206,7 @@ export class TextRenderer {
     ctx.fillText(displayText, x, y);
     
     // Render text decoration (underline, strikethrough)
-    if (style.textDecoration && style.textDecoration !== 'none') {
+    if (hasDecoration(style)) {
       const textWidth = this.measureCtx.measureText(displayText).width;
       
       // Adjust x for decoration based on alignment
@@ -211,21 +223,42 @@ export class TextRenderer {
       }
       
       ctx.strokeStyle = style.color ?? this.theme.cellTextColor;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      
-      if (style.textDecoration === 'underline') {
-        const underlineY = y + 2;
-        ctx.moveTo(decorationX, underlineY);
-        ctx.lineTo(decorationX + textWidth, underlineY);
-      } else if (style.textDecoration === 'line-through') {
-        const strikeY = y - metrics.baseline / 3;
-        ctx.moveTo(decorationX, strikeY);
-        ctx.lineTo(decorationX + textWidth, strikeY);
-      }
-      
-      ctx.stroke();
+      this.drawDecorations(ctx, style, decorationX, textWidth, y, metrics.baseline);
     }
+  }
+
+  /** The indent in pixels (a level moves the text `INDENT_PX`). */
+  private indentOf(style: Partial<TextStyle>): number {
+    return style.indent && style.indent > 0 ? style.indent * INDENT_PX : 0;
+  }
+
+  /** `style` with a font size at which `text` fits `width` (never larger than its own: shrink to fit does not enlarge). */
+  private shrunkToFit(text: string, style: Partial<TextStyle>, width: number): Partial<TextStyle> {
+    const natural = this.measureText(text, style);
+    if (natural <= width || width <= 0) return style;
+    const size = style.fontSize ?? this.theme.cellFontSize;
+    return { ...style, fontSize: Math.max(size * (width / natural), 1) };
+  }
+
+  /**
+   * Underline and strike-through lines from `x` over `width`, `baselineY` being the text's baseline: a double underline is two lines
+   * and an accounting one runs the full width of the cell's text the same way (the file's accounting variants differ in where the
+   * line sits against the cell edge, which the canvas does not draw).
+   */
+  private drawDecorations(ctx: CanvasRenderingContext2D, style: Partial<TextStyle>, x: number, width: number, baselineY: number, baseline: number): void {
+    ctx.lineWidth = 1;
+    const line = (y: number): void => {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + width, y);
+      ctx.stroke();
+    };
+    if (style.textDecoration === 'underline') {
+      const double = style.underlineKind === 'double' || style.underlineKind === 'doubleAccounting';
+      line(baselineY + 2);
+      if (double) line(baselineY + 4);
+    }
+    if (style.textDecoration === 'line-through' || style.strikethrough) line(baselineY - baseline / 3);
   }
 
   /**
@@ -258,16 +291,11 @@ export class TextRenderer {
     ctx.textBaseline = 'middle';
     ctx.fillText(text, 0, 0);
 
-    if (style.textDecoration && style.textDecoration !== 'none') {
+    if (hasDecoration(style)) {
       const textWidth = ctx.measureText(text).width;
-      const dy =
-        style.textDecoration === 'underline' ? metrics.baseline * 0.4 : 0;
       ctx.strokeStyle = style.color ?? this.theme.cellTextColor;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(-textWidth / 2, dy);
-      ctx.lineTo(textWidth / 2, dy);
-      ctx.stroke();
+      // (about the text's centre, as it is drawn: the baseline is the middle, the underline a little below it)
+      this.drawDecorations(ctx, style, -textWidth / 2, textWidth, metrics.baseline * 0.4 - 2, metrics.baseline * 1.2 - 6);
     }
 
     ctx.restore();

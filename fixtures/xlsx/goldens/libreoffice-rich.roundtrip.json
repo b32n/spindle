@@ -24,27 +24,27 @@
     "changed": 0,
     "entries": [
       {
-        "after": "100",
+        "after": "66",
         "kind": "added",
         "path": "sheets[0].config.colWidths.A"
       },
       {
-        "after": "100",
+        "after": "66",
         "kind": "added",
         "path": "sheets[0].config.colWidths.B"
       },
       {
-        "after": "100",
+        "after": "66",
         "kind": "added",
         "path": "sheets[0].config.colWidths.C"
       },
       {
-        "after": "100",
+        "after": "66",
         "kind": "added",
         "path": "sheets[0].config.colWidths.D"
       },
       {
-        "after": "100",
+        "after": "66",
         "kind": "added",
         "path": "sheets[0].config.colWidths.E"
       },
@@ -59,7 +59,7 @@
         "path": "sheets[0].config.rowHeights.7"
       },
       {
-        "after": "100",
+        "after": "66",
         "kind": "added",
         "path": "sheets[1].config.colWidths.A"
       }

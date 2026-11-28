@@ -5,6 +5,7 @@ export {
   getSheetYTypes,
   createSheetYMap,
   ensureSheetYMap,
+  ensureLineStyleMaps,
   hydrateYDocFromData,
   serializeYDocToData,
   COLLAB_SCHEMA_VERSION,

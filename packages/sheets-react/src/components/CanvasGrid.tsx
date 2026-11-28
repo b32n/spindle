@@ -8,7 +8,7 @@ import {
   type CursorType,
   type FormulaRangeHighlight,
 } from '@b32nio/spindle-sheets-core';
-import type { Selection, Range, Cell, CellValue } from '@b32nio/spindle-sheets-core';
+import type { Selection, Range, Cell, CellValue, CellStyle, CellFormat, LineFormat } from '@b32nio/spindle-sheets-core';
 import { formatSelectionLabel } from './selectionLabel';
 import { extractFormulaRanges, columnIndexToLabel, adjustFormula, type FormulaRange } from '@b32nio/spindle-sheets-core';
 import { detectSeries, extrapolate, isDateFormat } from '@b32nio/spindle-sheets-core';
@@ -342,7 +342,28 @@ export const CanvasGrid = memo(function CanvasGrid({
       if (r !== undefined && c !== undefined) commentedCells.add(`${r}:${c}`);
     }
 
+    // default formats of columns and rows, by index: an empty cell there shows their fill and borders
+    const formatPool = workbook.getFormatPool();
+    const lineFormats = (
+      lines: Map<string, LineFormat> | undefined,
+      indexOf: (id: string) => number | undefined
+    ): Map<number, { style?: CellStyle; format?: CellFormat }> | undefined => {
+      if (!lines || lines.size === 0) return undefined;
+      const out = new Map<number, { style?: CellStyle; format?: CellFormat }>();
+      for (const [id, line] of lines) {
+        const index = indexOf(id);
+        if (index === undefined) continue;
+        out.set(index, {
+          style: line.styleId ? styles.get(line.styleId) : undefined,
+          format: line.formatId ? formatPool.get(line.formatId) : undefined,
+        });
+      }
+      return out;
+    };
+
     const renderState: RenderState = {
+      colFormats: lineFormats(sheet.config.colStyles, (id) => sheet.getColIndex(id)),
+      rowFormats: lineFormats(sheet.config.rowStyles, (id) => sheet.getRowIndex(id)),
       cells,
       styles: styles.getAllStyles(),
       formats: workbook.getFormatPool().getAllFormats(),

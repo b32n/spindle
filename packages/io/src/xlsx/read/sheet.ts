@@ -1,6 +1,7 @@
 import type {
   SpreadsheetCell,
   SpreadsheetCellValue,
+  SpreadsheetDefaultFormat,
   SpreadsheetMergedRange,
   SpreadsheetSheet,
   XlsxColumnInfo,
@@ -180,6 +181,10 @@ const DATE1904_OFFSET = 1462;
 const excelColumnWidthToPx = (width: number): number => Math.round(width * 7) + 5;
 const pointsToPx = (points: number): number => points / 0.75;
 
+/** The sheet's default column width in pixels (`sheetFormatPr defaultColWidth`, read as a column's `width` is), or `undefined` when the file gives none. */
+export const defaultColumnWidthPx = (format: XlsxSheetFormat): number | undefined =>
+  format.defaultColWidth !== undefined && format.defaultColWidth > 0 ? excelColumnWidthToPx(format.defaultColWidth) : undefined;
+
 function readViews(root: XmlElement | undefined): XlsxSheetView[] {
   return kids(root, 'sheetView').map((v) => {
     const a = v.attrs;
@@ -293,6 +298,22 @@ function applyColumns(columns: readonly XlsxColumnInfo[], maxCol: number): { col
     if (hidden[i]) hiddenCols.add(i);
   }
   return { columnWidths, hiddenCols };
+}
+
+/**
+ * The default format (looks of a `cellXfs` entry) of each column up to `span`, from the `<col style>` ranges: the last range that names a
+ * style wins (style 0 is the workbook default and clears an earlier range). Only the columns that have a format are in the result.
+ */
+function columnFormats(columns: readonly XlsxColumnInfo[], span: number, formats: LookCache): Map<number, SpreadsheetDefaultFormat> {
+  const out = new Map<number, SpreadsheetDefaultFormat>();
+  if (span <= 0) return out;
+  const styles = lastWriter(columns, (c) => c.style, span - 1);
+  for (let i = 0; i < span; i++) {
+    const index = styles[i];
+    const look = index === undefined || index < 1 ? undefined : formats.get(index);
+    if (look?.style || look?.numberFormat) out.set(i, { style: look.style, numberFormat: look.numberFormat });
+  }
+  return out;
 }
 
 /** One `<hyperlink>` element, or `undefined` when it has no range. A missing relationship is reported through `missing`. */
@@ -702,6 +723,18 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     if (columnCount < maxCol + 1 && budget.loss.add('columns', name, maxCol + 1 - columnCount)) ctx.warn(`${label}: the widths and hidden state of ${maxCol + 1 - columnCount} column(s) were left out (the import limit maxColumns, ${budget.limits.maxColumns}, for the workbook); the other sheets that lose some are counted in the import report.`);
   }
   const { columnWidths, hiddenCols } = applyColumns(columns, columnCount - 1);
+  // the columns that carry a default format, past the last cell too (a formatted column is mostly empty): they draw on the same budget
+  let styleSpan = 0;
+  for (const c of columns) if (c.style !== undefined && c.style >= 1) styleSpan = Math.max(styleSpan, Math.min(c.max, MAX_COL));
+  const extra = Math.min(Math.max(styleSpan - columnCount, 0), Math.max(budget.columns, 0));
+  budget.columns -= extra;
+  if (columnCount + extra < styleSpan && budget.loss.add('columns', name, styleSpan - columnCount - extra)) ctx.warn(`${label}: the default formats of ${styleSpan - columnCount - extra} column(s) were left out (the import limit maxColumns, ${budget.limits.maxColumns}, for the workbook); the other sheets that lose some are counted in the import report.`);
+  const columnStyles = columnFormats(columns, columnCount + extra, formats);
+  const rowStyles = new Map<number, SpreadsheetDefaultFormat>();
+  for (const [r, info] of rowInfo) {
+    const look = info.customFormat && info.style !== undefined && info.style >= 1 ? formats.get(info.style) : undefined;
+    if (look?.style || look?.numberFormat) rowStyles.set(r, { style: look.style, numberFormat: look.numberFormat });
+  }
   const rowHeights = new Map<number, number>();
   const hiddenRows = new Set<number>();
   for (const [r, info] of rowInfo) {
@@ -732,6 +765,10 @@ export function readSheet(text: string | undefined, ref: XlsxSheetRef, ctx: Shee
     rowHeights,
     hiddenCols,
     hiddenRows,
+    columnStyles: columnStyles.size > 0 ? columnStyles : undefined,
+    rowStyles: rowStyles.size > 0 ? rowStyles : undefined,
+    defaultColumnWidth: defaultColumnWidthPx(details.format),
+    defaultRowHeight: details.format.defaultRowHeight !== undefined ? pointsToPx(details.format.defaultRowHeight) : undefined,
     frozenRows: frozen?.ySplit || undefined,
     frozenCols: frozen?.xSplit || undefined,
     mergedRanges: merges.length > 0 ? merges : undefined,

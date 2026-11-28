@@ -64,7 +64,7 @@ class Tally {
 const TALLY_KEYS = [
   'cf', 'dv', 'filter', 'protect', 'outline', 'spark', 'comments', 'charts', 'images',
   'structured', 'unsupported', 'cachedOnly', 'array', 'dynamic', 'external', 'volatile',
-  'columnRowStyles', 'tabColor', 'zoom', 'rtl', 'gridlines', 'customViews',
+  'tabColor', 'zoom', 'rtl', 'gridlines', 'customViews',
   'printSetup', 'breaks', 'headerFooter',
   'dataBarExt', 'iconSetExt', 'formulaRule', 'stopIfTrue',
   'dvCustom', 'dvMessages', 'dvCrossSheet', 'commentsThreaded', 'commentsRich',
@@ -203,7 +203,6 @@ interface CellFacts {
   /** Formulas the editor keeps as the value the file saved (a function it lacks, or text its engine cannot evaluate). */
   cachedOnly: number;
   outlineRows: number;
-  styledRows: number;
   styleIds: Set<number>;
   richInline: number;
   /** Facts of each shared formula's master by `si`, applied to its followers (cells with no formula text). */
@@ -221,7 +220,6 @@ async function scanSheetData(xml: string, options: DetectXlsxLossOptions): Promi
     unsupportedNames: [],
     cachedOnly: 0,
     outlineRows: 0,
-    styledRows: 0,
     styleIds: new Set(),
     richInline: 0,
     shared: new Map(),
@@ -265,10 +263,7 @@ async function scanSheetData(xml: string, options: DetectXlsxLossOptions): Promi
       const level = Number(row.attrs.outlineLevel);
       if (level >= 1) cells.outlineRows++;
       const rowStyle = Number(row.attrs.s);
-      if (rowStyle >= 1 && isTrue(row.attrs.customFormat)) {
-        cells.styledRows++;
-        cells.styleIds.add(rowStyle);
-      }
+      if (rowStyle >= 1 && isTrue(row.attrs.customFormat)) cells.styleIds.add(rowStyle);
       for (const c of kids(row, 'c')) readCell(c, cells, options);
     }
   }
@@ -442,11 +437,12 @@ async function detect(bytes: Uint8Array, options: DetectXlsxLossOptions, items: 
 
   // ---- styles -------------------------------------------------------------
   const used = styles.usedFacts(scan.usedStyles);
-  addFull('xlsx.styles.patternFill', 'cell format(s) with a pattern fill', used.patternFill, 'lost: pattern fills are dropped (only solid fills are imported)');
-  addFull('xlsx.styles.gradientFill', 'cell format(s) with a gradient fill', used.gradientFill, 'lost: gradient fills are dropped');
+  addFull('xlsx.styles.patternFill', 'cell format(s) with a pattern fill', used.patternFill, 'approximated: drawn as one flat colour (the pattern\'s average); the pattern and its colours are kept and saved back', undefined, 'approximated');
+  addFull('xlsx.styles.gradientFill', 'cell format(s) with a gradient fill', used.gradientFill, 'approximated: drawn as its first colour stop, and saved back as a solid fill of that colour', undefined, 'approximated');
   addFull('xlsx.styles.diagonalBorder', 'cell format(s) with a diagonal border', used.diagonalBorder, 'lost: diagonal borders are dropped');
-  addFull('xlsx.styles.namedStyles', 'named cell style(s) in use', used.namedStyles.length, 'approximated: formatting is kept per cell; the style names are not', used.namedStyles);
-  addFull('xlsx.styles.columnRowStyles', 'column/row default style(s)', t.columnRowStyles.total, 'lost: only cells present in the file keep their formatting', t.columnRowStyles.where);
+  addFull('xlsx.styles.borderStyles', 'cell format(s) with a border line style drawn approximately', used.approximateBorders.count, 'approximated: the line style is kept and saved back; on screen hair is a fine dotted line and slantDashDot a dash-dot line', used.approximateBorders.styles, 'approximated');
+  addFull('xlsx.styles.shrinkToFit', 'cell format(s) that shrink the text to fit', used.shrinkToFit, 'approximated: kept and saved back; on screen the text is scaled down to the cell width, the scale is not Excel\'s', undefined, 'approximated');
+  addFull('xlsx.styles.namedStyles', 'named cell style(s) in use', used.namedStyles.length, 'approximated: formatting is kept per cell; the style names are not', used.namedStyles, 'approximated');
 
   // ---- sheet --------------------------------------------------------------
   addFull('xlsx.sheet.tabColor', 'tab colour(s)', t.tabColor.total, 'lost: not imported', t.tabColor.where);
@@ -587,7 +583,6 @@ async function scanSheets(pkg: Package, sheets: SheetEntry[], options: DetectXls
       t.unsupported.add(name, cells.unsupported);
       t.cachedOnly.add(name, cells.cachedOnly);
       t.outline.add(name, cells.outlineRows);
-      t.columnRowStyles.add(name, cells.styledRows);
       for (const fn of cells.unsupportedNames) if (scan.unsupportedNames.length < MAX_WHERE && !scan.unsupportedNames.includes(fn)) scan.unsupportedNames.push(fn);
       for (const id of cells.styleIds) scan.usedStyles.add(id);
       scan.richInline += cells.richInline;
@@ -643,10 +638,7 @@ function scanWorksheet(root: XmlElement, name: string, t: Tallies, owned: Set<st
 
   for (const col of kids(kid(root, 'cols'), 'col')) {
     const style = Number(col.attrs.style);
-    if (style >= 1) {
-      t.columnRowStyles.add(name);
-      usedStyles.add(style);
-    }
+    if (style >= 1) usedStyles.add(style);
     if (Number(col.attrs.outlineLevel) >= 1) t.outline.add(name);
   }
 

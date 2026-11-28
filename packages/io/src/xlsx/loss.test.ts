@@ -616,13 +616,28 @@ describe('styles and number formats', () => {
     const bytes = await build({ styles, sheets: [{ rows: used(1, 2, 3, 4) }] });
     const report = await full(bytes);
     expect(item(report, 'xlsx.styles.themeColors')).toBeUndefined(); // the colours are resolved by the reader now (S2b)
-    expect(item(report, 'xlsx.styles.patternFill')).toMatchObject({ count: 1 });
-    expect(item(report, 'xlsx.styles.gradientFill')).toMatchObject({ count: 1 });
+    expect(item(report, 'xlsx.styles.patternFill')).toMatchObject({ count: 1, state: 'approximated' });
+    expect(item(report, 'xlsx.styles.gradientFill')).toMatchObject({ count: 1, state: 'approximated' });
     expect(item(report, 'xlsx.styles.diagonalBorder')).toMatchObject({ count: 1 });
     expect(item(report, 'xlsx.styles.namedStyles')).toMatchObject({ count: 1, where: ['Good'] });
     const none = await full(await build({ styles, sheets: [{ rows: used(0) }] }));
     expect(ids(none)).toEqual([]);
     expect(ids(await detectXlsxLoss(bytes))).toEqual([]);
+  });
+
+  it('reports border line styles drawn approximately and shrink-to-fit, only for formats in use', async () => {
+    const approx = STYLES(
+      '<fonts><font/></fonts><fills><fill/></fills>' +
+        '<borders><border/><border><left style="hair"/><top style="thin"/></border><border><bottom style="slantDashDot"/><right style="hair"/></border><border><left style="dashDot"/></border></borders>' +
+        '<cellStyleXfs><xf/></cellStyleXfs>' +
+        '<cellXfs><xf/><xf borderId="1"/><xf borderId="2"/><xf borderId="3"/><xf><alignment shrinkToFit="1"/></xf><xf><alignment shrinkToFit="true"/></xf><xf><alignment shrinkToFit="0"/></xf></cellXfs>'
+    );
+    const report = await full(await build({ styles: approx, sheets: [{ rows: used(1, 2, 3, 4, 5, 6) }] }));
+    expect(item(report, 'xlsx.styles.borderStyles')).toMatchObject({ count: 2, where: ['hair', 'slantDashDot'], state: 'approximated' });
+    expect(item(report, 'xlsx.styles.shrinkToFit')).toMatchObject({ count: 2, state: 'approximated' });
+    const none = await full(await build({ styles: approx, sheets: [{ rows: used(0, 3, 7) }] }));
+    expect(item(none, 'xlsx.styles.borderStyles')).toBeUndefined();
+    expect(item(none, 'xlsx.styles.shrinkToFit')).toBeUndefined();
   });
 
   it('counts the formats of rows and columns as in use, and the column and row styles themselves', async () => {
@@ -637,7 +652,8 @@ describe('styles and number formats', () => {
       ],
     });
     const report = await full(bytes);
-    expect(item(report, 'xlsx.styles.columnRowStyles')).toMatchObject({ count: 2, where: ['S'] });
+    // (column and row default formats are imported since S6: no item, and the formats they name still count as used)
+    expect(item(report, 'xlsx.styles.columnRowStyles')).toBeUndefined();
     expect(item(report, 'xlsx.styles.themeColors')).toBeUndefined();
   });
 
@@ -1302,7 +1318,7 @@ describe('package level', () => {
 describe('full id coverage', () => {
   const FULL_IDS = [
     'xlsx.formulas.array', 'xlsx.formulas.dynamicArray', 'xlsx.formulas.externalRef', 'xlsx.formulas.volatile',
-    'xlsx.styles.patternFill', 'xlsx.styles.gradientFill', 'xlsx.styles.diagonalBorder', 'xlsx.styles.namedStyles', 'xlsx.styles.columnRowStyles',
+    'xlsx.styles.patternFill', 'xlsx.styles.gradientFill', 'xlsx.styles.diagonalBorder', 'xlsx.styles.namedStyles',
     'xlsx.sheet.tabColor', 'xlsx.sheet.zoom', 'xlsx.sheet.rtl', 'xlsx.sheet.gridlines', 'xlsx.sheet.veryHidden', 'xlsx.sheet.customViews',
     'xlsx.print.setup', 'xlsx.print.areas', 'xlsx.print.titles', 'xlsx.print.breaks', 'xlsx.print.headersFooters',
     'xlsx.cf.dataBarExt', 'xlsx.cf.iconSetExt', 'xlsx.cf.formulaRule', 'xlsx.cf.stopIfTrue',
