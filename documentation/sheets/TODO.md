@@ -106,12 +106,12 @@ statistical, date/time, information, financial, reference and array categories
       host should lower `maxTotalCells` and `maxSheets` and/or import in a worker (`documentation/import-loss.md`). Related, not a defect: a table of
       two million shared strings peaks at 2.8 GB of process memory in the reader (five million took 1.17 GB).
 
-- [ ] **Blank source cells in dynamic-array results** (found in the S4 review; S5 or S11). The engine spills a blank source cell as blank where Excel
+- [ ] **Blank source cells in dynamic-array results** (found in the S4 review; unowned: S5 and S11 are merged and no later plan entry covers it, so it is a known wrong value that needs a new follow-up entry). The engine spills a blank source cell as blank where Excel
       shows 0. Repro: A1 = 1, A2 empty, A3 = 3, `B1 = A1:A3` spills `1, (blank), 3` (Excel: `1, 0, 3`), and `D1 = B2&"x"` gives `"x"` (Excel: `"0x"`).
       A legacy (CSE) array formula read from a file already reads 0 (`fitToExtent`). Fix: coerce a null member of a plain range-reference spill to 0 in the
       spill path, without changing `=A1:A3*1`-style results; it is an engine semantics change, so it is not part of the interchange PR.
 
-- [ ] **Implicit intersection of ranges inside calls in legacy formulas** (found in the SA-gap review; S5 or S11). A formula saved without the array mark gets Excel's
+- [ ] **Implicit intersection of ranges inside calls in legacy formulas** (found in the SA-gap review; unowned: S5 and S11 are merged and no later plan entry covers it, so it is a known wrong value that needs a new follow-up entry). A formula saved without the array mark gets Excel's
       intersection only for range operands outside every call and group (`=A1:A3*2`, shown `=@A1:A3*2`). Excel also intersects a range passed to a scalar parameter or used
       in the arithmetic of a call's argument; the engine has no table of which parameters are scalar (the function catalog has names only), so it can return a wrong value.
       Repros (data A1:A3 = 1, 2, 3; the formula is in a file without `cm` and `t="array"`): `F5 = LEN(A1:A3)` gives 5 (Excel `#VALUE!`; in F2 Excel 1),

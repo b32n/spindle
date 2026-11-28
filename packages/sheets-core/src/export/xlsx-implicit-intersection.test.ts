@@ -105,7 +105,7 @@ describe('a legacy formula over a multi-cell range is intersected with its own r
     expect(await valueAt(at, f)).toEqual(expected);
   });
 
-  // KNOWN DIVERGENCE (documentation/sheets/TODO.md, S5/S11): in a legacy formula Excel also intersects a range given to a scalar parameter
+  // KNOWN DIVERGENCE (documentation/sheets/TODO.md, Open items: unowned, no later plan entry): in a legacy formula Excel also intersects a range given to a scalar parameter
   // or used inside the arithmetic of a call's argument; the engine has no table of which parameters are scalar, so it leaves the calls alone
   // and returns a value where Excel gives the intersected cell or #VALUE!. The Excel column is from Excel's documented behaviour (and
   // a LibreOffice recalculation of the same formulas agrees with every row of the Excel column); these cases pin what the engine does today, so a fix shows up as a failing test to update.
