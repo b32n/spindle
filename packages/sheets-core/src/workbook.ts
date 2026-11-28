@@ -2079,12 +2079,14 @@ export class WorkbookImpl implements Workbook {
     for (const [sheetId, sheet] of this.sheets) {
       for (const [row, col, cell] of (sheet as SheetImpl).entries()) {
         if (!cell.formulaAst || cell.cachedOnly) continue;
-        if (!retargetRangesForDelete(cell.formulaAst, edited, edit)) continue;
+        const formulaAst = retargetRangesForDelete(cell.formulaAst, edited, edit);
+        if (!formulaAst) continue;
+        (sheet as SheetImpl).setCell(row, col, { formulaAst });
         this.formulaGraph.addFormula(
           this.graphKey(sheetId, row, col),
           cell.formula ?? '',
-          collectStableDependencies(cell.formulaAst),
-          formulaIsVolatile(cell.formulaAst),
+          collectStableDependencies(formulaAst),
+          formulaIsVolatile(formulaAst),
         );
       }
     }

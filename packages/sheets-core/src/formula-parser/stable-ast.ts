@@ -473,35 +473,54 @@ export function walkStableAst(node: StableFormulaNode, visit: (n: StableFormulaN
  * nearest surviving one, so a range keeps what survives of it (`A2:A5` without row 5 is `A2:A4`) and only becomes `#REF!` when all of
  * its rows/columns are deleted, as in Excel (the span rule is `shiftSpan`, shared with the cached-only text shifter). Whole-column/row
  * ranges are moved on their bounded axis. A single cell, a range of the other sheets, a positional (3D / not-yet-existing sheet) one
- * and a range on the axis the edit does not touch are left alone. Returns whether the AST changed.
+ * and a range on the axis the edit does not touch are left alone.
+ *
+ * Returns the adjusted AST, or `undefined` when nothing changes. It never mutates `root`: history snapshots share the nodes, so the
+ * nodes on the path to a changed range are copied.
  */
-export function retargetRangesForDelete(root: StableFormulaNode, sheet: Sheet, edit: StructuralEdit): boolean {
+export function retargetRangesForDelete(root: StableFormulaNode, sheet: Sheet, edit: StructuralEdit): StableFormulaNode | undefined {
   const isRow = edit.axis === 'row';
   const indexOf = (id: string): number | undefined => (isRow ? sheet.getRowIndex(id) : sheet.getColIndex(id));
-  let changed = false;
-  walkStableAst(root, (n) => {
-    const range = n.rangeRef;
-    if (!range || n.type === 'ref3d') return;
-    const [first, second] = [range.start, range.end].map((c) => (isRow ? c.rowId : c.colId));
-    const [a, b] = [indexOf(first), indexOf(second)];
-    if (a === undefined || b === undefined) return; // the other axis (whole), another sheet's ids, or already gone
+  const idOf = (c: StableCellRef): string => (isRow ? c.rowId : c.colId);
+  // the row/column that holds position `p` after the delete is the one at `p` before it, or `count` further on
+  const survivor = (p: number): string => {
+    const before = p < edit.start ? p : p + edit.count;
+    return isRow ? sheet.ensureRowId(before) : sheet.ensureColId(before);
+  };
+  const moved = (corner: StableCellRef, old: number, now: number): StableCellRef => {
+    if (old < edit.start || old >= edit.start + edit.count) return corner;
+    const id = survivor(now);
+    return isRow ? { ...corner, rowId: id } : { ...corner, colId: id };
+  };
+
+  const retargetRange = (range: StableRangeRef): StableRangeRef | undefined => {
+    const [a, b] = [indexOf(idOf(range.start)), indexOf(idOf(range.end))];
+    if (a === undefined || b === undefined) return undefined; // the other axis (whole), another sheet's ids, or already gone
     const next = shiftPair(a, b, edit);
-    if (next === undefined) return; // every row/column of it is deleted: its ids go and it is #REF!
-    // the row/column that holds position `p` after the delete is the one at `p` before it, or `count` further on
-    const survivor = (p: number): string => {
-      const before = p < edit.start ? p : p + edit.count;
-      return isRow ? sheet.ensureRowId(before) : sheet.ensureColId(before);
-    };
-    [range.start, range.end].forEach((corner, i) => {
-      const old = [a, b][i];
-      if (old < edit.start || old >= edit.start + edit.count) return;
-      const id = survivor(next[i]);
-      if (isRow) corner.rowId = id;
-      else corner.colId = id;
-      changed = true;
-    });
-  });
-  return changed;
+    if (next === undefined) return undefined; // every row/column of it is deleted: its ids go and it is #REF!
+    const start = moved(range.start, a, next[0]);
+    const end = moved(range.end, b, next[1]);
+    return start === range.start && end === range.end ? undefined : { ...range, start, end };
+  };
+
+  const visit = (node: StableFormulaNode): StableFormulaNode => {
+    let out = node;
+    const own = (): StableFormulaNode => (out === node ? (out = { ...node }) : out);
+    const range = node.rangeRef && node.type !== 'ref3d' ? retargetRange(node.rangeRef) : undefined;
+    if (range) own().rangeRef = range;
+    if (node.args) {
+      const args = node.args.map(visit);
+      if (args.some((arg, i) => arg !== (node.args as StableFormulaNode[])[i])) own().args = args;
+    }
+    for (const side of ['left', 'right'] as const) {
+      const child = node[side];
+      const next = child && visit(child);
+      if (next !== child) own()[side] = next;
+    }
+    return out;
+  };
+  const result = visit(root);
+  return result === root ? undefined : result;
 }
 
 /** Point every reference to sheet `oldName` (including a 3D span's endpoints) at `newName`. */
