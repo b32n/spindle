@@ -342,7 +342,8 @@ describe('differential: own reader against the exceljs reader, over the corpus',
       const { o, n } = await both(corpus(f.filename));
       if ('r' in o && 'r' in n) seen.push(...compare(o.r, n.r).seen);
     }
-    expect(tally(seen)).toEqual({ builtinFormat: 8, colourResolved: 3, falsyResult: 7, newWarning: 1, sharedFormulaExpanded: 4 });
+    // (falsyResult was 7 until the xlsxwriter-rich SORT probe saved its real result "N" instead of xlsxwriter's placeholder 0)
+    expect(tally(seen)).toEqual({ builtinFormat: 8, colourResolved: 3, falsyResult: 6, newWarning: 1, sharedFormulaExpanded: 4 });
   });
 
   it('lists the files the old reader could not read: the own reader reads them or refuses them with an ImportError', async () => {
