@@ -17,6 +17,18 @@ const texts = (d: DeckImpl) =>
     s.elements.flatMap((e: SlideElement) => (e.type === 'text' || e.type === 'shape') && e.richText ? [richTextToPlainText(e.richText)] : [])
   );
 
+const shapeOf = (d: DeckImpl) =>
+  d.getData().slides.map((s) =>
+    s.elements.map((e) => ({
+      type: e.type,
+      frame: [e.x, e.y, e.w, e.h, e.rotation ?? 0].map((n) => Math.round(n * 10) / 10),
+      fill: 'fill' in e ? JSON.stringify(e.fill) : undefined,
+      cells: e.type === 'table' ? e.cells.map((r) => r.length) : undefined,
+      grouped: e.groupId !== undefined,
+      bind: e.type === 'line' ? [e.startBind?.anchor, e.endBind?.anchor] : undefined,
+    }))
+  );
+
 describe('PPTX corpus through the editor', () => {
   it.each(files)('%s keeps its slides, element kinds and text through export', async (f) => {
     const deck = new DeckImpl();
@@ -28,6 +40,7 @@ describe('PPTX corpus through the editor', () => {
     expect(again.getData().slides).toHaveLength(deck.getData().slides.length);
     expect(kinds(again)).toEqual(kinds(deck));
     expect(texts(again)).toEqual(texts(deck));
+    expect(shapeOf(again)).toEqual(shapeOf(deck));
     // exporting the re-imported deck once more changes nothing the reader sees
     const twice = await exportToPptx(again);
     const third = new DeckImpl();

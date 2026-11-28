@@ -3,7 +3,7 @@
 // `@b32nio/spindle-io` is loaded on first use (like the sheets and docs cores), so a host that never opens or saves a PPTX does not
 // ship the reader and writer.
 
-import type { ImportLossReport } from '@b32nio/spindle-shared';
+import type { Comment, ImportLossReport } from '@b32nio/spindle-shared';
 import type { OpaquePart } from '@b32nio/spindle-shared/opaque';
 import type { DetectPptxLossOptions, PptxCommentThread, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
 import type { DeckImpl } from '../deck';
@@ -12,7 +12,6 @@ import { indexesBetween } from '../scene/fractional-index';
 import type { SlideElement } from '../scene/types';
 import { richTextToPlainText } from '../text/model';
 import { BUILTIN_LAYOUTS } from '../theme/builtin';
-import type { Comment } from '@b32nio/spindle-shared';
 import type { LayoutData } from '../theme/types';
 import type { DeckData, SlideData, SlidesCommentThread } from '../types';
 import {
@@ -177,6 +176,7 @@ export async function importFromPptx(
   const io = await loadIo();
   const { now: _now, ...readerOptions } = options;
   const result = await io.importPptx(bytes, readerOptions);
+  // the package is read twice (the reader, then the loss report): the report needs the file as it is, not as the editor took it
   const loss = await io.detectPptxLoss(bytes);
   if (result.slides.length === 0) throw new Error('The file contains no slides.');
   const warnings = [...result.warnings];

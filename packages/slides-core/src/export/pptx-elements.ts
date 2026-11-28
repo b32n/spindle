@@ -560,7 +560,8 @@ export function elementsFromPptx(list: PptxElement[], containerId: string, tally
         continue;
       }
       if (item.kind === 'group') {
-        const id = generateId();
+        // the group's own `pptxId` rides in its id, so an animation that targets the group still resolves after saving
+        const id = item.pptxId !== '' ? `${GROUP_PREFIX}${item.pptxId}-${generateId()}` : generateId();
         walk(item.children, { id, ...(group ? { parent: group.id } : {}) });
         continue;
       }
@@ -597,9 +598,17 @@ export function elementsFromPptx(list: PptxElement[], containerId: string, tally
 
 const NAMES: Record<SlideElement['type'], string> = { text: 'Text', shape: 'Shape', image: 'Picture', line: 'Connector', table: 'Table', opaque: 'Content' };
 
-/** A source of ids for the elements that have no `pptxId` (and for groups), unique among the slide's. */
+const GROUP_PREFIX = 'pptx-group-';
+const GROUP_ID = /^pptx-group-([^-]+)-/;
+const groupPptxId = (id: string): string | undefined => GROUP_ID.exec(id)?.[1];
+
+/** A source of ids for the elements that have no `pptxId` (and for groups), unique among the slide's and the kept ids of its groups. */
 function idSource(elements: SlideElement[]): () => string {
   const used = new Set(elements.flatMap((e) => (e.pptxId !== undefined ? [e.pptxId] : [])));
+  for (const e of elements) for (const g of [e.groupId, e.parentGroupId]) {
+    const kept = g === undefined ? undefined : groupPptxId(g);
+    if (kept !== undefined) used.add(kept);
+  }
   let next = 1;
   return () => {
     do next++;
@@ -617,6 +626,7 @@ export function elementsToPptx(elements: SlideElement[]): { elements: PptxElemen
   const sorted = [...elements].sort((a, b) => Number(a.index > b.index) - Number(a.index < b.index));
   const withIds = sorted.map((e) => (e.pptxId === undefined ? { ...e } : e)) as SlideElement[];
   const freshId = idSource(withIds);
+  const taken = new Set(withIds.flatMap((e) => (e.pptxId !== undefined ? [e.pptxId] : [])));
   for (const e of withIds) e.pptxId ??= freshId();
   const byId = new Map(withIds.map((e) => [e.id, e]));
   const counts: Record<string, number> = {};
@@ -639,7 +649,10 @@ export function elementsToPptx(elements: SlideElement[]): { elements: PptxElemen
   const group = (id: string): PptxGroup => {
     let node = nodes.get(id);
     if (!node) {
-      node = { kind: 'group', pptxId: freshId(), name: `Group ${nodes.size + 1}`, children: [] };
+      const kept = groupPptxId(id);
+      const own = kept !== undefined && !taken.has(kept) ? kept : freshId();
+      taken.add(own);
+      node = { kind: 'group', pptxId: own, name: `Group ${nodes.size + 1}`, children: [] };
       nodes.set(id, node);
       const parent = parents.get(id);
       (parent && parent !== id ? group(parent).children : top).push(node);

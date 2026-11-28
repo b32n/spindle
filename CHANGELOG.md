@@ -510,7 +510,6 @@ lockstep.
   row leaves it, inside it extends it. It applies to normal formulas (stable ids: the range boundary moves onto the nearest surviving row or
   column before the delete; undo restores it) and to the text of cached-only formulas alike. Sheet names in references are case-insensitive
   (`sheet2!A1` points at `Sheet2` and follows its rename and edits). A workbook saved with such a `#REF!` keeps it; only new deletes change.
-
 - **Slides: deck <-> PPTX (K15a).** New additive exports from `@b32nio/spindle-slides-core`: `importFromPptx(bytes, deck, options?)`
   (replaces the deck with the file: slide size, theme, layouts with their text levels, shapes, text with marks and paragraph
   attributes, pictures, tables, connectors glued to their shapes, groups, notes, comments, and charts, diagrams, objects and media

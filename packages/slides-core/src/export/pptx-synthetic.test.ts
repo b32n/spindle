@@ -236,7 +236,7 @@ describe('importFromPptx', () => {
         slide([
           shape('1', { geometry: { kind: 'preset', prst: 'ellipse', known: true } }),
           shape('2', { geometry: rectGeom }),
-          { kind: 'group', pptxId: '3', name: 'G', children: [shape('4'), { kind: 'group', pptxId: '5', name: 'H', children: [shape('6')] }, { kind: 'group', pptxId: '9', name: 'hid', hidden: true, children: [shape('10')] }] },
+          { kind: 'group', pptxId: '3', name: 'G', children: [shape('4'), { kind: 'group', pptxId: '5', name: 'H', children: [shape('6')] }, { kind: 'group', pptxId: '9', name: 'hid', hidden: true, children: [shape('10')] }, { kind: 'group', pptxId: '', name: 'anon', children: [shape('13')] }] },
           conn('7', { start: { id: '1', idx: 6 }, end: { id: '2', idx: 1 }, geometry: { kind: 'preset', prst: 'bentConnector3', adjustments: { adj1: 25000 }, known: true }, line: { ...line, head: { type: 'triangle' }, tail: { type: 'oval' } } }),
           conn('8', { start: { id: '1', idx: 0 }, geometry: { kind: 'preset', prst: 'curvedConnector3', known: true }, frame: { ...frame(0, 0, 100, 50), flipH: true, flipV: true }, line: { fill: { kind: 'none' }, head: { type: 'stealth' }, tail: { type: 'nope' } } }),
           conn('11', { end: { id: '2', idx: 3 }, line: {}, geometry: undefined }),
@@ -251,6 +251,10 @@ describe('importFromPptx', () => {
     expect(byP('4').parentGroupId).toBeUndefined();
     expect(byP('6')).toMatchObject({ parentGroupId: byP('4').groupId });
     expect(byP('6').groupId).not.toBe(byP('4').groupId);
+    expect(byP('4').groupId).toMatch(/^pptx-group-3-/);
+    expect(byP('6').groupId).toMatch(/^pptx-group-5-/);
+    expect(byP('13').groupId).toBeDefined();
+    expect(byP('13').groupId).not.toMatch(/^pptx-group-/);
     expect(byP('10')).toBeUndefined();
     expect(byP('7')).toMatchObject({ type: 'line', connector: 'elbow', adjustments: [0.25], startBind: { elementId: byP('1').id, anchor: 'e' }, endBind: { elementId: byP('2').id, anchor: 'w' }, startArrow: 'triangle', endArrow: 'circle' });
     expect(byP('8')).toMatchObject({ connector: 'curved', startBind: { anchor: 'n' }, endPoint: { x: 0, y: 0 }, startArrow: 'triangle', stroke: { color: { alpha: 0 } } });
@@ -401,6 +405,26 @@ describe('exportToPptx', () => {
     const single = p.slides[0].elements![1] as Extract<PptxElement, { kind: 'table' }>;
     expect(single).not.toHaveProperty('flags');
     expect(single.rows[0].cells[0].borders!.l).toMatchObject({ width: 2 });
+  });
+
+  it('keeps a group\'s own pptxId through the editor so a timing target still resolves, and never reuses one', async () => {
+    const box = (id: string, over: Record<string, unknown>) => el({ id, type: 'shape', shape: 'rect', fill: { kind: 'none' }, w: 10, h: 10, ...over });
+    const deck = deckOf([
+      box('a', { pptxId: '5', groupId: 'pptx-group-8-xyz', parentGroupId: 'pptx-group-9-xyz' }),
+      box('b', { groupId: 'pptx-group-8-xyz', parentGroupId: 'pptx-group-9-xyz' }),
+      box('c', { groupId: 'pptx-group-5-copy' }),
+      box('d', { groupId: 'pptx-group-8-other' }),
+      box('e2', { groupId: 'plain' }),
+    ] as SlideElement[]);
+    const { p } = await captured(deck);
+    const groups = p.slides[0].elements!.filter((x) => x.kind === 'group');
+    const ids = groups.map((g) => g.pptxId);
+    expect(ids).toContain('9');
+    const outer = groups.find((g) => g.pptxId === '9') as Extract<PptxElement, { kind: 'group' }>;
+    expect((outer.children[0] as Extract<PptxElement, { kind: 'group' }>).pptxId).toBe('8');
+    // '5' is an element's id, and '8' was taken by the first group: the others get free ids
+    const all = JSON.stringify(p.slides[0].elements).match(/"pptxId":"(\d+)"/g)!;
+    expect(new Set(all).size).toBe(all.length);
   });
 
   it('rebuilds groups with their box, resolves connectors against their shapes and writes comments', async () => {
