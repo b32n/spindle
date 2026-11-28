@@ -97,7 +97,7 @@ export default defineConfig([
       { file: 'dist/export/xlsx/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/export/xlsx/index.esm.js', format: 'esm', sourcemap: true },
     ],
-    external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx'],
+    external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx', '@b32nio/spindle-io/pptx'],
     plugins: [tsExportXlsx],
   },
   {
@@ -106,7 +106,7 @@ export default defineConfig([
       { file: 'dist/export/docx/index.js', format: 'cjs', sourcemap: true, dynamicImportInCjs: false },
       { file: 'dist/export/docx/index.esm.js', format: 'esm', sourcemap: true },
     ],
-    external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx'],
+    external: ['@b32nio/spindle-io/xlsx', '@b32nio/spindle-io/docx', '@b32nio/spindle-io/pptx'],
     plugins: [tsExportDocx],
   },
   {

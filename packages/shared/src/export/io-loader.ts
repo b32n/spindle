@@ -26,3 +26,11 @@ export async function loadIoDocx() {
     throw new Error(`${MISSING.replace(/%FORMAT%/g, 'docx')} (${err instanceof Error ? err.message : String(err)})`);
   }
 }
+
+export async function loadIoPptx() {
+  try {
+    return await import('@b32nio/spindle-io/pptx');
+  } catch (err) {
+    throw new Error(`${MISSING.replace(/%FORMAT%/g, 'pptx')} (${err instanceof Error ? err.message : String(err)})`);
+  }
+}

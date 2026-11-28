@@ -30,6 +30,8 @@ const tsPluginNoDecl = typescript({
 const external = [
   '@b32nio/spindle-shared',
   '@b32nio/spindle-shared/opaque',
+  '@b32nio/spindle-shared/export/pptx',
+  '@b32nio/spindle-io/pptx',
   'yjs',
   'y-protocols',
   'y-protocols/awareness',

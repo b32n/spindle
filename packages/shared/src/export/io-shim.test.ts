@@ -33,3 +33,19 @@ describe('deprecated export/xlsx and export/docx shims', () => {
     expect(docx.detectDocxLoss).toHaveBeenCalledWith(bytes);
   });
 });
+
+describe('loadIoPptx', () => {
+  it('loads the optional spindle-io pptx entry, and names the peer when it is missing', async () => {
+    const pptx = { importPptx: jest.fn() };
+    jest.doMock('@b32nio/spindle-io/pptx', () => pptx, { virtual: true });
+    const { loadIoPptx } = await import('./io-loader');
+    expect((await loadIoPptx()).importPptx).toBe(pptx.importPptx);
+    jest.dontMock('@b32nio/spindle-io/pptx');
+    jest.doMock('@b32nio/spindle-io/pptx', () => {
+      throw new Error('boom');
+    }, { virtual: true });
+    jest.resetModules();
+    const fresh = await import('./io-loader');
+    await expect(fresh.loadIoPptx()).rejects.toThrow(/moved to @b32nio\/spindle-io.*"@b32nio\/spindle-io\/pptx".*boom/s);
+  });
+});

@@ -54,3 +54,7 @@ export type { CollabBlocker } from './collab/blockers';
 // Utilities re-exported for convenience
 export { generateId } from './utils/id';
 export { EventEmitter } from '@b32nio/spindle-shared';
+
+// PPTX import / export (the reader and writer in `@b32nio/spindle-io/pptx` load on first use)
+export { importFromPptx, exportToPptx, inspectPptx } from './export/pptx';
+export type { ImportFromPptxOptions, ExportToPptxOptions, ExportToPptxResult } from './export/pptx';
