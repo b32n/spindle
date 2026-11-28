@@ -118,15 +118,6 @@
     },
     {
       "count": 1,
-      "effect": "lost: not imported (the PPTX reader does not read this yet)",
-      "id": "pptx.shapes.effects",
-      "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges",
-      "where": [
-        "Slide 3"
-      ]
-    },
-    {
-      "count": 1,
       "effect": "approximated: imported as a gradient; a gradient taken from the theme's style list (not the shape's own fill) is read as a solid colour",
       "id": "pptx.shapes.gradientFill",
       "label": "gradient fill(s)",

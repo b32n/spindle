@@ -841,6 +841,18 @@ describe('shapes', () => {
     expect(countOf(r, 'pptx.shapes.effects')).toBe(4);
   });
 
+  it('does not count the outer shadow of a shape the reader keeps; any other effect, a second shadow or a shadow it cannot read stays counted', async () => {
+    const shdw = '<a:outerShdw blurRad="1"><a:srgbClr val="000000"/></a:outerShdw>';
+    const r = await one(
+      sp({ spPr: `${frame}<a:effectLst>${shdw}</a:effectLst>` }) + // kept
+        sp({ spPr: `${frame}<a:effectLst>${shdw}<a:glow rad="1"/></a:effectLst>` }) +
+        sp({ spPr: `${frame}<a:effectLst>${shdw}${shdw}</a:effectLst>` }) +
+        sp({ spPr: `${frame}<a:effectLst><a:outerShdw/></a:effectLst>` }) +
+        '<p:cxnSp><p:nvCxnSpPr/><p:spPr><a:effectLst>' + shdw + '</a:effectLst></p:spPr></p:cxnSp>' // a connector's shadow is not read
+    );
+    expect(countOf(r, 'pptx.shapes.effects')).toBe(4);
+  });
+
   it('counts gradient and pattern fills on shapes, cells and backgrounds, not on outlines', async () => {
     const r = await build({
       slides: [

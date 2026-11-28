@@ -68,11 +68,11 @@ describe('slide shapes', () => {
     expect(warnings).toContain('Changed on export: shapes with an unusable preset name written as rectangles (1).');
   });
 
-  it('writes custom geometry without its outline until K13 and says so', async () => {
+  it('writes custom geometry the reader could not keep without its outline and says so', async () => {
     const { shapes, warnings } = await write([shape({ geometry: { kind: 'custom' }, text: { props: {}, paragraphs: [para([text('kept')])] } })]);
     expect(shapes[0].geometry).toBeUndefined();
     expect(shapes[0].text?.paragraphs[0].runs[0].text).toBe('kept');
-    expect(warnings).toEqual(['Changed on export: shapes with custom geometry written without their outline, until K13 (1).']);
+    expect(warnings).toEqual(['Changed on export: shapes with custom geometry the editor could not keep written without their outline (1).']);
   });
 
   it('writes text boxes, hidden shapes and placeholders', async () => {
@@ -125,7 +125,7 @@ describe('fills and outlines', () => {
     const pic: PptxFill = { kind: 'picture' };
     const { shapes, warnings } = await write([shape({ fill: { kind: 'gradient', shape: 'linear', stops }, line: { fill: pic, dash: 'custom' } })]);
     expect(shapes[0].fill).toEqual({ kind: 'gradient', shape: 'linear', angle: 0, stops });
-    expect(warnings).toEqual(['Changed on export: custom dash patterns written as solid lines (1).', 'Changed on export: picture fills left out, until K13 (1).']);
+    expect(warnings).toEqual(['Changed on export: custom dash patterns written as solid lines (1).', 'Changed on export: picture fills left out (the image of a fill is not kept) (1).']);
   });
 
   it('leaves picture fills out and says so once per use', async () => {
@@ -133,7 +133,7 @@ describe('fills and outlines', () => {
     const { shapes, warnings, xml } = await write([shape({ fill: pic, line: { fill: pic, width: 1 } })], { background: pic });
     expect(shapes[0].fill).toBeUndefined();
     expect(xml).not.toContain('<p:bg>');
-    expect(warnings).toEqual(['Changed on export: picture fills left out, until K13 (3).']);
+    expect(warnings).toEqual(['Changed on export: picture fills left out (the image of a fill is not kept) (3).']);
   });
 
   it('writes an empty outline and a custom dash as a solid line, with a warning', async () => {

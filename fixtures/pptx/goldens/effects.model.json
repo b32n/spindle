@@ -3987,6 +3987,18 @@
             "kind": "shape",
             "name": "Outer shadow",
             "pptxId": "3",
+            "shadow": {
+              "algn": "tl",
+              "blur": 6.666666666666667,
+              "color": {
+                "alpha": 0.45,
+                "hex": "#000000",
+                "kind": "rgb"
+              },
+              "dir": 45,
+              "dist": 8,
+              "rotWithShape": false
+            },
             "text": {
               "paragraphs": [
                 {

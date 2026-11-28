@@ -10,42 +10,22 @@
       "slides": 1
     },
     "byField": {
-      "removed slides[].elements[].geometry": 5
+      "removed slides[].elements[].geometry": 1
     },
     "changed": 0,
     "entries": [
       {
-        "before": "{\"kind\":\"custom\",\"paths\":[{\"w\":100,\"h\":100,\"commands\":[{\"op\":\"move\",\"x\":0,\"y\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[1].geometry"
-      },
-      {
-        "before": "{\"kind\":\"custom\",\"paths\":[{\"w\":200,\"h\":100,\"commands\":[{\"op\":\"move\",\"x\":0,\"y\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[2].geometry"
-      },
-      {
-        "before": "{\"kind\":\"custom\",\"paths\":[{\"w\":100,\"h\":100,\"commands\":[{\"op\":\"move\",\"x\":0,\"y\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[3].geometry"
-      },
-      {
         "before": "{\"kind\":\"custom\"}",
         "kind": "removed",
         "path": "slides[0].elements[4].geometry"
-      },
-      {
-        "before": "{\"kind\":\"custom\",\"paths\":[{\"w\":100,\"h\":100,\"commands\":[{\"op\":\"move\",\"x\":50,\"y...",
-        "kind": "removed",
-        "path": "slides[0].elements[5].geometry"
       }
     ],
-    "removed": 5,
-    "total": 5,
+    "removed": 1,
+    "total": 1,
     "truncated": false
   },
   "exportWarnings": [
-    "Changed on export: shapes with custom geometry written without their outline, until K13 (5)."
+    "Changed on export: shapes with custom geometry the editor could not keep written without their outline (1)."
   ],
   "reimportWarnings": [],
   "status": "ok"

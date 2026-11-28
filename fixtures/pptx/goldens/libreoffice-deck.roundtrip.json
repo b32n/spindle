@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 10,
+      "elements": 12,
       "slides": 4
     },
     "before": {
@@ -13,8 +13,7 @@
       "changed fonts.used[]": 2,
       "removed fonts.used[]": 1,
       "removed opaqueParts[]": 1,
-      "removed slides[].elements[]": 3,
-      "removed slides[].notes": 1,
+      "removed slides[].elements[]": 1,
       "removed slides[].opaque": 4
     },
     "changed": 2,
@@ -52,21 +51,6 @@
         "path": "slides[1].opaque"
       },
       {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"70\",\"name\":\"Table 2\",\"frame\":{\"x\":48,\"y\":153.6,\"w\":...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"71\",\"name\":\"Picture 3\",\"altText\":\"image.png\",\"fra...",
-        "kind": "removed",
-        "path": "slides[2].elements[2]"
-      },
-      {
-        "before": "{\"props\":{\"insets\":{\"l\":9.6,\"t\":4.8,\"r\":9.6,\"b\":4.8},\"anchor\":\"top\",\"autofit\"...",
-        "kind": "removed",
-        "path": "slides[2].notes"
-      },
-      {
         "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
         "kind": "removed",
         "path": "slides[2].opaque"
@@ -82,15 +66,12 @@
         "path": "slides[3].opaque"
       }
     ],
-    "removed": 10,
-    "total": 12,
+    "removed": 7,
+    "total": 9,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 1 pictures (K13).",
-    "Not exported yet: 1 tables (K13).",
     "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
-    "Not exported yet: 1 speaker notes (K13).",
     "Not exported yet: 4 transitions (K14)."
   ],
   "reimportWarnings": [],

@@ -2,77 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 8,
+      "elements": 18,
       "slides": 2
     },
     "before": {
       "elements": 18,
       "slides": 2
     },
-    "byField": {
-      "removed slides[].elements[]": 10
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"kind\":\"group\",\"pptxId\":\"10\",\"name\":\"Simple group\",\"frame\":{\"x\":73.490813648...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"group\",\"pptxId\":\"20\",\"name\":\"Scaled group\",\"frame\":{\"x\":461.94225721...",
-        "kind": "removed",
-        "path": "slides[0].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"group\",\"pptxId\":\"31\",\"name\":\"Level 1\",\"frame\":{\"x\":73.49081364829397...",
-        "kind": "removed",
-        "path": "slides[0].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"group\",\"pptxId\":\"40\",\"name\":\"Group with text and a line\",\"frame\":{\"x...",
-        "kind": "removed",
-        "path": "slides[0].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"20\",\"name\":\"Straight connector\",\"frame\":{\"x\":23...",
-        "kind": "removed",
-        "path": "slides[1].elements[7]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"21\",\"name\":\"Elbow connector\",\"frame\":{\"x\":230.9...",
-        "kind": "removed",
-        "path": "slides[1].elements[8]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"22\",\"name\":\"Curved connector\",\"frame\":{\"x\":230....",
-        "kind": "removed",
-        "path": "slides[1].elements[9]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"23\",\"name\":\"Unconnected elbow\",\"frame\":{\"x\":787...",
-        "kind": "removed",
-        "path": "slides[1].elements[10]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"24\",\"name\":\"Unconnected curve\",\"frame\":{\"x\":787...",
-        "kind": "removed",
-        "path": "slides[1].elements[11]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"25\",\"name\":\"Unconnected line\",\"frame\":{\"x\":787....",
-        "kind": "removed",
-        "path": "slides[1].elements[12]"
-      }
-    ],
-    "removed": 10,
-    "total": 10,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 6 connectors (K13).",
-    "Not exported yet: 4 groups (K13)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

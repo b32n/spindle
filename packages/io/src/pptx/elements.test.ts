@@ -535,6 +535,11 @@ describe('table styles', () => {
     const none = await read({ tree: styled(1, 1, '') });
     expect(none.warnings.some((w) => w.includes(STYLE_ID))).toBe(true);
     expect((await read({ tree: table([[cell('A')]], { pr: '<a:tblPr><a:tableStyleId> </a:tableStyleId></a:tblPr>' }) })).warnings.some((w) => w.includes('style'))).toBe(false);
+    // a built-in style (any case) is resolved by the application, so the file need not define it
+    for (const id of ['{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}', '{5c22544a-7ee6-4342-b048-85bdc9fd1c3a}']) {
+      const builtIn = await read({ tree: table([[cell('A')]], { pr: `<a:tblPr><a:tableStyleId>${id}</a:tableStyleId></a:tblPr>` }), tableStyles: `<a:tblStyleLst ${NS}/>` });
+      expect(builtIn.warnings.some((w) => w.includes('style'))).toBe(false);
+    }
   });
 
   it('reads the flags that are on', async () => {

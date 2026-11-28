@@ -166,6 +166,41 @@ describe('p:sp: outlines (K1)', () => {
   });
 });
 
+describe('p:sp: outer shadow (K13)', () => {
+  const shadow = async (xml: string) => (await one(sp({ spPr: xml }))).shadow;
+
+  it('reads blur, distance, direction, anchor and rotation flag with the colour and its alpha', async () => {
+    expect(await shadow(`<a:effectLst><a:outerShdw blurRad="${4 * E}" dist="${2 * E}" dir="2700000" algn="tl" rotWithShape="0">${srgb('112233', '<a:alpha val="40000"/>')}</a:outerShdw></a:effectLst>`)).toEqual({
+      color: { kind: 'rgb', hex: '#112233', alpha: 0.4 },
+      blur: 4,
+      dist: 2,
+      dir: 45,
+      algn: 'tl',
+      rotWithShape: false,
+    });
+    expect(await shadow(`<a:effectLst><a:outerShdw rotWithShape="false">${srgb('000000')}</a:outerShdw></a:effectLst>`)).toEqual({ color: { kind: 'rgb', hex: '#000000' }, rotWithShape: false });
+    expect(await shadow(`<a:effectLst><a:outerShdw rotWithShape="1"><a:schemeClr val="tx1"/></a:outerShdw></a:effectLst>`)).toEqual({ color: { kind: 'theme', slot: 'dk1' }, rotWithShape: true });
+  });
+
+  it('ignores a negative size and a bad number, and keeps a direction of any sign', async () => {
+    expect(await shadow(`<a:effectLst><a:outerShdw blurRad="-1" dist="x" dir="-60000">${srgb('000000')}</a:outerShdw></a:effectLst>`)).toEqual({ color: { kind: 'rgb', hex: '#000000' }, dir: -1 });
+  });
+
+  it('reads nothing when the list holds another effect, two shadows, an unreadable colour or no colour', async () => {
+    const c = srgb('000000');
+    expect(await shadow(`<a:effectLst><a:outerShdw>${c}</a:outerShdw><a:glow rad="1"/></a:effectLst>`)).toBeUndefined();
+    expect(await shadow(`<a:effectLst><a:outerShdw>${c}</a:outerShdw><a:outerShdw>${c}</a:outerShdw></a:effectLst>`)).toBeUndefined();
+    expect(await shadow('<a:effectLst><a:innerShdw/></a:effectLst>')).toBeUndefined();
+    expect(await shadow('<a:effectLst><a:outerShdw><a:schemeClr val="phClr"/></a:outerShdw></a:effectLst>')).toBeUndefined();
+    expect(await shadow('<a:effectLst><a:outerShdw/></a:effectLst>')).toBeUndefined();
+    for (const attr of ['sx', 'sy', 'kx', 'ky']) {
+      expect(await shadow(`<a:effectLst><a:outerShdw ${attr}="50000">${srgb('000000')}</a:outerShdw></a:effectLst>`)).toBeUndefined();
+    }
+    expect(await shadow('<a:effectLst/>')).toBeUndefined();
+    expect(await shadow('')).toBeUndefined();
+  });
+});
+
 describe('p:sp: shape style references', () => {
   const style = (fill: string, ln: string, font = '') => `<p:style><a:lnRef idx="${ln}"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="${fill}"><a:schemeClr val="accent2"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent1"/></a:effectRef>${font || '<a:fontRef idx="minor"/>'}</p:style>`;
 

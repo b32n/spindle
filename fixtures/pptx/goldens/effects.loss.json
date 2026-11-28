@@ -12,10 +12,10 @@
       ]
     },
     {
-      "count": 9,
+      "count": 8,
       "effect": "lost: not imported (the PPTX reader does not read this yet)",
       "id": "pptx.shapes.effects",
-      "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges",
+      "label": "shape(s) or run(s) with shadow, glow, reflection or soft edges (the lone outer shadow of a plain shape is kept)",
       "where": [
         "Slide 1",
         "Slide 2"
