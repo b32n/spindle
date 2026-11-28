@@ -1,4 +1,4 @@
-import { InMemoryProvider, __resetInMemoryRooms, type CollabIdentity } from '@b32nio/spindle-shared';
+import { InMemoryProvider, __resetInMemoryRooms, type CollabChannel, type CollabIdentity } from '@b32nio/spindle-shared';
 import { WorkbookImpl } from './workbook';
 
 // A range keeps what survives of it when rows/columns are deleted and is #REF! only when all of it goes (Excel): the engine's
@@ -73,7 +73,8 @@ describe('deleting rows under a range formula', () => {
     wb.setFormula(undefined, 2, 5, '=SUM(B1:C1)');
     wb.getSheet().deleteCols(1, 1);
     expect(formulaOf(wb, 2, 3)).toEqual({ formula: '=SUM(A:B)', value: 101 });
-    expect(formulaOf(wb, 2, 4)).toEqual({ formula: '=SUM(B1:B1)', value: 100 }); // C1 is B1 now
+    // C1 is B1 now; that the one-cell range stays `B1:B1` is an engine convention (Excel does not document how it shows it)
+    expect(formulaOf(wb, 2, 4)).toEqual({ formula: '=SUM(B1:B1)', value: 100 });
     wb.getSheet().deleteCols(1, 1);
     expect(formulaOf(wb, 2, 2)).toEqual({ formula: '=SUM(A:A)', value: 1 });
     expect(formulaOf(wb, 2, 3)).toEqual({ formula: '=SUM(#REF!)', value: '#REF!' }); // all of its columns are gone
@@ -142,5 +143,71 @@ describe('collaboration: a delete under a range formula', () => {
     for (const wb of [a, b]) expect(sumOf(wb).value).toBe(23);
     ha.detach();
     hb.detach();
+  });
+
+  // Both clients edit before either one's change reaches the other: each provider holds its outgoing doc messages until released.
+  class GatedProvider extends InMemoryProvider {
+    private held: Uint8Array[] | undefined;
+    hold(): void {
+      this.held = [];
+    }
+    send(channel: CollabChannel, payload: Uint8Array): void {
+      if (this.held && channel === 'doc') this.held.push(payload);
+      else super.send(channel, payload);
+    }
+    release(): void {
+      const held = this.held ?? [];
+      this.held = undefined;
+      for (const payload of held) super.send('doc', payload);
+    }
+  }
+
+  const cells = (wb: WorkbookImpl) =>
+    [...wb.getSheet().entries()].map(([r, c, cell]) => [r, c, cell.formula, cell.value] as const).sort((x, y) => String(x).localeCompare(String(y)));
+  const formulaText = (wb: WorkbookImpl): string | undefined => [...wb.getSheet().entries()].find(([, , cell]) => cell.formula)?.[2].formula;
+
+  type Edit = (w: WorkbookImpl) => void;
+  const delRow = (i: number): Edit => (w) => w.getSheet().deleteRows(i, 1);
+  const editFormula: Edit = (w) => w.setFormula(undefined, 9, 1, '=SUM(A1:A3)');
+  const editValue: Edit = (w) => w.setCellValue(undefined, 2, 0, 100);
+  /** The formula text after one edit alone on a fresh copy of `book`. */
+  const alone = (edit: Edit): string | undefined => {
+    const wb = book('alone');
+    edit(wb);
+    return formulaText(wb);
+  };
+
+  // Structure sync is last writer wins (pre-existing): a concurrent structural edit may be lost, and which one survives depends on the
+  // clients' random ids. So the check is convergence (identical documents) and that the surviving formula text is one of the results of a
+  // single edit, or SUM(#REF!) when the surviving structure and the surviving text disagree about the deleted corner (seen when the corner
+  // row is deleted next to a value edit or an interior delete; for the latter master gave SUM(A2:A4): both are LWW artefacts, not measured
+  // for the former on master).
+  it.each([
+    ['A deletes the corner row while B edits the formula', delRow(4), editFormula, []],
+    ['A deletes the first row while B edits the formula', delRow(1), editFormula, ['=SUM(A1:A2)']], // B's new text with A's delete applied
+    ['A deletes the corner row while B edits a value', delRow(4), editValue, ['=SUM(#REF!)']],
+    ['both delete different rows (the corner and an interior one)', delRow(4), delRow(2), ['=SUM(#REF!)']],
+    ['both delete different rows (the first and the corner)', delRow(1), delRow(4), ['=SUM(#REF!)']],
+  ] as Array<[string, Edit, Edit, string[]]>)('concurrent: %s: both release orders converge on a single-edit text', async (_name, editA, editB, extra) => {
+    const allowed = [alone(editA), alone(editB), ...extra];
+    for (const order of ['a then b', 'b then a']) {
+      __resetInMemoryRooms();
+      const [ga, gb] = [new GatedProvider(), new GatedProvider()];
+      const a = book('room');
+      const ha = await a.attachCollab(ga, identity('A'), { roomId: 'gated-range' });
+      const b = new WorkbookImpl('b', 'B');
+      const hb = await b.attachCollab(gb, identity('B'), { roomId: 'gated-range' });
+      ga.hold();
+      gb.hold();
+      editA(a);
+      editB(b);
+      const [first, second] = order === 'a then b' ? [ga, gb] : [gb, ga];
+      first.release();
+      second.release();
+      expect(cells(a)).toEqual(cells(b));
+      expect(allowed).toContain(formulaText(a));
+      ha.detach();
+      hb.detach();
+    }
   });
 });
