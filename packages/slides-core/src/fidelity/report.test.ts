@@ -40,15 +40,15 @@ describe('toReportFile', () => {
 describe('pptxScoreboard', () => {
   const files = (list: Array<[string, Partial<ReportFile>]>): ReportFile[] => list.map(([id, over]) => ({ ...toReportFile(outcome(id, result())), ...over }));
 
-  it('measures L12 and L13, covers only the stubs for L11 and says L14 needs the exporter', () => {
+  it('measures L12 and L13, covers only the stubs for L11 and measures L14 from the round trip', () => {
     const rows = pptxScoreboard(files([['a', {}], ['b', {}]]));
     expect(rows.map((r) => r.id)).toEqual(['L11', 'L12', 'L13', 'L14']);
     // both files threw although the manifest does not say they should: L12 is not met
-    expect(rows.map((r) => r.status)).toEqual(['not-measured', 'not-met', 'not-met', 'not-measured']);
+    expect(rows.map((r) => r.status)).toEqual(['not-measured', 'not-met', 'not-met', 'met']);
     expect(rows[1].measured).toBe('2 of 2 files: a threw, b threw');
     expect(rows[2].measured).toBe('4 of 6 parts unaccounted in 2 of 2 files (0 mapped, 0 opaque, 2 dropped)');
     expect(rows[0].measured).toMatch(/^only the stub files are covered so far/);
-    expect(rows[3].measured).toMatch(/^not measurable yet: no exporter yet/);
+    expect(rows[3].measured).toMatch(/^0 differences in 0 of 0 round-tripped files; 0 failed, 2 skipped/);
   });
 
   it('meets L12 when every file ends as its manifest says, and names a file that imported but should have failed', () => {

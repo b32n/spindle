@@ -1,7 +1,57 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 1
+    },
+    "before": {
+      "elements": 6,
+      "slides": 1
+    },
+    "byField": {
+      "removed slides[].elements[]": 6
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Triangle path\",\"frame\":{\"x\":62.992125984...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Bezier curves\",\"frame\":{\"x\":293.96325459...",
+        "kind": "removed",
+        "path": "slides[0].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Arcs, two paths\",\"frame\":{\"x\":587.926509...",
+        "kind": "removed",
+        "path": "slides[0].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Guides and connection sites\",\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"Hand-drawn star\",\"frame\":{\"x\":62.9921259...",
+        "kind": "removed",
+        "path": "slides[0].elements[5]"
+      }
+    ],
+    "removed": 6,
+    "total": 6,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 6 shapes and text boxes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

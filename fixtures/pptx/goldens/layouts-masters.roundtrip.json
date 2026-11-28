@@ -1,7 +1,230 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 5
+    },
+    "before": {
+      "elements": 12,
+      "slides": 5
+    },
+    "byField": {
+      "changed layouts[].masterName": 5,
+      "changed layouts[].masterPart": 5,
+      "changed layouts[].staticShapes": 7,
+      "removed layouts[].elements[]": 7,
+      "removed slides[].elements[]": 12
+    },
+    "changed": 17,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[0].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[0].staticShapes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[1].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[1].staticShapes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[2].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[2].staticShapes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[3].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[3].staticShapes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[4].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[4].staticShapes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[5].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[5].staticShapes"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Master accent bar\",\"frame\":{\"x\":0,\"y\":0...",
+        "kind": "removed",
+        "path": "layouts[6].elements[0]"
+      },
+      {
+        "after": "0",
+        "before": "1",
+        "kind": "changed",
+        "path": "layouts[6].staticShapes"
+      },
+      {
+        "after": "\"First master\"",
+        "before": "\"Second master\"",
+        "kind": "changed",
+        "path": "layouts[8].masterName"
+      },
+      {
+        "after": "\"ppt/slideMasters/slideMaster1.xml\"",
+        "before": "\"ppt/slideMasters/slideMaster2.xml\"",
+        "kind": "changed",
+        "path": "layouts[8].masterPart"
+      },
+      {
+        "after": "\"First master\"",
+        "before": "\"Second master\"",
+        "kind": "changed",
+        "path": "layouts[9].masterName"
+      },
+      {
+        "after": "\"ppt/slideMasters/slideMaster1.xml\"",
+        "before": "\"ppt/slideMasters/slideMaster2.xml\"",
+        "kind": "changed",
+        "path": "layouts[9].masterPart"
+      },
+      {
+        "after": "\"First master\"",
+        "before": "\"Second master\"",
+        "kind": "changed",
+        "path": "layouts[10].masterName"
+      },
+      {
+        "after": "\"ppt/slideMasters/slideMaster1.xml\"",
+        "before": "\"ppt/slideMasters/slideMaster2.xml\"",
+        "kind": "changed",
+        "path": "layouts[10].masterPart"
+      },
+      {
+        "after": "\"First master\"",
+        "before": "\"Second master\"",
+        "kind": "changed",
+        "path": "layouts[11].masterName"
+      },
+      {
+        "after": "\"ppt/slideMasters/slideMaster1.xml\"",
+        "before": "\"ppt/slideMasters/slideMaster2.xml\"",
+        "kind": "changed",
+        "path": "layouts[11].masterPart"
+      },
+      {
+        "after": "\"First master\"",
+        "before": "\"Second master\"",
+        "kind": "changed",
+        "path": "layouts[12].masterName"
+      },
+      {
+        "after": "\"ppt/slideMasters/slideMaster1.xml\"",
+        "before": "\"ppt/slideMasters/slideMaster2.xml\"",
+        "kind": "changed",
+        "path": "layouts[12].masterPart"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"ctrTitle...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Subtitle 2\",\"placeholder\":{\"type\":\"subTi...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Object Placeholder 8\",\"placeholder\":{\"ty...",
+        "kind": "removed",
+        "path": "slides[1].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Slide Number Placeholder 3\",\"placeholder...",
+        "kind": "removed",
+        "path": "slides[1].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Content Placeholder 3\",\"placeholder\":{\"t...",
+        "kind": "removed",
+        "path": "slides[2].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Date Placeholder 3\",\"placeholder\":{\"type...",
+        "kind": "removed",
+        "path": "slides[2].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Footer Placeholder 4\",\"placeholder\":{\"ty...",
+        "kind": "removed",
+        "path": "slides[2].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Slide Number Placeholder 5\",\"placeholder...",
+        "kind": "removed",
+        "path": "slides[2].elements[4]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[3].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Plain text box\",\"textBox\":true,\"frame\":{...",
+        "kind": "removed",
+        "path": "slides[4].elements[0]"
+      }
+    ],
+    "removed": 19,
+    "total": 36,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "2 slide masters were merged into one (their layouts keep their placeholders).",
+    "Not exported yet: 12 shapes and text boxes (K12b).",
+    "Not exported yet: 7 static layout shapes (K12b)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

@@ -66,8 +66,8 @@ describe('PPTX fidelity corpus (io source)', () => {
       } else {
         expect({ id: o.entry.id, error: o.result.model.importError }).toEqual({ id: o.entry.id, error: null });
         expect(o.result.model.presentation).not.toBeNull();
-        // the writer does not exist yet (K12): the round trip stops there
-        expect(o.result.roundtrip).toMatchObject({ status: 'export-error', error: 'no exporter' });
+        // the writer (K12) round-trips every readable deck
+        expect(o.result.roundtrip.status).toBe('ok');
       }
       expect(o.importExpectation).toBe('as-expected');
       expect(o.result.loss.items.map((i) => i.id).filter((i) => i.startsWith('harness.'))).toEqual([]);
@@ -158,7 +158,7 @@ describe('PPTX fidelity corpus (io source)', () => {
     expect(report.scoreboard.map((r) => r.id)).toEqual(['L11', 'L12', 'L13', 'L14']);
     // L12 holds (every file ends as its manifest says); L13 does not: the rejected no-presentation package has 26 parts
     // that nothing accounts for, which is correct (nothing was imported) and recorded
-    expect(report.scoreboard.map((r) => r.status)).toEqual(['not-measured', 'met', 'not-met', 'not-measured']);
+    expect(report.scoreboard.map((r) => r.status)).toEqual(['not-measured', 'met', 'not-met', 'not-met']);
     expect(report.files).toHaveLength(committed.length);
   });
 

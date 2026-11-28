@@ -1,6 +1,6 @@
 import type { HarnessReport } from '../fidelity-core/harness';
 import type { FidelityReport, ReportFile } from '../fidelity-core/report';
-import { exceptionStats, ledgerStats, scoreRow, unmeasuredRow, type ScoreRow } from '../fidelity-core/scoreboard';
+import { exceptionStats, ledgerStats, roundtripStats, scoreRow, unmeasuredRow, type ScoreRow } from '../fidelity-core/scoreboard';
 import { PPTX_KINDS, type PptxResult } from './run';
 
 const MAX_UNACCOUNTED_LISTED = 12;
@@ -28,11 +28,9 @@ export function toReportFile(o: HarnessReport<PptxResult>['fixtures'][number]): 
   };
 }
 
-const NO_EXPORTER_YET = 'no exporter yet (plan K12): every round trip stops at "no exporter"';
-
 /**
  * The launch-bar rows (plan 7.3) a PPTX run can speak to. L12 and L13 are real now that the reader exists (K9); L11 only
- * covers the stub files until the limit probes are added, and L14 needs the exporter (K12). L15 to L17 need other tools (PowerPoint, Google Slides, LibreOffice) and are not listed.
+ * covers the stub files until the limit probes are added, and L14 is the round trip (the writer, K12). L15 to L17 need other tools (PowerPoint, Google Slides, LibreOffice) and are not listed.
  */
 export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
   const area = 'Slides';
@@ -41,6 +39,7 @@ export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
   const flagged = (id: string, lossId: string) =>
     withId(id)?.loss.some((i) => i.id === lossId) ? 'reported' : 'not reported';
   const ex = exceptionStats(files);
+  const rt = roundtripStats(files);
   const bad = ex.unexpectedErrors.length + ex.unexpectedSuccesses.length;
   return [
     unmeasuredRow(
@@ -66,12 +65,13 @@ export function pptxScoreboard(files: ReportFile[]): ScoreRow[] {
       '0',
       lg.unaccounted === 0
     ),
-    unmeasuredRow(
+    scoreRow(
       'L14',
       area,
       'Round trip: counts, positions, text, theme equal; opaque parts hash-identical',
-      `not measurable yet: ${NO_EXPORTER_YET}`,
-      '0 diffs'
+      `${rt.diffs} differences in ${rt.filesWithDiffs} of ${rt.roundTripped} round-tripped files; ${rt.failed} failed, ${rt.skipped} skipped (import error)`,
+      '0 diffs',
+      rt.diffs === 0 && rt.failed === 0
     ),
   ];
 }

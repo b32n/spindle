@@ -2,9 +2,9 @@
  * The PPTX adapter for the generic harness: one file in, four measurements out (model, loss, roundtrip, ledger). Every
  * step catches its own failures, so a throwing importer is a recorded result, never a crash.
  *
- * The reader exists (plan K9) and the writer does not (K12): `model` holds the imported presentation (or the import
- * error, for the files that are not presentations) with the text parity check against the source, and `roundtrip` stops at `no exporter` until the writer lands. Against
- * an API without `importPptx` the model records `importError: "no importer"`.
+ * The reader (plan K9) and the writer (K12) exist: `model` holds the imported presentation (or the import
+ * error, for the files that are not presentations) with the text parity check against the source, and `roundtrip` is import -> export -> import with the
+ * writer's own report of what it does not export yet. Against an API without `importPptx` the model records `importError: "no importer"`.
  */
 import path from 'node:path';
 import { diffValues } from '../fidelity-core/diff';
@@ -82,15 +82,16 @@ async function roundtrip(
   imported: Json
 ): Promise<RoundtripSnapshot> {
   if (!api.exportPptx || !api.importPptx) return roundtripOf('export-error', { error: 'no exporter' });
-  let exported: Uint8Array;
+  let exported: { bytes: Uint8Array; warnings: string[] };
   try {
     exported = await api.exportPptx(presentation);
   } catch (e) {
     return roundtripOf('export-error', { error: errorMessage(e) });
   }
   try {
-    const second = await api.importPptx(exported);
+    const second = await api.importPptx(exported.bytes);
     return roundtripOf('ok', {
+      exportWarnings: exported.warnings,
       reimportWarnings: second.warnings,
       diff: diffValues(imported, normalizePresentation(second.presentation), {
         counts: countPresentation,
@@ -98,7 +99,7 @@ async function roundtrip(
       }),
     });
   } catch (e) {
-    return roundtripOf('reimport-error', { error: errorMessage(e) });
+    return roundtripOf('reimport-error', { error: errorMessage(e), exportWarnings: exported.warnings });
   }
 }
 

@@ -1,7 +1,115 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 6
+    },
+    "before": {
+      "elements": 11,
+      "slides": 6
+    },
+    "byField": {
+      "removed slides[].elements[]": 11,
+      "removed slides[].opaque": 6
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
+        "kind": "removed",
+        "path": "slides[0].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
+        "kind": "removed",
+        "path": "slides[1].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
+        "kind": "removed",
+        "path": "slides[2].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[3].elements[0]"
+      },
+      {
+        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
+        "kind": "removed",
+        "path": "slides[3].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[4].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Entrance\",\"frame\":{\"x\":73.49081364829397...",
+        "kind": "removed",
+        "path": "slides[4].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Exit\",\"frame\":{\"x\":367.4540682414698,\"y\"...",
+        "kind": "removed",
+        "path": "slides[4].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Emphasis\",\"frame\":{\"x\":661.4173228346457...",
+        "kind": "removed",
+        "path": "slides[4].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Path\",\"frame\":{\"x\":955.3805774278215,\"y\"...",
+        "kind": "removed",
+        "path": "slides[4].elements[4]"
+      },
+      {
+        "before": "{\"timing\":\"<p:timing xmlns:a=\\\"http://schemas.openxmlformats.org/drawingml/20...",
+        "kind": "removed",
+        "path": "slides[4].opaque"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[5].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Content Placeholder 3\",\"placeholder\":{\"t...",
+        "kind": "removed",
+        "path": "slides[5].elements[1]"
+      },
+      {
+        "before": "{\"timing\":\"<p:timing xmlns:a=\\\"http://schemas.openxmlformats.org/drawingml/20...",
+        "kind": "removed",
+        "path": "slides[5].opaque"
+      }
+    ],
+    "removed": 17,
+    "total": 17,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 11 shapes and text boxes (K12b).",
+    "Not exported yet: 4 transitions (K14).",
+    "Not exported yet: 2 animation timelines (K14)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

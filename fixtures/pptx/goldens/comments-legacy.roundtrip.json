@@ -1,7 +1,54 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 3
+    },
+    "before": {
+      "elements": 3,
+      "slides": 3
+    },
+    "byField": {
+      "removed slides[].elements[]": 3,
+      "removed slides[].threads": 2
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "[{\"id\":\"256-0.1\",\"format\":\"legacy\",\"anchor\":{\"kind\":\"slide\"},\"position\":{\"x\":...",
+        "kind": "removed",
+        "path": "slides[0].threads"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[1].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[2].elements[0]"
+      },
+      {
+        "before": "[{\"id\":\"258-1.2\",\"format\":\"legacy\",\"anchor\":{\"kind\":\"slide\"},\"position\":{\"x\":...",
+        "kind": "removed",
+        "path": "slides[2].threads"
+      }
+    ],
+    "removed": 5,
+    "total": 5,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 3 shapes and text boxes (K12b).",
+    "Not exported yet: 3 comment threads (K13)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }

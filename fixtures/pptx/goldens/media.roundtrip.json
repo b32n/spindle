@@ -1,7 +1,69 @@
 {
-  "diff": null,
-  "error": "no exporter",
-  "exportWarnings": [],
+  "diff": {
+    "added": 0,
+    "after": {
+      "elements": 0,
+      "slides": 1
+    },
+    "before": {
+      "elements": 5,
+      "slides": 1
+    },
+    "byField": {
+      "removed opaqueParts[]": 3,
+      "removed slides[].elements[]": 5
+    },
+    "changed": 0,
+    "entries": [
+      {
+        "before": "{\"hash\":\"de17900c6e6225de65eec7b1970c03636113a98dc8a9c0e9ea5e937fa7ad32f8\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[0]"
+      },
+      {
+        "before": "{\"hash\":\"b6f9afbfc0ef2db793105d4cb042beda0855b7861e87ab32345ea76ff8d6598b\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[1]"
+      },
+      {
+        "before": "{\"hash\":\"421a2ff8af9dc9971057324353b1324d629c72ab244c0615edc222b463c2dd0c\",\"c...",
+        "kind": "removed",
+        "path": "opaqueParts[2]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "kind": "removed",
+        "path": "slides[0].elements[0]"
+      },
+      {
+        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"media\",\"pptxId\":\"3\",\"name\":\"Video 1\",\"altText\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[1]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Label video\",\"textBox\":true,\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[2]"
+      },
+      {
+        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"media\",\"pptxId\":\"4\",\"name\":\"Audio 2\",\"altText\"...",
+        "kind": "removed",
+        "path": "slides[0].elements[3]"
+      },
+      {
+        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"Label audio\",\"textBox\":true,\"frame\":{\"x...",
+        "kind": "removed",
+        "path": "slides[0].elements[4]"
+      }
+    ],
+    "removed": 8,
+    "total": 8,
+    "truncated": false
+  },
+  "exportWarnings": [
+    "Not exported yet: 3 shapes and text boxes (K12b).",
+    "Not exported yet: 2 charts, diagrams, objects, media and ink (K14)."
+  ],
   "reimportWarnings": [],
-  "status": "export-error"
+  "status": "ok"
 }
