@@ -35,7 +35,6 @@ const GAPS = [
   ['docs', 'D-GAP-03', 'Ruler margin handles, table column resize, image resize handles', 'not covered', 'Pointer gestures on the canvas-like page layer; to add.'],
   ['docs', 'D-GAP-04', 'Headers/footers in additional sections, odd/even pages', 'n/a', 'Not supported by the product yet.'],
   ['docs', 'D-GAP-05', 'Suggestion / review mode', 'n/a', 'Not implemented (missing everywhere).'],
-  ['slides', 'SL-GAP-01', 'Import / export (PPTX / PDF) UI', 'n/a', 'No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests. Image upload is covered (SL-IMG-*, SL-INS-07).'],
   ['slides', 'SL-GAP-02', 'Presenter view in a separate window', 'not covered', 'Opens a popup window; only the S-key notes panel is covered (SL-PRS-06).'],
   ['slides', 'SL-GAP-03', 'Connector snapping to anchors, table cell selection gestures', 'not covered', 'Complex pointer gestures; to add.'],
   ['slides', 'SL-GAP-04', 'Slide drag-reorder in the filmstrip', 'not covered', 'To add.'],
@@ -66,7 +65,7 @@ for (const file of walk(specRoot)) {
       note = buf.join(' ').replace(/^Bug:\s*/, '').replace(/\|/g, '\\|');
     }
     const smoke = /@smoke/.test(m[4]);
-    rows.push({ editor, id: m[3], title: m[4].replace(/\s*@smoke/, '').replace(/\|/g, '\\|'), fixme, note, smoke, file: path.relative(root, file) });
+    rows.push({ editor, id: m[3], title: m[4].replace(/\s*@smoke\s*/, ' ').trim().replace(/\|/g, '\\|'), fixme, note, smoke, file: path.relative(root, file) });
   });
 }
 

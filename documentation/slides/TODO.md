@@ -15,13 +15,12 @@ The scene model already carries what most deferred items need, so several are
 
 Not in the current scope; verified absent in code.
 
-- [ ] **PPTX import / export** — the schema deliberately keeps `layoutRef`,
-      placeholder `{type, idx}`, symbolic theme colors, and flat text bodies so
-      this stays honest, but no reader/writer exists yet. A corpus of test decks with a
-      construct manifest (`fixtures/pptx/`) now defines what the importer has to cover. A loss detector
-      (`detectPptxLoss` in `@b32nio/spindle-io/pptx`, loss ids in `documentation/import-loss.md`) and a golden runner
-      (`npm run slides:pptx-fidelity`) already report what every corpus deck holds; both say "not imported" until the
-      importer lands. Nothing opens a `.pptx` yet.
+- [ ] **PPTX import / export** — Open and Download (`fileActions`, off by default) are in the toolbar: Open
+      inspects the file (`inspectPptx`), shows the import dialog with a "Kept, not editable" group, then replaces the
+      deck (`importFromPptx`); Download writes a `.pptx` (`exportToPptx`). A corpus of test decks with a construct
+      manifest (`fixtures/pptx/`) and a golden runner (`npm run slides:pptx-fidelity`) record what each deck holds;
+      loss ids are in `documentation/import-loss.md`. Still open: Open fails while collaboration is attached, and
+      constructs the editor cannot edit (charts, transitions, …) are kept for saving back but not shown or editable.
 - [ ] **Charts** as a first-class element type (bar / line / pie, …). No chart
       element or renderer exists.
 - [ ] **Video / audio** elements — absent from the `SlideElement` union.
@@ -56,7 +55,7 @@ Not in the current scope; verified absent in code.
       field's stored text; a date follows the viewer's locale; footer fields have no insert control yet).
 - [ ] **Rich speaker notes** — notes are plain-text only (`NotesPanel.tsx`).
 - [ ] **Real PDF / PNG export backend** — intentionally **not** in these
-      packages; export is delegated to the host app (`SlidesEditor.tsx`). A
+      packages; PDF/PNG export is delegated to the host app (`SlidesEditor.tsx`); `.pptx` Download is built in. A
       shared, headless export backend is a possible follow-up.
 
 ## Collaboration gaps

@@ -85,7 +85,7 @@ test.describe('slides: insert tools, text editing, zoom, notes, background', () 
 
   test('SL-INS-07 Image upload inserts an image from a chosen file', async ({ page }) => {
     const before = await ids();
-    await page.locator('input[type="file"]').setInputFiles({
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles({
       name: 'pixel.png',
       mimeType: 'image/png',
       buffer: Buffer.from(PNG.split(',')[1], 'base64'),

@@ -79,6 +79,8 @@ export default function SlidesDemo() {
         <div style={{ width, height, overflow: 'hidden', background: '#fff' }}>
           <DeckProvider deck={deck} currentUser={DEMO_USERS[0]} mentionableUsers={DEMO_USERS}>
             <SlidesEditor
+              fileActions
+              onFileError={(error, action) => window.alert(`Could not ${action} the file: ${error.message}`)}
               headerActions={
                 <button
                   onClick={() => exportDeckToPdf(deck)}

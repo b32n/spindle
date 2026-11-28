@@ -2,8 +2,10 @@
 // interactive stage. Owns keyboard shortcuts (attached to a focused wrapper,
 // not window) and the right-click context menu.
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createFontLoader, ImageHooksContext, type FontSource, type ImageHooks } from '@b32nio/spindle-shared/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createFontLoader, ImageHooksContext, useImportConfirm, type FontSource, type ImageHooks, type ImportConfirmation } from '@b32nio/spindle-shared/react';
+import type { ImportLossReport } from '@b32nio/spindle-shared';
+import { downloadDeckFile, openDeckFile, type SlidesExportFormat } from '../file-io';
 import { useDeck, useTheme, useKeyboardShortcuts, useCommentsOpen, useFilmstripOpen } from '../hooks';
 import { usePasteImport } from '../hooks/usePasteImport';
 import { useDeckContext } from '../context/DeckContext';
@@ -51,6 +53,21 @@ export interface SlidesEditorProps {
   maxImageBytes?: number;
   /** Called when inserting an image fails (wrong type, too large, hook rejected). */
   onImageError?: (error: Error) => void;
+  /**
+   * Show Open (.pptx, read from a local file input) and Download (.pptx) in the toolbar. Opening a file replaces the whole deck.
+   * Default: false. Requires the toolbar (hidden in read-only mode); use `exportDeckFile` for a host-side download button.
+   */
+  fileActions?: boolean;
+  /** How Open reacts to a file whose import would lose something (default `'dialog'`; see `ImportConfirmation`). */
+  importConfirmation?: ImportConfirmation;
+  /** Base name for downloaded files (no extension). Default: the deck title. */
+  fileName?: string;
+  /** Called after a file was opened; `warnings` lists what the importer had to change, `loss` what it could not take or only keeps. */
+  onFileOpened?: (info: { fileName: string; warnings: string[]; loss: ImportLossReport }) => void;
+  /** Called when opening or downloading fails (unsupported type, corrupt file, collab attached...). */
+  onFileError?: (error: Error, action: 'open' | 'download') => void;
+  /** Called with what a download's writer left out or changed (not called when nothing was). */
+  onExportWarning?: (warnings: string[]) => void;
 }
 
 /** First family of a CSS font stack, unquoted ("Inter, Arial" -> "Inter"). */
@@ -71,7 +88,7 @@ function ensureDrawerStyles(): void {
   document.head.appendChild(el);
 }
 
-export function SlidesEditor({ style, readOnly = false, headerActions, toolbarExtras, fontSource, resolveImage, uploadImage, maxImageBytes, onImageError }: SlidesEditorProps): React.ReactElement {
+export function SlidesEditor({ style, readOnly = false, headerActions, toolbarExtras, fontSource, resolveImage, uploadImage, maxImageBytes, onImageError, fileActions = false, importConfirmation, fileName, onFileOpened, onFileError, onExportWarning }: SlidesEditorProps): React.ReactElement {
   const deck = useDeck();
   const theme = useTheme();
   const imageHooks = useMemo<ImageHooks>(
@@ -82,6 +99,15 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
   useEffect(() => {
     loadFonts([firstFamily(theme.fonts.major), firstFamily(theme.fonts.minor)]);
   }, [loadFonts, theme.fonts.major, theme.fonts.minor]);
+  const { confirm: confirmImport, dialog: importDialog } = useImportConfirm(importConfirmation);
+  const handleOpenFile = useCallback(
+    (file: File) => openDeckFile(deck, file, { confirm: confirmImport, onFileOpened, onFileError }),
+    [deck, confirmImport, onFileOpened, onFileError]
+  );
+  const handleDownload = useCallback(
+    (format: SlidesExportFormat) => downloadDeckFile(deck, format, { fileName, onFileError, onExportWarning }),
+    [deck, fileName, onFileError, onExportWarning]
+  );
   const [zoom, setZoom] = useState<Zoom>('fit');
   const [menu, setMenu] = useState<
     | { x: number; y: number; kind: 'element' }
@@ -204,6 +230,8 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
           zoom={zoom}
           onZoomChange={setZoom}
           onPresent={() => setPresenting(true)}
+          onOpenFile={fileActions ? handleOpenFile : undefined}
+          onDownload={fileActions ? handleDownload : undefined}
         />
       )}
       <div style={{ display: 'flex', flex: '1 1 auto', minHeight: 0, gap: 12, padding: '4px 12px 12px', background: 'linear-gradient(180deg, #f1f5f9 0%, #eaeef4 100%)' }}>
@@ -236,6 +264,7 @@ export function SlidesEditor({ style, readOnly = false, headerActions, toolbarEx
       {menu?.kind === 'element' && <ContextMenu x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
       {menu?.kind === 'slide' && <SlideContextMenu slideId={menu.slideId} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
       {menu?.kind === 'tableCell' && <TableCellMenu tableId={menu.tableId} row={menu.row} col={menu.col} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />}
+      {importDialog}
       {presenting && <PresentMode onExit={() => setPresenting(false)} />}
     </div>
     </ImageHooksContext.Provider>

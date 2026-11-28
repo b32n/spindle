@@ -83,6 +83,9 @@ export { StaticRichText } from './components/elements/StaticRichText';
 export { shapeGeom } from './components/elements/shapes';
 export type { ShapeGeom } from './components/elements/shapes';
 
-// Shared import-confirmation dialog (slides has no importer yet; hosts that import decks can reuse it).
+// PPTX Open / Download helpers and the shared import-confirmation dialog (for hosts that render their own Open flow).
+export * from './file-io';
+export { FileActions } from './components/FileActions';
+export type { FileActionsProps } from './components/FileActions';
 export { ImportConfirmDialog } from '@b32nio/spindle-shared/react';
-export type { ImportConfirmDialogProps } from '@b32nio/spindle-shared/react';
+export type { ImportConfirmation, ImportConfirmDialogProps } from '@b32nio/spindle-shared/react';

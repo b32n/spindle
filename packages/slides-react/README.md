@@ -21,6 +21,23 @@ Includes the interactive stage (selection, move/resize/rotate gestures with smar
 
 Compose the whole editor with `SlidesEditor`, or drop down to `SlideStage`, `SlideView`, `Filmstrip`, `PresentMode`, and the `useDeck` / `useElement` / `useSelection` / `useComments` hooks.
 
+## Open / Download (PPTX)
+
+`SlidesEditor` can show **Open** (a local `.pptx` file picker) and **Download** (`.pptx`) in its toolbar, the same host contract as the docs and sheets editors. It is opt-in:
+
+```tsx
+<SlidesEditor
+  fileActions
+  importConfirmation="dialog"                // or 'never', or (report, file) => boolean | Promise<boolean>
+  fileName="Quarterly review"                // optional; defaults to the deck title
+  onFileOpened={({ fileName, warnings, loss }) => {}}
+  onFileError={(error, action) => {}}        // action: 'open' | 'download'
+  onExportWarning={(warnings) => {}}         // what the writer left out or changed
+/>
+```
+
+Opening a file replaces the whole deck (and fails while collaboration is attached). When the file holds something the editor cannot take, a dialog lists it first: what will be lost, what is imported approximately and what is "kept, not editable" (charts, diagrams, objects, media, transitions and animations, saved back unchanged). Files are read locally; nothing is uploaded. For a host-owned button use the exported `exportDeckFile`, `importDeckFile` and `inspectDeckFile`.
+
 Peer dependencies: `react` and `react-dom` (>= 18). Full docs: <https://spindle.b32n.io/docs/slides/components>.
 
 MIT licensed.
