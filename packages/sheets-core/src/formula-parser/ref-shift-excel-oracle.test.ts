@@ -1,4 +1,6 @@
-// An oracle table for a structural edit of rows/columns, written from what Excel documents and does, NOT derived from this engine:
+// An oracle table for a structural edit of rows/columns. The rules below are what Excel documents and does, NOT derived from this engine;
+// the rows marked ENGINE CONVENTION in the table are not Excel behaviour (Excel never shows them or does not document them) and pin what
+// this engine chooses:
 // - a reference to a deleted cell is #REF!;
 // - a range keeps the rows/columns of it that survive (a deleted boundary moves to the nearest survivor) and is #REF! only when every
 //   row/column of it is deleted;
@@ -78,6 +80,8 @@ const table: Array<[string, Edit, string]> = [
   ['=SUM($B$2:$D$5)', delCols('B'), '=SUM($B$2:$C$5)'],
   ['=$A$5', insRows(1), '=$A$6'],
   // --- the corners written the other way round
+  // ENGINE CONVENTION, not Excel: Excel normalises reversed corners (A5:A2 becomes A2:A5) when the formula is entered, so it never has
+  // such a reference to edit. These rows pin that the engine keeps the written order and moves each corner as the edit moves it.
   ['=SUM(A5:A2)', delRows(5), '=SUM(A4:A2)'],
   ['=SUM(A5:A2)', delRows(2), '=SUM(A4:A2)'],
   ['=SUM(A5:A2)', delRows(2, 4), '=SUM(#REF!)'],
@@ -97,7 +101,7 @@ const table: Array<[string, Edit, string]> = [
   ['=SUM(B:D)', insCols('D'), '=SUM(B:E)'],
   ['=SUM(B:D)', insCols('E'), '=SUM(B:D)'],
   ['=SUM($B:$D)', delCols('C'), '=SUM($B:$C)'],
-  ['=SUM(D:B)', delCols('B'), '=SUM(C:B)'],
+  ['=SUM(D:B)', delCols('B'), '=SUM(C:B)'], // ENGINE CONVENTION (reversed corners, see above)
   ['=SUM(B:D)', insRows(1), '=SUM(B:D)'], // rows do not touch a whole column
   ['=SUM(B:D)', delRows(2, 3), '=SUM(B:D)'],
   // --- whole rows
@@ -111,7 +115,7 @@ const table: Array<[string, Edit, string]> = [
   ['=SUM(2:4)', insRows(4), '=SUM(2:5)'],
   ['=SUM(2:4)', insRows(5), '=SUM(2:4)'],
   ['=SUM($2:$4)', delRows(2), '=SUM($2:$3)'],
-  ['=SUM(4:2)', delRows(4), '=SUM(3:2)'],
+  ['=SUM(4:2)', delRows(4), '=SUM(3:2)'], // ENGINE CONVENTION (reversed corners, see above)
   ['=SUM(2:4)', insCols('A'), '=SUM(2:4)'], // columns do not touch a whole row
   ['=SUM(2:4)', delCols('A', 3), '=SUM(2:4)'],
   // --- other sheets: only an edit of the referenced sheet reaches a reference
@@ -120,6 +124,9 @@ const table: Array<[string, Edit, string]> = [
   ['=SUM(Sheet2!A2:A5)', insRows(2, 1, 'Sheet2'), '=SUM(Sheet2!A3:A6)'],
   ['=SUM(A2:A5)', delRows(5, 1, 'Sheet2'), '=SUM(A2:A5)'], // unprefixed: the formula's own sheet
   ["=SUM('My Sheet'!A2:A5)", delRows(2, 1, 'My Sheet'), "=SUM('My Sheet'!A2:A4)"],
+  // ENGINE CONVENTION on the text: Excel shows `=Sheet2!#REF!` (the sheet prefix stays). The engine (and both of its paths) drop the
+  // prefix of a deleted single cell: `=#REF!`. The value is the same #REF! error; only the text differs, and a cachedOnly formula
+  // takes the same text as a normal one (the differential test needs one text for both paths).
   ['=Sheet2!A5', delRows(5, 1, 'Sheet2'), '=#REF!'],
   ['=SUM(Sheet2!B:D)', delCols('B', 1, 'Sheet2'), '=SUM(Sheet2!B:C)'],
   ['=SUM(Sheet2!2:4)', delRows(2, 1, 'Sheet2'), '=SUM(Sheet2!2:3)'],
