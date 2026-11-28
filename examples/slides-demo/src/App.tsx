@@ -24,6 +24,26 @@ const imageProps = (() => {
   };
 })();
 
+/**
+ * `?fileActions=1` shows Open / Download (.pptx) in the toolbar and `?importConfirmation=never|host-yes|host-no` picks how Open
+ * reacts to a lossy file (default: the built-in dialog). Opt-in so the default toolbar stays as it is.
+ */
+const fileActions = new URLSearchParams(window.location.search).get('fileActions') === '1';
+const importConfirmation = (() => {
+  const v = new URLSearchParams(window.location.search).get('importConfirmation');
+  if (v === 'never') return 'never' as const;
+  if (v === 'host-yes') return () => true;
+  if (v === 'host-no') return () => false;
+  return undefined;
+})();
+function reportFileOpened(info: { fileName: string; warnings: string[]; loss: { items: unknown[] } }): void {
+  (window as unknown as { __lastOpened?: unknown }).__lastOpened = info; // e2e hook: what the last Open reported
+  if (info.warnings.length > 0) console.warn(`[open] ${info.fileName}: ${info.warnings.length} import warning(s)`, info.warnings);
+}
+function reportFileError(error: Error, action: 'open' | 'download'): void {
+  window.alert(`Could not ${action} the file: ${error.message}`);
+}
+
 const fontSource = (() => {
   const v = new URLSearchParams(window.location.search).get('fontSource');
   if (v === 'local') return { kind: 'local' } as const;
@@ -182,7 +202,15 @@ export default function App() {
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <DeckProvider deck={singleDeck} currentUser={DEMO_USERS[0]} mentionableUsers={DEMO_USERS} onCommentEvent={logCommentEvent}>
-          <SlidesEditor fontSource={fontSource} {...imageProps} readOnly={readOnly} />
+          <SlidesEditor
+            fontSource={fontSource}
+            {...imageProps}
+            readOnly={readOnly}
+            fileActions={fileActions}
+            importConfirmation={importConfirmation}
+            onFileOpened={reportFileOpened}
+            onFileError={reportFileError}
+          />
         </DeckProvider>
       </div>
     </div>

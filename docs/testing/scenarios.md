@@ -393,6 +393,12 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-GRP-01 | group and ungroup with Ctrl/Cmd+G | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-ORD-01 | bring to front / send to back change z-order | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-TAB-01 | Tab cycles element selection | covered |  |  | `e2e/slides/editing.spec.ts` |
+| SL-FIO-01 |  opening a generated 6-slide deck shows 6 slides in the filmstrip and the first slide text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-02 |  a deck with transitions and charts asks first, listing them under "Kept, not editable" | covered | yes |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-03 | Cancel keeps the open deck; Import anyway replaces it and reports what is kept | covered |  |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-04 |  Download then Open again keeps the slide count and the text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-05 | a file that is not a .pptx is refused with a message and leaves the deck as it was | covered |  |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-06 | without ?fileActions the toolbar has no Open or Download and one file input (images) | covered |  |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIL-01 | a gradient preset fills the selected shape and the slide background | covered |  |  | `e2e/slides/fills.spec.ts` |
 | L-FNT-01 | default: theme fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | L-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/slides/fonts.spec.ts` |
@@ -458,7 +464,6 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-ZOOM-01 | zoom buttons rescale the slide | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-BGD-01 | background colour input recolours the slide | covered |  |  | `e2e/slides/tools.spec.ts` |
 | SL-NTS-01 | speaker notes are stored per slide | covered |  |  | `e2e/slides/tools.spec.ts` |
-| SL-GAP-01 | Import / export (PPTX / PDF) UI | n/a | | No import/export UI exists in slides-react or the slides demo (unlike sheets and docs, which have `fileActions`); round-trips stay in slides-core unit tests. Image upload is covered (SL-IMG-*, SL-INS-07). | |
 | SL-GAP-02 | Presenter view in a separate window | not covered | | Opens a popup window; only the S-key notes panel is covered (SL-PRS-06). | |
 | SL-GAP-03 | Connector snapping to anchors, table cell selection gestures | not covered | | Complex pointer gestures; to add. | |
 | SL-GAP-04 | Slide drag-reorder in the filmstrip | not covered | | To add. | |
@@ -508,7 +513,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 
 ## Summary
 
-- covered: 443
+- covered: 449
 - fixme + bug: 7
 - not covered: 8
-- n/a: 6
+- n/a: 5

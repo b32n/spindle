@@ -24,6 +24,8 @@ import { ShapeFormatBar } from './ShapeFormatBar';
 import { ImageFormatBar } from './ImageFormatBar';
 import { TableFormatBar } from './TableFormatBar';
 import { ShapePicker } from './ShapePicker';
+import { FileActions } from './FileActions';
+import { SLIDES_IMPORT_ACCEPT, type SlidesExportFormat } from '../file-io';
 import { TB, ToolbarButton as IconButton, ToolbarDivider } from './toolbarUI';
 
 export type Zoom = number | 'fit';
@@ -41,9 +43,13 @@ export interface ToolbarProps {
   zoom: Zoom;
   onZoomChange: (zoom: Zoom) => void;
   onPresent: () => void;
+  /** Opens a chosen file. Providing it (with `onDownload`) shows the Open and Download controls. */
+  onOpenFile?: (file: File) => void;
+  /** Downloads the deck in the chosen format. */
+  onDownload?: (format: SlidesExportFormat) => void;
 }
 
-export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }: ToolbarProps): React.ReactElement {
+export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent, onOpenFile, onDownload }: ToolbarProps): React.ReactElement {
   const deck = useDeck();
   const imageHooks = useImageHooks();
   const selection = useSelection();
@@ -52,6 +58,7 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
   const filmstripOpen = useFilmstripOpen();
   const showComments = useCommentsOpen();
   const fileRef = useRef<HTMLInputElement>(null);
+  const openRef = useRef<HTMLInputElement>(null);
   const editingId = useEditingId();
   const ids = selection.elementIds;
   const hasSel = ids.length > 0;
@@ -127,6 +134,22 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
     <div style={TB.strip}>
       <div style={TB.pill}>
       <input ref={fileRef} type="file" accept="image/*" onChange={onImageFile} style={{ display: 'none' }} />
+      {onOpenFile && (
+        <input
+          ref={openRef}
+          type="file"
+          accept={SLIDES_IMPORT_ACCEPT}
+          aria-label="Open file"
+          data-testid="slides-open-file-input"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // Reset so choosing the same file again still fires onChange.
+            e.target.value = '';
+            if (file) onOpenFile(file);
+          }}
+        />
+      )}
       {/* Pinned outside ResponsiveToolbar so it never collapses into the overflow
           menu — the filmstrip toggle stays a first-class, always-visible button. */}
       <IconButton title="Slides panel" label="Slides" active={filmstripOpen} onClick={() => ui.toggleFilmstrip()}>
@@ -134,6 +157,7 @@ export function Toolbar({ extras, headerActions, zoom, onZoomChange, onPresent }
       </IconButton>
       <ToolbarDivider />
       <ResponsiveToolbar gap={2}>
+      {onOpenFile && onDownload && <FileActions onOpen={() => openRef.current?.click()} onDownload={onDownload} />}
       <DeckControls />
 
       {/* Insert — only when nothing is selected. */}
