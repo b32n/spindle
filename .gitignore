@@ -20,3 +20,6 @@ docx-fidelity-report.json
 
 # Python bytecode from the fixture generators
 __pycache__/
+
+# Local review pack and benchmark output (scripts/review-pack)
+review-pack-output/

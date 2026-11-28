@@ -49,6 +49,8 @@
     "sheets:xlsx-fidelity:update": "tsx scripts/xlsx-fidelity/cli.ts --update",
     "slides:pptx-fidelity": "tsx scripts/pptx-fidelity/cli.ts",
     "slides:pptx-fidelity:update": "tsx scripts/pptx-fidelity/cli.ts --update",
+    "slides:bench": "tsx scripts/review-pack/benchmark.ts",
+    "slides:review-pack": "tsx scripts/review-pack/review-pack.ts",
     "fidelity": "npm run docs:docx-fidelity && npm run sheets:xlsx-fidelity && npm run slides:pptx-fidelity",
     "build:demos": "vite build examples/sheets-demo && vite build examples/docs-demo && vite build examples/slides-demo",
     "test:e2e:preview": "PW_TARGET=preview playwright test --grep @smoke --project=chromium",
