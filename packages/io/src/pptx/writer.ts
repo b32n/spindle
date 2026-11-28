@@ -66,8 +66,11 @@ export interface PptxExportResult {
 }
 
 /** The file extension and content type of each image format a data URL can carry; SVG is left out (PowerPoint needs a PNG beside it). */
-const IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/bmp': 'bmp', 'image/avif': 'avif' };
-const MEDIA_PART = /^ppt\/media\/[A-Za-z0-9._-]+\.(?:png|jpe?g|gif|webp|bmp|avif)$/i;
+// only the formats every PowerPoint version displays; WebP and AVIF are left out (reported as a dropped picture)
+const IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/gif': 'gif', 'image/bmp': 'bmp' };
+const MEDIA_PART = /^ppt\/media\/[A-Za-z0-9._-]+\.(?:png|jpe?g|gif|bmp)$/i;
+// the built-in table styles PowerPoint resolves by id: an empty definition here would shadow them
+const BUILT_IN_TABLE_STYLES = new Set(['{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}', '{2D5ABB26-0587-4C30-8999-92F81FD0307C}', '{5940675A-B579-460E-94D1-54222C63F5DA}', '{073A0DAA-6AF3-43AB-8588-CEC1D06C72B9}', '{21E4AEA4-8DFA-4A89-87EB-49C32662AFE0}', '{F5AB1C69-6EDB-4FF4-983F-18BD219EF322}', '{00A15C55-8517-42AA-B614-E9B94910E393}', '{7DF18680-E054-41AD-8BC1-D1AEF772440D}', '{93296810-A885-4BE3-A3E7-6D5BEEA58F35}']);
 const DATA_URL = /^data:([^;,]+);base64,([A-Za-z0-9+/]*={0,2})$/;
 
 /** The bytes of base64 text, or `undefined` when it is not valid base64 (a length no encoder writes). */
@@ -177,7 +180,7 @@ function slideXml(slide: PptxSlide, ctx: WriteContext): string {
   const bg = slide.background ? fillXml(slide.background, ctx) : '';
   const background = bg === '' ? '' : `<p:bg><p:bgPr>${bg}<a:effectLst/></p:bgPr></p:bg>`;
   return (
-    `${XML_DECLARATION}<p:sld ${ROOT_NS}${attrs({ show: slide.hidden ? 0 : undefined })}><p:cSld${attrs({ name: slide.name })}>${background}<p:spTree>${TREE_HEADER}${elementsXml(slide.elements ?? [], ctx, elementIds(ids))}</p:spTree></p:cSld>` +
+    `${XML_DECLARATION}<p:sld ${ROOT_NS}${attrs({ show: slide.hidden ? 0 : undefined })}><p:cSld${attrs({ name: slide.name })}>${background}<p:spTree>${TREE_HEADER}${elementsXml(slide.elements ?? [], ctx, elementIds(ids, ctx))}</p:spTree></p:cSld>` +
     '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>'
   );
 }
@@ -317,7 +320,7 @@ export async function exportPptx(presentation: PresentationImportResult, options
     add('ppt/theme/theme2.xml', themeXml(presentation.theme), TYPE.theme);
   }
   if (authorsRel) add('ppt/commentAuthors.xml', authors.xml(), TYPE.commentAuthors);
-  const defs = [...tableStyles].map(([id, name]) => `<a:tblStyle${attrs({ styleId: id, styleName: name ?? '' })}/>`).join('');
+  const defs = [...tableStyles].filter(([id]) => !BUILT_IN_TABLE_STYLES.has(id.toUpperCase())).map(([id, name]) => `<a:tblStyle${attrs({ styleId: id, styleName: name ?? '' })}/>`).join('');
   tableStylesEntry.data = `${XML_DECLARATION}<a:tblStyleLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" def="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}">${defs}</a:tblStyleLst>`;
   for (const image of media.values()) if (image) entries.push({ name: image.name, data: image.bytes });
 

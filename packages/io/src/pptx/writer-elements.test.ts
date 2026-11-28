@@ -97,7 +97,26 @@ describe('pictures', () => {
   });
 });
 
+describe('picture formats and crops', () => {
+  it('leaves out WebP and AVIF pictures as dropped, and keeps the four formats every PowerPoint displays', async () => {
+    const { els, warnings } = await write([
+      picture({ pptxId: '4', dataUrl: 'data:image/webp;base64,UklGRg==', mime: 'image/webp', part: 'ppt/media/a.webp' }),
+      picture({ pptxId: '5', dataUrl: 'data:image/avif;base64,AAAA', mime: 'image/avif', part: 'ppt/media/a.avif' }),
+      picture({ pptxId: '6', dataUrl: 'data:image/gif;base64,R0lGODlh', mime: 'image/gif', part: 'ppt/media/a.gif' }),
+      picture({ pptxId: '7', dataUrl: 'data:image/bmp;base64,Qk0AAA==', mime: 'image/bmp', part: 'ppt/media/a.bmp' }),
+    ]);
+    expect(els.map((e) => e.pptxId)).toEqual(['6', '7']);
+    expect(warnings.some((w) => /picture/i.test(JSON.stringify(w)))).toBe(true);
+  });
+
+  it('writes a negative crop (the picture grown outward) as it is', async () => {
+    const { xml } = await write([picture({ crop: { l: -5, t: 0, r: 2.5, b: -0.5 } })]);
+    expect(xml).toContain('<a:srcRect l="-5000" r="2500" b="-500"/>');
+  });
+});
+
 describe('tables', () => {
+  const CUSTOM = '{00000000-0000-4000-8000-000000000001}';
   const cell = (t: string, over: Partial<PptxTableCell> = {}): PptxTableCell => ({ text: body(t), ...over });
   const table = (over: Partial<PptxTable> = {}): PptxTable => ({
     kind: 'table',
@@ -119,10 +138,22 @@ describe('tables', () => {
   it('writes spans, borders, margins, anchors, fills, flags and the style, and reads back equal', async () => {
     const t = table();
     const { els, xml, part } = await write([t]);
-    expect(els).toEqual([t]);
+    // a built-in style has no definition in the file, so its name is not read back
+    expect(els).toEqual([{ ...t, styleName: undefined }]);
     expect(xml).toContain('gridSpan="2"');
     expect(xml).toContain('<a:lnR><a:noFill/></a:lnR>');
-    expect(await part('ppt/tableStyles.xml')).toContain('<a:tblStyle styleId="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}" styleName="Medium Style 2 - Accent 1"/>');
+    expect(xml).toContain('<a:tableStyleId>{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}</a:tableStyleId>');
+    expect(await part('ppt/tableStyles.xml')).not.toContain('<a:tblStyle ');
+  });
+
+  it('registers no definition for a built-in style id (any case) that PowerPoint resolves itself, and keeps one for a custom style', async () => {
+    const { part } = await write([table({ styleId: '{5c22544a-7ee6-4342-b048-85bdc9fd1c3a}' }), table({ pptxId: '5', styleId: '{00000000-0000-4000-8000-000000000001}', styleName: 'Mine' })]);
+    const styles = await part('ppt/tableStyles.xml');
+    expect(styles).not.toContain('5c22544a');
+    expect(styles).not.toContain('5C22544A-7EE6-4342-B048-85BDC9FD1C3A}" styleName');
+    expect(styles).toContain('<a:tblStyle styleId="{00000000-0000-4000-8000-000000000001}" styleName="Mine"/>');
+    const unnamed = await write([table({ styleId: CUSTOM, styleName: undefined })]);
+    expect(await unnamed.part('ppt/tableStyles.xml')).toContain(`<a:tblStyle styleId="${CUSTOM}" styleName=""/>`);
   });
 
   it('writes a table without a frame, a style or flags at the size of its grid, and a style without a name', async () => {
@@ -133,7 +164,7 @@ describe('tables', () => {
   });
 
   it('keeps the first name of a table style several tables use', async () => {
-    const { part } = await write([table({ styleName: undefined }), table({ pptxId: '5', styleName: 'Named' }), table({ pptxId: '6', styleName: 'Later' })]);
+    const { part } = await write([table({ styleId: CUSTOM, styleName: undefined }), table({ pptxId: '5', styleId: CUSTOM, styleName: 'Named' }), table({ pptxId: '6', styleId: CUSTOM, styleName: 'Later' })]);
     expect(await part('ppt/tableStyles.xml')).toContain('styleName="Named"');
   });
 
@@ -156,6 +187,24 @@ describe('connectors', () => {
     expect(xml).not.toContain('endCxn');
     const free = (await write([{ kind: 'connector', pptxId: '7', name: 'Free' }])).els;
     expect(free).toEqual([{ kind: 'connector', pptxId: '7', name: 'Free' }]);
+  });
+});
+
+describe('connectors glued to elements that are not written', () => {
+  const cxn = (over: Record<string, unknown> = {}): PptxElement => ({ kind: 'connector', pptxId: '7', name: 'C', start: { id: '9', idx: 1 }, end: { id: '2', idx: 0 }, ...over }) as PptxElement;
+
+  it('leaves the end free for an opaque element and for pictures with no embeddable image, and glues to the written one that shares the id', async () => {
+    const opaque: PptxElement = { kind: 'opaque', opaqueKind: 'chart', pptxId: '9', name: 'chart', parts: [] };
+    const emf = picture({ pptxId: '10', dataUrl: undefined, unsupported: 'emf' });
+    const noUrl = picture({ pptxId: '11', dataUrl: 'data:image/webp;base64,UklGRg==', mime: 'image/webp' });
+    const kept = shape({ pptxId: '9', name: 'same id, written' });
+    const { xml } = await write([opaque, emf, noUrl, cxn({ start: { id: '9', idx: 1 }, end: { id: '10', idx: 2 } }), cxn({ pptxId: '8', start: { id: '11', idx: 0 }, end: { id: '2', idx: 4 } }), kept, shape({ pptxId: '2', name: 'S' })]);
+    expect(xml.match(/<a:stCxn id="(\d+)" idx="1"\/>/)).not.toBeNull();
+    expect(xml).not.toMatch(/<a:endCxn id="\d+" idx="2"/);
+    expect(xml).not.toMatch(/<a:stCxn id="\d+" idx="0"/);
+    expect(xml).toMatch(/<a:endCxn id="\d+" idx="4"\/>/);
+    const only = await write([opaque, emf, cxn({ start: { id: '9', idx: 1 }, end: { id: '10', idx: 2 } })]);
+    expect(only.xml).not.toContain('Cxn id');
   });
 });
 
@@ -204,20 +253,23 @@ describe('groups', () => {
     expect(xml.match(/<p:cNvPr id="\d+"/g)).toHaveLength(3);
   });
 
-  it('maps a frame into the child space of the group so the reader composes it back, for any rotation and flips', () => {
-    const rot = [0, 30, 90, 135, 270, 359];
+  it('maps a frame through chains of 1 to 3 nested groups so the reader composes it back, for any rotations and flips of the groups and the child', () => {
     let seed = 7;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    for (const r of rot) for (const fh of [false, true]) for (const fv of [false, true]) {
-      const g: PptxFrame = { x: rnd() * 300, y: rnd() * 300, w: 50 + rnd() * 200, h: 50 + rnd() * 200, ...(r ? { rot: r } : {}), ...(fh ? { flipH: true } : {}), ...(fv ? { flipV: true } : {}) };
-      const f: PptxFrame = { x: rnd() * 500, y: rnd() * 500, w: 10 + rnd() * 100, h: 10 + rnd() * 100, rot: rnd() * 360, ...(rnd() > 0.5 ? { flipH: true } : {}) };
-      const c = toChildSpace(f, g);
-      const xfrm = { off: { x: g.x, y: g.y }, ext: { w: g.w, h: g.h }, chOff: { x: g.x, y: g.y }, chExt: { w: g.w, h: g.h }, rotation: g.rot ?? 0, flipH: g.flipH ?? false, flipV: g.flipV ?? false };
-      const back = composeGroupChain({ x: c.x, y: c.y, w: c.w, h: c.h, rotation: c.rot ?? 0, flipH: c.flipH ?? false, flipV: c.flipV ?? false }, [xfrm]);
-      expect(back.x).toBeCloseTo(f.x, 6);
-      expect(back.y).toBeCloseTo(f.y, 6);
-      expect(back.w).toBeCloseTo(f.w, 6);
-      expect(((back.rotation - (f.rot ?? 0)) % 360 + 360) % 360 < 1e-6 || Math.abs(((back.rotation - (f.rot ?? 0)) % 360 + 360) % 360 - 360) < 1e-6).toBe(true);
+    const flag = (): { flipH?: true; flipV?: true } => ({ ...(rnd() > 0.5 ? { flipH: true as const } : {}), ...(rnd() > 0.5 ? { flipV: true as const } : {}) });
+    const frame = (min: number, spread: number): PptxFrame => ({ x: rnd() * 300, y: rnd() * 300, w: min + rnd() * spread, h: min + rnd() * spread, rot: [0, 30, 90, 135, 270, 359, rnd() * 360][Math.floor(rnd() * 7)], ...flag() });
+    const turns = (a: number, b: number) => Math.abs((((a - b) % 360) + 540) % 360 - 180);
+    for (let n = 0; n < 300; n++) {
+      const chain = Array.from({ length: 1 + (n % 3) }, () => frame(50, 200));
+      const f = frame(10, 100);
+      const c = chain.reduce(toChildSpace, f);
+      const xfrms = chain.map((g) => ({ off: { x: g.x, y: g.y }, ext: { w: g.w, h: g.h }, chOff: { x: g.x, y: g.y }, chExt: { w: g.w, h: g.h }, rotation: g.rot ?? 0, flipH: g.flipH ?? false, flipV: g.flipV ?? false }));
+      const back = composeGroupChain({ x: c.x, y: c.y, w: c.w, h: c.h, rotation: c.rot ?? 0, flipH: c.flipH ?? false, flipV: c.flipV ?? false }, xfrms.reverse());
+      expect(back.x).toBeCloseTo(f.x, 5);
+      expect(back.y).toBeCloseTo(f.y, 5);
+      expect(back.w).toBeCloseTo(f.w, 5);
+      expect(back.h).toBeCloseTo(f.h, 5);
+      expect(turns(back.rotation, f.rot ?? 0)).toBeLessThan(1e-6);
       expect(back.flipH).toBe(f.flipH ?? false);
       expect(back.flipV).toBe(f.flipV ?? false);
     }

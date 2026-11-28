@@ -21,10 +21,16 @@ export interface ElementIds {
   bySource: Map<string, number>;
 }
 
-/** The ids of `allocateElementIds`, with the lookup connectors need to glue their ends to the shapes' new ids. */
-export function elementIds(ids: Map<PptxElement, number>): ElementIds {
+/**
+ * The ids of `allocateElementIds`, with the lookup connectors need to glue their ends to the shapes' new ids. Only elements that
+ * are written have an entry: opaque elements and pictures with no image to embed leave a connector end free, not dangling.
+ */
+export function elementIds(ids: Map<PptxElement, number>, ctx: WriteContext): ElementIds {
   const bySource = new Map<string, number>();
-  for (const [e, id] of ids) if (!bySource.has(e.pptxId)) bySource.set(e.pptxId, id);
+  for (const [e, id] of ids) {
+    const written = e.kind === 'opaque' ? false : e.kind === 'picture' ? e.dataUrl !== undefined && ctx.image(e.dataUrl, e.part) !== undefined : true;
+    if (written && !bySource.has(e.pptxId)) bySource.set(e.pptxId, id);
+  }
   return { ids, bySource };
 }
 
@@ -54,8 +60,8 @@ function pictureXml(pic: PptxPicture, id: number, ctx: WriteContext): string {
   );
 }
 
-/** Percent of the source (`25`) to the thousandths of a percent of `a:srcRect` (`25000`), omitted when 0. */
-const pctOf = (v: number): number | undefined => (v > 0 ? Math.round(v * 1000) : undefined);
+/** Percent of the source (`25`) to the thousandths of a percent of `a:srcRect` (`25000`), omitted when 0; a negative value (the crop grown outward) is written as it is. */
+const pctOf = (v: number): number | undefined => (v !== 0 ? Math.round(v * 1000) : undefined);
 
 function cellXml(cell: PptxTableCell, ctx: WriteContext): string {
   const borders = CELL_SIDES.map(([side, tag]) => {

@@ -67,7 +67,7 @@ export function layoutXml(layout: PptxLayout, ctx: WriteContext): string {
   const background = layout.background ? `<p:bg><p:bgPr>${solidFillXml(layout.background)}<a:effectLst/></p:bgPr></p:bg>` : '';
   return (
     `${XML_DECLARATION}<p:sldLayout ${ROOT_NS}${attrs({ type: layoutType && LAYOUT_TYPES.has(layoutType) ? layoutType : undefined, showMasterSp: layout.hideMasterShapes ? 0 : undefined, preserve: 1 })}>` +
-    `<p:cSld name="${esc(layout.name)}">${background}<p:spTree>${TREE_HEADER}${layout.placeholders.map((p, i) => layoutPlaceholder(p, i + 2)).join('')}${elementsXml(layout.elements, ctx, elementIds(ids))}</p:spTree></p:cSld>` +
+    `<p:cSld name="${esc(layout.name)}">${background}<p:spTree>${TREE_HEADER}${layout.placeholders.map((p, i) => layoutPlaceholder(p, i + 2)).join('')}${elementsXml(layout.elements, ctx, elementIds(ids, ctx))}</p:spTree></p:cSld>` +
     '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>'
   );
 }
