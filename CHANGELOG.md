@@ -495,13 +495,21 @@ lockstep.
 - **References inside cached-only formulas follow inserted and deleted rows and columns (S4b).** A formula the engine cannot evaluate
   (`cachedOnly`) keeps no parsed form, so inserting or deleting rows or columns used to leave the cell references in its text where they were.
   They are now rewritten in the text, using the formula tokenizer, with the outcome of a normal formula's: `A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`,
-  `Sheet2!A1` and `'My Sheet'!A1` move with their cells, a reference into deleted rows or columns (or a range with a deleted corner) becomes
-  `#REF!`, a reference to another sheet only changes when that sheet is edited, and everything else in the text (whitespace, case, string
+  `Sheet2!A1` and `'My Sheet'!A1` move with their cells, a reference into deleted rows or columns becomes
+  `#REF!`, a range keeps the rows or columns of it that survive (and is `#REF!` only when all of them are deleted), a reference to another sheet only changes when that sheet is edited, and everything else in the text (whitespace, case, string
   literals, function names, structured references, fragments the grammar rejects) is kept byte for byte. 3D references, references to sheets
   that do not exist and external workbook references are left as they are, as for a normal formula. Undo restores the text, and with
   collaboration the shifted text is the cell's new value. The saved value stays, and the note's "does not recalculate when the cells it uses
-  change" caveat stays. New exports of `@b32nio/spindle-sheets-core`: `shiftFormulaRefs`, `shiftIndex` and `StructuralEdit`. The
+  change" caveat stays. New exports of `@b32nio/spindle-sheets-core`: `shiftFormulaRefs`, `shiftIndex`, `shiftSpan`, `shiftPair` and `StructuralEdit`. The
   `xlsx.formulas.cachedOnly` effect text and `documentation/import-loss.md` changed accordingly.
+- **A range keeps its surviving rows and columns when part of it is deleted (fix, found in the S4b review).** Deleting the first or last row or
+  column of a range, or a column or row that is a boundary of it, made the whole range `#REF!` (`=SUM(A2:A5)` without row 5), although deleting
+  one in the middle shrank it: the engine disagreed with itself and with Excel. A range now keeps the rows and columns of it that survive
+  (`A2:A5` without row 5 or without row 2 is `A2:A4`, `2:4` without row 2 is `2:3`, `B:D` without `B` is `B:C`) and is `#REF!` only when all of
+  them are deleted; a single cell into deleted rows or columns is still `#REF!`. Inserting before the first row shifts a range, after its last
+  row leaves it, inside it extends it. It applies to normal formulas (stable ids: the range boundary moves onto the nearest surviving row or
+  column before the delete; undo restores it) and to the text of cached-only formulas alike. Sheet names in references are case-insensitive
+  (`sheet2!A1` points at `Sheet2` and follows its rename and edits). A workbook saved with such a `#REF!` keeps it; only new deletes change.
 - **Sheets collaboration gate.** Sheets rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-sheets-core`: `getCollabBlockers(workbook)` (empty for now) and

@@ -80,7 +80,7 @@ unchanged. It is reported as `xlsx.formulas.cachedOnly`. **The value can be out 
 refers to, and a cell that depends on it reads its saved value. **Its references do follow structural edits**: inserting or deleting rows or columns rewrites the cell
 references in its text (`A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`, `Sheet2!A1`, `'My Sheet'!A1:B2`) with the outcome of a normal formula's, and only those
 bytes change (whitespace, case, string literals, function names, structured references and text the grammar rejects are copied as written). A
-reference into deleted rows or columns becomes `#REF!` (a range with a deleted corner becomes `#REF!` as a whole, as for a normal formula), a
+reference into deleted rows or columns becomes `#REF!`, a range keeps the rows or columns of it that survive and is `#REF!` only when all of them are deleted (as in Excel and for a normal formula), a
 reference to another sheet only moves when that sheet is edited, and 3D references, references to sheets that do not exist and external workbook
 references stay as they are (as for a normal formula). Sorting leaves the text as it is, and the engine has no move operation: copying or filling
 a cell rebases a formula it can parse and drops the cached-only mark (below). Undo restores the original text. The saved value stays, so Excel
