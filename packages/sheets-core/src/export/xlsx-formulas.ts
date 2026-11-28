@@ -68,6 +68,7 @@ export function spanRef(row: number, col: number, rows: number, cols: number): s
  * and so is a formula with a union, an intersection (space), a spill reference or anything the tokenizer rejects.
  */
 export function withImplicitIntersection(formula: string): string {
+  if (!formula.includes(':')) return formula; // every range has a colon: most formulas need no tokenizing
   let tokens: Token[];
   try {
     tokens = tokenize(formula);
