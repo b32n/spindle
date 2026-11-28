@@ -176,7 +176,9 @@ describe('p:sp: outer shadow (K13)', () => {
       dist: 2,
       dir: 45,
       algn: 'tl',
+      rotWithShape: false,
     });
+    expect(await shadow(`<a:effectLst><a:outerShdw rotWithShape="false">${srgb('000000')}</a:outerShdw></a:effectLst>`)).toEqual({ color: { kind: 'rgb', hex: '#000000' }, rotWithShape: false });
     expect(await shadow(`<a:effectLst><a:outerShdw rotWithShape="1"><a:schemeClr val="tx1"/></a:outerShdw></a:effectLst>`)).toEqual({ color: { kind: 'theme', slot: 'dk1' }, rotWithShape: true });
   });
 
@@ -191,6 +193,9 @@ describe('p:sp: outer shadow (K13)', () => {
     expect(await shadow('<a:effectLst><a:innerShdw/></a:effectLst>')).toBeUndefined();
     expect(await shadow('<a:effectLst><a:outerShdw><a:schemeClr val="phClr"/></a:outerShdw></a:effectLst>')).toBeUndefined();
     expect(await shadow('<a:effectLst><a:outerShdw/></a:effectLst>')).toBeUndefined();
+    for (const attr of ['sx', 'sy', 'kx', 'ky']) {
+      expect(await shadow(`<a:effectLst><a:outerShdw ${attr}="50000">${srgb('000000')}</a:outerShdw></a:effectLst>`)).toBeUndefined();
+    }
     expect(await shadow('<a:effectLst/>')).toBeUndefined();
     expect(await shadow('')).toBeUndefined();
   });

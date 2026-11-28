@@ -4133,7 +4133,8 @@
                 "kind": "rgb"
               },
               "dir": 90,
-              "dist": 2.4188976377952756
+              "dist": 2.4188976377952756,
+              "rotWithShape": false
             },
             "text": {
               "paragraphs": [
@@ -4232,7 +4233,8 @@
                 "kind": "rgb"
               },
               "dir": 90,
-              "dist": 2.4188976377952756
+              "dist": 2.4188976377952756,
+              "rotWithShape": false
             },
             "text": {
               "paragraphs": [
@@ -4330,7 +4332,8 @@
                 "kind": "rgb"
               },
               "dir": 90,
-              "dist": 2.4188976377952756
+              "dist": 2.4188976377952756,
+              "rotWithShape": false
             },
             "text": {
               "paragraphs": [

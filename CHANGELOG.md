@@ -1071,9 +1071,9 @@ lockstep.
   timing stay K14. The PPTX round-trip differences over the corpus fall further: pictures, tables, groups, connectors, notes, comments and custom
   geometry now read back with no differences; what is left is opaque content (K14), picture fills, dropped pictures and the modern-comment conversion.
   The outer shadow of a shape is now a model property (`PptxShape.shadow`, new additive type `PptxShadow`: colour with alpha, blur, distance,
-  direction, anchor): the reader reads an effect list that holds one `a:outerShdw` and the writer writes it back. `pptx.shapes.effects` no longer
-  counts a plain shape whose effect list is only that shadow; glow, reflection, soft edges, inner and preset shadows, two shadows, and the
-  effects of groups, pictures, connectors and runs are still reported.
+  direction, anchor, rotation flag): the reader reads an effect list that holds one `a:outerShdw` and the writer writes it back. `pptx.shapes.effects` no longer
+  counts a plain shape whose effect list is only that shadow; glow, reflection, soft edges, inner and preset shadows, two shadows, and
+  shadows with a scale or skew, the effects of groups, pictures, connectors and runs are still reported.
 
 ## [0.4.0] - 2026-10-26
 

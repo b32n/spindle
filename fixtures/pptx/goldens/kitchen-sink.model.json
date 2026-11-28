@@ -4600,7 +4600,8 @@
                 "kind": "rgb"
               },
               "dir": 45,
-              "dist": 8
+              "dist": 8,
+              "rotWithShape": false
             }
           },
           {

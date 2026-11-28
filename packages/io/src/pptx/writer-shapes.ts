@@ -94,7 +94,7 @@ export function shadowXml(shadow: PptxShadow | undefined): string {
     dist: shadow.dist !== undefined ? Math.round(shadow.dist * 9525) : undefined,
     dir: shadow.dir !== undefined ? angle(shadow.dir) : undefined,
     algn: shadow.algn !== undefined && SHADOW_ANCHORS.has(shadow.algn) ? shadow.algn : undefined,
-    rotWithShape: shadow.rotWithShape ? 1 : undefined,
+    rotWithShape: shadow.rotWithShape === undefined ? undefined : shadow.rotWithShape ? 1 : 0,
   });
   return `<a:effectLst><a:outerShdw${a}>${colorXml(shadow.color)}</a:outerShdw></a:effectLst>`;
 }

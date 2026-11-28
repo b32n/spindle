@@ -298,6 +298,15 @@ describe('custom geometry', () => {
 });
 
 describe('outer shadow', () => {
+  it('writes an explicit rotWithShape="0" and reads it back; an unset flag is left out', async () => {
+    const off: PptxShape['shadow'] = { color: { kind: 'rgb', hex: '#000000' }, rotWithShape: false };
+    const a = await write([shape({ shadow: off })]);
+    expect(a.xml).toContain('rotWithShape="0"');
+    expect((a.els[0] as PptxShape).shadow).toEqual(off);
+    const b = await write([shape({ shadow: { color: { kind: 'rgb', hex: '#000000' } } })]);
+    expect(b.xml).not.toContain('rotWithShape');
+  });
+
   it('writes the effect list after the outline and reads back equal', async () => {
     const shadow: PptxShape['shadow'] = { color: { kind: 'rgb', hex: '#112233', alpha: 0.4 }, blur: 4, dist: 2, dir: 45, algn: 'tl', rotWithShape: true };
     const { xml, els, warnings } = await write([shape({ shadow, line: { width: 1 } })]);
