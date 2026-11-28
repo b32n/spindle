@@ -4590,7 +4590,18 @@
             },
             "kind": "shape",
             "name": "Shadow",
-            "pptxId": "4"
+            "pptxId": "4",
+            "shadow": {
+              "algn": "tl",
+              "blur": 6.666666666666667,
+              "color": {
+                "alpha": 0.45,
+                "hex": "#000000",
+                "kind": "rgb"
+              },
+              "dir": 45,
+              "dist": 8
+            }
           },
           {
             "fill": {

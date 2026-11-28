@@ -218,7 +218,7 @@ async function detect(bytes: Uint8Array, options: DetectPptxLossOptions, items: 
 
   // ---- shapes -------------------------------------------------------------
   addTally('pptx.shapes.custGeom', 'shape(s) with custom geometry', t.custGeom, 'approximated: the paths (lines, curves, arcs, several paths, fill modes) are kept as written; guide formulas are not evaluated, so a path that needs them keeps the shape\'s frame, fill and text but not its outline', true);
-  addTally('pptx.shapes.effects', 'shape(s) or run(s) with shadow, glow, reflection or soft edges', t.effects, NOT_IMPORTED, true);
+  addTally('pptx.shapes.effects', 'shape(s) or run(s) with shadow, glow, reflection or soft edges (the lone outer shadow of a plain shape is kept)', t.effects, NOT_IMPORTED, true);
   addTally('pptx.shapes.gradientFill', 'gradient fill(s)', t.gradientFill, 'approximated: imported as a gradient; a gradient taken from the theme\'s style list (not the shape\'s own fill) is read as a solid colour', true);
   addTally('pptx.shapes.patternFill', 'pattern fill(s)', t.patternFill, 'approximated: kept as a pattern but painted as a solid blend of its two colours', true);
   addTally('pptx.shapes.connectors.elbowCurved', 'elbow or curved connector(s)', t.elbowCurved, 'kept: the route (bent or curved preset with its adjustments), the arrow heads and the shapes the ends are glued to are stored; the editor draws the route itself, so bends may differ slightly from PowerPoint\'s', true);

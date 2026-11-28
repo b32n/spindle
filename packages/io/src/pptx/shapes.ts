@@ -4,6 +4,7 @@ import { colorElement, parseColor } from './color';
 import { parseFill, parseGeometry, parseLine, type Rels } from './fill';
 import { frameOf, matchLayoutPlaceholder } from './levels';
 import { shapeLink } from './links';
+import { parseShadow } from './shadow';
 import { readTextBody } from './text';
 import { EMU_PER_PX, num } from './units';
 
@@ -93,6 +94,7 @@ export function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
   const fillRef = styleRef(style, 'fillRef', ctx.map);
   if (!fill && fillRef) fill = fillRef.idx === 0 || !fillRef.color ? undefined : styleFill(fillRef.color, fillRef.idx, ctx);
   const line = shapeOutline(spPr, style, ctx);
+  const shadow = parseShadow(kid(spPr, 'effectLst'), ctx.map);
   const body = kid(e, 'txBody');
   // `fontRef` names a font (`idx="minor"`), not a style index, so only its colour is read
   const fontColor = parseColor(colorElement(kid(style, 'fontRef')), ctx.map);
@@ -112,6 +114,7 @@ export function readShape(e: XmlElement, ctx: ShapeContext): PptxShape {
     ...(geometry ? { geometry } : {}),
     ...(fill ? { fill } : {}),
     ...(line ? { line } : {}),
+    ...(shadow ? { shadow } : {}),
     ...(body ? { text: readTextBody(body, match?.levels ?? ctx.defaultLevels, match?.bodyProps, ctx.map, fontColor, links) } : {}),
     ...(link ? { link } : {}),
   };

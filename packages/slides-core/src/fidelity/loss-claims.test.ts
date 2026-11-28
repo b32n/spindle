@@ -84,6 +84,9 @@ const KNOWN_DIFFERENCES: Record<string, 'detector' | 'claim'> = {
   'tables:pptx.shapes.gradientFill': 'detector',
   // only the themes a slide master points at count; the claim looks at every theme part (here the notes master's)
   'libreoffice-deck:pptx.theme.fontScheme': 'claim',
+  // a plain shape's lone outer shadow is kept by the reader (K13), so the detector does not count it; the claim counts the shadow
+  'libreoffice-deck:pptx.shapes.effects': 'claim',
+  'kitchen-sink:pptx.shapes.effects': 'claim',
 };
 
 describe('the detector agrees with the manifest claims', () => {

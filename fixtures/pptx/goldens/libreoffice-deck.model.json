@@ -4125,6 +4125,16 @@
             },
             "name": "Rounded Rectangle 4",
             "pptxId": "72",
+            "shadow": {
+              "blur": 4.195275590551181,
+              "color": {
+                "alpha": 0.35,
+                "hex": "#000000",
+                "kind": "rgb"
+              },
+              "dir": 90,
+              "dist": 2.4188976377952756
+            },
             "text": {
               "paragraphs": [
                 {
@@ -4214,6 +4224,16 @@
             },
             "name": "5-Point Star 5",
             "pptxId": "73",
+            "shadow": {
+              "blur": 4.195275590551181,
+              "color": {
+                "alpha": 0.35,
+                "hex": "#000000",
+                "kind": "rgb"
+              },
+              "dir": 90,
+              "dist": 2.4188976377952756
+            },
             "text": {
               "paragraphs": [
                 {
@@ -4302,6 +4322,16 @@
             },
             "name": "Right Arrow 6",
             "pptxId": "74",
+            "shadow": {
+              "blur": 4.195275590551181,
+              "color": {
+                "alpha": 0.35,
+                "hex": "#000000",
+                "kind": "rgb"
+              },
+              "dir": 90,
+              "dist": 2.4188976377952756
+            },
             "text": {
               "paragraphs": [
                 {

@@ -297,6 +297,26 @@ describe('custom geometry', () => {
   });
 });
 
+describe('outer shadow', () => {
+  it('writes the effect list after the outline and reads back equal', async () => {
+    const shadow: PptxShape['shadow'] = { color: { kind: 'rgb', hex: '#112233', alpha: 0.4 }, blur: 4, dist: 2, dir: 45, algn: 'tl', rotWithShape: true };
+    const { xml, els, warnings } = await write([shape({ shadow, line: { width: 1 } })]);
+    expect(xml).toContain('<a:ln w="9525"/><a:effectLst><a:outerShdw blurRad="38100" dist="19050" dir="2700000" algn="tl" rotWithShape="1">');
+    expect((els[0] as PptxShape).shadow).toEqual(shadow);
+    expect(warnings).toEqual([]);
+  });
+
+  it('writes a bare shadow with a theme colour, and leaves out a shape anchor that is not one of the nine', async () => {
+    const { xml, els } = await write([shape({ shadow: { color: { kind: 'theme', slot: 'dk1' }, algn: 'nope' } })]);
+    expect(xml).toContain('<a:effectLst><a:outerShdw><a:schemeClr val="dk1"/></a:outerShdw></a:effectLst>');
+    expect((els[0] as PptxShape).shadow).toEqual({ color: { kind: 'theme', slot: 'dk1' } });
+  });
+
+  it('writes no effect list for a shape without a shadow', async () => {
+    expect((await write([shape()])).xml).not.toContain('effectLst');
+  });
+});
+
 describe('notes', () => {
   it('writes the notes master and a notes slide per slide with notes, and reads the text and its formatting back', async () => {
     const notes: PptxTextBody = {

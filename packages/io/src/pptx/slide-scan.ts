@@ -1,5 +1,7 @@
 import type { Rel } from '../common/ooxml-package';
 import { descendants, isOn, isTrue, kid, type XmlElement } from '../xlsx/xml';
+import { DEFAULT_COLOR_MAP } from './color';
+import { parseShadow } from './shadow';
 import type { Tallies } from './tally';
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,11 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
   let timing = false;
   let effects = 0;
   let animates = false;
+  const shadows = new Set<XmlElement>();
+
+  const keptShadow = (list: XmlElement | undefined): void => {
+    if (list && parseShadow(list, DEFAULT_COLOR_MAP)) shadows.add(list);
+  };
 
   const geometry = (e: XmlElement): void => {
     const spPr = kid(e, 'spPr');
@@ -137,6 +144,10 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
     if (e.children.some((k) => k.name === 'scene3d' || k.name === 'sp3d')) t.scene3d.add(label);
     switch (e.name) {
       case 'sp':
+        // the reader keeps the shadow of a shape whose effect list holds only that
+        keptShadow(kid(kid(e, 'spPr'), 'effectLst'));
+        geometry(e);
+        break;
       case 'cxnSp':
         geometry(e);
         break;
@@ -219,7 +230,7 @@ export function scanSlide(root: XmlElement, c: SlideContext): void {
         break;
       case 'effectLst':
       case 'effectDag':
-        if (parent && EFFECT_HOLDERS.has(parent.name) && (e.name === 'effectDag' || e.children.length > 0))
+        if (parent && EFFECT_HOLDERS.has(parent.name) && !shadows.has(e) && (e.name === 'effectDag' || e.children.length > 0))
           t.effects.add(label);
         break;
       default:

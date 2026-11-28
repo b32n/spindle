@@ -1,4 +1,4 @@
-import type { PptxElement, PptxFill, PptxGeometry, PptxGroup, PptxLine, PptxLineEnd, PptxShape } from '@b32nio/spindle-shared/export/pptx';
+import type { PptxElement, PptxFill, PptxGeometry, PptxGroup, PptxLine, PptxLineEnd, PptxShadow, PptxShape } from '@b32nio/spindle-shared/export/pptx';
 import { hlinkXml, type WriteContext } from './writer-context';
 import { txBodyXml } from './writer-body';
 import { customGeometryXml } from './writer-custom-geometry';
@@ -8,6 +8,7 @@ import { angle, attrs, colorXml, pct, solidFillXml, xfrmXml } from './writer-xml
 
 const MAX_ID = 4294967295;
 const PRESET_NAME = /^[A-Za-z][A-Za-z0-9]*$/;
+const SHADOW_ANCHORS = new Set(['tl', 't', 'tr', 'l', 'ctr', 'r', 'bl', 'b', 'br']);
 const CAPS = { flat: 'flat', round: 'rnd', square: 'sq' } as const;
 const GRADIENT_PATH = { radial: 'circle', rect: 'rect', shape: 'shape' } as const;
 const FILL_TO_RECT = '<a:fillToRect l="50000" t="50000" r="50000" b="50000"/>';
@@ -85,6 +86,19 @@ export function lineXml(line: PptxLine | undefined, ctx: WriteContext, tag = 'a:
   return body === '' ? `<${tag}${a}/>` : `<${tag}${a}>${body}</${tag}>`;
 }
 
+/** `a:effectLst` with the outer shadow of a shape; nothing without one. Distances are EMU, the direction 60000ths of a degree. */
+export function shadowXml(shadow: PptxShadow | undefined): string {
+  if (!shadow) return '';
+  const a = attrs({
+    blurRad: shadow.blur !== undefined ? Math.round(shadow.blur * 9525) : undefined,
+    dist: shadow.dist !== undefined ? Math.round(shadow.dist * 9525) : undefined,
+    dir: shadow.dir !== undefined ? angle(shadow.dir) : undefined,
+    algn: shadow.algn !== undefined && SHADOW_ANCHORS.has(shadow.algn) ? shadow.algn : undefined,
+    rotWithShape: shadow.rotWithShape ? 1 : undefined,
+  });
+  return `<a:effectLst><a:outerShdw${a}>${colorXml(shadow.color)}</a:outerShdw></a:effectLst>`;
+}
+
 /** `a:prstGeom` with its adjustments. A name that is not an identifier (the editor's `unknown:` prefix is dropped) is written as a rectangle; custom geometry is written as its paths, or not at all when the reader could not keep them. */
 export function geometryXml(geometry: PptxGeometry | undefined, ctx: WriteContext): string {
   if (!geometry) return '';
@@ -109,7 +123,7 @@ export function shapeXml(shape: PptxShape, id: number, ctx: WriteContext): strin
   const link = hlinkXml(shape.link, ctx);
   const cNvSpPr = ph ? '<p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>' : `<p:cNvSpPr${attrs({ txBox: shape.textBox ? 1 : undefined })}/>`;
   const nvPr = ph ? `<p:nvPr><p:ph${attrs({ type: ph.type === 'obj' ? undefined : ph.type, idx: ph.idx })}/></p:nvPr>` : '<p:nvPr/>';
-  const spPr = (shape.frame ? xfrmXml(shape.frame) : '') + geometryXml(shape.geometry, ctx) + fillXml(shape.fill, ctx) + lineXml(shape.line, ctx);
+  const spPr = (shape.frame ? xfrmXml(shape.frame) : '') + geometryXml(shape.geometry, ctx) + fillXml(shape.fill, ctx) + lineXml(shape.line, ctx) + shadowXml(shape.shadow);
   return (
     `<p:sp><p:nvSpPr>${link === '' ? `<p:cNvPr${cNvPr}/>` : `<p:cNvPr${cNvPr}>${link}</p:cNvPr>`}${cNvSpPr}${nvPr}</p:nvSpPr>` +
     `<p:spPr>${spPr}</p:spPr>${shape.text ? `<p:txBody>${txBodyXml(shape.text, ctx)}</p:txBody>` : ''}</p:sp>`

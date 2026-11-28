@@ -247,6 +247,16 @@ export interface PptxLineEnd {
   len?: string;
 }
 
+/** An outer shadow (`a:effectLst/a:outerShdw`): `blur` and `dist` in px, `dir` in degrees, `algn` the anchor (`b`, `tl`...). The other effects (glow, reflection, soft edges, inner or preset shadows) are not modelled. */
+export interface PptxShadow {
+  color: PptxColor;
+  blur?: number;
+  dist?: number;
+  dir?: number;
+  algn?: string;
+  rotWithShape?: boolean;
+}
+
 /** An outline (`a:ln`): `width` in px; the rest as written. A property the element does not state is absent. */
 export interface PptxLine {
   fill?: PptxFill;
@@ -360,6 +370,8 @@ export interface PptxShape {
   geometry?: PptxGeometry;
   fill?: PptxFill;
   line?: PptxLine;
+  /** An outer shadow, when the shape's effect list holds nothing else. */
+  shadow?: PptxShadow;
   text?: PptxTextBody;
   /** `a:hlinkClick` on the shape. */
   link?: PptxLink;
