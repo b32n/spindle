@@ -3,7 +3,7 @@
 A set of `.pptx` / `.pptm` / `.ppt` files that exercise what real presentations contain, plus a manifest that says
 exactly which constructs each file holds, plus the goldens that record what the PPTX tooling does with each file
 today. The goldens describe the loss detector (`loss`, `ledger`) and the reader (`model`: the slide list, size, theme,
-sections, layouts and the slides' `p:sp` shapes, pictures, tables, connectors and groups with their text, with the text parity check; `roundtrip` is import, export, import again: the writer (K12) writes the package, theme, master, layouts and slide shells so far); they describe **current behaviour, not
+sections, layouts and the slides' `p:sp` shapes, pictures, tables, connectors and groups with their text, with the text parity check; `roundtrip` is import, export, import again: the writer (K12, K13) writes the package, theme, master, layouts and the slides' shapes, text, pictures, tables, groups, connectors, notes and comments so far); they describe **current behaviour, not
 correctness**, and the importer PRs (plan K9 onwards) show up as golden diffs to review. The construct probes in
 `scripts/pptx-fidelity/constructs.ts` verify the manifest against its own files, and the detector is checked against
 those claims.
@@ -87,7 +87,7 @@ byte-identical on Node 22 and 24. The harness catches everything: a detector or 
 |---|---|
 | `model` | The reader's `PresentationImportResult` (`@b32nio/spindle-shared/export/pptx`) without its `warnings`, normalised by `scripts/pptx-fidelity/normalize.ts`, plus the warnings; or `importError` and `presentation: null` for the four files that are not presentations (`expectImportError` in the manifest: truncated zip, no presentation part, encrypted, legacy `.ppt`). It grows with each K9 PR: slide size, slide list (`pptxId`, hidden flag, layout, error placeholders), sections, theme and colour map now; layouts and slide content next. |
 | `loss` | `detectPptxLoss(bytes, { detail: 'full' })` sorted by id: the 16 summary ids the import dialog will show (`pptx.charts`, `smartArt`, `media`, `embeddedObjects`, `transitions`, `animations`, `comments`, `macros`, `hiddenSlides`, `notes`, `fonts.unavailable`, `shapes.unsupportedGeometry`, `images.unsupportedFormat`, `encrypted`, `legacyBinary`, `sizeLimit`) plus the finer ids of the PPTX table in `documentation/import-loss.md`. Every effect starts with `lost:` and says that no `.pptx` can be opened today. |
-| `roundtrip` | `status: "skipped-import-error"` for the four rejected files; `ok` for every other file, with the structured difference between the first and the second import and the writer's own `exportWarnings` (what it does not export yet: slide shapes and text arrive with K12b, pictures, tables, groups, notes and comments with K13, opaque parts with K14). |
+| `roundtrip` | `status: "skipped-import-error"` for the four rejected files; `ok` for every other file, with the structured difference between the first and the second import and the writer's own `exportWarnings` (what it does not export yet: opaque parts, transitions and timing arrive with K14; and what it changes: dropped pictures, picture fills, modern comments written as legacy). |
 | `ledger` | Every part of the input package with a status, see below. |
 
 ### Package ledger rules

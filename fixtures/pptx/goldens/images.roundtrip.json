@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 11,
+      "elements": 25,
       "slides": 4
     },
     "before": {
@@ -10,30 +10,10 @@
       "slides": 4
     },
     "byField": {
-      "removed slides[].elements[]": 17
+      "removed slides[].elements[]": 3
     },
     "changed": 0,
     "entries": [
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"PNG picture\",\"altText\":\"A small PNG pi...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"JPEG picture\",\"altText\":\"A small JPEG ...",
-        "kind": "removed",
-        "path": "slides[0].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"5\",\"name\":\"GIF picture\",\"altText\":\"A small GIF pi...",
-        "kind": "removed",
-        "path": "slides[0].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"SVG with PNG fallback\",\"altText\":\"Vect...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
       {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"EMF picture\",\"altText\":\"An empty enhan...",
         "kind": "removed",
@@ -45,67 +25,17 @@
         "path": "slides[1].elements[3]"
       },
       {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"Cropped\",\"frame\":{\"x\":52.4934383202099...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"Rotated\",\"frame\":{\"x\":283.464566929133...",
-        "kind": "removed",
-        "path": "slides[2].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"5\",\"name\":\"Flipped horizontally\",\"frame\":{\"x\":514...",
-        "kind": "removed",
-        "path": "slides[2].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"6\",\"name\":\"Flipped vertically\",\"frame\":{\"x\":745.4...",
-        "kind": "removed",
-        "path": "slides[2].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"7\",\"name\":\"Bordered, rounded\",\"frame\":{\"x\":976.37...",
-        "kind": "removed",
-        "path": "slides[2].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"8\",\"name\":\"Duotone\",\"frame\":{\"x\":52.4934383202099...",
-        "kind": "removed",
-        "path": "slides[2].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"9\",\"name\":\"Brightness and contrast\",\"frame\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[2].elements[7]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"10\",\"name\":\"Greyscale\",\"frame\":{\"x\":514.435695538...",
-        "kind": "removed",
-        "path": "slides[2].elements[8]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"11\",\"name\":\"Colour change\",\"frame\":{\"x\":745.40682...",
-        "kind": "removed",
-        "path": "slides[2].elements[9]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"12\",\"name\":\"Transparency\",\"frame\":{\"x\":976.377952...",
-        "kind": "removed",
-        "path": "slides[2].elements[10]"
-      },
-      {
         "before": "{\"kind\":\"picture\",\"pptxId\":\"3\",\"name\":\"Linked picture\",\"altText\":\"A picture t...",
         "kind": "removed",
         "path": "slides[3].elements[1]"
       }
     ],
-    "removed": 17,
-    "total": 17,
+    "removed": 3,
+    "total": 3,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 17 pictures (K13)."
+    "Changed on export: pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF or SVG without a PNG) left out (3)."
   ],
   "reimportWarnings": [],
   "status": "ok"

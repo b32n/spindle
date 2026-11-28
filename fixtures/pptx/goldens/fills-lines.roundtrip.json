@@ -36,7 +36,7 @@
     "truncated": false
   },
   "exportWarnings": [
-    "Changed on export: picture fills left out, until K13 (3)."
+    "Changed on export: picture fills left out (the image of a fill is not kept) (3)."
   ],
   "reimportWarnings": [],
   "status": "ok"

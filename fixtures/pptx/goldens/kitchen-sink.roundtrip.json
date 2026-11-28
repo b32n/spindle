@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 18,
+      "elements": 22,
       "slides": 8
     },
     "before": {
@@ -11,11 +11,8 @@
     },
     "byField": {
       "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 5,
-      "removed slides[].elements[].geometry": 1,
-      "removed slides[].notes": 1,
-      "removed slides[].opaque": 2,
-      "removed slides[].threads": 1
+      "removed slides[].elements[]": 1,
+      "removed slides[].opaque": 2
     },
     "changed": 0,
     "entries": [
@@ -40,44 +37,9 @@
         "path": "slides[0].opaque"
       },
       {
-        "before": "[{\"id\":\"256-0.1\",\"format\":\"legacy\",\"anchor\":{\"kind\":\"slide\"},\"position\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[0].threads"
-      },
-      {
-        "before": "{\"props\":{},\"paragraphs\":[{\"level\":0,\"style\":{\"fontSize\":12,\"color\":{\"kind\":\"...",
-        "kind": "removed",
-        "path": "slides[1].notes"
-      },
-      {
-        "before": "{\"kind\":\"custom\",\"paths\":[{\"w\":100,\"h\":100,\"commands\":[{\"op\":\"move\",\"x\":0,\"y\"...",
-        "kind": "removed",
-        "path": "slides[2].elements[4].geometry"
-      },
-      {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Table\",\"frame\":{\"x\":73.49081364829397,\"y...",
-        "kind": "removed",
-        "path": "slides[3].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"Picture\",\"altText\":\"A small picture\",\"...",
-        "kind": "removed",
-        "path": "slides[3].elements[2]"
-      },
-      {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Bar chart\",\"frame\"...",
         "kind": "removed",
         "path": "slides[4].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"group\",\"pptxId\":\"10\",\"name\":\"Group\",\"frame\":{\"x\":73.49081364829397,\"...",
-        "kind": "removed",
-        "path": "slides[5].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"connector\",\"pptxId\":\"14\",\"name\":\"Elbow\",\"frame\":{\"x\":451.44356955380...",
-        "kind": "removed",
-        "path": "slides[5].elements[3]"
       },
       {
         "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
@@ -85,21 +47,14 @@
         "path": "slides[6].opaque"
       }
     ],
-    "removed": 13,
-    "total": 13,
+    "removed": 6,
+    "total": 6,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 1 pictures (K13).",
-    "Not exported yet: 1 tables (K13).",
-    "Not exported yet: 1 connectors (K13).",
-    "Not exported yet: 1 groups (K13).",
     "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
-    "Not exported yet: 1 speaker notes (K13).",
-    "Not exported yet: 1 comment threads (K13).",
     "Not exported yet: 2 transitions (K14).",
-    "Not exported yet: 1 animation timelines (K14).",
-    "Changed on export: shapes with custom geometry written without their outline, until K13 (1)."
+    "Not exported yet: 1 animation timelines (K14)."
   ],
   "reimportWarnings": [
     "2 fonts the editor may not have (MS Gothic, MS Mincho) are used; text in them shows in a substitute and may reflow."

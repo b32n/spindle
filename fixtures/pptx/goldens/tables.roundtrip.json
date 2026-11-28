@@ -2,46 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 3,
+      "elements": 7,
       "slides": 3
     },
     "before": {
       "elements": 7,
       "slides": 3
     },
-    "byField": {
-      "removed slides[].elements[]": 4
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Styled table\",\"frame\":{\"x\":73.4908136482...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"4\",\"name\":\"Unstyled table\",\"frame\":{\"x\":73.49081364...",
-        "kind": "removed",
-        "path": "slides[0].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Merged table\",\"frame\":{\"x\":73.4908136482...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Bordered table\",\"frame\":{\"x\":73.49081364...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      }
-    ],
-    "removed": 4,
-    "total": 4,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 4 tables (K13)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

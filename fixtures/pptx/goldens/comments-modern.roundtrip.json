@@ -1,6 +1,6 @@
 {
   "diff": {
-    "added": 0,
+    "added": 1,
     "after": {
       "elements": 2,
       "slides": 2
@@ -10,22 +10,36 @@
       "slides": 2
     },
     "byField": {
-      "removed slides[].threads": 1
+      "added slides[].threads[].position": 1,
+      "changed slides[].threads[].format": 1,
+      "changed slides[].threads[].id": 1
     },
-    "changed": 0,
+    "changed": 2,
     "entries": [
       {
-        "before": "[{\"id\":\"256-{00000000-0000-4000-8000-0000000000C1}\",\"format\":\"modern\",\"anchor...",
-        "kind": "removed",
-        "path": "slides[0].threads"
+        "after": "\"legacy\"",
+        "before": "\"modern\"",
+        "kind": "changed",
+        "path": "slides[0].threads[0].format"
+      },
+      {
+        "after": "\"256-0.1\"",
+        "before": "\"256-{00000000-0000-4000-8000-0000000000C1}\"",
+        "kind": "changed",
+        "path": "slides[0].threads[0].id"
+      },
+      {
+        "after": "{\"x\":0,\"y\":0}",
+        "kind": "added",
+        "path": "slides[0].threads[0].position"
       }
     ],
-    "removed": 1,
-    "total": 1,
+    "removed": 0,
+    "total": 3,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 1 comment threads (K13)."
+    "Changed on export: modern comments written as legacy comments on the slide (status and the shape a comment was anchored to are not kept) (1)."
   ],
   "reimportWarnings": [],
   "status": "ok"

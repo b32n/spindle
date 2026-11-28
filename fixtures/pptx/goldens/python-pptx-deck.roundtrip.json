@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 10,
+      "elements": 12,
       "slides": 4
     },
     "before": {
@@ -11,8 +11,7 @@
     },
     "byField": {
       "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 3,
-      "removed slides[].notes": 1
+      "removed slides[].elements[]": 1
     },
     "changed": 0,
     "entries": [
@@ -32,35 +31,17 @@
         "path": "opaqueParts[2]"
       },
       {
-        "before": "{\"kind\":\"table\",\"pptxId\":\"3\",\"name\":\"Table 2\",\"frame\":{\"x\":48,\"y\":153.6,\"w\":3...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"picture\",\"pptxId\":\"4\",\"name\":\"Picture 3\",\"altText\":\"image.png\",\"fram...",
-        "kind": "removed",
-        "path": "slides[2].elements[2]"
-      },
-      {
-        "before": "{\"props\":{},\"paragraphs\":[{\"level\":0,\"style\":{\"fontSize\":12,\"color\":{\"kind\":\"...",
-        "kind": "removed",
-        "path": "slides[2].notes"
-      },
-      {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Chart 2\",\"frame\":{...",
         "kind": "removed",
         "path": "slides[3].elements[1]"
       }
     ],
-    "removed": 7,
-    "total": 7,
+    "removed": 4,
+    "total": 4,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 1 pictures (K13).",
-    "Not exported yet: 1 tables (K13).",
-    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
-    "Not exported yet: 1 speaker notes (K13)."
+    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14)."
   ],
   "reimportWarnings": [],
   "status": "ok"

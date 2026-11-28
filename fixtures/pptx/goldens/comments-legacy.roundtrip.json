@@ -9,29 +9,14 @@
       "elements": 3,
       "slides": 3
     },
-    "byField": {
-      "removed slides[].threads": 2
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "[{\"id\":\"256-0.1\",\"format\":\"legacy\",\"anchor\":{\"kind\":\"slide\"},\"position\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[0].threads"
-      },
-      {
-        "before": "[{\"id\":\"258-1.2\",\"format\":\"legacy\",\"anchor\":{\"kind\":\"slide\"},\"position\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[2].threads"
-      }
-    ],
-    "removed": 2,
-    "total": 2,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 3 comment threads (K13)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }
