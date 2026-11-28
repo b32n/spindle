@@ -26,10 +26,26 @@ function rangesIntersect(a: Range, b: Range): boolean {
   );
 }
 
+/**
+ * The cell store, remembering whether a formula or a cached-only formula may be in it: set on every write that carries one and
+ * cleared only by a caller that has scanned every cell, so the flags are never stale-low and a structural edit can skip the scan of
+ * a sheet with none.
+ */
+export class CellMap extends Map<string, Cell> {
+  maybeFormulas = false;
+  maybeCachedOnly = false;
+
+  override set(key: string, cell: Cell): this {
+    if (cell.formula !== undefined || cell.formulaAst !== undefined) this.maybeFormulas = true;
+    if (cell.cachedOnly) this.maybeCachedOnly = true;
+    return super.set(key, cell);
+  }
+}
+
 export class SheetImpl implements Sheet {
   id: string;
   name: string;
-  cells: Map<string, Cell> = new Map(); // key: "rowId:colId"
+  cells: CellMap = new CellMap(); // key: "rowId:colId"
   config: SheetConfig;
   rowCount: number;
   colCount: number;
