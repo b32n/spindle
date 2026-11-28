@@ -1,3 +1,4 @@
+import { PartRels } from './writer-context';
 import { attrs, colorXml, emu, esc, hex6, pct, relsXml, solidFillXml, xfrmXml } from './writer-xml';
 import { bodyPrXml, levelXml, lstStyleXml, plainParagraphsXml, typefaceOf } from './writer-text';
 import { themeXml } from './writer-theme';
@@ -80,5 +81,38 @@ describe('writer-theme', () => {
     expect(xml.match(/<a:srgbClr val="[0-9A-F]{6}"\/><\/a:(?:dk1|lt1|dk2|lt2|accent[1-6]|hlink|folHlink)>/g)).toHaveLength(12);
     expect(xml).toContain('<a:majorFont><a:latin typeface="Calibri Light"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont>');
     expect(xml).toContain('<a:fmtScheme name="Office">');
+  });
+});
+
+describe('PartRels', () => {
+  const first = { id: 'rId1', type: 'slideLayout', target: '../slideLayouts/slideLayout1.xml' };
+  it('numbers relationships from rId2, shares one per target, and skips an id a part asked for', () => {
+    const r = new PartRels(first);
+    expect(r.add('image', 'a.png')).toBe('rId2');
+    expect(r.add('image', 'a.png')).toBe('rId2');
+    expect(r.add('image', 'b.png', false, 'rId4')).toBe('rId4');
+    expect(r.add('image', 'c.png')).toBe('rId5');
+    expect(r.add('image', 'd.png')).toBe('rId6');
+    expect(r.add('image', 'e.png', false, 'rId4')).toBe('rId7');
+  });
+  it('writes a type given as a whole URI as it is, and an external relationship as external', () => {
+    const r = new PartRels(first);
+    r.add('http://schemas.microsoft.com/office/2007/relationships/ink', '../ink/ink1.xml');
+    r.add('hyperlink', 'https://example.com/', true);
+    expect(relsXml(r.entries)).toContain('Type="http://schemas.microsoft.com/office/2007/relationships/ink" Target="../ink/ink1.xml"');
+    expect(relsXml(r.entries)).toContain('TargetMode="External"');
+  });
+  it('moves the first relationship out of rId1 only when it is movable and rId1 is asked for', () => {
+    const fixed = new PartRels(first);
+    expect(fixed.add('image', 'a', false, 'rId1')).toBe('rId2');
+    expect(fixed.entries[0].id).toBe('rId1');
+    const movable = new PartRels(first, true);
+    expect(movable.add('image', 'a', false, 'rId1')).toBe('rId1');
+    expect(movable.entries[0].id).toBe('rId2');
+    expect(movable.add('image', 'b', false, 'rId1')).toBe('rId3');
+    expect(movable.add('image', 'c')).toBe('rId4');
+    const plain = new PartRels(first, true);
+    expect(plain.add('image', 'a', false, 'rId7')).toBe('rId7');
+    expect(plain.entries[0].id).toBe('rId1');
   });
 });

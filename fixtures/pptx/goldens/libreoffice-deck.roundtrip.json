@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 12,
+      "elements": 13,
       "slides": 4
     },
     "before": {
@@ -11,10 +11,7 @@
     },
     "byField": {
       "changed fonts.used[]": 2,
-      "removed fonts.used[]": 1,
-      "removed opaqueParts[]": 1,
-      "removed slides[].elements[]": 1,
-      "removed slides[].opaque": 4
+      "removed fonts.used[]": 1
     },
     "changed": 2,
     "entries": [
@@ -34,46 +31,13 @@
         "before": "\"Times New Roman\"",
         "kind": "removed",
         "path": "fonts.used[2]"
-      },
-      {
-        "before": "{\"hash\":\"d4dabbe6d26f4c31f10c4758bbb46e65aafb7c5441c0329b813f3922eb71400d\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[0]"
-      },
-      {
-        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
-        "kind": "removed",
-        "path": "slides[0].opaque"
-      },
-      {
-        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
-        "kind": "removed",
-        "path": "slides[1].opaque"
-      },
-      {
-        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
-        "kind": "removed",
-        "path": "slides[2].opaque"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"77\",\"name\":\"Chart 2\",\"frame\":...",
-        "kind": "removed",
-        "path": "slides[3].elements[1]"
-      },
-      {
-        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
-        "kind": "removed",
-        "path": "slides[3].opaque"
       }
     ],
-    "removed": 7,
-    "total": 9,
+    "removed": 1,
+    "total": 3,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
-    "Not exported yet: 4 transitions (K14)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

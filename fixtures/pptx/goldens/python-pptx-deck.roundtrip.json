@@ -2,47 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 12,
+      "elements": 13,
       "slides": 4
     },
     "before": {
       "elements": 13,
       "slides": 4
     },
-    "byField": {
-      "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 1
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"hash\":\"4c57ff9f9f735e6611cc27f9b7bffff69e28ac59e74cd6d70156d59d8d627458\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[0]"
-      },
-      {
-        "before": "{\"hash\":\"6993abdd85830edc87f3f5822b391a5346d35239ee70aa049a729cbe07553f8a\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[1]"
-      },
-      {
-        "before": "{\"hash\":\"ca3dc4af54b324c6ad5c46ab2121438a6d28a5628b1ae0302fc54281a55a17c5\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[2]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Chart 2\",\"frame\":{...",
-        "kind": "removed",
-        "path": "slides[3].elements[1]"
-      }
-    ],
-    "removed": 4,
-    "total": 4,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

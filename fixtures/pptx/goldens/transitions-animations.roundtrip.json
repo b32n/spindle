@@ -9,50 +9,14 @@
       "elements": 11,
       "slides": 6
     },
-    "byField": {
-      "removed slides[].opaque": 6
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
-        "kind": "removed",
-        "path": "slides[0].opaque"
-      },
-      {
-        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
-        "kind": "removed",
-        "path": "slides[1].opaque"
-      },
-      {
-        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
-        "kind": "removed",
-        "path": "slides[2].opaque"
-      },
-      {
-        "before": "{\"transition\":\"<mc:AlternateContent xmlns:a=\\\"http://schemas.openxmlformats.o...",
-        "kind": "removed",
-        "path": "slides[3].opaque"
-      },
-      {
-        "before": "{\"timing\":\"<p:timing xmlns:a=\\\"http://schemas.openxmlformats.org/drawingml/20...",
-        "kind": "removed",
-        "path": "slides[4].opaque"
-      },
-      {
-        "before": "{\"timing\":\"<p:timing xmlns:a=\\\"http://schemas.openxmlformats.org/drawingml/20...",
-        "kind": "removed",
-        "path": "slides[5].opaque"
-      }
-    ],
-    "removed": 6,
-    "total": 6,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 4 transitions (K14).",
-    "Not exported yet: 2 animation timelines (K14)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

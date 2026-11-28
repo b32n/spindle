@@ -7,7 +7,8 @@ import { descendants, kid, kids, parseXml, walk, type XmlElement } from '../xlsx
 // string-built package is prone to. They run in Jest over what the writer produced (and over hand-broken packages, to prove
 // each one fires); they read the finished package, not the writer's inputs, so they also catch a bug in the packaging itself.
 // The list is the one of the plan: unique shape ids per part, relationship ids and targets, content types, the child order of
-// `p:spTree`, and the id ranges of the slide, master and layout lists.
+// `p:spTree`, and the id ranges of the slide, master and layout lists. A part nothing relates to is a lint too: the opaque parts
+// (charts, diagrams, objects, media, ink; K14) are written next to the slides and a lost relationship would leave them orphaned.
 
 const SHAPE_CHILDREN = new Set(['sp', 'grpSp', 'graphicFrame', 'cxnSp', 'pic', 'contentPart', 'AlternateContent']);
 const DRAWN_PARTS = /^ppt\/(?:slides|slideLayouts|slideMasters|notesSlides|notesMasters)\/[^/]+\.xml$/;
@@ -28,7 +29,12 @@ async function contentTypes(zip: JSZip, problems: string[]): Promise<{ defaults:
 
 function lintShapeTree(part: string, root: XmlElement, problems: string[]): void {
   const ids = new Set<string>();
-  for (const c of descendants(root, 'cNvPr')) {
+  // the preview picture inside an OLE object states id 0 (as PowerPoint writes it); it is not a shape of the slide
+  const inObjects = new Set<XmlElement>();
+  walk(root, (e) => {
+    if (e.name === 'oleObj') for (const c of descendants(e, 'cNvPr')) inObjects.add(c);
+  });
+  for (const c of descendants(root, 'cNvPr').filter((x) => !inObjects.has(x))) {
     const id = c.attrs.id ?? '';
     if (!/^\d+$/.test(id)) problems.push(`${part}: a shape has no numeric id`);
     else if (ids.has(id)) problems.push(`${part}: shape id ${id} is used twice`);
@@ -54,7 +60,8 @@ function lintShapeTree(part: string, root: XmlElement, problems: string[]): void
 /** Every attribute that refers to a relationship (`r:id`, `r:embed`, `r:link`...) must name one the part has. */
 function lintRelationshipRefs(part: string, root: XmlElement, ids: Set<string>, problems: string[]): void {
   walk(root, (e) => {
-    for (const [attr, id] of Object.entries(e.rattrs ?? {})) if (!ids.has(id)) problems.push(`${part}: ${e.name}@r:${attr} refers to ${id}, which the part's relationships do not have`);
+    // an empty id states no relationship (`r:blip=""` of a diagram layout)
+    for (const [attr, id] of Object.entries(e.rattrs ?? {})) if (id !== '' && !ids.has(id)) problems.push(`${part}: ${e.name}@r:${attr} refers to ${id}, which the part's relationships do not have`);
   });
 }
 
@@ -86,6 +93,7 @@ export async function lintPptxPackage(bytes: Uint8Array | JSZip): Promise<string
     for (const part of types.overrides) if (!zip.file(part)) problems.push(`[Content_Types].xml declares ${part}, which the package does not have`);
   }
 
+  const targeted = new Set<string>();
   const idsTaken = { slide: new Set<string>(), master: new Set<string>() };
   for (const part of parts) {
     if (!/\.(?:xml|rels)$/.test(part)) continue;
@@ -102,7 +110,10 @@ export async function lintPptxPackage(bytes: Uint8Array | JSZip): Promise<string
         const id = r.attrs.Id ?? '';
         if (ids.has(id)) problems.push(`${part}: relationship id ${id} is used twice`);
         ids.add(id);
-        if (r.attrs.TargetMode !== 'External' && !zip.file(resolveTarget(owner, r.attrs.Target ?? ''))) problems.push(`${part}: ${id} targets ${r.attrs.Target}, which the package does not have`);
+        if (r.attrs.TargetMode === 'External') continue;
+        const target = resolveTarget(owner, r.attrs.Target ?? '');
+        targeted.add(target);
+        if (!zip.file(target)) problems.push(`${part}: ${id} targets ${r.attrs.Target}, which the package does not have`);
       }
       continue;
     }
@@ -120,5 +131,6 @@ export async function lintPptxPackage(bytes: Uint8Array | JSZip): Promise<string
     const want = needs[root.name];
     if (want && kids(rels ?? undefined, 'Relationship').filter((r) => (r.attrs.Type ?? '').endsWith(`/${want}`)).length !== 1) problems.push(`${part}: needs exactly one ${want} relationship`);
   }
+  for (const part of parts) if (part !== '[Content_Types].xml' && !part.endsWith('.rels') && !targeted.has(part)) problems.push(`${part}: no relationship targets this part`);
   return problems;
 }

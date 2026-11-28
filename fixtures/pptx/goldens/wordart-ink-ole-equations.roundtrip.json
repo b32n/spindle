@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 8,
+      "elements": 10,
       "slides": 3
     },
     "before": {
@@ -10,49 +10,21 @@
       "slides": 3
     },
     "byField": {
-      "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 2,
       "removed slides[].elements[].link": 1
     },
     "changed": 0,
     "entries": [
-      {
-        "before": "{\"hash\":\"980ebf817f204fff9a9069747675a57a62cdb6f0601908c93b525518953c69e8\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[0]"
-      },
-      {
-        "before": "{\"hash\":\"d4eb7fcb1ad5d21793e68bf101723e750964b2bf59257af46eb55335d7947b11\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[1]"
-      },
-      {
-        "before": "{\"hash\":\"e7a74ce0393b4d20209e02b0aa09042c07192a32763f922883a45fb28d989290\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[2]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"ink\",\"pptxId\":\"3\",\"name\":\"Ink 2\",\"frame\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"ole\",\"pptxId\":\"3\",\"name\":\"Embedded worksheet\",...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
       {
         "before": "{\"kind\":\"action\",\"target\":\"ppaction://macro?name=Module1.Hello\"}",
         "kind": "removed",
         "path": "slides[2].elements[3].link"
       }
     ],
-    "removed": 6,
-    "total": 6,
+    "removed": 1,
+    "total": 1,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 2 charts, diagrams, objects, media and ink (K14).",
     "Changed on export: hyperlinks with an address the editor does not allow left out (1)."
   ],
   "reimportWarnings": [],

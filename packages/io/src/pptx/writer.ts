@@ -1,12 +1,13 @@
 import JSZip from 'jszip';
 import { relsPart } from '../common/ooxml-package';
 import { baseName } from './parts';
-import type { PptxElement, PptxLayout, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
+import type { PptxLayout, PptxSlide, PresentationImportResult } from '@b32nio/spindle-shared/export/pptx';
 import { BLANK_LAYOUT, layoutXml, MASTER_ID, masterXml } from './writer-layouts';
 import { BUILT_IN_TABLE_STYLES } from './table-styles';
 import { LOSSY, PartRels, type LossyKey, type WriteContext } from './writer-context';
 import { CommentAuthors, commentsXml } from './writer-comments';
 import { elementIds, elementsXml } from './writer-elements';
+import { OpaqueParts, slideFragmentsXml } from './writer-opaque';
 import { notesMasterXml, notesSlideXml } from './writer-notes';
 import { allocateElementIds, fillXml } from './writer-shapes';
 import { themeXml } from './writer-theme';
@@ -19,8 +20,9 @@ import { attrs, emu, esc, NS_CT, NS_P, NS_PKG_REL, relsXml, ROOT_NS, TREE_HEADER
 //
 // K12a wrote the package, theme, master and layouts; K12b adds the slides' text boxes and shapes (text, fills, outlines, hyperlinks),
 // slide backgrounds and the layouts' static shapes; K13 adds pictures (media parts), tables, groups, connectors, custom geometry, notes
-// (the notes master and a notes slide per slide) and comments (legacy format). Opaque parts, transitions and timing arrive with K14;
-// until then `exportPptx` says in `warnings` what it left out, so nothing is dropped silently.
+// (the notes master and a notes slide per slide) and comments (legacy format); K14 re-emits the opaque content (charts, diagrams,
+// objects, media, ink) with its parts from the opaque part store, and the transitions and timing of the slides. `exportPptx` says in
+// `warnings` what it left out or changed, so nothing is dropped silently.
 
 const CT_ROOT = 'application/vnd.openxmlformats-officedocument.presentationml';
 const TYPE = {
@@ -127,31 +129,11 @@ function allocateLayoutParts(layouts: PptxLayout[]): string[] {
 
 const plural = (n: number, one: string, many = `${one}s`): string => `${n} ${n === 1 ? one : many}`;
 
-/** What this writer does not export yet, one sentence per kind, so the report never says "clean" about a deck it emptied. */
+/** What the writer cannot say about the deck as a whole, one sentence per kind, so the report never says "clean" about a deck it emptied. */
 function notExported(p: PresentationImportResult): string[] {
-  const counts: Record<string, number> = {};
-  const bump = (k: string, n = 1) => {
-    counts[k] = (counts[k] ?? 0) + n;
-  };
-  const count = (list: PptxElement[]) => {
-    for (const e of list) {
-      if (e.kind === 'opaque') bump('opaque');
-      else if (e.kind === 'group') count(e.children);
-    }
-  };
-  for (const s of p.slides) {
-    count(s.elements ?? []);
-    if (s.opaque?.transition) bump('transition');
-    if (s.opaque?.timing) bump('timing');
-  }
+  const out: string[] = [];
   const failed = p.slides.filter((s) => s.error !== undefined).length;
-  const lines: [string, string][] = [
-    ['opaque', 'charts, diagrams, objects, media and ink (K14)'],
-    ['transition', 'transitions (K14)'],
-    ['timing', 'animation timelines (K14)'],
-  ];
-  const out = lines.filter(([k]) => counts[k]).map(([k, label]) => `Not exported yet: ${counts[k]} ${label}.`);
-  if (failed > 0) out.unshift(`${plural(failed, 'slide')} could not be read at import and ${failed === 1 ? 'is' : 'are'} written empty.`);
+  if (failed > 0) out.push(`${plural(failed, 'slide')} could not be read at import and ${failed === 1 ? 'is' : 'are'} written empty.`);
   const masters = new Set(p.layouts.map((l) => l.masterPart)).size;
   if (masters > 1) out.unshift(`${masters} slide masters were merged into one (their layouts keep their placeholders).`);
   return out;
@@ -174,12 +156,16 @@ function presentationXml(p: PresentationImportResult, slideIds: string[], slideR
 }
 
 function slideXml(slide: PptxSlide, ctx: WriteContext): string {
-  const ids = allocateElementIds(slide.elements ?? []);
+  const elements = slide.elements ?? [];
+  const ids = allocateElementIds(elements);
+  // the diagrams of the slide name a relationship of it by id: those ids are taken before any other relationship takes one
+  ctx.opaque?.reserve(elements, ctx.rels);
+  const all = elementIds(ids, ctx);
   const bg = slide.background ? fillXml(slide.background, ctx) : '';
   const background = bg === '' ? '' : `<p:bg><p:bgPr>${bg}<a:effectLst/></p:bgPr></p:bg>`;
   return (
-    `${XML_DECLARATION}<p:sld ${ROOT_NS}${attrs({ show: slide.hidden ? 0 : undefined })}><p:cSld${attrs({ name: slide.name })}>${background}<p:spTree>${TREE_HEADER}${elementsXml(slide.elements ?? [], ctx, elementIds(ids, ctx))}</p:spTree></p:cSld>` +
-    '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>'
+    `${XML_DECLARATION}<p:sld ${ROOT_NS}${attrs({ show: slide.hidden ? 0 : undefined })}><p:cSld${attrs({ name: slide.name })}>${background}<p:spTree>${TREE_HEADER}${elementsXml(elements, ctx, all)}</p:spTree></p:cSld>` +
+    `<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>${slideFragmentsXml(slide.opaque, all.bySource, ctx.lossy)}</p:sld>`
   );
 }
 
@@ -229,12 +215,15 @@ export async function exportPptx(presentation: PresentationImportResult, options
     const image = media.get(dataUrl);
     return image ? `../media/${baseName(image.name)}` : undefined;
   };
-  const context = (rels: PartRels, slideTarget: (part: string) => string | undefined): WriteContext => {
+  const opaqueParts = new OpaqueParts(presentation.opaqueParts, mediaNames);
+  const context = (rels: PartRels, slideTarget: (part: string) => string | undefined, owner?: string): WriteContext => {
     let field = 0;
+    const count = (key: LossyKey) => lossy.set(key, (lossy.get(key) ?? 0) + 1);
     return {
+      ...(owner !== undefined ? { opaque: opaqueParts.forPart(owner, count) } : {}),
       rels,
       slideTarget,
-      lossy: (key) => lossy.set(key, (lossy.get(key) ?? 0) + 1),
+      lossy: count,
       image: registerImage,
       tableStyle: (id, name) => {
         if (tableStyles.get(id) === undefined) tableStyles.set(id, name);
@@ -293,8 +282,8 @@ export async function exportPptx(presentation: PresentationImportResult, options
   presentation.layouts.forEach((l, i) => byPart.has(l.partName) || byPart.set(l.partName, layoutParts[i]));
   presentation.slides.forEach((slide, i) => {
     const layout = (slide.layoutPart !== undefined ? byPart.get(slide.layoutPart) : undefined) ?? layoutParts[0];
-    const rels = new PartRels({ id: 'rId1', type: 'slideLayout', target: `../slideLayouts/${baseName(layout)}` });
-    const ctx = context(rels, slideTarget(''));
+    const rels = new PartRels({ id: 'rId1', type: 'slideLayout', target: `../slideLayouts/${baseName(layout)}` }, true);
+    const ctx = context(rels, slideTarget(''), `ppt/slides/slide${i + 1}.xml`);
     add(`ppt/slides/slide${i + 1}.xml`, slideXml(slide, ctx), TYPE.slide);
     if (slide.notes) {
       const part = `ppt/notesSlides/notesSlide${++notesCount}.xml`;
@@ -321,6 +310,7 @@ export async function exportPptx(presentation: PresentationImportResult, options
   const defs = [...tableStyles].filter(([id]) => !BUILT_IN_TABLE_STYLES.has(id.toUpperCase())).map(([id, name]) => `<a:tblStyle${attrs({ styleId: id, styleName: name ?? '' })}/>`).join('');
   tableStylesEntry.data = `${XML_DECLARATION}<a:tblStyleLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" def="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}">${defs}</a:tblStyleLst>`;
   for (const image of media.values()) if (image) entries.push({ name: image.name, data: image.bytes });
+  entries.push(...opaqueParts.entries);
 
   add('docProps/core.xml', corePropertiesXml(options.metadata), TYPE.core);
   add('docProps/app.xml', `${XML_DECLARATION}<Properties xmlns="${NS_APP}"><Application>Spindle</Application><Slides>${presentation.slides.length}</Slides></Properties>`, TYPE.app);

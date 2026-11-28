@@ -2,92 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 4,
+      "elements": 8,
       "slides": 4
     },
     "before": {
       "elements": 8,
       "slides": 4
     },
-    "byField": {
-      "removed opaqueParts[]": 9,
-      "removed slides[].elements[]": 4
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"hash\":\"8138d3790525f1b655d551e43fa734b86889a6c28a2f848f06beb74d75ea98c5\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[0]"
-      },
-      {
-        "before": "{\"hash\":\"6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[1]"
-      },
-      {
-        "before": "{\"hash\":\"79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[2]"
-      },
-      {
-        "before": "{\"hash\":\"424336d14dc0f6ca84db878755115c6f255e24591ae42fe7ddcd9a37280f33e8\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[3]"
-      },
-      {
-        "before": "{\"hash\":\"54003405cc44d15eccda8fc03bcc37e84c752cda37685f2b7c6260d881a1fae9\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[4]"
-      },
-      {
-        "before": "{\"hash\":\"0b3e4efeab4dc986979067456c1b0e989c58510ddae1b8b9217927416a13d898\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[5]"
-      },
-      {
-        "before": "{\"hash\":\"73a0e5ce2f8eeed422cfe2f97700d5d3dbdc337f6c465ff6a26746947be6afa6\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[6]"
-      },
-      {
-        "before": "{\"hash\":\"f69b9be80d6b4ec54a0c3f77b7078fac168a1d50ab59b4cade260e03151fda8e\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[7]"
-      },
-      {
-        "before": "{\"hash\":\"1d7288d10bb2cad437712536e74f972fc18f103d59b0d2f13659ddd964d36218\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[8]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Bar chart\",\"frame\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Line chart\",\"frame...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Pie chart\",\"frame\"...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Scatter chart\",\"fr...",
-        "kind": "removed",
-        "path": "slides[3].elements[1]"
-      }
-    ],
-    "removed": 13,
-    "total": 13,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 4 charts, diagrams, objects, media and ink (K14)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

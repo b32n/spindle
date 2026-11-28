@@ -2,57 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 1,
+      "elements": 2,
       "slides": 1
     },
     "before": {
       "elements": 2,
       "slides": 1
     },
-    "byField": {
-      "removed opaqueParts[]": 5,
-      "removed slides[].elements[]": 1
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"hash\":\"31264ec4799326f8eee5350f9a95380c845c7f244d5a5d2f7647860c450c739d\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[0]"
-      },
-      {
-        "before": "{\"hash\":\"b2562b24c33d3c9043f214b39d88c29393d9fa03cecaed48890cdf8cd877f431\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[1]"
-      },
-      {
-        "before": "{\"hash\":\"1a82986ad0f25ab2e0d045b4daec167b6d1102269df3a43b69ed5e4a52770bca\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[2]"
-      },
-      {
-        "before": "{\"hash\":\"120899877c1f9df22521fb1483a77d80c9e791574622895bdd070f43aff107b6\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[3]"
-      },
-      {
-        "before": "{\"hash\":\"39fc7c1b78afb6c7bb569f25c8caf9be5a2aba56988f49b4b8acc04ef6aaeca1\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[4]"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"smartArt\",\"pptxId\":\"3\",\"name\":\"Diagram\",\"frame...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      }
-    ],
-    "removed": 6,
-    "total": 6,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }
