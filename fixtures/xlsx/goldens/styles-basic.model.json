@@ -79,6 +79,11 @@
         },
         "colCount": 100,
         "config": {
+          "colStyles": {
+            "G": {
+              "style": "s8"
+            }
+          },
           "colWidths": {
             "A": 131
           },
@@ -143,6 +148,11 @@
         "shrinkToFit": true
       },
       "s7": {
+        "fontFamily": "Calibri",
+        "fontSize": 11
+      },
+      "s8": {
+        "backgroundColor": "#fff2cc",
         "fontFamily": "Calibri",
         "fontSize": 11
       }

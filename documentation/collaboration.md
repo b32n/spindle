@@ -316,7 +316,12 @@ edits, and the inverse operations broadcast to peers like any other edit.
   of a cached-only array formula are ordinary cells. An insert or delete of rows or columns rewrites the references in a cached-only
   cell's `formula` text, so the structural edit writes that cell as well (the new text is its new value, last writer wins like any other). An imported workbook shows the file's saved results on the client that
   imported it; a client that joins the room recalculates the formulas the engine can evaluate (cached-only cells are the same
-  everywhere).
+  everywhere). Version 3 (S6) added the per-sheet Y maps `colStyles` and `rowStyles` (`colId`/`rowId` to `{ styleId?, formatId? }`: the
+  default format of a column or row, so a cell typed there starts with it) and the style fields `underlineKind`, `strikethrough`, `indent`,
+  `shrinkToFit`, `fillPattern`, `patternColor` and `border*Kind`. A v2 client would not see the column and row formats and would drop them on its
+  next structural write, so it refuses a v3 room. A sheet written before version 3 has no such maps: they read as empty and the first client that
+  sets a format adds them (two clients adding them to the same old sheet at once keep one map; the other client's next structural write puts its
+  entries back, since the maps are rebuilt from its own sheet). The styles and number formats they name travel in the shared pools like a cell's.
 - **Content controls.** A Word content control is a ProseMirror node
   (`content_control` around blocks, `content_control_inline` in a paragraph), so it
   syncs like any other content and does not block attach. Concurrent edits merge as

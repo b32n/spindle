@@ -290,3 +290,70 @@ describe('exportXlsx', () => {
     expect((cell.value as ExcelJS.CellHyperlinkValue).hyperlink).toBe('https://example.com');
   });
 });
+
+/** exceljs keeps a row's format in `style` (its typings leave it out). */
+const rowStyle = (row: ExcelJS.Row): Partial<ExcelJS.Style> => (row as unknown as { style: Partial<ExcelJS.Style> }).style;
+
+describe('exportXlsx: styles (S6)', () => {
+  const sheetOf = (cells: Array<[string, import('@b32nio/spindle-shared/export/xlsx').SpreadsheetCell]>, extra: Partial<import('@b32nio/spindle-shared/export/xlsx').SpreadsheetSheet> = {}) =>
+    ({ name: 'S', cells: new Map(cells), ...extra });
+
+  it('writes every border style per side with its colour', async () => {
+    const styles = ['thin', 'hair', 'dotted', 'dashed', 'dashDot', 'dashDotDot', 'double', 'medium', 'mediumDashed', 'mediumDashDot', 'mediumDashDotDot', 'slantDashDot', 'thick'] as const;
+    const wb = await readBack({
+      sheets: [sheetOf(styles.map((style, i) => [`${i}:0`, { value: 1, style: { border: { top: { style, color: '#ff0000' }, left: { style, color: '#00ff00' }, bottom: { style } } } }]))],
+    });
+    styles.forEach((style, i) => {
+      const border = wb.worksheets[0].getCell(i + 1, 1).border;
+      expect(border?.top).toMatchObject({ style, color: { argb: 'FFFF0000' } });
+      expect(border?.left).toMatchObject({ style, color: { argb: 'FF00FF00' } });
+      expect(border?.bottom?.style).toBe(style);
+      expect(border?.right).toBeUndefined();
+    });
+  });
+
+  it('writes pattern fills with both colours, solid fills, underline variants, strike, indent and shrink-to-fit', async () => {
+    const wb = await readBack({
+      sheets: [
+        sheetOf([
+          ['0:0', { value: 1, style: { fillPattern: 'darkGrid', patternColor: '#112233', backgroundColor: '#445566' } }],
+          ['1:0', { value: 1, style: { fillPattern: 'lightGray', patternColor: '#112233' } }],
+          ['2:0', { value: 1, style: { backgroundColor: '#abcdef' } }],
+          ['3:0', { value: 1, style: { underline: true, underlineStyle: 'double', strikethrough: true } }],
+          ['4:0', { value: 1, style: { underline: true } }],
+          ['5:0', { value: 1, style: { indent: 3, shrinkToFit: true, horizontalAlign: 'left' } }],
+        ]),
+      ],
+    });
+    const ws = wb.worksheets[0];
+    expect(ws.getCell('A1').fill).toMatchObject({ pattern: 'darkGrid', fgColor: { argb: 'FF112233' }, bgColor: { argb: 'FF445566' } });
+    expect(ws.getCell('A2').fill).toMatchObject({ pattern: 'lightGray', fgColor: { argb: 'FF112233' } });
+    expect(ws.getCell('A3').fill).toMatchObject({ pattern: 'solid', fgColor: { argb: 'FFABCDEF' } });
+    expect(ws.getCell('A4').font).toMatchObject({ underline: 'double', strike: true });
+    expect(ws.getCell('A5').font?.underline).toBe(true);
+    expect(ws.getCell('A6').alignment).toMatchObject({ indent: 3, shrinkToFit: true, horizontal: 'left' });
+  });
+
+  it('writes column and row default formats (a row with nothing else gets the default height) and the default sizes', async () => {
+    const wb = await readBack({
+      sheets: [
+        sheetOf([['0:0', { value: 'x' }]], {
+          columnStyles: new Map([[2, { style: { bold: true, backgroundColor: '#ffeecc' }, numberFormat: { code: '0.00' } }]]),
+          rowStyles: new Map([[6, { style: { italic: true, border: { bottom: { style: 'dashDot' } } } }]]),
+          defaultColumnWidth: 64,
+          defaultRowHeight: 30,
+        }),
+      ],
+    });
+    const ws = wb.worksheets[0];
+    expect(ws.getColumn(3).style).toMatchObject({ font: { bold: true }, numFmt: '0.00', fill: { fgColor: { argb: 'FFFFEECC' } } });
+    expect(rowStyle(ws.getRow(7))).toMatchObject({ font: { italic: true }, border: { bottom: { style: 'dashDot' } } });
+    expect(ws.getRow(7).height).toBe(22.5);
+    expect(ws.properties.defaultColWidth).toBeCloseTo(8.43, 1);
+    expect(ws.properties.defaultRowHeight).toBe(22.5);
+    // the row's format without a height of its own, and a default format with no style
+    const plain = await readBack({ sheets: [sheetOf([], { rowStyles: new Map([[2, { numberFormat: { code: '0%' } }]]) })] });
+    expect(rowStyle(plain.worksheets[0].getRow(3))).toMatchObject({ numFmt: '0%' });
+    expect(plain.worksheets[0].getRow(3).height).toBe(15);
+  });
+});

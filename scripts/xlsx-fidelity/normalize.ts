@@ -191,6 +191,18 @@ export function normalizeWorkbook(data: unknown): JsonObject {
       filters: byCol(config.filters),
       sortOrder: digestBinaries(config.sortOrder ?? []),
     };
+    // default formats of columns and rows (S6): by column letter / row number, the style and format as pool ordinals
+    const lineFormat = (v: unknown): Json => {
+      const line = asObj(v);
+      const out: JsonObject = {};
+      if (line.styleId) out.style = refOf(line.styleId, stylePool, styles, 's', outStyles);
+      if (line.formatId) out.format = refOf(line.formatId, formatPool, formats, 'f', outFormats);
+      return out;
+    };
+    const colStyles = byCol(asArray(config.colStyles).map((e) => [(e as unknown[])[0], lineFormat((e as unknown[])[1])]));
+    const rowStyles = byRow(asArray(config.rowStyles).map((e) => [(e as unknown[])[0], lineFormat((e as unknown[])[1])]));
+    if (Object.keys(colStyles).length > 0) outConfig.colStyles = colStyles;
+    if (Object.keys(rowStyles).length > 0) outConfig.rowStyles = rowStyles;
     if (config.defaultRowHeight !== undefined)
       outConfig.defaultRowHeight = config.defaultRowHeight as number;
     if (config.defaultColWidth !== undefined)

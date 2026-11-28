@@ -84,7 +84,12 @@ function writeSheet(worksheet: ExcelJS.Worksheet, sheet: SpreadsheetSheet): Set<
     worksheet.getRow(row + 1).height = pxToPoints(px);
   });
   sheet.columnStyles?.forEach((format, col) => Object.assign(worksheet.getColumn(col + 1), { style: toExcelDefaultStyle(format) }));
-  sheet.rowStyles?.forEach((format, row) => Object.assign(worksheet.getRow(row + 1), { style: toExcelDefaultStyle(format) }));
+  sheet.rowStyles?.forEach((format, row) => {
+    const excelRow = worksheet.getRow(row + 1);
+    Object.assign(excelRow, { style: toExcelDefaultStyle(format) });
+    // exceljs leaves out a row with no cell and no height, which would drop its format: such a row gets the sheet's default height
+    if (excelRow.height === undefined) excelRow.height = pxToPoints(sheet.defaultRowHeight ?? DEFAULT_ROW_HEIGHT_PX);
+  });
   sheet.hiddenCols?.forEach((col) => {
     worksheet.getColumn(col + 1).hidden = true;
   });
@@ -240,6 +245,9 @@ const EXCEL_MAX_DIGIT_WIDTH = 7;
 function pxToExcelColumnWidth(px: number): number {
   return Math.round((((px - 5) / EXCEL_MAX_DIGIT_WIDTH) * 100 + 0.5)) / 100;
 }
+
+/** The editor's default row height in pixels, for a row that has a format and nothing else. */
+const DEFAULT_ROW_HEIGHT_PX = 20;
 
 // Excel row height is in points (1/72in); our grid stores CSS pixels (96dpi).
 function pxToPoints(px: number): number {

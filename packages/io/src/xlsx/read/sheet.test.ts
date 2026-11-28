@@ -1228,3 +1228,60 @@ describe('readSheet: the package budgets and what they cut', () => {
     expect(budget.loss.items()).toMatchObject([{ label: 'number format code(s) over 255 characters', count: 1 }]);
   });
 });
+
+describe('readSheet: column and row default formats and default sizes', () => {
+  const wide = row(1, '<c r="C1"><v>1</v></c>');
+  const budgetOf = (limits: Partial<ImportLimits>): ReadBudget => readBudget({ ...DEFAULT_IMPORT_LIMITS, ...limits });
+
+  it('reads the format of the columns a <col style> names, past the last cell too, the last range winning and style 0 clearing', () => {
+    const head = '<cols><col min="1" max="2" width="9" style="1"/><col min="2" max="2" style="0"/><col min="5" max="6" style="3"/></cols>';
+    const { sheet } = read(wide, { head });
+    expect([...(sheet.columnStyles?.keys() ?? [])]).toEqual([0, 4, 5]);
+    expect(sheet.columnStyles?.get(0)?.style).toMatchObject({ bold: true, fontColor: '#ff0000' });
+    expect(sheet.columnStyles?.get(4)).toMatchObject({ numberFormat: { code: '0.0" kg"' } });
+    // the cells and widths are as before
+    expect(sheet.columnWidths?.get(0)).toBe(Math.round(9 * 7) + 5);
+    // one look object per format, shared
+    expect(sheet.columnStyles?.get(4)).toBe(sheet.columnStyles?.get(4));
+  });
+
+  it('has no column formats for columns without a style or with an unknown one, and none for style 0', () => {
+    expect(read(wide, { head: '<cols><col min="1" max="3" width="9"/><col min="4" max="4" style="0"/><col min="5" max="5" style="99"/></cols>' }).sheet.columnStyles).toBeUndefined();
+    expect(read(wide).sheet.columnStyles).toBeUndefined();
+  });
+
+  it('reads the format of a row that says customFormat, and not of one that only has an s', () => {
+    const { sheet } = read(row(1, '', ' s="1" customFormat="1"') + row(2, '', ' s="1"') + row(3, '', ' s="0" customFormat="1"') + row(9, '', ' s="2" customFormat="true"'));
+    expect([...(sheet.rowStyles?.keys() ?? [])]).toEqual([0, 8]);
+    expect(sheet.rowStyles?.get(8)?.numberFormat).toEqual({ code: 'm/d/yyyy' });
+  });
+
+  it('reads the default column width and row height in pixels, and nothing when the file gives none', () => {
+    const a = read(wide, { tail: '' , head: '<sheetFormatPr defaultColWidth="9.140625" defaultRowHeight="30"/>' }).sheet;
+    expect(a.defaultColumnWidth).toBe(Math.round(9.140625 * 7) + 5);
+    expect(a.defaultRowHeight).toBe(40);
+    const b = read(wide, { head: '<sheetFormatPr defaultRowHeight="15" baseColWidth="8"/>' }).sheet;
+    expect(b.defaultColumnWidth).toBeUndefined();
+    expect(b.defaultRowHeight).toBe(20);
+    const c = read(wide, { head: '<sheetFormatPr defaultColWidth="0"/>' }).sheet;
+    expect(c.defaultColumnWidth).toBeUndefined();
+    expect(read(wide).sheet.defaultRowHeight).toBeUndefined();
+  });
+
+  it('draws the formats of columns past the last cell on the column budget and reports the ones it has no room for', () => {
+    const budget = budgetOf({ maxColumns: 10 });
+    const a = read(wide, { head: '<cols><col min="1" max="40" style="1"/></cols>', budget });
+    // the range costs 1, the 3 columns up to C 3, and 6 more of the 40 fit
+    expect(a.sheet.columnStyles?.size).toBe(9);
+    expect(budget.columns).toBe(0);
+    expect(a.warnings).toEqual(['S: the default formats of 31 column(s) were left out (the import limit maxColumns, 10, for the workbook); the other sheets that lose some are counted in the import report.']);
+    expect(budget.loss.items()).toMatchObject([{ id: 'xlsx.package.sizeLimit', label: 'column setting(s) left out', count: 31 }]);
+  });
+
+  it('is bounded when every column of the sheet has a format, whatever ranges say it', () => {
+    const ranges = Array.from({ length: 3000 }, (_, i) => `<col min="${(i % 16384) + 1}" max="16384" style="${1 + (i % 3)}"/>`).join('');
+    const { sheet } = read(wide, { head: `<cols>${ranges}</cols>` });
+    expect(sheet.columnStyles?.size).toBeLessThanOrEqual(16384);
+    expect(sheet.columnStyles?.size).toBeGreaterThan(0);
+  });
+});
