@@ -5,6 +5,7 @@ import { FormulaParser } from '../formula-parser/parser';
 import type { ParsedFormulaNode } from '../formula-parser/types';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
 import { columnIndexToLabel, columnLabelToIndex } from '../formula-parser/cell-reference';
+import { tokenize, type Token } from '../formula-parser/tokenizer';
 
 let parser: FormulaParser | undefined;
 let known: ReadonlySet<string> | undefined;
@@ -55,4 +56,88 @@ export function rangeSpan(ref: string): { rows: number; cols: number } | undefin
 export function spanRef(row: number, col: number, rows: number, cols: number): string {
   const first = `${columnIndexToLabel(col)}${row + 1}`;
   return rows === 1 && cols === 1 ? first : `${first}:${columnIndexToLabel(col + cols - 1)}${row + rows}`;
+}
+
+/**
+ * A formula a file saved without the array or dynamic-array mark is a legacy one: where it uses a range of several cells as an
+ * operand of its own operators (`=A1:A3*2`, `=A1:A3`), Excel takes the one cell of the range in the formula's row (or column), or
+ * `#VALUE!` when there is none. Excel 365 shows that with `@` (`=@A1:A3*2`), and so does this: the `@` is put before each such range.
+ * The export takes it out again (`withoutImplicitIntersection`), so the file keeps the text it had.
+ *
+ * Only a range outside every parenthesis and call is changed. What a function does with a range argument depends on the function
+ * (SUM takes the whole range, ROUND the cell in its row), so a call's arguments, a group and an array constant are left as they are,
+ * and so is a formula with a union, an intersection (space), a spill reference or anything the tokenizer rejects.
+ */
+export function withImplicitIntersection(formula: string): string {
+  const found = rangeOperands(formula);
+  if (found === undefined || found.some((r) => r.explicit)) return formula;
+  let out = formula;
+  for (const { pos } of found.reverse()) out = `${out.slice(0, pos)}@${out.slice(pos)}`;
+  return out;
+}
+
+/**
+ * The export of a formula that goes out without the array or dynamic-array mark: an `@` directly before a range operand (the places
+ * `withImplicitIntersection` puts it, or a user typed it) is dropped, because Excel applies the same intersection to that range in a
+ * formula without the mark, and `_xlfn.SINGLE(A1:A3)` is a function Excel 2016 and earlier do not know (`#NAME?`). An `@` before anything else
+ * (a call, a name, a spill reference) and one inside a call or group stays: there it is not the same as no `@`.
+ */
+export function withoutImplicitIntersection(formula: string): string {
+  if (!formula.includes('@')) return formula;
+  const found = rangeOperands(formula);
+  if (found === undefined) return formula;
+  let out = formula;
+  for (const { pos, explicit } of found.reverse()) if (explicit) out = `${out.slice(0, pos - 1)}${out.slice(pos)}`;
+  return out;
+}
+
+/**
+ * The multi-cell range operands outside every parenthesis and call, as the position of the range (with its sheet prefix) and whether an
+ * `@` sits directly before it (so the `@` is at `pos - 1`); undefined when the formula has nothing to talk about: it has no colon,
+ * the tokenizer rejects it, or it has a union, an intersection, a spill reference or a range of ranges.
+ */
+function rangeOperands(formula: string): Array<{ pos: number; explicit: boolean }> | undefined {
+  if (!formula.includes(':')) return undefined; // every range has a colon: most formulas need no tokenizing
+  let tokens: Token[];
+  try {
+    tokens = tokenize(formula);
+  } catch {
+    return undefined;
+  }
+  const found: Array<{ pos: number; explicit: boolean }> = [];
+  let depth = 0;
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.kind === 'op') {
+      if (t.text === '(' || t.text === '{') depth++;
+      else if (t.text === ')' || t.text === '}') depth--;
+      else if (t.text === '#' || (t.text === ',' && depth === 0)) return undefined;
+      continue;
+    }
+    if (i > 0 && t.space && tokens[i - 1].kind !== 'op') return undefined;
+    if (depth !== 0) continue;
+    // an optional sheet prefix, then a range of more than one cell: A1:B2 is `cell : cell`, A:A and 1:1 are one token
+    const start = t.kind === 'sheet' ? i + 1 : i;
+    if (t.kind === 'sheet' && t.end !== undefined) {
+      i++; // a 3D reference is one operand: the cell after its prefix is not a range of its own
+      continue;
+    }
+    const first = tokens[start];
+    let length = 0;
+    if (first?.kind === 'colrange' || first?.kind === 'rowrange') length = 1;
+    else if (first?.kind === 'cell') {
+      const colon = tokens[start + 1];
+      const last = tokens[start + 2];
+      if (colon?.kind === 'op' && colon.text === ':' && last?.kind === 'cell') {
+        if (last.row !== first.row || last.col !== first.col) length = 3;
+      }
+    }
+    if (length === 0) continue;
+    const before = tokens[i - 1];
+    const after = tokens[start + length];
+    if ((before?.kind === 'op' && before.text === ':') || (after?.kind === 'op' && after.text === ':')) return undefined;
+    found.push({ pos: t.pos, explicit: before?.kind === 'op' && before.text === '@' });
+    i = start + length - 1;
+  }
+  return found;
 }

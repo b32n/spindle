@@ -1,3 +1,5 @@
+import { importFromXlsx } from './export/xlsx';
+import { fcell, ncell, xlsxWith } from './export/test-xlsx';
 import { WorkbookImpl } from './workbook';
 import type { CircularReferenceMode } from './types';
 
@@ -100,5 +102,39 @@ describe("circular references with mode 'error' (diagnostic token)", () => {
     w.setFormula(undefined, 0, 0, '=B1+1');
     w.setFormula(undefined, 0, 1, '=A1+1');
     expect([v(w, 0, 0), v(w, 0, 1)]).toEqual(['#CIRCULAR!', '#CIRCULAR!']);
+  });
+});
+
+describe('a circular reference in an imported file (SA-gap)', () => {
+  const load = async (cells: Record<number, string[]>, mode?: CircularReferenceMode) => {
+    const w = wb(mode);
+    await importFromXlsx(await xlsxWith(cells), w, { recalculateOnLoad: true });
+    return w;
+  };
+
+  it('a self-reference the file saved as 0 is 0 when the formulas are calculated on load (it was #VALUE!)', async () => {
+    const w = await load({ 12: [fcell('F12', 'F12+1', 0)] });
+    expect(v(w, 11, 5)).toBe(0);
+  });
+
+  it('a cycle settles to 0, and a cell downstream of it is computed from that 0', async () => {
+    const w = await load({ 1: [fcell('A1', 'B1+1', 0), fcell('B1', 'A1+1', 0), fcell('C1', 'A1*2+5', 5)] });
+    expect([v(w, 0, 0), v(w, 0, 1), v(w, 0, 2)]).toEqual([0, 0, 5]);
+  });
+
+  it('follows the circular reference mode', async () => {
+    expect(v(await load({ 1: [fcell('A1', 'A1+1', 0)] }, 'ref'), 0, 0)).toBe('#REF!');
+    expect(v(await load({ 1: [fcell('A1', 'A1+1', 0)] }, 'error'), 0, 0)).toBe('#CIRCULAR!');
+  });
+
+  it('keeps the saved result of a formula the load does not calculate (the default import)', async () => {
+    const w = wb();
+    await importFromXlsx(await xlsxWith({ 12: [fcell('F12', 'F12+1', 7)] }), w);
+    expect(v(w, 11, 5)).toBe(7);
+  });
+
+  it('a workbook without a cycle loads as before', async () => {
+    const w = await load({ 1: [ncell('A1', 2), fcell('B1', 'A1+1', 3)] });
+    expect(v(w, 0, 1)).toBe(3);
   });
 });

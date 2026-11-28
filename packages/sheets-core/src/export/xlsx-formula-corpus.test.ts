@@ -12,12 +12,12 @@ const corpus = fs.readdirSync(path.join(ROOT, 'fixtures/xlsx')).filter((f) => f.
 
 /** [file, sheet, address, formula as the formula bar shows it, saved result] of every cached-only formula of the corpus. */
 const CACHED_ONLY: Array<[string, string, string, string, unknown]> = [
-  ['formulas-core.xlsx', 'Data', 'I132', '=_xlfn.LET(x,2,x*3)', 6],
-  ['formulas-core.xlsx', 'Data', 'I133', '=_xlfn.HSTACK(A1:A2,B1:B2)', 1],
-  ['formulas-core.xlsx', 'Data', 'I134', '=_xlfn.VSTACK(A1:A2,B1:B2)', 1],
-  ['formulas-core.xlsx', 'Data', 'I135', '=_xlfn.TAKE(A1:A10,2)', 1],
+  ['formulas-core.xlsx', 'Data', 'AF132', '=_xlfn.LET(x,2,x*3)', 6],
+  ['formulas-core.xlsx', 'Data', 'AI133', '=_xlfn.HSTACK(A1:A2,B1:B2)', 1],
+  ['formulas-core.xlsx', 'Data', 'AL134', '=_xlfn.VSTACK(A1:A2,B1:B2)', 1],
+  ['formulas-core.xlsx', 'Data', 'AO135', '=_xlfn.TAKE(A1:A10,2)', 1],
   ['formulas-core.xlsx', 'Data', 'I66', '=_xlfn.TEXTBEFORE("a-b","-")', 'a'],
-  ['formulas-core.xlsx', 'Data', 'I67', '=_xlfn.TEXTSPLIT("a-b","-")', 'a'],
+  ['formulas-core.xlsx', 'Data', 'K67', '=_xlfn.TEXTSPLIT("a-b","-")', 'a'],
   ['formulas-modern.xlsx', 'Modern', 'G7', '=_xlfn.LET(_xlpm.x,B2,_xlpm.y,B3,_xlpm.x+_xlpm.y)', 15],
   ['formulas-modern.xlsx', 'Modern', 'G8', '=_xlfn.LAMBDA(_xlpm.n,_xlpm.n*2)(B2)', 20],
   ['xlsxwriter-rich.xlsx', 'Data', 'F2', '=_xlfn.LET(_xlpm.x,2,_xlpm.x*3)', 6],
@@ -35,7 +35,7 @@ const CACHED_ONLY: Array<[string, string, string, string, unknown]> = [
   ['tables.xlsx', 'Tables', 'E6', '=SUBTOTAL(109,Sales[Total])', 135],
 ];
 
-const label = (c: number) => String.fromCharCode(65 + (c % 26)); // the corpus sheets are narrower than 26 columns
+const label = (c: number): string => (c < 26 ? '' : label(Math.floor(c / 26) - 1)) + String.fromCharCode(65 + (c % 26));
 
 interface Found {
   sheet: string;

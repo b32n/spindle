@@ -86,7 +86,7 @@ statistical, date/time, information, financial, reference and array categories
       of Excel, which gives up in some cases), `MIRR`, `SLN`, `SYD`, `DDB`, `EFFECT`, `NOMINAL`, `RRI`, `PDURATION`, `ISPMT`,
       `FVSCHEDULE`, `QUOTIENT`, `SQRTPI`, `SUMX2MY2`, `SUMX2PY2` and `SUMXMY2` (plan S12). Where LibreOffice reports `#VALUE!` for an
       argument out of range (most finance functions) the rows carry Excel's `#NUM!` / `#DIV/0!`, tagged unverified. In the
-      `formulas-core` fixture `=TRANSPOSE(A1:B2)` evaluates but spills into a range blocked by the next probe row (`#SPILL!`).
+      `formulas-core` fixture each dynamic-array probe has a column of its own, so its spill is not blocked (SA-gap).
 - [x] **Math, trigonometry and statistics, batch A** — `SIN` to `ATANH`, `PI`,
       `RADIANS`, `DEGREES`, `FACT`, `FACTDOUBLE`, `COMBIN`, `PERMUT`, `SUMSQ`,
       `EVEN`, `ODD`, `ISEVEN`, `ISODD`, `CEILING.MATH`, `FLOOR.MATH`, `MAXIFS`,
@@ -106,10 +106,19 @@ statistical, date/time, information, financial, reference and array categories
       host should lower `maxTotalCells` and `maxSheets` and/or import in a worker (`documentation/import-loss.md`). Related, not a defect: a table of
       two million shared strings peaks at 2.8 GB of process memory in the reader (five million took 1.17 GB).
 
-- [ ] **Blank source cells in dynamic-array results** (found in the S4 review; S5 or S11). The engine spills a blank source cell as blank where Excel
+- [ ] **Blank source cells in dynamic-array results** (found in the S4 review; unowned: S5 and S11 are merged and no later plan entry covers it, so it is a known wrong value that needs a new follow-up entry). The engine spills a blank source cell as blank where Excel
       shows 0. Repro: A1 = 1, A2 empty, A3 = 3, `B1 = A1:A3` spills `1, (blank), 3` (Excel: `1, 0, 3`), and `D1 = B2&"x"` gives `"x"` (Excel: `"0x"`).
       A legacy (CSE) array formula read from a file already reads 0 (`fitToExtent`). Fix: coerce a null member of a plain range-reference spill to 0 in the
       spill path, without changing `=A1:A3*1`-style results; it is an engine semantics change, so it is not part of the interchange PR.
+
+- [ ] **Implicit intersection of ranges inside calls in legacy formulas** (found in the SA-gap review; unowned: S5 and S11 are merged and no later plan entry covers it, so it is a known wrong value that needs a new follow-up entry). A formula saved without the array mark gets Excel's
+      intersection only for range operands outside every call and group (`=A1:A3*2`, shown `=@A1:A3*2`). Excel also intersects a range passed to a scalar parameter or used
+      in the arithmetic of a call's argument; the engine has no table of which parameters are scalar (the function catalog has names only), so it can return a wrong value.
+      Repros (data A1:A3 = 1, 2, 3; the formula is in a file without `cm` and `t="array"`): `F5 = LEN(A1:A3)` gives 5 (Excel `#VALUE!`; in F2 Excel 1),
+      `F5 = IF(A1:A3>1,1,0)` gives 1 (Excel `#VALUE!`; F1 gives 0), `F2 = SUM(A1:A3*2)` gives 12 (Excel 4), `F2 = ABS(A1:A3)` gives `#VALUE!` (Excel 2). Fix: a
+      scalar/array flag per parameter in the catalog, checked against Excel's documentation, then `@` before range operands in scalar slots on import (nested
+      comparison and arithmetic included) and on export the same bare-range rule only at the top level. The repros are `known divergence` tests in
+      `xlsx-implicit-intersection.test.ts`. Named ranges and structured references are not intersected either.
 
 - [x] **Textual reference shifting for cached-only formulas** (found in the S4 review; done in S4b). Inserting or deleting rows or columns now rewrites
       the references in a cached-only formula's text (`formula-parser/ref-shift.ts`, on the lenient tokenizer), by the same rule as a normal formula.

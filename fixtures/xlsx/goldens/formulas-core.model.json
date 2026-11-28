@@ -39,6 +39,71 @@
           "A9": {
             "value": 9
           },
+          "AC131": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 3
+            },
+            "formula": "=SORTBY(A1:A3,A1:A3,-1)",
+            "value": 3
+          },
+          "AF132": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 1
+            },
+            "cachedOnly": true,
+            "formula": "=_xlfn.LET(x,2,x*3)",
+            "value": 6
+          },
+          "AI133": {
+            "arraySpan": {
+              "cols": 2,
+              "rows": 2
+            },
+            "cachedOnly": true,
+            "formula": "=_xlfn.HSTACK(A1:A2,B1:B2)",
+            "value": 1
+          },
+          "AI134": {
+            "value": 2
+          },
+          "AJ133": {
+            "value": "x"
+          },
+          "AJ134": {
+            "value": "y"
+          },
+          "AL134": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 4
+            },
+            "cachedOnly": true,
+            "formula": "=_xlfn.VSTACK(A1:A2,B1:B2)",
+            "value": 1
+          },
+          "AL135": {
+            "value": 2
+          },
+          "AL136": {
+            "value": "x"
+          },
+          "AL137": {
+            "value": "y"
+          },
+          "AO135": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 2
+            },
+            "cachedOnly": true,
+            "formula": "=_xlfn.TAKE(A1:A10,2)",
+            "value": 1
+          },
+          "AO136": {
+            "value": 2
+          },
           "B1": {
             "value": "x"
           },
@@ -724,93 +789,9 @@
             "formula": "=LOOKUP(3,A1:A10)",
             "value": 3
           },
-          "I126": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "formula": "=TRANSPOSE(A1:B2)",
-            "value": 1
-          },
-          "I127": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "formula": "=FILTER(A1:A10,A1:A10>8)",
-            "value": 9
-          },
-          "I128": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "formula": "=SORT(A1:A3,1,-1)",
-            "value": 3
-          },
-          "I129": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "formula": "=UNIQUE(B1:B10)",
-            "value": "x"
-          },
           "I13": {
             "formula": "=FLOOR(A2,2)",
             "value": 2
-          },
-          "I130": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "formula": "=SEQUENCE(3)",
-            "value": 1
-          },
-          "I131": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "formula": "=SORTBY(A1:A3,A1:A3,-1)",
-            "value": 3
-          },
-          "I132": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "cachedOnly": true,
-            "formula": "=_xlfn.LET(x,2,x*3)",
-            "value": 6
-          },
-          "I133": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "cachedOnly": true,
-            "formula": "=_xlfn.HSTACK(A1:A2,B1:B2)",
-            "value": 1
-          },
-          "I134": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "cachedOnly": true,
-            "formula": "=_xlfn.VSTACK(A1:A2,B1:B2)",
-            "value": 1
-          },
-          "I135": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "cachedOnly": true,
-            "formula": "=_xlfn.TAKE(A1:A10,2)",
-            "value": 1
           },
           "I136": {
             "formula": "=COUNTA(A1:C10)",
@@ -885,7 +866,7 @@
             "value": 4
           },
           "I152": {
-            "formula": "=A1:A3*2",
+            "formula": "=@A1:A3*2",
             "value": "#VALUE!"
           },
           "I153": {
@@ -1145,15 +1126,6 @@
             "formula": "=_xlfn.TEXTBEFORE(\"a-b\",\"-\")",
             "value": "a"
           },
-          "I67": {
-            "arraySpan": {
-              "cols": 1,
-              "rows": 1
-            },
-            "cachedOnly": true,
-            "formula": "=_xlfn.TEXTSPLIT(\"a-b\",\"-\")",
-            "value": "a"
-          },
           "I68": {
             "formula": "=DATE(2026,2,3)",
             "value": 46056
@@ -1293,6 +1265,58 @@
           "I99": {
             "formula": "=PMT(0.05/12,60,-10000)",
             "value": 188.7123364401
+          },
+          "K67": {
+            "arraySpan": {
+              "cols": 2,
+              "rows": 1
+            },
+            "cachedOnly": true,
+            "formula": "=_xlfn.TEXTSPLIT(\"a-b\",\"-\")",
+            "value": "a"
+          },
+          "L67": {
+            "value": "b"
+          },
+          "N126": {
+            "arraySpan": {
+              "cols": 2,
+              "rows": 2
+            },
+            "formula": "=TRANSPOSE(A1:B2)",
+            "value": 1
+          },
+          "Q127": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 2
+            },
+            "formula": "=FILTER(A1:A10,A1:A10>8)",
+            "value": 9
+          },
+          "T128": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 3
+            },
+            "formula": "=SORT(A1:A3,1,-1)",
+            "value": 3
+          },
+          "W129": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 2
+            },
+            "formula": "=UNIQUE(B1:B10)",
+            "value": "x"
+          },
+          "Z130": {
+            "arraySpan": {
+              "cols": 1,
+              "rows": 3
+            },
+            "formula": "=SEQUENCE(3)",
+            "value": 1
           }
         },
         "colCount": 100,

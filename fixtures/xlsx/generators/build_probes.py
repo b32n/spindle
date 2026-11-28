@@ -2,7 +2,7 @@
 import datetime
 
 import xlsxbuilder as X
-from probe_data import DYNAMIC, FORMULAS, FORMULA_EXPECTED, NUMBER_FORMATS, SYNTAX
+from probe_data import DYNAMIC, FORMULAS, FORMULA_EXPECTED, NUMBER_FORMATS, SPILLS, SYNTAX
 
 
 def _props(wb, title):
@@ -22,10 +22,20 @@ def formulas_core(path):
     for i, (v, d) in enumerate([(-100, 46023), (30, 46100), (40, 46200), (50, 46300)]):
         ws.write(i, 3, v)
         ws.write(i, 4, d)
+    dynamic = 0
     for i, f in enumerate(FORMULAS):
         ws.write_string(i, 7, f)
         if f.split("(")[0] in DYNAMIC:
-            ws.write_dynamic_array_formula(i, 8, i, 8, "=" + f, None, FORMULA_EXPECTED[i])
+            # a dynamic array spills over rows and columns the next probe would otherwise occupy: each has a column of its own, three apart, and
+            # its range and the cells after the first are what Excel saves for the spill
+            spill = SPILLS[f]
+            col = 10 + 3 * dynamic
+            dynamic += 1
+            ws.write_dynamic_array_formula(i, col, i + len(spill) - 1, col + len(spill[0]) - 1, "=" + f, None, FORMULA_EXPECTED[i])
+            for r, line in enumerate(spill):
+                for c, v in enumerate(line):
+                    if r + c > 0:
+                        ws.write(i + r, col + c, v)
         else:
             ws.write_formula(i, 8, "=" + f, None, FORMULA_EXPECTED[i])
     wb.close()

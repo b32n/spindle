@@ -232,6 +232,22 @@ overlay is never written to `sheet.cells` and never synced over the
 collaboration CRDT — each client recomputes it from the anchor formula. A
 target cell that already holds content yields `#SPILL!`.
 
+**Legacy formulas and `@`.** A formula an .xlsx file saved without the array or dynamic-array mark is a legacy one: where it uses a range of several
+cells as an operand of its own operators (`=A1:A3*2`, `=-A1:A3`, `=A1:A3&"x"`), Excel takes the one cell of the range in the formula's row (a column
+range) or column (a row range), and `#VALUE!` when the formula is outside the range. The import does the same by writing the `@` Excel 365 shows
+(`=@A1:A3*2`; in a shared formula each cell gets its own range, `G3` reading `A2:A4` shows `=@A2:A4`). The export takes that `@` out again: a formula written without
+`t="array"` and `cm` has the bare range in the file (`A1:A3*2`), because Excel applies the same intersection to it, in Excel 2016, 365 and LibreOffice, and the old
+`_xlfn.SINGLE(A1:A3)` would show `#NAME?` in Excel 2016. The same holds for a formula typed in the editor as `=@A1:A3*2`. An `@` before anything else keeps `_xlfn.SINGLE(...)`
+(`@INDEX(...)`, `@A1#`, a name or a table reference, an `@` inside a call or a group, and any `@` in a formula that is written as a dynamic array, where a bare range would spill).
+Structural edits shift the references inside `@A1:A3*2` like any other (the `@` stays).
+
+Only operands outside every call and group are intersected on import. What a function does with a range argument depends on the function (`SUM(A1:A3*2)` in a
+legacy formula is also intersected in Excel; here it still sums the array), and the engine has no table of which parameters of its functions are scalar, so
+**these are known differences, where the engine can return a wrong value** (not only a missing intersection): `SUM(A1:A3*2)` sums the array (Excel: the cell's double, `#VALUE!` outside the range's rows),
+`LEN(A1:A3)` is 5 (Excel: the length of the cell in the row, `#VALUE!` outside), `IF(A1:A3>1,1,0)` is 1 (Excel: the cell's result, `#VALUE!` outside), `ABS(A1:A3)` is `#VALUE!` inside the range's rows (Excel: the cell's absolute value).
+Named ranges and structured (table) references are not intersected either. A formula typed in the editor, and an array formula, still spill. The cases are pinned as known
+divergences in `xlsx-implicit-intersection.test.ts` and listed in `documentation/sheets/TODO.md`.
+
 An array formula read from an .xlsx file carries `arraySpan` (`{ rows, cols, spill? }`): a legacy (CSE) array formula keeps that
 extent (its result is cut to it or padded with `#N/A`), a dynamic one (`spill: true`) spills freely and keeps `arraySpan` at the extent
 it spilled. A blank source cell inside the result of a legacy array reads 0 (as Excel shows it for `=A1:A3`); a dynamic array does not yet: the engine
@@ -297,8 +313,8 @@ endpoints (`INDEX(A1:C3,0,2):INDEX(A1:C3,0,3)`). A negative index is `#VALUE!`, 
 ### Array and finance, batch B
 
 `TRANSPOSE` (`array-ext.ts`) is the one dynamic-array shaper with a LibreOffice oracle; an empty cell passing through reads 0, as in Excel. In the
-`formulas-core` fixture `=TRANSPOSE(A1:B2)` evaluates, but its spill range is blocked by the next probe row's formula (`#SPILL!`), so that cell stays a
-mismatch.
+`formulas-core` fixture each dynamic-array probe sits in a column of its own, so its spill has room (the first version put them in one column, where each
+spill was blocked by the next probe and the values golden counted that as a mismatch).
 
 `XIRR` runs Newton's method from the guess (default 10%); when that fails to converge, leaves the domain or stops on a flat tail
 (a root a hair above -100% is `#NUM!`), it scans rates `e^s - 1` from -100% to 10^10 for a sign change (compared as signs) and bisects the

@@ -20,7 +20,7 @@ import { generateId } from '../utils/id';
 import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
 import { isFaithfulFormatCode } from '../number-format';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
-import { isFormulaEvaluable, parseRange, spanRef } from './xlsx-formulas';
+import { isFormulaEvaluable, parseRange, spanRef, withImplicitIntersection, withoutImplicitIntersection } from './xlsx-formulas';
 
 type IoXlsx = Awaited<ReturnType<typeof loadIo>>;
 
@@ -117,6 +117,8 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
       }
       state.remaining = Math.max(0, state.remaining - cells);
     }
+    // without an array or dynamic-array mark the `@` before a range operand (legacy intersection) goes out as the file had it: a bare range
+    if (!span && out.formula && !out.cachedOnly) out.formula = withoutImplicitIntersection(out.formula);
     if (span) {
       out.arrayRef = spanRef(row, col, span.rows, span.cols);
       // a dynamic array (one the file marked, or a formula typed here that spills) goes back as one; an array formula the file had
@@ -453,7 +455,8 @@ function toSheetData(
     if (spreadsheetCell.formula) {
       // the editor form of the text (no `_xlfn.` and friends) when the engine can evaluate it; otherwise the file's text as it is
       const text = io.fromFileFormula(spreadsheetCell.formula);
-      if (isFormulaEvaluable(text)) cell.formula = `=${text}`;
+      // a formula without the array mark is a legacy one: a multi-cell range it uses as an operand is intersected, as Excel does
+      if (isFormulaEvaluable(text)) cell.formula = `=${spreadsheetCell.formulaInfo?.type === 'array' ? text : withImplicitIntersection(text)}`;
       else {
         cell.formula = `=${spreadsheetCell.formula}`;
         cell.cachedOnly = true;

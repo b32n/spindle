@@ -81,7 +81,9 @@ def xlsxwriter_rich(path):
     ws.data_validation("D1:D3", {"validate": "list", "source": ["a", "b"]})
     ws.write_formula("F1", '=_xlfn.XLOOKUP("S",A2:A3,B2:B3)', None, 3)
     ws.write_formula("F2", "=_xlfn.LET(_xlpm.x,2,_xlpm.x*3)", None, 6)
-    ws.write_dynamic_array_formula("F4:F5", "=_xlfn.SORT(A2:A3)")
+    # xlsxwriter never calculates: without a value it saves 0 for the formula and for the cells it spills over, so the results Excel gives are passed
+    ws.write_dynamic_array_formula("F4:F5", "=_xlfn.SORT(A2:A3)", None, "N")
+    ws.write_string("F5", "S")
     ws.write_formula("F8", "=IFERROR(1/0,0)")
     wb.define_name("Tot", "=Data!$B$2:$B$3")
     ws.set_column("A:A", 20)
