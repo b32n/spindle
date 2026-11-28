@@ -1,6 +1,7 @@
 import type { PptxElement, PptxFill, PptxGeometry, PptxGroup, PptxLine, PptxLineEnd, PptxShape } from '@b32nio/spindle-shared/export/pptx';
 import { hlinkXml, type WriteContext } from './writer-context';
 import { txBodyXml } from './writer-body';
+import { customGeometryXml } from './writer-custom-geometry';
 import { angle, attrs, colorXml, pct, solidFillXml, xfrmXml } from './writer-xml';
 
 // `p:sp` shapes and text boxes (plan K12b, K1, K5): geometry, fill, outline, placeholder and hyperlink. The inverse of `readShape`.
@@ -70,8 +71,8 @@ export function fillXml(fill: PptxFill | undefined, ctx: WriteContext): string {
 
 const lineEndXml = (tag: string, end: PptxLineEnd | undefined): string => (end ? `<a:${tag}${attrs({ type: end.type, w: end.w, len: end.len })}/>` : '');
 
-/** `a:ln`: width, fill, dash, cap, join and the line ends, in the order of `CT_LineProperties`. */
-export function lineXml(line: PptxLine | undefined, ctx: WriteContext): string {
+/** `a:ln` (or the cell border `a:lnL` and its kin, `tag`): width, fill, dash, cap, join and the line ends, in the order of `CT_LineProperties`. */
+export function lineXml(line: PptxLine | undefined, ctx: WriteContext, tag = 'a:ln'): string {
   if (!line) return '';
   const a = attrs({ w: line.width !== undefined ? Math.round(line.width * 9525) : undefined, cap: line.cap ? CAPS[line.cap] : undefined });
   if (line.dash === 'custom') ctx.lossy('customDash');
@@ -81,13 +82,14 @@ export function lineXml(line: PptxLine | undefined, ctx: WriteContext): string {
     (line.join ? `<a:${line.join}/>` : '') +
     lineEndXml('headEnd', line.head) +
     lineEndXml('tailEnd', line.tail);
-  return body === '' ? `<a:ln${a}/>` : `<a:ln${a}>${body}</a:ln>`;
+  return body === '' ? `<${tag}${a}/>` : `<${tag}${a}>${body}</${tag}>`;
 }
 
-/** `a:prstGeom` with its adjustments. A name that is not an identifier (the editor's `unknown:` prefix is dropped) is written as a rectangle; custom geometry waits for K13. */
+/** `a:prstGeom` with its adjustments. A name that is not an identifier (the editor's `unknown:` prefix is dropped) is written as a rectangle; custom geometry is written as its paths, or not at all when the reader could not keep them. */
 export function geometryXml(geometry: PptxGeometry | undefined, ctx: WriteContext): string {
   if (!geometry) return '';
   if (geometry.kind === 'custom') {
+    if (geometry.paths) return customGeometryXml(geometry.paths);
     ctx.lossy('customGeometry');
     return '';
   }
@@ -112,9 +114,4 @@ export function shapeXml(shape: PptxShape, id: number, ctx: WriteContext): strin
     `<p:sp><p:nvSpPr>${link === '' ? `<p:cNvPr${cNvPr}/>` : `<p:cNvPr${cNvPr}>${link}</p:cNvPr>`}${cNvSpPr}${nvPr}</p:nvSpPr>` +
     `<p:spPr>${spPr}</p:spPr>${shape.text ? `<p:txBody>${txBodyXml(shape.text, ctx)}</p:txBody>` : ''}</p:sp>`
   );
-}
-
-/** The shapes of a list of elements, in drawing order; the other kinds (pictures, tables, connectors, groups, opaque content) wait for K13 and K14. */
-export function shapesXml(elements: PptxElement[], ids: Map<PptxElement, number>, ctx: WriteContext): string {
-  return elements.map((e) => (e.kind === 'shape' ? shapeXml(e, ids.get(e) as number, ctx) : '')).join('');
 }

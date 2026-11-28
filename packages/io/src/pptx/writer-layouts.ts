@@ -1,6 +1,7 @@
 import type { PptxColorMap, PptxLayout, PptxPlaceholder } from '@b32nio/spindle-shared/export/pptx';
 import type { WriteContext } from './writer-context';
-import { allocateElementIds, shapesXml } from './writer-shapes';
+import { elementIds, elementsXml } from './writer-elements';
+import { allocateElementIds } from './writer-shapes';
 import { bodyPrXml, lstStyleXml, plainParagraphsXml } from './writer-text';
 import { attrs, esc, ROOT_NS, solidFillXml, TREE_HEADER, XML_DECLARATION, xfrmXml } from './writer-xml';
 
@@ -21,7 +22,7 @@ const LAYOUT_TYPES = new Set([
 export const FIRST_LAYOUT_ID = 2147483649;
 export const MASTER_ID = 2147483648;
 
-const COLOR_MAP_ROLES: (keyof PptxColorMap)[] = ['bg1', 'tx1', 'bg2', 'tx2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'];
+export const COLOR_MAP_ROLES: (keyof PptxColorMap)[] = ['bg1', 'tx1', 'bg2', 'tx2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink'];
 
 /** A layout to write: the model's layout, its part name and its place in the master's list. */
 export interface LayoutPart {
@@ -66,7 +67,7 @@ export function layoutXml(layout: PptxLayout, ctx: WriteContext): string {
   const background = layout.background ? `<p:bg><p:bgPr>${solidFillXml(layout.background)}<a:effectLst/></p:bgPr></p:bg>` : '';
   return (
     `${XML_DECLARATION}<p:sldLayout ${ROOT_NS}${attrs({ type: layoutType && LAYOUT_TYPES.has(layoutType) ? layoutType : undefined, showMasterSp: layout.hideMasterShapes ? 0 : undefined, preserve: 1 })}>` +
-    `<p:cSld name="${esc(layout.name)}">${background}<p:spTree>${TREE_HEADER}${layout.placeholders.map((p, i) => layoutPlaceholder(p, i + 2)).join('')}${shapesXml(layout.elements, ids, ctx)}</p:spTree></p:cSld>` +
+    `<p:cSld name="${esc(layout.name)}">${background}<p:spTree>${TREE_HEADER}${layout.placeholders.map((p, i) => layoutPlaceholder(p, i + 2)).join('')}${elementsXml(layout.elements, ctx, elementIds(ids))}</p:spTree></p:cSld>` +
     '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>'
   );
 }

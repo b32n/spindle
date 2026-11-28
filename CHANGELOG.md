@@ -1060,6 +1060,16 @@ lockstep.
   Custom geometry, picture fills and custom dash patterns are not written yet and the warnings say so. The PPTX round-trip report now aligns
   elements by kind and name and allows half a pixel on frames; decks of shapes and text read back with no differences, and the
   round-trip differences over the corpus fall from 846 to 140, all of them content still to come (K13, K14) or macro actions dropped on purpose.
+- **PPTX writer B: pictures, tables, groups, connectors, notes, comments, custom geometry (K13).** `exportPptx` now writes `p:pic` pictures
+  (media parts with their content types, shared between pictures with the same image and keeping their part name when that is a usable
+  `ppt/media` name; crop, transparency, outline, geometry and link), tables (`a:tbl` with column and row sizes, spans, per-cell borders,
+  margins, anchors, fills and the style flags, the style named in `tableStyles.xml`), groups (the group's box is its child space, so
+  each child's slide-space frame is mapped back through the group's rotation and flips, nested groups included), connectors with
+  `a:stCxn` and `a:endCxn` glued to the shapes' new ids, custom geometry paths, speaker notes (a notes master and a notes slide per slide that has notes)
+  and comments (legacy format with authors and replies; modern comments are written as legacy ones and the warnings say so). Pictures with no
+  embedded image PowerPoint can show (linked, missing, EMF, WMF, an SVG without a PNG) are left out and reported. Opaque parts, transitions and
+  timing stay K14. The PPTX round-trip differences over the corpus fall further: pictures, tables, groups, connectors, notes, comments and custom
+  geometry now read back with no differences; what is left is opaque content (K14), picture fills, dropped pictures and the modern-comment conversion.
 
 ## [0.4.0] - 2026-10-26
 

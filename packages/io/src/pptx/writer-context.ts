@@ -28,15 +28,17 @@ export class PartRels {
 }
 
 /** What a writer can leave out or change within an element it writes, as keys of `LOSSY`. */
-export type LossyKey = 'customGeometry' | 'pictureFill' | 'customDash' | 'link' | 'geometryName' | 'underline';
+export type LossyKey = 'customGeometry' | 'pictureFill' | 'customDash' | 'link' | 'geometryName' | 'underline' | 'picture' | 'modernComment';
 
 export const LOSSY: Record<LossyKey, string> = {
-  customGeometry: 'shapes with custom geometry written without their outline, until K13',
-  pictureFill: 'picture fills left out, until K13',
+  customGeometry: 'shapes with custom geometry the editor could not keep written without their outline',
+  pictureFill: 'picture fills left out (the image of a fill is not kept)',
   customDash: 'custom dash patterns written as solid lines',
   link: 'hyperlinks with an address the editor does not allow left out',
   geometryName: 'shapes with an unusable preset name written as rectangles',
   underline: 'underline styles outside the format written as single',
+  picture: 'pictures with no embedded image PowerPoint can show (linked, missing, EMF, WMF or SVG without a PNG) left out',
+  modernComment: 'modern comments written as legacy comments on the slide (status and the shape a comment was anchored to are not kept)',
 };
 
 export interface WriteContext {
@@ -44,6 +46,10 @@ export interface WriteContext {
   /** The relationship target (from the part being written) of the slide that was the part `partName` in the source, when it is in the deck. */
   slideTarget: (partName: string) => string | undefined;
   lossy: (key: LossyKey) => void;
+  /** The relationship target (from the part being written) of the media part holding an image given as a data URL (it keeps the media part name `part` when that is usable), which is registered once per distinct image; `undefined` when the data URL is not a base64 image PowerPoint can show. */
+  image: (dataUrl: string, part?: string) => string | undefined;
+  /** Names a table style (`a:tableStyleId`) so the package lists it in `ppt/tableStyles.xml`. */
+  tableStyle: (id: string, name: string | undefined) => void;
   /** A GUID for the next `a:fld`: fields need one, the model does not keep it. */
   nextFieldId: () => string;
 }

@@ -228,10 +228,7 @@ describe('exportPptx: what is not exported yet', () => {
       slide({
         elements: [
           shape,
-          { kind: 'picture', pptxId: '3', name: 'p' },
-          { kind: 'table', pptxId: '4', name: 't', columns: [], rows: [] },
-          { kind: 'connector', pptxId: '5', name: 'c' },
-          { kind: 'group', pptxId: '6', name: 'g', children: [shape] },
+          { kind: 'group', pptxId: '6', name: 'g', children: [shape, { kind: 'group', pptxId: '8', name: 'g2', children: [{ kind: 'opaque', opaqueKind: 'ink', pptxId: '9', name: 'i', parts: [] }] }] },
           { kind: 'opaque', opaqueKind: 'chart', pptxId: '7', name: 'o', parts: [] },
         ],
         background: { kind: 'picture' },
@@ -244,16 +241,11 @@ describe('exportPptx: what is not exported yet', () => {
     const { warnings } = await exportPptx(deck({ slides, layouts: [layout({ elements: [shape] })] }));
     expect(warnings).toEqual([
       '1 slide could not be read at import and is written empty.',
-      'Not exported yet: 1 pictures (K13).',
-      'Not exported yet: 1 tables (K13).',
-      'Not exported yet: 1 connectors (K13).',
-      'Not exported yet: 1 groups (K13).',
-      'Not exported yet: 1 charts, diagrams, objects, media and ink (K14).',
-      'Not exported yet: 1 speaker notes (K13).',
-      'Not exported yet: 2 comment threads (K13).',
+      'Not exported yet: 2 charts, diagrams, objects, media and ink (K14).',
       'Not exported yet: 1 transitions (K14).',
       'Not exported yet: 1 animation timelines (K14).',
-      'Changed on export: picture fills left out, until K13 (1).',
+      'Changed on export: modern comments written as legacy comments on the slide (status and the shape a comment was anchored to are not kept) (1).',
+      'Changed on export: picture fills left out (the image of a fill is not kept) (1).',
     ]);
     const two = await exportPptx(deck({ slides: [slide({ error: 'e' }), slide({ pptxId: '257', error: 'e' })], layouts: [layout({ elements: [shape, shape] })] }));
     expect(two.warnings).toEqual(['2 slides could not be read at import and are written empty.']);
