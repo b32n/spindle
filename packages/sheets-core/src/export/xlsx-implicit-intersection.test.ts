@@ -40,6 +40,8 @@ describe('withImplicitIntersection: where the `@` goes', () => {
     // already explicit, a spill reference, a union, an intersection, a 3D reference, a range of ranges
     ['@A1:A3*2', '@A1:A3*2'],
     ['A1#*2', 'A1#*2'],
+    ['A1:A3*B1#', 'A1:A3*B1#'],
+    ['A1:A3,B1', 'A1:A3,B1'],
     ['(A1:A2,C1)', '(A1:A2,C1)'],
     ['A1:A3 B2:C2', 'A1:A3 B2:C2'],
     ['Sheet1:Sheet3!A1:A3*2', 'Sheet1:Sheet3!A1:A3*2'],
@@ -166,6 +168,7 @@ describe('withoutImplicitIntersection: the `@` the export drops', () => {
     // an `@` before anything else stays, and so does one inside a call or a group (SUM(@A1:A3) is not SUM(A1:A3))
     ['@INDEX(A1:A3,2)*2', '@INDEX(A1:A3,2)*2'],
     ['@A1#*2', '@A1#*2'],
+    ['@A1:A3*B1#', '@A1:A3*B1#'],
     ['@A1*2', '@A1*2'],
     ['@Name*2', '@Name*2'],
     ['@Table1[Col]*2', '@Table1[Col]*2'],
