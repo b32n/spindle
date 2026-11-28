@@ -65,7 +65,7 @@ for (const file of walk(specRoot)) {
       note = buf.join(' ').replace(/^Bug:\s*/, '').replace(/\|/g, '\\|');
     }
     const smoke = /@smoke/.test(m[4]);
-    rows.push({ editor, id: m[3], title: m[4].replace(/\s*@smoke/, '').replace(/\|/g, '\\|'), fixme, note, smoke, file: path.relative(root, file) });
+    rows.push({ editor, id: m[3], title: m[4].replace(/\s*@smoke\s*/, ' ').trim().replace(/\|/g, '\\|'), fixme, note, smoke, file: path.relative(root, file) });
   });
 }
 

@@ -85,7 +85,7 @@ export interface DeckOpenHandlers {
 
 const asError = (err: unknown): Error => (err instanceof Error ? err : new Error(String(err)));
 
-/** The toolbar's Open: pre-check, ask before replacing the deck when the file loses something, import, report. Never throws. */
+/** The toolbar's Open: pre-check (the file is parsed twice, here and in the import; revisit for the K17 100/200-slide benchmark), ask before replacing the deck when the file loses something, import, report. Never throws. */
 export async function openDeckFile(deck: DeckImpl, file: File, handlers: DeckOpenHandlers): Promise<void> {
   try {
     if (!(await handlers.confirm(file, await inspectDeckFile(file)))) return;

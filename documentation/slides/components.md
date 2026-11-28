@@ -19,7 +19,7 @@
 
 ## Top-level
 
-- **`SlidesEditor`** — the full editor: header (title, present, PDF, comments), toolbar, filmstrip, interactive stage, notes panel. Owns keyboard shortcuts and the context menu. Pass `readOnly` for a viewer.
+- **`SlidesEditor`** — the full editor: header (title, present, PDF, comments), toolbar, filmstrip, interactive stage, notes panel. Owns keyboard shortcuts and the context menu. Pass `readOnly` for a viewer. Pass `fileActions` (default `false`) to show Open (`.pptx`, with the import dialog) and Download (PPTX) in the toolbar; `exportFormats` and `fileName` work as in docs.
 - **`SlideStage`** — the central canvas; fit-to-container or an explicit `zoom`. `interactive` turns on selection, gestures, and overlays.
 - **`Filmstrip`** — slide navigator with click-to-activate, drag-to-reorder, and an add-slide button.
 - **`PresentMode`** — fullscreen playback via a portal; arrow/space/home/end/number-jump navigation and a 150 ms cross-fade.

@@ -393,10 +393,10 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-GRP-01 | group and ungroup with Ctrl/Cmd+G | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-ORD-01 | bring to front / send to back change z-order | covered |  |  | `e2e/slides/editing.spec.ts` |
 | SL-TAB-01 | Tab cycles element selection | covered |  |  | `e2e/slides/editing.spec.ts` |
-| SL-FIO-01 |  opening a generated 6-slide deck shows 6 slides in the filmstrip and the first slide text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
-| SL-FIO-02 |  a deck with transitions and charts asks first, listing them under "Kept, not editable" | covered | yes |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-01 | opening a generated 6-slide deck shows 6 slides in the filmstrip and the first slide text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-02 | a deck with transitions and charts asks first, listing them under "Kept, not editable" | covered | yes |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIO-03 | Cancel keeps the open deck; Import anyway replaces it and reports what is kept | covered |  |  | `e2e/slides/file-io.spec.ts` |
-| SL-FIO-04 |  Download then Open again keeps the slide count and the text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-04 | Download then Open again keeps the slide count and the text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIO-05 | a file that is not a .pptx is refused with a message and leaves the deck as it was | covered |  |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIO-06 | without ?fileActions the toolbar has no Open or Download and one file input (images) | covered |  |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIL-01 | a gradient preset fills the selected shape and the slide background | covered |  |  | `e2e/slides/fills.spec.ts` |
