@@ -1074,6 +1074,17 @@ lockstep.
   direction, anchor, rotation flag): the reader reads an effect list that holds one `a:outerShdw` and the writer writes it back. `pptx.shapes.effects` no longer
   counts a plain shape whose effect list is only that shadow; glow, reflection, soft edges, inner and preset shadows, two shadows, and
   shadows with a scale or skew, the effects of groups, pictures, connectors and runs are still reported.
+- **PPTX writer C: opaque content, transitions and timing (K14).** `exportPptx` now re-emits what the reader keeps in the opaque part store:
+  charts with their embedded workbook and style and colour parts, SmartArt (data, layout, quick style, colours and the cached drawing, which keeps
+  the relationship id the data part names), OLE objects with their preview picture, audio and video with their poster frame (under both the
+  clip's and the `p14:media` relationships) and ink, each as the frame that names its parts and each part byte for byte (hash equal). A part keeps
+  its name unless the package has another use for it (then it moves under `ppt/opaque/` or gets a number) and the relationship parts are
+  rewritten only where a target changed or points at a part that was not kept. Transitions (with their `mc:AlternateContent` fallback) and the
+  timing tree are written as read, after `p:clrMapOvr`; a timing that names a shape the slide does not hold under the same id, a malformed
+  fragment and a sound the file does not carry are left out and reported. Linked media and objects and ActiveX controls are not written
+  (a link is never written) and are reported. The lints of the writer now also report a part no relationship targets, and accept the id 0
+  of an OLE preview picture and an empty relationship id (`r:blip=""`). The PPTX round-trip differences for opaque content, transitions and
+  animations fall to zero over the corpus. No collab schema change (no new model fields).
 
 ## [0.4.0] - 2026-10-26
 

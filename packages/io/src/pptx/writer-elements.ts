@@ -1,12 +1,13 @@
-import type { PptxConnection, PptxConnector, PptxElement, PptxFrame, PptxGroup, PptxPicture, PptxTable, PptxTableCell } from '@b32nio/spindle-shared/export/pptx';
+import type { PptxConnection, PptxConnector, PptxElement, PptxFrame, PptxGroup, PptxOpaque, PptxPicture, PptxTable, PptxTableCell } from '@b32nio/spindle-shared/export/pptx';
 import { hlinkXml, type WriteContext } from './writer-context';
 import { txBodyXml } from './writer-body';
+import { opaqueXml } from './writer-opaque';
 import { fillXml, geometryXml, lineXml, shapeXml } from './writer-shapes';
 import { angle, attrs, emu, esc, xfrmXml } from './writer-xml';
 
 // The slide elements other than `p:sp` (plan K13): pictures, tables, connectors and groups, and the dispatcher that writes a list
 // of elements in drawing order. The inverses of `readPicture`, `readTable`, `readConnector` and `readGroup`. Opaque elements
-// (charts, diagrams, objects, media, ink) wait for K14.
+// (charts, diagrams, objects, media, ink) are written by `writer-opaque.ts` (K14).
 
 const CELL_SIDES = [['l', 'a:lnL'], ['r', 'a:lnR'], ['t', 'a:lnT'], ['b', 'a:lnB']] as const;
 const MARGINS = [['l', 'marL'], ['r', 'marR'], ['t', 'marT'], ['b', 'marB']] as const;
@@ -23,12 +24,12 @@ export interface ElementIds {
 
 /**
  * The ids of `allocateElementIds`, with the lookup connectors need to glue their ends to the shapes' new ids. Only elements that
- * are written have an entry: opaque elements and pictures with no image to embed leave a connector end free, not dangling.
+ * are written have an entry: opaque elements the store holds no parts for and pictures with no image to embed leave a connector end free, not dangling.
  */
 export function elementIds(ids: Map<PptxElement, number>, ctx: WriteContext): ElementIds {
   const bySource = new Map<string, number>();
   for (const [e, id] of ids) {
-    const written = e.kind === 'opaque' ? false : e.kind === 'picture' ? e.dataUrl !== undefined && ctx.image(e.dataUrl, e.part) !== undefined : true;
+    const written = e.kind === 'opaque' ? ctx.opaque?.place(e) !== undefined : e.kind === 'picture' ? e.dataUrl !== undefined && ctx.image(e.dataUrl, e.part) !== undefined : true;
     if (written && !bySource.has(e.pptxId)) bySource.set(e.pptxId, id);
   }
   return { ids, bySource };
@@ -139,8 +140,7 @@ function groupXml(g: PptxGroup, frame: PptxFrame | undefined, id: number, ctx: W
 }
 
 /**
- * The elements of a slide in drawing order: shapes, pictures, tables, connectors and groups. The other kind (opaque content) is left
- * out until K14 and counted in the export warnings. The frames of the model are in slide space; `chain` holds the groups the list is
+ * The elements of a slide in drawing order: shapes, pictures, tables, connectors, groups and opaque content. The frames of the model are in slide space; `chain` holds the groups the list is
  * in, outermost first, each frame as written (in the child space of the one before it), and the frames are mapped through them.
  */
 export function elementsXml(elements: PptxElement[], ctx: WriteContext, all: ElementIds, chain: PptxFrame[] = []): string {
@@ -161,7 +161,7 @@ export function elementsXml(elements: PptxElement[], ctx: WriteContext, all: Ele
         case 'group':
           return groupXml(e as PptxGroup, placed.frame, id, ctx, all, chain);
         case 'opaque':
-          return '';
+          return opaqueXml(e as PptxOpaque, placed.frame, id, ctx);
       }
     })
     .join('');

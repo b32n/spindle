@@ -316,5 +316,8 @@ SmartArt diagram its data, layout, quick-style, colours and cached drawing parts
 object part and preview picture; an audio or video clip its media part and poster frame; ink its ink part; an ActiveX control (`p:control`) its
 control part and picture. The relationship part of every kept part is kept with it (role `rels`) so an export can rewrite the targets. Linked clips
 and objects are never fetched: the address is kept inert. A slide's transition and timing tree are kept as XML fragments in `PptxSlide.opaque` and
-`Slide.opaque` in the editor; the timing names shapes by `pptxId` and is pruned when the shape is deleted. Nothing is written back yet (the PPTX
-writer is plan K12 to K14); the loss report says `kept` because the parts are stored, and the placeholder in the editor says "(kept, not editable)".
+`Slide.opaque` in the editor; the timing names shapes by `pptxId` and is pruned when the shape is deleted. `exportPptx` (plan K14) writes them
+back: each part byte for byte from the store (under its own name where the package has no use for it, else renamed, with the relationship
+parts rewritten to match), the frame that names them, and the transition and timing XML of each slide. Left out and reported: linked clips
+and objects (a link is never written), ActiveX controls, a timing that names a shape the slide does not hold under the same id, and the sound of a
+transition. The loss report says `kept` because the parts are stored, and the placeholder in the editor says "(kept, not editable)".

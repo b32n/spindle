@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import JSZip from 'jszip';
@@ -241,10 +242,8 @@ describe('exportPptx: what is not exported yet', () => {
     const { warnings } = await exportPptx(deck({ slides, layouts: [layout({ elements: [shape] })] }));
     expect(warnings).toEqual([
       '1 slide could not be read at import and is written empty.',
-      'Not exported yet: 2 charts, diagrams, objects, media and ink (K14).',
-      'Not exported yet: 1 transitions (K14).',
-      'Not exported yet: 1 animation timelines (K14).',
       'Changed on export: modern comments written as legacy comments on the slide (status and the shape a comment was anchored to are not kept) (1).',
+      'Changed on export: charts, diagrams, objects, media and ink left out because the parts they are made of are missing (2).',
       'Changed on export: picture fills left out (the image of a fill is not kept) (1).',
     ]);
     const two = await exportPptx(deck({ slides: [slide({ error: 'e' }), slide({ pptxId: '257', error: 'e' })], layouts: [layout({ elements: [shape, shape] })] }));
@@ -276,5 +275,20 @@ describe('exportPptx over the corpus', () => {
     expect(second.sections).toEqual(first.sections?.map((s) => ({ ...s, slideIds: s.slideIds.map((id) => second.slides[first.slides.findIndex((x) => x.pptxId === id)].pptxId) })));
     // every layout comes back with the same placeholders (the master of origin is the one thing a single-master deck loses)
     expect(second.layouts.map((l) => l.placeholders.map((p) => ({ ...p, name: p.name })))).toEqual(first.layouts.map((l) => l.placeholders));
+  });
+
+  it.each(decks)('%s: every opaque part is in the written package byte for byte, its elements and slide fragments read back equal, and nothing is reported as not written', async (name) => {
+    const first = await importPptx(fixture(name));
+    const { bytes, warnings } = await exportPptx(first);
+    const zip = await JSZip.loadAsync(bytes);
+    const second = await importPptx(bytes);
+    const sha = (b: Uint8Array) => createHash('sha256').update(b).digest('hex');
+    const written = new Set<string>();
+    for (const n of Object.keys(zip.files)) if (!zip.files[n].dir) written.add(sha(await zip.files[n].async('uint8array')));
+    for (const part of first.opaqueParts) expect(written.has(part.hash)).toBe(true);
+    expect(second.opaqueParts.map((p) => p.hash).sort()).toEqual(first.opaqueParts.map((p) => p.hash).sort());
+    const opaque = (r: typeof first) => r.slides.map((sl) => [sl.opaque, JSON.stringify((sl.elements ?? []).filter((e) => e.kind === 'opaque'))]);
+    expect(opaque(second)).toEqual(opaque(first));
+    expect(warnings.filter((w) => /opaque|charts, diagrams|animation|transition|linked from outside|ActiveX/.test(w))).toEqual([]);
   });
 });

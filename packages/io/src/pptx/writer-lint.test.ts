@@ -91,6 +91,25 @@ describe('lintPptxPackage', () => {
     expect(await lintPptxPackage(group)).toContain('ppt/slides/slide1.xml: grpSp must start with nvGrpSpPr and grpSpPr');
   });
 
+  it('reports a part that no relationship targets (an opaque part whose relationship was lost)', async () => {
+    const zip = await base();
+    zip.file('ppt/charts/chart1.xml', '<c:chartSpace xmlns:c="c"/>');
+    zip.file('[Content_Types].xml', (await zip.file('[Content_Types].xml')?.async('string'))?.replace('</Types>', '<Override PartName="/ppt/charts/chart1.xml" ContentType="x"/></Types>') as string);
+    expect(await lintPptxPackage(zip)).toEqual(['ppt/charts/chart1.xml: no relationship targets this part']);
+    zip.file('ppt/slides/_rels/slide1.xml.rels', (await zip.file('ppt/slides/_rels/slide1.xml.rels')?.async('string'))?.replace('</Relationships>', '<Relationship Id="rId2" Type="t" Target="../charts/chart1.xml"/></Relationships>') as string);
+    expect(await lintPptxPackage(zip)).toEqual([]);
+  });
+
+  it('lets the preview picture of an OLE object state id 0 (twice), an empty relationship id state none, and still checks the other ids', async () => {
+    const ole = '<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="5" name="o"/></p:nvGraphicFramePr><a:graphic><a:graphicData><p:oleObj><p:pic><p:nvPicPr><p:cNvPr id="0" name=""/></p:nvPicPr></p:pic></p:oleObj></a:graphicData></a:graphic></p:graphicFrame>';
+    const twice = await edit('ppt/slides/slide1.xml', (x) => x.replace('</p:spTree>', `${ole}${ole.replace('id="5"', 'id="6"')}</p:spTree>`));
+    expect(await lintPptxPackage(twice)).toEqual([]);
+    const clash = await edit('ppt/slides/slide1.xml', (x) => x.replace('</p:spTree>', `${ole}${ole}</p:spTree>`));
+    expect(await lintPptxPackage(clash)).toEqual(['ppt/slides/slide1.xml: shape id 5 is used twice']);
+    const empty = await edit('ppt/slides/slide1.xml', (x) => x.replace('</p:spTree>', '<p:pic><p:blipFill><a:blip r:embed=""/></p:blipFill></p:pic></p:spTree>'));
+    expect(await lintPptxPackage(empty)).toEqual([]);
+  });
+
   it('reports slide, master and layout list ids that are out of range or repeat', async () => {
     const range = await edit('ppt/presentation.xml', (x) => x.replace('id="256"', 'id="12"').replace('id="2147483648"', 'id="5"'));
     expect(await lintPptxPackage(range)).toEqual(['ppt/presentation.xml: sldId id 12 is outside 256..2147483647', 'ppt/presentation.xml: sldMasterId id 5 is outside 2147483648..4294967295']);

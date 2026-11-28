@@ -2,60 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 22,
+      "elements": 23,
       "slides": 8
     },
     "before": {
       "elements": 23,
       "slides": 8
     },
-    "byField": {
-      "removed opaqueParts[]": 3,
-      "removed slides[].elements[]": 1,
-      "removed slides[].opaque": 2
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"hash\":\"5f7866c780fbd59943d6082410c5f9c42ea5b290afd5c3a982a8dd7b5b1b2575\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[0]"
-      },
-      {
-        "before": "{\"hash\":\"6456ffde2ae3e457eaa3df1d0549bb47d91b91af1daec5f03e3f356422a73cd4\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[1]"
-      },
-      {
-        "before": "{\"hash\":\"79270997169c6191bacee54cef7a5af20020196fba137bd46fcc2a2dc0368150\",\"c...",
-        "kind": "removed",
-        "path": "opaqueParts[2]"
-      },
-      {
-        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
-        "kind": "removed",
-        "path": "slides[0].opaque"
-      },
-      {
-        "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Bar chart\",\"frame\"...",
-        "kind": "removed",
-        "path": "slides[4].elements[1]"
-      },
-      {
-        "before": "{\"transition\":\"<p:transition xmlns:a=\\\"http://schemas.openxmlformats.org/draw...",
-        "kind": "removed",
-        "path": "slides[6].opaque"
-      }
-    ],
-    "removed": 6,
-    "total": 6,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 1 charts, diagrams, objects, media and ink (K14).",
-    "Not exported yet: 2 transitions (K14).",
-    "Not exported yet: 1 animation timelines (K14)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [
     "2 fonts the editor may not have (MS Gothic, MS Mincho) are used; text in them shows in a substitute and may reflow."
   ],
