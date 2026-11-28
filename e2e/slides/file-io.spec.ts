@@ -11,8 +11,7 @@ import {
 } from '../support/file-io';
 import { closeToolbarMenu, toolbarButton } from '../support/toolbar';
 
-// Open / Download (.pptx) in the slides toolbar (plan K15). The demo shows the controls with `?fileActions=1` (opt-in, so the default
-// toolbar the visual and a11y baselines capture does not change). Both controls may sit in the "More tools" overflow menu, which
+// Open / Download (.pptx) in the slides toolbar (plan K15). The demo shows the controls by default, like the docs and sheets demos. Both controls may sit in the "More tools" overflow menu, which
 // depends on the browser's fonts and widths, so they are clicked through `toolbarButton`.
 
 const OPEN = 'Open file (.pptx)';
@@ -57,7 +56,7 @@ test.describe('slides: file open / download', () => {
   test('SL-FIO-01 @smoke opening a generated 6-slide deck shows 6 slides in the filmstrip and the first slide text', async ({
     page,
   }) => {
-    await slides.goto('?fileActions=1');
+    await slides.goto();
     await openFile(page, fixture('six-slides.pptx'));
     await expect(slides.thumbs).toHaveCount(6);
     await expect(slides.slide.getByText('Quarterly review')).toBeVisible();
@@ -69,7 +68,7 @@ test.describe('slides: file open / download', () => {
   test('SL-FIO-02 @smoke a deck with transitions and charts asks first, listing them under "Kept, not editable"', async ({
     page,
   }) => {
-    await slides.goto('?fileActions=1');
+    await slides.goto();
     const before = await slides.thumbs.count();
     await openFile(page, fixture('transitions-charts.pptx'));
     await expect(dialog(page)).toBeVisible();
@@ -85,7 +84,7 @@ test.describe('slides: file open / download', () => {
   test('SL-FIO-03 Cancel keeps the open deck; Import anyway replaces it and reports what is kept', async ({
     page,
   }) => {
-    await slides.goto('?fileActions=1');
+    await slides.goto();
     const before = await slides.thumbs.count();
     await openFile(page, fixture('transitions-charts.pptx'));
     await dialog(page).getByRole('button', { name: 'Cancel' }).click();
@@ -106,7 +105,7 @@ test.describe('slides: file open / download', () => {
   test('SL-FIO-04 @smoke Download then Open again keeps the slide count and the text', async ({
     page,
   }) => {
-    await slides.goto('?fileActions=1&importConfirmation=never');
+    await slides.goto('?importConfirmation=never');
     await openFile(page, fixture('six-slides.pptx'));
     await expect(slides.thumbs).toHaveCount(6);
     await closeToolbarMenu(page);
@@ -119,7 +118,7 @@ test.describe('slides: file open / download', () => {
     ).toHaveLength(6);
 
     // a fresh page, so the six slides can only come from the downloaded file
-    await slides.goto('?fileActions=1&importConfirmation=never');
+    await slides.goto('?importConfirmation=never');
     await openFile(page, asUpload(file, PPTX_MIME));
     await expect(slides.thumbs).toHaveCount(6);
     await expect(slides.slide.getByText('Quarterly review')).toBeVisible();
@@ -129,7 +128,7 @@ test.describe('slides: file open / download', () => {
   test('SL-FIO-05 a file that is not a .pptx is refused with a message and leaves the deck as it was', async ({
     page,
   }) => {
-    await slides.goto('?fileActions=1');
+    await slides.goto();
     const before = await slides.thumbs.count();
     await openFile(page, fixture('notes.txt'));
     await expect.poll(() => alerts.length).toBe(1);
@@ -137,12 +136,13 @@ test.describe('slides: file open / download', () => {
     await expect(slides.thumbs).toHaveCount(before);
   });
 
-  test('SL-FIO-06 without ?fileActions the toolbar has no Open or Download and one file input (images)', async ({
+  test('SL-FIO-06 the default toolbar has Open and Download, and the Open input is separate from the image input', async ({
     page,
   }) => {
     await slides.goto();
-    await expect(page.getByRole('button', { name: OPEN, exact: true })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: DOWNLOAD, exact: true })).toHaveCount(0);
-    await expect(page.locator('input[type="file"]')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: OPEN, exact: true })).toHaveCount(1);
+    await expect(page.getByRole('button', { name: DOWNLOAD, exact: true })).toHaveCount(1);
+    await expect(page.locator('input[type="file"][accept="image/*"]')).toHaveCount(1);
+    await expect(page.locator('input[type="file"]')).toHaveCount(2);
   });
 });

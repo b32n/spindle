@@ -60,7 +60,7 @@ test.describe('slides: image upload variants', () => {
       page,
     }) => {
       const before = await ids();
-      await page.locator('input[type="file"]').setInputFiles(fixture(file));
+      await page.locator('input[type="file"][accept="image/*"]').setInputFiles(fixture(file));
       await expect.poll(async () => (await images(page, before)).length).toBe(1);
       const [el] = await images(page, before);
       expect(el.type).toBe('image');
@@ -82,7 +82,7 @@ test.describe('slides: image upload variants', () => {
     const png = makePng(4000, 3000, (x, y) => [x & 255, y & 255, (x + y) & 255]);
     const started = Date.now();
     await page
-      .locator('input[type="file"]')
+      .locator('input[type="file"][accept="image/*"]')
       .setInputFiles({ name: 'huge.png', mimeType: 'image/png', buffer: png });
     await expect.poll(async () => (await images(page, before)).length).toBe(1);
     expect(Date.now() - started, 'insert time for a 4000x3000 image').toBeLessThan(10_000);
@@ -119,7 +119,10 @@ test.describe('slides: image upload variants', () => {
       s.toolbar('Image (upload)').click(),
     ]);
     expect(chooser.isMultiple()).toBe(false);
-    await expect(page.locator('input[type="file"]')).toHaveAttribute('accept', 'image/*');
+    await expect(page.locator('input[type="file"][accept="image/*"]')).toHaveAttribute(
+      'accept',
+      'image/*'
+    );
     const before = await ids();
     await chooser.setFiles(fixture('logo.png'));
     await expect.poll(async () => (await images(page, before)).length).toBe(1);
@@ -130,7 +133,7 @@ test.describe('slides: image upload variants', () => {
   }) => {
     // Current behaviour: the decode failure is silent (no message) and the slide is unchanged.
     const before = await ids();
-    await page.locator('input[type="file"]').setInputFiles({
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles({
       name: 'broken.png',
       mimeType: 'image/png',
       buffer: Buffer.from(Array.from({ length: 2048 }, (_, i) => (i * 31 + 7) & 0xff)),
@@ -143,7 +146,7 @@ test.describe('slides: image upload variants', () => {
     page,
   }) => {
     const before = await ids();
-    await page.locator('input[type="file"]').setInputFiles(fixture('notes.txt'));
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles(fixture('notes.txt'));
     await page.evaluate(() => new Promise((r) => setTimeout(r, 500)));
     expect(await ids()).toEqual(before);
   });
@@ -204,7 +207,7 @@ test.describe('slides: image hooks (no URL fetching by default)', () => {
     await s.goto('?uploadImage=1');
     await s.gotoSlide(2);
     const before = (await slideImages(page)).length;
-    await page.locator('input[type="file"]').setInputFiles(fixture('logo.png'));
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles(fixture('logo.png'));
     await expect.poll(async () => (await slideImages(page)).length).toBe(before + 1);
     const srcs = await slideImages(page);
     expect(srcs[srcs.length - 1]).toBe(`${SLIDES_URL}/uploaded/logo.png`);
@@ -216,7 +219,7 @@ test.describe('slides: image hooks (no URL fetching by default)', () => {
     await s.gotoSlide(2);
     const before = (await slideImages(page)).length;
     await page
-      .locator('input[type="file"]')
+      .locator('input[type="file"][accept="image/*"]')
       .setInputFiles({ name: 'big.png', mimeType: 'image/png', buffer: Buffer.alloc(4096) });
     await page.evaluate(
       () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))

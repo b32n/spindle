@@ -15,7 +15,7 @@ test.describe('slides: image crop', () => {
     page,
   }) => {
     const before = (await s.els()).map((e) => e.id);
-    await page.locator('input[type="file"]').setInputFiles(fixture('logo.png'));
+    await page.locator('input[type="file"][accept="image/*"]').setInputFiles(fixture('logo.png'));
     await expect.poll(async () => (await s.els()).length).toBe(before.length + 1);
     const id = (await s.els()).find((e) => !before.includes(e.id))!.id;
     await s.expectSelection([id]);

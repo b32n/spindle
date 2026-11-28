@@ -24,11 +24,7 @@ const imageProps = (() => {
   };
 })();
 
-/**
- * `?fileActions=1` shows Open / Download (.pptx) in the toolbar and `?importConfirmation=never|host-yes|host-no` picks how Open
- * reacts to a lossy file (default: the built-in dialog). Opt-in so the default toolbar stays as it is.
- */
-const fileActions = new URLSearchParams(window.location.search).get('fileActions') === '1';
+/** e2e hook: `?importConfirmation=never|host-yes|host-no` (default: the built-in dialog). */
 const importConfirmation = (() => {
   const v = new URLSearchParams(window.location.search).get('importConfirmation');
   if (v === 'never') return 'never' as const;
@@ -206,7 +202,7 @@ export default function App() {
             fontSource={fontSource}
             {...imageProps}
             readOnly={readOnly}
-            fileActions={fileActions}
+            fileActions
             importConfirmation={importConfirmation}
             onFileOpened={reportFileOpened}
             onFileError={reportFileError}

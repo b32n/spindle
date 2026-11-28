@@ -398,7 +398,7 @@ Status: **covered** (test exists and passes), **fixme + bug** (test written, `te
 | SL-FIO-03 | Cancel keeps the open deck; Import anyway replaces it and reports what is kept | covered |  |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIO-04 | Download then Open again keeps the slide count and the text | covered | yes |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIO-05 | a file that is not a .pptx is refused with a message and leaves the deck as it was | covered |  |  | `e2e/slides/file-io.spec.ts` |
-| SL-FIO-06 | without ?fileActions the toolbar has no Open or Download and one file input (images) | covered |  |  | `e2e/slides/file-io.spec.ts` |
+| SL-FIO-06 | the default toolbar has Open and Download, and the Open input is separate from the image input | covered |  |  | `e2e/slides/file-io.spec.ts` |
 | SL-FIL-01 | a gradient preset fills the selected shape and the slide background | covered |  |  | `e2e/slides/fills.spec.ts` |
 | L-FNT-01 | default: theme fonts come from the Spindle mirror, never Google | covered |  |  | `e2e/slides/fonts.spec.ts` |
 | L-FNT-02 | fontSource {kind:'local'}: zero font requests | covered |  |  | `e2e/slides/fonts.spec.ts` |
