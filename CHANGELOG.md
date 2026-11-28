@@ -510,6 +510,15 @@ lockstep.
   row leaves it, inside it extends it. It applies to normal formulas (stable ids: the range boundary moves onto the nearest surviving row or
   column before the delete; undo restores it) and to the text of cached-only formulas alike. Sheet names in references are case-insensitive
   (`sheet2!A1` points at `Sheet2` and follows its rename and edits). A workbook saved with such a `#REF!` keeps it; only new deletes change.
+- **Slides: deck <-> PPTX (K15a).** New additive exports from `@b32nio/spindle-slides-core`: `importFromPptx(bytes, deck, options?)`
+  (replaces the deck with the file: slide size, theme, layouts with their text levels, shapes, text with marks and paragraph
+  attributes, pictures, tables, connectors glued to their shapes, groups, notes, comments, and charts, diagrams, objects and media
+  kept byte for byte), `exportToPptx(deck, options?)` and `inspectPptx(bytes, { detail? })` (the loss report, with the "kept, not
+  editable" group). `@b32nio/spindle-io/pptx` loads on first use, like the sheets and docs cores, and `@b32nio/spindle-io` becomes a
+  dependency of `slides-core` (a workspace package, as in sheets and docs). `@b32nio/spindle-shared/export/io-loader` gains
+  `loadIoPptx`. Type sizes and spacing in points become px at 4/3 (18 pt is 24 px) and back. Slide-level comments are kept as threads
+  with no element (listed as "no longer attached", written back as slide comments). No model fields were added, so the slides
+  collaboration schema version stays at 10. The Open and Download buttons follow in K15b.
 - **Sheets collaboration gate.** Sheets rooms now record `meta.schemaVersion` (missing key = 1; no migration), and
   `attachCollab` refuses a room written by a newer client with a `CollabSchemaVersionError` instead of editing it.
   New additive exports from `@b32nio/spindle-sheets-core`: `getCollabBlockers(workbook)` (empty for now) and
