@@ -174,20 +174,24 @@ it touches.
 | Edit | `A:A` / `A:C` | `1:1` / `1:3` | `A1:B2`, `A1`, `@`, `A1#`, `:` over refs | 3D (`Sheet1:Sheet3!A1`) |
 |---|---|---|---|---|
 | Insert rows | unchanged (text and value stay valid; new rows count) | follows its rows (`1:1` becomes `3:3` after two rows are inserted above); grows when rows are inserted inside `1:3` | follow their ids as before | not moved: it names positions |
-| Delete rows | unchanged | `#REF!` when a row that is a corner of the range is deleted (printed `#REF!`) | as before: a deleted corner row gives `#REF!` | not moved |
+| Delete rows | unchanged | keeps its surviving rows (`1:3` with row 2 deleted is `1:2`); `#REF!` only when every row of the range is deleted | keep their surviving rows (`A2:A5` with row 5 deleted is `A2:A4`); a single cell in a deleted row, or a range whose rows are all deleted, is `#REF!` | not moved |
 | Insert columns | follows its columns (`A:A` becomes `C:C`); grows when inserted inside `A:C` | unchanged | follow their ids | not moved |
-| Delete columns | `#REF!` when a corner column is deleted | unchanged | as before | not moved |
+| Delete columns | keeps its surviving columns (`A:C` with column C deleted is `A:B`); `#REF!` only when every column of the range is deleted | unchanged | keep their surviving columns; a single cell in a deleted column, or a range whose columns are all deleted, is `#REF!` | not moved |
 | Copy / fill | relative columns move (`A:A` one column right is `B:B`), `$A:$A` stays, rows never change | relative rows move (`1:1` one row down is `2:2`), `$1:$1` stays | as before (`@` and `#` operands move with the cell) | relative positions move with the copy; sheets stay |
 | Rename a sheet | the prefix follows | the prefix follows | the prefix follows | both end names follow; the span is quoted when needed (`'First one:Last'!A1`) |
 | Delete a sheet | `#REF!` if it is the referenced sheet | `#REF!` | `#REF!` | an end sheet moves **inward** (Excel's rule); deleting a sheet inside the span just drops it from the total; a span left with only the deleted sheet is `#REF!` |
 | Reorder sheets | | | | the span is read from the live order |
 | Add a sheet | | | | included only if it lands between the end sheets (a new sheet is appended after the last) |
 
-Deleting a *corner* of a multi-row or multi-column range gives `#REF!` for every
-range form, plain or whole (Excel shrinks the range instead): this is the
-engine's existing rule for ranges and it is applied unchanged to `A:C` and
-`1:3`. The whole-column and whole-row forms are valid again as soon as the
-formula is re-entered.
+Deleting rows or columns that overlap a range keeps the surviving rows or
+columns, as Excel does (`A2:A5` with row 5 deleted is `A2:A4`, with row 2
+deleted `A2:A4`, with rows 4 to 9 deleted `A2:A3`); the range is `#REF!` only
+when every one of its rows (or columns) is deleted, and a single-cell reference
+into a deleted row or column is always `#REF!`. Inserting before the first row
+shifts the range, inserting after its last row leaves it, inserting inside it
+extends it. The rule is one shared function used by both the engine's stable-id
+path and the text shifter of cached-only formulas (S4b), and it applies to
+`A:C` and `1:3` as well. A formula saved with `#REF!` already in it keeps it.
 
 A 3D reference is **positional**: it stores the cell positions (not ids) and the
 two end sheet names, so inserting or deleting rows on one sheet of the span does
