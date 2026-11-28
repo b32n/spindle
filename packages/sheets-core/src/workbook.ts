@@ -581,6 +581,8 @@ export class WorkbookImpl implements Workbook {
     // Add to evaluating cells to detect circular references
     this.evaluatingCells.add(cellKey);
 
+    // the display text of the formula as its stable AST renders it: an error result keeps it up to date too (`=1/0+A1` follows an insert)
+    let refreshedText = cell.formula;
     try {
       const sheet = this.getSheet(sheetId);
       const resolver = this.buildSheetResolver();
@@ -624,6 +626,7 @@ export class WorkbookImpl implements Workbook {
       // Refresh the display string from the AST so the user sees A1
       // notation that tracks structural edits (insert/delete/sort).
       const refreshedFormula = renderStableAst(stableAst, resolver, sheet);
+      refreshedText = refreshedFormula;
 
       const evaluationContext = {
         getCellValue: (r: number, c: number, sId?: string, sheetName?: string) => {
@@ -696,7 +699,7 @@ export class WorkbookImpl implements Workbook {
       if (typeof result === 'number' && !isFinite(result)) {
         const error = result === Infinity || result === -Infinity ? '#DIV/0!' : '#NUM!';
         this.formulaGraph.markClean(cellKey, error);
-        this.setCell(sheetId, row, col, { value: error });
+        this.setCell(sheetId, row, col, { value: error, formula: refreshedFormula });
         return error;
       }
 
@@ -718,7 +721,7 @@ export class WorkbookImpl implements Workbook {
       // otherwise be stored as the cell value; normalize it to #VALUE!.
       const errorMsg = raw.startsWith('#') ? raw : '#VALUE!';
       this.formulaGraph.markClean(cellKey, errorMsg as CellValue);
-      this.setCell(sheetId, row, col, { value: errorMsg as CellValue });
+      this.setCell(sheetId, row, col, { value: errorMsg as CellValue, formula: refreshedText });
       return errorMsg;
     }
   }

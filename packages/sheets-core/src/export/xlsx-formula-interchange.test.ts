@@ -81,18 +81,19 @@ describe('implicit intersection and spill references', () => {
     expect(cellAt(wb, 2, 3)).toMatchObject({ formula: '=SUM(C3#)' });
     expect(cellAt(wb, 2, 2)?.cachedOnly).toBeUndefined();
     const xml = await sheetXml(await exportToXlsx(wb));
-    expect(xml).toMatch(/<f>_xlfn\.SINGLE\(A1:A2\)<\/f>/);
+    // no array mark: `@` before a range is the intersection Excel applies to the bare range anyway (and Excel 2016 has no SINGLE)
+    expect(xml).toMatch(/<f>A1:A2<\/f>/);
     expect(xml).toMatch(/<f>SUM\(_xlfn\.ANCHORARRAY\(C3\)\)<\/f>/);
     expect(xml).not.toContain('@A1');
     expect(xml).not.toMatch(/C3#/);
   });
 
-  it('writes a formula typed with @ and # the same way', async () => {
+  it('writes a formula typed with @ the same way (a bare range)', async () => {
     const wb = new WorkbookImpl('wb', 'WB');
     wb.setCellValue(undefined, 0, 0, 5);
     wb.setFormula(undefined, 0, 1, '=@A1:A2');
     const xml = await sheetXml(await exportToXlsx(wb));
-    expect(xml).toMatch(/<f>_xlfn\.SINGLE\(A1:A2\)<\/f>/);
+    expect(xml).toMatch(/<f>A1:A2<\/f>/);
   });
 });
 

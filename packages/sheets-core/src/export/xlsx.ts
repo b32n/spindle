@@ -20,7 +20,7 @@ import { generateId } from '../utils/id';
 import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
 import { isFaithfulFormatCode } from '../number-format';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
-import { isFormulaEvaluable, parseRange, spanRef, withImplicitIntersection } from './xlsx-formulas';
+import { isFormulaEvaluable, parseRange, spanRef, withImplicitIntersection, withoutImplicitIntersection } from './xlsx-formulas';
 
 type IoXlsx = Awaited<ReturnType<typeof loadIo>>;
 
@@ -117,6 +117,8 @@ function toSpreadsheetSheet(workbook: WorkbookImpl, sheet: Sheet, state: ExportA
       }
       state.remaining = Math.max(0, state.remaining - cells);
     }
+    // without an array or dynamic-array mark the `@` before a range operand (legacy intersection) goes out as the file had it: a bare range
+    if (!span && out.formula && !out.cachedOnly) out.formula = withoutImplicitIntersection(out.formula);
     if (span) {
       out.arrayRef = spanRef(row, col, span.rows, span.cols);
       // a dynamic array (one the file marked, or a formula typed here that spills) goes back as one; an array formula the file had
