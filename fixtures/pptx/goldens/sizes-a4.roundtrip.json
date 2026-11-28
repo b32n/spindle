@@ -2,61 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 7,
       "slides": 3
     },
     "before": {
       "elements": 7,
       "slides": 3
     },
-    "byField": {
-      "removed slides[].elements[]": 7
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 1\",\"placeholder\":{\"type\":\"ctrTitle...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Subtitle 2\",\"placeholder\":{\"type\":\"subTi...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Content Placeholder 3\",\"placeholder\":{\"t...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[2].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Page frame\",\"frame\":{\"x\":0,\"y\":0,\"w\":112...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Centre ellipse\",\"frame\":{\"x\":420.9448818...",
-        "kind": "removed",
-        "path": "slides[2].elements[2]"
-      }
-    ],
-    "removed": 7,
-    "total": 7,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 7 shapes and text boxes (K12b)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 4,
       "slides": 4
     },
     "before": {
@@ -11,7 +11,7 @@
     },
     "byField": {
       "removed opaqueParts[]": 9,
-      "removed slides[].elements[]": 8
+      "removed slides[].elements[]": 4
     },
     "changed": 0,
     "entries": [
@@ -61,19 +61,9 @@
         "path": "opaqueParts[8]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Bar chart\",\"frame\"...",
         "kind": "removed",
         "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
       },
       {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Line chart\",\"frame...",
@@ -81,19 +71,9 @@
         "path": "slides[1].elements[1]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[2].elements[0]"
-      },
-      {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Pie chart\",\"frame\"...",
         "kind": "removed",
         "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[3].elements[0]"
       },
       {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"chart\",\"pptxId\":\"3\",\"name\":\"Scatter chart\",\"fr...",
@@ -101,12 +81,11 @@
         "path": "slides[3].elements[1]"
       }
     ],
-    "removed": 17,
-    "total": 17,
+    "removed": 13,
+    "total": 13,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 4 shapes and text boxes (K12b).",
     "Not exported yet: 4 charts, diagrams, objects, media and ink (K14)."
   ],
   "reimportWarnings": [],

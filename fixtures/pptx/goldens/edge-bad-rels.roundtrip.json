@@ -2,46 +2,21 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 4,
       "slides": 2
     },
     "before": {
       "elements": 4,
       "slides": 2
     },
-    "byField": {
-      "removed slides[].elements[]": 4
-    },
+    "byField": {},
     "changed": 0,
-    "entries": [
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Box\",\"frame\":{\"x\":96,\"y\":209.97375328083...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Box\",\"frame\":{\"x\":96,\"y\":209.97375328083...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      }
-    ],
-    "removed": 4,
-    "total": 4,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 4 shapes and text boxes (K12b)."
-  ],
+  "exportWarnings": [],
   "reimportWarnings": [],
   "status": "ok"
 }

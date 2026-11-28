@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 2,
       "slides": 1
     },
     "before": {
@@ -10,27 +10,22 @@
       "slides": 1
     },
     "byField": {
-      "removed slides[].elements[]": 2
+      "removed slides[].elements[].link": 1
     },
     "changed": 0,
     "entries": [
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "before": "{\"kind\":\"action\",\"target\":\"ppaction://macro?name=Module1.Hello\"}",
         "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Macro button\",\"frame\":{\"x\":73.4908136482...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
+        "path": "slides[0].elements[1].link"
       }
     ],
-    "removed": 2,
-    "total": 2,
+    "removed": 1,
+    "total": 1,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 2 shapes and text boxes (K12b)."
+    "Changed on export: hyperlinks with an address the editor does not allow left out (1)."
   ],
   "reimportWarnings": [],
   "status": "ok"

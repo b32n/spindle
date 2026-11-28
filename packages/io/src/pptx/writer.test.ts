@@ -231,9 +231,10 @@ describe('exportPptx: what is not exported yet', () => {
           { kind: 'picture', pptxId: '3', name: 'p' },
           { kind: 'table', pptxId: '4', name: 't', columns: [], rows: [] },
           { kind: 'connector', pptxId: '5', name: 'c' },
-          { kind: 'group', pptxId: '6', name: 'g', children: [shape, { kind: 'opaque', opaqueKind: 'chart', pptxId: '7', name: 'o', parts: [] }] },
+          { kind: 'group', pptxId: '6', name: 'g', children: [shape] },
+          { kind: 'opaque', opaqueKind: 'chart', pptxId: '7', name: 'o', parts: [] },
         ],
-        background: { kind: 'none' },
+        background: { kind: 'picture' },
         notes: { props: {}, paragraphs: [] },
         threads: [{ id: '1', format: 'legacy', anchor: { kind: 'slide' }, comments: [] }, { id: '2', format: 'modern', anchor: { kind: 'slide' }, comments: [] }],
         opaque: { transition: '<p:transition/>', timing: '<p:timing/>' },
@@ -243,21 +244,19 @@ describe('exportPptx: what is not exported yet', () => {
     const { warnings } = await exportPptx(deck({ slides, layouts: [layout({ elements: [shape] })] }));
     expect(warnings).toEqual([
       '1 slide could not be read at import and is written empty.',
-      'Not exported yet: 2 shapes and text boxes (K12b).',
       'Not exported yet: 1 pictures (K13).',
       'Not exported yet: 1 tables (K13).',
       'Not exported yet: 1 connectors (K13).',
       'Not exported yet: 1 groups (K13).',
       'Not exported yet: 1 charts, diagrams, objects, media and ink (K14).',
-      'Not exported yet: 1 slide backgrounds (K12b).',
       'Not exported yet: 1 speaker notes (K13).',
       'Not exported yet: 2 comment threads (K13).',
       'Not exported yet: 1 transitions (K14).',
       'Not exported yet: 1 animation timelines (K14).',
-      'Not exported yet: 1 static layout shape (K12b).',
+      'Changed on export: picture fills left out, until K13 (1).',
     ]);
     const two = await exportPptx(deck({ slides: [slide({ error: 'e' }), slide({ pptxId: '257', error: 'e' })], layouts: [layout({ elements: [shape, shape] })] }));
-    expect(two.warnings).toEqual(['2 slides could not be read at import and are written empty.', 'Not exported yet: 2 static layout shapes (K12b).']);
+    expect(two.warnings).toEqual(['2 slides could not be read at import and are written empty.']);
   });
 });
 

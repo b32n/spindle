@@ -2,111 +2,23 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 5,
       "slides": 2
     },
     "before": {
       "elements": 5,
       "slides": 2
     },
-    "byField": {
-      "changed fonts.used[]": 2,
-      "removed fonts.unavailable[]": 4,
-      "removed fonts.used[]": 5,
-      "removed slides[].elements[]": 5
-    },
-    "changed": 2,
-    "entries": [
-      {
-        "before": "\"Malgun Gothic\"",
-        "kind": "removed",
-        "path": "fonts.unavailable[0]"
-      },
-      {
-        "before": "\"MS Gothic\"",
-        "kind": "removed",
-        "path": "fonts.unavailable[1]"
-      },
-      {
-        "before": "\"PMingLiU\"",
-        "kind": "removed",
-        "path": "fonts.unavailable[2]"
-      },
-      {
-        "before": "\"SimSun\"",
-        "kind": "removed",
-        "path": "fonts.unavailable[3]"
-      },
-      {
-        "after": "\"Calibri\"",
-        "before": "\"Arial\"",
-        "kind": "changed",
-        "path": "fonts.used[0]"
-      },
-      {
-        "after": "\"Calibri Light\"",
-        "before": "\"Calibri\"",
-        "kind": "changed",
-        "path": "fonts.used[1]"
-      },
-      {
-        "before": "\"Calibri Light\"",
-        "kind": "removed",
-        "path": "fonts.used[2]"
-      },
-      {
-        "before": "\"Malgun Gothic\"",
-        "kind": "removed",
-        "path": "fonts.used[3]"
-      },
-      {
-        "before": "\"MS Gothic\"",
-        "kind": "removed",
-        "path": "fonts.used[4]"
-      },
-      {
-        "before": "\"PMingLiU\"",
-        "kind": "removed",
-        "path": "fonts.used[5]"
-      },
-      {
-        "before": "\"SimSun\"",
-        "kind": "removed",
-        "path": "fonts.used[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Hebrew and Arabic\",\"textBox\":true,\"frame...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"CJK text\",\"textBox\":true,\"frame\":{\"x\":73...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Vertical Japanese\",\"textBox\":true,\"frame...",
-        "kind": "removed",
-        "path": "slides[1].elements[2]"
-      }
-    ],
-    "removed": 14,
-    "total": 16,
+    "byField": {},
+    "changed": 0,
+    "entries": [],
+    "removed": 0,
+    "total": 0,
     "truncated": false
   },
-  "exportWarnings": [
-    "Not exported yet: 5 shapes and text boxes (K12b)."
+  "exportWarnings": [],
+  "reimportWarnings": [
+    "4 fonts the editor may not have (Malgun Gothic, MS Gothic, PMingLiU, SimSun) are used; text in them shows in a substitute and may reflow."
   ],
-  "reimportWarnings": [],
   "status": "ok"
 }

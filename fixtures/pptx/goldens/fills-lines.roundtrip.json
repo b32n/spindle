@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 50,
       "slides": 5
     },
     "before": {
@@ -10,219 +10,33 @@
       "slides": 5
     },
     "byField": {
-      "removed slides[].background": 3,
-      "removed slides[].elements[]": 50
+      "removed slides[].background": 1,
+      "removed slides[].elements[].fill": 2
     },
     "changed": 0,
     "entries": [
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
+        "before": "{\"kind\":\"picture\",\"part\":\"ppt/media/tile.png\"}",
         "kind": "removed",
-        "path": "slides[0].elements[0]"
+        "path": "slides[0].elements[10].fill"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Solid RGB\",\"frame\":{\"x\":52.4934383202099...",
+        "before": "{\"kind\":\"picture\",\"part\":\"ppt/media/tile.png\",\"tile\":true}",
         "kind": "removed",
-        "path": "slides[0].elements[1]"
+        "path": "slides[0].elements[11].fill"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Solid scheme, darker\",\"frame\":{\"x\":293.9...",
+        "before": "{\"kind\":\"picture\",\"part\":\"ppt/media/background.png\",\"tile\":true}",
         "kind": "removed",
-        "path": "slides[0].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Linear gradient\",\"frame\":{\"x\":535.433070...",
-        "kind": "removed",
-        "path": "slides[0].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Three stop gradient\",\"frame\":{\"x\":776.90...",
-        "kind": "removed",
-        "path": "slides[0].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"Circle gradient\",\"frame\":{\"x\":1018.37270...",
-        "kind": "removed",
-        "path": "slides[0].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"Rectangle gradient\",\"frame\":{\"x\":52.4934...",
-        "kind": "removed",
-        "path": "slides[0].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"9\",\"name\":\"Pattern dkDnDiag\",\"frame\":{\"x\":293.96325...",
-        "kind": "removed",
-        "path": "slides[0].elements[7]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Pattern pct50\",\"frame\":{\"x\":535.4330708...",
-        "kind": "removed",
-        "path": "slides[0].elements[8]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"Pattern smCheck\",\"frame\":{\"x\":776.90288...",
-        "kind": "removed",
-        "path": "slides[0].elements[9]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"Picture stretch\",\"frame\":{\"x\":1018.3727...",
-        "kind": "removed",
-        "path": "slides[0].elements[10]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"13\",\"name\":\"Picture tile\",\"frame\":{\"x\":52.493438320...",
-        "kind": "removed",
-        "path": "slides[0].elements[11]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"14\",\"name\":\"No fill\",\"frame\":{\"x\":293.9632545931758...",
-        "kind": "removed",
-        "path": "slides[0].elements[12]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"15\",\"name\":\"Alpha 50 percent\",\"frame\":{\"x\":535.4330...",
-        "kind": "removed",
-        "path": "slides[0].elements[13]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"16\",\"name\":\"Alpha 20 percent\",\"frame\":{\"x\":776.9028...",
-        "kind": "removed",
-        "path": "slides[0].elements[14]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Dash solid\",\"frame\":{\"x\":52.493438320209...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Dash dot\",\"frame\":{\"x\":52.49343832020997...",
-        "kind": "removed",
-        "path": "slides[1].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"Dash dash\",\"frame\":{\"x\":52.4934383202099...",
-        "kind": "removed",
-        "path": "slides[1].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Dash lgDash\",\"frame\":{\"x\":52.49343832020...",
-        "kind": "removed",
-        "path": "slides[1].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"Dash dashDot\",\"frame\":{\"x\":52.4934383202...",
-        "kind": "removed",
-        "path": "slides[1].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"Dash lgDashDot\",\"frame\":{\"x\":52.49343832...",
-        "kind": "removed",
-        "path": "slides[1].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"9\",\"name\":\"Dash lgDashDotDot\",\"frame\":{\"x\":52.49343...",
-        "kind": "removed",
-        "path": "slides[1].elements[7]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Dash sysDash\",\"frame\":{\"x\":52.493438320...",
-        "kind": "removed",
-        "path": "slides[1].elements[8]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"Dash sysDot\",\"frame\":{\"x\":52.4934383202...",
-        "kind": "removed",
-        "path": "slides[1].elements[9]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"Dash sysDashDot\",\"frame\":{\"x\":52.493438...",
-        "kind": "removed",
-        "path": "slides[1].elements[10]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"13\",\"name\":\"Dash sysDashDotDot\",\"frame\":{\"x\":52.493...",
-        "kind": "removed",
-        "path": "slides[1].elements[11]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"20\",\"name\":\"Arrow triangle\",\"frame\":{\"x\":419.947506...",
-        "kind": "removed",
-        "path": "slides[1].elements[12]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"30\",\"name\":\"Head arrow triangle\",\"frame\":{\"x\":419.9...",
-        "kind": "removed",
-        "path": "slides[1].elements[13]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"21\",\"name\":\"Arrow stealth\",\"frame\":{\"x\":419.9475065...",
-        "kind": "removed",
-        "path": "slides[1].elements[14]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"31\",\"name\":\"Head arrow stealth\",\"frame\":{\"x\":419.94...",
-        "kind": "removed",
-        "path": "slides[1].elements[15]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"22\",\"name\":\"Arrow diamond\",\"frame\":{\"x\":419.9475065...",
-        "kind": "removed",
-        "path": "slides[1].elements[16]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"32\",\"name\":\"Head arrow diamond\",\"frame\":{\"x\":419.94...",
-        "kind": "removed",
-        "path": "slides[1].elements[17]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"23\",\"name\":\"Arrow oval\",\"frame\":{\"x\":419.9475065616...",
-        "kind": "removed",
-        "path": "slides[1].elements[18]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"33\",\"name\":\"Head arrow oval\",\"frame\":{\"x\":419.94750...",
-        "kind": "removed",
-        "path": "slides[1].elements[19]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"24\",\"name\":\"Arrow arrow\",\"frame\":{\"x\":419.947506561...",
-        "kind": "removed",
-        "path": "slides[1].elements[20]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"34\",\"name\":\"Head arrow arrow\",\"frame\":{\"x\":419.9475...",
-        "kind": "removed",
-        "path": "slides[1].elements[21]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"40\",\"name\":\"Width 0 cap flat\",\"frame\":{\"x\":787.4015...",
-        "kind": "removed",
-        "path": "slides[1].elements[22]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"41\",\"name\":\"Width 12700 cap rnd\",\"frame\":{\"x\":787.4...",
-        "kind": "removed",
-        "path": "slides[1].elements[23]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"42\",\"name\":\"Width 76200 cap sq\",\"frame\":{\"x\":787.40...",
-        "kind": "removed",
-        "path": "slides[1].elements[24]"
+        "path": "slides[3].background"
       }
     ],
-    "removed": 53,
-    "total": 53,
-    "truncated": true
+    "removed": 3,
+    "total": 3,
+    "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 50 shapes and text boxes (K12b).",
-    "Not exported yet: 3 slide backgrounds (K12b)."
+    "Changed on export: picture fills left out, until K13 (3)."
   ],
   "reimportWarnings": [],
   "status": "ok"

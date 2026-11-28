@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 1,
       "slides": 1
     },
     "before": {
@@ -11,7 +11,7 @@
     },
     "byField": {
       "removed opaqueParts[]": 5,
-      "removed slides[].elements[]": 2
+      "removed slides[].elements[]": 1
     },
     "changed": 0,
     "entries": [
@@ -41,22 +41,16 @@
         "path": "opaqueParts[4]"
       },
       {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
         "before": "{\"kind\":\"opaque\",\"opaqueKind\":\"smartArt\",\"pptxId\":\"3\",\"name\":\"Diagram\",\"frame...",
         "kind": "removed",
         "path": "slides[0].elements[1]"
       }
     ],
-    "removed": 7,
-    "total": 7,
+    "removed": 6,
+    "total": 6,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 1 shapes and text boxes (K12b).",
     "Not exported yet: 1 charts, diagrams, objects, media and ink (K14)."
   ],
   "reimportWarnings": [],

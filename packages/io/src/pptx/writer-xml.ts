@@ -48,6 +48,8 @@ export function colorXml(color: PptxColor): string {
   return transforms === '' ? `<${tag} val="${val}"/>` : `<${tag} val="${val}">${transforms}</${tag}>`;
 }
 
+export const highlightXml = (color: PptxColor): string => `<a:highlight>${colorXml(color)}</a:highlight>`;
+
 export const solidFillXml = (color: PptxColor): string => `<a:solidFill>${colorXml(color)}</a:solidFill>`;
 
 /** A relationship of a `.rels` part. */

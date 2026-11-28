@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 26,
       "slides": 3
     },
     "before": {
@@ -11,8 +11,7 @@
     },
     "byField": {
       "changed layouts[].masterName": 5,
-      "changed layouts[].masterPart": 5,
-      "removed slides[].elements[]": 26
+      "changed layouts[].masterPart": 5
     },
     "changed": 10,
     "entries": [
@@ -75,145 +74,14 @@
         "before": "\"ppt/slideMasters/slideMaster2.xml\"",
         "kind": "changed",
         "path": "layouts[9].masterPart"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"tx1\",\"frame\":{\"x\":62.99212598425197,\"y\":...",
-        "kind": "removed",
-        "path": "slides[0].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"bg1\",\"frame\":{\"x\":251.96850393700788,\"y\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"tx2\",\"frame\":{\"x\":440.9448818897638,\"y\":...",
-        "kind": "removed",
-        "path": "slides[0].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"bg2\",\"frame\":{\"x\":629.9212598425197,\"y\":...",
-        "kind": "removed",
-        "path": "slides[0].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"7\",\"name\":\"accent1\",\"frame\":{\"x\":818.8976377952756,...",
-        "kind": "removed",
-        "path": "slides[0].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"8\",\"name\":\"accent2\",\"frame\":{\"x\":1007.8740157480315...",
-        "kind": "removed",
-        "path": "slides[0].elements[6]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"9\",\"name\":\"accent3\",\"frame\":{\"x\":62.99212598425197,...",
-        "kind": "removed",
-        "path": "slides[0].elements[7]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"accent4\",\"frame\":{\"x\":251.9685039370078...",
-        "kind": "removed",
-        "path": "slides[0].elements[8]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"accent5\",\"frame\":{\"x\":440.9448818897638...",
-        "kind": "removed",
-        "path": "slides[0].elements[9]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"accent6\",\"frame\":{\"x\":629.9212598425197...",
-        "kind": "removed",
-        "path": "slides[0].elements[10]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"13\",\"name\":\"hlink\",\"frame\":{\"x\":818.8976377952756,\"...",
-        "kind": "removed",
-        "path": "slides[0].elements[11]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"14\",\"name\":\"folHlink\",\"frame\":{\"x\":1007.87401574803...",
-        "kind": "removed",
-        "path": "slides[0].elements[12]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"20\",\"name\":\"accent1 lumMod\",\"frame\":{\"x\":62.9921259...",
-        "kind": "removed",
-        "path": "slides[0].elements[13]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"21\",\"name\":\"accent1 lumMod\",\"frame\":{\"x\":251.968503...",
-        "kind": "removed",
-        "path": "slides[0].elements[14]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"22\",\"name\":\"accent1 lumOff\",\"frame\":{\"x\":440.944881...",
-        "kind": "removed",
-        "path": "slides[0].elements[15]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"23\",\"name\":\"accent1 tint\",\"frame\":{\"x\":629.92125984...",
-        "kind": "removed",
-        "path": "slides[0].elements[16]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"24\",\"name\":\"accent1 shade\",\"frame\":{\"x\":818.8976377...",
-        "kind": "removed",
-        "path": "slides[0].elements[17]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"25\",\"name\":\"accent1 satMod\",\"frame\":{\"x\":1007.87401...",
-        "kind": "removed",
-        "path": "slides[0].elements[18]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Accent 1 remapped\",\"frame\":{\"x\":96,\"y\":1...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[2].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"3\",\"name\":\"Major font\",\"textBox\":true,\"frame\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[2].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"4\",\"name\":\"Minor font\",\"textBox\":true,\"frame\":{\"x\":...",
-        "kind": "removed",
-        "path": "slides[2].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"5\",\"name\":\"East Asian font\",\"textBox\":true,\"frame\":...",
-        "kind": "removed",
-        "path": "slides[2].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"6\",\"name\":\"Effect style\",\"frame\":{\"x\":96,\"y\":440.94...",
-        "kind": "removed",
-        "path": "slides[2].elements[4]"
       }
     ],
-    "removed": 26,
-    "total": 36,
+    "removed": 0,
+    "total": 10,
     "truncated": false
   },
   "exportWarnings": [
-    "2 slide masters were merged into one (their layouts keep their placeholders).",
-    "Not exported yet: 26 shapes and text boxes (K12b)."
+    "2 slide masters were merged into one (their layouts keep their placeholders)."
   ],
   "reimportWarnings": [],
   "status": "ok"

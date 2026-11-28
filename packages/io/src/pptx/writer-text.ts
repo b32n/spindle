@@ -8,7 +8,7 @@ const ALGN: Record<NonNullable<PptxLevelStyle['align']>, string> = { left: 'l', 
 const ANCHOR: Record<NonNullable<PptxBodyProps['anchor']>, string> = { top: 't', middle: 'ctr', bottom: 'b' };
 
 /** `typeface` of a font as the editor names it: `major` and `minor` are the theme fonts. */
-export const typefaceOf = (font: string): string => (font === 'major' ? '+mj-lt' : font === 'minor' ? '+mn-lt' : font);
+export const typefaceOf = (font: string, script: 'lt' | 'ea' | 'cs' = 'lt'): string => (font === 'major' ? `+mj-${script}` : font === 'minor' ? `+mn-${script}` : font);
 
 function bulletXml(b: PptxBullet): string {
   if (b.kind === 'none') return '<a:buNone/>';
@@ -31,7 +31,13 @@ function defaultRunXml(s: PptxLevelStyle): string {
  * spacing, bullet colour, size, font and kind, tab stops, then the default run properties. An empty level is an empty string.
  */
 export function levelXml(index: number, s: PptxLevelStyle): string {
+  return levelPropsXml(`a:lvl${index + 1}pPr`, s);
+}
+
+/** The element `tag` (`a:lvlNpPr`, `a:pPr`) of a level style, with `extra` attributes (a paragraph's `lvl` and `rtl`). Empty when there is nothing to state. */
+export function levelPropsXml(tag: string, s: PptxLevelStyle, extra: Record<string, string | number | undefined> = {}): string {
   const a = attrs({
+    ...extra,
     marL: s.marginLeft !== undefined ? emu(s.marginLeft) : undefined,
     indent: s.indent !== undefined ? emu(s.indent) : undefined,
     algn: s.align !== undefined ? ALGN[s.align] : undefined,
@@ -47,7 +53,6 @@ export function levelXml(index: number, s: PptxLevelStyle): string {
     (s.tabStops?.length ? `<a:tabLst>${s.tabStops.map((t) => `<a:tab${attrs({ pos: emu(t.pos), algn: t.align })}/>`).join('')}</a:tabLst>` : '') +
     defaultRunXml(s);
   if (a === '' && body === '') return '';
-  const tag = `a:lvl${index + 1}pPr`;
   return body === '' ? `<${tag}${a}/>` : `<${tag}${a}>${body}</${tag}>`;
 }
 

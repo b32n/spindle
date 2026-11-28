@@ -5,7 +5,8 @@ import type { Rels } from './fill';
 // Hyperlinks (plan K10): the scheme allow-list of the editor's links (http, https, mailto and tel; the S10 rule). Linked targets are
 // never fetched and `ppaction://` and `file:` targets are kept inert.
 
-const ALLOWED = new Set(['http', 'https', 'mailto', 'tel']);
+/** The schemes a link may have (the writer checks against the same list). */
+export const LINK_SCHEMES = new Set(['http', 'https', 'mailto', 'tel']);
 const SCHEME = /^([a-z][a-z0-9+.-]*):/i;
 // control characters and whitespace inside the scheme are how `java\tscript:` slips past a naive check
 // eslint-disable-next-line no-control-regex
@@ -32,7 +33,7 @@ export function readLink(hlink: XmlElement | undefined, ctx: LinkContext): PptxL
   if (!rel.external) return slidePart ? { kind: 'action', target: action || 'ppaction://hlinksldjump', slidePart, ...extra } : undefined;
   const target = rel.raw.trim();
   const scheme = schemeOf(target);
-  if (scheme !== undefined && ALLOWED.has(scheme)) return { kind: 'url', href: target, ...extra };
+  if (scheme !== undefined && LINK_SCHEMES.has(scheme)) return { kind: 'url', href: target, ...extra };
   if (scheme === 'file') {
     ctx.warn('A link to a file is kept as an inert action; it is never opened.');
     return { kind: 'action', target, ...extra };

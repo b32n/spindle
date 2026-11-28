@@ -2,7 +2,7 @@
   "diff": {
     "added": 0,
     "after": {
-      "elements": 0,
+      "elements": 8,
       "slides": 2
     },
     "before": {
@@ -10,15 +10,10 @@
       "slides": 2
     },
     "byField": {
-      "removed slides[].elements[]": 18
+      "removed slides[].elements[]": 10
     },
     "changed": 0,
     "entries": [
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[0].elements[0]"
-      },
       {
         "before": "{\"kind\":\"group\",\"pptxId\":\"10\",\"name\":\"Simple group\",\"frame\":{\"x\":73.490813648...",
         "kind": "removed",
@@ -38,41 +33,6 @@
         "before": "{\"kind\":\"group\",\"pptxId\":\"40\",\"name\":\"Group with text and a line\",\"frame\":{\"x...",
         "kind": "removed",
         "path": "slides[0].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"2\",\"name\":\"Title 2\",\"placeholder\":{\"type\":\"title\"},...",
-        "kind": "removed",
-        "path": "slides[1].elements[0]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"10\",\"name\":\"Start 1\",\"frame\":{\"x\":73.49081364829397...",
-        "kind": "removed",
-        "path": "slides[1].elements[1]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"11\",\"name\":\"End 1\",\"frame\":{\"x\":524.9343832020998,\"...",
-        "kind": "removed",
-        "path": "slides[1].elements[2]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"12\",\"name\":\"Start 2\",\"frame\":{\"x\":73.49081364829397...",
-        "kind": "removed",
-        "path": "slides[1].elements[3]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"13\",\"name\":\"End 2\",\"frame\":{\"x\":524.9343832020998,\"...",
-        "kind": "removed",
-        "path": "slides[1].elements[4]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"14\",\"name\":\"Start 3\",\"frame\":{\"x\":73.49081364829397...",
-        "kind": "removed",
-        "path": "slides[1].elements[5]"
-      },
-      {
-        "before": "{\"kind\":\"shape\",\"pptxId\":\"15\",\"name\":\"End 3\",\"frame\":{\"x\":524.9343832020998,\"...",
-        "kind": "removed",
-        "path": "slides[1].elements[6]"
       },
       {
         "before": "{\"kind\":\"connector\",\"pptxId\":\"20\",\"name\":\"Straight connector\",\"frame\":{\"x\":23...",
@@ -105,14 +65,13 @@
         "path": "slides[1].elements[12]"
       }
     ],
-    "removed": 18,
-    "total": 18,
+    "removed": 10,
+    "total": 10,
     "truncated": false
   },
   "exportWarnings": [
-    "Not exported yet: 17 shapes and text boxes (K12b).",
     "Not exported yet: 6 connectors (K13).",
-    "Not exported yet: 6 groups (K13)."
+    "Not exported yet: 4 groups (K13)."
   ],
   "reimportWarnings": [],
   "status": "ok"
