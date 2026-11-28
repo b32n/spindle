@@ -86,7 +86,7 @@ statistical, date/time, information, financial, reference and array categories
       of Excel, which gives up in some cases), `MIRR`, `SLN`, `SYD`, `DDB`, `EFFECT`, `NOMINAL`, `RRI`, `PDURATION`, `ISPMT`,
       `FVSCHEDULE`, `QUOTIENT`, `SQRTPI`, `SUMX2MY2`, `SUMX2PY2` and `SUMXMY2` (plan S12). Where LibreOffice reports `#VALUE!` for an
       argument out of range (most finance functions) the rows carry Excel's `#NUM!` / `#DIV/0!`, tagged unverified. In the
-      `formulas-core` fixture `=TRANSPOSE(A1:B2)` evaluates but spills into a range blocked by the next probe row (`#SPILL!`).
+      `formulas-core` fixture each dynamic-array probe has a column of its own, so its spill is not blocked (SA-gap).
 - [x] **Math, trigonometry and statistics, batch A** — `SIN` to `ATANH`, `PI`,
       `RADIANS`, `DEGREES`, `FACT`, `FACTDOUBLE`, `COMBIN`, `PERMUT`, `SUMSQ`,
       `EVEN`, `ODD`, `ISEVEN`, `ISODD`, `CEILING.MATH`, `FLOOR.MATH`, `MAXIFS`,

@@ -20,7 +20,7 @@ import { generateId } from '../utils/id';
 import { toExcelNumberFormatCode, fromExcelNumberFormatCode, normalizeExcelNumberFormatCode } from './xlsx-number-format';
 import { isFaithfulFormatCode } from '../number-format';
 import { getRegisteredFunctionNames } from '../formula-parser/functions';
-import { isFormulaEvaluable, parseRange, spanRef } from './xlsx-formulas';
+import { isFormulaEvaluable, parseRange, spanRef, withImplicitIntersection } from './xlsx-formulas';
 
 type IoXlsx = Awaited<ReturnType<typeof loadIo>>;
 
@@ -453,7 +453,8 @@ function toSheetData(
     if (spreadsheetCell.formula) {
       // the editor form of the text (no `_xlfn.` and friends) when the engine can evaluate it; otherwise the file's text as it is
       const text = io.fromFileFormula(spreadsheetCell.formula);
-      if (isFormulaEvaluable(text)) cell.formula = `=${text}`;
+      // a formula without the array mark is a legacy one: a multi-cell range it uses as an operand is intersected, as Excel does
+      if (isFormulaEvaluable(text)) cell.formula = `=${spreadsheetCell.formulaInfo?.type === 'array' ? text : withImplicitIntersection(text)}`;
       else {
         cell.formula = `=${spreadsheetCell.formula}`;
         cell.cachedOnly = true;

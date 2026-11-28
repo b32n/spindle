@@ -1,20 +1,11 @@
 {
   "cachedOnly": 1,
   "compared": 3,
-  "firstMismatches": [
-    {
-      "actual": "\"N\"",
-      "cell": "F4",
-      "expected": "0",
-      "sheet": "Data"
-    }
-  ],
+  "firstMismatches": [],
   "formulaCells": 4,
-  "matched": 2,
-  "mismatchClasses": {
-    "number -> text": 1
-  },
-  "mismatched": 1,
+  "matched": 3,
+  "mismatchClasses": {},
+  "mismatched": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

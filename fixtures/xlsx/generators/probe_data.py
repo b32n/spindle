@@ -55,6 +55,22 @@ NUMBER_FORMATS = [
 # Functions xlsxwriter must be told to write as dynamic arrays (they spill).
 DYNAMIC = {"FILTER", "SORT", "UNIQUE", "SEQUENCE", "SORTBY", "LET", "HSTACK", "VSTACK", "TAKE", "TRANSPOSE", "TEXTSPLIT"}
 
+# What Excel spills for each dynamic-array probe formula (rows of values, over the data A1:B10 above): the file's `ref` covers all of it and the cells
+# after the first hold the results, as Excel saves them. Each such formula sits in a column of its own (see formulas_core) so nothing is in its way.
+SPILLS = {
+    'TEXTSPLIT("a-b","-")': [["a", "b"]],
+    "TRANSPOSE(A1:B2)": [[1, 2], ["x", "y"]],
+    "FILTER(A1:A10,A1:A10>8)": [[9], [10]],
+    "SORT(A1:A3,1,-1)": [[3], [2], [1]],
+    "UNIQUE(B1:B10)": [["x"], ["y"]],
+    "SEQUENCE(3)": [[1], [2], [3]],
+    "SORTBY(A1:A3,A1:A3,-1)": [[3], [2], [1]],
+    "LET(x,2,x*3)": [[6]],
+    "HSTACK(A1:A2,B1:B2)": [[1, "x"], [2, "y"]],
+    "VSTACK(A1:A2,B1:B2)": [[1], [2], ["x"], ["y"]],
+    "TAKE(A1:A10,2)": [[1], [2]],
+}
+
 # Formula-syntax probe (plan 2.2 item 4): (formula as stored in the file, cached value Excel computes, note).
 # The first form must stay in row 2 (implicit intersection reads A2).
 # Data: A1:A5 = 1..5, B1 = 10, C1 = 20, Sheet2!A1 = 100, 'Q1 Data'!A1 = 7; formulas sit in column G (rows 2..), none in row 1.

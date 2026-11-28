@@ -232,6 +232,13 @@ overlay is never written to `sheet.cells` and never synced over the
 collaboration CRDT — each client recomputes it from the anchor formula. A
 target cell that already holds content yields `#SPILL!`.
 
+**Legacy formulas and `@`.** A formula an .xlsx file saved without the array or dynamic-array mark is a legacy one: where it uses a range of several
+cells as an operand of its own operators (`=A1:A3*2`, `=-A1:A3`, `=A1:A3&"x"`), Excel takes the one cell of the range in the formula's row (a column
+range) or column (a row range), and `#VALUE!` when the formula is outside the range. The import does the same by writing the `@` Excel 365 shows
+(`=@A1:A3*2`, saved back as `_xlfn.SINGLE(A1:A3)*2`). Only operands outside every call and group are changed: what a function does with a range argument depends on the
+function (`SUM(A1:A3*2)` in a legacy formula is also intersected in Excel; here it still sums the array), so those formulas are the known difference. A formula typed in
+the editor, and an array formula, still spill.
+
 An array formula read from an .xlsx file carries `arraySpan` (`{ rows, cols, spill? }`): a legacy (CSE) array formula keeps that
 extent (its result is cut to it or padded with `#N/A`), a dynamic one (`spill: true`) spills freely and keeps `arraySpan` at the extent
 it spilled. A blank source cell inside the result of a legacy array reads 0 (as Excel shows it for `=A1:A3`); a dynamic array does not yet: the engine
@@ -297,8 +304,8 @@ endpoints (`INDEX(A1:C3,0,2):INDEX(A1:C3,0,3)`). A negative index is `#VALUE!`, 
 ### Array and finance, batch B
 
 `TRANSPOSE` (`array-ext.ts`) is the one dynamic-array shaper with a LibreOffice oracle; an empty cell passing through reads 0, as in Excel. In the
-`formulas-core` fixture `=TRANSPOSE(A1:B2)` evaluates, but its spill range is blocked by the next probe row's formula (`#SPILL!`), so that cell stays a
-mismatch.
+`formulas-core` fixture each dynamic-array probe sits in a column of its own, so its spill has room (the first version put them in one column, where each
+spill was blocked by the next probe and the values golden counted that as a mismatch).
 
 `XIRR` runs Newton's method from the guess (default 10%); when that fails to converge, leaves the domain or stops on a flat tail
 (a root a hair above -100% is `#NUM!`), it scans rates `e^s - 1` from -100% to 10^10 for a sign change (compared as signs) and bisects the

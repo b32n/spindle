@@ -1012,13 +1012,18 @@ export class WorkbookImpl implements Workbook {
         if (cell.formula) this.evaluateFormula(sheetId, row, col);
       }
     }
-    // A cycle met while evaluating in sheet order is only a marker: settle it
-    // through the dependency graph, which knows which cells are on the cycle.
-    if (this.circularSeen.length > 0) {
-      const seen = [...new Set(this.circularSeen)];
-      this.circularSeen = [];
-      this.recalculateDependents(seen[0], undefined, seen.slice(1));
-    }
+    this.settleCircularMarkers();
+  }
+
+  /**
+   * A cycle met while evaluating in sheet order is only a marker: settle it
+   * through the dependency graph, which knows which cells are on the cycle.
+   */
+  private settleCircularMarkers(): void {
+    if (this.circularSeen.length === 0) return;
+    const seen = [...new Set(this.circularSeen)];
+    this.circularSeen = [];
+    this.recalculateDependents(seen[0], undefined, seen.slice(1));
   }
 
   /**
@@ -1777,7 +1782,10 @@ export class WorkbookImpl implements Workbook {
         }
       }
     }
+    this.circularSeen = [];
     for (const [sheetId, row, col] of evaluateNow) this.evaluateFormula(sheetId, row, col);
+    // (a cycle on load settles like one met by a full recalculation: the cells on it take the circular value, 0 by default)
+    this.settleCircularMarkers();
   }
 
   // ============================================

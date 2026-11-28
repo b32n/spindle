@@ -492,6 +492,13 @@ lockstep.
 
 ### Sheets and slides fidelity
 
+- **The nine remaining values-golden mismatches are gone (SA-gap).** (1) A circular reference met while a workbook is calculated on load (`recalculateOnLoad`, the
+  values harness) is settled like one met by a full recalculation: the cells on the cycle take the circular value, 0 by default, instead of `#VALUE!`.
+  (2) A formula an .xlsx file saved without the array mark is intersected, as Excel does, where it uses a multi-cell range as an operand of its own operators
+  (`=A1:A3*2` in row 152 is `#VALUE!`, in row 2 it is `A2*2`); it is shown with the `@` Excel 365 shows and saved back as `_xlfn.SINGLE(...)`. (3) The
+  `formulas-core` and `xlsxwriter-rich` fixtures were wrong, not the engine: the dynamic-array probes sat one under the other, so every spill was blocked
+  by the next probe (Excel recalculating the file gives `#SPILL!` too), and a SORT spill carried xlsxwriter's placeholder 0. The generators now give each spill room,
+  its true range and its results. Values golden: 195 of 204 matched before, 204 of 204 now (cached-only 21, unchanged).
 - **References inside cached-only formulas follow inserted and deleted rows and columns (S4b).** A formula the engine cannot evaluate
   (`cachedOnly`) keeps no parsed form, so inserting or deleting rows or columns used to leave the cell references in its text where they were.
   They are now rewritten in the text, using the formula tokenizer, with the outcome of a normal formula's: `A1`, `$A$1`, `A1:B2`, `A:A`, `1:1`,

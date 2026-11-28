@@ -1,58 +1,11 @@
 {
   "cachedOnly": 6,
   "compared": 153,
-  "firstMismatches": [
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I126",
-      "expected": "1",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I127",
-      "expected": "9",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I128",
-      "expected": "3",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I129",
-      "expected": "\"x\"",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I130",
-      "expected": "1",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I131",
-      "expected": "3",
-      "sheet": "Data"
-    },
-    {
-      "actual": "\"#SPILL!\"",
-      "cell": "I152",
-      "expected": "\"#VALUE!\"",
-      "sheet": "Data"
-    }
-  ],
+  "firstMismatches": [],
   "formulaCells": 159,
-  "matched": 146,
-  "mismatchClasses": {
-    "error -> error": 1,
-    "number -> error": 5,
-    "text -> error": 1
-  },
-  "mismatched": 7,
+  "matched": 153,
+  "mismatchClasses": {},
+  "mismatched": 0,
   "status": "ok",
   "uncached": 0,
   "unreadableSheets": 0,

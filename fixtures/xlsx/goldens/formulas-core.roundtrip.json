@@ -1,8 +1,8 @@
 {
   "diff": {
-    "added": 168,
+    "added": 200,
     "after": {
-      "cells": 356,
+      "cells": 364,
       "formats": 0,
       "formulas": 159,
       "merges": 0,
@@ -10,7 +10,7 @@
       "styles": 0
     },
     "before": {
-      "cells": 356,
+      "cells": 364,
       "formats": 0,
       "formulas": 159,
       "merges": 0,
@@ -18,7 +18,7 @@
       "styles": 0
     },
     "byField": {
-      "added sheets[].config.colWidths.*": 9,
+      "added sheets[].config.colWidths.*": 41,
       "added sheets[].config.rowHeights.*": 159
     },
     "changed": 0,
@@ -27,6 +27,81 @@
         "after": "100",
         "kind": "added",
         "path": "sheets[0].config.colWidths.A"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AA"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AB"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AC"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AD"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AE"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AF"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AG"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AH"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AI"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AJ"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AK"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AL"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AM"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AN"
+      },
+      {
+        "after": "100",
+        "kind": "added",
+        "path": "sheets[0].config.colWidths.AO"
       },
       {
         "after": "100",
@@ -69,163 +144,88 @@
         "path": "sheets[0].config.colWidths.I"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.1"
+        "path": "sheets[0].config.colWidths.J"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.10"
+        "path": "sheets[0].config.colWidths.K"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.100"
+        "path": "sheets[0].config.colWidths.L"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.101"
+        "path": "sheets[0].config.colWidths.M"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.102"
+        "path": "sheets[0].config.colWidths.N"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.103"
+        "path": "sheets[0].config.colWidths.O"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.104"
+        "path": "sheets[0].config.colWidths.P"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.105"
+        "path": "sheets[0].config.colWidths.Q"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.106"
+        "path": "sheets[0].config.colWidths.R"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.107"
+        "path": "sheets[0].config.colWidths.S"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.108"
+        "path": "sheets[0].config.colWidths.T"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.109"
+        "path": "sheets[0].config.colWidths.U"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.11"
+        "path": "sheets[0].config.colWidths.V"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.110"
+        "path": "sheets[0].config.colWidths.W"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.111"
+        "path": "sheets[0].config.colWidths.X"
       },
       {
-        "after": "20",
+        "after": "100",
         "kind": "added",
-        "path": "sheets[0].config.rowHeights.112"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.113"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.114"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.115"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.116"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.117"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.118"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.119"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.12"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.120"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.121"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.122"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.123"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.124"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.125"
-      },
-      {
-        "after": "20",
-        "kind": "added",
-        "path": "sheets[0].config.rowHeights.126"
+        "path": "sheets[0].config.colWidths.Y"
       }
     ],
     "removed": 0,
-    "total": 168,
+    "total": 200,
     "truncated": true
   },
   "exportWarnings": [],
